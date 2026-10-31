@@ -35,6 +35,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - The agent-kit plugin folder has the README and license that the Claude
   plugin directory requires.
 
+### Fixed
+
+- Wikipedia articles capture instead of failing as an "empty JavaScript
+  page". The wiki skin puts feature flags such as `main-menu-pinned-disabled`
+  on the `<html>` element, the menu filter matched them, and the whole page
+  was dropped before the text was measured. Class names on `<html>` and
+  `<body>` no longer hide the page; empty JavaScript pages still fail.
+- Captured web pages show a thumbnail in the Library. Uoink saves the page's
+  `og:image` (else `twitter:image`, else `image_src`) as `thumbnail.jpg`,
+  where video captures keep theirs, through the same public-network checks,
+  10 MB cap and image type check as saved images. A missing or broken image
+  leaves the page saved without a thumbnail.
+
 ## [3.12.0] - 2026-10-30
 
 ### Added

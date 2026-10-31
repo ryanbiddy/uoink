@@ -755,13 +755,51 @@ def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None, html=
 
 
 # ---- persist as a yoink row -------------------------------------------
+def _save_page_thumbnail(image_url: str, page_url: str, folder: Path, *,
+                         http_open=None) -> Path | None:
+    """Best-effort Library thumbnail from the page's lead image (og:image,
+    then twitter:image, then image_src) at <folder>/thumbnail.jpg, where a
+    video capture keeps its own. Reuses the public-network fetch policy and
+    the image capture's byte cap, magic-byte check and JPEG re-encode. Any
+    failure returns None and the page saves without a preview. http_open is
+    an explicit test injection."""
+    import images  # lazy: images imports this module for its taxonomy tags
+
+    url = article_extractor.safe_link((image_url or "").strip(), page_url)
+    if not url:
+        return None
+    raw_path = folder / "thumbnail.raw"
+    thumb_path = folder / "thumbnail.jpg"
+    try:
+        with (http_open or source_subscriptions.public_http_open)(
+                url, headers={"User-Agent": _USER_AGENT},
+                timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
+            if resp.status != 200:
+                return None
+            data = resp.read(images.MAX_IMAGE_BYTES + 1)
+        if len(data) > images.MAX_IMAGE_BYTES or images.sniff_mime(data) is None:
+            return None
+        raw_path.write_bytes(data)
+        width, _ = images._write_thumbnail(raw_path, thumb_path)
+    except Exception as e:  # never fail a page save over its preview
+        log.warning("page thumbnail failed: %s", e)
+        return None
+    finally:
+        try:
+            raw_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+    return thumb_path if width else None
+
+
 def persist_page_yoink(idx, extract_result: dict, *,
                          topic: str | None = None,
                          data_root: Path | None = None,
                          source_type: str = SOURCE_TYPE_PAGE,
                          subfolder: str = "Pages",
                          slug_prefix: str = "page",
-                         topic_classifier=None) -> str | None:
+                         topic_classifier=None,
+                         http_open=None) -> str | None:
     """Persist a successful extract_page-shaped result as a yoink row.
     Returns the synthetic video_id used (so caller can link to it). When the
     extract result is ok=False, returns None.
@@ -772,7 +810,8 @@ def persist_page_yoink(idx, extract_result: dict, *,
     slug_prefix -- e.g. Reddit threads pass source_type='reddit_thread',
     subfolder='Reddit', slug_prefix='reddit'. The yoink has no real video_id;
     we synthesize one from a stable hash of the canonical URL so re-capturing
-    the same source upserts cleanly."""
+    the same source upserts cleanly. A web page's lead image becomes its
+    thumbnail.jpg; http_open is an explicit test injection for that fetch."""
     if not isinstance(extract_result, dict) or not extract_result.get("ok"):
         return None
     url = extract_result.get("url") or ""
@@ -852,6 +891,9 @@ def persist_page_yoink(idx, extract_result: dict, *,
             "screenshot_path": extract_result.get("screenshot_path"),
             "extracted_at": extract_result.get("extracted_at"),
         }, indent=2, ensure_ascii=False), encoding="utf-8")
+        if source_type == SOURCE_TYPE_PAGE and isinstance(metadata.get("image"), str):
+            _save_page_thumbnail(metadata["image"], extract_result.get("fetched_url") or url,
+                                 folder, http_open=http_open)
 
     import json as _json
     metadata_json = _json.dumps({

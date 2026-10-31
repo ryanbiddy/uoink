@@ -42,6 +42,8 @@ _BLOCK = set("article section div p pre blockquote table ul ol li dl h1 h2 h3 h4
 _WALL = re.compile(r"(?:sign\s*in|log\s*in|subscribe|subscription|register|create an account)\s+(?:is required|required|to (?:read|continue|view|access|unlock))|(?:subscriber|members?)[- ]only|already a subscriber|unlock (?:this|the|full) article|purchase (?:a )?subscription", re.I)
 _JS = re.compile(r"enable javascript|javascript is (?:not available|disabled|required)|requires javascript|please turn on javascript", re.I)
 _BYLINE = re.compile(r"(?:^|[\s_-])(?:byline|author|writtenby)(?:$|[\s_-])", re.I)
+# Lead image sources in preference order. Relative URLs resolve like links.
+_IMAGE_KEYS = ("og:image", "og:image:url", "twitter:image", "twitter:image:src", "image_src")
 _LOADER = re.compile(r"^(?:loading(?:\s+(?:the\s+)?(?:reader|article|page|content|app|application|data))?|please wait)(?:[.!\u2026 ]|\bplease wait)*$", re.I)
 
 
@@ -140,14 +142,21 @@ def _value(value):
     return ""
 
 
-def _metadata(doc):
-    meta, ld = {}, {}
+def _metadata(doc, base):
+    meta, ld, images = {}, {}, {}
     budget = 128000
     for node in doc.nodes:
         if node.tag == "meta":
             key = (node.attrs.get("property") or node.attrs.get("name") or "").lower()
             if key and len(meta) < 100:
                 meta[key] = _value(node.attrs.get("content"))
+            # The first lead image of each kind, from the raw attribute so a
+            # long CDN URL is not cut at the display-value limit.
+            if key in _IMAGE_KEYS and not images.get(key) and node.attrs.get("content", "").strip():
+                images[key] = safe_link(node.attrs["content"], base)
+        if (node.tag == "link" and "image_src" in node.attrs.get("rel", "").lower().split()
+                and not images.get("image_src") and node.attrs.get("href", "").strip()):
+            images["image_src"] = safe_link(node.attrs["href"], base)
         if node.tag == "title":
             meta.setdefault("html_title", _text(node, limit=500))
         if node.tag == "script" and node.attrs.get("type", "").lower() == "application/ld+json" and budget > 0:
@@ -182,6 +191,7 @@ def _metadata(doc):
         "author": ld.get("author") or first("author", "article:author", "byl", "byline", "dc.creator"),
         "published_date": ld.get("published_date") or first("article:published_time", "datepublished", "date", "pubdate", "dc.date", "dcterms.created"),
         "site_name": ld.get("site_name") or first("og:site_name", "application-name"),
+        "image": next((images[k] for k in _IMAGE_KEYS if images.get(k)), None),
     }
     bylines = []
     for node in doc.nodes:
@@ -202,8 +212,10 @@ def _prepare(doc):
         a = node.attrs
         hidden = ("hidden" in a or a.get("aria-hidden") == "true" or
                   re.search(r"display\s*:\s*none|visibility\s*:\s*hidden", a.get("style", ""), re.I))
+        # Root classes carry skin and feature flags ("main-menu-pinned-disabled"),
+        # not a content role. Readability never strips <body> as unlikely either.
         noise = (node.tag in _NOISE or a.get("role") in {"navigation", "complementary", "menu", "contentinfo"}
-                 or _UNLIKELY.search(node.hint))
+                 or (node.tag not in {"html", "body"} and _UNLIKELY.search(node.hint)))
         node.excluded = bool((node.parent and node.parent.excluded) or hidden or noise or node.tag in _HIDDEN or node.tag == "head")
     for node in reversed(doc.nodes):
         if node.excluded:
@@ -441,7 +453,9 @@ def extract(html: bytes | str, url: str) -> dict:
             doc.check()
             doc.feed(html[offset:offset + 16384])
         doc.close()
-        result["metadata"] = _metadata(doc)
+        base = next((n.attrs["href"] for n in doc.nodes if n.tag == "base" and "href" in n.attrs), None)
+        base = safe_link(base, url) or url
+        result["metadata"] = _metadata(doc, base)
         result["title"] = result["metadata"].get("title")
         _prepare(doc)
         chosen = _choose(doc)
@@ -462,8 +476,7 @@ def extract(html: bytes | str, url: str) -> dict:
         if diagnostic:
             result.update(code="article_body_not_found", diagnostic=diagnostic, error=diagnostic)
             return result
-        base = next((n.attrs["href"] for n in doc.nodes if n.tag == "base" and "href" in n.attrs), None)
-        renderer = Markdown(safe_link(base, url) or url, doc.check)
+        renderer = Markdown(base, doc.check)
         markdown = renderer.cap("".join(renderer.render(n) for n in chosen)).strip()
         doc.check()
         result.update(ok=True, markdown=markdown, links=renderer.links,
