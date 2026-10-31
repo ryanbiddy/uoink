@@ -182,3 +182,9 @@ Claude directory blocks (its README and LICENSE blockers are fixed). Goose's
 | **B. A `uoink mcp` subcommand** | The CLI starts the stdio server, so every client can use `command: "uoink", args: ["mcp"]`. | One launch line for the directory, Goose, Smithery and others. On Windows, clients that don't resolve `.cmd` files need `cmd /c uoink mcp` or a small `uoink.exe`. A PATH command is held for a reviewer, not blocked. |
 
 A now, B in the next release, is the fastest route.
+
+**B is built** and lands in the next release: `uoink mcp` runs the same stdio
+server, and `cmd /c uoink mcp` works through the Windows `cli\uoink.cmd`
+launcher. Installed 3.12.0 copies don't have it, so the agent-kit plugin and
+`.mcpb` keep their current launch config until that release ships. Then the
+directory plugin and the Goose entry can use `command: "uoink", args: ["mcp"]`.

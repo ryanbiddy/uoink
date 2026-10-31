@@ -79,6 +79,8 @@ After installing Uoink, open the setup page from the extension popup's **Setting
 
 > Claude Desktop does not expand `%LOCALAPPDATA%` — use the full absolute path (e.g. `C:\\Users\\<you>\\AppData\\Local\\Uoink\\python\\python.exe`). Restart the client after saving; Uoink's tools appear automatically.
 
+Releases after 3.12.0 add a portable launch line that needs no install path: `"command": "uoink", "args": ["mcp"]`, or `"command": "cmd", "args": ["/c", "uoink", "mcp"]` for Windows clients that cannot start `.cmd` files. It uses the `uoink` command on PATH. See [Connect your agent](docs/connect-your-agent.md#one-launch-command-for-any-mcp-client).
+
 **One-click install:** a Claude Desktop [`.mcpb` bundle](./docs/mcpb-bundle.md) installs the stdio server without hand-editing config. See [docs/mcpb-bundle.md](./docs/mcpb-bundle.md).
 
 **HTTP transport:** point an HTTP MCP client at `http://127.0.0.1:5179/mcp/v1` and send the header `X-Uoink-Token` (read the token from `%LOCALAPPDATA%\Uoink\token.txt`).

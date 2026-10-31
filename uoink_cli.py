@@ -76,6 +76,16 @@ def parser():
     install.add_argument("--force", action="store_true")
     serve = command("serve", help="run the original helper CLI; remaining args pass through")
     serve.add_argument("server_args", nargs=argparse.REMAINDER)
+    # No --text: the session speaks only JSON-RPC. The toolset stays an env var,
+    # as it is for uoink_mcp.py.
+    sub.add_parser("mcp", help="run the stdio MCP server for an agent client",
+                   formatter_class=argparse.RawDescriptionHelpFormatter,
+                   description="Run the stdio MCP server in this process, the same server as uoink_mcp.py.\n"
+                               "Stdout carries only JSON-RPC; logs and warnings go to stderr.\n"
+                               "UOINK_MCP_TOOLSET=core serves the core toolset (default: full).",
+                   epilog='Client config: "command": "uoink", "args": ["mcp"]\n'
+                          'Windows clients that cannot start .cmd files: "command": "cmd", '
+                          '"args": ["/c", "uoink", "mcp"]')
     return root
 
 
@@ -260,6 +270,16 @@ CAPTURE_WORKERS = ("playlist-", "source-capture-", "comments-", "hook-type-",
                    "comment-intelligence-", "entity-extraction-")
 
 
+def serve_mcp():
+    """Run uoink_mcp.py's stdio server in this process, through its own main()."""
+    # Importing uoink_mcp binds server.py logging to stderr. Never redirect
+    # stdout here: the transport claims the real descriptor for JSON-RPC and
+    # diverts stray prints to stderr for the rest of the session.
+    import uoink_mcp
+    uoink_mcp.main()
+    return 0
+
+
 def finish_call_work(server, name, payload, existing_threads):
     if name == "transcribe_podcast_episode" and payload.get("ok") is True:
         server._podcast_transcription_queue.join()
@@ -277,6 +297,7 @@ def finish_call_work(server, name, payload, existing_threads):
 
 def main(argv=None):
     raw = list(sys.argv[1:] if argv is None else argv)
+    mcp_session = False
     try:
         isolation.apply_from_process(raw)
         clean = isolation.strip_cli(raw)
@@ -290,6 +311,9 @@ def main(argv=None):
         ns = parser().parse_args(clean)
         if ns.command is None:
             raise UsageError("choose a command; use uoink --help")
+        if ns.command == "mcp":
+            mcp_session = True
+            return serve_mcp()
         text_mode = getattr(ns, "text_output", False)
         if ns.command == "serve":
             with redirect_stdout(sys.stderr):
@@ -362,6 +386,9 @@ def main(argv=None):
         print(f"uoink: {exc}", file=sys.stderr)
         return 2
     except (OSError, ValueError, RuntimeError) as exc:
+        if mcp_session:
+            # Stdout is the JSON-RPC transport. Fail on stderr, as uoink_mcp.py does.
+            raise
         return emit({"ok": False, "error": str(exc)})
 
 
