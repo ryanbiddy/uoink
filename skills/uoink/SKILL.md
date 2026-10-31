@@ -44,7 +44,7 @@ other values stay strings. Quote multiword strings for your shell. If the CLI
 is missing, ask the user to install Uoink with its PATH task and open a new
 terminal. `uoink connect --list` lists print-only MCP setup recipes.
 
-For the private macOS build, use the CLI at
+On macOS, use the CLI at
 `<installed Uoink.app>/Contents/Helpers/uoink`, or a PATH symlink to it.
 `uoink connect <client>` resolves the running bundle and prints
 `Contents/Resources/Python/bin/python3 -B -s` with
@@ -52,8 +52,9 @@ For the private macOS build, use the CLI at
 Claude Desktop uses `~/Library/Application Support/Claude/claude_desktop_config.json`,
 Cursor uses `~/.cursor/mcp.json`, and Codex uses `~/.codex/config.toml`.
 The agent kit's static Claude Code plugin MCP entry is Windows-only. On Mac,
-use `uoink connect claude-code` and the standalone skill. Client acceptance
-is pending. Library mirroring is unavailable on Mac.
+use `uoink connect claude-code` and the standalone skill. Claude Code passed
+Mac acceptance; other clients are untested there. Library mirroring is
+unavailable on Mac.
 
 ## Find and cite saved evidence
 

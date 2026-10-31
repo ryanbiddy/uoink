@@ -2,18 +2,18 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ryanbiddy/uoink",
   "title": "Uoink",
-  "description": "Search and cite saved YouTube and podcast transcripts on your PC. Needs the Uoink Windows app.",
+  "description": "Search and cite your saved YouTube and podcast transcripts. Needs the Uoink app for Windows or Mac.",
   "websiteUrl": "https://uoink.app",
   "repository": {
     "url": "https://github.com/ryanbiddy/uoink",
     "source": "github"
   },
-  "version": "3.11.2",
+  "version": "3.12.0",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/ryanbiddy/uoink/releases/download/v3.11.2/uoink-3.11.2.mcpb",
-      "fileSha256": "e31bbb96e033723ab70d8e3fa44fcee5dbdf5207fae5e44190d6f9a984e6847a",
+      "identifier": "https://github.com/ryanbiddy/uoink/releases/download/v3.12.0/uoink-3.12.0.mcpb",
+      "fileSha256": "3708adcebd77e9f583e58649e3fd803f91b3e826affe4400710c9e8494d69c9f",
       "transport": {
         "type": "stdio"
       }
