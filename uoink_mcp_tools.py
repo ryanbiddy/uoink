@@ -1807,6 +1807,7 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
         return _err(f"uoink_x failed: {exc}")
     if not video_id:
         return _err("couldn't save the X post")
+    server._save_x_video_poster(video_id, result)
     return _ok(
         video_id=video_id,
         title=result["title"],
