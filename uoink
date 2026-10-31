@@ -28,7 +28,7 @@ for uoink_arg do
     esac
 done
 case $uoink_command in
-    tools|call|capture|recent|get|note|status|connect|skill|serve|--text|-h|--help)
+    tools|call|capture|recent|get|note|status|connect|skill|serve|mcp|--text|-h|--help)
         export PYTHONIOENCODING=utf-8 PYTHONUTF8=1
         exec "$uoink_python" "$uoink_root/uoink_cli.py" "$@" ;;
 esac

@@ -321,6 +321,7 @@ def test_legacy_launcher_unchanged_and_serve_forwards(monkeypatch):
     (["--help"], "uoink_cli.py"), (["--text", "status"], "uoink_cli.py"),
     (["--isolated-profile", "p q", "--isolated-port", "18090", "status"], "uoink_cli.py"),
     (["--isolated-from-install-dir", "app", "recent"], "uoink_cli.py"),
+    (["mcp"], "uoink_cli.py"), (["--isolated-from-install-dir", "app", "mcp"], "uoink_cli.py"),
 ])
 def test_root_launcher_sends_agent_subcommands_to_cli(tmp_path, args, script):
     # Stubs report which script the real root launcher ran, with argv and exit code intact.

@@ -17,8 +17,8 @@ Times are estimates for the hands-on part.
 | 9 | [Edge Add-ons](#9-edge-add-ons) | 30 min | Ready; needs a helper release for the new ID |
 | 10 | [Alfred Gallery](#10-alfred-gallery) | later | Use the workflow for a while first |
 | 10b | [Obsidian community directory](#10b-obsidian-community-directory) | 20 min | Ready after a test run in a vault |
-| 11 | [Claude directory](#11-claude-directory-and-goose) | — | **Blocked** on one decision |
-| 12 | [Goose extensions directory](#11-claude-directory-and-goose) | — | **Blocked** on the same decision |
+| 11 | [Claude directory](#11-claude-directory-and-goose) | — | **Blocked** on the next release for option B (`uoink mcp` is built); option A can go first |
+| 12 | [Goose extensions directory](#11-claude-directory-and-goose) | — | **Blocked** on the next release, which ships `uoink mcp` |
 
 ---
 

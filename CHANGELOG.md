@@ -38,7 +38,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   any client can launch Uoink with `"command": "uoink", "args": ["mcp"]` and
   no install path. On Windows, clients that cannot start `.cmd` files use
   `cmd /c uoink mcp`. It runs the same server as `uoink_mcp.py`, honors
-  `UOINK_MCP_TOOLSET`, and keeps stdout for JSON-RPC only.
+  `UOINK_MCP_TOOLSET`, and keeps stdout for JSON-RPC only. The root
+  `uoink.cmd` and `uoink` launchers route `mcp` to the CLI as well, and the
+  dashboard counts a client entry that runs `uoink mcp` as connected.
 
 ## [3.12.0] - 2026-10-30
 
