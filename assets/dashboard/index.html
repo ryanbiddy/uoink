@@ -8548,7 +8548,8 @@
       const out = [];
       for (const [topic, arr] of byTopic.entries()) {
         if (arr.length < 2) continue;
-        const sorted = arr.slice().sort((a, b) => String(b.yoinked_at || "").localeCompare(String(a.yoinked_at || "")));
+        // Parse, don't compare text: stamps mix local and UTC ("Z") forms.
+        const sorted = arr.slice().sort((a, b) => (timeOf(b.yoinked_at) || 0) - (timeOf(a.yoinked_at) || 0));
         out.push({
           topic,
           a: sorted[0],

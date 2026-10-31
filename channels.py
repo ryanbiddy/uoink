@@ -260,11 +260,12 @@ def _yoinked_month(ts: str | None) -> str:
 
 def self_yoink_rows(idx) -> list[dict]:
     """Pull every yoink the user owns (tagged is_self), newest first."""
+    from index import capture_time_sql  # noqa: WPS433 -- index imports this module
     rows = idx._conn.execute(
         "SELECT y.* FROM yoinks y "
         "JOIN yoink_tags t ON t.video_id = y.video_id "
         "WHERE t.tag = 'is_self' AND y.deleted_at IS NULL "
-        "ORDER BY y.yoinked_at DESC NULLS LAST"
+        f"ORDER BY {capture_time_sql('y.yoinked_at')} DESC NULLS LAST"
     ).fetchall()
     return [dict(r) for r in rows]
 
