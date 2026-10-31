@@ -112,9 +112,11 @@ Uoink makes these outbound requests:
   and delete each one after it captures it. Uoink sends nothing else to the
   relay: no library content, transcripts or settings. The relay runs on your
   own Render account, not a Uoink server. It holds a shared link and an
-  optional note until Uoink picks it up, or for 7 days at most, and its logs
-  record only method, route, status and duration. Capturing a picked-up link
-  then contacts its source service as above. See [docs/relay.md](relay.md).
+  optional note until Uoink picks it up, or for 7 days at most, and its own
+  log lines record only method, route, status and duration. Render, as the
+  host, handles those requests under its own policy. Capturing a picked-up
+  link then contacts its source service as above. See
+  [docs/relay.md](relay.md).
 - **GitHub release check — only when you click `Check now`.** The dashboard
   requests the latest Uoink release record from `api.github.com`. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.

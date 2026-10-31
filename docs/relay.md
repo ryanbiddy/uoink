@@ -141,10 +141,11 @@ Uoink, then suspend or delete both services in Render.
 | Where | What | How long |
 |---|---|---|
 | Relay (your Key Value) | The link, the optional note, a random id and the time it was shared | Until Uoink picks it up, or 7 days |
-| Relay logs (Render) | Method, route, status code and duration only. Never tokens, links, notes or IP addresses | Render's log retention |
+| The relay's own log lines | Method, route, status code and duration only. Never tokens, links, notes or IP addresses | Render's log retention |
 | Uoink settings | Relay address, on/off, check interval | Until you change them |
 | System credential store | The pull token | Until you replace it |
 
+Render hosts the relay, so its platform handles each request under Render's own policy.
 The relay has no page that shows your links. `GET /healthz` answers whether
 the store is reachable, with no counts. Every response is marked
 `Cache-Control: no-store`.
