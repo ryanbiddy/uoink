@@ -37,6 +37,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- An X post with a video shows the video's poster on its Library row instead
+  of a grey "post" block. Capturing the post saves the poster as its
+  thumbnail; a poster that can't be fetched never fails the capture. Text
+  and photo posts look as before.
+- An X or Reddit post with a video opens in the reader as a video: a timed
+  transcript, **Watch on X**, and the same transcript notes a YouTube video
+  gets, including why there is no transcript.
+- The Sources page's paste box offers **Allow <site>** when the site
+  allowlist turns a page away, like a Library capture row, instead of a
+  toast that sent you to Settings.
+- The model status gives no download size for the bundled Whisper model
+  (`estimated_download_mb` is `null` while the bundled copy runs).
+- Opening Settings at a section from another page (such as "Download it in
+  Settings") lands on the section. It used to stop short by the height of
+  the lists that load above it, leaving the heading under the one-time usage
+  card or, in the Mac app, below the window.
 - Newest first is newest first in a library that mixes videos with pages,
   posts or notes. Videos store their save time as local time and the rest
   as UTC, and the two were compared as text, so west of UTC a page saved in

@@ -123,10 +123,22 @@ def test_size_mismatch_is_unavailable_as_before(roots):
     assert status["estimated_download_mb"] == 490
 
 
+def test_download_size_shows_only_when_the_bundle_is_not_running(roots):
+    # The bundled copy is never downloaded, so it has no download size.
+    stage_bundled(roots.bundled)
+    assert rel.reliability_model_status("base", roots.user)["estimated_download_mb"] is None
+    # Another size still names its download, and so does the user's own copy.
+    assert rel.reliability_model_status("small", roots.user)["estimated_download_mb"] == 490
+    seed_user_cache(roots.user)
+    status = rel.reliability_model_status("base", roots.user)
+    assert status["source"] == "downloaded" and status["estimated_download_mb"] == 150
+
+
 def test_no_bundle_keeps_pre_312_behavior(roots):
     status = rel.reliability_model_status("base", roots.user)
     assert status["cached"] is False and status["source"] is None
     assert status["bundled_model"] is None and status["bundled_path"] is None
+    assert status["estimated_download_mb"] == 150
 
 
 @pytest.mark.parametrize("damage", ["missing_tokenizer", "short_model", "wrong_repo", "wrong_model",

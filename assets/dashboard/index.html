@@ -3182,6 +3182,13 @@
       scroll-margin-top: 16px;
     }
 
+    /* A block a route names (#settings/transcription-model, byo-key) lands
+       with the same room above it as a section, so its heading never sits
+       on the edge under the one-time usage card. */
+    #tab-settings .setting-block[id] {
+      scroll-margin-top: 16px;
+    }
+
     .settings-section-title {
       color: var(--text);
       font-size: 20px;
@@ -5413,6 +5420,7 @@
               <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
               <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
               <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
+              <button class="button hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote"></button>
             </div>
             <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
           </div>
@@ -6547,6 +6555,7 @@
       universalCaptureInput: document.getElementById("universalCaptureInput"),
       universalCaptureChip: document.getElementById("universalCaptureChip"),
       universalCaptureButton: document.getElementById("universalCaptureButton"),
+      universalCaptureAllow: document.getElementById("universalCaptureAllow"),
       universalCaptureNote: document.getElementById("universalCaptureNote"),
       noteCapture: document.getElementById("noteCapture"),
       noteTitleInput: document.getElementById("noteTitleInput"),
@@ -7560,6 +7569,18 @@
       `;
     }
 
+    // An X or Reddit post with a video. The index names a post by its URL
+    // (x_thread, reddit_thread) either way, but only the video path records
+    // how the transcript came out (transcript_source, asr_fallback), as
+    // compute_health checks; a text post's page path records neither.
+    function isVideoPost(row, sidecar = {}) {
+      const st = String(firstValue(row && row.source_type, sidecar.source_type) || "").toLowerCase();
+      if (st !== "x_thread" && st !== "reddit_thread") return false;
+      return Boolean(row && (row.transcript_source || row.asr_fallback_status))
+        || Object.prototype.hasOwnProperty.call(sidecar, "transcript_source")
+        || Boolean(sidecar.asr_fallback);
+    }
+
     function mediaLabelFor(row, sidecar = {}) {
       if (isPodcastContent(row, sidecar)) return "podcast";
       if (isLiveContent(row, sidecar)) return "live stream";
@@ -7569,12 +7590,13 @@
         sidecar.source_type,
         meta.source_type,
       ) || "").toLowerCase();
+      const videoPost = isVideoPost(row, sidecar);
       if (st === "note") return "note";
       if (st === "image") return "image";
       if (st === "page") return "page";
       if (st === "x_article") return "article";
-      if (st === "x_thread") return "post";
-      if (st === "reddit_thread") return "thread";
+      if (st === "x_thread" && !videoPost) return "post";
+      if (st === "reddit_thread" && !videoPost) return "thread";
       const platform = platformOf(row, sidecar);
       if (platform === "note") return "note";
       if (platform === "image") return "image";
@@ -7613,6 +7635,7 @@
         note: "note",
         image: "image",
       };
+      if (isVideoPost(row)) return "video";
       if (labels[st]) return labels[st];
       if (isPodcastContent(row)) return "episode";
       if (isLiveContent(row)) return "live";
@@ -7631,9 +7654,11 @@
     // in a 44px gutter, screenshots where they were taken, then comments
     // and AI analysis folded away below.
 
-    // Kinds whose words follow a timeline (a transcript), not a page.
+    // Kinds whose words follow a timeline (a transcript), not a page. An X
+    // or Reddit post with a video is a video here, like a YouTube one.
     function isTimedMedia(row, sidecar = {}) {
       if (isNoteContent(row, sidecar)) return false;
+      if (isVideoPost(row, sidecar)) return true;
       const st = String(firstValue(row && row.source_type, sidecar.source_type) || "").toLowerCase();
       if (["image", "page", "x_article", "x_thread", "reddit_thread"].includes(st)) return false;
       return platformOf(row, sidecar) !== "image";
@@ -10643,7 +10668,24 @@
     let universalDetectTimer = null;
     // Shared with the Library box, which adds feeds the same way.
     const PODCAST_FEED_SAVED_COPY = "Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.";
-    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null };
+    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null, allowHost: "" };
+
+    // A page the site allowlist turned away, said the same way here and on
+    // a Library capture row: with its host, "Allow <host>" sits beside it.
+    function allowlistWallCopy(host) {
+      return host
+        ? "That site isn't on your allowed pages list yet. Allow it to capture this page."
+        : "That site isn't on your allowed pages list yet. Add it in Settings, then try again.";
+    }
+
+    function setUniversalAllowHost(host) {
+      universalState.allowHost = host || "";
+      const btn = els.universalCaptureAllow;
+      if (!btn) return;
+      btn.disabled = false;
+      btn.textContent = host ? `Allow ${host}` : "";
+      btn.classList.toggle("hidden", !host);
+    }
 
     async function detectCaptureUrl(url) {
       const token = await getToken();
@@ -10666,6 +10708,7 @@
       universalState.canonical = "";
       universalState.label = "";
       universalState.lastRaw = null;
+      setUniversalAllowHost("");
       setCaptureChip("empty", "Paste a link");
       if (els.universalCaptureButton) els.universalCaptureButton.disabled = true;
       if (els.universalCaptureNote) {
@@ -10681,6 +10724,7 @@
       universalState.payloadKey = supported ? (result.payload_key || "url") : null;
       universalState.canonical = (result && result.canonical) || "";
       universalState.label = (result && result.label) || "";
+      setUniversalAllowHost("");
       setCaptureChip(supported ? "supported" : "unsupported",
         result && result.label ? result.label : "Not a supported source yet");
       if (els.universalCaptureButton) els.universalCaptureButton.disabled = !supported;
@@ -10752,7 +10796,11 @@
         refreshActivity();
       } catch (err) {
         if (err && err.data && err.data.code === "host_not_allowed") {
-          showToast("That site isn't on your allowed pages list yet. Add it in Settings, then try again.");
+          // The box offers "Allow <host>" (allowUniversalCaptureSite), as a
+          // Library capture row does, instead of a trip to Settings.
+          const host = urlHostname(url);
+          setUniversalAllowHost(host);
+          if (els.universalCaptureNote) els.universalCaptureNote.textContent = allowlistWallCopy(host);
         } else if (err && err.data && err.data.code === "x_login_wall") {
           // Honest copy straight from the helper: X login-walls Articles and
           // pages. Don't run it through the "retry with cookies" mapping.
@@ -10765,6 +10813,24 @@
         if (btn) btn.textContent = "Uoink it";
         if (btn) btn.disabled = !universalState.endpoint;
       }
+    }
+
+    // "Allow <host>" in the box: add the host the way Settings' Add does,
+    // then capture the same link again.
+    async function allowUniversalCaptureSite() {
+      const host = universalState.allowHost;
+      const btn = els.universalCaptureAllow;
+      if (!host || universalState.busy) return;
+      if (btn) { btn.disabled = true; btn.textContent = "Allowing..."; }
+      try {
+        await saveAllowedSite(host);
+      } catch (err) {
+        if (btn) { btn.disabled = false; btn.textContent = `Allow ${host}`; }
+        if (els.universalCaptureNote) els.universalCaptureNote.textContent = `Couldn't allow ${host}: ${settingError(err)}`;
+        return;
+      }
+      setUniversalAllowHost("");
+      await runUniversalCapture();
     }
 
     // Context-layer item 1: jot a note. A note is a first-class uoink, so the
@@ -11623,7 +11689,7 @@
       if (st === "page" || st === "x_article") return "article text";
       // A post with a video went through the video path, which records how
       // its transcript came out; a text post records neither.
-      const videoPost = Boolean(row && (row.transcript_source || row.asr_fallback_status));
+      const videoPost = isVideoPost(row);
       if (st === "x_thread" && !videoPost) return "post and thread";
       if (st === "reddit_thread" && !videoPost) return "thread and comments";
       const kind = transcriptKind(row && row.transcript_source);
@@ -11893,9 +11959,7 @@
         // The row offers "Allow <host>" (allowLibraryRunSite), so the wall
         // is one click from here instead of a trip to Settings.
         run.allowHost = urlHostname(run.url);
-        run.reason = run.allowHost
-          ? "That site isn't on your allowed pages list yet. Allow it to capture this page."
-          : "That site isn't on your allowed pages list yet. Add it in Settings, then try again.";
+        run.reason = allowlistWallCopy(run.allowHost);
       } else if (data.code === "x_login_wall") {
         run.reason = failure.detail ? failure.reason : "X login-walls this one. Paste a /status/ link to capture X posts and threads.";
       } else {
@@ -16981,20 +17045,35 @@
       return target && panel && panel.contains(target) ? target : null;
     }
 
+    // Longest a jump into Settings waits for the Settings read to finish.
+    const SETTINGS_REVEAL_WAIT_MS = 1000;
+
     // #settings/<section>: scroll the section (or a block such as byo-key)
     // into view and put focus on its heading, as an in-page link would. A
     // block that names a control with data-reveal-focus (the transcription
-    // model picker) focuses that control instead.
-    function revealSettingsSection(section) {
+    // model picker) focuses that control instead. From another tab,
+    // `loaded` is the Settings read the switch started: its lists and
+    // statuses fill in above the target, so the scroll waits for them (a
+    // second at most). Scrolling first stopped short by their height, which
+    // left the heading under the usage card or below the window.
+    function revealSettingsSection(section, loaded = null) {
       const target = settingsSectionTarget(section);
       if (!target) return;
-      window.setTimeout(() => {
+      const reveal = () => window.setTimeout(() => {
         target.scrollIntoView({ block: "start", behavior: scrollBehavior() });
         const control = target.querySelector("[data-reveal-focus]");
         const heading = control || target.querySelector(".settings-section-title, h2") || target;
         if (!control && !heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
         heading.focus({ preventScroll: true });
       }, 0);
+      if (!loaded) {
+        reveal();
+        return;
+      }
+      Promise.race([
+        Promise.resolve(loaded).catch(() => {}),
+        new Promise((done) => window.setTimeout(done, SETTINGS_REVEAL_WAIT_MS)),
+      ]).then(reveal);
     }
 
     function revealSourcesDiscover() {
@@ -17040,12 +17119,12 @@
       if (tab === "yoink") renderYoinkDetail();
       if (tab === "sources") renderSources();
       if (tab === "activity") refreshActivity();
-      if (tab === "settings") refreshSettings();
+      const settingsRead = tab === "settings" ? refreshSettings() : null;
       const back = tab === "library" && previousTab === "yoink" ? state.libraryScroll : null;
       setPageScrollPosition(back || { content: 0, page: 0 });
       syncReaderCrumbs();
       if (!options.fromRoute) pushRoute(routeForTab(tab, options));
-      if (tab === "settings" && options.section) revealSettingsSection(options.section);
+      if (tab === "settings" && options.section) revealSettingsSection(options.section, settingsRead);
       if (tab === "sources" && options.section === "discover") revealSourcesDiscover();
     }
 
@@ -17507,6 +17586,9 @@
       }
       if (els.universalCaptureButton) {
         els.universalCaptureButton.addEventListener("click", runUniversalCapture);
+      }
+      if (els.universalCaptureAllow) {
+        els.universalCaptureAllow.addEventListener("click", allowUniversalCaptureSite);
       }
       if (els.noteTextInput) {
         els.noteTextInput.addEventListener("input", syncNoteButton);
