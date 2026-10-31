@@ -11,8 +11,8 @@ Times are estimates for the hands-on part.
 | 3 | [mcp.so and PulseMCP](#3-mcpso-and-pulsemcp) | 10 min | Ready |
 | 4 | [Glama score, then awesome-mcp-servers](#4-glama-then-awesome-mcp-servers) | 15 min | **Blocked** on Ryan running the Glama build |
 | 5 | [Raycast Store](#5-raycast-store) | 30 min | **Needs** Ryan's Raycast handle (author 404), then a test run on a Mac |
-| 6 | [Homebrew tap](#6-homebrew-tap) | 10 min | **Needs** v3.12.0 published on GitHub (the cask's DMG URL) |
-| 7 | [winget](#7-winget) | 20 min | **Needs** v3.12.0 published on GitHub (the installer URL) |
+| 6 | [Homebrew tap](#6-homebrew-tap) | 10 min | Ready (v3.12.0 is published) |
+| 7 | [winget](#7-winget) | 20 min | Ready (v3.12.0 is published) |
 | 8 | [Flow Launcher store](#8-flow-launcher-store) | 20 min | Ready after a test run on Windows |
 | 9 | [Edge Add-ons](#9-edge-add-ons) | 30 min | Ready; needs a helper release for the new ID |
 | 10 | [Alfred Gallery](#10-alfred-gallery) | later | Use the workflow for a while first |

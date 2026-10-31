@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [3.12.0] - 2026-10-30
-
 ### Added
 
 - A Raycast extension in `integrations/raycast` for macOS and Windows.
@@ -36,6 +34,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `docs/submissions/`.
 - The agent-kit plugin folder has the README and license that the Claude
   plugin directory requires.
+
+## [3.12.0] - 2026-10-30
+
+### Added
+
 - Every download ships the Whisper transcription model, so a fresh install
   transcribes videos that have no captions with no download step. The
   Windows installer and the Mac app carry the default **base** model (OpenAI

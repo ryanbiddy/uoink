@@ -1,8 +1,8 @@
 # Package manager manifests
 
-Manifests for Uoink 3.12.0. The SHA-256 values are the 3.12.0 release build's.
-Their download URLs go live when v3.12.0 is published on GitHub; before you
-submit, confirm both hashes against that release's `SHA256SUMS.txt`.
+Manifests for Uoink 3.12.0. The SHA-256 values match the published v3.12.0
+release's `SHA256SUMS.txt`. For a later release, update the version, URLs and
+hashes from that release's `SHA256SUMS.txt` before you submit.
 
 ## winget (Windows)
 
