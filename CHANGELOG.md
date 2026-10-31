@@ -34,6 +34,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `docs/submissions/`.
 - The agent-kit plugin folder has the README and license that the Claude
   plugin directory requires.
+- `uoink mcp` starts the stdio MCP server from the `uoink` command on PATH, so
+  any client can launch Uoink with `"command": "uoink", "args": ["mcp"]` and
+  no install path. On Windows, clients that cannot start `.cmd` files use
+  `cmd /c uoink mcp`. It runs the same server as `uoink_mcp.py`, honors
+  `UOINK_MCP_TOOLSET`, and keeps stdout for JSON-RPC only. The root
+  `uoink.cmd` and `uoink` launchers route `mcp` to the CLI as well, and the
+  dashboard counts a client entry that runs `uoink mcp` as connected.
 
 ### Fixed
 

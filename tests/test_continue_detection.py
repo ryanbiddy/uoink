@@ -210,3 +210,70 @@ def test_detection_survives_a_bundle_without_its_launcher(tmp_path, monkeypatch)
                       encoding="utf-8")
     assert server._entry_launches_uoink({"command": "python3", "args": ["uoink_mcp.py"]}) is False
     assert server._client_is_connected(config) is False
+    # `uoink mcp` needs no bundled-Python path to match.
+    assert server._entry_launches_uoink({"command": "uoink", "args": ["mcp"]}) is True
+
+
+@pytest.mark.parametrize("platform, command, args, expected", [
+    ("win32", "uoink", ["mcp"], True),
+    ("win32", "UOINK.cmd", ["mcp"], True),
+    ("win32", "cmd", ["/c", "uoink", "mcp"], True),
+    ("win32", r"C:\Windows\System32\cmd.exe", ["/C", "uoink", "mcp"], True),
+    ("darwin", "uoink", ["mcp"], True),
+    ("linux", "uoink", ["mcp"], True),
+    ("win32", "uoink", ["mcp", "--toolset", "core"], False),
+    ("win32", "uoink", ["status"], False),
+    ("win32", "uoink", [], False),
+    ("win32", "uoink-helper", ["mcp"], False),
+    ("win32", "cmd", ["/c", "uoink"], False),
+    ("win32", "cmd", ["/c", "other", "mcp"], False),
+    ("win32", "cmd", ["/k", "uoink", "mcp"], False),
+    ("darwin", "cmd", ["/c", "uoink", "mcp"], False),
+    ("darwin", "uoink.cmd", ["mcp"], False),
+    ("win32", r"C:\Other\Uoink\cli\uoink.cmd", ["mcp"], False),
+])
+def test_uoink_mcp_entries_are_detected(client_home, monkeypatch, platform, command, args, expected):
+    monkeypatch.setattr(sys, "platform", platform)
+    path = client_home / "mcp.json"
+    path.write_text(json.dumps({"mcpServers": {"library": {"command": command, "args": args}}}),
+                    encoding="utf-8")
+    assert server._client_is_connected(path) is expected
+    disabled = {"command": command, "args": args, "disabled": True}
+    assert server._entry_launches_uoink(disabled) is False
+
+
+def test_uoink_mcp_entry_carries_isolation_arguments(client_home, monkeypatch):
+    # The isolated install's own profile, never the PATH install's default.
+    flags = ["--isolated-profile", str(client_home / "profile"), "--isolated-port", "18094"]
+    monkeypatch.setattr(server._install_isolation, "child_argv", lambda: flags)
+    assert server._entry_launches_uoink({"command": "uoink", "args": ["mcp"]}) is False
+    assert server._entry_launches_uoink({"command": "uoink", "args": ["mcp", *flags]}) is True
+
+
+def test_uoink_mcp_absolute_launchers_of_this_install(client_home, tmp_path):
+    name = "uoink.cmd" if sys.platform == "win32" else "uoink"
+    for launcher, expected in ((server.HERE / "cli" / name, True), (server.HERE / name, True),
+                               (tmp_path / "other" / "cli" / name, False)):
+        entry = {"command": str(launcher), "args": ["mcp"]}
+        assert server._entry_launches_uoink(entry) is expected, launcher
+        assert server._entry_launches_uoink({"command": "cmd", "args": ["/c", str(launcher), "mcp"]}) is (
+            expected and sys.platform == "win32")
+    if sys.platform == "win32":
+        spelled = str(server.HERE / "CLI" / "UOINK.CMD").replace("\\", "/")
+        assert server._entry_launches_uoink({"command": spelled, "args": ["mcp"]})
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX symlinks and the Mac bundle layout")
+def test_uoink_mcp_mac_shim_through_a_path_symlink(tmp_path, monkeypatch):
+    monkeypatch.setattr(sys, "platform", "darwin")
+    resources = tmp_path / "Uoink.app/Contents/Resources"
+    monkeypatch.setattr(server, "HERE", resources)
+    shim = resources.parent / "Helpers/uoink"
+    shim.parent.mkdir(parents=True)
+    shim.write_text("#!/bin/bash\n", encoding="utf-8")
+    link = tmp_path / "bin/uoink"
+    link.parent.mkdir()
+    link.symlink_to(shim)
+    for command, expected in ((shim, True), (link, True), (resources / "uoink", False),
+                              (resources / "cli/uoink", False)):
+        assert server._entry_launches_uoink({"command": str(command), "args": ["mcp"]}) is expected, command

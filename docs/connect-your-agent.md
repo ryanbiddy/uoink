@@ -120,9 +120,46 @@ Detection reads global `~/.continue/config.yaml` on macOS and Linux, or
 legacy `config.json` in the same directory, using
 `experimental.modelContextProtocolServers[].transport`. YAML takes precedence.
 The dashboard reports connected only when an entry's command and arguments
-match this Uoink install. Malformed or unreadable files report disconnected
+match this Uoink install, or run `uoink mcp` as described in the next section.
+Malformed or unreadable files report disconnected
 with a reason. Detection does not scan workspace configs or resolve Continue
 Hub references.
+
+## One launch command for any MCP client
+
+Uoink releases after 3.12.0 add `uoink mcp`. It runs the same stdio server as
+the recipes above through the `uoink` command on PATH, so a client entry needs
+no install path:
+
+```json
+{
+  "mcpServers": {
+    "uoink": {
+      "command": "uoink",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+On Windows, the PATH command is `cli\uoink.cmd`. A client that starts commands
+without a shell cannot run a `.cmd` file; give it `"command": "cmd"` and
+`"args": ["/c", "uoink", "mcp"]` instead. For clients with tool caps, set
+`UOINK_MCP_TOOLSET=core` in the entry's environment, as with the recipes.
+Stdout carries only JSON-RPC; startup messages and logs go to stderr.
+
+The client must see `uoink` on its PATH. On Windows, leave the installer's
+PATH option checked and restart the client. On a Mac, create the PATH symlink
+from [the Mac install guide](mac/INSTALL.md). Mac apps opened from the Dock
+usually do not read your shell's PATH; if the client cannot find `uoink`, use
+the symlink's full path as the command. The dashboard reports an entry as
+connected when it runs `uoink mcp` through the `uoink` name, `cmd /c`, or this
+install's launcher by absolute path (`cli\uoink.cmd` or the root `uoink.cmd`
+on Windows; `Contents/Helpers/uoink` or a symlink to it on a Mac). It cannot
+check which install a bare `uoink` on the client's PATH reaches. `uoink
+connect <client>` keeps printing absolute paths, which work on every release.
+The test suite drives `uoink mcp` through `cmd /c` and the POSIX launchers with
+a test MCP client; it is not yet tested in each client.
 
 ## Local-model apps
 
@@ -420,11 +457,21 @@ a returned job ID means the queue accepted the job. Use `get_job_status` to
 inspect its final result, including failures. MCP sessions retain their usual
 asynchronous behavior.
 
+`uoink mcp` (releases after 3.12.0) is for MCP clients, not for typing. It
+runs the stdio MCP server in the CLI's process through `uoink_mcp.py`'s own
+entry point, until the client closes stdin. It prints no envelope: stdout
+carries only JSON-RPC, and startup messages and logs go to stderr. The toolset
+comes from `UOINK_MCP_TOOLSET`, as for `uoink_mcp.py`; there is no
+`--toolset` flag. `uoink mcp --help` shows the client config. See
+[One launch command for any MCP client](#one-launch-command-for-any-mcp-client).
+
 The original root `uoink.cmd` and POSIX `uoink` still run `server.py`, including
 their existing HTTP search and maintenance commands. They hand the agent
 subcommands (`tools`, `call`, `capture`, `recent`, `get`, `note`, `status`,
-`connect`, `skill`, `serve`) to this CLI, so a source checkout can run
-`./uoink status`; `search` stays the helper's HTTP search. The new PATH
+`connect`, `skill`, `serve`, `mcp`) to this CLI, so a source checkout can run
+`./uoink status` or `./uoink mcp`; `search` stays the helper's HTTP search.
+Inside the Mac app, `Contents/Resources/uoink` hands every command to the app
+binary instead, so use `Contents/Helpers/uoink` there. The new PATH
 command is `{app}\cli\uoink.cmd`. Its no-argument behavior starts the helper;
 `uoink serve` does the same, and `uoink serve --doctor` forwards the old CLI.
 Use the new command's `search` for in-process library reads. An extensionless

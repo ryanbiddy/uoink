@@ -17,8 +17,8 @@ Times are estimates for the hands-on part.
 | 9 | [Edge Add-ons](#9-edge-add-ons) | 30 min | Ready; needs a helper release for the new ID |
 | 10 | [Alfred Gallery](#10-alfred-gallery) | later | Use the workflow for a while first |
 | 10b | [Obsidian community directory](#10b-obsidian-community-directory) | 20 min | Ready after a test run in a vault |
-| 11 | [Claude directory](#11-claude-directory-and-goose) | — | **Blocked** on one decision |
-| 12 | [Goose extensions directory](#11-claude-directory-and-goose) | — | **Blocked** on the same decision |
+| 11 | [Claude directory](#11-claude-directory-and-goose) | — | **Blocked** on the next release for option B (`uoink mcp` is built); option A can go first |
+| 12 | [Goose extensions directory](#11-claude-directory-and-goose) | — | **Blocked** on the next release, which ships `uoink mcp` |
 
 ---
 
@@ -182,3 +182,9 @@ Claude directory blocks (its README and LICENSE blockers are fixed). Goose's
 | **B. A `uoink mcp` subcommand** | The CLI starts the stdio server, so every client can use `command: "uoink", args: ["mcp"]`. | One launch line for the directory, Goose, Smithery and others. On Windows, clients that don't resolve `.cmd` files need `cmd /c uoink mcp` or a small `uoink.exe`. A PATH command is held for a reviewer, not blocked. |
 
 A now, B in the next release, is the fastest route.
+
+**B is built** and lands in the next release: `uoink mcp` runs the same stdio
+server, and `cmd /c uoink mcp` works through the Windows `cli\uoink.cmd`
+launcher. Installed 3.12.0 copies don't have it, so the agent-kit plugin and
+`.mcpb` keep their current launch config until that release ships. Then the
+directory plugin and the Goose entry can use `command: "uoink", args: ["mcp"]`.

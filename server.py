@@ -11905,26 +11905,58 @@ def _uoink_mcp_entry() -> dict:
     return {"command": command, "args": args}
 
 
+def _entry_runs_uoink_mcp(command: str, args: list[str]) -> bool:
+    """Match `uoink mcp` by its PATH name, through `cmd /c`, or by this install's launcher."""
+    import ntpath
+    import posixpath
+    windows = sys.platform == "win32"
+    paths = ntpath if windows else posixpath
+    if (windows and len(args) > 1 and args[0].lower() == "/c"
+            and paths.normcase(paths.basename(command)) in ("cmd", "cmd.exe")):
+        # Clients that start no shell reach the .cmd launcher through cmd /c.
+        command, args = args[1], args[2:]
+    if args != ["mcp", *_install_isolation.child_argv()]:
+        return False
+    if paths.normcase(command) in (("uoink", "uoink.cmd") if windows else ("uoink",)):
+        return True
+    if not paths.isabs(command):
+        return False
+    from uoink_connect import bundle_resources
+    resources = bundle_resources(HERE)
+    if resources is not None:
+        # The bundle's Resources/uoink starts the app, which never routes to the CLI.
+        launchers = [resources.parent / "Helpers/uoink"]
+    else:
+        name = "uoink.cmd" if windows else "uoink"
+        launchers = [HERE / "cli" / name, HERE / name]
+    # Follow a PATH symlink back to the launcher, like the one the Mac guide creates.
+    actual = paths.normcase(paths.realpath(command))
+    return any(actual == paths.normcase(paths.realpath(str(launcher))) for launcher in launchers)
+
+
 def _entry_launches_uoink(entry) -> bool:
     """Match this install's stdio launch, regardless of the user's entry name."""
     if not isinstance(entry, dict) or entry.get("disabled") is True or entry.get("enabled") is False:
         return False
+    actual_args = entry.get("args")
+    if not isinstance(entry.get("command"), str) or not isinstance(actual_args, list):
+        return False
+    if not all(isinstance(arg, str) for arg in actual_args) or entry.get("type", "stdio") != "stdio":
+        return False
+    if _entry_runs_uoink_mcp(entry["command"], actual_args):
+        return True
     try:
         command, args = _mcp_stdio_command()
     except OSError:
         # An incomplete app bundle has no launcher to match; detection must not fail the scan.
         return False
-    actual_args = entry.get("args")
-    if not isinstance(entry.get("command"), str) or not isinstance(actual_args, list):
-        return False
-    if len(actual_args) != len(args) or not all(isinstance(arg, str) for arg in actual_args):
+    if len(actual_args) != len(args):
         return False
     import ntpath
     import posixpath
     paths = ntpath if sys.platform == "win32" else posixpath
     normalize = lambda value: paths.normcase(paths.normpath(value))
-    return (entry.get("type", "stdio") == "stdio"
-            and normalize(entry["command"]) == normalize(command)
+    return (normalize(entry["command"]) == normalize(command)
             and all(normalize(actual) == normalize(expected) if paths.isabs(expected)
                     else actual == expected for actual, expected in zip(actual_args, args)))
 
