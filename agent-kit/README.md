@@ -23,7 +23,7 @@ On Mac, use `uoink connect claude-code` with the standalone skill instead of
 the static Windows plugin MCP entry below. For example,
 `uoink skill install --to "$HOME/.claude/skills"`. For Codex, use
 `uoink skill install --to "$HOME/.agents/skills"` and the printed Codex MCP
-recipe. Mac client acceptance is pending.
+recipe. Claude Code passed Mac acceptance; other clients are untested there.
 
 ## Claude Code
 

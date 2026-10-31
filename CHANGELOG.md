@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.12.0] - 2026-10-30
+
 ### Added
 
 - Every download ships the Whisper transcription model, so a fresh install
@@ -20,14 +22,73 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   The Windows installer grows by about 129 MB. A model you downloaded
   yourself still takes precedence, and other sizes still download only when
   you ask. Podcast transcription uses the same copy.
+- Settings > App > **Appearance**: Match Windows (Match system on a Mac),
+  Light or Dark. The helper keeps the choice, so the Uoink window and a
+  browser tab agree, and the page opens in the chosen theme with no flash.
+- The needs-attention badge names the problem (`No transcript`,
+  `Comments failed`, `2 issues`...). Clicking it opens a drawer that says
+  why for each item and offers **Re-uoink**, which refreshes the item in
+  place.
+- A page the site allowlist turned away gets **Allow <site>** on its Library
+  row. One click adds the site and saves the page.
 
 ### Changed
 
+- Health checks only count what a source can have. Web pages, X and Reddit
+  text posts and images are no longer flagged for a missing transcript,
+  screenshots or comments, and comments the uploader turned off no longer
+  count as missing. X and Reddit posts with a video keep their transcript
+  and screenshot checks. Existing items are corrected on the next Library
+  load, with no re-capture.
+- A row reads **Done** only when nothing is outstanding. A row with a badge
+  reads **Saved**.
+- Videos with nothing to transcribe are not problems. A video with no audio
+  reads "no audio", and one where Whisper heard no speech (music, silence)
+  reads **Done · no speech found**. The note says "No transcript: captions
+  unavailable, and Whisper found no speech" instead of reporting missing
+  captions.
+- Video posts on X and Reddit say how their transcript came out ("transcript
+  by Whisper", "no captions") instead of "post and thread".
+- Reading an item, the Back row stays at the top while you scroll. Esc
+  closes the reader, and Back (the button, the browser's or the mouse's)
+  returns to the same place in the Library.
 - Settings no longer offers to download a model that is already on the
   device. Items saved before the model was there say to Re-uoink instead
   of to download it, and when a model really is missing, the
   needs-attention drawer's "Download it in Settings" opens Settings at the
   transcription-model control.
+- Settings > "Sites Uoink works on": Enter adds the site, and a pasted link
+  saves its host instead of the whole URL, which could never match.
+- The dashboard and setup splash are fetched fresh on every load, so a tab
+  left open across an upgrade shows the new version instead of the old one
+  for up to five minutes.
+- From a source checkout, `./uoink status`, `./uoink tools` and the other
+  agent subcommands run the agent CLI instead of starting the helper.
+  `doctor`, `rebuild-index`, `search` and `clips` still go to the helper.
+- The agent skill no longer calls the Mac build private, and says Claude
+  Code passed Mac acceptance.
+
+### Fixed
+
+- Screenshots are taken at the times their labels say. Each one used to be
+  half an interval late (the `[00:00:00]` shot was about 15 s in), and a
+  clip shorter than half the interval got no screenshots at all, so
+  re-capturing a short X clip failed with "Screenshot generation produced no
+  images".
+- Linux: an exited process that hasn't been reaped yet (a zombie) no longer
+  counts as running in the liveness checks for subscriptions, the library
+  mirror, writer peers and install receipts.
+- The one-time usage-sharing card leaves a gap above the content that
+  scrolls under it.
+
+### Compatibility and testing
+
+- The MCP server still exposes 91 tools by default and 35 with
+  `UOINK_MCP_TOOLSET=core`.
+- The Windows installer is about 519 MB (390 MB in 3.11.2) and the Mac DMG
+  about 711 MB (580 MB), because both now carry the Whisper base model.
+- The IPv6 refusal test skips on machines that cannot bind `[::1]`, and says
+  why.
 
 ## [3.11.2] - 2026-10-25
 
