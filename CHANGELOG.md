@@ -29,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   timestamped citations into notes. None is in its store yet. All four quote
   only a passage Uoink verified, mark a cut-short quote with "…", and cite
   title or metadata matches as a plain link.
-- winget manifests and a Homebrew cask for 3.11.2 in `packaging/`, and a
+- winget manifests and a Homebrew cask for 3.12.0 in `packaging/`, and a
   submission kit with paste-ready text for each directory and store in
   `docs/submissions/`.
 - The agent-kit plugin folder has the README and license that the Claude
