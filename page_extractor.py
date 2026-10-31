@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import re
 import urllib.error
 import urllib.request
@@ -859,7 +860,13 @@ def persist_page_yoink(idx, extract_result: dict, *,
     corpus_path = None
     sidecar_path = None
     if data_root is not None:
-        folder = Path(data_root) / subfolder / slug
+        # Keep every file this writes inside data_root. The slug is already
+        # sanitized; the prefix check is the containment CodeQL recognizes.
+        root = os.path.join(os.path.abspath(data_root), "")
+        folder_path = os.path.abspath(os.path.join(root, subfolder, slug))
+        if not folder_path.startswith(root):
+            raise ValueError(f"capture folder outside the library: {slug!r}")
+        folder = Path(folder_path)
         folder.mkdir(parents=True, exist_ok=True)
         corpus_path = folder / f"{slug_prefix}.md"
         sidecar_path = folder / f"{slug_prefix}.json"
