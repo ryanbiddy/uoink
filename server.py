@@ -493,6 +493,12 @@ KEYRING_SERVICE = "Uoink"
 KEYRING_SERVICE_LEGACY = "Yoink"
 KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
 KEYRING_SCRAPECREATORS_USERNAME = "scrapecreators_key"
+# Uoink Relay (docs/relay.md): the relay's pull token, write-only like the
+# ScrapeCreators key, in the same isolation-aware keyring service.
+KEYRING_RELAY_USERNAME = "relay_pull_token"
+RELAY_POLL_DEFAULT_MINUTES = 5
+RELAY_POLL_MIN_MINUTES = 1
+RELAY_POLL_MAX_MINUTES = 60
 
 
 def _isolated_binding() -> _install_isolation.IsolationBinding | None:
@@ -1038,6 +1044,13 @@ def _default_settings() -> dict:
         # "light" or "dark" forces it. Stored here, not per browser, so the
         # Uoink window and a browser tab show the same theme.
         "dashboard_theme": "system",
+        # Uoink Relay (Settings > Capture > Phone inbox). OFF by default.
+        # When on, the helper contacts only relay_url, with the pull token
+        # from the keyring, and captures what the phone shared. The token is
+        # never stored here.
+        "relay_enabled": False,
+        "relay_url": "",
+        "relay_poll_minutes": RELAY_POLL_DEFAULT_MINUTES,
         # Living Library Phase 2 (2026-09-04, brief reservation 10): whether
         # apply_reshelving(mode=apply) may write labels. Shipping default OFF
         # and deliberately absent from the /settings POST field list: turning
@@ -1154,6 +1167,15 @@ def _normalize_settings(data: dict) -> dict:
         clean.update(data)
     clean.pop("anthropic_key", None)
     clean.pop("scrapecreators_key", None)
+    clean.pop("relay_token", None)
+    clean["relay_enabled"] = clean.get("relay_enabled") is True
+    relay_url, _relay_url_error = _normalize_relay_url(clean.get("relay_url"))
+    clean["relay_url"] = relay_url or ""
+    relay_minutes = clean.get("relay_poll_minutes")
+    clean["relay_poll_minutes"] = (
+        relay_minutes if type(relay_minutes) is int
+        and RELAY_POLL_MIN_MINUTES <= relay_minutes <= RELAY_POLL_MAX_MINUTES
+        else RELAY_POLL_DEFAULT_MINUTES)
     for field in ("scrapecreators_enabled", "scrapecreators_agent_calls_enabled",
                   "scrapecreators_key_invalid"):
         clean[field] = clean.get(field) is True
@@ -1498,6 +1520,75 @@ def _store_saved_scrapecreators_key(key: str) -> None:
         raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
 
 
+def _get_saved_relay_token() -> str:
+    """The relay pull token from this profile's keyring namespace only."""
+    if _keyring is None:
+        return ""
+    try:
+        value = _keyring.get_password(_keyring_service_name(), KEYRING_RELAY_USERNAME)
+        return value if isinstance(value, str) else ""
+    except Exception:
+        # Credential backends can include the secret in their exception text.
+        return ""
+
+
+def _store_saved_relay_token(token: str) -> None:
+    """Save or clear the pull token. A backend that accepts the write but
+    cannot read it back (the null keyring) counts as unavailable."""
+    if _keyring is None:
+        raise CredentialStoreError("relay credential store unavailable")
+    try:
+        service = _keyring_service_name()
+        if token:
+            _keyring.set_password(service, KEYRING_RELAY_USERNAME, token)
+            readable = _keyring.get_password(service, KEYRING_RELAY_USERNAME) == token
+        else:
+            if _keyring.get_password(service, KEYRING_RELAY_USERNAME) is not None:
+                _keyring.delete_password(service, KEYRING_RELAY_USERNAME)
+            readable = True
+    except Exception:
+        raise CredentialStoreError("relay credential store unavailable") from None
+    if not readable:
+        raise CredentialStoreError("relay credential store unavailable")
+
+
+_RELAY_TOKEN_RE = re.compile(r"\A[\x21-\x7e]{32,4096}\Z")
+_RELAY_LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
+
+
+def _normalize_relay_url(value) -> tuple[str | None, str | None]:
+    """(url without a trailing slash, None) or (None, reason). "" clears.
+
+    HTTPS only, except http://127.0.0.1 and http://localhost for a relay run
+    on this computer. No credentials, query or fragment."""
+    if value is None or value == "":
+        return "", None
+    if not isinstance(value, str):
+        return None, "relay_url must be a string"
+    raw = value.strip()
+    if not raw:
+        return "", None
+    if len(raw) > 2048 or any(ch.isspace() or ord(ch) < 32 or ord(ch) == 127 for ch in raw):
+        return None, "relay_url must be one web address without spaces"
+    try:
+        parts = urlparse(raw)
+        parts.port  # noqa: B018 - raises ValueError for a malformed port
+    except ValueError:
+        return None, "relay_url is not a valid address"
+    scheme = parts.scheme.lower()
+    host = (parts.hostname or "").lower()
+    if "@" in parts.netloc:
+        return None, "relay_url must not contain a username or password"
+    if not host:
+        return None, "relay_url needs a host, like https://your-relay.onrender.com"
+    if parts.query or parts.fragment or parts.params:
+        return None, "relay_url must not include ? or #"
+    if scheme == "https" or (scheme == "http" and host in _RELAY_LOOPBACK_HOSTS):
+        return raw.rstrip("/"), None
+    return None, ("relay_url must start with https:// "
+                  "(http:// only for 127.0.0.1 or localhost)")
+
+
 def _mark_scrapecreators_key_invalid(invalid: bool = True, *, expected_key: str | None = None) -> None:
     # A 401/403 preserves the saved key for the user to replace or clear.
     # Serialize with settings saves, and ignore a response for a replaced key.
@@ -1559,6 +1650,7 @@ def _migrate_plaintext_anthropic_key() -> None:
 def _public_settings(data: dict | None = None) -> dict:
     data = data or _read_settings()
     key = _get_saved_anthropic_key()
+    normalized = _normalize_settings(data)
     configured_output_dir = str(
         Path(data.get("output_dir") or DESKTOP_ROOT).expanduser()
     )
@@ -1594,7 +1686,7 @@ def _public_settings(data: dict | None = None) -> dict:
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
         "scrapecreators_enabled": data.get("scrapecreators_enabled") is True,
         "scrapecreators_agent_calls_enabled": data.get("scrapecreators_agent_calls_enabled") is True,
-        "scrapecreators_daily_credit_cap": _normalize_settings(data)["scrapecreators_daily_credit_cap"],
+        "scrapecreators_daily_credit_cap": normalized["scrapecreators_daily_credit_cap"],
         "scrapecreators_key_set": bool(_get_saved_scrapecreators_key()),
         "scrapecreators_key_invalid": data.get("scrapecreators_key_invalid") is True,
         # Tier 2 dashboard Settings tab additions:
@@ -1650,6 +1742,11 @@ def _public_settings(data: dict | None = None) -> dict:
         # Settings > App > Appearance: system, light or dark.
         "dashboard_theme": (data.get("dashboard_theme")
                             if data.get("dashboard_theme") in _DASHBOARD_THEMES else "system"),
+        # Uoink Relay: the pull token is write-only; only its presence shows.
+        "relay_enabled": data.get("relay_enabled") is True,
+        "relay_url": normalized["relay_url"],
+        "relay_poll_minutes": normalized["relay_poll_minutes"],
+        "relay_token_set": bool(_get_saved_relay_token()),
         # Living Library Phase 2: read-only here; see _default_settings.
         "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
         # Phase 4 opt-in corpus mirror (separate from obsidian_vault_path).
@@ -8087,6 +8184,14 @@ def _classify_capture_url(raw: str) -> dict:
         "YouTube, X, Reddit threads, podcasts, and most web pages work."}
 
 
+def _capture_tools() -> dict:
+    """The agent CLI's source-to-tool map (uoink_cli.CAPTURE_TOOLS), so the
+    Uoink Relay poller routes a link exactly as `uoink capture` does.
+    Imported on use; uoink_cli loads nothing from this module at import."""
+    import uoink_cli
+    return uoink_cli.CAPTURE_TOOLS
+
+
 def _is_valid_job_id(s: str) -> bool:
     return bool(s) and bool(_JOB_ID_RE.match(s))
 
@@ -11137,6 +11242,379 @@ def _start_podcast_feed_scheduler_thread() -> threading.Thread:
     return thread
 
 
+# ---------------------------------------------------------------------------
+# Uoink Relay: phone share-sheet inbox (docs/relay.md)
+# ---------------------------------------------------------------------------
+# The relay is a tiny service each user deploys to their own Render account.
+# The phone POSTs links to it; this poller lists them with the pull token,
+# captures each one through the same registry tool `uoink capture` uses, and
+# deletes it from the relay. Off by default. When on, the only host contacted
+# is the saved relay_url.
+RELAY_TICK_SEC = 30
+# A sleeping free Render instance takes about a minute to wake.
+RELAY_HTTP_TIMEOUT_SEC = 90
+RELAY_MAX_RAISES = 2
+RELAY_CHECK_WAIT_SEC = 8.0
+RELAY_NOTE_TITLE = "From my phone"
+RELAY_FALLBACK_TITLE = "From my phone (not captured)"
+RELAY_DONE_TTL_SEC = 8 * 24 * 60 * 60   # past the relay's own 7-day expiry
+_RELAY_ID_RE = re.compile(r"\A[0-9]{13}-[0-9a-f]{12}\Z")
+_RELAY_RATE_LIMITED_PREFIX = "rate limit exceeded"
+
+_relay_wake = threading.Event()
+_relay_stop = threading.Event()
+_relay_poll_lock = threading.Lock()
+_relay_cond = threading.Condition()
+_relay_state = {
+    "last_poll_at": None,
+    "last_ok_at": None,
+    "last_error": None,
+    "last_capture_error": None,
+    "picked_up_total": 0,
+    "last_pending_count": None,
+    "polling": False,
+    "generation": 0,
+    "next_due": 0.0,
+}
+# In memory only: capture raises per link id, and ids already captured whose
+# DELETE has not succeeded yet (never captured twice).
+_relay_raises: dict[str, int] = {}
+_relay_done: dict[str, float] = {}
+# Links Uoink couldn't capture whose fallback note hasn't saved yet: the
+# reason to write, retried on the next check before the link is deleted.
+_relay_fallback: dict[str, str] = {}
+
+
+class _RelayError(Exception):
+    """A relay answer Uoink can describe in plain words (never the token)."""
+
+
+class _RelayNoRedirect(urllib.request.HTTPRedirectHandler):
+    # A redirect is an error: the pull token must never follow it elsewhere.
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _relay_update(**fields) -> None:
+    with _relay_cond:
+        _relay_state.update(fields)
+
+
+def _relay_settings_changed() -> None:
+    """A saved relay setting takes effect now: clear the old error and wake
+    the poller so a newly configured relay is checked within seconds."""
+    with _relay_cond:
+        _relay_state["last_error"] = None
+        _relay_state["last_capture_error"] = None
+        _relay_state["next_due"] = 0.0
+    _relay_wake.set()
+
+
+def _relay_status_payload(settings: dict | None = None) -> dict:
+    settings = settings if settings is not None else _read_settings()
+    configured = bool(settings.get("relay_url")) and bool(_get_saved_relay_token())
+    with _relay_cond:
+        snapshot = dict(_relay_state)
+    return {
+        "ok": True,
+        "enabled": settings.get("relay_enabled") is True,
+        "configured": configured,
+        "last_poll_at": snapshot["last_poll_at"],
+        "last_ok_at": snapshot["last_ok_at"],
+        "last_error": snapshot["last_error"],
+        "last_capture_error": snapshot["last_capture_error"],
+        "picked_up_total": snapshot["picked_up_total"],
+        "last_pending_count": snapshot["last_pending_count"],
+        "polling": snapshot["polling"],
+    }
+
+
+def _relay_http(method: str, url: str, token: str,
+                timeout: float = RELAY_HTTP_TIMEOUT_SEC) -> tuple[int, dict]:
+    request = urllib.request.Request(url, method=method, headers={
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+        "User-Agent": f"Uoink/{VERSION} relay",
+    })
+    opener = urllib.request.build_opener(_RelayNoRedirect)
+    try:
+        with opener.open(request, timeout=timeout) as response:
+            status, raw = response.status, response.read(1024 * 1024)
+    except urllib.error.HTTPError as e:
+        status = e.code
+        try:
+            raw = e.read(64 * 1024)
+        except Exception:
+            raw = b""
+    try:
+        payload = json.loads(raw.decode("utf-8")) if raw else {}
+    except (UnicodeDecodeError, ValueError):
+        payload = {}
+    return status, payload if isinstance(payload, dict) else {}
+
+
+def _relay_status_error(status: int) -> str:
+    if status == 401:
+        return ("The relay didn't accept the pull token. Copy RELAY_PULL_TOKEN from "
+                "Render again and save it here.")
+    if status == 403:
+        return ("That is the relay's push token. Uoink needs the pull token "
+                "(RELAY_PULL_TOKEN).")
+    if status == 404:
+        return "There's no relay at this address. Check the relay address."
+    if status == 429:
+        return "The relay is limiting requests for now. Uoink will try again later."
+    if status in (300, 301, 302, 303, 307, 308):
+        return "The relay address redirects. Enter the address Render shows for the relay."
+    if 500 <= status < 600:
+        return "The relay is up, but its storage isn't answering. Uoink will try again."
+    return f"The relay answered with HTTP {int(status)}."
+
+
+def _relay_exception_text(exc: BaseException) -> str:
+    # Plain words only. Exception text can carry hosts or headers; the token
+    # never reaches it, but keep the message fixed anyway.
+    if isinstance(exc, _RelayError):
+        return str(exc)
+    reason = getattr(exc, "reason", None)
+    if isinstance(exc, (TimeoutError, socket.timeout)) or isinstance(reason, (TimeoutError, socket.timeout)):
+        return (f"The relay didn't answer within {RELAY_HTTP_TIMEOUT_SEC} seconds. A free relay "
+                "can take about a minute to wake. Uoink will try again.")
+    import ssl
+    if isinstance(exc, ssl.SSLError) or isinstance(reason, ssl.SSLError):
+        return "Couldn't make a secure connection to the relay."
+    if isinstance(exc, (urllib.error.URLError, OSError)):
+        return "Couldn't reach the relay. Check the address and your connection."
+    return "Checking the relay failed. Uoink will try again."
+
+
+def _relay_delete(base: str, token: str, link_id: str) -> bool:
+    try:
+        status, _payload = _relay_http("DELETE", f"{base}/v1/links/{link_id}", token)
+    except Exception as exc:
+        log.warning("relay: delete failed (%s)", type(exc).__name__)
+        return False
+    if status in (200, 404):   # 404: already gone (expired, or deleted earlier)
+        _relay_done.pop(link_id, None)
+        return True
+    log.warning("relay: delete answered HTTP %d", status)
+    return False
+
+
+def _relay_capture_failure_reason(result: dict, url: str) -> str:
+    """Plain words for a capture that returned ok false. A page whose site
+    isn't allowed says how to fix it."""
+    if result.get("code") == "host_not_allowed":
+        host = re.sub(r"[^A-Za-z0-9.-]", "", urlparse(url).hostname or "")[:253]
+        return (f"{host or 'this site'} isn't in Sites Uoink works on. Allow the site in "
+                "Settings > Capture > Sites Uoink works on, then Re-uoink.")
+    error = result.get("error")
+    message = error.get("message") if isinstance(error, dict) else error
+    return _sanitize_error(str(message or "the capture failed")) or "the capture failed"
+
+
+def _relay_save_fallback_note(tools, url: str, note, reason: str) -> bool:
+    """Keep a link Uoink couldn't capture as a Uoink note: the shared note,
+    the URL, and one line saying why."""
+    parts = [note.strip()] if isinstance(note, str) and note.strip() else []
+    if url:
+        parts.append(url)
+    parts.append(f"Uoink couldn't capture this link: {reason}")
+    try:
+        saved = tools.call_tool("uoink_note", {
+            "title": RELAY_FALLBACK_TITLE, "text": "\n\n".join(parts)})
+    except Exception as exc:
+        log.warning("relay: the fallback note was not saved (%s)", type(exc).__name__)
+        return False
+    if isinstance(saved, dict) and saved.get("ok") is True:
+        return True
+    log.warning("relay: the fallback note was not saved")
+    return False
+
+
+def _relay_settle_uncaptured(link_id: str, base: str, token: str, tools,
+                             url: str, note, reason: str) -> str:
+    """Nothing shared is lost: save the link as a note, then delete it from
+    the relay. If the note can't be saved, keep the link for the next check."""
+    if not _relay_save_fallback_note(tools, url, note, reason):
+        _relay_fallback[link_id] = reason
+        _relay_update(last_capture_error=_sanitize_error(
+            "A shared link couldn't be captured or saved as a note. Uoink will "
+            f"try again at the next check. {reason}"))
+        return "kept"
+    _relay_fallback.pop(link_id, None)
+    _relay_done[link_id] = time.time()
+    _relay_update(last_capture_error=_sanitize_error(
+        f"A shared link couldn't be captured, so it was saved as a note: {reason}"))
+    _relay_delete(base, token, link_id)
+    return "noted"
+
+
+def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
+    """Capture one pending link. Returns captured, noted (kept as a note
+    because it couldn't be captured), kept, deferred or skipped."""
+    link_id = link.get("id")
+    if not isinstance(link_id, str) or not _RELAY_ID_RE.match(link_id):
+        return "skipped"
+    if link_id in _relay_done:
+        # Handled on an earlier check; only the DELETE is still owed.
+        _relay_delete(base, token, link_id)
+        return "skipped"
+    url = link.get("url") if isinstance(link.get("url"), str) else ""
+    note = link.get("note")
+    if link_id in _relay_fallback:
+        # The capture already failed; only its fallback note is still owed.
+        return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
+                                        _relay_fallback[link_id])
+    route = _classify_capture_url(url)
+    capture_tools = _capture_tools()
+    if not route.get("ok") or route.get("source") not in capture_tools:
+        log.info("relay: a shared link Uoink can't capture becomes a note (%s)",
+                 route.get("source") or "unsupported")
+        return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
+                                        "Uoink doesn't support this kind of link yet.")
+    name, key = capture_tools[route["source"]]
+    try:
+        result = tools.call_tool(name, {key: route["canonical"]})
+    except Exception as exc:
+        attempts = _relay_raises.get(link_id, 0) + 1
+        if attempts >= RELAY_MAX_RAISES:
+            _relay_raises.pop(link_id, None)
+            log.warning("relay: capture failed %d times (%s); the link becomes a note",
+                        attempts, type(exc).__name__)
+            return _relay_settle_uncaptured(
+                link_id, base, token, tools, url, note,
+                f"the capture failed {attempts} times ({type(exc).__name__}).")
+        _relay_raises[link_id] = attempts
+        log.warning("relay: capture raised %s; the link stays for the next check",
+                    type(exc).__name__)
+        return "kept"
+    _relay_raises.pop(link_id, None)
+    if not isinstance(result, dict):
+        result = {"ok": False, "error": "capture returned no result"}
+    error = result.get("error")
+    if result.get("ok") is False and isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX):
+        # The registry refused before trying. Not picked up: try next check.
+        return "deferred"
+    with _relay_cond:
+        _relay_state["picked_up_total"] += 1
+    if result.get("ok") is not True:
+        return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
+                                        _relay_capture_failure_reason(result, url))
+    _relay_done[link_id] = time.time()
+    if isinstance(note, str) and note.strip():
+        try:
+            saved = tools.call_tool("uoink_note", {
+                "title": RELAY_NOTE_TITLE, "text": f"{note.strip()}\n\n{url}"})
+            if not (isinstance(saved, dict) and saved.get("ok") is True):
+                log.warning("relay: the shared note was not saved")
+        except Exception as exc:
+            log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
+    _relay_delete(base, token, link_id)
+    return "captured"
+
+
+def _relay_poll_once() -> dict:
+    """One check: list pending links and handle them one at a time, oldest
+    first. Never raises; the outcome lands in the relay status."""
+    with _relay_poll_lock:
+        try:
+            settings = _read_settings()
+            base = settings.get("relay_url") or ""
+            token = _get_saved_relay_token()
+            if settings.get("relay_enabled") is not True or not base or not token:
+                return _relay_status_payload(settings)
+            _relay_update(polling=True, last_poll_at=_now_iso())
+            cutoff = time.time() - RELAY_DONE_TTL_SEC
+            for done_id in [k for k, at in _relay_done.items() if at < cutoff]:
+                _relay_done.pop(done_id, None)
+            status, payload = _relay_http("GET", f"{base}/v1/links", token)
+            links = payload.get("links")
+            if status != 200 or payload.get("ok") is not True or not isinstance(links, list):
+                raise _RelayError(_relay_status_error(status) if status != 200
+                                  else "The relay sent an answer Uoink doesn't understand.")
+            links = [link for link in links if isinstance(link, dict)]
+            links.sort(key=lambda link: str(link.get("id") or ""))
+            _relay_update(last_pending_count=len(links), last_error=None)
+            tools = _mcp_tools_module() if links else None
+            outcomes = []
+            for link in links:
+                if _relay_stop.is_set():
+                    break
+                outcome = _relay_handle_link(link, base, token, tools)
+                outcomes.append(outcome)
+                if outcome == "deferred":
+                    break
+            if outcomes and not {"noted", "kept"} & set(outcomes):
+                _relay_update(last_capture_error=None)
+            _relay_update(last_ok_at=_now_iso())
+            if outcomes:
+                log.info("relay: checked %d link(s): %s", len(outcomes),
+                         ", ".join(f"{o} {outcomes.count(o)}" for o in sorted(set(outcomes))))
+        except Exception as exc:
+            _relay_update(last_error=_relay_exception_text(exc))
+            log.warning("relay: check failed (%s)", type(exc).__name__)
+        finally:
+            with _relay_cond:
+                _relay_state["polling"] = False
+                _relay_state["generation"] += 1
+                _relay_cond.notify_all()
+        return _relay_status_payload()
+
+
+def _relay_tick(*, force: bool = False) -> None:
+    settings = _read_settings()
+    if settings.get("relay_enabled") is not True:
+        return
+    now = time.monotonic()
+    with _relay_cond:
+        if not force and now < _relay_state["next_due"]:
+            return
+        _relay_state["next_due"] = now + 60 * settings["relay_poll_minutes"]
+    _relay_poll_once()
+
+
+def _relay_request_check(wait: float = RELAY_CHECK_WAIT_SEC) -> dict:
+    """Wake the poller now. Wait briefly for that check so the answer is
+    fresh; a waking free relay finishes later and the status shows it."""
+    settings = _read_settings()
+    if (settings.get("relay_enabled") is not True or not settings.get("relay_url")
+            or not _get_saved_relay_token()):
+        return _relay_status_payload(settings)
+    with _relay_cond:
+        generation = _relay_state["generation"]
+        _relay_state["next_due"] = 0.0
+    _relay_wake.set()
+    with _relay_cond:
+        _relay_cond.wait_for(lambda: _relay_state["generation"] > generation, timeout=max(0.0, wait))
+    return _relay_status_payload()
+
+
+def _start_relay_inbox_thread() -> threading.Thread:
+    """Daemon thread: wake every 30 s and check the relay when it is on,
+    configured and due (every relay_poll_minutes). A wake from Check now or
+    a settings save checks at once. Stops at helper shutdown."""
+    def _runner():
+        while not _relay_stop.is_set():
+            woken = _relay_wake.wait(RELAY_TICK_SEC)
+            _relay_wake.clear()
+            if _relay_stop.is_set():
+                break
+            try:
+                _relay_tick(force=woken)
+            except Exception as exc:
+                log.warning("relay: tick failed (%s)", type(exc).__name__)
+
+    thread = threading.Thread(target=_runner, name="relay-inbox", daemon=True)
+    thread.start()
+    return thread
+
+
+def _stop_relay_inbox_thread() -> None:
+    _relay_stop.set()
+    _relay_wake.set()
+
+
 def _job_cancel_event(job_id: str) -> threading.Event | None:
     with _jobs_lock:
         job = _jobs.get(job_id)
@@ -14124,6 +14602,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/relay/status":
+            return self._send_json(200, _relay_status_payload())
         if bare == "/search/status":
             return self._handle_search_control("status")
         if bare.startswith("/search/notices/"):
@@ -16784,14 +17264,18 @@ class Handler(BaseHTTPRequestHandler):
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
+            "relay_enabled",                # Uoink Relay phone inbox
+                                            # (default OFF)
         )
-        integer_fields = ("clipboard_screenshot_cap", "scrapecreators_daily_credit_cap")
+        integer_fields = ("clipboard_screenshot_cap", "scrapecreators_daily_credit_cap",
+                          "relay_poll_minutes")
         extra_fields = ("output_dir", "autostart", "topics",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
                          "live_stream_behavior",  # v3.1 live
                          "whisper_model",         # v3.1 A1/podcast
                          "dashboard_theme",       # Settings > App > Appearance
+                         "relay_url",             # Settings > Capture > Phone inbox
                          "library_mirror_enabled",
                          "library_mirror_consent")
         if (
@@ -16799,6 +17283,7 @@ class Handler(BaseHTTPRequestHandler):
             and not any(f in body for f in integer_fields)
             and "anthropic_key" not in body
             and "scrapecreators_key" not in body
+            and "relay_token" not in body
             and not any(f in body for f in extra_fields)
         ):
             return self._send_json(400, {
@@ -16845,6 +17330,25 @@ class Handler(BaseHTTPRequestHandler):
             if value is not None and (not isinstance(value, str) or len(value) > 4096):
                 return self._send_json(400, {
                     "ok": False, "error": "scrapecreators_key must be a string of at most 4096 characters or null"})
+        relay_url = None
+        if "relay_poll_minutes" in body:
+            minutes = body["relay_poll_minutes"]
+            if type(minutes) is not int or not RELAY_POLL_MIN_MINUTES <= minutes <= RELAY_POLL_MAX_MINUTES:
+                return self._send_json(400, {
+                    "ok": False, "error": (f"relay_poll_minutes must be an integer from "
+                                           f"{RELAY_POLL_MIN_MINUTES} to {RELAY_POLL_MAX_MINUTES}")})
+        if "relay_url" in body:
+            relay_url, relay_error = _normalize_relay_url(body["relay_url"])
+            if relay_error:
+                return self._send_json(400, {"ok": False, "error": relay_error})
+        if "relay_token" in body:
+            value = body["relay_token"]
+            # Never echo the value in an error, even a malformed one.
+            if value is not None and (not isinstance(value, str)
+                                      or (value.strip() and not _RELAY_TOKEN_RE.match(value.strip()))):
+                return self._send_json(400, {
+                    "ok": False, "error": ("relay_token must be the relay's pull token: 32 to 4096 "
+                                           "characters with no spaces, or null to clear")})
 
         data = _read_settings()
         if "scrapecreators_daily_credit_cap" in body:
@@ -16855,6 +17359,15 @@ class Handler(BaseHTTPRequestHandler):
             except CredentialStoreError:
                 return self._send_json(200, {"ok": False, "error": "credential store unavailable"})
             data["scrapecreators_key_invalid"] = False
+        if "relay_token" in body:
+            try:
+                _store_saved_relay_token((body["relay_token"] or "").strip())
+            except CredentialStoreError:
+                return self._send_json(200, {"ok": False, "error": "credential store unavailable"})
+        if "relay_url" in body:
+            data["relay_url"] = relay_url
+        if "relay_poll_minutes" in body:
+            data["relay_poll_minutes"] = body["relay_poll_minutes"]
         for field in boolean_fields:
             if field in body:
                 data[field] = body[field]
@@ -17048,6 +17561,8 @@ class Handler(BaseHTTPRequestHandler):
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})
+        if any(f in body for f in ("relay_enabled", "relay_url", "relay_token", "relay_poll_minutes")):
+            _relay_settings_changed()
         settings = _public_settings(data)
         if defer_stop:
             self._mac_bootout_pending = True
@@ -18915,6 +19430,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_sources_service_route("archive_source", body)
         if bare == "/settings":
             return self._handle_settings_post(body)
+        if bare == "/relay/check":
+            return self._send_json(200, _relay_request_check())
         if bare == "/settings/usage-prompt":
             return self._handle_usage_prompt()
         if bare == "/settings/output-folder/pick":
@@ -20701,6 +21218,9 @@ def main(*, show_dashboard: bool = False):
     # Podcast watch mode: registration polls metadata automatically; the
     # per-feed auto_ingest flag separately controls media work.
     _start_podcast_feed_scheduler_thread()
+    # Uoink Relay phone inbox: wakes every 30 s and contacts the relay only
+    # when the user turned it on and saved an address and pull token.
+    _start_relay_inbox_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
     isolated = _install_isolation.current_binding()
@@ -20876,6 +21396,7 @@ def main(*, show_dashboard: bool = False):
     except KeyboardInterrupt:
         log.info("Shutting down.")
     finally:
+        _stop_relay_inbox_thread()
         if sys.platform == "darwin":
             from helper.mac_ui import close_children
             close_children()

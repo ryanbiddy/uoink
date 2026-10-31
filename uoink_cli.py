@@ -132,6 +132,8 @@ def backend():
     return server
 
 
+# Registry tool and argument for each server._classify_capture_url source.
+# The helper's Uoink Relay poller routes through this same map.
 CAPTURE_TOOLS = {
     "youtube_video": ("uoink_video", "url"),
     "youtube_playlist": ("uoink_playlist", "url"),

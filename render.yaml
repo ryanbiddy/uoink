@@ -1,0 +1,45 @@
+# Uoink Relay: a personal inbox for links shared from your phone.
+# Deploy it to your own Render account with the button in docs/relay.md.
+# It stores only a link and an optional note, and deletes each one when
+# Uoink picks it up or after 7 days.
+#
+# Free-tier tradeoffs:
+# - The free web service sleeps after 15 minutes with no requests and takes
+#   about a minute to wake. Uoink waits up to 90 seconds for that.
+# - Free Key Value keeps data in memory only, so a restart drops links that
+#   are still waiting. A workspace can have only one free Key Value instance.
+# Both services use the same default region, so the web service reaches Key
+# Value over Render's private network.
+services:
+  - type: web
+    name: uoink-relay
+    runtime: python
+    plan: free
+    rootDir: relay
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /healthz
+    # Render strongly advises this for Deploy to Render templates: a push to
+    # the Uoink repo must not redeploy everyone's relay.
+    autoDeployTrigger: "off"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.14.8"
+      - key: RELAY_PUSH_TOKEN
+        generateValue: true
+      - key: RELAY_PULL_TOKEN
+        generateValue: true
+      - key: RELAY_KEYVALUE_URL
+        fromService:
+          type: keyvalue
+          name: uoink-relay-kv
+          property: connectionString
+
+  - type: keyvalue
+    name: uoink-relay-kv
+    plan: free
+    # Internal connections only: nothing outside Render can reach it.
+    ipAllowList: []
+    # Never evict a queued link to make room. Each key expires after 7 days
+    # through its own TTL, so no cron job is needed.
+    maxmemoryPolicy: noeviction

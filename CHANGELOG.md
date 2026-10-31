@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Phone inbox (Uoink Relay)**, off by default. Deploy a small relay to your
+  own Render account with the Deploy to Render button in
+  [docs/relay.md](docs/relay.md), share links to it from an iOS Shortcut or an
+  Android share target, and Uoink captures each one with the same tool
+  `uoink capture` uses, then deletes it from the relay. A link Uoink can't
+  capture is saved as a note instead, so nothing shared is lost. It stores only
+  the link and an optional note, with a 7-day expiry, and separates the
+  phone's push token from the desktop's pull token. Set it up in
+  Settings > Capture > **Phone inbox**; the pull token stays in the system
+  credential store. New helper routes: `GET /relay/status` and
+  `POST /relay/check`.
 - A Raycast extension in `integrations/raycast` for macOS and Windows.
   Search Library copies a Markdown citation that links to the timestamp,
   Uoink This URL saves the copied link (or the active browser tab on macOS),
