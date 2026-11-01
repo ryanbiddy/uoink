@@ -265,7 +265,7 @@ class UoinkTray:
                     self._open_path(Path(folder))
             items.append(MenuItem(title, _open))
         if not items:
-            items.append(MenuItem("No recent yoinks yet", None, enabled=False))
+            items.append(MenuItem("No recent items yet", None, enabled=False))
         return items
 
     def _build_menu(self):
@@ -274,10 +274,10 @@ class UoinkTray:
         return Menu(
             MenuItem(lambda _i: self._status_text(), None, enabled=False),
             Menu.SEPARATOR,
-            MenuItem("Open Dashboard", self._open_dashboard, default=True),
-            MenuItem("Open Uoink Folder", self._open_folder),
-            MenuItem("Recent Uoinks", Menu(lambda: self._recent_items())),
-            MenuItem("Settings…", self._open_settings),
+            MenuItem("Open dashboard", self._open_dashboard, default=True),
+            MenuItem("Open folder", self._open_folder),
+            MenuItem("Recent items", Menu(lambda: self._recent_items())),
+            MenuItem("Settings", self._open_settings),
             Menu.SEPARATOR,
             MenuItem("Quit Uoink", self._on_stop),
         )
