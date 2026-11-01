@@ -79,7 +79,7 @@ After installing Uoink, open the setup page from the extension popup's **Setting
 
 > Claude Desktop does not expand `%LOCALAPPDATA%` — use the full absolute path (e.g. `C:\\Users\\<you>\\AppData\\Local\\Uoink\\python\\python.exe`). Restart the client after saving; Uoink's tools appear automatically.
 
-Releases after 3.12.0 add a portable launch line that needs no install path: `"command": "uoink", "args": ["mcp"]`, or `"command": "cmd", "args": ["/c", "uoink", "mcp"]` for Windows clients that cannot start `.cmd` files. It uses the `uoink` command on PATH. See [Connect your agent](docs/connect-your-agent.md#one-launch-command-for-any-mcp-client).
+Uoink 3.12.1 and later add a portable launch line that needs no install path: `"command": "uoink", "args": ["mcp"]`, or `"command": "cmd", "args": ["/c", "uoink", "mcp"]` for Windows clients that cannot start `.cmd` files. It uses the `uoink` command on PATH. See [Connect your agent](docs/connect-your-agent.md#one-launch-command-for-any-mcp-client).
 
 **One-click install:** a Claude Desktop [`.mcpb` bundle](./docs/mcpb-bundle.md) installs the stdio server without hand-editing config. See [docs/mcpb-bundle.md](./docs/mcpb-bundle.md).
 
@@ -91,13 +91,13 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.12.0.exe` from the [v3.12.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.12.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.12.1.exe` from the [v3.12.1 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.12.1). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 <!-- store-install:start -->
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
 <!-- store-install:end -->
 
-**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.12.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
+**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.12.1-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
 
 The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
 

@@ -87,7 +87,7 @@ still answer.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all
-91 schemas fit; inbound requests and tool results retain their existing caps.
+92 schemas fit; inbound requests and tool results retain their existing caps.
 Work-queue mutations use their service's lease, transaction and operation-key
 bounds; they do not inherit a read timeout that could abandon a committed write.
 
@@ -158,7 +158,7 @@ Installed Windows command:
 }
 ```
 
-Portable command, in Uoink releases after 3.12.0. It needs the `uoink` command on the client's PATH and starts the same server. On Windows, a client that cannot start `.cmd` files uses `"command": "cmd"` with `"args": ["/c", "uoink", "mcp"]`. See [Connect your agent](connect-your-agent.md#one-launch-command-for-any-mcp-client).
+Portable command, in Uoink 3.12.1 and later. It needs the `uoink` command on the client's PATH and starts the same server. On Windows, a client that cannot start `.cmd` files uses `"command": "cmd"` with `"args": ["/c", "uoink", "mcp"]`. See [Connect your agent](connect-your-agent.md#one-launch-command-for-any-mcp-client).
 
 ```json
 {

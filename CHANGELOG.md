@@ -12,6 +12,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Import a list.** Paste a list link in Sources > **Import a list** and
+  Uoink queues every video in it for a normal capture, transcripts and all.
+  It reads a HackerTube playlist, category, area or the whole collection best
+  first ([hackertube.org](https://hackertube.org)), a Hacker News thread
+  (through the Algolia HN API), a Reddit thread (public .json) or a YouTube
+  playlist (yt-dlp's flat listing, no API key). The dialog previews the batch
+  ("Found 37 videos, 5 already in your library") before one Import button.
+  Batches are 50 videos by default and at most; **Next 50** (or `--offset`)
+  works through big lists such as a 2,000-episode playlist. Videos already in
+  the library are skipped and the rest go on the existing download queue,
+  which captures one video at a time. Each imported capture gets a source tag
+  (`hackertube`, `hn thread`, `reddit thread`, `youtube playlist`) and keeps
+  its note, such as HackerTube's "why HN likes it", shown in the reader. Also
+  `uoink import-list <url> [--limit N] [--offset N] [--preview]` and the
+  `import_list` MCP tool.
+  The MCP server now exposes 92 tools by default (35 in core mode).
+  HackerTube data is ODC-By 1.0: Uoink credits HackerTube and the
+  open-index/hacker-news dataset on every HackerTube item and fetches it at
+  import time; none of it is bundled.
+- For You has a **From lists you imported** panel: imported videos you
+  haven't opened yet, ranked against your own taste (your saved channels,
+  anchors and engagement; the imports themselves don't vote), with
+  HackerTube's quality score breaking ties.
+- **Card image** setting (Settings > Library and export): Library and For You
+  cards for saved videos show a screenshot from the middle of the video by
+  default, or the original thumbnail. Existing captures switch only when a
+  screenshot near the halfway mark is already saved; nothing is downloaded
+  again, and videos without one keep their thumbnail.
+
+## [3.12.1] - 2026-11-01
+
+### Added
+
 - **Phone inbox (Uoink Relay)**, off by default. Deploy a small relay to your
   own Render account with the Deploy to Render button in
   [docs/relay.md](docs/relay.md), share links to it from an iOS Shortcut or an
@@ -52,34 +85,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `UOINK_MCP_TOOLSET`, and keeps stdout for JSON-RPC only. The root
   `uoink.cmd` and `uoink` launchers route `mcp` to the CLI as well, and the
   dashboard counts a client entry that runs `uoink mcp` as connected.
-- **Import a list.** Paste a list link in Sources > **Import a list** and
-  Uoink queues every video in it for a normal capture, transcripts and all.
-  It reads a HackerTube playlist, category, area or the whole collection best
-  first ([hackertube.org](https://hackertube.org)), a Hacker News thread
-  (through the Algolia HN API), a Reddit thread (public .json) or a YouTube
-  playlist (yt-dlp's flat listing, no API key). The dialog previews the batch
-  ("Found 37 videos, 5 already in your library") before one Import button.
-  Batches are 50 videos by default and at most; **Next 50** (or `--offset`)
-  works through big lists such as a 2,000-episode playlist. Videos already in
-  the library are skipped and the rest go on the existing download queue,
-  which captures one video at a time. Each imported capture gets a source tag
-  (`hackertube`, `hn thread`, `reddit thread`, `youtube playlist`) and keeps
-  its note, such as HackerTube's "why HN likes it", shown in the reader. Also
-  `uoink import-list <url> [--limit N] [--offset N] [--preview]` and the
-  `import_list` MCP tool.
-  The MCP server now exposes 92 tools by default (35 in core mode).
-  HackerTube data is ODC-By 1.0: Uoink credits HackerTube and the
-  open-index/hacker-news dataset on every HackerTube item and fetches it at
-  import time; none of it is bundled.
-- For You has a **From lists you imported** panel: imported videos you
-  haven't opened yet, ranked against your own taste (your saved channels,
-  anchors and engagement; the imports themselves don't vote), with
-  HackerTube's quality score breaking ties.
-- **Card image** setting (Settings > Library and export): Library and For You
-  cards for saved videos show a screenshot from the middle of the video by
-  default, or the original thumbnail. Existing captures switch only when a
-  screenshot near the halfway mark is already saved; nothing is downloaded
-  again, and videos without one keep their thumbnail.
 
 ### Changed
 
@@ -152,6 +157,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   are only a short label and a link ("Facebook - https://..."), no longer
   count, so a lecture's social link list doesn't file it under Social Media
   Research. A plural "s" still matches ("creators", "LLMs").
+- The Mac `.mcpb` no longer describes itself as reading a library "on
+  Windows" in Claude Desktop.
+
+### Compatibility and testing
+
+- The MCP server still exposes 91 tools by default and 35 with
+  `UOINK_MCP_TOOLSET=core`. `uoink mcp` starts the same server.
+- The Windows installer is about 519 MB and the Mac DMG about 711 MB, the
+  same as 3.12.0 within 3 MB.
+- The winget and Homebrew manifests in `packaging/` still point at the
+  published 3.12.0 files until 3.12.1 is published.
 
 ## [3.12.0] - 2026-10-30
 
@@ -1424,7 +1440,7 @@ The first public release. Single-video extraction with creator-research-grade ou
 - **Local helper server** on `127.0.0.1:5179` with token-based extension auth.
 - **Master `_all-yoinks-index.md`** at the Desktop\Yoink root tracking every yoink.
 
-### Notes
+### Compatibility and testing
 
 - v1.0 was Windows-only. Mac installer is on the v1.1 roadmap.
 - v1.0 shipped without telemetry; opt-in install-success telemetry is on the v1.1 roadmap.

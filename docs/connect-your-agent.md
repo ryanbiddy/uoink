@@ -127,7 +127,7 @@ Hub references.
 
 ## One launch command for any MCP client
 
-Uoink releases after 3.12.0 add `uoink mcp`. It runs the same stdio server as
+Uoink 3.12.1 and later add `uoink mcp`. It runs the same stdio server as
 the recipes above through the `uoink` command on PATH, so a client entry needs
 no install path:
 
@@ -457,7 +457,7 @@ a returned job ID means the queue accepted the job. Use `get_job_status` to
 inspect its final result, including failures. MCP sessions retain their usual
 asynchronous behavior.
 
-`uoink mcp` (releases after 3.12.0) is for MCP clients, not for typing. It
+`uoink mcp` (3.12.1 and later) is for MCP clients, not for typing. It
 runs the stdio MCP server in the CLI's process through `uoink_mcp.py`'s own
 entry point, until the client closes stdin. It prints no envelope: stdout
 carries only JSON-RPC, and startup messages and logs go to stderr. The toolset
