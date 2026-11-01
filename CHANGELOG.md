@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- A silent Windows install or upgrade, such as a winget upgrade, now starts the
+  helper again when it was running before, and starts it on a fresh install like
+  the default-checked finish page box. It starts with no splash, dashboard or
+  ready toast. The stop file setup leaves behind no longer holds back the next
+  login start, while a real Quit is still honored.
+
 ### Changed
 
 - The winget manifests and the Homebrew cask in `packaging/` point at the
