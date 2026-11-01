@@ -158,7 +158,7 @@ Installed Windows command:
 }
 ```
 
-Portable command, in Uoink releases after 3.12.0. It needs the `uoink` command on the client's PATH and starts the same server. On Windows, a client that cannot start `.cmd` files uses `"command": "cmd"` with `"args": ["/c", "uoink", "mcp"]`. See [Connect your agent](connect-your-agent.md#one-launch-command-for-any-mcp-client).
+Portable command, in Uoink 3.12.1 and later. It needs the `uoink` command on the client's PATH and starts the same server. On Windows, a client that cannot start `.cmd` files uses `"command": "cmd"` with `"args": ["/c", "uoink", "mcp"]`. See [Connect your agent](connect-your-agent.md#one-launch-command-for-any-mcp-client).
 
 ```json
 {

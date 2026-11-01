@@ -4,11 +4,11 @@
 const SERVER = "http://127.0.0.1:5179";
 const POLL_MS = 2000;
 const HEARTBEAT_MS = 10000;
-// Release download target; 3.12.0, its GitHub release and uoink.app go live together.
-const PUBLISHED_INSTALLER_VERSION = "3.12.0";
+// Release download target; 3.12.1, its GitHub release and uoink.app go live together.
+const PUBLISHED_INSTALLER_VERSION = "3.12.1";
 // Version of the published Mac DMG (Uoink-<version>-macos-arm64.dmg). Empty
 // until that release asset exists; bump it with PUBLISHED_INSTALLER_VERSION.
-const PUBLISHED_MAC_DMG = "3.12.0";
+const PUBLISHED_MAC_DMG = "3.12.1";
 const RUNNING_COPY = { win: "Running on this PC", mac: "Running on this Mac", linux: "Running on this computer" };
 const SUGGESTED_VIDEO = {
   url: "https://www.youtube.com/watch?v=8rABwKRsec4",
