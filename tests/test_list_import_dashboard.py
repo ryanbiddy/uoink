@@ -3,6 +3,7 @@ Card image setting. Static checks over assets/dashboard/index.html, plus a
 node syntax check of the inline scripts when node is available."""
 from __future__ import annotations
 
+from html.parser import HTMLParser
 from pathlib import Path
 import re
 import shutil
@@ -79,7 +80,27 @@ def test_card_image_setting_defaults_to_middle():
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
 def test_inline_scripts_parse(tmp_path):
-    scripts = re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", DASHBOARD, re.S)
+    class Scripts(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.bodies, self._inside = [], False
+
+        def handle_starttag(self, tag, attrs):
+            self._inside = tag == "script" and not dict(attrs).get("src")
+            if self._inside:
+                self.bodies.append("")
+
+        def handle_endtag(self, tag):
+            if tag == "script":
+                self._inside = False
+
+        def handle_data(self, data):
+            if self._inside:
+                self.bodies[-1] += data
+
+    parser = Scripts()
+    parser.feed(DASHBOARD)
+    scripts = parser.bodies
     assert scripts
     for i, body in enumerate(scripts):
         path = tmp_path / f"inline_{i}.js"

@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import sys
+from urllib.parse import urlparse
 
 import pytest
 
@@ -144,14 +145,16 @@ def test_parsers_refuse_wrong_shapes(bad):
 def fake_fetch(calls):
     def fetch(url):
         calls.append(url)
-        if "/api/playlist?slug=" in url:
-            return load("hackertube_playlist.json")
-        if url.endswith("/api/browse"):
-            return load("hackertube_browse.json")
-        if "/api/list?" in url:
-            return load("hackertube_list.json")
-        if "hn.algolia.com" in url:
+        parsed = urlparse(url)
+        if parsed.hostname == "hn.algolia.com":
             return load("hn_item_15926973.json")
+        assert parsed.hostname == "hackertube.org", url
+        if parsed.path == "/api/playlist":
+            return load("hackertube_playlist.json")
+        if parsed.path == "/api/browse":
+            return load("hackertube_browse.json")
+        if parsed.path == "/api/list":
+            return load("hackertube_list.json")
         raise AssertionError(url)
     return fetch
 

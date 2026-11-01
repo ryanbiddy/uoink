@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import sys
+from urllib.parse import urlparse
 
 import pytest
 
@@ -29,9 +30,10 @@ def load(name):
 
 
 def fake_fetch(url):
-    if "/api/playlist?slug=" in url:
+    parsed = urlparse(url)
+    if parsed.hostname == "hackertube.org" and parsed.path == "/api/playlist":
         return load("hackertube_playlist.json")
-    if "hn.algolia.com" in url:
+    if parsed.hostname == "hn.algolia.com":
         return load("hn_item_15926973.json")
     raise AssertionError(f"unexpected fetch {url}")
 
