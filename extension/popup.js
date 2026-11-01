@@ -383,7 +383,9 @@ function applyCaptureQueueState(s) {
     if (queued) {
       uoinkCurrentBtn.textContent = "Uoinking...";
       uoinkCurrentBtn.disabled = true;
+      uoinkCurrentBtn.ariaBusy = "true";
     } else if (currentSourceQueued) {
+      uoinkCurrentBtn.ariaBusy = null;
       uoinkCurrentBtn.textContent =
         SOURCE_BUTTON_LABELS[currentSource.source] || "Uoink this page";
       uoinkCurrentBtn.disabled = !serverOnline || currentCaptureBusy;
@@ -438,6 +440,7 @@ async function runPopupUoinkCurrent() {
   const old = uoinkCurrentBtn.textContent;
   uoinkCurrentBtn.disabled = true;
   uoinkCurrentBtn.textContent = "Uoinking...";
+  uoinkCurrentBtn.ariaBusy = "true";
   try {
     const interval = await STC.getInterval();
 
@@ -493,6 +496,7 @@ async function runPopupUoinkCurrent() {
     currentCaptureBusy = false;
     uoinkCurrentBtn.disabled = !serverOnline || !currentSource;
     uoinkCurrentBtn.textContent = SOURCE_BUTTON_LABELS[src.source] || old;
+    uoinkCurrentBtn.ariaBusy = null;
     applyCaptureQueueState(captureData.worker || {});
     // E1: back to "Uoinking..." while the SW queue still has this source.
     refreshQueue();

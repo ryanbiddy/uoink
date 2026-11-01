@@ -72,6 +72,20 @@
   --step-todo: #EBD5C5;
   --focus-ring: #C2410C;
 
+  /* Buttons (UI review 2026-10-31): secondary border, hover/press fills,
+     primary and danger states, disabled. See the dashboard's button block. */
+  --btn-border: #94745F;
+  --btn-hover: #FBE6D6;
+  --btn-press: #F3D7C2;
+  --btn-primary-hover: #B23C0B;
+  --btn-primary-press: #A3370A;
+  --btn-danger: #B42318;
+  --on-danger: #FFFFFF;
+  --btn-danger-hover: #A62016;
+  --btn-danger-press: #971D14;
+  --btn-disabled: #EEE4DD;
+  --on-btn-disabled: #89786D;
+
   /* Older accents with no SPEC role (light values). */
   --acid: #854D0E;
   --warn: #854D0E;
@@ -147,7 +161,19 @@
     --step-now: #C2410C;
     --step-fail: #FF3D00;
     --step-todo: #3A2E27;
-    --focus-ring: #C2410C;
+    --focus-ring: #FF8A5C;
+
+    --btn-border: #806957;
+    --btn-hover: #241C18;
+    --btn-press: #332720;
+    --btn-primary-hover: #FF4D14;
+    --btn-primary-press: #FF5C29;
+    --btn-danger: #FFB4AB;
+    --on-danger: #0A0A0A;
+    --btn-danger-hover: #FFBAB2;
+    --btn-danger-press: #FFC0B8;
+    --btn-disabled: #211C18;
+    --on-btn-disabled: #76675E;
 
     --acid: #FFD23F;
     --warn: #FFE3A3;
@@ -183,7 +209,19 @@
   --step-now: #C2410C;
   --step-fail: #FF3D00;
   --step-todo: #3A2E27;
-  --focus-ring: #C2410C;
+  --focus-ring: #FF8A5C;
+
+  --btn-border: #806957;
+  --btn-hover: #241C18;
+  --btn-press: #332720;
+  --btn-primary-hover: #FF4D14;
+  --btn-primary-press: #FF5C29;
+  --btn-danger: #FFB4AB;
+  --on-danger: #0A0A0A;
+  --btn-danger-hover: #FFBAB2;
+  --btn-danger-press: #FFC0B8;
+  --btn-disabled: #211C18;
+  --on-btn-disabled: #76675E;
 
   --acid: #FFD23F;
   --warn: #FFE3A3;

@@ -41,4 +41,7 @@ def test_only_reader_toast_and_steps_have_motion():
             # The global reduced-motion override is part of the foundation gate.
             if selector != "*, *::before, *::after":
                 animated.add(selector)
-    assert animated == {".step.now.advanced", ".tab-panel.reader.active", ".toast", ".toast.show"}
+    # The busy-button spinner (UI review 2026-10-31) is the one control that
+    # moves; the global reduced-motion rule stops it like the rest.
+    assert animated == {".step.now.advanced", ".tab-panel.reader.active", ".toast", ".toast.show",
+                        '.button[aria-busy="true"]::before'}

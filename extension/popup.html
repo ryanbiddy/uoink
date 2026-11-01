@@ -29,14 +29,25 @@
     .tab-title, .capture-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
     .tab-source, .capture-source, .capture-state, .empty-state, .hint { color: var(--text-2); font-size: 12px; }
     button, input, select, a { font: inherit; }
-    button, .button { min-height: 32px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface); color: var(--text); padding: 4px 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-    button:hover, .button:hover { background: var(--surface-sel); }
-    button:active, .button:active { background: var(--surface-sel); }
-    button:disabled { cursor: default; color: var(--text-2); background: var(--surface-sel); }
-    button.primary { min-height: 44px; background: var(--action); border-color: var(--action); color: var(--on-action); font-weight: 600; }
-    button.primary:hover, button.primary:active { background: var(--action); color: var(--on-action); }
+    /* Button system shared with the dashboard and setup page (UI review
+       2026-10-31): secondary by default, .primary, .ghost, .danger; 600
+       weight, pill; compact 32px here except the 44px main actions. */
+    button, .button { min-height: 32px; border: 1px solid var(--btn-border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text); padding: 0 10px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; }
+    button:hover, .button:hover { background: var(--btn-hover); color: var(--text); }
+    button:active, .button:active { background: var(--btn-press); color: var(--text); }
+    button.ghost { border-color: transparent; background: transparent; }
+    button.primary { min-height: 44px; padding: 0 14px; font-size: 14px; background: var(--action); border-color: var(--action); color: var(--on-action); }
+    button.primary:hover { background: var(--btn-primary-hover); border-color: var(--btn-primary-hover); color: var(--on-action); }
+    button.primary:active { background: var(--btn-primary-press); border-color: var(--btn-primary-press); color: var(--on-action); }
+    button.danger { background: var(--btn-danger); border-color: var(--btn-danger); color: var(--on-danger); }
+    button.danger:hover { background: var(--btn-danger-hover); border-color: var(--btn-danger-hover); color: var(--on-danger); }
+    button.danger:active { background: var(--btn-danger-press); border-color: var(--btn-danger-press); color: var(--on-danger); }
+    button:disabled, button:disabled:hover, button:disabled:active { cursor: not-allowed; color: var(--on-btn-disabled); background: var(--btn-disabled); border-color: transparent; }
+    button[aria-busy="true"] { cursor: progress; pointer-events: none; }
+    button.primary[aria-busy="true"]:disabled { background: var(--action); border-color: var(--action); color: var(--on-action); }
+    button[aria-busy="true"]::before { content: ""; width: 14px; height: 14px; flex: 0 0 auto; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: button-spin .8s linear infinite; }
+    @keyframes button-spin { to { transform: rotate(360deg); } }
     #uoink-current-btn { width: 100%; }
-    #uoink-current-btn:disabled { background: var(--surface-sel); color: var(--text-2); border-color: var(--line-strong); }
     #uoink-podcast-btn, #uoink-allow-retry-btn { margin-top: 8px; min-height: 44px; }
     .hint:not(:empty), .source-alert:not(.hidden) { margin-top: 8px; }
     .source-alert { color: var(--rust-bright); overflow-wrap: anywhere; }

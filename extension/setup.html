@@ -27,11 +27,17 @@
     .step-number { color: var(--text-2); font-size: 14px; font-weight: 600; }
     .step-body { margin-left: 44px; }
     .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-    .button { display: inline-flex; justify-content: center; align-items: center; min-height: var(--target-primary); padding: 8px 20px; border: 1px solid var(--action); border-radius: var(--radius-pill); background: var(--action); color: var(--on-action); font: 600 14px/1.4 var(--font-ui); text-align: center; text-decoration: none; cursor: pointer; }
-    .button:hover { background: var(--action); color: var(--on-action); text-decoration: underline; text-underline-offset: 4px; }
-    .button.secondary { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
-    .button.secondary:hover { background: var(--surface-sel); color: var(--text); }
-    .button:disabled { background: var(--surface); color: var(--text-2); border-color: var(--line-strong); cursor: not-allowed; }
+    /* Button system shared with the dashboard and popup (UI review
+       2026-10-31). .button is secondary; .primary marks the current step's
+       main action (setup.js moves it as the steps advance). */
+    .button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: var(--target-primary); padding: 0 14px; border: 1px solid var(--btn-border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text); font: 600 14px/1.2 var(--font-ui); text-align: center; text-decoration: none; cursor: pointer; }
+    .button:hover { background: var(--btn-hover); color: var(--text); }
+    .button:active { background: var(--btn-press); color: var(--text); }
+    .button.primary { background: var(--action); border-color: var(--action); color: var(--on-action); }
+    .button.primary:hover { background: var(--btn-primary-hover); border-color: var(--btn-primary-hover); color: var(--on-action); }
+    .button.primary:active { background: var(--btn-primary-press); border-color: var(--btn-primary-press); color: var(--on-action); }
+    .button:disabled, .button:disabled:hover, .button:disabled:active { background: var(--btn-disabled); color: var(--on-btn-disabled); border-color: transparent; cursor: not-allowed; }
+    .button[aria-busy="true"] { cursor: progress; }
     .status { display: flex; align-items: baseline; gap: 8px; font-weight: 600; }
     .status-dot { display: inline-block; width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--line-strong); }
     .status[data-state="running"] .status-dot { background: var(--ok); }
@@ -90,8 +96,8 @@
         <p>The helper runs on your computer and saves captures to your local library.</p>
         <p id="install-instructions" class="secondary">Download the Windows installer, open it, and follow the installation steps.</p>
         <div class="actions">
-          <a id="download-btn" class="button" data-win-only href="https://github.com/ryanbiddy/uoink/releases/download/v3.12.0/Uoink-Setup-3.12.0.exe" target="_blank" rel="noopener">Download for Windows</a>
-          <a id="manual-install" class="button secondary" href="https://github.com/ryanbiddy/uoink/blob/main/REQUIREMENTS.md" target="_blank" rel="noopener" hidden>Manual install instructions</a>
+          <a id="download-btn" class="button primary" data-win-only href="https://github.com/ryanbiddy/uoink/releases/download/v3.12.0/Uoink-Setup-3.12.0.exe" target="_blank" rel="noopener">Download for Windows</a>
+          <a id="manual-install" class="button" href="https://github.com/ryanbiddy/uoink/blob/main/REQUIREMENTS.md" target="_blank" rel="noopener" hidden>Manual install instructions</a>
           <a id="skip-install" href="#verify">Already installed? Verify</a>
         </div>
       </div>
@@ -101,7 +107,7 @@
       <div class="step-body">
         <p id="status-block" class="status" data-state="checking" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-text">Checking for Uoink…</span></p>
         <p id="status-instructions" class="secondary">This page checks automatically while it is open.</p>
-        <button id="verify-btn" class="button secondary" type="button">Check again</button>
+        <button id="verify-btn" class="button" type="button">Check again</button>
         <details id="diagnose" hidden>
           <summary>Connection checks</summary>
           <ul id="diagnose-list" class="diagnose-list"></ul>

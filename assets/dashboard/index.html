@@ -71,6 +71,20 @@
       --step-todo: #EBD5C5;
       --focus-ring: #C2410C;
 
+      /* Buttons (UI review 2026-10-31): secondary border, hover/press fills,
+         primary and danger states, disabled. See the dashboard's button block. */
+      --btn-border: #94745F;
+      --btn-hover: #FBE6D6;
+      --btn-press: #F3D7C2;
+      --btn-primary-hover: #B23C0B;
+      --btn-primary-press: #A3370A;
+      --btn-danger: #B42318;
+      --on-danger: #FFFFFF;
+      --btn-danger-hover: #A62016;
+      --btn-danger-press: #971D14;
+      --btn-disabled: #EEE4DD;
+      --on-btn-disabled: #89786D;
+
       /* Older accents with no SPEC role (light values). */
       --acid: #854D0E;
       --warn: #854D0E;
@@ -146,7 +160,19 @@
         --step-now: #C2410C;
         --step-fail: #FF3D00;
         --step-todo: #3A2E27;
-        --focus-ring: #C2410C;
+        --focus-ring: #FF8A5C;
+
+        --btn-border: #806957;
+        --btn-hover: #241C18;
+        --btn-press: #332720;
+        --btn-primary-hover: #FF4D14;
+        --btn-primary-press: #FF5C29;
+        --btn-danger: #FFB4AB;
+        --on-danger: #0A0A0A;
+        --btn-danger-hover: #FFBAB2;
+        --btn-danger-press: #FFC0B8;
+        --btn-disabled: #211C18;
+        --on-btn-disabled: #76675E;
 
         --acid: #FFD23F;
         --warn: #FFE3A3;
@@ -182,7 +208,19 @@
       --step-now: #C2410C;
       --step-fail: #FF3D00;
       --step-todo: #3A2E27;
-      --focus-ring: #C2410C;
+      --focus-ring: #FF8A5C;
+
+      --btn-border: #806957;
+      --btn-hover: #241C18;
+      --btn-press: #332720;
+      --btn-primary-hover: #FF4D14;
+      --btn-primary-press: #FF5C29;
+      --btn-danger: #FFB4AB;
+      --on-danger: #0A0A0A;
+      --btn-danger-hover: #FFBAB2;
+      --btn-danger-press: #FFC0B8;
+      --btn-disabled: #211C18;
+      --on-btn-disabled: #76675E;
 
       --acid: #FFD23F;
       --warn: #FFE3A3;
@@ -357,11 +395,11 @@
       text-align: left;
     }
 
-    .nav-button:hover,
-    .nav-button:focus-visible {
-      outline: none;
-      border-color: var(--border);
-      background: color-mix(in srgb, var(--text) 4%, transparent);
+    /* Hover tints; keyboard focus is the global ring only, so a nav button
+       that keeps focus after the page changes some other way (a link, the
+       address bar) never looks like a second selected page. */
+    .nav-button:hover {
+      background: var(--btn-hover);
       color: var(--cream);
     }
 
@@ -573,29 +611,43 @@
       line-height: 1.55;
     }
 
+    /* Button system (UI review 2026-10-31). One set of variants shared with
+       the extension popup and setup page: primary, secondary (plain
+       .button), ghost, danger, link and icon. Every variant is 44px tall,
+       14px/600, pill-shaped; .small is the 32px desktop size (44px again on
+       touch screens). States: hover and press darken (light) or lighten
+       (dark) the fill, keyboard focus is the global 2px ring, disabled is a
+       flat neutral that ignores the pointer, and aria-busy shows a spinner
+       without changing the button's width. One primary per view. */
     .button,
     .icon-button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 8px;
       min-height: var(--target-primary);
-      border: 1px solid var(--border);
+      border: 1px solid var(--btn-border);
       border-radius: var(--radius-pill);
-      padding: 0 13px;
-      background: var(--ink-warm);
-      color: var(--cream);
+      padding: 0 14px;
+      background: var(--surface);
+      color: var(--text);
       cursor: pointer;
-      font-weight: 800;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
       text-decoration: none;
     }
 
     .button:hover,
-    .icon-button:hover,
-    .button:focus-visible,
-    .icon-button:focus-visible {
-      outline: none;
-      border-color: var(--rust);
-      background: color-mix(in srgb, var(--action) 15%, transparent);
+    .icon-button:hover {
+      background: var(--btn-hover);
+    }
+
+    .button:active,
+    .icon-button:active {
+      background: var(--btn-press);
+      transform: none;
     }
 
     .button.primary {
@@ -604,38 +656,156 @@
       color: var(--on-action);
     }
 
-    .button.ghost {
+    .button.primary:hover {
+      border-color: var(--btn-primary-hover);
+      background: var(--btn-primary-hover);
+      color: var(--on-action);
+    }
+
+    .button.primary:active {
+      border-color: var(--btn-primary-press);
+      background: var(--btn-primary-press);
+      color: var(--on-action);
+    }
+
+    .button.ghost,
+    .icon-button {
+      border-color: transparent;
       background: transparent;
     }
 
+    .button.ghost:hover,
+    .icon-button:hover {
+      background: var(--btn-hover);
+    }
+
+    .button.ghost:active,
+    .icon-button:active {
+      background: var(--btn-press);
+    }
+
+    .icon-button {
+      width: var(--target-primary);
+      padding: 0;
+    }
+
     .button.danger {
-      border-color: color-mix(in srgb, var(--action) 50%, transparent);
-      background: color-mix(in srgb, var(--action) 9%, transparent);
+      border-color: var(--btn-danger);
+      background: var(--btn-danger);
+      color: var(--on-danger);
+    }
+
+    .button.danger:hover {
+      border-color: var(--btn-danger-hover);
+      background: var(--btn-danger-hover);
+      color: var(--on-danger);
+    }
+
+    .button.danger:active {
+      border-color: var(--btn-danger-press);
+      background: var(--btn-danger-press);
+      color: var(--on-danger);
+    }
+
+    /* A link that sits where buttons sit: same height, underlined, no fill. */
+    .button.link {
+      border-color: transparent;
+      border-radius: 4px;
+      padding: 0 4px;
+      background: transparent;
+      color: var(--rust-bright);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .button.link:hover {
+      background: var(--btn-hover);
+      text-decoration-thickness: 2px;
+    }
+
+    .button.link:active {
+      background: var(--btn-press);
+    }
+
+    .button.small {
+      min-height: var(--target-chip);
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    @media (pointer: coarse) {
+      .button.small {
+        min-height: var(--target-primary);
+      }
+    }
+
+    /* A selected toggle (Activity's 1d / 7d / 30d): neutral tint and a check,
+       never the primary fill. */
+    .button.ghost.active,
+    .button.ghost[aria-pressed="true"] {
+      border-color: var(--btn-border);
+      background: var(--surface-sel);
       color: var(--text);
+    }
+
+    .button.ghost.active::before,
+    .button.ghost[aria-pressed="true"]::before {
+      content: "\2713";
+      font-size: 0.9em;
     }
 
     .button:disabled,
     .icon-button:disabled,
     .button:disabled:hover,
     .icon-button:disabled:hover,
-    .button:disabled:focus-visible,
-    .icon-button:disabled:focus-visible {
-      border-color: var(--border);
-      background: color-mix(in srgb, var(--text) 3%, transparent);
-      color: var(--dim);
+    .button:disabled:active,
+    .icon-button:disabled:active {
+      border-color: transparent;
+      background: var(--btn-disabled);
+      color: var(--on-btn-disabled);
       box-shadow: none;
       cursor: not-allowed;
       opacity: 1;
-    }
-
-    .button:active,
-    .icon-button:active {
+      text-decoration: none;
       transform: none;
     }
 
-    .button:disabled:active,
-    .icon-button:disabled:active {
-      transform: none;
+    .button.ghost:disabled,
+    .button.link:disabled {
+      background: transparent;
+    }
+
+    /* Loading: keeps its width and focus, refuses a second click. */
+    .button[aria-busy="true"] {
+      cursor: progress;
+      pointer-events: none;
+    }
+
+    .button:not(.primary)[aria-busy="true"]:disabled {
+      border-color: var(--btn-border);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .button.primary[aria-busy="true"]:disabled {
+      border-color: var(--action);
+      background: var(--action);
+      color: var(--on-action);
+    }
+
+    .button[aria-busy="true"]::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: button-spin 0.8s linear infinite;
+    }
+
+    @keyframes button-spin {
+      to { transform: rotate(360deg); }
     }
 
     .control-grid {
@@ -1209,27 +1379,30 @@
       margin: 18px 0;
     }
 
+    /* Help links to uoink.app read as links, not as in-app filter pills. */
     .learn-links {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0 18px;
+      column-gap: 16px;
+      row-gap: 4px;
+      margin: 8px 0 18px;
     }
 
     .learn-links a,
     .small-link-button {
       display: inline-flex;
       align-items: center;
-      min-height: 28px;
-      border: 1px solid color-mix(in srgb, var(--action) 36%, transparent);
-      border-radius: var(--pill-radius);
-      padding: 0 10px;
-      background: color-mix(in srgb, var(--action) 12%, transparent);
-      color: var(--cream);
-      font-size: 11px;
-      font-weight: 900;
-      text-decoration: none;
-      white-space: nowrap;
+      min-height: var(--target-chip);
+      color: var(--rust-bright);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .learn-links a:hover,
+    .small-link-button:hover {
+      text-decoration-thickness: 2px;
     }
 
     .insight-card,
@@ -1719,30 +1892,23 @@
       object-fit: contain;
     }
 
+    /* Detection status beside the paste box: plain helper text, not a
+       button-shaped pill next to the real "Uoink it". */
     .universal-capture-chip {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      min-height: 26px;
-      align-self: flex-start;
-      border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
-      border-radius: var(--pill-radius);
-      padding: 0 11px;
-      color: var(--cream);
+      align-self: center;
+      color: var(--muted);
       font-family: var(--font-ui);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .universal-capture-chip[data-state="supported"] {
-      border-color: color-mix(in srgb, var(--ok) 40%, transparent);
       color: var(--ok-bright);
     }
 
     .universal-capture-chip[data-state="unsupported"] {
-      border-color: color-mix(in srgb, var(--action) 42%, transparent);
       color: var(--rust-bright);
     }
 
@@ -1948,15 +2114,13 @@
       justify-self: start;
       width: auto;
       margin-top: 2px;
-      padding: 6px 9px;
+      padding: 0 10px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 13px;
     }
 
-    .button.ghost.card-write:hover,
-    .button.ghost.card-write:focus-visible {
-      border-color: var(--action);
-      color: var(--vermillion);
+    .button.ghost.card-write:hover {
+      color: var(--text);
     }
 
     /* Hooks explainer (U-06): the card badge is a real button now, the
@@ -2579,10 +2743,18 @@
       font-size: 0.92em;
     }
 
+    /* Wide enough that "Newsletter" never splits mid-word in any system
+       font; narrow panels drop to two columns, then one. */
     .radio-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(148px, 100%), 1fr));
       gap: 8px;
+    }
+
+    .radio-grid .choice-row span {
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: none;
     }
 
     .badge-row {
@@ -2701,9 +2873,7 @@
 
     .app:has(#tab-activity.active) { background: var(--bg); }
     .app:has(#tab-activity.active) .uoink-mark { filter: none; }
-    #tab-activity .button { min-height: 44px; border-radius: var(--radius-pill); box-shadow: none; transition: none; }
-    #tab-activity .button:active { transform: none; }
-    #tab-activity .button:disabled { opacity: 1; background: var(--surface-sel); color: var(--text-2); border-color: var(--line-strong); }
+    #tab-activity .button { min-height: 44px; }
     #queueMeta { margin: 0 0 24px; }
     .activity-layout { display: grid; gap: 32px; }
     .capture-group h2 { margin: 0; padding-bottom: 12px; font-size: 18px; border-bottom: 1px solid var(--line-strong); }
@@ -2963,11 +3133,7 @@
     .taste-anchor-row strong { flex: 1; overflow-wrap: anywhere; }
     .hook-correction-row { display: grid; justify-items: start; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
     .settings-tool-details summary { min-height: var(--target-primary); padding: 8px 0; cursor: pointer; }
-    .settings-tool-button { min-height: var(--target-primary); border-radius: var(--radius-pill); transition: none; }
-    .settings-tool-button:active { transform: none; }
-    .settings-tool-button:disabled,
-    .settings-tool-button:disabled:hover,
-    .settings-tool-button:disabled:focus-visible { opacity: 1; background: var(--surface); color: var(--text-2); border-color: var(--line-strong); }
+    .settings-tool-button { min-height: var(--target-primary); }
     @media (max-width: 600px) {
       #tab-settings .page-head { align-items: flex-start; }
       #tab-settings .topic-row { grid-template-columns: minmax(0, 1fr); }
@@ -3234,11 +3400,36 @@
       text-align: left;
     }
 
+    /* "Fill gap" and other in-row actions: the compact secondary button. */
     .row-link {
+      flex: 0 0 auto;
+      min-height: var(--target-chip);
+      border-color: var(--btn-border);
+      border-radius: var(--radius-pill);
+      padding: 0 10px;
+      background: var(--surface);
       color: var(--cream);
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .row-link:hover {
+      background: var(--btn-hover);
+      color: var(--cream);
+    }
+
+    .row-link:active {
+      background: var(--btn-press);
+      color: var(--cream);
+    }
+
+    .row-link:disabled,
+    .row-link:disabled:hover {
+      border-color: transparent;
+      background: var(--btn-disabled);
+      color: var(--on-btn-disabled);
+      cursor: not-allowed;
     }
 
     .toast {
@@ -3371,8 +3562,6 @@
 
     .omnibox-row .button {
       min-height: var(--target-primary);
-      border-radius: var(--radius-pill);
-      padding: 0 18px;
       white-space: nowrap;
     }
 
@@ -3607,8 +3796,6 @@
 
     .yoink-actions .button {
       min-height: var(--target-primary);
-      border-radius: var(--radius-pill);
-      padding: 0 16px;
     }
 
     .reader-body {
@@ -4562,7 +4749,7 @@
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="refreshForYou">Refresh</button>
-              <button class="button primary" type="button" id="openYouTubeForYou">Open YouTube</button>
+              <button class="button link" type="button" id="openYouTubeForYou">Open YouTube</button>
             </div>
           </div>
 
@@ -4959,7 +5146,7 @@
             <div class="inline-row library-head-actions">
               <a class="route-link" href="#for-you" data-nav-label="For You">For You <span class="nav-count" id="forYouNavCount" title="0 suggestions" aria-label="0 suggestions">0</span></a>
               <button class="button ghost hidden" type="button" id="clearFilters">Clear filters</button>
-              <button class="button ghost" type="button" id="newYoink">Open YouTube</button>
+              <button class="button link" type="button" id="newYoink">Open YouTube</button>
             </div>
           </div>
           <div class="control-grid">
@@ -5337,7 +5524,7 @@
             </div>
             <div class="inline-row">
               <a class="button ghost" href="#sources/discover">Discover</a>
-              <button class="button primary" type="button" data-open-youtube>Open YouTube</button>
+              <button class="button link" type="button" data-open-youtube>Open YouTube</button>
             </div>
           </div>
           <div class="learn-links" aria-label="Sources walkthrough links">
@@ -5382,7 +5569,7 @@
                 </select>
                 <input class="field" id="standingAddUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Feed URL or YouTube channel/playlist link" aria-label="New source URL">
                 <input class="field" id="standingAddDisplayName" type="text" autocomplete="off" placeholder="Display name (optional)" aria-label="Display name (optional)">
-                <button class="button primary" type="button" id="standingAddButton">Subscribe</button>
+                <button class="button" type="button" id="standingAddButton">Subscribe</button>
               </div>
             </div>
             <div class="subscription-card-list" id="standingSubscriptionList" role="list" aria-label="Subscribed sources"></div>
@@ -5401,14 +5588,14 @@
               <label for="discoveryTerm"><span id="discoveryTermLabel">Creator handle or YouTube channel ID</span><input class="field" id="discoveryTerm" type="text" maxlength="100" autocomplete="off" spellcheck="false"></label>
               <label for="discoveryPages">Pages<select class="field" id="discoveryPages"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
             </fieldset>
-            <div class="inline-row"><button class="button" id="discoveryPlan" type="button">Review credits</button><button class="button primary" id="discoveryRun" type="button" disabled aria-describedby="discoveryCreditPlan">Run</button></div>
+            <div class="inline-row"><button class="button" id="discoveryPlan" type="button">Review credits</button><button class="button" id="discoveryRun" type="button" disabled aria-describedby="discoveryCreditPlan">Run</button></div>
             <p class="discovery-note" id="discoveryCreditPlan" role="status" aria-live="polite">Review the credit plan before running discovery.</p>
             <p class="discovery-note" id="discoveryStatus" role="status" aria-live="polite"></p>
             <div id="discoveryRecovery" class="hidden">
               <p class="discovery-note" role="status">Results were fetched, but could not be saved on <span data-this-device>this PC</span>. Keep Uoink open and save them again before queueing. This uses no more provider credits.</p>
               <button class="button" id="discoverySaveAgain" type="button">Save results locally again</button>
             </div>
-            <div class="inline-row"><button class="button primary" id="discoveryQueue" type="button" disabled>Uoink selected (0)</button><button class="button ghost" id="discoveryRefresh" type="button" disabled>Refresh capture states</button></div>
+            <div class="inline-row"><button class="button" id="discoveryQueue" type="button" disabled>Uoink selected (0)</button><button class="button ghost" id="discoveryRefresh" type="button" disabled>Refresh capture states</button></div>
             <p class="discovery-note">Select up to 10 posts. Results are sorted by lift; posts without a lift appear last. No thumbnails are loaded.</p>
             <ul class="discovery-results" id="discoveryResults" aria-label="Discovery results"></ul>
           </section>
@@ -5431,7 +5618,7 @@
             <input class="field" id="noteTitleInput" type="text" autocomplete="off" placeholder="Title (optional, we'll use your first line)" aria-label="Note title">
             <textarea class="field note-capture-text" id="noteTextInput" rows="5" placeholder="What's on your mind?" aria-label="Note text" aria-describedby="noteCaptureNote"></textarea>
             <div class="universal-capture-row">
-              <button class="button primary" type="button" id="noteSaveButton" disabled>Save note</button>
+              <button class="button" type="button" id="noteSaveButton" disabled>Save note</button>
             </div>
             <p class="universal-capture-note" id="noteCaptureNote">Saves as a note by You. It shows up in your Library right away.</p>
           </div>
@@ -5446,7 +5633,7 @@
             </div>
             <input class="field" id="imageCaptionInput" type="text" autocomplete="off" placeholder="Caption (optional, makes it searchable)" aria-label="Image caption">
             <div class="universal-capture-row">
-              <button class="button primary" type="button" id="imageSaveButton" disabled>Save image</button>
+              <button class="button" type="button" id="imageSaveButton" disabled>Save image</button>
               <button class="button" type="button" id="imageClearButton" hidden>Clear</button>
             </div>
             <p class="universal-capture-note" id="imageCaptureNote">Saved by You under your output folder. It shows up in your Library right away.</p>
@@ -5458,7 +5645,7 @@
                 <h2>Get the extension</h2>
                 <p>The Uoink button lives in a browser extension you load once. It's already on this machine at <code id="extensionPathText">%LOCALAPPDATA%\Uoink\extension</code>.</p>
               </div>
-              <button class="button primary" type="button" data-open-extension>Open extension folder</button>
+              <button class="button" type="button" data-open-extension>Open extension folder</button>
             </div>
             <ol class="get-extension-steps">
               <li>Open <code>chrome://extensions</code> in Chrome.</li>
@@ -5961,12 +6148,12 @@
               <p class="setting-copy" id="helperStatus">Checking app status...</p>
               <div class="inline-row">
                 <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
-                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked aria-describedby="autostartToggleSaveStatus"> Autostart on login</label>
+                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked aria-describedby="autostartToggleSaveStatus"> <span data-mac-copy="Open at Login">Autostart on login</span></label>
               <div class="setting-feedback"><span class="setting-status" id="autostartToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="autostartToggleSaveRetry" type="button" data-setting-retry="autostartToggle">Retry save</button></div>
               </div>
               <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked aria-describedby="notificationsEnabledSaveStatus"> Show desktop notifications</label>
               <div class="setting-feedback"><span class="setting-status" id="notificationsEnabledSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="notificationsEnabledSaveRetry" type="button" data-setting-retry="notificationsEnabled">Retry save</button></div>
-              <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
+              <p class="setting-copy" data-mac-copy="When off, updates stay in Activity without showing a notification. Fullscreen apps also receive this courtesy automatically.">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
             </div>
 
             <div class="setting-block" id="settings-usage">
@@ -6852,6 +7039,12 @@
       let html = htmlEscape(value);
       html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
       html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      // *emphasis* and _emphasis_ (saved pages keep their italics this way).
+      // The marker must hug the words, so "2 * 3 * 4" and snake_case stay
+      // as written, and code spans are left alone.
+      html = html.split(/(<code>[\s\S]*?<\/code>)/).map((part) => part.startsWith("<code>") ? part : part
+        .replace(/(^|[^*\w])\*(?=\S)([^*]*?\S)\*(?![*\w])/g, "$1<em>$2</em>")
+        .replace(/(^|[^\w])_(?=\S)([^_]*?\S)_(?!\w)/g, "$1<em>$2</em>")).join("");
       html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" data-source-link target="_blank" rel="noreferrer">$1</a>');
       return html;
     }
@@ -7029,7 +7222,7 @@
           <strong>Connect a writing agent</strong>
           <span class="soft-note">Uoink found ${htmlEscape(installed.map((agent) => agent.label).join(", "))}. One click adds Uoink to that client's config and keeps a backup.</span>
           <div class="inline-row">
-            ${installed.map((agent) => `<button class="button primary" type="button" data-connect-agent="${htmlEscape(agent.name)}">Connect ${htmlEscape(agent.label)}</button>`).join("")}
+            ${installed.map((agent, index) => `<button class="button${index === 0 ? " primary" : ""}" type="button" data-connect-agent="${htmlEscape(agent.name)}">Connect ${htmlEscape(agent.label)}</button>`).join("")}
           </div>
           ${keyReady ? `<span class="compute-indicator">Your Anthropic key is ready as the no-agent fallback.</span>` : ""}
         `;
@@ -10780,7 +10973,7 @@
       universalState.busy = true;
       const btn = els.universalCaptureButton;
       const label = universalState.label || "source";
-      if (btn) { btn.disabled = true; btn.textContent = "Uoinking..."; }
+      if (btn) { btn.disabled = true; btn.textContent = "Uoinking..."; btn.setAttribute("aria-busy", "true"); }
       try {
         await authFetch(universalState.endpoint, {
           method: "POST",
@@ -10810,7 +11003,7 @@
         }
       } finally {
         universalState.busy = false;
-        if (btn) btn.textContent = "Uoink it";
+        if (btn) { btn.textContent = "Uoink it"; btn.removeAttribute("aria-busy"); }
         if (btn) btn.disabled = !universalState.endpoint;
       }
     }
@@ -10851,7 +11044,7 @@
       const title = els.noteTitleInput ? els.noteTitleInput.value.trim() : "";
       noteState.busy = true;
       const btn = els.noteSaveButton;
-      if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
+      if (btn) { btn.disabled = true; btn.textContent = "Saving..."; btn.setAttribute("aria-busy", "true"); }
       try {
         await authFetch("/notes", {
           method: "POST",
@@ -10872,7 +11065,7 @@
         showToast(honest || translateMachineMessage(err && err.message));
       } finally {
         noteState.busy = false;
-        if (btn) btn.textContent = "Save note";
+        if (btn) { btn.textContent = "Save note"; btn.removeAttribute("aria-busy"); }
         syncNoteButton();
       }
     }
@@ -10928,7 +11121,7 @@
       const caption = els.imageCaptionInput ? els.imageCaptionInput.value.trim() : "";
       imageState.busy = true;
       const btn = els.imageSaveButton;
-      if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
+      if (btn) { btn.disabled = true; btn.textContent = "Saving..."; btn.setAttribute("aria-busy", "true"); }
       try {
         const params = new URLSearchParams();
         if (caption) params.set("caption", caption);
@@ -10952,12 +11145,12 @@
         showToast(honest || translateMachineMessage(err && err.message));
       } finally {
         imageState.busy = false;
-        if (btn) btn.textContent = "Save image";
+        if (btn) { btn.textContent = "Save image"; btn.removeAttribute("aria-busy"); }
         syncImageButton();
       }
     }
 
-    function insightCard(row, kicker, { writeFrom = false } = {}) {
+    function insightCard(row, kicker, { writeFrom = false, lead = false } = {}) {
       const score = normalizedScore(row);
       const age = daysSince(row.last_event_ts || row.yoinked_at);
       const scorePill = score > 0
@@ -10970,7 +11163,7 @@
       // [data-write-from] before the card-open branch, so the button wins.
       const vid = videoIdOf(row);
       const writeBtn = writeFrom && vid
-        ? `<button class="button primary insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(rowTitle(row))}">Write from this</button>`
+        ? `<button class="button${lead ? " primary" : ""} insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(rowTitle(row))}">Write from this</button>`
         : "";
       return `
         <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
@@ -11017,7 +11210,7 @@
         ? "Reading your saved work."
         : "Built from local signals.";
       els.worthCards.innerHTML = worth.length
-        ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting", { writeFrom: true })).join("")
+        ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting", { writeFrom: true, lead: i === 0 })).join("")
         : [0, 1, 2].map(() => `<article class="insight-card"><div class="insight-kicker">waiting for signal</div><div class="insight-title">Nothing worth resurfacing yet.</div><div class="insight-copy">Open, cite, or search your saved uoinks. Once a good one sits idle for a couple weeks, it lands here.</div></article>`).join("");
       els.connectionMeta.textContent = `${connections.length} possible link${connections.length === 1 ? "" : "s"}`;
       els.connectionRows.innerHTML = connections.length
@@ -11042,7 +11235,7 @@
       // Only offer Write-from-this once the local capture has finished and
       // it's actually in the corpus -- otherwise say so honestly.
       const action = (ready && vid)
-        ? `<button class="button primary insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(item.title || "this")}">Write from this</button>`
+        ? `<button class="button insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(item.title || "this")}">Write from this</button>`
         : `<div class="job-sub">Capturing locally &mdash; transcript in progress.</div>`;
       return `
         <article class="insight-card" data-video-id="${htmlEscape(vid)}">
@@ -12296,7 +12489,7 @@
           actions: failed
             ? `${run.allowHost
               ? `<button class="button" type="button" data-library-allow-site="${htmlEscape(run.id)}">Allow ${htmlEscape(run.allowHost)}</button>`
-              : `<button class="button ghost" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button>`}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
+              : `<button class="button" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button>`}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
             : "",
         });
       });
@@ -12354,13 +12547,13 @@
           const reason = activityErrorMessage(error || row.error || "", row.phase, {
             url: row.url || "", terminal: true, retryExhausted: row.retry_exhausted === true, attempts: row.attempt_count });
           items.push({ ...base, tone: "fail", word: "Failed", detail: reason, strip: "",
-            actions: `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button><button class="button ghost" type="button" data-library-dismiss="${htmlEscape(key)}">Dismiss</button>` });
+            actions: `<button class="button" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button><button class="button ghost" type="button" data-library-dismiss="${htmlEscape(key)}">Dismiss</button>` });
           return;
         }
         if (error === "youtube_rate_limit") {
           items.push({ ...base, tone: "fail", word: "Failed", detail: `YouTube refused it (HTTP 429).${at ? ` Retries ${at}` : " Retries on its own"}`,
             strip: captureStripHtml(1, { failed: true }),
-            actions: `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` });
+            actions: `<button class="button" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` });
           return;
         }
         items.push({ ...base, tone: "wait", word: "Waiting",
@@ -12382,7 +12575,7 @@
           detail: failure.reason,
           errorDetail: failure.detail,
           strip: captureStripHtml(index, { failed: true }),
-          actions: `${url ? `<button class="button ghost" type="button" data-library-retry="${htmlEscape(url)}" data-library-run="${htmlEscape(`job:${job.id}`)}">Retry now</button>` : ""}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(`job:${job.id}`)}">Dismiss</button>`,
+          actions: `${url ? `<button class="button" type="button" data-library-retry="${htmlEscape(url)}" data-library-run="${htmlEscape(`job:${job.id}`)}">Retry now</button>` : ""}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(`job:${job.id}`)}">Dismiss</button>`,
         });
       });
       return items;
@@ -17101,6 +17294,16 @@
         if (current) btn.setAttribute("aria-current", "page");
         else btn.removeAttribute("aria-current");
       });
+      // A page change that did not come from the sidebar (a link, Back, the
+      // address bar) must not leave keyboard focus on the old nav button,
+      // where it reads as a second selected page. Focus follows the page.
+      const focusedNav = document.activeElement && document.activeElement.closest
+        ? document.activeElement.closest(".nav-button[data-tab-button]") : null;
+      if (focusedNav && focusedNav.dataset.tabButton !== navTab) {
+        const owner = document.querySelector(`.nav-button[data-tab-button="${navTab}"]`);
+        if (owner) owner.focus({ preventScroll: true });
+        else focusedNav.blur();
+      }
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       state.activeTab = tab;
       // Re-haul: from 900px up the Library list stays beside the reader.
@@ -17652,6 +17855,10 @@
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusLibraryBox);
       for (const node of document.querySelectorAll("[data-this-device]")) node.textContent = thisDevice();
+      // Mac words where Windows words differ ("balloon", "Autostart on login").
+      if (helperPlatform() === "mac") {
+        for (const node of document.querySelectorAll("[data-mac-copy]")) node.textContent = node.dataset.macCopy;
+      }
       // Delegate once so links rendered after startup use the same boundary.
       document.addEventListener("click", openExternalLink);
       document.addEventListener("auxclick", (event) => {

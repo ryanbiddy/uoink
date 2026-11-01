@@ -42,8 +42,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `uoink.cmd` and `uoink` launchers route `mcp` to the CLI as well, and the
   dashboard counts a client entry that runs `uoink mcp` as connected.
 
+### Changed
+
+- One button system across the dashboard, the extension popup, the setup
+  page and the in-page Uoink buttons: primary, secondary, ghost, danger, link
+  and icon variants share one height, padding, pill shape and 600 weight, with
+  visible hover, press, keyboard focus, disabled and loading states in light
+  and dark. Primary buttons now respond to the pointer, disabled buttons look
+  disabled, and Stop Uoink reads as destructive. Each view keeps one primary
+  action: "Open YouTube" is a link, Sources keeps "Uoink it", For You keeps
+  the top recommendation's "Write from this", and Settings > Agents keeps the
+  first Connect button. The setup page moves its primary to the current step.
+- The paste box status ("Paste a link") is plain helper text, and the
+  "Learn: ..." pills are underlined help links.
+- The Windows tray menu uses the Mac menu's words: Open dashboard, Open
+  folder, Recent items, Settings, and "No recent items yet" (was "yoinks").
+- On a Mac, Settings says "Open at Login" and "notification" instead of the
+  Windows "Autostart on login" and "balloon".
+
 ### Fixed
 
+- The in-page Uoink button on YouTube, Reddit and X shows a keyboard focus
+  ring on light and dark pages, and its hover no longer puts white text on
+  bright orange.
+- Generate's "Newsletter" output no longer breaks mid-word.
+- The sidebar no longer shows two selected pages after you leave Settings
+  by a link or the address bar.
+- The article reader shows `*italic*` and `_italic_` text as italics instead
+  of raw asterisks.
 - Wikipedia articles capture instead of failing as an "empty JavaScript
   page". The wiki skin puts feature flags such as `main-menu-pinned-disabled`
   on the `<html>` element, the menu filter matched them, and the whole page
