@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.12.1] - 2026-11-01
+
 ### Added
 
 - **Phone inbox (Uoink Relay)**, off by default. Deploy a small relay to your
@@ -124,6 +126,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   are only a short label and a link ("Facebook - https://..."), no longer
   count, so a lecture's social link list doesn't file it under Social Media
   Research. A plural "s" still matches ("creators", "LLMs").
+- The Mac `.mcpb` no longer describes itself as reading a library "on
+  Windows" in Claude Desktop.
+
+### Compatibility and testing
+
+- The MCP server still exposes 91 tools by default and 35 with
+  `UOINK_MCP_TOOLSET=core`. `uoink mcp` starts the same server.
+- The winget and Homebrew manifests in `packaging/` still point at the
+  published 3.12.0 files until 3.12.1 is published.
 
 ## [3.12.0] - 2026-10-30
 
@@ -1396,7 +1407,7 @@ The first public release. Single-video extraction with creator-research-grade ou
 - **Local helper server** on `127.0.0.1:5179` with token-based extension auth.
 - **Master `_all-yoinks-index.md`** at the Desktop\Yoink root tracking every yoink.
 
-### Notes
+### Compatibility and testing
 
 - v1.0 was Windows-only. Mac installer is on the v1.1 roadmap.
 - v1.0 shipped without telemetry; opt-in install-success telemetry is on the v1.1 roadmap.

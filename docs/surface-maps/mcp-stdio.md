@@ -84,7 +84,7 @@ regression gate now requires exactly 91 canonical names and rejects the six
 removed names. The same sequence on the original C-01 file exits 1 with the
 ModuleNotFoundError.
 
-## 3.12.0 toolsets
+## 3.12.1 toolsets
 
 `UOINK_MCP_TOOLSET=full` serves all registry tools; `core` preserves the previous
 35 in their original order. Full keeps that prefix. Unknown values warn on
