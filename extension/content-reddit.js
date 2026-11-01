@@ -25,7 +25,7 @@
         border: none;
         border-radius: 16px;
         background: #C2410C;
-        color: #FFF4EC;
+        color: #FFFFFF;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         font-size: 12px;
         font-weight: 600;
@@ -35,11 +35,19 @@
         transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
       }
       .${BTN_CLASS}:hover {
-        background: #FF3D00;
+        background: #B23C0B;
         color: #FFFFFF;
       }
       .${BTN_CLASS}:active {
+        background: #A3370A;
+        color: #FFFFFF;
         transform: scale(0.97);
+      }
+      /* Same focus as the YouTube button: white inner, black outer ring. */
+      .${BTN_CLASS}:focus-visible {
+        outline: 2px solid #0A0A0A;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px #FFFFFF;
       }
       .${BTN_CLASS}[disabled] { opacity: 0.7; cursor: progress; }
       .${BTN_CLASS}.stc-reddit-error { background: #3A1F1F; color: #FFD9D9; }

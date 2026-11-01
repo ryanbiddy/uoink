@@ -49,7 +49,7 @@
         border: none;
         border-radius: 18px;
         background: #C2410C;
-        color: #FFF4EC;
+        color: #FFFFFF;
         font-family: "Roboto", "Arial", sans-serif;
         font-size: 14px;
         font-weight: 600;
@@ -58,9 +58,13 @@
         white-space: nowrap;
         transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
       }
+      /* Keyboard focus: a white inner ring and a black outer ring, so one
+         of the two shows on YouTube's light and dark pages alike. Shared
+         with the Reddit and X buttons (UI review 2026-10-31). */
       .${BTN_CLASS}:focus-visible {
-        outline: 1px solid #FFF4EC;
-        outline-offset: 1px;
+        outline: 2px solid #0A0A0A;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px #FFFFFF;
       }
       /* Shorts variant — a fixed-position pill in the lower-right, sitting
          below the like/dislike/share column. Parented to <body> so YouTube
@@ -76,7 +80,7 @@
         height: 40px;
         border-radius: 20px;
         background: #15110D;
-        color: #FFF4EC;
+        color: #FFFFFF;
         box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         border: 1px solid #2C2621;
       }
@@ -84,11 +88,17 @@
         background: #C2410C;
         box-shadow: 0 2px 14px rgba(0,0,0,0.6);
       }
+      .${BTN_CLASS}.${SHORTS_FLOATING_CLASS}:focus-visible {
+        box-shadow: 0 0 0 2px #FFFFFF, 0 2px 10px rgba(0,0,0,0.5);
+      }
+      /* Hover and press darken the fill; the white label stays 5:1 or more. */
       .${BTN_CLASS}:hover {
-        background: #FF3D00;
-        color: #0A0A0A;
+        background: #B23C0B;
+        color: #FFFFFF;
       }
       .${BTN_CLASS}:active {
+        background: #A3370A;
+        color: #FFFFFF;
         transform: translateY(1px) scale(0.97);
       }
       .${BTN_CLASS}[disabled] { opacity: 0.7; cursor: progress; }
