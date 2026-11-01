@@ -72,6 +72,16 @@ function markCurrent(step) {
     if (name === step) link.setAttribute("aria-current", "step");
     else link.removeAttribute("aria-current");
   }
+  // One primary per page: the current step's main action. Install shows
+  // either the download or the manual instructions, never both.
+  const main = {
+    install: [$("download-btn"), $("manual-install")],
+    verify: [$("verify-btn")],
+    capture: [$("uoink-suggested-btn")],
+  };
+  for (const [name, buttons] of Object.entries(main)) {
+    for (const button of buttons) button.classList.toggle("primary", name === step);
+  }
 }
 
 // Old bookmarks and extension links still lead to the settings they named.

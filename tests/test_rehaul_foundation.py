@@ -390,8 +390,11 @@ def test_theme_colours_meet_wcag_aa():
 def test_focus_ring_is_two_px_rust_offset_two():
     for label, css in _sources().items():
         light, dark = _themes(css)
-        assert _same(light.get("--focus-ring", ""), RUST) and _same(dark.get("--focus-ring", ""), RUST), \
-            f"{label}: the focus ring is rust in both themes"
+        # Rust in light; the brighter rust (#FF8A5C, the dark --rust-bright) in
+        # dark, so the ring stays visible next to the dark primary fill (UI
+        # review 2026-10-31).
+        assert _same(light.get("--focus-ring", ""), RUST) and _same(dark.get("--focus-ring", ""), "#FF8A5C"), \
+            f"{label}: the focus ring is rust (light) and bright rust (dark)"
         rules = [_norm(body) for body in FOCUS_RE.findall(css)]
         assert any("outline: 2px solid var(--focus-ring) !important" in body and
                    "outline-offset: 2px !important" in body for body in rules), \

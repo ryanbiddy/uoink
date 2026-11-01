@@ -47,7 +47,7 @@
         border: none;
         border-radius: 18px;
         background: #C2410C;
-        color: #FFF4EC;
+        color: #FFFFFF;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         font-size: 13px;
         font-weight: 600;
@@ -56,8 +56,14 @@
         box-shadow: 0 4px 14px rgba(0,0,0,0.25);
         transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
       }
-      #${BTN_ID}.${BTN_CLASS}:hover { background: #FF3D00; color: #FFFFFF; }
-      #${BTN_ID}.${BTN_CLASS}:active { transform: scale(0.97); }
+      #${BTN_ID}.${BTN_CLASS}:hover { background: #B23C0B; color: #FFFFFF; }
+      #${BTN_ID}.${BTN_CLASS}:active { background: #A3370A; color: #FFFFFF; transform: scale(0.97); }
+      /* Same focus as the YouTube button: white inner, black outer ring. */
+      #${BTN_ID}.${BTN_CLASS}:focus-visible {
+        outline: 2px solid #0A0A0A;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px #FFFFFF, 0 4px 14px rgba(0,0,0,0.25);
+      }
       #${BTN_ID}.${BTN_CLASS}[disabled] { opacity: 0.7; cursor: progress; }
       #${BTN_ID}.${BTN_CLASS}.stc-x-article-error { background: #3A1F1F; color: #FFD9D9; }
       #${BTN_ID}.${BTN_CLASS}.stc-x-article-success { background: #1F2B22; color: #D9FFE7; }
