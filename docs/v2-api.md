@@ -1605,11 +1605,11 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-91 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
+92 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
 local-write `publish_library_brief`, joined it on 2026-09-08, run AV-2; the
 read-only Phase 6 cited export `export_cited_range` joined it on 2026-09-08,
 run BC-2, and is also on stdio; `get_playbook_input` adds local research packets,
-and `discover_candidates` / `queue_discovered` add opt-in discovery).
+and `discover_candidates` / `queue_discovered` add opt-in discovery; `import_list` queues the videos from a HackerTube list, an HN or Reddit thread, or a YouTube playlist).
 
 `get_playbook_input` is available through `/tools/get_playbook_input` and MCP
 `tools/call`, with `{"playbook":"comment-mining","arguments":{"author":"Example creator","lens":"demand"}}`.
@@ -2110,6 +2110,62 @@ and a sanitized "Uoink couldn't capture this link: <reason>" line. The link
 is deleted only after that note saves; otherwise it stays, and the next check
 retries the note without capturing again. A note on a captured link is also
 saved with `uoink_note`, titled "From my phone".
+
+### POST /import-list/preview and POST /import-list
+
+Import a list. Both require `X-Uoink-Token` and take
+`{"url": "...", "offset": 0, "limit": 50}`; `offset` and `limit` are optional
+and `limit` is clamped to 1-50. Supported links:
+
+| Source | Link | Read through |
+|---|---|---|
+| HackerTube playlist, category, area, video | `hackertube.org/p/<slug>`, `/c/<id>`, `/a/<id>`, `/watch/<id>` | `/api/playlist?slug=`, `/api/list?cat=` or `?area=`, `/api/video?vid=` |
+| HackerTube, best first (top N by quality) | `hackertube.org/`, `/browse` (sort and filter parameters kept), or `hackertube` | `/api/list` |
+| Hacker News thread | `news.ycombinator.com/item?id=<n>` | `hn.algolia.com/api/v1/items/<n>` (whole comment tree) |
+| Reddit thread | `reddit.com/r/<sub>/comments/...` | the thread's public `.json` |
+| YouTube playlist | `youtube.com/playlist?list=...` | `yt-dlp --flat-playlist --playlist-items <offset+1>:<offset+limit>` |
+
+Preview reads one batch and marks videos the library already has. It never
+queues anything:
+
+```json
+{
+  "ok": true,
+  "source": {"kind": "hackertube", "label": "HackerTube", "title": "The HN canon",
+             "url": "https://hackertube.org/p/hn-canon",
+             "credit": "From HackerTube (hackertube.org), ODC-By 1.0. Built on the open-index/hacker-news dataset; Hacker News data by Y Combinator."},
+  "offset": 0, "limit": 50, "total": 10, "found": 10, "already": 2, "new": 8,
+  "has_more": false, "next_offset": null,
+  "message": "Found 10 videos, 2 already in your library.",
+  "videos": [{"video_id": "jbkSRLYSojo", "url": "https://www.youtube.com/watch?v=jbkSRLYSojo",
+              "title": "...", "channel": "BBC", "note": "HN commenters send it as ...",
+              "duration_seconds": 288, "quality_score": 13.5, "in_library": false}]
+}
+```
+
+`POST /import-list` returns the same fields plus `queued`, `already_queued`,
+`skipped` and `import_id`. Each new video goes on the download queue
+(`pending_yoinks`, see `GET /queue/status`) through `enqueue_pending_once`, so
+a URL already waiting is not queued twice; the retry worker captures one video
+per 30-second pass. Uoink records each queued video's origin in
+`list-imports.json` in the data folder. When the capture is indexed it gets a
+library tag (`hackertube`, `hn thread`, `reddit thread` or
+`youtube playlist`), and `/recent`, `/memory/search` and For You rows carry
+`import_origin` (`label`, `list_title`, `list_url`, `note`, `credit`).
+`/resurface` and `/discovery` add `from_imports`: indexed imports with no
+engagement events, ranked by the taste score (the profile leaves the imports
+themselves out), then HackerTube's quality score.
+
+Refusals: 400 with `code` `empty`, `invalid_url` or `unsupported`; 501
+`unavailable` when a YouTube playlist needs media tools this install lacks;
+502 `not_found`, `fetch_failed`, `rate_limited` or `too_large` when the
+source can't be read.
+
+Library rows also carry `card_image_source` (`middle`, `thumbnail` or null)
+and `original_thumbnail_path`. With the `card_image` setting at `middle` (the
+default; the other value is `thumbnail`), `thumbnail_path` points at the saved
+screenshot nearest the middle of a video, within 20% of its duration, when
+one exists.
 
 ## Job state machine
 

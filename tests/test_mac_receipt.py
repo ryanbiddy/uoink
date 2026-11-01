@@ -99,7 +99,7 @@ def rig(tmp_path, monkeypatch):
             if state.failure != "missing_binding":
                 observer(event, SimpleNamespace(pid=pid), {"pid": pid + 1})
         result = {"ok": True, "bundle_unchanged": True,
-                  "mcp": [{"toolset": "full", "count": 91, "ok": True}, {"toolset": "core", "count": 35, "ok": True}],
+                  "mcp": [{"toolset": "full", "count": 92, "ok": True}, {"toolset": "core", "count": 35, "ok": True}],
                   "menubar": {name: True for name in ("connected", "duplicate_launch_same_pid", "quit_no_survivor",
                                                        "relaunch_connected", "helper_death_no_survivor")}}
         result.update({key: {"ok": True} for key in ("health", "media", "mirror", "connect", "launchagent", "cocoa", "status", "pillow")})

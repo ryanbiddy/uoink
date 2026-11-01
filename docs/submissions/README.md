@@ -33,7 +33,7 @@ and attach [`logo-400.png`](logo-400.png). Before you submit, give Cline the rep
 > **Reason for addition:** Uoink saves the YouTube videos, podcasts, articles,
 > X posts and Reddit threads you study as Markdown on your own machine, with
 > timestamped transcripts, screenshots and comments. Its local MCP server gives
-> Cline 91 tools to search that library and cite the exact timestamp, capture
+> Cline 92 tools to search that library and cite the exact timestamp, capture
 > new links, and save notes, so answers come from sources the user actually
 > saved instead of guesses. It's free, MIT licensed, and local-first: no account,
 > no cloud, and library reads need no API key. Windows 10/11, plus a macOS 15+
@@ -60,7 +60,7 @@ Both use web forms. Paste the same values:
 - **Website:** https://uoink.app
 - **Short description:** Save the YouTube videos, podcasts and articles you
   study. Your AI searches them and cites the timestamp.
-- **Description:** Local-first MCP server with 91 tools over a Markdown library
+- **Description:** Local-first MCP server with 92 tools over a Markdown library
   on your own disk: search transcripts and articles with timestamped citations,
   capture YouTube, X, Reddit, podcast and web links, save notes, and write from
   your own sources. Free, MIT, no account. Windows, plus a macOS preview

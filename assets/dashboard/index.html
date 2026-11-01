@@ -1426,6 +1426,99 @@
       margin-top: 4px;
     }
 
+    /* For You: imported, unopened items carry their card image (a frame
+       from the middle of the video, or the uploaded thumbnail). */
+    .insight-image {
+      aspect-ratio: 16 / 9;
+      margin: -4px -4px 0;
+      overflow: hidden;
+      border-radius: var(--radius-thumb);
+      background: color-mix(in srgb, var(--border) 60%, transparent);
+    }
+
+    .insight-image img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .insight-note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .insight-credit {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .list-import-modal {
+      width: min(640px, calc(100vw - 32px));
+      max-height: min(720px, calc(100vh - 32px));
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .list-import-status {
+      margin: 0;
+      font-weight: 700;
+      color: var(--cream);
+    }
+
+    .list-import-preview {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .list-import-preview li {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      min-width: 0;
+    }
+
+    .list-import-preview li span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .list-import-chip {
+      flex: none;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .list-import-credit {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .list-import-actions {
+      justify-content: flex-end;
+    }
+
+    .reader-import-note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      max-width: 72ch;
+    }
+
     .insight-kicker,
     .score-pill {
       color: var(--rust-bright);
@@ -4774,6 +4867,17 @@
             </div>
           </div>
 
+          <div class="panel hidden" id="importsPanel" style="margin-bottom:16px">
+            <div class="panel-head">
+              <div class="panel-title">From lists you imported</div>
+              <div class="localhost" id="importsMeta">ranked by your taste</div>
+            </div>
+            <div class="panel-body">
+              <p class="setting-copy" id="importsNote" style="margin-top:0">Videos you imported and haven't opened yet, best match for your taste first.</p>
+              <div class="feature-grid" id="importCards"></div>
+            </div>
+          </div>
+
           <div class="feature-grid" id="worthCards"></div>
 
           <div class="resurface-layout">
@@ -5473,6 +5577,7 @@
               <h1 id="yoinkHeading" tabindex="-1">Pick something to read</h1>
               <p class="reader-meta" id="yoinkSubhead">Open a capture from Library to read it here.</p>
               <a class="reader-source-link hidden" id="yoinkSourceLink" data-source-link href="#" target="_blank" rel="noreferrer">Watch on the source</a>
+              <p class="reader-import-note hidden" id="yoinkImportNote"></p>
             </div>
               <div class="inline-row yoink-actions">
                 <button class="button" type="button" id="yoinkCopyMarkdown">Copy as Markdown</button>
@@ -5611,6 +5716,12 @@
               <button class="button hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote"></button>
             </div>
             <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
+          </div>
+          <div class="universal-capture list-import-card" id="listImportCard">
+            <div class="eyebrow">Many at once</div>
+            <h2>Import a list</h2>
+            <p class="universal-lede">Paste a HackerTube list, a Hacker News or Reddit thread, or a YouTube playlist. Uoink queues every video in it for a normal capture, transcripts and all, 50 at a time.</p>
+            <div class="inline-row"><button class="button" type="button" id="openListImport">Import a list</button></div>
           </div>
           <div class="universal-capture note-capture" id="noteCapture">
             <div class="eyebrow">Your own words</div>
@@ -6007,6 +6118,17 @@
           <section class="settings-section" id="settings-library" aria-labelledby="settingsLibraryTitle">
           <h2 class="settings-section-title" id="settingsLibraryTitle" tabindex="-1">Library and export</h2>
           <div class="settings-grid">
+            <div class="setting-block" id="settings-card-image">
+              <h2>Card image</h2>
+              <label for="cardImage">For saved videos, show</label>
+              <select class="field" id="cardImage" style="max-width:280px" aria-describedby="cardImageCopy cardImageSaveStatus">
+                <option value="middle">Middle of the video</option>
+                <option value="thumbnail">Original thumbnail</option>
+              </select>
+              <div class="setting-feedback"><span class="setting-status" id="cardImageSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="cardImageSaveRetry" type="button" data-setting-retry="cardImage">Retry save</button></div>
+              <p class="setting-copy" id="cardImageCopy">Middle of the video uses a screenshot Uoink already took near the halfway mark. Videos without one keep their original thumbnail.</p>
+            </div>
+
             <div class="setting-block">
               <h2>Creator defaults</h2>
               <p class="setting-copy">Defaults from extension setup. If this helper cannot store a setting, its error appears beside the control.</p>
@@ -6254,6 +6376,28 @@
       </div>
       <p class="setting-copy">Defaults stay in your library. Activate the ones that fit, deactivate them any time, and keep deletion for anchors you add yourself.</p>
       <div class="default-anchor-list" id="defaultAnchorList"></div>
+    </div>
+  </div>
+  <!-- Import a list: one paste field, a preview count, one Import button. -->
+  <div class="modal-backdrop hidden" id="listImportModal" role="dialog" aria-modal="true" aria-labelledby="listImportTitle">
+    <div class="modal-card list-import-modal">
+      <div class="panel-head">
+        <div>
+          <div class="soft-note">Sources</div>
+          <div class="panel-title" id="listImportTitle">Import a list</div>
+        </div>
+        <button class="button ghost" type="button" id="closeListImport">Close</button>
+      </div>
+      <label class="soft-note" for="listImportInput">List link</label>
+      <input class="field" id="listImportInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="hackertube.org/p/hn-canon, an HN or Reddit thread, or a YouTube playlist" aria-describedby="listImportStatus listImportHelp">
+      <p class="list-import-status" id="listImportStatus" role="status" aria-live="polite">Paste a link to see how many videos it holds.</p>
+      <ul class="list-import-preview" id="listImportPreview" aria-label="Videos in this batch"></ul>
+      <p class="list-import-credit hidden" id="listImportCredit"></p>
+      <div class="inline-row list-import-actions">
+        <button class="button ghost hidden" type="button" id="listImportNext">Next 50</button>
+        <button class="button primary" type="button" id="listImportGo" disabled>Import</button>
+      </div>
+      <p class="setting-copy" id="listImportHelp">Works with HackerTube playlists, categories and the whole collection (best first), Hacker News threads, Reddit threads and YouTube playlists. Videos already in your library are skipped. The rest capture one at a time in the background and show up in Activity.</p>
     </div>
   </div>
   <div class="modal-backdrop hidden" id="stopHelperConfirm" role="dialog" aria-modal="true" aria-labelledby="stopHelperConfirmTitle">
@@ -6640,6 +6784,7 @@
       yoinkCrumbTopic: document.getElementById("yoinkCrumbTopic"),
       yoinkCrumbTopicItem: document.getElementById("yoinkCrumbTopicItem"),
       yoinkSourceLink: document.getElementById("yoinkSourceLink"),
+      yoinkImportNote: document.getElementById("yoinkImportNote"),
       yoinkTranscriptNote: document.getElementById("yoinkTranscriptNote"),
       yoinkDetail: document.getElementById("yoinkDetail"),
       yoinkCommentsSection: document.getElementById("yoinkCommentsSection"),
@@ -8313,6 +8458,7 @@
         els.yoinkKind.textContent = "";
         els.yoinkCrumbTopicItem.classList.add("hidden");
         els.yoinkSourceLink.classList.add("hidden");
+        els.yoinkImportNote.classList.add("hidden");
         els.yoinkTranscriptNote.classList.add("hidden");
         els.yoinkCommentsSection.classList.add("hidden");
         els.yoinkAnalysisSection.classList.add("hidden");
@@ -8334,6 +8480,9 @@
       els.yoinkSourceLink.href = sourceUrl || "#";
       els.yoinkSourceLink.textContent = sourceLinkLabel(row, sidecar);
       els.yoinkSourceLink.classList.toggle("hidden", !sourceUrl);
+      const importNote = importOriginText(row);
+      els.yoinkImportNote.textContent = importNote;
+      els.yoinkImportNote.classList.toggle("hidden", !importNote);
       const note = transcriptNoteText(row, sidecar);
       els.yoinkTranscriptNote.textContent = note;
       els.yoinkTranscriptNote.classList.toggle("hidden", !note);
@@ -8461,7 +8610,9 @@
     function rowFromCard(card) {
       const id = card && card.dataset.videoId;
       const folder = card && card.dataset.folder;
-      const rows = state.library.concat(state.resurface && Array.isArray(state.resurface.worth_revisiting) ? state.resurface.worth_revisiting : []);
+      const rows = state.library.concat(
+        state.resurface && Array.isArray(state.resurface.worth_revisiting) ? state.resurface.worth_revisiting : [],
+        state.resurface && Array.isArray(state.resurface.from_imports) ? state.resurface.from_imports : []);
       const found = rows.find((row) => (id && videoIdOf(row) === id) || (folder && folderPathOf(row) === folder));
       if (found) return found;
       return {
@@ -8915,6 +9066,7 @@
         }
         state.resurface = payload;
         renderForYou(payload);
+        renderImports(payload);
         renderFresh(payload);
       } catch (err) {
         els.forYouSummary.textContent = "For You is checking your saved work.";
@@ -11248,6 +11400,207 @@
         : emptyPanelRow("No performing anchors yet.", "Anchor cards appear after engagement events or taste memory are available.");
     }
 
+    // Import a list: the reader line and the For You cards share this text.
+    function importOriginText(row) {
+      const origin = row && row.import_origin;
+      if (!origin || !origin.label) return "";
+      const from = origin.list_title ? `${origin.label}: ${origin.list_title}` : origin.label;
+      const note = origin.note ? ` ${origin.note}` : "";
+      const credit = origin.credit ? ` ${origin.credit}` : "";
+      return `From ${from}.${note}${credit}`;
+    }
+
+    // Card images on For You load through the token-gated /file route, the
+    // same way Library rows do, sharing the blob cache.
+    async function loadCardImages(container) {
+      if (!container) return;
+      const imgs = Array.from(container.querySelectorAll("img[data-card-thumb]"));
+      for (const img of imgs) {
+        const path = img.dataset.cardThumb;
+        if (!path) continue;
+        try {
+          if (!state.blobUrls.has(path)) {
+            const token = await getToken();
+            const res = await fetch(`/file?path=${encodeURIComponent(path)}`, { headers: { "X-Uoink-Token": token } });
+            if (!res.ok) throw new Error("image unavailable");
+            state.blobUrls.set(path, URL.createObjectURL(await res.blob()));
+          }
+          img.src = state.blobUrls.get(path);
+          img.classList.remove("hidden");
+        } catch (_) {}
+      }
+    }
+
+    function importCard(row) {
+      const vid = videoIdOf(row);
+      const origin = row.import_origin || {};
+      const score = Number(row.taste_score);
+      const reasons = Array.isArray(row.taste_reasons) ? row.taste_reasons.join("; ") : "";
+      const scorePill = Number.isFinite(score) && score > 0
+        ? `<div class="score-pill" title="${htmlEscape(reasons)}">taste ${score.toFixed(2)}</div>` : "";
+      const image = row.thumbnail_path
+        ? `<div class="insight-image" aria-hidden="true"><img alt="" class="hidden" data-card-thumb="${htmlEscape(row.thumbnail_path)}"></div>` : "";
+      return `
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
+          ${image}
+          <div class="insight-kicker">${htmlEscape(origin.label || "imported")}${origin.list_title ? ` &middot; ${htmlEscape(origin.list_title)}` : ""}</div>
+          <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
+          <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")}${row.topic ? ` | ${htmlEscape(row.topic)}` : ""}</div>
+          ${origin.note ? `<div class="insight-note">${htmlEscape(origin.note)}</div>` : ""}
+          ${scorePill}
+          ${origin.credit ? `<div class="insight-credit">${htmlEscape(origin.credit)}</div>` : ""}
+          ${vid ? `<button class="button insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(rowTitle(row))}">Write from this</button>` : ""}
+        </article>
+      `;
+    }
+
+    function renderImports(payload) {
+      const panel = document.getElementById("importsPanel");
+      const cards = document.getElementById("importCards");
+      if (!panel || !cards) return;
+      const rows = Array.isArray(payload && payload.from_imports) ? payload.from_imports : [];
+      panel.classList.toggle("hidden", rows.length === 0);
+      document.getElementById("importsMeta").textContent = `${rows.length} unopened, ranked by your taste`;
+      cards.innerHTML = rows.map(importCard).join("");
+      loadCardImages(cards);
+    }
+
+    // ---- Import a list ---------------------------------------------------
+    const listImportState = { offset: 0, preview: null, seq: 0, timer: null, opener: null };
+
+    function listImportEl(id) { return document.getElementById(id); }
+
+    function resetListImportPreview(message) {
+      listImportState.preview = null;
+      listImportEl("listImportStatus").textContent = message;
+      listImportEl("listImportPreview").innerHTML = "";
+      listImportEl("listImportCredit").classList.add("hidden");
+      listImportEl("listImportNext").classList.add("hidden");
+      const go = listImportEl("listImportGo");
+      go.disabled = true;
+      go.textContent = "Import";
+    }
+
+    function openListImport() {
+      listImportState.opener = document.activeElement;
+      const modal = listImportEl("listImportModal");
+      modal.classList.remove("hidden");
+      focusFirstIn(modal, listImportEl("listImportInput"));
+    }
+
+    function closeListImport() {
+      listImportEl("listImportModal").classList.add("hidden");
+      restoreFocus(listImportState.opener);
+    }
+
+    function scheduleListPreview() {
+      window.clearTimeout(listImportState.timer);
+      listImportState.offset = 0;
+      listImportState.timer = window.setTimeout(runListPreview, 450);
+    }
+
+    function renderListPreview(data) {
+      listImportState.preview = data;
+      listImportEl("listImportStatus").textContent = data.message || "";
+      const videos = Array.isArray(data.videos) ? data.videos : [];
+      const shown = videos.slice(0, 8).map((v) => `<li><span>${htmlEscape(v.title || `YouTube video ${v.video_id}`)}</span>${v.in_library ? `<span class="list-import-chip">in your library</span>` : ""}</li>`);
+      if (videos.length > 8) shown.push(`<li><span>and ${videos.length - 8} more</span></li>`);
+      listImportEl("listImportPreview").innerHTML = shown.join("");
+      const credit = listImportEl("listImportCredit");
+      const source = data.source || {};
+      credit.textContent = source.credit || "";
+      credit.classList.toggle("hidden", !source.credit);
+      const go = listImportEl("listImportGo");
+      const count = Number(data.new) || 0;
+      go.disabled = count === 0;
+      go.textContent = count ? `Import ${count} video${count === 1 ? "" : "s"}` : "Import";
+      const next = listImportEl("listImportNext");
+      next.classList.toggle("hidden", !(data.has_more && data.next_offset != null));
+    }
+
+    async function runListPreview() {
+      const url = listImportEl("listImportInput").value.trim();
+      if (!url) {
+        resetListImportPreview("Paste a link to see how many videos it holds.");
+        return;
+      }
+      const seq = ++listImportState.seq;
+      resetListImportPreview("Reading the list...");
+      try {
+        const data = await authFetch("/import-list/preview", {
+          method: "POST",
+          body: JSON.stringify({ url, offset: listImportState.offset, limit: 50 }),
+        });
+        if (seq !== listImportState.seq) return;
+        renderListPreview(data);
+      } catch (err) {
+        if (seq !== listImportState.seq) return;
+        resetListImportPreview(err.message || "Uoink couldn't read that list.");
+      }
+    }
+
+    async function runListImport() {
+      const preview = listImportState.preview;
+      const url = listImportEl("listImportInput").value.trim();
+      if (!preview || !url) return;
+      const go = listImportEl("listImportGo");
+      go.disabled = true;
+      go.setAttribute("aria-busy", "true");
+      const seq = ++listImportState.seq;
+      try {
+        const data = await authFetch("/import-list", {
+          method: "POST",
+          body: JSON.stringify({ url, offset: listImportState.offset, limit: 50 }),
+        });
+        if (seq !== listImportState.seq) return;
+        listImportState.preview = null;
+        listImportEl("listImportStatus").textContent = data.message || "Queued.";
+        listImportEl("listImportPreview").innerHTML = "";
+        go.textContent = "Import";
+        showToast(data.message || "Queued.");
+        if (data.has_more && data.next_offset != null) {
+          listImportState.offset = data.next_offset;
+          listImportEl("listImportNext").classList.remove("hidden");
+        } else {
+          listImportEl("listImportNext").classList.add("hidden");
+        }
+        if (typeof loadLibraryActivity === "function") loadLibraryActivity(true).catch(() => {});
+      } catch (err) {
+        if (seq !== listImportState.seq) return;
+        listImportEl("listImportStatus").textContent = err.message || "Uoink couldn't import that list.";
+        go.disabled = false;
+      } finally {
+        go.removeAttribute("aria-busy");
+      }
+    }
+
+    function nextListBatch() {
+      const preview = listImportState.preview;
+      if (preview && preview.next_offset != null) listImportState.offset = preview.next_offset;
+      runListPreview();
+    }
+
+    function wireListImport() {
+      const opener = listImportEl("openListImport");
+      if (!opener) return;
+      opener.addEventListener("click", openListImport);
+      listImportEl("closeListImport").addEventListener("click", closeListImport);
+      const modal = listImportEl("listImportModal");
+      modal.addEventListener("click", (event) => { if (event.target === modal) closeListImport(); });
+      modal.addEventListener("keydown", (event) => trapModalFocus(event, modal, closeListImport));
+      const input = listImportEl("listImportInput");
+      input.addEventListener("input", scheduleListPreview);
+      input.addEventListener("paste", () => { listImportState.offset = 0; window.setTimeout(runListPreview, 0); });
+      input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        if (listImportState.preview && !listImportEl("listImportGo").disabled) runListImport();
+        else runListPreview();
+      });
+      listImportEl("listImportGo").addEventListener("click", runListImport);
+      listImportEl("listImportNext").addEventListener("click", nextListBatch);
+    }
+
     // V-4: the "Fresh from your sources" strip -- V-3 auto-uoinked items.
     function freshCard(item) {
       const vid = item.video_id || "";
@@ -11959,7 +12312,7 @@
           </div>
           <div class="row-body">
             <div class="card-title">${title}</div>
-            <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}</div>
+            <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}</div>
           </div>
           <div class="row-actions">
@@ -16194,6 +16547,7 @@
       obsidianVaultPath: ["obsidian_vault_path", ""],
       mirrorScriptsToggle: ["mirror_scripts_to_obsidian", false],
       dashboardTheme: ["dashboard_theme", "system"],
+      cardImage: ["card_image", "middle"],
     };
     const TASTE_FIELDS = { tasteHooks: "preferred_hooks", tasteFormats: "preferred_formats", tasteAvoid: "avoid" };
     const settingEdits = new Map();
@@ -16451,6 +16805,10 @@
         if (field === "voice_dna_warnings_enabled") els.writingShowWarnings.checked = patch[field];
         if (field === "auto_uoink_enabled") renderAutoUoinkStatus();
         if (field === "writing_show_screenshot_picker") renderWritingScreenshots();
+        if (field === "card_image") {
+          loadLibrary({ reset: true }).catch(() => {});
+          if (state.resurface) loadForYou();
+        }
       });
     }
 
@@ -17973,6 +18331,7 @@
       if (els.universalCaptureButton) {
         els.universalCaptureButton.addEventListener("click", runUniversalCapture);
       }
+      wireListImport();
       if (els.universalCaptureAllow) {
         els.universalCaptureAllow.addEventListener("click", allowUniversalCaptureSite);
       }

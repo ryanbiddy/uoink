@@ -57,7 +57,10 @@ Uoink makes these outbound requests:
   `cdn.syndication.twimg.com`. A web-page or podcast capture requests the
   user-supplied web page or podcast feed; a web-page capture also requests
   the preview image the page names for its thumbnail, which can be on another
-  host. Those services receive the ordinary
+  host. Import a list reads the list you paste from its source: HackerTube's
+  public API at `hackertube.org`, the Algolia Hacker News API at
+  `hn.algolia.com`, Reddit's public JSON, or YouTube through yt-dlp; it sends
+  only the list's address. Those services receive the ordinary
   request metadata needed to answer, such as your IP address and Uoink's user
   agent, and may redirect the request to their own CDN.
 - **Anthropic API requests — only with your own key.** Uoink has no

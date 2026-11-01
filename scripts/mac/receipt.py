@@ -333,7 +333,7 @@ def artifact_metadata(mounted: Path) -> dict:
 def verify_runtime(checks: dict):
     require(checks.get("ok") is True and checks.get("bundle_unchanged") is True, "Bundle smoke did not pass")
     require({(r["toolset"], r["count"], r["ok"]) for r in checks.get("mcp", [])}
-            == {("full", 91, True), ("core", 35, True)}, "MCP 91/35 proof missing")
+            == {("full", 92, True), ("core", 35, True)}, "MCP 92/35 proof missing")
     for name in ("health", "media", "mirror", "connect", "launchagent", "cocoa", "status", "pillow"):
         require(bool(checks.get(name)), f"Runtime proof missing: {name}")
     menu = checks.get("menubar", {})

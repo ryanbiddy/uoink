@@ -50,7 +50,7 @@ def test_sdk2_http_client_completes_list_and_call(tmp_path, mode):
     with HttpClient(tmp_path) as http:
         anyio.run(check, f"http://127.0.0.1:{http.port}/mcp/v1")
     assert evidence["protocol_version"] == "2025-11-25"
-    assert evidence["tools"] == 91
+    assert evidence["tools"] == 92
     requests = evidence["requests"]
     assert requests[0]["rpc_method"] == ("server/discover" if mode == "auto" else "initialize")
     if mode == "auto":

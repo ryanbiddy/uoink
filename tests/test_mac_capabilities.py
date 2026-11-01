@@ -163,7 +163,7 @@ def test_mcp_tools_disclose_deferred_mirror_without_changing_inventory(darwin, m
     result = uoink_mcp_tools.call_tool(name, {})
     assert result["capabilities"]["library_mirror"]["available"] is False
     assert result["capabilities"]["library_mirror"]["code"] == CODE
-    assert len(uoink_mcp_tools.stdio_tool_names()) == 91
+    assert len(uoink_mcp_tools.stdio_tool_names()) == 92
     assert len(uoink_mcp_tools.stdio_tool_names("core")) == 35
 
 

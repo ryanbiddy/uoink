@@ -188,7 +188,7 @@ def test_full_inventory_and_equal_sized_normal_result(modern):
             size = len(listing.rstrip("\n").encode())
             assert 65536 < size <= 262144
             domain = json.loads(listing)["result"]
-            assert len((modern_domain(domain, cacheable=True) if modern else domain)["tools"]) == 91
+            assert len((modern_domain(domain, cacheable=True) if modern else domain)["tools"]) == 92
             await client.request(name="search_clips")
             baseline = await client.receive()
             payload[0] = "x" * (size - len(baseline.rstrip("\n").encode()))

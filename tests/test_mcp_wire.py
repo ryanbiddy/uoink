@@ -53,7 +53,7 @@ def inventory():
     full, core = registry_golden(), registry_golden("core")
     assert full == GOLDEN["tools"]
     assert core == full[:35]
-    assert len(full) == 91 and len(core) == 35
+    assert len(full) == 92 and len(core) == 35
     assert tools.list_tools() == frozen
     changed = set()
     for tool in full:

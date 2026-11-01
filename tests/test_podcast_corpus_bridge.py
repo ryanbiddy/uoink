@@ -309,5 +309,5 @@ def test_bridge_is_available_through_http_and_full_mcp(tmp_path, monkeypatch):
         "https://show.example/episodes/42#t=64")
     assert "youtube.com" not in json.dumps(citation_map).lower()
     # Phase 6's 88 tools + get_playbook_input, discover_candidates, queue_discovered.
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 92
     idx.close()
