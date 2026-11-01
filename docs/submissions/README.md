@@ -11,8 +11,8 @@ Times are estimates for the hands-on part.
 | 3 | [mcp.so and PulseMCP](#3-mcpso-and-pulsemcp) | 10 min | Ready |
 | 4 | [Glama score, then awesome-mcp-servers](#4-glama-then-awesome-mcp-servers) | 15 min | **Blocked** on Ryan running the Glama build |
 | 5 | [Raycast Store](#5-raycast-store) | 30 min | **Needs** Ryan's Raycast handle (author 404), then a test run on a Mac |
-| 6 | [Homebrew tap](#6-homebrew-tap) | 10 min | Ready (v3.12.0 is published) |
-| 7 | [winget](#7-winget) | 20 min | Ready (v3.12.0 is published) |
+| 6 | [Homebrew tap](#6-homebrew-tap) | 10 min | Ready (v3.12.1 is published) |
+| 7 | [winget](#7-winget) | 20 min | Ready (v3.12.1 is published) |
 | 8 | [Flow Launcher store](#8-flow-launcher-store) | 20 min | Ready after a test run on Windows |
 | 9 | [Edge Add-ons](#9-edge-add-ons) | 30 min | Ready; needs a helper release for the new ID |
 | 10 | [Alfred Gallery](#10-alfred-gallery) | later | Use the workflow for a while first |
@@ -107,7 +107,7 @@ npm run lint       # also checks your author handle against raycast.com
 gh repo create ryanbiddy/homebrew-uoink --public
 git clone https://github.com/ryanbiddy/homebrew-uoink && cd homebrew-uoink
 mkdir Casks && cp <uoink>/packaging/homebrew/Casks/uoink.rb Casks/
-git add Casks && git commit -m "Add Uoink 3.12.0" && git push
+git add Casks && git commit -m "Add Uoink 3.12.1" && git push
 brew install --cask ryanbiddy/uoink/uoink   # check it
 ```
 
@@ -116,8 +116,8 @@ Then add `brew install --cask ryanbiddy/uoink/uoink` to the README's Mac steps.
 ## 7. winget
 
 Follow [`packaging/README.md`](../../packaging/README.md#winget-windows). The
-manifests are in `packaging/winget/manifests/r/ReplayRyan/Uoink/3.12.0/`.
-Pull request title: `New package: ReplayRyan.Uoink version 3.12.0`.
+manifests are in `packaging/winget/manifests/r/ReplayRyan/Uoink/3.12.1/`.
+Pull request title: `New package: ReplayRyan.Uoink version 3.12.1`.
 
 ## 8. Flow Launcher store
 
