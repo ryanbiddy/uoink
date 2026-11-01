@@ -37,6 +37,7 @@
     "LICENSE",
     "media_handoff.py",
     "memory_layer.py",
+    "list_imports.py",
     "migrate_install.py",
     "migrations",
     "mobile_playlists.py",

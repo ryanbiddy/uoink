@@ -48,6 +48,7 @@ $requiredFiles = @(
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
+    'list_imports.py',
     'notes.py',
     'images.py',
     'taste_scoring.py',
