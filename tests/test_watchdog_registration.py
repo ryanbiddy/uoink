@@ -45,6 +45,46 @@ def test_registration_arguments_and_migration_order(tmp_path, scenario, events, 
         assert payload['result'] == 'absent'
 
 
+
+def _run_fixture(tmp_path, scenario):
+    app = tmp_path / 'Install with spaces'
+    (app / 'python').mkdir(parents=True)
+    (app / 'python/pythonw.exe').touch()
+    (app / 'uoink_supervisor.py').touch()
+    result = subprocess.run([
+        shutil.which('powershell.exe'), '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+        '-File', str(ROOT / 'tests/watchdog_fixture.ps1'),
+        '-Script', str(ROOT / 'scripts/install-watchdog.ps1'),
+        '-InstallDir', str(app), '-Scenario', scenario], capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stderr
+    return json.loads(result.stdout.strip().splitlines()[-1])
+
+
+# Task Scheduler reads a local account's principal back as the bare user name,
+# not MACHINE/user. Every form of the current account must count as ours, and
+# any other account must still be refused.
+@pytest.mark.skipif(os.name != 'nt', reason='Windows PowerShell registration contracts')
+@pytest.mark.parametrize('principal,ours', [
+    ('full', True), ('bare', True), ('sid', True), ('upper', True),
+    ('other-user', False), ('other-bare', False), ('other-domain', False), ('other-sid', False),
+])
+def test_task_owner_matches_every_form_of_current_user(tmp_path, principal, ours):
+    update = _run_fixture(tmp_path / 'update', 'update:' + principal)
+    assert update['failed'] is (not ours)
+    assert update['events'] == (['register', 'remove-run'] if ours else [])
+    status = _run_fixture(tmp_path / 'status', 'status:' + principal)
+    assert status['failed'] is (not ours)
+    if ours:
+        assert status['result'] == 'enabled'
+    ownership = _run_fixture(tmp_path / 'ownership', 'ownership:' + principal)
+    assert ownership['failed'] is (not ours)
+    if ours:
+        assert ownership['result'] == 'owned'
+    # The legacy task is migrated only when it is ours; otherwise it is left alone.
+    legacy = _run_fixture(tmp_path / 'legacy', 'legacy-task:' + principal)
+    assert legacy['failed'] is False
+    assert legacy['events'] == (['register', 'disable-old', 'unregister-old'] if ours else ['register'])
+
 def test_powershell_sources_parse_without_execution():
     powershell = shutil.which('powershell.exe')
     if not powershell:
