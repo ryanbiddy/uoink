@@ -23,6 +23,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 STATE_FILE = "helper-recovery.json"
 STOP_FILE = "helper-stop.json"
+# installer/upgrade_prep.ps1 writes this reason after it stops a helper itself.
+UPGRADE_STOP = "upgrade"
 # A Darwin open asks the resident supervisor, the only consumer, through this file.
 DASHBOARD_REQUEST = "dashboard-request.json"
 REQUEST_WINDOW = 300
@@ -83,6 +85,15 @@ def status(root: Path | None = None) -> dict:
 
 def request_stop(root: Path | None = None, reason: str = "quit") -> None:
     write_json((root or data_root()) / STOP_FILE, {"requested_at": stamp(), "reason": reason})
+
+
+def stop_reason(root: Path) -> str | None:
+    """The reason in a stop file, or "quit" for one that cannot be read."""
+    try:
+        reason = read_json(root / STOP_FILE).get("reason") if (root / STOP_FILE).exists() else None
+    except (OSError, ValueError):
+        return "quit"
+    return reason if isinstance(reason, str) else "quit"
 
 
 def login_session() -> str:
@@ -322,7 +333,9 @@ class Supervisor:
             except ValueError:
                 old = {}
             fresh = not self.startup or old.get("session") != self.session
-            if fresh:
+            # Setup stops the helper only to replace its files. That stop is not
+            # a user's Quit, so it never holds back a later login start.
+            if fresh or stop_reason(self.root) == UPGRADE_STOP:
                 (self.root / STOP_FILE).unlink(missing_ok=True)
             if old.get("session") != self.session:
                 # Open times are per boot; a new login never honors older ones.
@@ -447,6 +460,8 @@ def main(argv=None) -> int:
     parser.add_argument("--startup", action="store_true")
     parser.add_argument("--stop", action="store_true")
     parser.add_argument("--show-dashboard", action="store_true")
+    # A silent install starts the helper with no splash window and no toast.
+    parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--resident", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--opened-at", type=float, help=argparse.SUPPRESS)
     args = parser.parse_args(isolation.strip_cli(sys.argv[1:] if argv is None else argv))
@@ -454,6 +469,9 @@ def main(argv=None) -> int:
         request_stop()
         return 0
     command = [sys.executable, "-B", "-s", str(HERE / "server.py")]
+    if args.quiet:
+        # Every start, so a crash restart cannot pop the splash either.
+        command.append("--quiet")
     first_args = []
     if args.show_dashboard:
         # A Darwin restart after a crash must not pop the dashboard again.

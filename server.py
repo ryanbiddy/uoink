@@ -21472,7 +21472,7 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
             super().server_bind()
 
 
-def main(*, show_dashboard: bool = False):
+def main(*, show_dashboard: bool = False, quiet: bool = False):
     global _active_migration_version, _TOKEN_OWNED
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
@@ -21693,7 +21693,9 @@ def main(*, show_dashboard: bool = False):
         splash_spawned = False
         try:
             _splash_sentinel = DATA_ROOT / ".first-run-done"
-            if _splash_should_spawn(_splash_sentinel):
+            # A quiet start leaves the sentinel alone, so the next normal
+            # start still shows this version's splash.
+            if not quiet and _splash_should_spawn(_splash_sentinel):
                 _splash_script = str(HERE / "uoink_splash.py")
                 _splash_pyw = str(_bundled_interpreter(gui=True) or sys.executable)
                 _splash_flags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
@@ -21721,7 +21723,7 @@ def main(*, show_dashboard: bool = False):
         except Exception as exc:
             log.warning("menu bar could not start: %s", exc)
         try:
-            if _splash_should_spawn(DATA_ROOT / ".first-run-done"):
+            if not quiet and _splash_should_spawn(DATA_ROOT / ".first-run-done"):
                 mac_ui.spawn("uoink_splash")
                 splash_spawned = True
                 log.info("splash: spawned (version %s)", VERSION)
@@ -21741,7 +21743,9 @@ def main(*, show_dashboard: bool = False):
     # double-notify. If the install migration just ran, fire the one-time
     # post-migration toast instead of the regular ready toast, gated on
     # a settings flag so it never repeats.
-    if splash_spawned:
+    if quiet:
+        log.info("toast: skipped ready toast for a quiet start")
+    elif splash_spawned:
         log.info("toast: skipped regular ready toast while first-run splash is visible")
     elif _desktop_alerts_for_results_only():
         log.info("toast: skipped ready toast on macOS")
@@ -22352,6 +22356,7 @@ def run_cli(argv: list[str]) -> int:
       `author` column + correct hostname `channel` values for X / Reddit / web
       rows from their sidecars. Idempotent; prints before/after counts.
     - --show-dashboard  : run the server, then open the dashboard window.
+    - --quiet           : run the server with no splash and no ready toast.
     (no flag)           : run the server.
     """
     if _install_isolation.CLI_STOP in argv or _install_isolation.CLI_UPGRADE_CHECK in argv:
@@ -22449,9 +22454,9 @@ def run_cli(argv: list[str]) -> int:
         # Replace this process so its imported server logger cannot hold the
         # child's rotating log open on Windows.
         os.execv(sys.executable, [sys.executable, "-B", "-s", str(HERE / "uoink_supervisor.py"),
-                                 *(["--show-dashboard"] if "--show-dashboard" in argv else [])])
+                                 *[flag for flag in ("--show-dashboard", "--quiet") if flag in argv]])
         return 0
-    main(show_dashboard="--show-dashboard" in argv)
+    main(show_dashboard="--show-dashboard" in argv, quiet="--quiet" in argv)
     return 0
 
 

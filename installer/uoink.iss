@@ -351,6 +351,15 @@ Filename: "{app}\python\pythonw.exe"; \
   Description: "Set up the browser button now"; \
   Flags: postinstall nowait skipifsilent; \
   Check: not IsolatedInstall
+; A silent install has no finish page, so the entry above never runs there.
+; Start the helper again when it was running before the upgrade, and on a
+; fresh install, matching the default-checked box. --quiet keeps the splash,
+; dashboard and ready toast away from an unattended (winget) install.
+Filename: "{app}\python\pythonw.exe"; \
+  Parameters: """{app}\uoink_supervisor.py"" --quiet"; \
+  WorkingDir: "{app}"; \
+  Flags: nowait skipifnotsilent; \
+  Check: SilentHelperStartWanted
 
 [UninstallRun]
 Filename: "powershell.exe"; \
@@ -426,6 +435,7 @@ var
   DefaultNextLeft: Integer;
   DefaultNextWidth: Integer;
   IsolatedErrorText: String;
+  HelperStartWanted: Boolean;
 
 function IsolatedCmdToken(const Param: String; var Name, Value: String; var HasValue: Boolean): Boolean;
 var
@@ -1701,6 +1711,8 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   ScriptPath: string;
   SentinelPath: string;
+  RestartMarker: string;
+  FreshInstall: Boolean;
   ResultCode: Integer;
   Executed: Boolean;
   AppDir: String;
@@ -1744,6 +1756,10 @@ begin
     Exit;
   end;
   SentinelPath := ExpandConstant('{localappdata}\Uoink\.first-run-done');
+  (* No helper files yet: a fresh install. The silent start treats it like
+     the default-checked finish page box. *)
+  FreshInstall := (not FileExists(AppDir + '\uoink_supervisor.py')) and (not FileExists(AppDir + '\server.py'));
+  RestartMarker := ExpandConstant('{tmp}\uoink-helper-restart.txt');
 
   (* dontcopy file -- ExtractTemporaryFile pulls it into {tmp} the first
      time we call it. ScriptPath then resolves to that {tmp} location. *)
@@ -1761,7 +1777,7 @@ begin
     ResultCode := -1;
     Executed := Exec(
       'powershell.exe',
-      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ScriptPath + '" -InstallDir "' + ExpandConstant('{app}') + '"',
+      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ScriptPath + '" -InstallDir "' + ExpandConstant('{app}') + '" -RestartMarker "' + RestartMarker + '"',
       ExpandConstant('{tmp}'),
       SW_HIDE,
       ewWaitUntilTerminated,
@@ -1777,6 +1793,12 @@ begin
     Result := 'Uoink setup is missing its upgrade preparation script. Download setup again.';
     Exit;
   end;
+
+  (* The script writes the marker only when the old helper was answering
+     before the script stopped it. *)
+  HelperStartWanted := FreshInstall or FileExists(RestartMarker);
+  if HelperStartWanted then
+    Log('PrepareToInstall: a silent install starts the helper after setup');
 
   (* Repeat sentinel cleanup only after preparation succeeded. *)
   if FileExists(SentinelPath) then
@@ -2023,6 +2045,13 @@ begin
     Log('Post-install: wrote and verified isolated-install.json')
   else
     Log('Post-install: isolated-install.json persistence verification failed');
+end;
+
+(* [Run] Check for the silent-only helper start. Isolated installs never
+   start an ordinary helper, and PrepareToInstall leaves the flag unset. *)
+function SilentHelperStartWanted(): Boolean;
+begin
+  Result := HelperStartWanted and (not IsolatedInstall());
 end;
 
 procedure RegisterHelperRecovery();

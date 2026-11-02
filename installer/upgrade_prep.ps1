@@ -20,7 +20,16 @@
 # are logged to %TEMP%\uoink-upgrade-prep.log for post-mortem if a user
 # reports the new helper still not starting.
 
-param([string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'Uoink'))
+#
+# Silent installs skip the finish page checkbox that starts the new helper.
+# When the old helper was answering on 5179 before this script stopped it,
+# the script writes -RestartMarker so setup starts the new helper again. It
+# also relabels the stop file it caused as an upgrade stop, which the new
+# supervisor does not treat as a user's Quit. A stop file that was already
+# there before setup started is the user's own Quit and is left alone.
+
+param([string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'Uoink'),
+      [string]$RestartMarker = '')
 
 $ErrorActionPreference = 'Continue'
 $logPath = Join-Path $env:TEMP 'uoink-upgrade-prep.log'
@@ -57,6 +66,19 @@ function Wait-PortFree($timeoutSeconds) {
     }
     return -not (Test-Port5179Bound)
 }
+
+function Test-UserStopFile($path) {
+    # A stop file from the user's Quit, or one that cannot be read, is honored.
+    if (-not (Test-Path -LiteralPath $path)) { return $false }
+    try {
+        $stopBody = [System.IO.File]::ReadAllText($path) | ConvertFrom-Json
+        return ($stopBody.reason -ne 'upgrade')
+    } catch { return $true }
+}
+
+$stopPath = Join-Path $env:LOCALAPPDATA 'Uoink\helper-stop.json'
+# Read before --stop below writes its own stop file.
+$userStopped = Test-UserStopFile $stopPath
 
 # Stop retrying before probing the old helper or replacing installed files.
 # Older installs have no supervisor and continue through the existing flow.
@@ -177,6 +199,28 @@ if (Test-Path $sentinel) {
     }
 } else {
     Write-PrepLog 'no first-run sentinel present (clean install or already cleared)'
+}
+
+# ---- Step 5: hand the stop back to setup ---------------------------------
+# The stop file now on disk was written for this upgrade, by --stop or by the
+# old helper's /helper/quit. Relabel it so a later login start is not held
+# back. BOM-less UTF-8, because the supervisor reads it with Python's json.
+if ((-not $userStopped) -and (Test-Path -LiteralPath $stopPath)) {
+    try {
+        $stopJson = '{{"requested_at": "{0}", "reason": "upgrade"}}' -f ((Get-Date).ToUniversalTime().ToString('s') + '+00:00')
+        [System.IO.File]::WriteAllText($stopPath, $stopJson, (New-Object System.Text.UTF8Encoding $false))
+        Write-PrepLog 'marked helper-stop.json as an upgrade stop'
+    } catch {
+        Write-PrepLog ("could not mark helper-stop.json as an upgrade stop: {0}" -f $_.Exception.Message)
+    }
+}
+if ($portStart -and $RestartMarker) {
+    try {
+        [System.IO.File]::WriteAllText($RestartMarker, 'restart')
+        Write-PrepLog 'helper was running before the upgrade -- setup will start it again'
+    } catch {
+        Write-PrepLog ("could not write the restart marker: {0}" -f $_.Exception.Message)
+    }
 }
 
 Write-PrepLog '==== upgrade prep done ===='

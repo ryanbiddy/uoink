@@ -1,4 +1,4 @@
-param([string]$Script, [string]$InstallDir, [string]$Scenario, [string]$EventsPath)
+param([string]$Script, [string]$InstallDir, [string]$Scenario, [string]$EventsPath, [string]$RestartMarker = '')
 $ErrorActionPreference = 'Stop'
 $global:recoveryFixtureKilled = $false
 $global:recoveryFixtureTime = [DateTime]'2026-01-01T00:00:00'
@@ -57,6 +57,11 @@ $replacements = @(
 '@},
     [pscustomobject]@{Start=$stop[0].Extent.StartOffset; End=$stop[0].Extent.EndOffset; Text=@'
 Record-Event 'stop-intent'
+# Like the installed supervisor's --stop: a Quit-style stop file in the data folder.
+$fixtureData = Join-Path $env:LOCALAPPDATA 'Uoink'
+if (Test-Path -LiteralPath $fixtureData) {
+    [IO.File]::WriteAllText((Join-Path $fixtureData 'helper-stop.json'), '{"reason": "quit"}')
+}
 if ($Scenario -eq 'stop-fails') { $global:LASTEXITCODE = 1 } else { $global:LASTEXITCODE = 0 }
 '@}
 )
@@ -64,5 +69,5 @@ $source = [IO.File]::ReadAllText($Script)
 foreach ($replacement in ($replacements | Sort-Object Start -Descending)) {
     $source = $source.Substring(0, $replacement.Start) + $replacement.Text + $source.Substring($replacement.End)
 }
-& ([ScriptBlock]::Create($source)) -InstallDir $InstallDir
+& ([ScriptBlock]::Create($source)) -InstallDir $InstallDir -RestartMarker $RestartMarker
 exit $LASTEXITCODE

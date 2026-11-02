@@ -446,7 +446,7 @@ def test_status_cli_retains_main_fallthrough(monkeypatch, platform):
     monkeypatch.setattr(server, "main", lambda **kwargs: calls.append(kwargs))
     monkeypatch.setattr(server, "_helper_health_status", forbidden)
     assert server.run_cli(["status"]) == 0
-    assert calls == [{"show_dashboard": False}]
+    assert calls == [{"show_dashboard": False, "quiet": False}]
 
 
 def test_real_bundle_interpreter_resolution(monkeypatch, tmp_path):
