@@ -60,6 +60,13 @@ def parser():
     get = command("get", help="get a bounded library card by item id")
     get.add_argument("id")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
+    imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
+                      "Reddit thread or YouTube playlist (50 per batch)")
+    imports.add_argument("url")
+    imports.add_argument("--limit", type=int, default=50, help="videos per batch, 1-50 (default 50)")
+    imports.add_argument("--offset", type=int, default=0,
+                         help="start position; use the printed next offset for the next batch")
+    imports.add_argument("--preview", action="store_true", help="count without queueing")
     note = command("note")
     note.add_argument("text")
     note.add_argument("--title")
@@ -165,6 +172,13 @@ def friendly_call(ns, server):
         return "list_recent_uoinks", {"limit": ns.limit}
     if ns.command == "get":
         return "get_library_item", {"slug" if ns.slug else "video_id": ns.id}
+    if ns.command == "import-list":
+        if not 1 <= ns.limit <= 50:
+            raise UsageError("--limit must be from 1 to 50")
+        if ns.offset < 0:
+            raise UsageError("--offset must be 0 or more")
+        return "import_list", {"url": ns.url, "limit": ns.limit, "offset": ns.offset,
+                               **({"preview_only": True} if ns.preview else {})}
     if ns.command == "note":
         return "uoink_note", {"text": ns.text, **({"title": ns.title} if ns.title is not None else {})}
     route = server._classify_capture_url(ns.url)
@@ -201,6 +215,15 @@ def human(payload):
         return "\n" + "\n".join(label(line) for line in summary_lines(evidence))
     if "clients" in payload:
         return "\n".join(payload["clients"])
+    if isinstance(payload.get("source"), dict) and "found" in payload:
+        source = payload["source"]
+        lines = [f"{label(source.get('label'))}: {label(source.get('title'))}",
+                 label(payload.get("message") or "")]
+        if source.get("credit"):
+            lines.append(label(source["credit"]))
+        if payload.get("next_offset") is not None:
+            lines.append(f"Next batch: --offset {payload['next_offset']}")
+        return "\n".join(line for line in lines if line)
     if "hits" in payload or "yoinks" in payload:
         rows = payload.get("hits", payload.get("yoinks", []))
         lines = [f"{len(rows)} result(s)"]

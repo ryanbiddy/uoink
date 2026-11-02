@@ -18,7 +18,7 @@ capability limits and release work still required.
   and native loader inventories, size report and permission-preserving tar.
   The old `installer/mac/Info.plist` template is no longer used by the builder.
 - `scripts/mac/bundle_smoke.py`: relocation, isolated helper health, CLI status,
-  MCP 91/35 inventory, Pillow operation and before/after bundle comparison.
+  MCP 92/35 inventory, Pillow operation and before/after bundle comparison.
 - `_platform.py`: mirror and media capabilities; `server.py`, `library_mirror.py`,
   MCP and dashboard surfaces consume them before unsupported work can run.
 

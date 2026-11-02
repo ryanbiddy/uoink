@@ -1,0 +1,173 @@
+[
+ {
+  "vid": "fNk_zzaMoSs",
+  "title": "Vectors | Chapter 1, Essence of linear algebra",
+  "channel": "3Blue1Brown",
+  "published": "2016-08-06T00:05:49Z",
+  "duration_s": 592,
+  "views": 12988516,
+  "likes": 241663,
+  "thumbnail": "https://i.ytimg.com/vi/fNk_zzaMoSs/mqdefault.jpg",
+  "summary": "The first chapter of 3Blue1Brown's Essence of Linear Algebra series, introducing vectors with animated geometric visuals. It begins a series that builds intuition for linear algebra from the basics.",
+  "why_hn": "HN's go-to recommendation for learning linear algebra intuition, repeatedly credited with making concepts click and complementing textbooks.",
+  "content_type": "course",
+  "level": "intro",
+  "shelf_life": "evergreen",
+  "primary_topic": "linear algebra",
+  "tags": [
+   "vectors",
+   "linear algebra",
+   "visual intuition",
+   "3blue1brown",
+   "machine learning math"
+  ],
+  "categories": [
+   {
+    "id": "pure-mathematics",
+    "name": "Pure mathematics",
+    "area": "math-theory",
+    "area_name": "Mathematics & Theoretical CS"
+   },
+   {
+    "id": "recreational-math",
+    "name": "Recreational & visual math",
+    "area": "math-theory",
+    "area_name": "Mathematics & Theoretical CS"
+   }
+  ],
+  "quote": {
+   "text": "the most welcoming and informative introduction to the topic I've ever seen",
+   "id": 18679785,
+   "year": "2018"
+  },
+  "hn": {
+   "mentions": 20,
+   "recommenders": 17,
+   "stances": {
+    "rec": 5,
+    "strong_rec": 14,
+    "reference": 1
+   },
+   "rec_months": 18,
+   "strong": 14,
+   "first": "2018",
+   "last": "2026",
+   "last_rec": "2026-07"
+  },
+  "score": 25.0
+ },
+ {
+  "vid": "spUNpyF58BY",
+  "title": "But what is the Fourier Transform?  A visual introduction.",
+  "channel": "3Blue1Brown",
+  "published": "2018-01-26T18:47:48Z",
+  "duration_s": 1182,
+  "views": 12615160,
+  "likes": 338944,
+  "thumbnail": "https://i.ytimg.com/vi/spUNpyF58BY/mqdefault.jpg",
+  "summary": "3Blue1Brown's animated visual introduction to the Fourier Transform, showing how a signal breaks into frequency components.",
+  "why_hn": "HN's default recommendation for understanding the Fourier transform intuitively; many say it was the explanation that made it click.",
+  "content_type": "explainer",
+  "level": "intro",
+  "shelf_life": "evergreen",
+  "primary_topic": "fourier transform",
+  "tags": [
+   "fourier transform",
+   "3blue1brown",
+   "signal processing",
+   "visual math",
+   "frequencies"
+  ],
+  "categories": [
+   {
+    "id": "information-theory",
+    "name": "Information theory & signal processing",
+    "area": "math-theory",
+    "area_name": "Mathematics & Theoretical CS"
+   },
+   {
+    "id": "recreational-math",
+    "name": "Recreational & visual math",
+    "area": "math-theory",
+    "area_name": "Mathematics & Theoretical CS"
+   }
+  ],
+  "quote": {
+   "text": "this was the first thing that ever really made sense to me",
+   "id": 24286802,
+   "year": "2020"
+  },
+  "hn": {
+   "mentions": 20,
+   "recommenders": 16,
+   "stances": {
+    "reference": 4,
+    "rec": 9,
+    "strong_rec": 7
+   },
+   "rec_months": 15,
+   "strong": 7,
+   "first": "2018",
+   "last": "2025",
+   "last_rec": "2025-10"
+  },
+  "score": 18.5
+ },
+ {
+  "vid": "ZK3O402wf1c",
+  "title": "Lec 1 | MIT 18.06 Linear Algebra, Spring 2005",
+  "channel": "MIT OpenCourseWare",
+  "published": "2009-05-07T04:07:58Z",
+  "duration_s": 2389,
+  "views": 4933482,
+  "likes": 42667,
+  "thumbnail": "https://i.ytimg.com/vi/ZK3O402wf1c/mqdefault.jpg",
+  "summary": "The first lecture of Gilbert Strang's MIT 18.06 Linear Algebra course, covering the geometry of linear equations. It opens a full 35-lecture university course.",
+  "why_hn": "It is HN's default recommendation for learning linear algebra, praised for Strang's teaching and for building real understanding useful in machine learning.",
+  "content_type": "lecture",
+  "level": "intro",
+  "shelf_life": "evergreen",
+  "primary_topic": "linear algebra",
+  "tags": [
+   "gilbert strang",
+   "mit ocw",
+   "matrices",
+   "machine learning math",
+   "systems of equations"
+  ],
+  "categories": [
+   {
+    "id": "university-lectures",
+    "name": "University lectures & courses",
+    "area": "ideas-education",
+    "area_name": "Ideas, Learning & Language"
+   },
+   {
+    "id": "pure-mathematics",
+    "name": "Pure mathematics",
+    "area": "math-theory",
+    "area_name": "Mathematics & Theoretical CS"
+   }
+  ],
+  "quote": {
+   "text": "I highly recommend the MIT 18.06 open course on linear algebra - the lectures are first rate.",
+   "id": 2992134,
+   "year": "2011"
+  },
+  "hn": {
+   "mentions": 15,
+   "recommenders": 11,
+   "stances": {
+    "rec": 8,
+    "strong_rec": 5,
+    "reference": 2
+   },
+   "rec_months": 12,
+   "strong": 5,
+   "first": "2011",
+   "last": "2020",
+   "last_rec": "2020-03"
+  },
+  "score": 14.0
+ }
+]

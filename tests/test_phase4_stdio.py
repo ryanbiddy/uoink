@@ -1,7 +1,7 @@
 """tests/test_phase4_stdio.py - Living Library Stdio MCP & Compatibility Tests (AV-1a).
 
 Gates covered:
-- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 91 tools,
+- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 92 tools,
   no promised notifications/subscriptions, JSON-RPC error codes -32602, -32002, -32603)
 - P4-13 stdio part (Installed compatibility: python -P embeddable rules, spaced paths, clean stdout,
   diagnostic stderr separation, restart resilience, missing storage handling)
@@ -234,7 +234,7 @@ class TestP406CapabilitiesAndDiscovery:
             assert NEW_PHASE4_BRIEF_TOOLS.issubset(names)
             assert NEW_PHASE6_EXPORT_TOOLS.issubset(names)
             assert names == set(__import__("uoink_mcp_tools").TOOL_REGISTRY)
-            assert len(names) == 91
+            assert len(names) == 92
         finally:
             client.close()
 
@@ -544,8 +544,8 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
         client.initialize()
         listed = client.request(2, "tools/list")["result"]["tools"]
         prompts = client.request(3, "prompts/list")["result"]["prompts"]
-    assert len(listed) == 91
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
+    assert len(listed) == 92
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 92
     _assert_tool_metadata(listed)
     tool = next(t for t in listed if t["name"] == "get_playbook_input")
     spec = uoink_mcp_tools.TOOL_REGISTRY[tool["name"]]

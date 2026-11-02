@@ -1901,6 +1901,26 @@ def uoink_reddit_thread(args: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def import_list(args: dict[str, Any]) -> dict[str, Any]:
+    """Import a list: queue every video in a HackerTube list, a Hacker News
+    thread, a Reddit thread or a YouTube playlist for normal capture, 50 at a
+    time. preview_only reads the batch without queueing anything."""
+    import list_imports as _li  # noqa: WPS433
+    b = _b()
+    url = args.get("url")
+    if not isinstance(url, str) or not url.strip():
+        return _err("url (string) is required")
+    try:
+        if args.get("preview_only") is True:
+            result = {**b._list_import_preview(url, args.get("offset"), args.get("limit")),
+                      "queued": 0}
+        else:
+            result = b._list_import_start(url, args.get("offset"), args.get("limit"))
+    except _li.ImportListError as e:
+        return {"ok": False, "error": str(e), "code": e.code}
+    return result
+
+
 def list_allowed_sites(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Universal Site: list the user's allowed sites. Default
     seeds (youtube.com, youtu.be, x.com, twitter.com) are pre-added by
@@ -3863,6 +3883,7 @@ DESCRIPTIONS = {
     "queue_discovered": "Enqueue selected saved discovery candidates for normal capture. Use after discover_candidates returns a run and candidate keys; use that tool again to search for new candidates. Requires agent discovery consent or a dashboard intent; stdio needs agent consent because dashboard intents are process-bound. Returns queued and skipped picks, skipping unknown, unsupported, captured or queued URLs. No ScrapeCreators credits are spent; the resident retry worker performs capture later.",
     "get_library_brief_input": "Prepare a dated library-status packet for a brief that the client writes. Use for a requested daily brief; use get_library_activity for direct metrics or get_playbook_input for topical research. Returns job_key, input_hash, bound revisions, counts, coverage, up to 20 work rows and five Librarian cards within 24,576 bytes. No work lease is acquired. Pass the unchanged packet to publish_library_brief after writing.",
     "publish_library_brief": "Save a client-written daily brief as an immutable local artifact. Use only for the user's requested brief job after get_library_brief_input; use read_library_resource to read a published brief. Validates the exact packet against current data and binds quotes to supplied evidence. An identical submission_key retry returns the saved result; stale_brief requires fresh input. Writes under reach/briefs without applying labels or changing the assignment queue.",
+    "import_list": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note.",
     "export_cited_range": "Export verbatim stored transcript cues with speaker provenance, overlapping chapters, safe links and evidence references. Use after search_clips identifies a passage; use get_citation_map for all citation rows or read_library_resource for an existing resource URI. Select exact cue-aligned bounds or a current excerpt, at most 120 seconds and 200 cues. Returns source/media revisions; refusals include next_step. It does not fetch media or recompute transcription.",
     "list_library_work": "List Librarian assignment counts and one cursor page of work for a run. Use to inspect readiness before claim_library_work; use get_library_activity for aggregate library metrics. Listing expires stale leases and can update work state. Returns run revision, work states, manifest dispositions and waiting-client status. The server does not perform the Librarian's model work.",
     "claim_library_work": "Lease Librarian evidence packets, or renew, release or cancel your current attempts. Use after list_library_work to acquire work; use submit_library_result to store an assignment. Claim returns up to twelve packets with attempt tokens. Renew/release/cancel require the work_id and attempt_token from that claim. Leases last 60-900 seconds, never beyond one hour from first claim; three attempts exhaust a row.",
@@ -4070,6 +4091,12 @@ OVERRIDES = {
     "uoink_page": {"url": "HTTP(S) webpage URL whose hostname matches an active page allowlist rule."},
     "uoink_x": {"url": "Public x.com or twitter.com status URL for the terminal post in the desired author chain."},
     "uoink_reddit_thread": {"url": "reddit.com/r/<sub>/comments/... thread URL."},
+    "import_list": {
+        "url": "hackertube.org page (/p/<slug>, /c/<id>, /a/<id>, /watch/<id>, / or /browse), news.ycombinator.com/item?id=... thread, reddit.com/r/<sub>/comments/... thread, or youtube.com/playlist?list=... URL.",
+        "limit": "Videos to read in this batch, 1-50; default 50.",
+        "offset": "Zero-based position in the list to start from; use next_offset from the previous call for the next batch.",
+        "preview_only": "When true, count and list the batch without queueing anything.",
+    },
     "get_workspace": {"id": "Preferred workspace ID from list_workspaces; takes precedence over workspace_id."},
     "get_claim": {"id": "Preferred claim ID from list_claims; takes precedence over claim_id."},
     "get_script": {"id": "Preferred script-version ID from list_scripts; takes precedence over script_id."},
@@ -4163,6 +4190,14 @@ OUTPUT_SCHEMAS = {
         "screenshots": _field("array", "Saved screenshot file paths.", items={"type": "string"}),
     }),
     "uoink_playlist": _output({"job_id": _field("string", "Asynchronous capture identifier for get_job_status or cancel_job.")}),
+    "import_list": _output({
+        "source": _field("object", "Source kind, label, list title, canonical URL and credit line (HackerTube is ODC-By 1.0)."),
+        "found": _field("integer", "Videos found in this batch."),
+        "already": _field("integer", "Videos in this batch already in the library; never queued again."),
+        "queued": _field("integer", "Videos newly added to the download queue; 0 on a preview."),
+        "next_offset": _field(["integer", "null"], "Offset for the next batch, or null at the end of the list."),
+        "videos": _field("array", "Per-video rows with video_id, url, title, channel and note.", items={"type": "object"}),
+    }),
     "get_uoink_corpus": _output({
         "corpus_md": _field("string", "Complete saved Markdown document."),
         "folder": _field("string", "Absolute local folder holding the corpus."),
@@ -5741,6 +5776,27 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                                   "description": "Drop comments below this score."},
         }, ["url"]),
         handler=uoink_reddit_thread,
+        rate_limiter=_RateLimiter(10),
+    ),
+    "import_list": ToolSpec(
+        name="import_list",
+        title="Import a list of videos",
+        annotations={
+            "readOnlyHint": False, "destructiveHint": False,
+            "idempotentHint": False, "openWorldHint": True,
+        },
+        description=DESCRIPTIONS["import_list"],
+        input_schema=_schema({
+            "url": {"type": "string",
+                    "description": "HackerTube, Hacker News thread, Reddit thread or YouTube playlist URL."},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 50,
+                      "description": "Videos per batch (1-50)."},
+            "offset": {"type": "integer", "minimum": 0, "default": 0,
+                       "description": "Start position in the list."},
+            "preview_only": {"type": "boolean", "default": False,
+                             "description": "Count without queueing."},
+        }, ["url"]),
+        handler=import_list,
         rate_limiter=_RateLimiter(10),
     ),
     "list_allowed_sites": ToolSpec(

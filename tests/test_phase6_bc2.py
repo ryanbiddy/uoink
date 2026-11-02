@@ -887,7 +887,7 @@ def test_bc2_export_adapter_admits_once_binds_existing_storage_and_bounds_the_lo
     assert spec.input_schema["additionalProperties"] is False
     assert set(spec.input_schema["properties"]) == {"video_id", "start", "end", "excerpt_id", "source_revision",
                                                     "media_revision"}
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 92
     previous = uoink_mcp_tools._backend
     uoink_mcp_tools.bind_backend(backend)
     try:
@@ -927,22 +927,22 @@ def test_bc2_export_is_on_stdio_with_the_registry_schema_and_wrapped_response_ch
     from mcp import types as mcp_types
     from tests.test_phase4_stdio import _complete_local_call
     tools = {t.name: t for t in _complete_local_call(uoink_mcp.mcp.list_tools())}
-    assert "export_cited_range" in tools and len(tools) == 91
+    assert "export_cited_range" in tools and len(tools) == 92
     spec = uoink_mcp_tools.TOOL_REGISTRY["export_cited_range"]
     handlers = uoink_mcp.mcp
     listed = _complete_local_call(handler_for(handlers, "tools/list")(
         mcp_types.ListToolsRequest(method="tools/list"))).tools
     wire = {t.name: t for t in listed}
-    assert len(wire) == 91
+    assert len(wire) == 92
     assert wire["export_cited_range"].input_schema == uoink_mcp_tools.client_input_schema(spec.input_schema, spec.name)
     assert wire["export_cited_range"].description == spec.description
     assert wire["export_cited_range"].annotations.read_only_hint is True
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
     assert "export_cited_range" in {t["name"] for t in manifest["tools"]}
-    assert len(manifest["tools"]) == 91
+    assert len(manifest["tools"]) == 92
     doc = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
-    assert "### export_cited_range" in doc and "**35 tools**" in doc and "**91 tools**" in doc
-    assert "91 tools" in (ROOT / "docs" / "v2-api.md").read_text(encoding="utf-8")
+    assert "### export_cited_range" in doc and "**35 tools**" in doc and "**92 tools**" in doc
+    assert "92 tools" in (ROOT / "docs" / "v2-api.md").read_text(encoding="utf-8")
 
     handler = handler_for(handlers, "tools/call")
     previous = uoink_mcp_tools._backend

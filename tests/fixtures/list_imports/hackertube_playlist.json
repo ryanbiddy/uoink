@@ -1,0 +1,185 @@
+{
+ "slug": "hn-canon",
+ "title": "The HN canon",
+ "tier": "start",
+ "kind": "start",
+ "pitch": "The ten videos Hacker News has pointed people to most often, thread after thread and year after year. Math, money, programming, chips, biology and how to live, all in one place.",
+ "intro": "If you only watch ten things from this collection, make it these. Each one has been recommended by many different HN commenters over many years, across every kind of thread, not just programming ones. The list opens with short, easy pieces and works up to the longer lectures, closing with the talk HN sends people when life gets hard.",
+ "videos": [
+  {
+   "vid": "jbkSRLYSojo",
+   "title": "Hans Rosling's 200 Countries, 200 Years, 4 Minutes - The Joy of Stats - BBC",
+   "channel": "BBC",
+   "published": "2010-11-26T17:47:18Z",
+   "duration_s": 288,
+   "views": 11495132,
+   "likes": 63475,
+   "thumbnail": "https://i.ytimg.com/vi/jbkSRLYSojo/mqdefault.jpg",
+   "summary": "Hans Rosling uses augmented-reality animation to show 200 countries over 200 years in four minutes, built from 120,000 data points. It tracks life expectancy and income to show the world's development.",
+   "why_hn": "HN commenters send it as a short antidote to cynicism, showing long-term global progress and the shrinking gap between rich and poor countries.",
+   "content_type": "explainer",
+   "level": "general",
+   "shelf_life": "evergreen",
+   "primary_topic": "global development",
+   "tags": [
+    "hans rosling",
+    "data visualization",
+    "life expectancy",
+    "poverty",
+    "gapminder"
+   ],
+   "categories": [
+    {
+     "id": "data-visualization",
+     "name": "Data visualization & information design",
+     "area": "ai-data",
+     "area_name": "AI, Machine Learning & Data"
+    },
+    {
+     "id": "macroeconomics",
+     "name": "Macroeconomics & financial crises",
+     "area": "business-economics",
+     "area_name": "Business, Startups & Economics"
+    }
+   ],
+   "quote": {
+    "text": "Spend five minutes and watch this. Amazing presentation my Hans Rausling",
+    "id": 36398576,
+    "year": "2023"
+   },
+   "hn": {
+    "mentions": 20,
+    "recommenders": 10,
+    "stances": {
+     "reference": 6,
+     "rec": 11,
+     "strong_rec": 3
+    },
+    "rec_months": 12,
+    "strong": 3,
+    "first": "2010",
+    "last": "2023",
+    "last_rec": "2023-06"
+   },
+   "score": 13.5,
+   "note": "A four-minute start: Rosling animates two centuries of health and wealth, and HN keeps sharing it as a short antidote to cynicism."
+  },
+  {
+   "vid": "fNk_zzaMoSs",
+   "title": "Vectors | Chapter 1, Essence of linear algebra",
+   "channel": "3Blue1Brown",
+   "published": "2016-08-06T00:05:49Z",
+   "duration_s": 592,
+   "views": 12988516,
+   "likes": 241663,
+   "thumbnail": "https://i.ytimg.com/vi/fNk_zzaMoSs/mqdefault.jpg",
+   "summary": "The first chapter of 3Blue1Brown's Essence of Linear Algebra series, introducing vectors with animated geometric visuals. It begins a series that builds intuition for linear algebra from the basics.",
+   "why_hn": "HN's go-to recommendation for learning linear algebra intuition, repeatedly credited with making concepts click and complementing textbooks.",
+   "content_type": "course",
+   "level": "intro",
+   "shelf_life": "evergreen",
+   "primary_topic": "linear algebra",
+   "tags": [
+    "vectors",
+    "linear algebra",
+    "visual intuition",
+    "3blue1brown",
+    "machine learning math"
+   ],
+   "categories": [
+    {
+     "id": "pure-mathematics",
+     "name": "Pure mathematics",
+     "area": "math-theory",
+     "area_name": "Mathematics & Theoretical CS"
+    },
+    {
+     "id": "recreational-math",
+     "name": "Recreational & visual math",
+     "area": "math-theory",
+     "area_name": "Mathematics & Theoretical CS"
+    }
+   ],
+   "quote": {
+    "text": "the most welcoming and informative introduction to the topic I've ever seen",
+    "id": 18679785,
+    "year": "2018"
+   },
+   "hn": {
+    "mentions": 20,
+    "recommenders": 17,
+    "stances": {
+     "rec": 5,
+     "strong_rec": 14,
+     "reference": 1
+    },
+    "rec_months": 18,
+    "strong": 14,
+    "first": "2018",
+    "last": "2026",
+    "last_rec": "2026-07"
+   },
+   "score": 25.0,
+   "note": "The highest-scoring video in the whole collection, and the opening chapter of the series HN credits with finally making linear algebra click."
+  },
+  {
+   "vid": "D1R-jKKp3NA",
+   "title": "Steve Jobs Stanford Commencement Speech 2005",
+   "channel": "JoshuaG",
+   "published": "2006-03-06T23:46:53Z",
+   "duration_s": 874,
+   "views": 12445819,
+   "likes": 75928,
+   "thumbnail": "https://i.ytimg.com/vi/D1R-jKKp3NA/mqdefault.jpg",
+   "summary": "Steve Jobs's 2005 Stanford commencement address, built around three stories: connecting the dots, love and loss including being fired from Apple, and death. It is a 15-minute talk on finding work you love.",
+   "why_hn": "HN returns to it for years as an inspirational talk to send to graduates, founders and anyone at a career crossroads.",
+   "content_type": "talk",
+   "level": "general",
+   "shelf_life": "evergreen",
+   "primary_topic": "career and life advice",
+   "tags": [
+    "steve jobs",
+    "commencement speech",
+    "motivation",
+    "stanford",
+    "follow your passion"
+   ],
+   "categories": [
+    {
+     "id": "productivity-self-improvement",
+     "name": "Productivity & self-improvement",
+     "area": "ideas-education",
+     "area_name": "Ideas, Learning & Language"
+    },
+    {
+     "id": "tech-figures-interviews",
+     "name": "Tech pioneers & interviews",
+     "area": "computing-history-culture",
+     "area_name": "Computing History & Culture"
+    }
+   ],
+   "quote": {
+    "text": "This is no doubt one of the best speech i ever heard.",
+    "id": 595537,
+    "year": "2009"
+   },
+   "hn": {
+    "mentions": 19,
+    "recommenders": 13,
+    "stances": {
+     "strong_rec": 6,
+     "reference": 6,
+     "rec": 7
+    },
+    "rec_months": 11,
+    "strong": 6,
+    "first": "2007",
+    "last": "2015",
+    "last_rec": "2013-12"
+   },
+   "score": 14.0,
+   "note": "Fifteen minutes and three stories about connecting the dots, losing Apple and death, sent on HN for years to graduates and anyone at a career crossroads."
+  }
+ ],
+ "minutes": 392
+}
