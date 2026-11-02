@@ -67,7 +67,11 @@ def main():
             spec = registry.TOOL_REGISTRY[tool["name"]]
             assert tool["description"] == spec.description
             assert tool["inputSchema"] == registry.client_input_schema(spec.input_schema, spec.name)
-        print(f"PASS: initialize and tools/list returned all {len(names)} registry tools without a helper")
+        # Directory inspectors also list resources; a fresh library is empty, not unavailable.
+        send(dict(id=3, method="resources/list"))
+        assert receive(3)["resources"] == []
+        print(f"PASS: initialize and tools/list returned all {len(names)} registry tools without a helper; "
+              "resources/list returned an empty library")
     finally:
         child.stdin.close()
         try:
