@@ -4,6 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release)](https://github.com/ryanbiddy/uoink/releases/latest)
 [![Platform: Windows and Mac](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B-0A0A0A.svg)](https://uoink.app/install)
 [![MCP server](https://img.shields.io/badge/MCP-server-FF3D00.svg)](https://uoink.app/mcp)
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/ryanbiddy/uoink)
 [![Website: uoink.app](https://img.shields.io/badge/web-uoink.app-C2410C.svg)](https://uoink.app)
 
 **Save the YouTube videos, podcasts and articles you study. Your AI searches them and cites the timestamp.**

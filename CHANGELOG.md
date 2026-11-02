@@ -41,6 +41,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   screenshot near the halfway mark is already saved; nothing is downloaded
   again, and videos without one keep their thumbnail.
 
+### Changed
+
+- The winget manifests and the Homebrew cask in `packaging/` point at the
+  published 3.12.1 files.
+
 ## [3.12.1] - 2026-11-01
 
 ### Added

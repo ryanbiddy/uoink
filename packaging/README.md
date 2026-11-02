@@ -1,12 +1,12 @@
 # Package manager manifests
 
-Manifests for Uoink 3.12.0. The SHA-256 values match the published v3.12.0
+Manifests for Uoink 3.12.1. The SHA-256 values match the published v3.12.1
 release's `SHA256SUMS.txt`. For a later release, update the version, URLs and
 hashes from that release's `SHA256SUMS.txt` before you submit.
 
 ## winget (Windows)
 
-`winget/manifests/r/ReplayRyan/Uoink/3.12.0/` holds the version, installer and
+`winget/manifests/r/ReplayRyan/Uoink/3.12.1/` holds the version, installer and
 en-US locale files (schema 1.12.0, validated against winget's JSON schemas).
 The package identifier follows the installer's publisher name, `ReplayRyan`.
 
@@ -18,7 +18,7 @@ under `Commands`.
 To submit:
 
 1. Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) and copy
-   `manifests/r/ReplayRyan/Uoink/3.12.0/` to the same path in the fork.
+   `manifests/r/ReplayRyan/Uoink/3.12.1/` to the same path in the fork.
 2. Optional: `winget validate --manifest <that folder>` and
    `winget install --manifest <that folder>` in Windows Sandbox.
 3. Open one pull request for this one package version and sign the CLA when the bot asks.
