@@ -13,7 +13,7 @@
     {
       "registryType": "mcpb",
       "identifier": "https://github.com/ryanbiddy/uoink/releases/download/v3.13.0/uoink-3.13.0.mcpb",
-      "fileSha256": "e16d6a2021e51094b1c20fbc8c2b7156f391c4f93599603ccec33b67d5540b48",
+      "fileSha256": "50a8fd530eec0767ef6ac0a3404b0cc3ef944d0c752658433f29d41ffdce7a18",
       "transport": {
         "type": "stdio"
       }

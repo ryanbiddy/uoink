@@ -63,6 +63,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The MCP server exposes 92 tools by default (91 in 3.12.1) and still 35 with
   `UOINK_MCP_TOOLSET=core`; `import_list` is the new one.
+- The Windows installer is about 519 MB, the same as 3.12.1, and the Mac DMG
+  about 716 MB, 4 MB more than 3.12.1.
 - The winget and Homebrew manifests in `packaging/` still point at the
   published 3.12.1 files until 3.13.0 is published.
 

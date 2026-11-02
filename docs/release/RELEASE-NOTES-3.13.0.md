@@ -45,3 +45,12 @@ See [docs/mac/INSTALL.md](https://github.com/ryanbiddy/uoink/blob/v3.13.0/docs/m
 - Mac: Apple Silicon only. Uoink doesn't update itself yet, so install new versions from the DMG. macOS still shows Uoink's alerts as coming from Script Editor. Library mirroring is unavailable on Mac.
 - Import a list needs the network at import time: HackerTube, the Algolia Hacker News API, Reddit or YouTube. A batch is at most 50 videos, and videos are captured one at a time.
 - The phone inbox and launcher integrations are unchanged from 3.12.1.
+
+## Checksums
+
+| File | Size | SHA-256 |
+| --- | --- | --- |
+| `Uoink-Setup-3.13.0.exe` | 519,273,366 B | `15d31cb0c1e70cecf17a6d710923d16e4f627bc11a27f78bc0fcf75091da789e` |
+| `uoink-3.13.0.mcpb` | 107,807 B | `50a8fd530eec0767ef6ac0a3404b0cc3ef944d0c752658433f29d41ffdce7a18` |
+| `Uoink-3.13.0-macos-arm64.dmg` | 715,903,915 B | `4f9799c7c4c585585613e03e48e230ada198cbb10b70b4f80c3df61fa8e41cbd` |
+| `uoink-3.13.0-macos.mcpb` | 104,675 B | `671334efc7b0a249296d32c946b824a9691ffb5ca1b493654eafd29774b7d7c8` |
