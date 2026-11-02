@@ -96,11 +96,11 @@ const groups = {
   async mac_download() {
     // The release publishes the Mac DMG next to the Windows installer.
     const published = readFileSync(join(EXT, 'setup.js'), 'utf8');
-    assert.match(published,/const PUBLISHED_MAC_DMG = "3.12.1";/);
+    assert.match(published,/const PUBLISHED_MAC_DMG = "3.13.0";/);
     const mac=await setup({os:'mac',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
     assert.equal(mac.el('download-btn').hidden,false);
     assert.equal(mac.el('manual-install').hidden,true);
-    assert.equal(mac.el('download-btn').href,'https://github.com/ryanbiddy/uoink/releases/download/v3.12.1/Uoink-3.12.1-macos-arm64.dmg');
+    assert.equal(mac.el('download-btn').href,'https://github.com/ryanbiddy/uoink/releases/download/v3.13.0/Uoink-3.13.0-macos-arm64.dmg');
     assert.equal(mac.el('download-btn').textContent,'Download for Mac');
     assert.match(mac.el('install-instructions').textContent,/drag Uoink to Applications/);
     const win=await setup({os:'win',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});

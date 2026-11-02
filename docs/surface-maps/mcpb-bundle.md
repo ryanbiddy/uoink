@@ -57,7 +57,7 @@ instead of hand-editing `claude_desktop_config.json`.
   default silently points at nothing; the user must re-pick the dir. Keep them
   in sync.
 
-The bundle inventory contains all 92 registry tools (3.12.1 shipped 91). Claude Desktop users
+The bundle inventory contains all 92 registry tools (3.12.1 shipped 91; 3.13.0 adds the list-import tool). Claude Desktop users
 reinstall the new bundle and restart Desktop. `UOINK_MCP_TOOLSET=core` keeps
 the previous 35 tools for clients with caps; default full mode keeps them first.
 The inventory checker compares the bundle, registry, docs and receipt pins.

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.13.0] - 2026-11-01
+
 ### Added
 
 - **Import a list.** Paste a list link in Sources > **Import a list** and
@@ -48,11 +50,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the default-checked finish page box. It starts with no splash, dashboard or
   ready toast. The stop file setup leaves behind no longer holds back the next
   login start, while a real Quit is still honored.
+- The Linux container build creates an empty library before it serves MCP, so
+  a fresh container answers `resources/list` and `search_library` with empty
+  results instead of a `library_unavailable` error.
 
 ### Changed
 
 - The winget manifests and the Homebrew cask in `packaging/` point at the
   published 3.12.1 files.
+
+### Compatibility and testing
+
+- The MCP server exposes 92 tools by default (91 in 3.12.1) and still 35 with
+  `UOINK_MCP_TOOLSET=core`; `import_list` is the new one.
+- The winget and Homebrew manifests in `packaging/` still point at the
+  published 3.12.1 files until 3.13.0 is published.
 
 ## [3.12.1] - 2026-11-01
 

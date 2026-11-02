@@ -30,9 +30,9 @@ def _tracked_docs() -> list[Path]:
     except (OSError, subprocess.SubprocessError):
         return sorted((ROOT / "docs").rglob("*.md"))
     return [ROOT / name for name in listing.split("\0") if name.endswith(".md")]
-# The v3.12.1 GitHub release, installer and website go live together.
+# The v3.13.0 GitHub release, installer and website go live together.
 # Keep download pointers aligned for that coordinated publication.
-PUBLISHED_VERSION = "3.12.1"
+PUBLISHED_VERSION = "3.13.0"
 RELEASE_VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 PUBLISHED_ASSET = f"Uoink-Setup-{PUBLISHED_VERSION}.exe"
 
