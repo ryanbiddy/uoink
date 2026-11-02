@@ -4,6 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release)](https://github.com/ryanbiddy/uoink/releases/latest)
 [![Platform: Windows and Mac](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B-0A0A0A.svg)](https://uoink.app/install)
 [![MCP server](https://img.shields.io/badge/MCP-server-FF3D00.svg)](https://uoink.app/mcp)
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/ryanbiddy/uoink)
 [![Website: uoink.app](https://img.shields.io/badge/web-uoink.app-C2410C.svg)](https://uoink.app)
 
 **Save the YouTube videos, podcasts and articles you study. Your AI searches them and cites the timestamp.**
@@ -39,12 +40,12 @@ Published sources are indexed in one local library. Podcast audio and transcript
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)**: A local MCP server exposing 91 tools over stdio, five library resource templates and nine prompts. Claude Desktop (.mcpb), Claude Code and Cursor get the full capture, research, writing and Library tool set through the standard connection. Consent gates are unchanged.
+**2. MCP server (the agent path)**: A local MCP server exposing 92 tools over stdio, five library resource templates and nine prompts. Claude Desktop (.mcpb), Claude Code and Cursor get the full capture, research, writing and Library tool set through the standard connection. Consent gates are unchanged.
 
 The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested.
 
-- **stdio** defaults to all 91 registry tools. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the previous 35 tools. Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 91-tool registry through the token-authenticated local helper. Both MCP transports share handlers and flatten the same three top-level `oneOf` input schemas for client compatibility. The server still validates the exact frozen schemas.
+- **stdio** defaults to all 92 registry tools. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the previous 35 tools. Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 92-tool registry through the token-authenticated local helper. Both MCP transports share handlers and flatten the same three top-level `oneOf` input schemas for client compatibility. The server still validates the exact frozen schemas.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 

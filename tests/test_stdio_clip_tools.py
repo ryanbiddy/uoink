@@ -32,7 +32,7 @@ def test_clip_tools_are_on_stdio_and_the_count_is_91(tmp_path):
     stdio = _stdio_tools(tmp_path)
     assert CLIP_TOOLS.issubset(stdio)
     # Full mode includes the clip tools and every other shared registry tool.
-    assert len(stdio) == 91
+    assert len(stdio) == 92
     assert set(stdio) == CANONICAL_STDIO_TOOLS
 
 
@@ -111,7 +111,7 @@ def test_lock_step_inventories_agree():
     runpy.run_path(str(ROOT / "scripts/check_mcp_inventory.py"))["check"]()
     doc = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
     headings = re.findall(r"^### ([a-z][a-z_]+)$", doc, re.M)
-    assert len(headings) == 91
+    assert len(headings) == 92
     assert set(headings) == CANONICAL_STDIO_TOOLS
     assert "(HTTP/OpenAPI only)" not in doc
     manifest = json.loads((ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8"))
@@ -123,4 +123,4 @@ def test_lock_step_inventories_agree():
                   re.finditer(r"MCP server[^\n]*?\b(\d+)\s+tools\b", text, re.I)]
         # The first match is the current statement (README body, newest changelog
         # entry); older changelog entries keep their historical counts.
-        assert counts and counts[0] == 91, counts
+        assert counts and counts[0] == 92, counts

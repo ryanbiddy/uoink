@@ -1,0 +1,14 @@
+{
+ "_type": "playlist",
+ "id": "PLbigpodcast0000000000000000000000",
+ "title": "Every episode of a long podcast",
+ "uploader": "Podcast Channel",
+ "channel": "Podcast Channel",
+ "playlist_count": 2412,
+ "requested_entries": [51, 52, 53],
+ "entries": [
+  {"_type": "url", "ie_key": "Youtube", "id": "ep051aaaaaa", "url": "https://www.youtube.com/watch?v=ep051aaaaaa", "title": "Episode 51: Compilers", "channel": "Podcast Channel", "duration": 3725.0},
+  {"_type": "url", "ie_key": "Youtube", "id": "ep052bbbbbb", "url": "https://www.youtube.com/watch?v=ep052bbbbbb", "title": "[Private video]", "channel": null, "duration": null},
+  {"_type": "url", "ie_key": "Youtube", "id": "ep053cccccc", "url": "https://www.youtube.com/watch?v=ep053cccccc", "title": "Episode 53: Memory", "uploader": "Podcast Channel", "duration": 4100}
+ ]
+}

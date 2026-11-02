@@ -1,0 +1,23 @@
+[
+ {"kind": "Listing", "data": {"children": [{"kind": "t3", "data": {
+   "id": "1abc23", "subreddit": "programming", "title": "What talks changed how you write code?",
+   "author": "op_user", "url": "https://www.reddit.com/r/programming/comments/1abc23/what_talks_changed_how_you_write_code/",
+   "selftext": "Mine is Simple Made Easy: https://www.youtube.com/watch?v=SxdOUGdseq4",
+   "permalink": "/r/programming/comments/1abc23/what_talks_changed_how_you_write_code/"}}]}},
+ {"kind": "Listing", "data": {"children": [
+   {"kind": "t1", "data": {"author": "alice", "score": 41,
+     "body": "The Mess We're In by Joe Armstrong https://youtu.be/lKXe3HUG2l4?t=42 every time.",
+     "replies": {"kind": "Listing", "data": {"children": [
+       {"kind": "t1", "data": {"author": "bob", "score": 12,
+         "body": "Seconding, and [Inventing on Principle](https://www.youtube.com/watch?v=PUv66718DII&amp;feature=youtu.be) too.",
+         "replies": ""}},
+       {"kind": "more", "data": {"count": 3, "children": ["x1", "x2"]}}]}}}},
+   {"kind": "t1", "data": {"author": "carol", "score": 7,
+     "body": "Not a talk but https://example.com/blog is great. Also the same Armstrong link: https://www.youtube.com/watch?v=lKXe3HUG2l4",
+     "replies": ""}},
+   {"kind": "t1", "data": {"author": "[deleted]", "score": 1, "body": "[removed]", "replies": ""}},
+   {"kind": "t1", "data": {"author": "dave", "score": 3,
+     "body": "Shorts count? https://www.youtube.com/shorts/aBcDeFgHiJk",
+     "replies": ""}}
+ ]}}
+]

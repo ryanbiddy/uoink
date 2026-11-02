@@ -410,6 +410,10 @@
       "description": "Capture a Reddit post and filtered comment tree as a local discussion corpus. Use when replies matter; use uoink_page for general webpage prose or uoink_url for video extraction. Fetches Reddit's public JSON without API credentials or the page allowlist, then saves nested replies with source_type reddit_thread. Returns captured content, comment counts and the saved item ID; fetch or save failures return an error. Recapturing a source can replace its saved corpus and metadata."
     },
     {
+      "name": "import_list",
+      "description": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note."
+    },
+    {
       "name": "list_allowed_sites",
       "description": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages."
     },

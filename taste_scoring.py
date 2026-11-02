@@ -78,7 +78,7 @@ def _channel_key(channel) -> str:
     return _norm(channel)
 
 
-def build_taste_profile(idx) -> dict:
+def build_taste_profile(idx, *, exclude_ids=None) -> dict:
     """Assemble the local taste profile once. Fail-open on any sub-source:
     a missing signal just means that dimension contributes nothing, never
     an exception that kills a scan.
@@ -174,7 +174,12 @@ def build_taste_profile(idx) -> dict:
     except Exception as e:
         log.warning("taste profile: corpus scan unavailable: %s", e)
         rows = []
+    # exclude_ids keeps bulk-imported, unopened items (Import a list) out
+    # of the corpus vote, so a batch can't rank itself by its own channels.
+    excluded = set(exclude_ids or ())
     for row in rows:
+        if excluded and row.get("video_id") in excluded:
+            continue
         chan = _channel_key(row.get("channel"))
         if chan:
             channel_counts[chan] = channel_counts.get(chan, 0) + 1

@@ -1,0 +1,80 @@
+[
+ {
+  "id": "arts-entertainment",
+  "name": "Arts, Comedy, Music & Film",
+  "count": 1731,
+  "categories": [
+   {
+    "id": "satire-parody",
+    "name": "Satire & parody",
+    "count": 362
+   },
+   {
+    "id": "film-tv-clips",
+    "name": "Film & TV clips",
+    "count": 310
+   },
+   {
+    "id": "standup-sketch-comedy",
+    "name": "Stand-up & sketch comedy",
+    "count": 244
+   }
+  ]
+ },
+ {
+  "id": "software",
+  "name": "Software Engineering & Languages",
+  "count": 1604,
+  "categories": [
+   {
+    "id": "functional-programming",
+    "name": "Functional programming",
+    "count": 225
+   },
+   {
+    "id": "programming-language-design",
+    "name": "Programming language design",
+    "count": 193
+   },
+   {
+    "id": "software-architecture-design",
+    "name": "Software architecture & design",
+    "count": 177
+   }
+  ]
+ },
+ {
+  "id": "politics-history-society",
+  "name": "Politics, History & Society",
+  "count": 1425,
+  "categories": [
+   {
+    "id": "media-journalism",
+    "name": "Media, journalism & propaganda",
+    "count": 334
+   },
+   {
+    "id": "law-policing-justice",
+    "name": "Law, policing & justice",
+    "count": 188
+   },
+   {
+    "id": "us-politics",
+    "name": "US politics & elections",
+    "count": 187
+   }
+  ]
+ },
+ {
+  "id": "math-theory",
+  "name": "Mathematics & Theoretical CS",
+  "count": 479,
+  "categories": [
+   {
+    "id": "pure-mathematics",
+    "name": "Pure mathematics",
+    "count": 97
+   }
+  ]
+ }
+]

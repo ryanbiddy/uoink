@@ -108,6 +108,7 @@ import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
+import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
@@ -907,6 +908,11 @@ LIVE_BEHAVIOR_NOW = "extract_when_recorded"
 _LIVE_BEHAVIORS = (LIVE_BEHAVIOR_WAIT, LIVE_BEHAVIOR_NOW)
 # Dashboard appearance: follow the OS theme, or force light or dark.
 _DASHBOARD_THEMES = ("system", "light", "dark")
+# Library and For You card image for video captures: a screenshot from the
+# middle of the video, or the uploaded thumbnail.
+CARD_IMAGE_MIDDLE = "middle"
+CARD_IMAGE_THUMBNAIL = "thumbnail"
+_CARD_IMAGES = (CARD_IMAGE_MIDDLE, CARD_IMAGE_THUMBNAIL)
 _WHISPER_MODELS = (
     "tiny", "base", "small", "medium", "large", "large-v3-turbo",
 )
@@ -1044,6 +1050,9 @@ def _default_settings() -> dict:
         # "light" or "dark" forces it. Stored here, not per browser, so the
         # Uoink window and a browser tab show the same theme.
         "dashboard_theme": "system",
+        # Settings > Library > Card image: "middle" uses a screenshot from
+        # the middle of a saved video; "thumbnail" keeps the uploaded one.
+        "card_image": CARD_IMAGE_MIDDLE,
         # Uoink Relay (Settings > Capture > Phone inbox). OFF by default.
         # When on, the helper contacts only relay_url, with the pull token
         # from the keyring, and captures what the phone shared. The token is
@@ -1236,6 +1245,8 @@ def _normalize_settings(data: dict) -> dict:
     clean["keep_media"] = bool(clean.get("keep_media"))
     theme = str(clean.get("dashboard_theme") or "system").strip().lower()
     clean["dashboard_theme"] = theme if theme in _DASHBOARD_THEMES else "system"
+    card_image = str(clean.get("card_image") or CARD_IMAGE_MIDDLE).strip().lower()
+    clean["card_image"] = card_image if card_image in _CARD_IMAGES else CARD_IMAGE_MIDDLE
     model = str(clean.get("whisper_model") or "base").strip().lower()
     clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"
     # Strict JSON true only; "true"/1 stay off, matching librarian_apply.
@@ -1742,6 +1753,9 @@ def _public_settings(data: dict | None = None) -> dict:
         # Settings > App > Appearance: system, light or dark.
         "dashboard_theme": (data.get("dashboard_theme")
                             if data.get("dashboard_theme") in _DASHBOARD_THEMES else "system"),
+        # Settings > Library: middle-of-the-video screenshot or thumbnail.
+        "card_image": (data.get("card_image")
+                       if data.get("card_image") in _CARD_IMAGES else CARD_IMAGE_MIDDLE),
         # Uoink Relay: the pull token is write-only; only its presence shows.
         "relay_enabled": data.get("relay_enabled") is True,
         "relay_url": normalized["relay_url"],
@@ -3626,6 +3640,11 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     }
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
+    try:
+        # Import a list: tag the capture with the list it came from (once).
+        list_imports.apply_on_index(idx, DATA_ROOT, video_id)
+    except Exception as e:
+        log.warning("list import tag skipped for %s: %s", video_id, e)
     # Phase 6 (BC-2/BD-08/BC-3e): a Phase 6 capture publishes through the
     # shared fenced publisher. The plan is not built until the ticket is
     # held and every consumed sidecar input still matches disk; a newer
@@ -13767,6 +13786,50 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
             **mode_info}
 
 
+# A mid-video card image must sit within this fraction of the duration from
+# the exact middle (0.2 -> between 30% and 70%), so a sparse capture never
+# shows an intro or end-card frame as "the middle".
+_MIDFRAME_TOLERANCE = 0.2
+
+
+def _midframe_path(folder: Path, sidecar: dict, duration_seconds) -> Path | None:
+    """The saved screenshot nearest 50% of a video's duration, or None.
+
+    Reuses the timed screenshots every video capture already takes; nothing is
+    downloaded. With no known duration it takes the middle shot of three or
+    more. Returns None for non-video captures and when no shot is close enough
+    to the middle, so the caller keeps the original thumbnail."""
+    shots = sidecar.get("screenshots") if isinstance(sidecar, dict) else None
+    if not isinstance(shots, list) or not shots:
+        return None
+    shots_dir = folder / "screenshots"
+    timed: list[tuple[float | None, Path]] = []
+    for shot in shots:
+        if not isinstance(shot, dict):
+            continue
+        name = (shot.get("filename") or Path(str(shot.get("path") or "")).name or "").strip()
+        if not name or Path(name).suffix.lower() not in (".jpg", ".jpeg", ".png", ".webp"):
+            continue
+        path = shots_dir / Path(name).name
+        if not path.is_file():
+            continue
+        timed.append((_parse_hms(shot.get("timestamp")), path))
+    if not timed:
+        return None
+    try:
+        duration = float(duration_seconds or 0)
+    except (TypeError, ValueError):
+        duration = 0.0
+    with_time = [(t, p) for t, p in timed if t is not None]
+    if duration > 0 and with_time:
+        middle = duration / 2.0
+        t, path = min(with_time, key=lambda tp: abs(tp[0] - middle))
+        return path if abs(t - middle) <= duration * _MIDFRAME_TOLERANCE else None
+    if len(timed) >= 3:
+        return timed[len(timed) // 2][1]
+    return None
+
+
 def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
     """Shape a page of index yoink rows into the enriched result the popup's
     /recent list and the Memory page both consume: fresh health (Sprint
@@ -13782,6 +13845,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
     Index would couple it to server-side helpers."""
     if not rows:
         return []
+    try:
+        card_image = _read_settings().get("card_image", CARD_IMAGE_MIDDLE)
+    except Exception:
+        card_image = CARD_IMAGE_MIDDLE
     try:
         rows = idx.enrich_yoinks(rows)
     except Exception:
@@ -13823,6 +13890,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # endpoint.
         thumb = folder / "thumbnail.jpg"
         thumbnail_path = str(thumb) if thumb.exists() else None
+        original_thumbnail_path = thumbnail_path
         metadata = {}
         if r.get("metadata_json"):
             try:
@@ -13850,6 +13918,15 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             or metadata.get("duration_seconds")
             or metadata.get("duration")
         )
+        # Card image: a screenshot from the middle of the video when one
+        # already exists (no re-download for older captures), else the
+        # uploaded thumbnail.
+        card_image_source = "thumbnail" if thumbnail_path else None
+        if card_image == CARD_IMAGE_MIDDLE:
+            midframe = _midframe_path(folder, live, duration_seconds)
+            if midframe is not None:
+                thumbnail_path = str(midframe)
+                card_image_source = "middle"
         speakers = live.get("speakers") or live.get("speaker_labels") or []
         transcript = live.get("transcript") or []
         speaker_names: set[str] = set()
@@ -13891,6 +13968,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "entity_count": r.get("entity_count", 0),
             "top_entities": r.get("top_entities", []),
             "thumbnail_path": thumbnail_path,
+            "original_thumbnail_path": original_thumbnail_path,
+            "card_image_source": card_image_source,
+            "import_origin": list_imports.public_origin(
+                list_imports.lookup(DATA_ROOT, video_id)),
             "sidecar_path": sidecar_path,
             "source_url": live.get("url") or metadata.get("url"),
             "platform": platform,
@@ -13911,6 +13992,152 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return out
+
+
+# ---------------------------------------------------------------------------
+# Import a list (HackerTube, HN thread, Reddit thread, YouTube playlist)
+# ---------------------------------------------------------------------------
+# Parsing, fetching and the origin registry live in list_imports.py. The
+# helper adds the yt-dlp listing, the library dedupe and the hand-off to the
+# existing download queue (pending_yoinks + the retry worker, one video per
+# pass), so an import is throttled like every other queued capture.
+_LIST_IMPORT_INTERVAL_SEC = 30
+
+
+def _list_import_ytdlp(url: str, start: int, end: int) -> dict:
+    """List one window of a YouTube playlist with yt-dlp's flat mode."""
+    capability = _platform.media_capability()
+    if not capability["available"]:
+        raise list_imports.ImportListError(
+            "YouTube playlists need the local media tools.", "unavailable")
+    try:
+        cp = _run_subprocess(
+            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
+             "--playlist-items", f"{int(start)}:{int(end)}", url],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", timeout=COMMENTS_TIMEOUT_SEC)
+        return json.loads(cp.stdout)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired,
+            json.JSONDecodeError, OSError) as e:
+        log.warning("import list: playlist listing failed: %s", e)
+        raise list_imports.ImportListError(
+            "yt-dlp couldn't list that playlist. Check that it is public.", "fetch_failed")
+
+
+def _list_import_in_library(video_id: str) -> bool:
+    row = _get_index().get_yoink(video_id)
+    return bool(row and not row.get("deleted_at"))
+
+
+def _list_import_preview(text, offset=0, limit=list_imports.DEFAULT_LIMIT) -> dict:
+    """Read one batch of a list source and mark what the library has.
+    Raises list_imports.ImportListError with a user-facing message."""
+    spec = list_imports.classify(text if isinstance(text, str) else "")
+    off = list_imports.clamp_offset(offset)
+    lim = list_imports.clamp_limit(limit)
+    batch = list_imports.fetch_source(
+        spec, offset=off, limit=lim, ytdlp_playlist=_list_import_ytdlp)
+    return list_imports.build_preview(
+        spec, batch, offset=off, limit=lim, in_library=_list_import_in_library)
+
+
+def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
+                       interval: int = _LIST_IMPORT_INTERVAL_SEC) -> dict:
+    """Preview, then queue every video the library doesn't have yet."""
+    preview = _list_import_preview(text, offset, limit)
+    idx = _get_index()
+    queued: list[dict] = []
+    skipped = 0
+    for item in preview["videos"]:
+        if item.get("in_library"):
+            skipped += 1
+            continue
+        url = _normalize_youtube_url(item["url"]) or item["url"]
+        pending_id, inserted = idx.enqueue_pending_once(url, interval, _now_iso())
+        queued.append({**item, "pending_id": pending_id, "already_queued": not inserted})
+    receipt = list_imports.record_import(DATA_ROOT, preview, queued) if queued else {}
+    fresh = sum(1 for q in queued if not q["already_queued"])
+    waiting = len(queued) - fresh
+    parts = [f"Queued {fresh} video{'s' if fresh != 1 else ''}"]
+    if waiting:
+        parts.append(f"{waiting} already waiting in the queue")
+    if skipped:
+        parts.append(f"{skipped} already in your library")
+    message = ", ".join(parts) + "."
+    if queued:
+        message += " They capture one at a time in the background."
+    return {
+        **{k: v for k, v in preview.items() if k != "videos"},
+        "queued": fresh,
+        "already_queued": waiting,
+        "skipped": skipped,
+        "import_id": receipt.get("import_id"),
+        "message": message,
+        "videos": [
+            {k: q.get(k) for k in ("video_id", "url", "title", "channel", "pending_id",
+                                   "already_queued")}
+            for q in queued
+        ],
+    }
+
+
+_IMPORTS_FOR_YOU_POOL = 300
+
+
+def _imported_for_you(idx, *, limit: int = 6) -> list[dict]:
+    """Imported captures you haven't opened yet, ranked by your taste.
+
+    Candidates are list-import registry items that are now in the library
+    with no engagement events. The taste profile is built without the
+    imported items themselves, so a batch import can't vote for its own
+    channels. HackerTube's quality score breaks ties."""
+    registry = list_imports.load_registry(DATA_ROOT)["items"]
+    if not registry:
+        return []
+    rows = []
+    # The newest imports are the candidates; this keeps For You cheap even
+    # after a few thousand imported videos.
+    recent = sorted(registry.items(), key=lambda kv: kv[1].get("imported_at") or "",
+                    reverse=True)[:_IMPORTS_FOR_YOU_POOL]
+    for vid, _origin in recent:
+        try:
+            row = idx.get_yoink(vid)
+        except Exception:
+            row = None
+        if not row or row.get("deleted_at") or not row.get("corpus_path"):
+            continue
+        try:
+            if idx.engagement_signal(vid).get("total_events"):
+                continue
+        except Exception:
+            pass
+        rows.append(row)
+    if not rows:
+        return []
+    try:
+        profile = taste_scoring.build_taste_profile(idx, exclude_ids=set(registry))
+    except Exception as e:
+        log.warning("For You imports: taste profile failed: %s", e)
+        profile = {}
+    enriched = _enrich_yoink_rows(idx, rows)
+    scored = []
+    for r in enriched:
+        verdict = taste_scoring.score_candidate(profile, r) if profile else {
+            "score": 0.0, "reasons": [], "blocked": False}
+        if verdict.get("blocked"):
+            continue
+        origin = registry.get(r.get("video_id")) or {}
+        scored.append({
+            **r,
+            "taste_score": verdict.get("score") or 0.0,
+            "taste_reasons": verdict.get("reasons") or [],
+            "quality_score": origin.get("quality_score"),
+        })
+    # Newest first, then (stable) taste, then HackerTube quality.
+    scored.sort(key=lambda r: index.capture_sort_key(r.get("yoinked_at")), reverse=True)
+    scored.sort(key=lambda r: (-(r.get("taste_score") or 0.0),
+                               -(r.get("quality_score") or 0.0)))
+    return scored[:limit]
 
 
 # ---------------------------------------------------------------------------
@@ -14017,8 +14244,17 @@ def _resurface_payload(idx) -> dict:
         "connections": connections[:5],
         "corpus_gaps": gaps[:8],
         "anchors": scored[:6],
+        "from_imports": _safe_imported_for_you(idx),
         "source": "engagement memory" if scored else "local library",
     }
+
+
+def _safe_imported_for_you(idx) -> list[dict]:
+    try:
+        return _imported_for_you(idx)
+    except Exception as e:
+        log.warning("For You imports failed: %s", e)
+        return []
 
 
 # ---------------------------------------------------------------------------
@@ -14156,6 +14392,7 @@ def _discovery_payload(idx) -> dict:
         "connections": resurface.get("connections") or [],
         "corpus_gaps": resurface.get("corpus_gaps") or [],
         "anchors": resurface.get("anchors") or [],
+        "from_imports": resurface.get("from_imports") or [],
         "source": resurface.get("source"),
     }
 
@@ -16460,6 +16697,34 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "changed": changed,
                                       "enabled": enabled})
 
+    def _handle_import_list(self, body, *, start: bool):
+        """POST /import-list/preview and /import-list {url, offset?, limit?}.
+
+        Preview reads one batch (default and maximum 50) of a HackerTube list,
+        HN thread, Reddit thread or YouTube playlist and marks what the
+        library already has. Import queues the rest on the download queue."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        url = body.get("url")
+        if not isinstance(url, str) or not url.strip():
+            return self._send_json(400, {"ok": False, "code": "empty",
+                                          "error": "Paste a list link first."})
+        try:
+            if start:
+                result = _list_import_start(url, body.get("offset"), body.get("limit"))
+            else:
+                result = _list_import_preview(url, body.get("offset"), body.get("limit"))
+        except list_imports.ImportListError as e:
+            status = 400 if e.code in ("empty", "invalid_url", "unsupported") else 502
+            if e.code == "unavailable":
+                status = 501
+            return self._send_json(status, {"ok": False, "code": e.code, "error": str(e)})
+        except Exception:
+            log.exception("/import-list failed")
+            return self._send_json(500, {"ok": False, "code": "internal",
+                                          "error": "Uoink couldn't import that list."})
+        return self._send_json(200, result)
+
     def _handle_monitored_playlist_poll(self, body):
         """POST /playlists/monitored/poll {playlist_id} -- yt-dlp
         --flat-playlist + diff + auto-queue. Returns the structured
@@ -17370,6 +17635,7 @@ class Handler(BaseHTTPRequestHandler):
                          "live_stream_behavior",  # v3.1 live
                          "whisper_model",         # v3.1 A1/podcast
                          "dashboard_theme",       # Settings > App > Appearance
+                         "card_image",            # Settings > Library > Card image
                          "relay_url",             # Settings > Capture > Phone inbox
                          "library_mirror_enabled",
                          "library_mirror_consent")
@@ -17637,6 +17903,13 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False,
                     "error": f"dashboard_theme must be one of {list(_DASHBOARD_THEMES)}"})
             data["dashboard_theme"] = raw_theme.strip().lower()
+        if "card_image" in body:
+            raw_card = body.get("card_image")
+            if not isinstance(raw_card, str) or raw_card.strip().lower() not in _CARD_IMAGES:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": f"card_image must be one of {list(_CARD_IMAGES)}"})
+            data["card_image"] = raw_card.strip().lower()
         if "topics" in body:
             err = _validate_topics(body.get("topics"))
             if err:
@@ -19567,6 +19840,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_reddit(body)
         if bare == "/notes":
             return self._handle_create_note(body)
+        if bare in ("/import-list/preview", "/import-list"):
+            return self._handle_import_list(body, start=bare == "/import-list")
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:

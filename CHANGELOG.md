@@ -10,6 +10,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Import a list.** Paste a list link in Sources > **Import a list** and
+  Uoink queues every video in it for a normal capture, transcripts and all.
+  It reads a HackerTube playlist, category, area or the whole collection best
+  first ([hackertube.org](https://hackertube.org)), a Hacker News thread
+  (through the Algolia HN API), a Reddit thread (public .json) or a YouTube
+  playlist (yt-dlp's flat listing, no API key). The dialog previews the batch
+  ("Found 37 videos, 5 already in your library") before one Import button.
+  Batches are 50 videos by default and at most; **Next 50** (or `--offset`)
+  works through big lists such as a 2,000-episode playlist. Videos already in
+  the library are skipped and the rest go on the existing download queue,
+  which captures one video at a time. Each imported capture gets a source tag
+  (`hackertube`, `hn thread`, `reddit thread`, `youtube playlist`) and keeps
+  its note, such as HackerTube's "why HN likes it", shown in the reader. Also
+  `uoink import-list <url> [--limit N] [--offset N] [--preview]` and the
+  `import_list` MCP tool.
+  The MCP server now exposes 92 tools by default (35 in core mode).
+  HackerTube data is ODC-By 1.0: Uoink credits HackerTube and the
+  open-index/hacker-news dataset on every HackerTube item and fetches it at
+  import time; none of it is bundled.
+- For You has a **From lists you imported** panel: imported videos you
+  haven't opened yet, ranked against your own taste (your saved channels,
+  anchors and engagement; the imports themselves don't vote), with
+  HackerTube's quality score breaking ties.
+- **Card image** setting (Settings > Library and export): Library and For You
+  cards for saved videos show a screenshot from the middle of the video by
+  default, or the original thumbnail. Existing captures switch only when a
+  screenshot near the halfway mark is already saved; nothing is downloaded
+  again, and videos without one keep their thumbnail.
+
 ### Fixed
 
 - A silent Windows install or upgrade, such as a winget upgrade, now starts the

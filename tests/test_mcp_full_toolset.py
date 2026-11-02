@@ -35,7 +35,7 @@ def call(name, args):
     return body
 
 
-@pytest.mark.parametrize("mode,count", [("default", 91), ("full", 91), ("core", 35), ("unknown", 91)])
+@pytest.mark.parametrize("mode,count", [("default", 92), ("full", 92), ("core", 35), ("unknown", 92)])
 def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
     env = _isolated_env(str(tmp_path))
     if mode == "default":
@@ -168,10 +168,10 @@ def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):
 
 
 def test_public_manifest_advertises_full_default():
-    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.10.0", tool_count=91)
+    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.10.0", tool_count=92)
     assert manifest["transports"] == ["stdio", "http"]
-    assert manifest["stdio_tool_count"] == 91
-    assert manifest["stdio_toolsets"] == {"full": 91, "core": 35}
+    assert manifest["stdio_tool_count"] == 92
+    assert manifest["stdio_toolsets"] == {"full": 92, "core": 35}
 
 
 def test_inventory_checker_fails_closed_on_missing_tool(monkeypatch):
@@ -257,7 +257,7 @@ def test_http_and_stdio_list_identical_client_schemas(local_backend, monkeypatch
     fields = ("name", "description", "inputSchema")
     assert [{k: t[k] for k in fields} for t in listed] == [
         {k: t[k] for k in fields} for t in stdio]
-    assert len(listed) == len(tools.TOOL_REGISTRY) == 91
+    assert len(listed) == len(tools.TOOL_REGISTRY) == 92
     changed = set()
     for tool in listed:
         schema = tool["inputSchema"]

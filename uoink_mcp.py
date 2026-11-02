@@ -8,7 +8,7 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The default full toolset serves all 91 tools in TOOL_REGISTRY, with the same
+The default full toolset serves all 92 tools in TOOL_REGISTRY, with the same
 names, descriptions, schemas, titles and annotations; three schemas with a
 top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
 serves the previous 35 tools. Those tools remain first, in their original

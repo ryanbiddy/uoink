@@ -4745,6 +4745,48 @@
     },
     {
       "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "description": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "hackertube.org page (/p/<slug>, /c/<id>, /a/<id>, /watch/<id>, / or /browse), news.ycombinator.com/item?id=... thread, reddit.com/r/<sub>/comments/... thread, or youtube.com/playlist?list=... URL."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 50,
+            "description": "Videos to read in this batch, 1-50; default 50."
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Zero-based position in the list to start from; use next_offset from the previous call for the next batch."
+          },
+          "preview_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, count and list the batch without queueing anything."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "name": "import_list",
+      "title": "Import a list of videos"
+    },
+    {
+      "annotations": {
         "destructiveHint": false,
         "idempotentHint": true,
         "openWorldHint": false,

@@ -1,6 +1,6 @@
 # MCP tool annotations
 
-All 91 stdio tools have a title and explicit MCP hints. HTTP tools with the same
+All 92 stdio tools have a title and explicit MCP hints. HTTP tools with the same
 names carry identical titles and hints in `uoink_mcp_tools.TOOL_REGISTRY`.
 
 Hints describe successful calls and their possible effects, including queued
@@ -100,6 +100,7 @@ saved analysis, transcripts or published corpora also use `destructiveHint=true`
 | `uoink_x` | Capture X post | false | true | false | true | Fetches and saves X text when X text capture is enabled. Recapture can replace the existing source snapshot. |
 | `uoink_page` | Capture web page | false | true | false | true | Fetches an allowed public page and saves it; private-network checks remain enforced. Recapture can replace the existing source snapshot. |
 | `uoink_reddit_thread` | Capture Reddit thread | false | true | false | true | Fetches a public Reddit thread and saves filtered comments. Recapture can replace the existing source snapshot. |
+| `import_list` | Import a list of videos | false | false | false | true | Reads a public list and queues videos the library doesn't have; never replaces a saved capture. Repeats can record another import. |
 | `list_allowed_sites` | List allowed sites | true | false | true | false | Reads the saved site allowlist. |
 | `add_allowed_site` | Add allowed site | false | false | true | true | Adds a unique host pattern, authorizing later page fetches; repeats reuse it. |
 | `remove_allowed_site` | Remove allowed site | false | true | true | false | Removes a site pattern; repeating leaves it absent. |

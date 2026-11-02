@@ -77,7 +77,7 @@ def test_initialize_with_modern_metadata_selects_legacy(tmp_path):
         assert "resultType" not in result
         client.send({"jsonrpc": "2.0", "method": "notifications/initialized"})
         listing = client.request(2, "tools/list")["result"]
-        assert len(listing["tools"]) == 91 and "resultType" not in listing
+        assert len(listing["tools"]) == 92 and "resultType" not in listing
         assert client.request(3, "tools/list", modern_params())["error"]["code"] == -32600
         assert client.request(4, "ping")["result"] == {}
         client.assert_quiet()
@@ -181,7 +181,7 @@ def test_installed_selfcheck_reports_actual_protocol(tmp_path, modern):
                            capture_output=True, text=True, encoding="utf-8", timeout=30)
     assert child.returncode == 0, child.stderr
     evidence = json.loads(child.stdout)
-    assert evidence["ok"] and evidence["tools"] == 91, evidence
+    assert evidence["ok"] and evidence["tools"] == 92, evidence
     assert evidence["protocol_era"] == ("modern" if modern else "legacy")
     assert evidence["protocol_version"] == ("2026-07-28" if modern else "2024-11-05")
     assert evidence["opening_method"] == ("server/discover" if modern else "initialize")

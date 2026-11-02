@@ -150,6 +150,7 @@ EXPECTED_STDIO_TOOLS = (
     "uoink_x",
     "uoink_page",
     "uoink_reddit_thread",
+    "import_list",
     "list_allowed_sites",
     "add_allowed_site",
     "remove_allowed_site",

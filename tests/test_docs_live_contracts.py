@@ -38,7 +38,7 @@ def test_documented_transport_counts_match_both_live_registries(tmp_path) -> Non
     # Phase 3 source-subscription tools (run AM) + get_library_activity (Phase 5 Part A)
     # + three Phase 4 read tools (run AV-1) + two Phase 4 brief tools (run AV-2)
     # + the Phase 6 cited export tool (run BC-2) + local playbook input (T3).
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 91
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 92
 
 
 def test_discovery_manifest_privacy_security_and_transport_contracts(tmp_path) -> None:
@@ -78,10 +78,10 @@ def test_discovery_manifest_privacy_security_and_transport_contracts(tmp_path) -
     with StdioClient.launch(tmp_path) as client:
         client.initialize()
         stdio = client.request(2, "tools/list")["result"]["tools"]
-    assert len(stdio) == 91
+    assert len(stdio) == 92
     audit = (ROOT / "docs/mcp-tool-annotations.md").read_text(encoding="utf-8")
     manifest = json.loads((ROOT / ".mcpb/manifest.json").read_text(encoding="utf-8"))
-    assert manifest["manifest_version"] == "0.4" and len(manifest["tools"]) == 91
+    assert manifest["manifest_version"] == "0.4" and len(manifest["tools"]) == 92
     for name, idempotent in (("discover_candidates", False), ("queue_discovered", True)):
         spec = uoink_mcp_tools.TOOL_REGISTRY[name]
         assert spec.annotations == {"readOnlyHint": False, "destructiveHint": False,
@@ -93,7 +93,7 @@ def test_discovery_manifest_privacy_security_and_transport_contracts(tmp_path) -
         assert f"| `{name}` |" in audit
         bundled = next(t for t in manifest["tools"] if t["name"] == name)
         assert set(bundled) == {"name", "description"}
-    assert "All 91 stdio tools" in audit
+    assert "All 92 stdio tools" in audit
 
 
 def test_discovery_docs_disclose_saved_request_and_failure_receipts() -> None:

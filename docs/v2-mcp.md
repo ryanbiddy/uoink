@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink serves the same tool registry over both MCP transports:
 
-- Supported stdio registry: **91 tools**.
-- Local HTTP/OpenAPI registry: **91 tools**.
+- Supported stdio registry: **92 tools**.
+- Local HTTP/OpenAPI registry: **92 tools**.
 
 Stdio uses the SDK's native dual-era runner. Existing clients can initialize
 with `2024-11-05`, `2025-03-26`, `2025-06-18` or `2025-11-25`, then send
@@ -87,7 +87,7 @@ still answer.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all
-91 schemas fit; inbound requests and tool results retain their existing caps.
+92 schemas fit; inbound requests and tool results retain their existing caps.
 Work-queue mutations use their service's lease, transaction and operation-key
 bounds; they do not inherit a read timeout that could abandon a committed write.
 
@@ -1631,6 +1631,14 @@ Arguments: `url`, `render_mode`, `include_screenshot`, `follow_links_depth`. The
 Fetch a thread via its public .json (no API key, no OAuth), flatten the comment tree with a depth limit and a score threshold, and persist it as a yoink with source_type='reddit_thread'. Renders as Post -> Top comments -> nested replies so search and facets work on the conversation. Runs on-device; no allowlist gate.
 
 Arguments: `url`, `depth_limit`, `score_threshold`. The registry schema in `tools/list` defines required fields and bounds.
+
+### import_list
+
+Queue every video from a list source for normal capture: a HackerTube playlist (`/p/<slug>`), category (`/c/<id>`), area (`/a/<id>`), video, or the whole collection best first; a Hacker News thread (read through the Algolia HN API); a Reddit thread (public .json); or a YouTube playlist (yt-dlp flat listing, no API key). Reads one batch of at most 50 videos, skips anything already in the library, and adds the rest to the background download queue, which captures one video per pass. `offset` with the returned `next_offset` works through big lists, such as a playlist of 2,000 episodes, 50 at a time. `preview_only` counts without queueing. Each imported capture gets a source tag (`hackertube`, `hn thread`, `reddit thread`, `youtube playlist`) and keeps its note, such as HackerTube's "why HN likes it", which For You uses to rank unopened imports against your taste.
+
+HackerTube data is ODC-By 1.0: credit HackerTube (hackertube.org) and the open-index/hacker-news dataset. Uoink stores the credit line with every HackerTube item.
+
+Arguments: `url`, `limit`, `offset`, `preview_only`. The registry schema in `tools/list` defines required fields and bounds.
 
 ### list_allowed_sites
 

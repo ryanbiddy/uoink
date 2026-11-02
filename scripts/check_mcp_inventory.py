@@ -27,7 +27,7 @@ def literal_pin(path: str, name: str):
 
 def check() -> None:
     names = tools.stdio_tool_names()
-    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 91
+    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 92
     assert names[:35] == tools.CORE_STDIO_TOOLS
     assert tools.stdio_tool_names("core") == tools.CORE_STDIO_TOOLS
     doc = (ROOT / "docs/v2-mcp.md").read_text(encoding="utf-8")
@@ -47,13 +47,18 @@ def check() -> None:
         assert all(type(v) is bool for v in spec.annotations.values()), name
     for path in ("README.md", "CHANGELOG.md"):
         text = (ROOT / path).read_text(encoding="utf-8")
+        pattern = r"MCP server[^\n]*?\b(\d+)\s+tools\b"
         if path == "CHANGELOG.md":
-            # Check only Unreleased and the current release; history is immutable.
+            # History is immutable. Unreleased states the count when it
+            # changes; otherwise the current release's statement must hold.
             text = text.split("## [Unreleased]", 1)[1]
             releases = list(re.finditer(r"^## \[", text, re.M))
-            if len(releases) > 1:
+            unreleased = text[:releases[0].start()] if releases else text
+            if re.search(pattern, unreleased, re.I):
+                text = unreleased
+            elif len(releases) > 1:
                 text = text[:releases[1].start()]
-        counts = [int(n) for n in re.findall(r"MCP server[^\n]*?\b(\d+)\s+tools\b", text, re.I)]
+        counts = [int(n) for n in re.findall(pattern, text, re.I)]
         assert counts and all(n == len(names) for n in counts), (path, counts)
     print(f"MCP inventory OK: full={len(names)}, core=35; docs, bundle, receipt and metadata agree")
 

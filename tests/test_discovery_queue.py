@@ -186,7 +186,7 @@ def test_stdio_discovery_serves_other_requests_and_cancellation(adapter, monkeyp
             assert not pending.done(), "discovery blocked the stdio event loop"
             result = await asyncio.wait_for(handler_for(handlers, "tools/list")(
                 types.ListToolsRequest(method="tools/list")), 1)
-            assert len(result.tools) == 91
+            assert len(result.tools) == 92
             assert tools.DISCOVERY_TOOL_NAMES <= {tool.name for tool in result.tools}
             assert not pending.done()
             if cancel:
