@@ -3,6 +3,21 @@ $ErrorActionPreference = 'Stop'
 $env:UOINK_ISOLATED_PROFILE = ''
 $events = [System.Collections.Generic.List[string]]::new()
 $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+# 'scenario:principal' picks how the existing task's Principal.UserId reads back.
+$principalKind = 'full'
+if ($Scenario -match '^(?<base>[^:]+):(?<kind>.+)$') { $Scenario = $Matches.base; $principalKind = $Matches.kind }
+$accountName = ($identity.Name -split '\\', 2)[-1]
+$principalUser = switch ($principalKind) {
+    'full' { $identity.Name }
+    'bare' { $accountName }
+    'sid' { $identity.User.Value }
+    'upper' { $identity.Name.ToUpperInvariant() }
+    'other-user' { 'UOINK-TEST-HOST\uoink-test-other' }
+    'other-bare' { 'uoink-test-other' }
+    'other-domain' { 'UOINK-TEST-HOST\' + $accountName }
+    'other-sid' { 'S-1-5-21-1000000000-1000000000-1000000000-1999' }
+    default { throw "Unknown principal kind [$principalKind]" }
+}
 $expectedName = 'Uoink Helper-' + $identity.User.Value
 $expectedArgument = '"{0}" --startup' -f (Join-Path $InstallDir 'uoink_supervisor.py')
 $runValue = '"{0}" "{1}"' -f (Join-Path $InstallDir 'python\pythonw.exe'), (Join-Path $InstallDir 'server.py')
@@ -10,7 +25,7 @@ $global:recoveryFixtureTask = $null
 if ($Scenario -in @('update', 'unregister', 'disable', 'status', 'foreign', 'unregister-preview', 'ownership', 'ownership-disabled', 'ownership-foreign')) {
     $global:recoveryFixtureTask = [pscustomobject]@{
         Actions = @([pscustomobject]@{Arguments=$expectedArgument})
-        Principal = [pscustomobject]@{UserId=$identity.Name}
+        Principal = [pscustomobject]@{UserId=$principalUser}
         State = 'Ready'
     }
 }
@@ -25,7 +40,7 @@ function Get-ScheduledTask {
         if ($Scenario -eq 'legacy-task') {
             return [pscustomobject]@{
                 Actions=@([pscustomobject]@{Arguments=('"{0}"' -f (Join-Path $InstallDir 'server.py'))})
-                Principal=[pscustomobject]@{UserId=$identity.Name}
+                Principal=[pscustomobject]@{UserId=$principalUser}
                 State='Ready'
             }
         }

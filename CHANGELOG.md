@@ -48,6 +48,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the default-checked finish page box. It starts with no splash, dashboard or
   ready toast. The stop file setup leaves behind no longer holds back the next
   login start, while a real Quit is still honored.
+- Upgrading on Windows no longer shows "Uoink could not register crash
+  recovery". Task Scheduler reports a local account's task owner as the bare
+  user name, which the owner check did not match against `MACHINE\user`, so
+  every upgrade refused to refresh its own login task. The check now accepts
+  the full name, the SID, or the bare name of the current account, and still
+  refuses a task owned by another user or another install. The legacy
+  `Uoink Helper` task cleanup uses the same check. The next upgrade fixes an
+  affected install with no extra steps; login startup kept working throughout.
 
 ### Changed
 
