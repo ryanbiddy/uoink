@@ -1,12 +1,19 @@
 """Start the real stdio server using only disposable container state."""
 from pathlib import Path
 import os
+import subprocess
 import sys
+
+# Creates the library the way a first capture does. Bounded reads
+# (resources/list, search_library) never create index.db, so without this a
+# fresh container refuses them with library_unavailable instead of empty results.
+_CREATE_EMPTY_LIBRARY = "import server; server._get_index().close()"
 
 
 def main():
     app = Path(__file__).resolve().parents[1]
-    root = Path("/tmp/uoink")
+    # Tests point UOINK_CONTAINER_ROOT at a temporary directory; images use /tmp/uoink.
+    root = Path(os.environ.get("UOINK_CONTAINER_ROOT") or "/tmp/uoink")
     # Explicit isolation must exist before importing any product module.
     paths = {
         "HOME": root / "home",
@@ -26,6 +33,9 @@ def main():
     )
     # Glama introspects the ordinary default toolset. No helper is launched.
     os.environ.pop("UOINK_MCP_TOOLSET", None)
+    # Keep stdout clean for the protocol: setup diagnostics go to stderr.
+    subprocess.run([sys.executable, "-B", "-c", _CREATE_EMPTY_LIBRARY],
+                   cwd=app, stdin=subprocess.DEVNULL, stdout=sys.stderr, check=True)
     os.execv(sys.executable, [sys.executable, "-B", str(app / "uoink_mcp.py")])
 
 
