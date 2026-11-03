@@ -1,21 +1,25 @@
 # Uoink
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-C2410C.svg)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release)](https://github.com/ryanbiddy/uoink/releases/latest)
-[![Platform: Windows and Mac](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B-0A0A0A.svg)](https://uoink.app/install)
-[![MCP server](https://img.shields.io/badge/MCP-server-FF3D00.svg)](https://uoink.app/mcp)
-[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/ryanbiddy/uoink)
+[![Platform: Windows and Mac](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B-0A0A0A.svg)](https://uoink.app/get)
 [![ryanbiddy/uoink MCP server](https://glama.ai/mcp/servers/ryanbiddy/uoink/badges/score.svg)](https://glama.ai/mcp/servers/ryanbiddy/uoink)
-[![Website: uoink.app](https://img.shields.io/badge/web-uoink.app-C2410C.svg)](https://uoink.app)
 
-**Save the YouTube videos, podcasts and articles you study. Your AI searches them and cites the timestamp.**
+**A YouTube transcript MCP server that remembers.** Uoink saves YouTube videos, podcasts, X posts, Reddit threads and web pages with their full transcripts to a library on your computer. Claude, Cursor or Codex then searches all of it and cites the exact timestamp.
 
-Free, open source and local on Windows: transcripts, frames and comments land on your disk as Markdown and JSON, ready for Claude, Cursor, Codex or any MCP client.
+Free and open source (MIT). Windows 10/11 and Mac (Apple silicon, macOS 15+). No account, no Uoink cloud. Videos without captions are transcribed on your machine with Whisper.
 
-Free, open source (MIT), and local-first: no account, no Uoink cloud, and anonymous usage counts stay off unless you turn them on. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
+## Quick start
 
-- **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
-- **Status:** Windows 10/11, plus a Mac preview (Apple Silicon, macOS 15 or later) that Apple has notarized. The extension sideloads from the release; it is not on the Chrome Web Store yet. The Windows installer is unsigned, so SmartScreen will warn on first run.
+1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`.
+2. **Connect your AI:** `uoink connect claude-code`. For other clients run `uoink connect --list`; Claude Desktop can use the `.mcpb` extension from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
+3. **Ask:** *"uoink https://youtu.be/… and tell me where they explain the eval setup."* Later: *"which of my saved talks disagreed about that?"*
+
+Your AI gets the quote and the minute, not a guess. Every saved source stays on disk as Markdown and JSON you can open yourself.
+
+- **Website:** https://uoink.app · **Developers:** https://uoink.app/developers · Also listed on [mcpservers.org](https://mcpservers.org/servers/ryanbiddy/uoink) and the official MCP registry.
+- **Good to know:** the Windows installer is unsigned, so SmartScreen asks first (choose **More info → Run anyway**). The browser extension loads from the app's setup screen; it isn't on the Chrome Web Store yet. Anonymous usage counts stay off unless you turn them on.
+
+If Uoink saves you time, a ⭐ helps other people find it.
 
 ## Why Uoink
 
