@@ -53,6 +53,13 @@ def test_collector_uses_dom_and_worker_messages_only():
         assert marker in script
     assert "MutationObserver" in script
     assert "event.isTrusted" in script
+    assert "globalThis.__UOINK_SAVES_TEST__ === true" in script
+    assert 'attachShadow({ mode: "closed" })' in script
+    assert "characterData: false" in script
+    assert 'navigation.addEventListener("navigatesuccess", syncPage)' in script
+    assert "document.hidden" in script
+    assert "closedKey" in script
+    assert "controls.close.disabled" not in script
 
 
 def test_worker_routes_and_http_helpers_are_wired():
@@ -63,6 +70,12 @@ def test_worker_routes_and_http_helpers_are_wired():
     for function in ("postStageSaves", "postImportList"):
         assert f"STC.{function}(" in background
         assert re.search(rf"^\s+{function},$", extract, re.MULTILINE)
+    assert "const SAVES_STAGE_BODY_MAX = 60000;" in background
+    assert "const SAVES_STAGE_CHUNK_MAX = 500;" in background
+    assert "JSON.stringify(body).length" in background
+    assert "append_to" in background and "append_to" in extract
+    assert "msg.items.length < 1" in background
+    assert "msg.offset > 100000" in background
 
 
 def test_store_allowlist_includes_saves_script():

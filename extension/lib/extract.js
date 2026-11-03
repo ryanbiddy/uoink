@@ -317,8 +317,10 @@
     }
   }
 
-  function postStageSaves(source, items) {
-    return postSavesRequest("/import-list/stage", { source, items });
+  function postStageSaves(source, items, appendTo) {
+    return postSavesRequest("/import-list/stage", {
+      source, items, ...(appendTo ? { append_to: appendTo } : {}),
+    });
   }
 
   function postImportList(url, offset, limit) {

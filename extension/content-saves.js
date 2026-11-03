@@ -36,7 +36,7 @@
   }
 
   // Tests can exercise parsing without a DOM, extension APIs, or networking.
-  if (globalThis.__UOINK_SAVES_TEST__) {
+  if (globalThis.__UOINK_SAVES_TEST__ === true) {
     globalThis.__UOINK_SAVES_HELPERS__ = { parseYouTubeId, normalizeXStatus, normalizeRedditPermalink };
     return;
   }
@@ -47,9 +47,9 @@
   const PREFIX = "uoink-saves-";
   const items = new Map();
   let active = null;
-  let closed = false;
+  let closedKey = null;
+  let host = null;
   let panel = null;
-  let style = null;
   let controls = null;
   let observer = null;
   let collectTimer = null;
@@ -88,27 +88,27 @@
     if (!controls) return;
     setText(controls.heading, `Uoink: ${items.size} ${active.label} found`);
     setText(controls.scroll, scrollTimer === null ? "Auto-scroll" : "Stop");
-    setText(controls.send, `Send ${items.size} to Uoink`);
+    setText(controls.send, batch && !batch.succeeded ? "Retry" : `Send ${items.size} to Uoink`);
     setText(controls.scrolling, scrollTimer !== null ? `Scrolling... ${items.size} found`
       : items.size === MAX_ITEMS ? "5,000-item limit reached." : "");
     controls.scroll.disabled = busy || items.size >= MAX_ITEMS;
-    controls.send.disabled = !!(busy || !items.size || (batch && batch.nextOffset !== null)
-      || (batch && items.size <= stagedSize));
-    controls.next.hidden = !batch || batch.nextOffset === null;
+    controls.send.disabled = !!(busy || !items.size || (batch && batch.succeeded
+      && (batch.nextOffset !== null || items.size <= stagedSize)));
+    controls.next.hidden = !batch || !batch.succeeded || batch.nextOffset === null;
     controls.next.disabled = busy;
-    controls.close.disabled = busy;
     panel.setAttribute("aria-busy", String(busy));
     setText(controls.progress, batch ? `${batch.done} of ${batch.total} sent` : "");
   }
 
-  function remember(id, value, metadata = {}) {
+  function remember(id, value) {
     if (!id || !value || value.length > 300 || items.has(id) || items.size >= MAX_ITEMS) return;
-    items.set(id, { value, ...metadata });
+    items.set(id, value);
   }
 
   function collect() {
     if (collectTimer !== null) clearTimeout(collectTimer);
     collectTimer = null;
+    if (document.hidden) return;
     const previous = active;
     syncPage();
     if (!active || active !== previous || items.size >= MAX_ITEMS) return;
@@ -118,12 +118,7 @@
         for (const link of row.querySelectorAll('a#video-title, a[href*="watch?v="]')) {
           const id = parseYouTubeId(link.getAttribute("href"));
           if (!id) continue;
-          const title = row.querySelector("a#video-title");
-          const channel = row.querySelector("#channel-name, ytd-channel-name");
-          remember(id, id, {
-            title: (title && (title.getAttribute("title") || title.textContent) || "").trim().slice(0, 300),
-            channel: (channel && channel.textContent || "").trim().slice(0, 200),
-          });
+          remember(id, id);
           break;
         }
         if (items.size >= MAX_ITEMS) break;
@@ -131,6 +126,7 @@
     } else if (active.source === "x_bookmarks") {
       for (const tweet of document.querySelectorAll('article[data-testid="tweet"]')) {
         for (const time of tweet.querySelectorAll("time")) {
+          if (time.closest('article[data-testid="tweet"]') !== tweet) continue;
           const link = time.closest("a[href]");
           const url = link && normalizeXStatus(link.getAttribute("href"));
           if (url) {
@@ -141,7 +137,9 @@
         if (items.size >= MAX_ITEMS) break;
       }
     } else {
-      for (const row of document.querySelectorAll('shreddit-post[permalink], .thing[data-permalink], a[href*="/comments/"]')) {
+      const feed = document.querySelector("main") || document.querySelector("#siteTable")
+        || document.querySelector("shreddit-feed") || document;
+      for (const row of feed.querySelectorAll('shreddit-post[permalink], .thing[data-permalink], a[href*="/comments/"]')) {
         const url = normalizeRedditPermalink(row.getAttribute("permalink")
           || row.getAttribute("data-permalink") || row.getAttribute("href"));
         if (url) {
@@ -156,7 +154,7 @@
   }
 
   function scheduleCollect(records) {
-    if (!active || collectTimer !== null || items.size >= MAX_ITEMS) return;
+    if (document.hidden || !active || collectTimer !== null || items.size >= MAX_ITEMS) return;
     if (records.every((record) => panel.contains(record.target))) return;
     collectTimer = setTimeout(collect, Math.max(0, COLLECT_MS - (Date.now() - lastCollect)));
   }
@@ -212,13 +210,14 @@
     if (!active || active !== previous || busy) return;
     stopScrolling();
     if (!next) collect();
-    if (next ? !batch || batch.nextOffset === null : !items.size) return;
+    if (next ? !batch || !batch.succeeded || batch.nextOffset === null : !items.size) return;
+    const retry = !next && batch && !batch.succeeded;
     const page = active;
     const offset = next ? batch.nextOffset : 0;
     const size = items.size;
-    const message = next ? { type: "stcImportNext", url: batch.url, offset }
+    const message = next || retry ? { type: "stcImportNext", url: batch.url, offset }
       : { type: "stcStageSaves", source: page.source,
-        items: Array.from(items.values(), (item) => item.value).slice(0, MAX_ITEMS) };
+        items: Array.from(items.values()).slice(0, MAX_ITEMS) };
     busy = true;
     setText(controls.status, "Sending to Uoink...");
     render();
@@ -226,15 +225,18 @@
       const result = await sendMessage(message);
       syncPage();
       if (active !== page) return;
-      if (!next && /^uoink-saves:[0-9a-f]{16}$/.test(result.url)) {
+      if (!next && !retry && /^uoink-saves:[0-9a-f]{16}$/.test(result.url)) {
         stagedSize = size;
-        batch = { url: result.url, total: result.total ?? result.count, done: 0, nextOffset: 0 };
+        batch = { url: result.url, total: Number(result.total ?? result.count) || 0,
+          done: 0, nextOffset: null, succeeded: false };
       }
       if (!result.ok) throw new Error(result.error || "Uoink couldn't import these saves.");
       if (batch) {
-        batch.total = result.total;
-        batch.done = Math.min(result.total, offset + result.found);
-        batch.nextOffset = result.next_offset;
+        batch.total = Number(result.total) || 0;
+        batch.done = Math.min(batch.total, offset + (Number(result.found) || 0));
+        batch.nextOffset = Number.isSafeInteger(result.next_offset) && result.next_offset >= 0
+          ? result.next_offset : null;
+        batch.succeeded = true;
       }
       setText(controls.status, result.message || "Sent to Uoink.");
     } catch (error) {
@@ -265,10 +267,15 @@
   }
 
   function createPanel() {
-    style = document.createElement("style");
+    host = document.createElement("div");
+    host.id = "uoink-saves-host";
+    host.style.cssText = "all: initial !important; position: fixed !important; right: 20px !important; "
+      + "bottom: 20px !important; z-index: 2147483647 !important;";
+    const shadow = host.attachShadow({ mode: "closed" });
+    const style = document.createElement("style");
     style.textContent = `
-      #uoink-saves-panel { all: initial; position: fixed; right: 20px; bottom: 20px;
-        z-index: 2147483647; box-sizing: border-box; width: 320px; max-width: calc(100vw - 40px);
+      #uoink-saves-panel { all: initial; display: block; position: relative;
+        box-sizing: border-box; width: 320px; max-width: calc(100vw - 40px);
         padding: 16px; border: 1px solid #EBD5C5; border-radius: 12px; background: #FFFFFF;
         color: #0A0A0A; font: 13px/1.5 system-ui, sans-serif; box-shadow: 0 4px 14px #0004; }
       #uoink-saves-panel * { box-sizing: border-box; }
@@ -290,7 +297,7 @@
       #uoink-saves-panel .uoink-saves-scrolling { display: block; margin-top: 8px; overflow-wrap: anywhere; }
       #uoink-saves-panel [hidden], #uoink-saves-panel :empty { display: none; }
     `;
-    document.head.appendChild(style);
+    shadow.appendChild(style);
     panel = element("section", "panel");
     panel.id = PREFIX + "panel";
     panel.setAttribute("aria-label", "Uoink saves");
@@ -302,7 +309,7 @@
     status.setAttribute("aria-live", "polite");
     const progress = element("div", "progress");
     const actions = element("div", "actions");
-    const close = button("close", "×", () => { closed = true; deactivate(); });
+    const close = button("close", "×", () => { closedKey = active.key; deactivate(); });
     close.setAttribute("aria-label", "Close Uoink saves panel");
     const scroll = button("scroll", "Auto-scroll", toggleScrolling);
     const sendButton = button("send", "", () => send(false));
@@ -310,7 +317,8 @@
     for (const node of [scroll, sendButton, next]) actions.appendChild(node);
     for (const node of [heading, close, scrolling, actions, status, progress]) panel.appendChild(node);
     controls = { heading, scrolling, status, progress, close, scroll, send: sendButton, next };
-    document.body.appendChild(panel);
+    shadow.appendChild(panel);
+    (document.documentElement || document.body).appendChild(host);
     render();
   }
 
@@ -320,16 +328,17 @@
     if (collectTimer !== null) clearTimeout(collectTimer);
     collectTimer = null;
     stopScrolling();
-    if (panel) panel.remove();
-    if (style) style.remove();
-    panel = style = controls = active = batch = null;
+    if (host) host.remove();
+    host = panel = controls = active = batch = null;
     busy = false;
     stagedSize = 0;
     items.clear();
   }
 
   function syncPage() {
-    const page = closed ? null : detectPage();
+    const page = detectPage();
+    if (closedKey !== (page && page.key)) closedKey = null;
+    if (page && page.key === closedKey) return;
     if (page && active && page.key === active.key) return;
     if (!page && !active) return;
     deactivate();
@@ -338,14 +347,15 @@
     createPanel();
     collect();
     observer = new MutationObserver(scheduleCollect);
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true,
+    observer.observe(document.body, { childList: true, subtree: true, characterData: false,
       attributes: true, attributeFilter: ["href", "permalink", "data-permalink"] });
   }
 
   document.addEventListener("yt-navigate-finish", syncPage);
   window.addEventListener("popstate", syncPage);
+  if (globalThis.navigation) navigation.addEventListener("navigatesuccess", syncPage);
   // Content scripts cannot reliably patch the page's isolated History API.
-  setInterval(syncPage, 1000);
+  setInterval(() => { if (!document.hidden) syncPage(); }, 1000);
   window.addEventListener("scroll", () => {
     if (scrollTimer !== null && window.scrollY < lastScrollY - 1) stopScrolling();
     lastScrollY = window.scrollY;
@@ -353,6 +363,9 @@
   window.addEventListener("wheel", (event) => {
     if (event.isTrusted && event.deltaY < 0) stopScrolling();
   }, { passive: true });
-  document.addEventListener("visibilitychange", () => { if (document.hidden) stopScrolling(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopScrolling();
+    else { syncPage(); collect(); }
+  });
   syncPage();
 })();
