@@ -68,9 +68,11 @@ Run these steps on the person's PC. See [README](README.md#install) for details.
    3.12.0 and earlier it is a usage error, so use the absolute command and
    args that `uoink connect` prints instead.
 
-6. Ask the person to start **Uoink** from the Start menu. Silent install does not
-   launch the helper; local CLI reads and MCP work without it. For browser capture,
-   use the setup splash to copy the installed extension path, open
+6. On 3.13.0 and later a silent install starts the helper with no window; check
+   with `uoink status`. On 3.12.1 and earlier it does not, so ask the person to
+   start **Uoink** from the Start menu. Local CLI reads and MCP work without the
+   helper either way. For browser capture, have the person open **Uoink** from
+   the Start menu, use the setup splash to copy the installed extension path, open
    `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
    and select that folder. Then click Chrome's puzzle-piece **Extensions** icon
    and pin **Uoink**. The Chrome Web Store listing is pending.
