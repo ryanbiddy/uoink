@@ -36,6 +36,7 @@ def helper(tmp_path, monkeypatch):
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
     monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "library")
     monkeypatch.setattr(server, "SETTINGS_PATH", tmp_path / "settings.json")
+    monkeypatch.setattr(server, "_settings_path", lambda: server.SETTINGS_PATH)
     monkeypatch.setattr(server, "_classify_topic", lambda _: "Testing")
     monkeypatch.setattr(server, "_save_x_video_poster", lambda *a: None)
     monkeypatch.setattr(mcp, "_b", lambda: server)
@@ -176,6 +177,153 @@ def test_file_and_text_auto_detection(tmp_path, text, source):
     path.write_text(text, encoding="utf-8-sig")
     assert li.stage_saves_file(tmp_path, path)["source"] == source
     assert li.stage_saves_text(tmp_path, text)["source"] == source
+
+
+def test_three_text_chunks_equal_one_shot_stage(tmp_path):
+    text = '\ufeffVideo ID,Title\r\nsave0000001,"café\r\nsecond line"\r\nsave0000002,Next\r\n'
+    chunks = [text[:4], text[4:40], text[40:]]
+    one_shot = li.stage_saves_text(tmp_path, text, filename="watch-later.csv")
+    first = li.append_upload_chunk(tmp_path, chunks[0])
+    assert first["ok"] and len(first["upload_id"]) == 16
+    assert first["received_bytes"] == len(chunks[0].encode("utf-8"))
+    part = li._staged_path(tmp_path, f"upload-{first['upload_id']}.part")
+    second = li.append_upload_chunk(tmp_path, chunks[1], first["upload_id"])
+    assert second["upload_id"] == first["upload_id"]
+    assert second["received_bytes"] == len("".join(chunks[:2]).encode("utf-8"))
+    assert part.read_bytes() == "".join(chunks[:2]).encode("utf-8")
+    finished = li.finish_upload(tmp_path, chunks[2], first["upload_id"], filename="watch-later.csv")
+    assert not part.exists()
+    assert finished["count"] == one_shot["count"] == 2
+    assert li._load_stage(tmp_path, finished["stage_id"]) == li._load_stage(tmp_path, one_shot["stage_id"])
+
+
+@pytest.mark.parametrize("finish", [False, True])
+def test_upload_byte_cap_removes_part(tmp_path, monkeypatch, finish):
+    monkeypatch.setattr(li, "SAVES_FILE_MAX_BYTES", 6)
+    first = li.append_upload_chunk(tmp_path, "éé")
+    assert first["received_bytes"] == 4
+    assert li.append_upload_chunk(tmp_path, "é", first["upload_id"])["received_bytes"] == 6
+    part = li._staged_path(tmp_path, f"upload-{first['upload_id']}.part")
+    operation = li.finish_upload if finish else li.append_upload_chunk
+    with pytest.raises(li.ImportListError) as err:
+        operation(tmp_path, "x", first["upload_id"])
+    assert err.value.code == "too_large" and not part.exists()
+    with pytest.raises(li.ImportListError) as err:
+        operation(tmp_path, "é" * 4)
+    assert err.value.code == "too_large"
+    assert not list((tmp_path / "saves-staged").glob("*.part"))
+
+
+@pytest.mark.parametrize("upload_id", ["", "../bad", "a" * 15, "a" * 17, "g" * 16,
+                                      "a" * 16 + "\n", "a" * 16 + "/x", 42, []])
+def test_bad_upload_ids(tmp_path, upload_id):
+    for operation in (li.append_upload_chunk, li.finish_upload):
+        with pytest.raises(li.ImportListError) as err:
+            operation(tmp_path, "Video ID\n", upload_id)
+        assert err.value.code == "invalid_items"
+    assert not (tmp_path / "saves-staged").exists()
+
+
+def test_missing_upload_is_not_created_and_failed_parse_consumes_part(tmp_path):
+    for operation in (li.append_upload_chunk, li.finish_upload):
+        with pytest.raises(li.ImportListError) as err:
+            operation(tmp_path, "Video ID\n", "0123456789abcdef")
+        assert err.value.code == "not_found"
+    upload = li.append_upload_chunk(tmp_path, "not a saves file")
+    with pytest.raises(li.ImportListError) as err:
+        li.finish_upload(tmp_path, "", upload["upload_id"])
+    assert err.value.code == "empty_file"
+    assert not list((tmp_path / "saves-staged").glob("*.part"))
+
+
+def test_upload_cleanup_keeps_five_newest_parts(tmp_path, monkeypatch):
+    monkeypatch.setattr(li.time, "time", lambda: 10000)
+    staged = li.stage_saves(tmp_path, "watch_later", ["save0000001"])
+    parts = []
+    for i in range(7):
+        upload = li.append_upload_chunk(tmp_path, "Video ID\n")
+        part = li._staged_path(tmp_path, f"upload-{upload['upload_id']}.part")
+        os.utime(part, (9990 + i, 9990 + i))
+        parts.append(part)
+        assert len(list(part.parent.glob("*.part"))) <= 5
+    assert not any(part.exists() for part in parts[:2])
+    assert all(part.exists() for part in parts[2:])
+    assert li._load_stage(tmp_path, staged["stage_id"])["items"]
+
+
+def test_new_upload_removes_parts_older_than_an_hour(tmp_path, monkeypatch):
+    monkeypatch.setattr(li.time, "time", lambda: 10000)
+    old = li.append_upload_chunk(tmp_path, "Video ID\n")
+    part = li._staged_path(tmp_path, f"upload-{old['upload_id']}.part")
+    os.utime(part, (6399, 6399))
+    new = li.append_upload_chunk(tmp_path, "Video ID\n")
+    assert not part.exists()
+    assert li._staged_path(tmp_path, f"upload-{new['upload_id']}.part").exists()
+
+
+@pytest.mark.parametrize("name", ["../outside.json", "nested/stage.json", ".", ".."])
+def test_staged_path_rejects_traversal_and_nested_names(tmp_path, name):
+    with pytest.raises(li.ImportListError) as err:
+        li._staged_path(tmp_path, name)
+    assert err.value.code == "not_found"
+    with pytest.raises(li.ImportListError) as err:
+        li._staged_path(tmp_path, str(tmp_path / "outside.json"))
+    assert err.value.code == "not_found"
+
+
+def test_append_stage_items_merges_in_order_and_writes_atomically(tmp_path, monkeypatch):
+    staged = li.stage_saves(tmp_path, "x_bookmarks", [{"url": X_URL, "title": "Original"}],
+                            filename="saves.txt")
+    replaced = []
+    replace = os.replace
+    def observe(src, dst):
+        assert li._load_stage(tmp_path, staged["stage_id"])["items"][0]["title"] == "Original"
+        assert len(json.loads(Path(src).read_text(encoding="utf-8"))["items"]) == 2
+        replaced.append((src, dst))
+        replace(src, dst)
+    monkeypatch.setattr(li.os, "replace", observe)
+    result = li.append_stage_items(tmp_path, staged["url"], "x_bookmarks", [
+        {"url": "https://twitter.com/Synthetic/status/10001", "title": "Duplicate"},
+        {"id": "10002", "title": "Second"}, "10002", "bad", None])
+    assert result == {**staged, "count": 2}
+    assert len(replaced) == 1 and not replaced[0][0].exists()
+    data = li._load_stage(tmp_path, staged["stage_id"])
+    assert data["filename"] == "saves.txt"
+    assert [(row["item_key"], row["title"]) for row in data["items"]] == [
+        ("x:10001", "Original"), ("x:10002", "Second")]
+    assert len(list((tmp_path / "saves-staged").glob("*.json"))) == 1
+
+
+def test_append_stage_items_cap_and_sticky_truncation(tmp_path, monkeypatch):
+    monkeypatch.setattr(li, "SAVES_STAGE_MAX", 3)
+    items = [f"save{i:07d}" for i in range(5)]
+    staged = li.stage_saves(tmp_path, "watch_later", items[:2])
+    full = li.append_stage_items(tmp_path, staged["url"], "watch_later", items[1:3])
+    assert full["count"] == 3 and not full["truncated"]
+    duplicates = li.append_stage_items(tmp_path, staged["url"], "watch_later", items[:3])
+    assert duplicates == full
+    capped = li.append_stage_items(tmp_path, staged["url"], "watch_later", items[2:])
+    assert capped["count"] == 3 and capped["truncated"]
+    assert [row["item_key"] for row in li._load_stage(tmp_path, staged["stage_id"])["items"]] == items[:3]
+    assert li.append_stage_items(tmp_path, staged["url"], "watch_later", [items[0]]) == capped
+    truncated = li.stage_saves(tmp_path, "watch_later", items)
+    assert li.append_stage_items(tmp_path, truncated["url"], "watch_later", [])["truncated"]
+
+
+def test_append_stage_items_refusals_preserve_stage(tmp_path):
+    staged = li.stage_saves(tmp_path, "watch_later", ["save0000001"])
+    before = li._load_stage(tmp_path, staged["stage_id"])
+    for token, source, items, code in [
+        (staged["url"], "reddit_saved", [COMMENT], "invalid_items"),
+        (staged["url"], "watch_later", "save0000002", "invalid_items"),
+        ("uoink-saves:../bad", "watch_later", [], "invalid_url"),
+        (None, "watch_later", [], "invalid_url"),
+        ("uoink-saves:0123456789abcdef", "watch_later", [], "not_found"),
+    ]:
+        with pytest.raises(li.ImportListError) as err:
+            li.append_stage_items(tmp_path, token, source, items)
+        assert err.value.code == code
+    assert li._load_stage(tmp_path, staged["stage_id"]) == before
 
 
 def test_file_refusals_and_empty_inputs(tmp_path):
@@ -348,7 +496,8 @@ def test_stage_handler_uses_shared_parsers_and_errors(helper):
     assert not pending(helper)
 
 
-def test_stage_http_route_auth_and_large_file_body(helper):
+@pytest.mark.parametrize("final_done", [{"done": True}, {}])
+def test_stage_http_route_auth_and_chunks_use_normal_reader(helper, monkeypatch, final_done):
     handler = object.__new__(server.Handler)
     handler.path = "/import-list/stage"
     handler._reject_bad_host = lambda: False
@@ -357,16 +506,74 @@ def test_stage_http_route_auth_and_large_file_body(helper):
     # Rejected authentication must not even read a body.
     assert handler.do_POST() is None
     handler._require_token = lambda: True
-    text = "Video ID,Time Added\n" + "save0000001,synthetic timestamp\n" * 3000
-    raw = json.dumps({"csv_text": text, "filename": "watch-later.csv"}).encode()
+    reads = []
+    read = handler._read_json_body
+    def observe(*, strict=False):
+        reads.append(strict)
+        return read(strict=strict)
+    monkeypatch.setattr(handler, "_read_json_body", observe)
+    raw = json.dumps({"csv_text": "Video ID,Time Added\nsave0000001,now\n", "done": False}).encode()
+    handler.headers = {"Content-Type": "application/json", "Content-Length": str(len(raw))}
+    handler.rfile = io.BytesIO(raw)
+    status, data = handler.do_POST()
+    assert status == 200 and data["ok"] and data["received_bytes"] > 0
+    assert "url" not in data and reads == [True]
+    part = li._staged_path(server.DATA_ROOT, f"upload-{data['upload_id']}.part")
+    assert part.exists()
+    raw = json.dumps({"csv_text": "save0000002,now\n", "upload_id": data["upload_id"],
+                      "filename": "watch-later.csv", **final_done}).encode()
+    handler.headers["Content-Length"] = str(len(raw))
+    handler.rfile = io.BytesIO(raw)
+    status, data = handler.do_POST()
+    assert status == 200 and data["count"] == 2 and data["source"] == "watch_later"
+    assert data["label"] == "YouTube Watch Later" and reads == [True, True]
+    assert not part.exists() and not pending(helper)
+
+
+def test_stage_http_body_over_64kb_is_rejected_by_normal_reader(helper):
+    handler = object.__new__(server.Handler)
+    handler.path = "/import-list/stage"
+    handler._reject_bad_host = lambda: False
+    handler._require_token = lambda: True
+    handler._send_json = lambda status, payload: (status, payload)
+    raw = json.dumps({"csv_text": "x" * server.MAX_BODY_BYTES, "done": False}).encode()
     assert len(raw) > server.MAX_BODY_BYTES
     handler.headers = {"Content-Type": "application/json", "Content-Length": str(len(raw))}
     handler.rfile = io.BytesIO(raw)
     status, data = handler.do_POST()
-    assert status == 200 and data["count"] == 1 and data["source"] == "watch_later"
-    handler.path = "/import-list/preview"
+    assert status == 413 and data["error"] == f"Body too large (>{server.MAX_BODY_BYTES} bytes)"
+    assert handler.rfile.tell() == 0 and not handler._body_consumed
+    assert not (server.DATA_ROOT / "saves-staged").exists()
+
+
+@pytest.mark.parametrize("raw", [b'{"csv_text":"a","csv_text":"b"}',
+                                 b'{"csv_text":"a","done":NaN}', b'[]'])
+def test_stage_http_requires_strict_json(helper, raw):
+    handler = object.__new__(server.Handler)
+    handler.path = "/import-list/stage"
+    handler._reject_bad_host = lambda: False
+    handler._require_token = lambda: True
+    handler._send_json = lambda status, payload: (status, payload)
+    handler.headers = {"Content-Type": "application/json", "Content-Length": str(len(raw))}
     handler.rfile = io.BytesIO(raw)
-    assert handler.do_POST()[0] == 413  # Other routes retain their original cap.
+    assert handler.do_POST()[0] == 400
+    assert not (server.DATA_ROOT / "saves-staged").exists()
+
+
+def test_stage_handler_appends_items_and_rejects_bad_upload_fields(helper):
+    handler = object.__new__(server.Handler)
+    handler._send_json = lambda status, payload: (status, payload)
+    token = stage("x_bookmarks", [X_URL])
+    status, data = handler._handle_import_list(
+        {"items": [X_URL, "10002"], "source": "x_bookmarks", "append_to": token}, stage=True)
+    assert status == 200 and data["ok"] and data["count"] == 2
+    assert data["url"] == token and data["label"] == "X bookmarks"
+    for body in ({"csv_text": "x", "done": "false"},
+                 {"csv_text": "x", "done": False, "upload_id": "../bad"},
+                 {"csv_text": "x", "upload_id": "../bad"},
+                 {"source": "reddit_saved", "items": [POST], "append_to": token}):
+        status, data = handler._handle_import_list(body, stage=True)
+        assert status == 400 and data["code"] == "invalid_items"
 
 
 def test_mcp_import_file_items_and_token_paging(helper, tmp_path):

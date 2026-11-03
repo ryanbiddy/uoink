@@ -777,6 +777,7 @@ def _strict_json_route(bare: str) -> bool:
         bare == LIBRARY_INTENT_ROUTE
         or bare.startswith("/discovery/")
         or bare == "/playbooks/run"
+        or bare == "/import-list/stage"
         or bare == LIBRARY_MIRROR_INTENT_ROUTE
         or bare == LIBRARY_MIRROR_ROUTE
         or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
@@ -15387,34 +15388,6 @@ class Handler(BaseHTTPRequestHandler):
             raise Handler._BodyError(400, "Top-level JSON must be an object")
         return parsed
 
-    def _read_saves_stage_body(self) -> dict:
-        """Read POST /import-list/stage: strict JSON object, bounded size."""
-        ctype = (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
-        if ctype != "application/json":
-            raise Handler._BodyError(415, "Content-Type must be application/json")
-        try:
-            length = int(self.headers.get("Content-Length", "0"))
-        except ValueError:
-            raise Handler._BodyError(400, "Bad Content-Length")
-        if length < 0:
-            raise Handler._BodyError(400, "Bad Content-Length")
-        # A 5 MB text file can expand sixfold as JSON Unicode escapes; the
-        # staging parser separately enforces the decoded file cap.
-        cap = 6 * list_imports.SAVES_FILE_MAX_BYTES + MAX_BODY_BYTES
-        if length > cap:
-            raise Handler._BodyError(413, f"Body too large (>{cap} bytes)")
-        raw = self.rfile.read(length) if length else b"{}"
-        self._body_consumed = True
-        try:
-            parsed = json.loads(raw.decode("utf-8") or "{}",
-                                parse_constant=_reject_json_constant,
-                                object_pairs_hook=_reject_duplicate_json_keys)
-        except (UnicodeDecodeError, ValueError) as e:
-            raise Handler._BodyError(400, f"Bad JSON: {e}")
-        if not isinstance(parsed, dict):
-            raise Handler._BodyError(400, "Top-level JSON must be an object")
-        return parsed
-
     # ---- Methods ----
     def do_OPTIONS(self):
         if self._reject_bad_host():
@@ -17372,13 +17345,25 @@ class Handler(BaseHTTPRequestHandler):
                 if filename is not None and not isinstance(filename, str):
                     raise list_imports.ImportListError("filename must be a string.", "invalid_items")
                 if "csv_text" in body:
-                    staged = list_imports.stage_saves_text(
-                        DATA_ROOT, body["csv_text"], source=body.get("source"), filename=filename)
+                    done = body.get("done", True)
+                    if not isinstance(done, bool):
+                        raise list_imports.ImportListError("done must be a boolean.", "invalid_items")
+                    if not done:
+                        result = list_imports.append_upload_chunk(
+                            DATA_ROOT, body["csv_text"], upload_id=body.get("upload_id"))
+                        return self._send_json(200, result)
+                    staged = list_imports.finish_upload(
+                        DATA_ROOT, body["csv_text"], upload_id=body.get("upload_id"),
+                        source=body.get("source"), filename=filename)
                 else:
                     if not isinstance(body["items"], list):
                         raise list_imports.ImportListError("items must be an array.", "invalid_items")
-                    items = list_imports.parse_save_items(body.get("source"), body["items"])
-                    staged = list_imports.stage_saves(DATA_ROOT, body["source"], items, filename=filename)
+                    if "append_to" in body:
+                        staged = list_imports.append_stage_items(
+                            DATA_ROOT, body["append_to"], body.get("source"), body["items"])
+                    else:
+                        staged = list_imports.stage_saves(
+                            DATA_ROOT, body.get("source"), body["items"], filename=filename)
                 result = {"ok": True, **staged, "label": list_imports.SOURCE_LABELS[staged["source"]]}
             elif start:
                 result = _list_import_start(url, body.get("offset"), body.get("limit"))
@@ -20436,14 +20421,6 @@ class Handler(BaseHTTPRequestHandler):
         # the raw body itself.
         if bare == "/images":
             return self._handle_create_image()
-        if bare == "/import-list/stage":
-            # A saves file is bigger than the 64 KB body cap, so this route
-            # reads its own body with a larger, still bounded, cap.
-            try:
-                body = self._read_saves_stage_body()
-            except Handler._BodyError as e:
-                return self._send_json(e.status, {"ok": False, "error": e.message})
-            return self._handle_import_list(body, stage=True)
         try:
             body = self._read_json_body(strict=_strict_json_route(bare))
         except Handler._BodyError as e:
@@ -20517,8 +20494,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_reddit(body)
         if bare == "/notes":
             return self._handle_create_note(body)
-        if bare in ("/import-list/preview", "/import-list"):
-            return self._handle_import_list(body, start=bare == "/import-list")
+        if bare in ("/import-list/preview", "/import-list", "/import-list/stage"):
+            return self._handle_import_list(body, start=bare == "/import-list",
+                                            stage=bare == "/import-list/stage")
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:

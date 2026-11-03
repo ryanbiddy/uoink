@@ -44,6 +44,7 @@ import os
 import re
 import secrets
 import threading
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -102,6 +103,9 @@ REGISTRY_ITEM_CAP = 5000
 SAVES_STAGE_MAX = 5000
 SAVES_STAGE_CAP = 20
 SAVES_FILE_MAX_BYTES = 5 * 1024 * 1024
+SAVES_UPLOAD_CAP = 5
+SAVES_UPLOAD_TTL_SEC = 60 * 60
+_SAVES_ID_RE = re.compile(r"[0-9a-f]{16}")
 _STAGE_TOKEN_RE = re.compile(r"uoink-saves:([0-9a-f]{16})", re.IGNORECASE)
 _stage_lock = threading.Lock()
 USER_AGENT = "uoink/1.0 (local corpus tool; +https://uoink.app)"
@@ -409,10 +413,38 @@ def parse_reddit_saved_csv(text: str) -> list[dict]:
     return parse_save_items(SOURCE_REDDIT_SAVED, _csv_values(text, "permalink"))
 
 
+def _staged_path(data_root: Path, name: str) -> Path:
+    """Resolve a direct child of the staging directory before using it."""
+    try:
+        root = (Path(data_root) / "saves-staged").resolve()
+        path = (root / name).resolve()
+        if os.path.commonpath([str(root), str(path)]) == str(root) and path.parent == root:
+            return path
+    except (OSError, ValueError, RuntimeError):
+        pass
+    raise ImportListError("That staged saves path wasn't found.", "not_found")
+
+
+def _staged_files(data_root: Path, pattern: str) -> list[Path]:
+    """List only validated, contained stage or upload files for cleanup."""
+    files = []
+    for entry in (Path(data_root) / "saves-staged").glob(pattern):
+        ident = entry.stem.removeprefix("upload-") if entry.suffix == ".part" else entry.stem
+        if not _SAVES_ID_RE.fullmatch(ident):
+            continue
+        try:
+            path = _staged_path(data_root, entry.name)
+            if path.is_file():
+                files.append(path)
+        except ImportListError:
+            continue
+    return sorted(files, key=lambda p: (p.stat().st_mtime_ns, p.name), reverse=True)
+
+
 def _load_stage(data_root: Path | None, stage_id: str) -> dict:
-    if data_root is None or not re.fullmatch(r"[0-9a-f]{16}", stage_id):
+    if data_root is None or not isinstance(stage_id, str) or not _SAVES_ID_RE.fullmatch(stage_id):
         raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
-    path = Path(data_root) / "saves-staged" / f"{stage_id}.json"
+    path = _staged_path(data_root, f"{stage_id}.json")
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         if data["source"] not in SAVE_SOURCES or not isinstance(data["items"], list):
@@ -422,31 +454,127 @@ def _load_stage(data_root: Path | None, stage_id: str) -> dict:
         raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
 
 
+def _write_stage(data_root: Path, stage_id: str, data: dict) -> Path:
+    if not isinstance(stage_id, str) or not _SAVES_ID_RE.fullmatch(stage_id):
+        raise ImportListError("That staged saves list wasn't found.", "not_found")
+    path = _staged_path(data_root, f"{stage_id}.json")
+    tmp = _staged_path(data_root, f"{stage_id}.json.tmp")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return path
+
+
+def _stage_result(stage_id: str, data: dict) -> dict:
+    return {"stage_id": stage_id, "url": f"uoink-saves:{stage_id}", "count": len(data["items"]),
+            "source": data["source"], "truncated": bool(data.get("truncated"))}
+
+
 def stage_saves(data_root: Path, source: str, items: list[dict], *, filename=None) -> dict:
     """Atomically stage a bounded list; keep the newest 20 lists."""
     parsed = parse_save_items(source, items)
-    truncated = bool(getattr(items, "truncated", False) or parsed.truncated)
     if not parsed:
         raise ImportListError("Found nothing to import in that file.", "empty_file")
     stage_id = secrets.token_hex(8)
-    folder = Path(data_root) / "saves-staged"
+    data = {"source": source, "items": parsed,
+            "filename": Path(filename).name if filename else None,
+            "truncated": bool(getattr(items, "truncated", False) or parsed.truncated)}
     with _stage_lock:
-        folder.mkdir(parents=True, exist_ok=True)
-        path = folder / f"{stage_id}.json"
-        tmp = path.with_suffix(".json.tmp")
-        try:
-            tmp.write_text(json.dumps({"source": source, "items": parsed,
-                                       "filename": Path(filename).name if filename else None,
-                                       "truncated": truncated}, ensure_ascii=False), encoding="utf-8")
-            os.replace(tmp, path)
-        finally:
-            tmp.unlink(missing_ok=True)
-        older = sorted((p for p in folder.glob("*.json") if p != path),
-                       key=lambda p: (p.stat().st_mtime_ns, p.name), reverse=True)
+        path = _write_stage(data_root, stage_id, data)
+        older = [p for p in _staged_files(data_root, "*.json") if p != path]
         for old in older[SAVES_STAGE_CAP - 1:]:
             old.unlink(missing_ok=True)
-    return {"stage_id": stage_id, "url": f"uoink-saves:{stage_id}", "count": len(parsed),
-            "source": source, "truncated": truncated}
+    return _stage_result(stage_id, data)
+
+
+def append_stage_items(data_root: Path, token: str, source: str, items: Iterable[Any]) -> dict:
+    """Append unique items to a stage, preserving its order and token."""
+    match = _STAGE_TOKEN_RE.fullmatch(token) if isinstance(token, str) else None
+    if not match:
+        raise ImportListError("That saves token isn't valid.", "invalid_url")
+    stage_id = match.group(1).lower()
+    with _stage_lock:
+        data = _load_stage(data_root, stage_id)
+        if source != data["source"]:
+            raise ImportListError("source must match the staged saves list.", "invalid_items")
+        parsed = parse_save_items(source, items)
+        merged = list(data["items"])
+        seen = {item["item_key"] for item in merged}
+        truncated = bool(data.get("truncated") or getattr(items, "truncated", False) or parsed.truncated)
+        for item in parsed:
+            if item["item_key"] in seen:
+                continue
+            if len(merged) == SAVES_STAGE_MAX:
+                truncated = True
+                break
+            seen.add(item["item_key"])
+            merged.append(item)
+        data.update(items=merged, truncated=truncated)
+        _write_stage(data_root, stage_id, data)
+    return _stage_result(stage_id, data)
+
+
+def _upload_part_path(data_root: Path, upload_id: str) -> Path:
+    if not isinstance(upload_id, str) or not _SAVES_ID_RE.fullmatch(upload_id):
+        raise ImportListError("upload_id must be 16 lowercase hex characters.", "invalid_items")
+    return _staged_path(data_root, f"upload-{upload_id}.part")
+
+
+def append_upload_chunk(data_root: Path, text: str, upload_id=None) -> dict:
+    """Append UTF-8 text to a bounded upload, keeping at most five parts."""
+    if not isinstance(text, str):
+        raise ImportListError("csv_text must be a string.", "invalid_items")
+    chunk = text.encode("utf-8")
+    new = upload_id is None
+    if new:
+        upload_id = secrets.token_hex(8)
+    path = _upload_part_path(data_root, upload_id)
+    with _stage_lock:
+        try:
+            received = 0 if new else path.stat().st_size
+        except OSError:
+            raise ImportListError("That saves upload wasn't found. Import the file again.", "not_found")
+        received += len(chunk)
+        if received > SAVES_FILE_MAX_BYTES:
+            path.unlink(missing_ok=True)
+            raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("ab") as stream:
+            stream.write(chunk)
+        if new:
+            cutoff = time.time() - SAVES_UPLOAD_TTL_SEC
+            kept = 1
+            for old in _staged_files(data_root, "upload-*.part"):
+                if old == path:
+                    continue
+                if old.stat().st_mtime < cutoff or kept >= SAVES_UPLOAD_CAP:
+                    old.unlink(missing_ok=True)
+                else:
+                    kept += 1
+    return {"ok": True, "upload_id": upload_id, "received_bytes": received}
+
+
+def finish_upload(data_root: Path, text: str, upload_id=None, *, source=None, filename=None) -> dict:
+    """Consume an upload's part file and stage the combined text."""
+    if not isinstance(text, str):
+        raise ImportListError("csv_text must be a string.", "invalid_items")
+    if upload_id is not None:
+        path = _upload_part_path(data_root, upload_id)
+        with _stage_lock:
+            try:
+                if path.stat().st_size + len(text.encode("utf-8")) > SAVES_FILE_MAX_BYTES:
+                    raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+                with path.open("rb") as stream:
+                    prefix = stream.read(SAVES_FILE_MAX_BYTES + 1)
+            except OSError:
+                raise ImportListError("That saves upload wasn't found. Import the file again.", "not_found")
+            finally:
+                path.unlink(missing_ok=True)
+        text = prefix.decode("utf-8") + text
+    return stage_saves_text(data_root, text, source=source, filename=filename)
 
 
 def stage_saves_text(data_root: Path, text: str, source=None, filename=None) -> dict:

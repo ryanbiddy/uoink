@@ -11591,6 +11591,27 @@
       }
     }
 
+    function savesUploadChunk(text, offset, filename, uploadId) {
+      let end = Math.min(offset + 48000, text.length);
+      const encoder = new TextEncoder();
+      while (true) {
+        if (end < text.length) {
+          const lineEnd = Math.max(text.lastIndexOf("\n", end - 1), text.lastIndexOf("\r", end - 1)) + 1;
+          if (lineEnd > offset) end = lineEnd;
+          // Keep a Unicode surrogate pair together when splitting a long line.
+          const last = text.charCodeAt(end - 1), next = text.charCodeAt(end);
+          if (last >= 0xD800 && last <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) --end;
+        }
+        const body = JSON.stringify({
+          csv_text: text.slice(offset, end), filename, upload_id: uploadId, done: end === text.length,
+        });
+        // JSON escaping and UTF-8 can make 48,000 characters exceed 64 KB.
+        if (encoder.encode(body).length <= 64 * 1024 && (end > offset || !text.length)) return { body, end };
+        if (end <= offset) throw new Error("The saves filename is too long.");
+        end = offset + Math.floor((end - offset) / 2);
+      }
+    }
+
     async function stageSavesFile() {
       const input = listImportEl("listImportFile");
       const file = input.files && input.files[0];
@@ -11604,11 +11625,14 @@
         if (file.size > 5 * 1024 * 1024) throw new Error("Saves files must be 5 MB or smaller.");
         const csvText = await file.text();
         if (seq !== listImportState.seq) return;
-        const data = await authFetch("/import-list/stage", {
-          method: "POST",
-          body: JSON.stringify({ csv_text: csvText, filename: file.name }),
-        });
-        if (seq !== listImportState.seq) return;
+        let offset = 0, uploadId, data;
+        do {
+          const chunk = savesUploadChunk(csvText, offset, file.name, uploadId);
+          data = await authFetch("/import-list/stage", { method: "POST", body: chunk.body });
+          if (seq !== listImportState.seq) return;
+          uploadId = data.upload_id;
+          offset = chunk.end;
+        } while (offset < csvText.length);
         listImportState.truncated = Boolean(data.truncated);
         listImportEl("listImportInput").value = data.url;
         await runListPreview();

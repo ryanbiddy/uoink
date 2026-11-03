@@ -2168,10 +2168,40 @@ Stage saves locally with the same `X-Uoink-Token` gate. Send either
 `{"source":"x_bookmarks","items":["https://x.com/example/status/10001"]}`.
 `source` may also be `watch_later` or `reddit_saved`; it is required with
 `items`, which accepts strings or objects with `url`/`id`, `title`, `channel`,
-and `author`. Text is limited to 5 MB and staging keeps at most 5,000 valid,
-unique items. The newest 20 staged lists are retained.
+and `author`. Every request uses the normal 64 KB (65,536-byte) JSON body
+limit, including JSON escaping and UTF-8 encoding. Larger bodies return 413.
+Text uploads can total up to 5 MB; staging keeps at most 5,000 valid, unique
+items. The newest 20 staged lists are retained.
 
-Returns `{ok, url, count, source, label, truncated}`. Feed the
+For larger text files, send chunks in order:
+
+1. Send `{"csv_text":"Video ID\nsave0000001\n","done":false}` to start an
+   upload. The response is `{ok: true, upload_id, received_bytes}`;
+   `received_bytes` is the accumulated UTF-8 text size.
+2. Send more chunks with `done: false` and the returned `upload_id`, a
+   16-character lowercase hex ID.
+3. Send the last chunk with that `upload_id` and `done: true`. Supply any
+   `filename` or explicit `source` on this final request. Omitting `done`
+   also finishes the upload. Without `upload_id`, it stages just that request's
+   text, so small files still need only one request.
+
+The final request concatenates the chunks, removes the temporary upload, and
+stages the text. Exceeding the accumulated 5 MB limit returns 400 with
+`too_large` and removes the upload. Creating a new upload removes parts older
+than one hour and retains at most five unfinished uploads, dropping the
+oldest first. The dashboard sends at most 48,000 characters per chunk,
+prefers line boundaries, and shrinks chunks further when needed to fit the
+encoded body limit.
+
+For item batches, stage the first batch normally, then include its token as
+`append_to` in later requests, for example
+`{"source":"x_bookmarks","items":["https://x.com/example/status/10002"],"append_to":"uoink-saves:0123456789abcdef"}`.
+The source must match the existing stage. New items follow the existing
+ones, duplicates are skipped by `item_key`, and the result keeps the same
+URL with the total count. Items beyond 5,000 set `truncated: true`.
+
+Completed text uploads and item batches return
+`{ok, url, count, source, label, truncated}`. Feed the
 `uoink-saves:<id>` URL into `/import-list/preview` and `/import-list`, reusing
 `next_offset` for later batches of at most 50. No capture happens during
 staging. Invalid input or an empty file returns 400; a missing staged list
