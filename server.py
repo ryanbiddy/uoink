@@ -15348,7 +15348,7 @@ class Handler(BaseHTTPRequestHandler):
             self.status = status
             self.message = message
 
-    def _read_json_body(self, *, strict: bool = False, max_bytes: int | None = None) -> dict:
+    def _read_json_body(self, *, strict: bool = False) -> dict:
         # P1-3: bound everything we trust from the network. Without these
         # checks Content-Length was unbounded (memory exhaustion via large
         # POST), Content-Type was unchecked (HTML form posts could trigger
@@ -15369,9 +15369,8 @@ class Handler(BaseHTTPRequestHandler):
             raise Handler._BodyError(400, "Bad Content-Length")
         if length < 0:
             raise Handler._BodyError(400, "Bad Content-Length")
-        cap = MAX_BODY_BYTES if max_bytes is None else max_bytes
-        if length > cap:
-            raise Handler._BodyError(413, f"Body too large (>{cap} bytes)")
+        if length > MAX_BODY_BYTES:
+            raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
         self._body_consumed = True
         try:
@@ -15383,6 +15382,34 @@ class Handler(BaseHTTPRequestHandler):
                 parsed = json.loads(text)
         except (UnicodeDecodeError, ValueError) as e:
             # json.JSONDecodeError is a ValueError; so are the strict hooks'.
+            raise Handler._BodyError(400, f"Bad JSON: {e}")
+        if not isinstance(parsed, dict):
+            raise Handler._BodyError(400, "Top-level JSON must be an object")
+        return parsed
+
+    def _read_saves_stage_body(self) -> dict:
+        """Read POST /import-list/stage: strict JSON object, bounded size."""
+        ctype = (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+        if ctype != "application/json":
+            raise Handler._BodyError(415, "Content-Type must be application/json")
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            raise Handler._BodyError(400, "Bad Content-Length")
+        if length < 0:
+            raise Handler._BodyError(400, "Bad Content-Length")
+        # A 5 MB text file can expand sixfold as JSON Unicode escapes; the
+        # staging parser separately enforces the decoded file cap.
+        cap = 6 * list_imports.SAVES_FILE_MAX_BYTES + MAX_BODY_BYTES
+        if length > cap:
+            raise Handler._BodyError(413, f"Body too large (>{cap} bytes)")
+        raw = self.rfile.read(length) if length else b"{}"
+        self._body_consumed = True
+        try:
+            parsed = json.loads(raw.decode("utf-8") or "{}",
+                                parse_constant=_reject_json_constant,
+                                object_pairs_hook=_reject_duplicate_json_keys)
+        except (UnicodeDecodeError, ValueError) as e:
             raise Handler._BodyError(400, f"Bad JSON: {e}")
         if not isinstance(parsed, dict):
             raise Handler._BodyError(400, "Top-level JSON must be an object")
@@ -20409,14 +20436,16 @@ class Handler(BaseHTTPRequestHandler):
         # the raw body itself.
         if bare == "/images":
             return self._handle_create_image()
+        if bare == "/import-list/stage":
+            # A saves file is bigger than the 64 KB body cap, so this route
+            # reads its own body with a larger, still bounded, cap.
+            try:
+                body = self._read_saves_stage_body()
+            except Handler._BodyError as e:
+                return self._send_json(e.status, {"ok": False, "error": e.message})
+            return self._handle_import_list(body, stage=True)
         try:
-            if bare == "/import-list/stage":
-                # A 5 MB text file can expand sixfold as JSON Unicode escapes.
-                # The staging parser separately enforces the decoded file cap.
-                body = self._read_json_body(strict=True,
-                    max_bytes=6 * list_imports.SAVES_FILE_MAX_BYTES + MAX_BODY_BYTES)
-            else:
-                body = self._read_json_body(strict=_strict_json_route(bare))
+            body = self._read_json_body(strict=_strict_json_route(bare))
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
@@ -20488,9 +20517,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_reddit(body)
         if bare == "/notes":
             return self._handle_create_note(body)
-        if bare in ("/import-list/preview", "/import-list", "/import-list/stage"):
-            return self._handle_import_list(body, start=bare == "/import-list",
-                                             stage=bare == "/import-list/stage")
+        if bare in ("/import-list/preview", "/import-list"):
+            return self._handle_import_list(body, start=bare == "/import-list")
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:
