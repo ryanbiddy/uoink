@@ -6125,11 +6125,11 @@ def stdio_tool_names(toolset: str = "full") -> tuple[str, ...]:
         raise RuntimeError("Invalid core stdio inventory")
     if not set(CORE_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
         raise RuntimeError("Core stdio tool missing from registry")
-    if len(SEARCH_STDIO_TOOLS) != 8 or not set(SEARCH_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
-        raise RuntimeError("Invalid search stdio inventory")
     if toolset == "core":
         return CORE_STDIO_TOOLS
     if toolset == "search":
+        if len(set(SEARCH_STDIO_TOOLS)) != 8 or not set(SEARCH_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
+            raise RuntimeError("Invalid search stdio inventory")
         return SEARCH_STDIO_TOOLS
     return CORE_STDIO_TOOLS + tuple(name for name in TOOL_REGISTRY if name not in CORE_STDIO_TOOLS)
 
