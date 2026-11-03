@@ -88,8 +88,8 @@ No mirror implementation, commit, push or ref was changed.
 ## Commands and results
 
 The final Windows run used
-`E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`,
-`IG_FORBIDDEN_LIVE=C:UsershelloAppDataLocalUoinkindex.db`,
+`<repo>/_scratch/ig-native/Scripts/python.exe`,
+`IG_FORBIDDEN_LIVE=C:\Users\<you>\AppData\Local\Uoink\index.db`,
 `PYTHONDONTWRITEBYTECODE=1`, and `PYTHONPATH` containing this worktree plus the
 scratch guard. HOME, USERPROFILE, APPDATA, LOCALAPPDATA, output and the isolated
 profile all pointed inside scratch. The Python guard set and checked

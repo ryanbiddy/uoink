@@ -1,7 +1,7 @@
 """Automatic podcast metadata watch and standing capture contracts.
 
 Phase 3 alignment (run AP, 2026-09-07). These tests encode contract
-``phase3-v1-2026-09-07`` (docs/library/PHASE3-CONTRACT-2026-09-07.md) in place
+``phase3-v1-2026-09-07`` (PHASE3-CONTRACT-2026-09-07 (internal note)) in place
 of the pre-contract watch semantics they replaced:
 
 * ``add_feed`` projects an off standing source. The old boolean can neither

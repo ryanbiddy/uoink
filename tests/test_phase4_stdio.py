@@ -6,7 +6,7 @@ Gates covered:
 - P4-13 stdio part (Installed compatibility: python -P embeddable rules, spaced paths, clean stdout,
   diagnostic stderr separation, restart resilience, missing storage handling)
 
-Tests against the frozen module interface in docs/library/PHASE4-AV-BRIEF-2026-09-08.md:
+Tests against the frozen module interface in PHASE4-AV-BRIEF-2026-09-08 (internal note):
 - library_resources.LibraryReader, parse_uri, encode_key, ResourceError
 - library_prompts.get_prompt
 """

@@ -96,7 +96,7 @@ compilation, MCP inventory, and the readiness bash syntax fallback. The inventor
 is 91 full / 35 core tools. `build-mac.sh` syntax and `git diff --check` also pass.
 
 Evidence is under
-`C:/Users/hello/AppData/Local/Temp/uoink-mac-pass3-80c2732a/`:
+`C:/Users/<you>/AppData/Local/Temp/uoink-mac-pass3-80c2732a/`:
 `verification-summary.json`, `regression.xml`, `extra/results.xml`,
 `extra/resumed.xml`, and `final.xml`.
 

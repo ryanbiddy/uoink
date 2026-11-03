@@ -2451,8 +2451,8 @@ def get_taxonomy(args: dict[str, Any]) -> dict[str, Any]:
 # Living Library, Phase 2 stage 1 (run J, 2026-09-04): the six registry
 # adapters for the Librarian work queue.
 #
-# Contract: docs/library/PHASE2-CONTRACT-2026-09-04.md (phase2-v1-2026-09-04).
-# Frozen input schemas: docs/library/phase2-contract/tool-schemas.json. The
+# Contract: PHASE2-CONTRACT-2026-09-04 (internal note) (phase2-v1-2026-09-04).
+# Frozen input schemas: tests/fixtures/phase2-contract/tool-schemas.json. The
 # schemas below ARE that file, embedded so an installed helper needs no
 # checkout; tests/test_library_adapters.py fails the moment the two drift.
 #
@@ -3404,7 +3404,7 @@ def library_status(index: Any, *, apply_enabled: bool, now: float | None = None)
 # Living Library, Phase 3 (run AM, 2026-09-07): the four standing-source
 # registry adapters and the dashboard consent-intent seam.
 #
-# Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md (phase3-v1-2026-09-07),
+# Contract: PHASE3-CONTRACT-2026-09-07 (internal note) (phase3-v1-2026-09-07),
 # "Registry and dashboard contract". The frozen input schemas live in
 # source_subscriptions.TOOL_SCHEMAS (one copy, embedded so an installed helper
 # needs no checkout); the adapters here only attach the trusted transport

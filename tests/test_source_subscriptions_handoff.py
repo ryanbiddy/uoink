@@ -1,6 +1,6 @@
 """Phase 3 handoff gates: S16 (publication crash boundaries), S17 (Phase 2
 enqueue and replay), S18 (classification waiting states). Contract:
-docs/library/PHASE3-CONTRACT-2026-09-07.md, "Post-commit classification handoff".
+PHASE3-CONTRACT-2026-09-07 (internal note), "Post-commit classification handoff".
 
 The Phase 2 service is the real library_work.LibraryWorkService on a
 temporary index with an approved fixture taxonomy; no model, client or

@@ -1,6 +1,6 @@
 # 3.8.1 release ready for owner review - 2026-09-23
 
-Branch `release/3.8.1` in checkout `E:\AI\projects\uoink\checkouts\Yoink-release-3.8.0`,
+Branch `release/3.8.1` in checkout `<repo>`,
 based on the 3.8.0 release commit `c766a1c`. Draft PR #270 into `main`, draft GitHub
 release `v3.8.1` (id 395313409). Nothing is published or merged, no tag exists, and
 auto-merge is off. 3.8.0 (#269, draft release 389447458) was not touched.
@@ -49,7 +49,7 @@ the fix, failed validation because of the BOM. It is kept at
 
 ## Isolated install receipt
 
-`E:\AI\projects\uoink\installation-receipts\Agent Install 13`
+`<workspace>\installation-receipts\Agent Install 13`
 
 1. `instruments\agent_install_observer05.ps1` (unchanged) with `/ISOLATED=1`, an empty
    profile and `/PORT=18081`. Exit 0. Inno post-install verification reported "bundled

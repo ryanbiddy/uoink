@@ -28,7 +28,7 @@ Gates covered:
   - TASTE.md and USER.md in vault are never owned, overwritten, or read back by mirror
   - Modifying vault files never alters Uoink internal taxonomy / correction tables
 
-Tests against the frozen interface in docs/library/PHASE4-AV2-BRIEF-2026-09-08.md:
+Tests against the frozen interface in PHASE4-AV2-BRIEF-2026-09-08 (internal note):
 - library_mirror.Mirror, MirrorConsent, CONTRACT_VERSION, MIRROR_LEDGER_DIR, MIRROR_ROOT, SCOPE_ALL
 """
 from __future__ import annotations

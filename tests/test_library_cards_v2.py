@@ -18,6 +18,7 @@ PHASE2-STAGE4-BRIEF-2026-09-07.md:
 """
 from __future__ import annotations
 
+from tests.private_archive import needs
 import copy
 import json
 from collections import Counter
@@ -371,6 +372,7 @@ def test_diff_helper_classifications():
 # 9. Replay over the 548 archived Stage 1 cards (receipts.json; no DB)
 # ---------------------------------------------------------------------------
 
+@needs('proof/run-2026-09-05/receipts.json')
 def test_replay_over_archived_stage1_cards():
     assert ARCHIVE_RECEIPTS.exists(), f"Archive receipts not found at {ARCHIVE_RECEIPTS}"
     receipts_data = json.loads(ARCHIVE_RECEIPTS.read_text(encoding="utf-8"))

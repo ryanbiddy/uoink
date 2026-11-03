@@ -1,4 +1,8 @@
 """Reproduce AZ's benchmark and compare its recorded fixture with the report."""
+from tests.private_archive import skip_module_unless
+
+skip_module_unless('PHASE5-AZ-MEASUREMENTS-2026-09-08.md')
+
 import re
 from pathlib import Path
 

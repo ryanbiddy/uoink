@@ -1,8 +1,8 @@
 """Phase 3 standing capture: source subscriptions, consent, detection, ledger.
 
-Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md (``phase3-v1-2026-09-07``).
-Brief: docs/library/PHASE3-IMPLEMENTATION-BRIEF-2026-09-07.md (run AM).
-Adapter limits: docs/library/PHASE3-ADAPTER-LIMITS-2026-09-07.md (Grok).
+Contract: PHASE3-CONTRACT-2026-09-07 (internal note) (``phase3-v1-2026-09-07``).
+Brief: PHASE3-IMPLEMENTATION-BRIEF-2026-09-07 (internal note) (run AM).
+Adapter limits: PHASE3-ADAPTER-LIMITS-2026-09-07 (internal note) (Grok).
 
 This module owns every durable decision about standing capture:
 

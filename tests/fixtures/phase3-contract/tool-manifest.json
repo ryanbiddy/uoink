@@ -1,0 +1,180 @@
+{
+  "contract_version": "phase3-v1-2026-09-07",
+  "json_schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+  "tools": [
+    {
+      "name": "list_sources",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "enum": [
+              "podcast_rss",
+              "youtube_channel",
+              "youtube_playlist"
+            ]
+          },
+          "consent_state": {
+            "enum": [
+              "off",
+              "on"
+            ]
+          },
+          "include_archived": {
+            "type": "boolean",
+            "default": false
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "register_source",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "enum": [
+              "podcast_rss",
+              "youtube_channel",
+              "youtube_playlist"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "poll_interval_min": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 1440,
+            "default": 60
+          }
+        },
+        "required": [
+          "kind",
+          "url"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "source_status",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^src_[a-f0-9]{64}$"
+          },
+          "item_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          },
+          "item_cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "source_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "set_source_consent",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^src_[a-f0-9]{64}$"
+          },
+          "consent_state": {
+            "enum": [
+              "off",
+              "on"
+            ]
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "expected_cursor_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "operation_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          },
+          "user_intent_token": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{43,128}$"
+          }
+        },
+        "required": [
+          "source_id",
+          "consent_state",
+          "expected_revision",
+          "operation_key",
+          "user_intent_token"
+        ],
+        "oneOf": [
+          {
+            "properties": {
+              "consent_state": {
+                "const": "on"
+              }
+            },
+            "required": [
+              "expected_cursor_revision"
+            ]
+          },
+          {
+            "properties": {
+              "consent_state": {
+                "const": "off"
+              }
+            },
+            "not": {
+              "required": [
+                "expected_cursor_revision"
+              ]
+            }
+          }
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

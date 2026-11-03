@@ -1,4 +1,8 @@
 """BA-3 contradictions between the measurement record and captured behavior."""
+from tests.private_archive import skip_module_unless
+
+skip_module_unless('PHASE5-AZ-MEASUREMENTS-2026-09-08.md')
+
 from pathlib import Path
 import sys
 

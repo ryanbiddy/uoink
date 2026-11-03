@@ -5,7 +5,7 @@ one click, so you don't have to hand-edit `claude_desktop_config.json`.
 
 It is **Claude Desktop only**. Claude Code CLI 2.1.261 does not recognize,
 install, or unpack `.mcpb` files; `claude mcp add bundle.mcpb` fails
-([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+(Phase 4 protocol-limits note
 §4.3). Configure Claude Code with project-scoped stdio JSON instead — see
 [`docs/claude-code-mcp.md`](../docs/claude-code-mcp.md). A `.mcpb` package
 does not prove Claude Code installation or any current CLI capability.
@@ -28,7 +28,7 @@ does not prove Claude Code installation or any current CLI capability.
 
 It's a **thin launcher**. Claude Desktop unpacks the ZIP, prompts for
 `user_config`, and writes the rendered `mcpServers` entry into its own config
-([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+(Phase 4 protocol-limits note
 §4.1, §4.3). At runtime it runs the working stdio command:
 
 ```
@@ -38,8 +38,8 @@ It's a **thin launcher**. Claude Desktop unpacks the ZIP, prompts for
 That command is the **installed console** `python.exe` (never `pythonw.exe`)
 with `uoink_mcp.py` as its own argument-array element, so spaces in the
 install path stay one token
-([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
-§4.3; [contract](../docs/library/PHASE4-CONTRACT-2026-09-08.md)).
+(Phase 4 protocol-limits note
+§4.3; Phase 4 contract).
 
 The bundle itself only carries `manifest.json`, `README.md`, `icon.png`, and
 reference copies of the two entry modules so `entry_point` resolves
@@ -51,8 +51,8 @@ installed copies.
 
 | Requirement | Why |
 |---|---|
-| Installed Uoink tree | Thin launcher; no bundled interpreter. Default `${HOME}/AppData/Local/Uoink` is `%LOCALAPPDATA%\Uoink` on a standard Windows install ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md) §4.3). |
-| Console `python.exe` | JSON-RPC stdio needs standard streams. `pythonw.exe` cannot carry the protocol ([contract](../docs/library/PHASE4-CONTRACT-2026-09-08.md)). |
+| Installed Uoink tree | Thin launcher; no bundled interpreter. Default `${HOME}/AppData/Local/Uoink` is `%LOCALAPPDATA%\Uoink` on a standard Windows install (Phase 4 protocol-limits note §4.3). |
+| Console `python.exe` | JSON-RPC stdio needs standard streams. `pythonw.exe` cannot carry the protocol (Phase 4 contract). |
 | UTF-8 stdout | The child must emit UTF-8 JSON-RPC on stdout; diagnostics go to stderr. Windows console Python otherwise uses the legacy code page. Claude Code's project config sets `PYTHONIOENCODING=utf-8` and `PYTHONUTF8=1` ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)). |
 | No resident HTTP helper for reads | Installing Uoink is enough to run stdio. `uoink_mcp.py` reads local storage directly and does not proxy through the helper. Do not put a helper URL in this configuration. |
 
@@ -232,28 +232,28 @@ hashes.
 ## Bundle format (`manifest_version` 0.4)
 
 Format claims below are from
-[PHASE4-PROTOCOL-LIMITS-2026-09-08.md](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+the internal Phase 4 protocol-limits note
 section 4. They are not a Claude Code CLI acceptance claim.
 
 - A `.mcpb` file is a plain **ZIP** archive with `manifest.json` at its
-  archive root ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+  archive root (Phase 4 protocol-limits note
   §4.1).
 - Required root identity fields: `manifest_version` `"0.4"`, `name`,
   `display_name`, SemVer `version`, `description`, `long_description`,
-  `author`, `license` ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+  `author`, `license` (Phase 4 protocol-limits note
   §4.2).
 - `server`: `type` `"python"`, `entry_point` `"uoink_mcp.py"`, and
   `mcp_config` `{command, args, env}` interpolating
   `${user_config.uoink_dir}`
-  ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+  (Phase 4 protocol-limits note
   §4.2, §4.3).
 - `user_config.uoink_dir` is a `directory` field (supported types: `string`,
   `boolean`, `directory`, `file`). Its default interpolates `${HOME}`
-  ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+  (Phase 4 protocol-limits note
   §4.2).
 - `compatibility` names `claude_desktop` `>=0.10.0`, `platforms` `["win32"]`,
   and `runtimes.python` `>=3.10,<4`
-  ([protocol-limits note](../docs/library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
+  (Phase 4 protocol-limits note
   §4.2). That Desktop range is not Claude Code CLI acceptance.
 
 ## Privacy
