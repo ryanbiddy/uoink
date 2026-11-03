@@ -1638,7 +1638,42 @@ Queue every video from a list source for normal capture: a HackerTube playlist (
 
 HackerTube data is ODC-By 1.0: credit HackerTube (hackertube.org) and the open-index/hacker-news dataset. Uoink stores the credit line with every HackerTube item.
 
-Arguments: `url`, `limit`, `offset`, `preview_only`. The registry schema in `tools/list` defines required fields and bounds.
+Arguments: `url`, `file`, `items`, `source`, `limit`, `offset`, `preview_only`.
+Supply exactly one of `url`, `file`, or `items`. The registry schema in
+`tools/list` defines required fields and bounds.
+
+#### Import platform saves
+
+To preview an export file, run `uoink import saves.csv --preview`, then omit
+`--preview` to queue its first batch. The dashboard's **Import a saves file**
+input uses the same preview, Import, and Next 50 flow.
+
+| Source | Input | Library tag |
+|---|---|---|
+| `watch_later` | Google Takeout playlist CSV (current or older format), or YouTube links | `watch later` |
+| `reddit_saved` | Reddit export `saved_posts.csv` / `saved_comments.csv`, or Reddit permalinks | `reddit saved` |
+| `x_bookmarks` | X or Twitter status links, one per line in a text file | `x bookmarks` |
+
+For MCP, pass `{"file":"/absolute/path/saves.csv","preview_only":true}`.
+The source is detected from the file; `source` can override it. Or pass
+`{"source":"x_bookmarks","items":["https://x.com/example/status/10001"],"preview_only":true}`.
+`items` accepts up to 5,000 strings and requires `source`. Files must be
+`.csv` or `.txt` and no larger than 5 MB.
+
+Staging keeps up to 5,000 valid, unique items and the newest 20 lists locally.
+The result's `stage_url` and `source.url` contain a `uoink-saves:<id>` token.
+Pass that token as `url` to import the previewed batch, then reuse it with
+`offset` set to `next_offset` to page through the list. CLI text output prints
+the token and the next `uoink import-list` command. An expired token requires
+staging the file again. `truncated: true` means the file exceeded 5,000 items.
+
+YouTube saves use the existing video queue. X and Reddit posts use a separate
+serial worker, with at least 15 seconds between captures. X requires
+`x_text_capture_enabled` in settings. Failures retry after 60 seconds and
+5 minutes, then stop after the third failed attempt; importing a failed item
+again retries it. Saved Reddit comments capture their parent thread, so saves
+from the same post share one library item. Library and registry checks skip
+already-saved posts, and repeat imports leave queued posts waiting once.
 
 ### list_allowed_sites
 

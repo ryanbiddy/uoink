@@ -6390,8 +6390,11 @@
       </div>
       <label class="soft-note" for="listImportInput">List link</label>
       <input class="field" id="listImportInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="hackertube.org/p/hn-canon, an HN or Reddit thread, or a YouTube playlist" aria-describedby="listImportStatus listImportHelp">
+      <label class="soft-note" for="listImportFile">Import a saves file</label>
+      <input class="field" id="listImportFile" type="file" accept=".csv,.txt" aria-describedby="listImportFileHelp listImportStatus">
+      <p class="setting-copy" id="listImportFileHelp">Watch Later: Google Takeout playlist CSV. Reddit: saved_posts.csv or saved_comments.csv from your Reddit data export. X bookmarks: use the Uoink extension on x.com/i/bookmarks.</p>
       <p class="list-import-status" id="listImportStatus" role="status" aria-live="polite">Paste a link to see how many videos it holds.</p>
-      <ul class="list-import-preview" id="listImportPreview" aria-label="Videos in this batch"></ul>
+      <ul class="list-import-preview" id="listImportPreview" aria-label="Items in this batch"></ul>
       <p class="list-import-credit hidden" id="listImportCredit"></p>
       <div class="inline-row list-import-actions">
         <button class="button ghost hidden" type="button" id="listImportNext">Next 50</button>
@@ -11466,7 +11469,7 @@
     }
 
     // ---- Import a list ---------------------------------------------------
-    const listImportState = { offset: 0, preview: null, seq: 0, timer: null, opener: null };
+    const listImportState = { offset: 0, preview: null, seq: 0, timer: null, opener: null, truncated: false };
 
     function listImportEl(id) { return document.getElementById(id); }
 
@@ -11495,15 +11498,19 @@
 
     function scheduleListPreview() {
       window.clearTimeout(listImportState.timer);
+      ++listImportState.seq;
+      listImportState.truncated = false;
+      resetListImportPreview("Reading the list...");
       listImportState.offset = 0;
       listImportState.timer = window.setTimeout(runListPreview, 450);
     }
 
     function renderListPreview(data) {
       listImportState.preview = data;
-      listImportEl("listImportStatus").textContent = data.message || "";
+      listImportEl("listImportStatus").textContent = (data.message || "") +
+        (listImportState.truncated ? " Staged the first 5,000 items." : "");
       const videos = Array.isArray(data.videos) ? data.videos : [];
-      const shown = videos.slice(0, 8).map((v) => `<li><span>${htmlEscape(v.title || `YouTube video ${v.video_id}`)}</span>${v.in_library ? `<span class="list-import-chip">in your library</span>` : ""}</li>`);
+      const shown = videos.slice(0, 8).map((v) => `<li><span>${htmlEscape(v.title || (v.kind === "post" ? v.url : `YouTube video ${v.video_id}`))}</span>${v.in_library ? `<span class="list-import-chip">in your library</span>` : ""}</li>`);
       if (videos.length > 8) shown.push(`<li><span>and ${videos.length - 8} more</span></li>`);
       listImportEl("listImportPreview").innerHTML = shown.join("");
       const credit = listImportEl("listImportCredit");
@@ -11513,7 +11520,8 @@
       const go = listImportEl("listImportGo");
       const count = Number(data.new) || 0;
       go.disabled = count === 0;
-      go.textContent = count ? `Import ${count} video${count === 1 ? "" : "s"}` : "Import";
+      const noun = videos.some((v) => v.kind === "post") ? "post" : "video";
+      go.textContent = count ? `Import ${count} ${noun}${count === 1 ? "" : "s"}` : "Import";
       const next = listImportEl("listImportNext");
       next.classList.toggle("hidden", !(data.has_more && data.next_offset != null));
     }
@@ -11536,6 +11544,35 @@
       } catch (err) {
         if (seq !== listImportState.seq) return;
         resetListImportPreview(err.message || "Uoink couldn't read that list.");
+      }
+    }
+
+    async function stageSavesFile() {
+      const input = listImportEl("listImportFile");
+      const file = input.files && input.files[0];
+      if (!file) return;
+      window.clearTimeout(listImportState.timer);
+      const seq = ++listImportState.seq;
+      listImportState.offset = 0;
+      listImportState.truncated = false;
+      resetListImportPreview("Reading the saves file...");
+      try {
+        if (file.size > 5 * 1024 * 1024) throw new Error("Saves files must be 5 MB or smaller.");
+        const csvText = await file.text();
+        if (seq !== listImportState.seq) return;
+        const data = await authFetch("/import-list/stage", {
+          method: "POST",
+          body: JSON.stringify({ csv_text: csvText, filename: file.name }),
+        });
+        if (seq !== listImportState.seq) return;
+        listImportState.truncated = Boolean(data.truncated);
+        listImportEl("listImportInput").value = data.url;
+        await runListPreview();
+      } catch (err) {
+        if (seq !== listImportState.seq) return;
+        resetListImportPreview(err.message || "Uoink couldn't read that saves file.");
+      } finally {
+        input.value = "";
       }
     }
 
@@ -11589,6 +11626,7 @@
       modal.addEventListener("click", (event) => { if (event.target === modal) closeListImport(); });
       modal.addEventListener("keydown", (event) => trapModalFocus(event, modal, closeListImport));
       const input = listImportEl("listImportInput");
+      listImportEl("listImportFile").addEventListener("change", stageSavesFile);
       input.addEventListener("input", scheduleListPreview);
       input.addEventListener("paste", () => { listImportState.offset = 0; window.setTimeout(runListPreview, 0); });
       input.addEventListener("keydown", (event) => {

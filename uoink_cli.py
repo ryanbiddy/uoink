@@ -71,6 +71,12 @@ def parser():
     imports.add_argument("--offset", type=int, default=0,
                          help="start position; use the printed next offset for the next batch")
     imports.add_argument("--preview", action="store_true", help="count without queueing")
+    saves = command("import", help="import Watch Later, Reddit saves or X bookmarks from a file")
+    saves.add_argument("file", type=Path)
+    saves.add_argument("--source", choices=("watch_later", "x_bookmarks", "reddit_saved"))
+    saves.add_argument("--limit", type=int, default=50, help="items per batch, 1-50 (default 50)")
+    saves.add_argument("--offset", type=int, default=0, help="start position in the staged list")
+    saves.add_argument("--preview", action="store_true", help="count without queueing")
     note = command("note")
     note.add_argument("text")
     note.add_argument("--title")
@@ -178,12 +184,14 @@ def friendly_call(ns, server):
         return "list_recent_uoinks", {"limit": ns.limit}
     if ns.command == "get":
         return "get_library_item", {"slug" if ns.slug else "video_id": ns.id}
-    if ns.command == "import-list":
+    if ns.command in ("import-list", "import"):
         if not 1 <= ns.limit <= 50:
             raise UsageError("--limit must be from 1 to 50")
         if ns.offset < 0:
             raise UsageError("--offset must be 0 or more")
-        return "import_list", {"url": ns.url, "limit": ns.limit, "offset": ns.offset,
+        source = ({"file": str(ns.file.resolve()), **({"source": ns.source} if ns.source else {})}
+                  if ns.command == "import" else {"url": ns.url})
+        return "import_list", {**source, "limit": ns.limit, "offset": ns.offset,
                                **({"preview_only": True} if ns.preview else {})}
     if ns.command == "note":
         return "uoink_note", {"text": ns.text, **({"title": ns.title} if ns.title is not None else {})}
@@ -225,10 +233,15 @@ def human(payload):
         source = payload["source"]
         lines = [f"{label(source.get('label'))}: {label(source.get('title'))}",
                  label(payload.get("message") or "")]
+        if source.get("url"):
+            lines.append(f"List: {label(source['url'])}")
+        if payload.get("truncated"):
+            lines.append("Staged the first 5000 items.")
         if source.get("credit"):
             lines.append(label(source["credit"]))
         if payload.get("next_offset") is not None:
-            lines.append(f"Next batch: --offset {payload['next_offset']}")
+            lines.append(f"Next batch: uoink import-list {label(source.get('url') or '')} "
+                         f"--offset {payload['next_offset']}")
         return "\n".join(line for line in lines if line)
     if "hits" in payload or "yoinks" in payload:
         rows = payload.get("hits", payload.get("yoinks", []))

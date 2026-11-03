@@ -2161,6 +2161,28 @@ Refusals: 400 with `code` `empty`, `invalid_url` or `unsupported`; 501
 502 `not_found`, `fetch_failed`, `rate_limited` or `too_large` when the
 source can't be read.
 
+#### POST /import-list/stage
+
+Stage saves locally with the same `X-Uoink-Token` gate. Send either
+`{"csv_text":"...","filename":"saved_posts.csv"}` (source auto-detected), or
+`{"source":"x_bookmarks","items":["https://x.com/example/status/10001"]}`.
+`source` may also be `watch_later` or `reddit_saved`; it is required with
+`items`, which accepts strings or objects with `url`/`id`, `title`, `channel`,
+and `author`. Text is limited to 5 MB and staging keeps at most 5,000 valid,
+unique items. The newest 20 staged lists are retained.
+
+Returns `{ok, url, count, source, label, truncated}`. Feed the
+`uoink-saves:<id>` URL into `/import-list/preview` and `/import-list`, reusing
+`next_offset` for later batches of at most 50. No capture happens during
+staging. Invalid input or an empty file returns 400; a missing staged list
+returns 502 with `not_found`, matching other list lookups.
+
+Preview rows in `videos` can now have `kind: "post"` and a stable `item_key`.
+X/Reddit imports queue posts in the local import registry, with captures at
+least 15 seconds apart. YouTube Watch Later uses the video queue. Source tags
+are `watch later`, `x bookmarks`, and `reddit saved`. X text capture must be
+enabled. Reddit comments share the library item for their parent post.
+
 Library rows also carry `card_image_source` (`middle`, `thumbnail` or null)
 and `original_thumbnail_path`. With the `card_image` setting at `middle` (the
 default; the other value is `thumbnail`), `thumbnail_path` points at the saved

@@ -32,7 +32,9 @@ def test_sources_entry_opens_the_dialog_without_a_second_primary():
 def test_dialog_has_one_paste_field_a_preview_count_and_one_primary_import():
     modal = _between('id="listImportModal"', 'id="stopHelperConfirm"')
     assert 'role="dialog"' in modal and 'aria-modal="true"' in modal
-    assert modal.count("<input") == 1 and 'id="listImportInput"' in modal
+    assert modal.count('type="url"') == 1 and 'id="listImportInput"' in modal
+    assert 'id="listImportFile" type="file" accept=".csv,.txt"' in modal
+    assert 'for="listImportFile">Import a saves file</label>' in modal
     assert 'id="listImportStatus"' in modal and 'aria-live="polite"' in modal
     assert modal.count('class="button primary"') == 1
     assert re.search(r'<button class="button primary" type="button" id="listImportGo" disabled>Import</button>', modal)
@@ -44,6 +46,9 @@ def test_dialog_has_one_paste_field_a_preview_count_and_one_primary_import():
 def test_dialog_talks_to_the_helper_routes():
     assert 'authFetch("/import-list/preview"' in DASHBOARD
     assert 'authFetch("/import-list"' in DASHBOARD
+    assert 'authFetch("/import-list/stage"' in DASHBOARD
+    assert "csv_text: csvText, filename: file.name" in DASHBOARD
+    assert 'listImportEl("listImportInput").value = data.url' in DASHBOARD
     assert "limit: 50" in DASHBOARD
     assert "wireListImport();" in DASHBOARD
     assert "trapModalFocus(event, modal, closeListImport)" in DASHBOARD

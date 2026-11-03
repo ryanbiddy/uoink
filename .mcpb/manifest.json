@@ -411,7 +411,7 @@
     },
     {
       "name": "import_list",
-      "description": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note."
+      "description": "Preview or import a list in batches of at most 50, skipping saved items and adding a source tag. Supply a HackerTube, HN thread, Reddit thread or YouTube playlist url; a local .csv/.txt file of YouTube Watch Later or Reddit saves; or items with source watch_later, x_bookmarks or reddit_saved. X status links also work in a text file. Use uoink_video for one video or uoink_playlist for one tracked playlist job. Set preview_only before importing. File/items input stages up to 5000 saves locally; reuse source.url (also stage_url on staging) with next_offset for later batches. YouTube uses the video queue; X/Reddit posts capture serially at least 15 seconds apart. X text capture must be enabled. Returns found, already, queued, next_offset and item rows. HackerTube imports retain ODC-By 1.0 credit."
     },
     {
       "name": "list_allowed_sites",
