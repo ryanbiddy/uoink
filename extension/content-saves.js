@@ -353,7 +353,7 @@
 
   document.addEventListener("yt-navigate-finish", syncPage);
   window.addEventListener("popstate", syncPage);
-  if (globalThis.navigation) navigation.addEventListener("navigatesuccess", syncPage);
+  if (globalThis.navigation) globalThis.navigation.addEventListener("navigatesuccess", syncPage);
   // Content scripts cannot reliably patch the page's isolated History API.
   setInterval(() => { if (!document.hidden) syncPage(); }, 1000);
   window.addEventListener("scroll", () => {
