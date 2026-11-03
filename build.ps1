@@ -344,6 +344,8 @@ foreach ($f in @(
     # subscriptions, consent, detection, start ledger. server.py and
     # uoink_mcp_tools.py import it; migration 0028 ships with the others.
     'source_subscriptions.py',
+    # Saved-source availability checks; server.py imports it at startup.
+    'source_availability.py',
     'library_analysis.py',
     'library_resources.py',
     'library_prompts.py',
@@ -657,6 +659,7 @@ Copy-Item (Join-Path $RepoRoot 'library_cards.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_work.py')  $StagingDir -Force
 # Living Library Phase 3: standing capture service (consent, detection, start ledger).
 Copy-Item (Join-Path $RepoRoot 'source_subscriptions.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'source_availability.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force

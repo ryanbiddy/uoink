@@ -56,6 +56,7 @@
     "server.py",
     "uoink_supervisor.py",
     "skills",
+    "source_availability.py",
     "source_manifest.py",
     "source_subscriptions.py",
     "suite_service.py",
