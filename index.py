@@ -1292,6 +1292,10 @@ class Index:
                     source_types=None, keyword=None, passages=True) -> dict:
         from uoink_core.search_service import search
         filters = dict(filters or {})
+        # An unset availability filter must not reach the semantic engine's
+        # allowlist; a set filter is routed to keyword by search_service.
+        if not filters.get("availability"):
+            filters.pop("availability", None)
         if keyword is None:
             def keyword(count, start, override):
                 if clips_only:
@@ -1420,6 +1424,145 @@ class Index:
         with self._lock:
             rows = self._conn.execute("SELECT video_id FROM yoinks").fetchall()
         return {r["video_id"] for r in rows}
+
+    # ---- source availability (independent of the saved corpus) ------------
+    def availability_due(self, now_iso: str, limit: int, *, offset: int = 0) -> list[dict]:
+        """Live HTTP sources, never checked first, then least recently checked.
+
+        Podcast sidecars may have only an enclosure or episode page URL.
+        Invalid legacy metadata must not prevent other sources being checked.
+        """
+        with self._lock:
+            rows = self._conn.execute(
+                "WITH sources AS (SELECT video_id, platform, source_type, metadata_json, "
+                "CASE WHEN json_valid(metadata_json) THEN metadata_json ELSE '{}' END AS meta "
+                "FROM yoinks WHERE deleted_at IS NULL "
+                "AND lower(trim(coalesce(platform, ''))) NOT IN ('note', 'image')) "
+                "SELECT y.video_id, y.platform, y.source_type, y.metadata_json "
+                "FROM sources y LEFT JOIN source_availability a USING(video_id) "
+                "WHERE (a.video_id IS NULL OR a.next_check_at IS NULL "
+                "OR julianday(a.next_check_at) <= julianday(?)) "
+                "AND (lower(trim(json_extract(y.meta, '$.url'))) LIKE 'http://_%' "
+                "OR lower(trim(json_extract(y.meta, '$.url'))) LIKE 'https://_%' "
+                "OR ((lower(coalesce(y.platform, '')) = 'podcast' OR y.source_type = 'episode') "
+                "AND (lower(trim(json_extract(y.meta, '$.audio_url'))) LIKE 'http://_%' "
+                "OR lower(trim(json_extract(y.meta, '$.audio_url'))) LIKE 'https://_%' "
+                "OR lower(trim(json_extract(y.meta, '$.episode_page_url'))) LIKE 'http://_%' "
+                "OR lower(trim(json_extract(y.meta, '$.episode_page_url'))) LIKE 'https://_%'))) "
+                "ORDER BY a.last_checked_at IS NOT NULL, julianday(a.last_checked_at), y.video_id LIMIT ? OFFSET ?",
+                (now_iso, max(0, int(limit)), max(0, int(offset))),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def availability_record(self, video_id: str) -> dict:
+        """Full checker state, including unconfirmed observations."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM source_availability WHERE video_id=?", (video_id,)
+            ).fetchone()
+        return dict(row) if row else {}
+
+    def record_availability(self, video_id: str, **fields) -> None:
+        allowed = {
+            "status", "pending_status", "pending_since", "last_checked_at", "next_check_at",
+            "status_changed_at", "gone_since", "http_status", "detail", "checker",
+            "consecutive_errors",
+        }
+        if fields.keys() - allowed:
+            raise ValueError("unknown availability fields")
+        columns = ["video_id", *fields]
+        updates = ", ".join(f"{name}=excluded.{name}" for name in fields)
+        conflict = f"DO UPDATE SET {updates}" if fields else "DO NOTHING"
+        with self.write_transaction() as conn:
+            # A user may delete the item while its HTTP check is in flight.
+            conn.execute(
+                f"INSERT INTO source_availability ({', '.join(columns)}) "
+                f"SELECT {', '.join('?' for _ in columns)} "
+                "WHERE EXISTS (SELECT 1 FROM yoinks WHERE video_id=? AND deleted_at IS NULL) "
+                f"ON CONFLICT(video_id) {conflict}",
+                [video_id, *fields.values(), video_id],
+            )
+
+    def availability_for(self, video_ids) -> dict[str, dict]:
+        """Public availability fields for a page, in one IN query."""
+        ids = list(dict.fromkeys(video_ids))
+        if not ids:
+            return {}
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, status, last_checked_at, gone_since, status_changed_at "
+                f"FROM source_availability WHERE video_id IN ({', '.join('?' for _ in ids)})",
+                ids,
+            ).fetchall()
+        return {row["video_id"]: {key: row[key] for key in row.keys() if key != "video_id"}
+                for row in rows}
+
+    def availability_summary(self, now_iso: str) -> dict:
+        """Counts of tracked, live sources; 'this month' is a rolling 30 days."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT a.status, COUNT(*) AS total, "
+                "SUM(a.last_checked_at IS NOT NULL) AS checked, "
+                "SUM(julianday(a.gone_since) BETWEEN julianday(?) - 30 AND julianday(?)) AS recent "
+                "FROM source_availability a JOIN yoinks y USING(video_id) "
+                "WHERE y.deleted_at IS NULL GROUP BY a.status", (now_iso, now_iso),
+            ).fetchall()
+        by_status = dict.fromkeys(("available", "deleted", "private", "region_blocked", "unknown"), 0)
+        gone_total = gone_this_month = checked_total = 0
+        for row in rows:
+            by_status[row["status"]] = row["total"]
+            checked_total += row["checked"]
+            if row["status"] in ("deleted", "private", "region_blocked"):
+                gone_total += row["total"]
+                gone_this_month += row["recent"] or 0
+        return {"gone_total": gone_total, "gone_this_month": gone_this_month,
+                "checked_total": checked_total, "by_status": by_status}
+
+    def gone_video_ids(self) -> set[str]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT a.video_id FROM source_availability a JOIN yoinks y USING(video_id) "
+                "WHERE y.deleted_at IS NULL AND a.status IN ('deleted', 'private', 'region_blocked')"
+            ).fetchall()
+        return {row["video_id"] for row in rows}
+
+    def availability_host(self, host: str) -> dict:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM source_availability_hosts WHERE host=?", (host,)
+            ).fetchone()
+        return dict(row) if row else {}
+
+    def set_availability_host(self, host: str, *, backoff_until=None, strikes=0,
+                              last_request_at=None) -> None:
+        with self.write_transaction() as conn:
+            conn.execute(
+                "INSERT INTO source_availability_hosts (host, backoff_until, strikes, last_request_at) "
+                "VALUES (?, ?, ?, ?) ON CONFLICT(host) DO UPDATE SET "
+                "backoff_until=excluded.backoff_until, strikes=excluded.strikes, "
+                "last_request_at=excluded.last_request_at",
+                (host, backoff_until, strikes, last_request_at),
+            )
+
+    def availability_run_state(self) -> dict:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM source_availability_state WHERE singleton=1"
+            ).fetchone()
+        return dict(row) if row else {}
+
+    def set_availability_run_state(self, **fields) -> None:
+        if fields.keys() - {"last_run_started_at", "last_run_finished_at", "last_run_json"}:
+            raise ValueError("unknown availability run fields")
+        if not fields:
+            return
+        with self.write_transaction() as conn:
+            conn.execute(
+                f"INSERT INTO source_availability_state (singleton, {', '.join(fields)}) "
+                f"VALUES (1, {', '.join('?' for _ in fields)}) ON CONFLICT(singleton) DO UPDATE SET "
+                + ", ".join(f"{name}=excluded.{name}" for name in fields),
+                list(fields.values()),
+            )
 
     # bm25() column weights for yoinks_fts, in column order
     # (0:video_id 1:slug 2:channel 3:title 4:topic 5:hook_type 6:content).
@@ -2589,6 +2732,7 @@ class Index:
                                  author: str | None = None,
                                  date_from: str | None = None,
                                  date_to: str | None = None,
+                                 availability: str | None = None,
                                  limit: int = 50,
                                  offset: int = 0,
                                  match: str = "forgiving", passages: bool = True) -> dict:
@@ -2605,6 +2749,11 @@ class Index:
 
         clauses = ["y.deleted_at IS NULL"]
         params: list = []
+        if availability:
+            if availability != "gone":
+                raise ValueError("availability must be gone")
+            clauses.append("y.video_id IN (SELECT video_id FROM source_availability "
+                           "WHERE status IN ('deleted','private','region_blocked'))")
         if channel:
             clauses.append("y.channel = ?")
             params.append(channel)

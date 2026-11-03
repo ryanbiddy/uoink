@@ -337,7 +337,8 @@ function makePage({ files = {}, extract = null, searchRows = [], jobsAnswer = nu
   vm.createContext(ctx);
   vm.runInContext(`${SCRIPT}
 ;globalThis.__page = { state, els, wireEvents, wireRoutes, switchTab, openYoinkDetail, renderYoinkDetail, renderQueue,
-  renderTopicOverview, cardHtml, captureStepIndex, CAPTURE_STEPS, loadLibrary, refreshJobs, handleJobsStreamEvent };`, ctx);
+  renderTopicOverview, cardHtml, captureStepIndex, CAPTURE_STEPS, loadLibrary, refreshJobs, handleJobsStreamEvent,
+  renderLibraryAvailability, loadLibraryAvailability, resetLibraryFilters };`, ctx);
   vm.runInContext(RECORDED.map((name) => `${name} = function () {};`).join("\n"), ctx);
   const page = ctx.__page;
   page.wireEvents();
@@ -349,6 +350,7 @@ function makePage({ files = {}, extract = null, searchRows = [], jobsAnswer = nu
   };
   return {
     page, state: page.state, els: page.els, requests, held, opened, clipboard, panels, fireClick,
+    storage: ctx.localStorage, run: (code) => vm.runInContext(code, ctx),
     paths: () => requests.map((r) => r.path),
     count: (path) => requests.filter((r) => r.path === path).length,
     searches: () => requests.filter((r) => r.path.startsWith("/memory/search"))
@@ -1163,7 +1165,106 @@ async function groupErrors() {
   });
 }
 
+async function groupAvailability() {
+  const click = (p, selector) => {
+    const button = new FakeEl("", "BUTTON");
+    button._matches = [selector];
+    p.fireClick(button);
+  };
+  await scenario("source badges name the status on browse and search cards", async () => {
+    const p = makePage();
+    for (const [status, label] of [["deleted", "Gone from the web"], ["private", "Now private"], ["region_blocked", "Blocked in your region"]]) {
+      const html = p.page.cardHtml({ video_id: status, title: "Saved source", source_status: { status } });
+      check(html.includes(`title="${label}, still in your library">${label}</span>`), `${status} has visible text and a preservation tooltip`, html);
+      check(html.includes(`aria-label="Open Saved source, ${label}, still in your library"`), `${status} is included in the card's accessible name`, html);
+    }
+    for (const status of [undefined, "unknown", "available"]) {
+      check(!p.page.cardHtml({ video_id: "up", source_status: { status } }).includes('class="source-availability-badge"'), `${status} has no gone badge`);
+    }
+  });
+  await scenario("availability composes with query, kind and sort and resets paging", async () => {
+    const p = makePage();
+    Object.assign(p.state.filters, { q: "needle", kind: "videos", sort: "oldest" });
+    p.state.offset = 80;
+    click(p, "[data-library-availability]");
+    await settle();
+    const sent = p.searches().at(-1);
+    check(sent.get("availability") === "gone" && sent.get("offset") === "0", "the gone chip restarts on the first filtered page", sent.toString());
+    check(sent.get("q") === "needle" && sent.get("kind") === "videos" && sent.get("sort") === "oldest", "the gone chip preserves the other filters", sent.toString());
+    check(p.els.libraryAvailabilityFilter.getAttribute("aria-pressed") === "true", "the gone chip announces its pressed state");
+    click(p, "[data-library-availability]");
+    await settle();
+    check(!p.searches().at(-1).has("availability"), "pressing again clears only availability");
+    click(p, "[data-show-gone-sources]");
+    await settle();
+    check(p.searches().at(-1).get("availability") === "gone", "the notice button turns on the gone filter");
+    p.page.resetLibraryFilters();
+    await settle();
+    check(!p.searches().at(-1).has("availability") && p.els.libraryAvailabilityFilter.getAttribute("aria-pressed") === "false", "Clear filters also releases the gone chip");
+  });
+  await scenario("notice counts, setting and per-month dismissal", async () => {
+    const data = { ok: true, enabled: true, gone_this_month: 2 };
+    const p = makePage({ files: { "/library/availability": data } });
+    await p.page.loadLibraryAvailability();
+    check(p.count("/library/availability") === 1, "the notice uses the availability route");
+    check(!p.els.libraryAvailabilityNotice.classList.contains("hidden"), "a positive count displays the notice");
+    check(p.els.libraryAvailabilityMessage.textContent === "2 sources you saved went offline this month. You still have them.", "plural copy preserves the saved sources");
+    p.page.renderLibraryAvailability({ ...data, gone_this_month: 1 });
+    check(p.els.libraryAvailabilityMessage.textContent === "1 source you saved went offline this month. You still have it.", "one source gets singular copy");
+    for (const hidden of [{ ...data, enabled: false }, { ...data, gone_this_month: 0 }, null]) {
+      p.page.renderLibraryAvailability(hidden);
+      check(p.els.libraryAvailabilityNotice.classList.contains("hidden"), "off, zero and unavailable notices are hidden", hidden);
+    }
+    p.state.settings = { source_availability_check_enabled: false };
+    p.page.renderLibraryAvailability(data);
+    check(p.els.libraryAvailabilityNotice.classList.contains("hidden"), "the current opt-out hides a stale enabled response");
+    p.state.settings = {};
+    p.page.renderLibraryAvailability(data);
+    click(p, "[data-dismiss-availability]");
+    await p.page.loadLibraryAvailability();
+    check(p.els.libraryAvailabilityNotice.classList.contains("hidden"), "a dismissed notice stays hidden after reload");
+    const key = "uoink.dashboard.availabilityDismissedMonth";
+    check(/^\d{4}-\d{2}$/.test(p.storage.getItem(key)), "dismissal stores the calendar month");
+    p.run('availabilityMonth = () => "2099-01"');
+    p.page.renderLibraryAvailability(data);
+    check(!p.els.libraryAvailabilityNotice.classList.contains("hidden"), "a previous month's dismissal does not hide this month");
+  });
+  await scenario("a failed storage write cannot undo this visit's dismissal", async () => {
+    const p = makePage();
+    p.storage.setItem("uoink.dashboard.availabilityDismissedMonth", "1999-01");
+    p.storage.setItem = () => { throw new Error("storage is read-only"); };
+    click(p, "[data-dismiss-availability]");
+    p.page.renderLibraryAvailability({ enabled: true, gone_this_month: 1 });
+    check(p.els.libraryAvailabilityNotice.classList.contains("hidden"), "an older stored month does not undo an in-memory dismissal");
+  });
+  await scenario("blocked storage still permits dismissal for this visit", async () => {
+    const p = makePage();
+    const data = { enabled: true, gone_this_month: 1 };
+    p.storage.getItem = p.storage.setItem = () => { throw new Error("storage blocked"); };
+    p.page.renderLibraryAvailability(data);
+    check(!p.els.libraryAvailabilityNotice.classList.contains("hidden"), "blocked storage does not break the notice");
+    click(p, "[data-dismiss-availability]");
+    p.page.renderLibraryAvailability(data);
+    check(p.els.libraryAvailabilityNotice.classList.contains("hidden"), "dismissal survives a blocked storage write in memory");
+    p.run('availabilityMonth = () => "2099-01"');
+    p.page.renderLibraryAvailability(data);
+    check(!p.els.libraryAvailabilityNotice.classList.contains("hidden"), "in-memory dismissal also expires next month");
+  });
+  await scenario("late notice responses cannot override the latest read", async () => {
+    const p = makePage();
+    p.run('globalThis.answers = []; authFetch = () => new Promise(resolve => answers.push(resolve));');
+    const old = p.page.loadLibraryAvailability();
+    const latest = p.page.loadLibraryAvailability();
+    p.run('answers[1]({ enabled: false, gone_this_month: 2 })');
+    await latest;
+    p.run('answers[0]({ enabled: true, gone_this_month: 2 })');
+    await old;
+    check(p.els.libraryAvailabilityNotice.classList.contains("hidden"), "late enabled response cannot revive an opted-out notice");
+  });
+}
+
 const GROUPS = {
+  availability: groupAvailability,
   paste: groupPaste,
   kinds: groupKinds,
   rows: groupRows,

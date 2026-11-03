@@ -371,6 +371,14 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(yoinks=yoinks)
 
 
+def _search_source_availability(idx, rows) -> dict:
+    """One local lookup per search page; availability never blocks saved text."""
+    try:
+        return idx.availability_for([r["video_id"] for r in rows if r.get("video_id")])
+    except Exception:
+        return {}
+
+
 def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     from uoink_core.search_service import MODES, metadata
     mode = args.get("mode", "auto")
@@ -396,11 +404,15 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
                            keyword=lambda count, offset, override: {"results": idx.search(
                                query, count, channel=channel, hook_type=hook_type, match=override or match, passages=False)})
     rows = page["results"]
+    availability = _search_source_availability(idx, rows)
     results = []
     for r in rows:
         score = r.get("_score")
+        source = availability.get(r.get("video_id"), {})
         results.append({
             "video_id": r.get("video_id"),
+            "source_status": source.get("status") or "unknown",
+            "source_last_checked": source.get("last_checked_at"),
             "slug": r.get("slug"),
             "title": r.get("title"),
             "snippet": (r.get("_snippet") or "").strip(),
@@ -548,15 +560,20 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
     limit = _limit_int(args.get("limit"), default=20, low=1, high=50)
     video_id = _clean_text(args.get("video_id"))
     channel = _clean_text(args.get("channel"))
-    page = _b()._get_index().search_mode(query, limit, mode=mode, clips_only=True,
-                                        video_id=video_id, filters={"channel": channel}, match=match)
+    idx = _b()._get_index()
+    page = idx.search_mode(query, limit, mode=mode, clips_only=True,
+                           video_id=video_id, filters={"channel": channel}, match=match)
     rows = page["results"]
+    availability = _search_source_availability(idx, rows)
     results = []
     for r in rows:
         score = r.get("_score")
+        source = availability.get(r.get("video_id"), {})
         results.append({
             "clip_id": r.get("clip_id"),
             "video_id": r.get("video_id"),
+            "source_status": source.get("status") or "unknown",
+            "source_last_checked": source.get("last_checked_at"),
             "slug": r.get("slug"),
             "title": r.get("title"),
             "channel": r.get("channel"),

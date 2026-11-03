@@ -39,10 +39,12 @@ import urllib.error
 import urllib.request
 import uuid
 import webbrowser
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+_HELPER_STARTED_MONOTONIC = time.monotonic()
 
 if sys.platform == "darwin":
     sys.dont_write_bytecode = True
@@ -107,6 +109,7 @@ import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
+import source_availability  # noqa: E402  -- bounded source availability checks
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
@@ -972,6 +975,7 @@ def _default_settings() -> dict:
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
+        "source_availability_check_enabled": True,
         # CM-11: when a downloaded video exposes no subtitle track, use a
         # local faster-whisper model (the user's download, else the copy the
         # installer bundles). Default ON because
@@ -1205,6 +1209,9 @@ def _normalize_settings(data: dict) -> dict:
     )
     clean["transcript_reliability_auto_check"] = bool(
         clean.get("transcript_reliability_auto_check")
+    )
+    clean["source_availability_check_enabled"] = bool(
+        clean.get("source_availability_check_enabled", True)
     )
     clean["asr_fallback_enabled"] = bool(
         clean.get("asr_fallback_enabled", True)
@@ -1684,6 +1691,7 @@ def _public_settings(data: dict | None = None) -> dict:
         "transcript_reliability_auto_check": bool(
             data.get("transcript_reliability_auto_check")
         ),
+        "source_availability_check_enabled": normalized["source_availability_check_enabled"],
         "asr_fallback_enabled": bool(
             data.get("asr_fallback_enabled", True)
         ),
@@ -11302,6 +11310,43 @@ def _podcast_feed_scheduler_tick() -> list[dict]:
     return results
 
 
+_source_availability_lock = threading.Lock()
+_SOURCE_AVAILABILITY_STARTUP_GRACE_SEC = 10 * 60
+
+
+def _source_availability_tick() -> None:
+    """Start at most one bounded check from the existing scheduler loop."""
+    acquired = False
+    try:
+        if (os.environ.get("UOINK_DISABLE_AVAILABILITY_CHECK") == "1"
+                or time.monotonic() - _HELPER_STARTED_MONOTONIC < _SOURCE_AVAILABILITY_STARTUP_GRACE_SEC
+                or not _read_settings().get("source_availability_check_enabled", True)):
+            return
+        acquired = _source_availability_lock.acquire(blocking=False)
+        if not acquired:
+            return
+        idx = _get_index()
+        if not source_availability.is_due_to_run(idx, datetime.now(timezone.utc)):
+            return
+
+        def _runner():
+            try:
+                source_availability.run_once(idx)
+            except Exception:
+                log.exception("source availability check crashed")
+            finally:
+                _source_availability_lock.release()
+
+        thread = threading.Thread(target=_runner, name="source-availability", daemon=True)
+        thread.start()
+        acquired = False  # The worker now owns releasing the lock.
+    except Exception:
+        log.exception("source availability tick crashed")
+    finally:
+        if acquired:
+            _source_availability_lock.release()
+
+
 def _start_podcast_feed_scheduler_thread() -> threading.Thread:
     """Run the standing-source scheduler every 30 seconds on a daemon thread.
     The tick only scans due rows; outbound polls follow each source's own
@@ -11310,6 +11355,7 @@ def _start_podcast_feed_scheduler_thread() -> threading.Thread:
         while True:
             try:
                 _podcast_feed_scheduler_tick()
+                _source_availability_tick()
             except Exception:
                 log.exception("source watch tick crashed")
             time.sleep(_PODCAST_FEED_TICK_SEC)
@@ -13693,7 +13739,7 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
     source-type group (``kind``) and an order over every match: newest,
     oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
     from uoink_core.search_service import citation_fields, select_mode
-    actual, reason = select_mode(idx, mode)
+    actual, reason = select_mode(idx, mode, filters=filters)
     if actual != "keyword" and q:
         result = idx.search_mode(q, max(200, offset + limit), mode=mode, match=match, filters=filters, passages=False,
                                 source_types=_LIBRARY_KINDS.get(kind or ""),
@@ -13715,6 +13761,9 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
     mode_info = {"search_mode": "keyword", "requested_mode": mode, "fallback_reason": reason}
     clauses = ["y.deleted_at IS NULL"]
     params: list = []
+    if filters.get("availability") == "gone":
+        clauses.append("y.video_id IN (SELECT video_id FROM source_availability "
+                       "WHERE status IN ('deleted','private','region_blocked'))")
     for column in ("channel", "platform", "source_type", "author", "topic", "hook_type"):
         value = filters.get(column)
         if value:
@@ -13855,6 +13904,11 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # Fail open: if the batch enrich raises, fall back to raw rows
         # without crashing the whole render.
         log.exception("enrich_yoinks failed; rendering bare rows")
+    try:
+        availability = idx.availability_for([r["video_id"] for r in rows if r.get("video_id")])
+    except Exception:
+        log.warning("source availability unavailable; rendering unknown status")
+        availability = {}
     out: list[dict] = []
     for r in rows:
         video_id = r.get("video_id")
@@ -13960,6 +14014,11 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "topic": r.get("topic") or "",
             "folder": str(folder),
             "video_id": video_id,
+            "source_status": {
+                "status": availability.get(video_id, {}).get("status") or "unknown",
+                "last_checked_at": availability.get(video_id, {}).get("last_checked_at"),
+                "gone_since": availability.get(video_id, {}).get("gone_since"),
+            },
             "channel": live.get("host") or live.get("channel") or r.get("channel"),
             "yoinked_at": r.get("yoinked_at"),
             "hook_type": r.get("hook_type"),
@@ -15012,6 +15071,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_corpus_v1_get(bare)
         if bare == "/library/facets":
             return self._handle_library_facets()
+        if bare == "/library/availability":
+            return self._handle_library_availability()
         if bare == "/corpus/channels":
             return self._handle_corpus_channels()
         if bare == "/facets/taxonomy":
@@ -15539,6 +15600,24 @@ class Handler(BaseHTTPRequestHandler):
                 payload.get("error", {}).get("code"),
             )
         return self._send_json(status, payload)
+
+    def _handle_library_availability(self):
+        """GET /library/availability -- local source-check counts for Library."""
+        if not self._require_token():
+            return
+        try:
+            idx = _get_index()
+            summary = idx.availability_summary(datetime.now(timezone.utc).isoformat())
+            run = idx.availability_run_state()
+            enabled = _read_settings().get("source_availability_check_enabled", True)
+        except Exception as exc:
+            log.warning("/library/availability failed: %s", exc)
+            return self._send_json(503, {
+                "ok": False, "error": "availability unavailable", "state": "unavailable"})
+        return self._send_json(200, {
+            "ok": True, "enabled": enabled, **summary,
+            "last_run_finished_at": run.get("last_run_finished_at"),
+        })
 
     def _handle_library_facets(self):
         """GET /library/facets -- corpus-wide filter facets (G-12 / QA #14).
@@ -17607,6 +17686,7 @@ class Handler(BaseHTTPRequestHandler):
                                             # never spawns the worker
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
+            "source_availability_check_enabled",
             "asr_fallback_enabled",          # CM-11 caption-less video ASR
             "claim_verification_enabled",  # v3 A2 -- default OFF (claims
                                             # extracted on yoink only when on)
@@ -18099,6 +18179,9 @@ class Handler(BaseHTTPRequestHandler):
             if hook_type not in HOOK_TYPES:
                 return self._send_json(
                     400, {"ok": False, "error": "hook_type invalid"})
+        availability = _one("availability")
+        if availability and availability != "gone":
+            return self._send_json(400, {"ok": False, "error": "availability must be gone"})
         date_from = _one("date_from")
         date_to = _one("date_to")
         for label, value in (("date_from", date_from), ("date_to", date_to)):
@@ -18154,6 +18237,7 @@ class Handler(BaseHTTPRequestHandler):
                         "hook_type": hook_type, "platform": _one("platform"),
                         "source_type": _one("source_type"), "author": _one("author"),
                         "date_from": date_from, "date_to": date_to,
+                        "availability": availability,
                     },
                     limit=limit, offset=offset,
                 )
@@ -18163,7 +18247,8 @@ class Handler(BaseHTTPRequestHandler):
                     filters={"channel": _one("channel"), "topic": _one("topic"),
                              "hook_type": hook_type, "platform": _one("platform"),
                              "source_type": _one("source_type"), "author": _one("author"),
-                             "date_from": date_from, "date_to": date_to},
+                             "date_from": date_from, "date_to": date_to,
+                             "availability": availability},
                 )
             corpus_total = idx.count_corpus()
         except Exception as e:
