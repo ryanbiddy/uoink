@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
 
 PackageIdentifier: ReplayRyan.Uoink
-PackageVersion: 3.12.1
+PackageVersion: 3.13.0
 MinimumOSVersion: 10.0.17763.0
 InstallerType: inno
 Scope: user
@@ -12,11 +12,11 @@ InstallModes:
 UpgradeBehavior: install
 Commands:
   - uoink
-ReleaseDate: 2026-11-01
+ReleaseDate: 2026-11-03
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/ryanbiddy/uoink/releases/download/v3.12.1/Uoink-Setup-3.12.1.exe
-    InstallerSha256: 2F258D36D23B5604E1D41E04FFD1BCF297E365DBE17B98D88D58BE628632D071
+    InstallerUrl: https://github.com/ryanbiddy/uoink/releases/download/v3.13.0/Uoink-Setup-3.13.0.exe
+    InstallerSha256: 15D31CB0C1E70CECF17A6D710923D16E4F627BC11A27F78BC0FCF75091DA789E
     ProductCode: '{1CCDA47D-2347-43D1-99F4-BD6E7C231288}_is1'
     AppsAndFeaturesEntries:
       - DisplayName: Uoink
