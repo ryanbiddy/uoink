@@ -4,7 +4,7 @@ Gate covered:
 - P4-04 (Provenance and trust: evidence kinds, boundary fences, role injection neutralization,
   safe URL validation, terminal control / path leak detection, recall hook consistency).
 
-Tests against the frozen module interface in docs/library/PHASE4-AV-BRIEF-2026-09-08.md:
+Tests against the frozen module interface in PHASE4-AV-BRIEF-2026-09-08 (internal note):
 - library_resources.LibraryReader, ResourceError, parse_uri, encode_key, etc.
 """
 from __future__ import annotations

@@ -10,7 +10,7 @@ packets; the calling client does the thinking; uoink would persist the
 structured result. Here the "persist" step is a JSON file on disk.
 
 Usage (from the worktree root):
-    python scripts/librarian/dryrun.py --index _scratch/index-copy.db --out E:/AI/projects/uoink/handoff/council/library-proof
+    python scripts/librarian/dryrun.py --index _scratch/index-copy.db --out <workspace>/handoff/council/library-proof
     python scripts/librarian/dryrun.py --index ... --phase assign --client codex --limit 12
 """
 from __future__ import annotations
@@ -35,7 +35,7 @@ PROMPTS = HERE / "prompts"
 def _default_codex_exe() -> str:
     """The Codex CLI: UOINK_CODEX_EXE, else `codex` on PATH, else the global npm
     install. Never a OneDrive path: npm cannot update a package there, and the
-    Control Room moved to E:\\AI\\projects\\agent-control-room on 2026-09-04."""
+    Control Room moved to <workspace>\\agent-control-room on 2026-09-04."""
     env = os.environ.get("UOINK_CODEX_EXE")
     if env:
         return env

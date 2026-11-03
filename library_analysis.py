@@ -1,6 +1,6 @@
 """Pure aggregation and read-only activity reporting for Living Library run AZ.
 
-Contract: phase5-v1 (docs/library/PHASE5-CONTRACT-2026-09-08.md).
+Contract: phase5-v1 (PHASE5-CONTRACT-2026-09-08 (internal note)).
 Implements get_library_activity, report_revision content binding,
 history coverage, survivor baseline churn proof, whats_new_adapter,
 and narration faithfulness evaluator.

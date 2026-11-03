@@ -36,7 +36,10 @@ from datetime import datetime, timezone
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-CONTRACT = ROOT / 'docs/library/PHASE3-CONTRACT-2026-09-07.md'
+# The phase3-v1 contract froze the Migration 0028 DDL (shipped as the migration)
+# and the registry tool manifest (kept as a test fixture).
+CONTRACT_DDL = ROOT / 'migrations/0028_source_subscriptions.sql'
+CONTRACT_TOOLS = ROOT / 'tests/fixtures/phase3-contract/tool-manifest.json'
 MIGRATION = ROOT / 'migrations/0028_source_subscriptions.sql'
 VERSION = 'phase3-v1-2026-09-07'
 MINUTE = 60_000

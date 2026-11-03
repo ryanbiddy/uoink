@@ -34,7 +34,7 @@ PROMPTS = ROOT / "scripts" / "librarian" / "prompts"
 DEFAULT_INDEX = Path(
     os.environ.get(
         "UOINK_INDEX_COPY",
-        r"C:\Users\hello\AppData\Local\AgentControlRoom\uoink-index-copy-2026-09-04.db",
+        str(Path.home() / "AppData" / "Local" / "AgentControlRoom" / "uoink-index-copy-2026-09-04.db"),
     )
 )
 
@@ -59,7 +59,7 @@ G4_FORECAST_OUTSIDE = (
 )
 
 # Live list prices, USD per million tokens, verified 2026-09-04.
-# Sources are in docs/library/COST-MODEL-2026-09-04.md.
+# Sources are in COST-MODEL-2026-09-04 (internal note).
 MODELS = {
     "claude-haiku-4.5": {
         "display": "Claude Haiku 4.5",

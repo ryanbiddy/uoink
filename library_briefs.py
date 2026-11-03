@@ -4,7 +4,7 @@ Uoink prepares a bounded, hashed input packet for a client-run report job and
 validates/persists the artifact the client submits. No model, no scheduler,
 no sampling request, no fallback cognition: a clock alone never produces a
 document. Run AV-2 (2026-09-08), claude worker. Frozen interface:
-``docs/library/PHASE4-AV2-BRIEF-2026-09-08.md``.
+``PHASE4-AV2-BRIEF-2026-09-08 (internal note)``.
 
 Contract rules this module does not implement exactly, and why
 --------------------------------------------------------------

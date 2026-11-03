@@ -137,5 +137,5 @@ def test_intent_expiry_session_and_undo_undo():
     idx.close()
 
 def test_frozen_schemas():
-    document=json.loads(Path('docs/library/phase2-contract/tool-schemas.json').read_text())
+    document=json.loads(Path('tests/fixtures/phase2-contract/tool-schemas.json').read_text())
     assert _SCHEMAS=={t['name']:t['inputSchema'] for t in document['tools']}

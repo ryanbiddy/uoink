@@ -7,7 +7,7 @@ that touches storage runs inside the sandbox: disposable migrated databases
 under the worker checkout, no model, no transcription engine, no helper, no
 port 5179, no live index, no thread start, no subprocess.
 
-Scope items (see docs/library/PHASE6-BC2-BRIEF-2026-09-08.md):
+Scope items (see PHASE6-BC2-BRIEF-2026-09-08 (internal note)):
 1 publication ownership fence, 2 complete publication with Phase 2
 invalidation, 3 artifact retention, 4 null production seek fields, 5 export
 validation/coherence/adapters, 6 production capture paths, 7 virtual view,

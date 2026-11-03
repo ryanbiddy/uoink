@@ -1877,7 +1877,7 @@ def validate_probe_receipts(receipts, manifest, *, root=ROOT, artifact_root=None
 
 
 def _legacy_fixture():
-    taxonomy = normalized_taxonomy(read_json(ROOT / "docs/library/taxonomy-v1-2026-09-04.json"))
+    taxonomy = normalized_taxonomy(read_json(ROOT / "tests/fixtures/library/taxonomy-synthetic.json"))
     card = library_cards.build_card(dict(video_id="fixture-note", title="Fixture", source_type="note"), [],
                                     corpus_text="A grounded fixture quote with Unicode caf\u00e9.", profile="librarian")
     # Exercise the historical route even after builder v2 lands.

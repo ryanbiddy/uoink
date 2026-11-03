@@ -1,5 +1,5 @@
 """Phase 3 gates S01 (migration and rerun) and S02 (default off, legacy
-conversion). Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md.
+conversion). Contract: PHASE3-CONTRACT-2026-09-07 (internal note).
 
 Run: python -m pytest -q tests/test_source_subscriptions_migration.py
 """

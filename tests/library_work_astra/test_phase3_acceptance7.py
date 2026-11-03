@@ -7,6 +7,7 @@ The service pagination control uses the existing isolated Phase 3 fixture.
 C22 requires Ryan's actual installed-build observations; no fixture substitutes for it.
 """
 
+from tests.private_archive import needs
 import ast
 import hashlib
 import json
@@ -40,6 +41,7 @@ def retained_files():
 
 
 @pytest.mark.parametrize('folder', [S20, S21], ids=['s20', 's21'])
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as7_supplied_manifest_matches_bytes(folder):
     for line in (folder / 'SHA256SUMS').read_text().splitlines():
         if not line.strip():
@@ -50,6 +52,7 @@ def test_as7_supplied_manifest_matches_bytes(folder):
         assert digest_bytes(path.read_bytes()) == expected, relative
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as7_c20_refresh_error_dump_matches_observed_screenshot():
     """03's JPG shows 2/10 starts, http_500, and 1 consecutive failure.
 
@@ -67,6 +70,7 @@ def test_as7_c20_refresh_error_dump_matches_observed_screenshot():
     assert observed == expected, {'dump': observed, 'screenshot': expected}
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as7_c21_executed_launcher_bytes_are_retained():
     receipt = read_json(AT6)
     expected = receipt['input_hashes'][r'tests\library_work_astra\test_phase3_s21.py']
@@ -88,6 +92,7 @@ def test_as7_c21_at6_receipt_records_process_exit_status():
         'Retained AT6 receipt has no explicit successful process exit status', exits)
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as7_c21_all_at6_artifact_bytes_are_archived():
     receipt = read_json(AT6)
     hashes = {digest_bytes(p.read_bytes()) for p in retained_files()}
@@ -97,6 +102,7 @@ def test_as7_c21_all_at6_artifact_bytes_are_archived():
 
 
 @pytest.mark.parametrize('feed_port', [64703, 49557], ids=['at6-browser', 'c21-pill-browser'])
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as7_c21_browser_run_has_retained_receipt_and_database(feed_port):
     """Ports are visible in the retained AT6 and new C21 Sources screenshots."""
     receipts = [read_json(p) for p in S21.glob('*.json')]

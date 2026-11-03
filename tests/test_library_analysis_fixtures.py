@@ -1,6 +1,6 @@
 """tests/test_library_analysis_fixtures.py - Phase 5 Acceptance Gates & Fixture Tests.
 
-Contract: phase5-v1 (docs/library/PHASE5-CONTRACT-2026-09-08.md).
+Contract: phase5-v1 (PHASE5-CONTRACT-2026-09-08 (internal note)).
 Implements every test name from the contract's acceptance table:
 - Seven gate tests:
   1. test_gate1_backlog_import_vs_steady_capture

@@ -1,4 +1,8 @@
 """Induction contract fixtures use archived original evidence, never a model."""
+from tests.private_archive import skip_module_unless
+
+skip_module_unless('proof/induction-manifest-2026-09-05.json')
+
 import copy
 import importlib.util
 

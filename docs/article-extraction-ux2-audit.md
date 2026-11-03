@@ -51,7 +51,7 @@ Commands ran from the requested worktree. Installation and audit processes inher
 
 ```powershell
 $env:UOINK_URL='http://127.0.0.1:1'
-$env:IG_FORBIDDEN_LIVE='C:\Users\hello\AppData\Local\Uoink\index.db'
+$env:IG_FORBIDDEN_LIVE='C:\Users\<you>\AppData\Local\Uoink\index.db'
 $env:PYTHONPATH=(Get-Location).Path
 $env:PYTHONDONTWRITEBYTECODE='1'
 $env:UV_CACHE_DIR=Join-Path (Get-Location) '_scratch\uv-cache'
@@ -61,10 +61,10 @@ $env:UV_CACHE_DIR=Join-Path (Get-Location) '_scratch\uv-cache'
 | Command | Result |
 |---|---|
 | `git branch --show-current`; `git rev-parse HEAD` | `feat/article-extract`, base `90349a3f6b3431f52908968674319bc60f67634f` |
-| `E:\AI\tools\uv\uv.exe python find --offline 3.11` | Found existing uv-managed CPython 3.11.14 |
-| `E:\AI\tools\uv\uv.exe venv --python C:\Users\hello\AppData\Roaming\uv\python\cpython-3.11.14-windows-x86_64-none\python.exe --seed _scratch/articles-venv` | Exit 0; isolated venv, no shared packages installed |
+| `<tools>\uv\uv.exe python find --offline 3.11` | Found existing uv-managed CPython 3.11.14 |
+| `<tools>\uv\uv.exe venv --python C:\Users\<you>\AppData\Roaming\uv\python\cpython-3.11.14-windows-x86_64-none\python.exe --seed _scratch/articles-venv` | Exit 0; isolated venv, no shared packages installed |
 | `_scratch\articles-venv\Scripts\python.exe scripts/verify_installer_lock.py requirements-installer-lock.txt --write-constraints _scratch/installer-constraints.txt` | Exit 0; exported existing pins using repo tooling |
-| `E:\AI\tools\uv\uv.exe pip install --python _scratch/articles-venv/Scripts/python.exe --only-binary :all: --constraint _scratch/installer-constraints.txt trafilatura` | Exit 0; resolved and installed 18 distributions |
+| `<tools>\uv\uv.exe pip install --python _scratch/articles-venv/Scripts/python.exe --only-binary :all: --constraint _scratch/installer-constraints.txt trafilatura` | Exit 0; resolved and installed 18 distributions |
 | `_scratch\articles-venv\Scripts\python.exe -B _scratch/audit_article_dependencies.py` | Exit 0; measured sizes and captured installed metadata in `_scratch/article-dependency-audit.json` |
 
 Network use was limited to dependency installation. No application fetch, extraction run, server, browser or live corpus was accessed. No commits, pushes, ref changes or version edits were made.

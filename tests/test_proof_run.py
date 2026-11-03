@@ -11,6 +11,7 @@ Exercises:
 """
 from __future__ import annotations
 
+from tests.private_archive import needs
 from collections import Counter
 import copy
 import json
@@ -194,6 +195,7 @@ def create_fixture_database(db_path: Path, n_items: int = 12) -> None:
     idx.close()
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_mock_run_end_to_end(tmp_path, clean_env):
     """End-to-end verification of --mock --limit 12 on an ephemeral port."""
     fixture_db = tmp_path / "source_copy.db"
@@ -307,6 +309,7 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
     assert (state_dir / "proposals.json").is_file()
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_scorer_on_fixture_receipts(tmp_path, clean_env):
     """Tests proof_score.py logic and report.md generation."""
     fixture_db = tmp_path / "source_copy.db"
@@ -349,6 +352,7 @@ def test_scorer_on_fixture_receipts(tmp_path, clean_env):
     assert report_file.is_file()
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_error_guard_breach_stops_and_records_partial_receipts(tmp_path, clean_env):
     """Verifies that an error rate > 10% after 20 attempts triggers the error guard, stops launching, and writes partial receipts."""
     fixture_db = tmp_path / "source_copy.db"
@@ -389,6 +393,7 @@ def test_error_guard_breach_stops_and_records_partial_receipts(tmp_path, clean_e
     assert (state_dir / "registry_export.json").is_file()
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_proof_score_rejects_25_word_quote(tmp_path, clean_env):
     """Pre-scoring check must reject quotes exceeding 24 words."""
     fixture_db = tmp_path / "source_copy.db"
@@ -413,6 +418,7 @@ def test_proof_score_rejects_25_word_quote(tmp_path, clean_env):
         score_receipts(receipts_data, holdout_data, gold_data)
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_proof_score_rejects_foreign_card(tmp_path, clean_env):
     """Pre-scoring check must reject attempts referencing cards outside target_ids."""
     fixture_db = tmp_path / "source_copy.db"
@@ -436,6 +442,7 @@ def test_proof_score_rejects_foreign_card(tmp_path, clean_env):
         score_receipts(receipts_data, holdout_data, gold_data)
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_proof_score_rejects_missing_source_hash(tmp_path, clean_env):
     """Pre-scoring check must reject missing source hash."""
     fixture_db = tmp_path / "source_copy.db"
@@ -457,6 +464,7 @@ def test_proof_score_rejects_missing_source_hash(tmp_path, clean_env):
         score_receipts(receipts_data, holdout_data, gold_data)
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_proof_score_rejects_modified_batch(tmp_path, clean_env):
     """Pre-scoring check must reject attempt referencing an unrecorded call or unlisted video in call."""
     fixture_db = tmp_path / "source_copy.db"
@@ -482,6 +490,7 @@ def test_proof_score_rejects_modified_batch(tmp_path, clean_env):
         score_receipts(receipts_data, holdout_data, gold_data)
 
 
+@needs('proof/manifest-2026-09-05.json')
 def test_proof_score_rejects_invented_usage(tmp_path, clean_env):
     """Pre-scoring check must reject invented usage in mock mode."""
     fixture_db = tmp_path / "source_copy.db"

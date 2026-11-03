@@ -5,6 +5,7 @@ identifiers, never paths to open. The dashboard checks use AS-7's Node VM runner
 no helper, browser, acquisition, client or model is started. AS-7 stays unchanged.
 """
 
+from tests.private_archive import needs
 from collections import Counter
 from contextlib import closing
 from datetime import datetime, timezone
@@ -40,6 +41,7 @@ def retained(folder, relative):
 
 
 @pytest.mark.parametrize('folder', [S20, S21], ids=['s20', 's21'])
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as8_supplied_manifest_matches_bytes(folder):
     problems = []
     for line in (folder / 'SHA256SUMS').read_text().splitlines():
@@ -54,6 +56,7 @@ def test_as8_supplied_manifest_matches_bytes(folder):
     assert not problems, problems
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as8_c20_refresh_error_frozen_pair_matches_observed_screenshot():
     # Manually inspected AS-8 image: 1/10 today, 2 captures, 3/25 enrolled,
     # observed 3, http_500 / HTTP 500, 1 consecutive failure. Pin that image.
@@ -108,6 +111,7 @@ def test_as8_c20_refresh_error_frozen_pair_matches_observed_screenshot():
         assert item['state'] == 'committed' and item['video_id'] == start['video_id']
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as8_c21_executed_launcher_bytes_are_retained():
     receipt, record = read_json(RECEIPT), read_json(RECORD)
     launcher = record['executed_launcher']
@@ -119,6 +123,7 @@ def test_as8_c21_executed_launcher_bytes_are_retained():
     assert raw == (ROOT / 'tests/library_work_astra/test_phase3_s21.py').read_bytes().replace(b'\r\n', b'\n')
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as8_c21_run_record_records_process_exit_status():
     receipt, record = read_json(RECEIPT), read_json(RECORD)
     assert retained(S21, record['receipt']) == RECEIPT.resolve()
@@ -141,6 +146,7 @@ def test_as8_c21_run_record_records_process_exit_status():
     assert retained(archive / 'logs', record['stderr']).is_file()
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as8_c21_all_at7_artifact_bytes_are_archived():
     receipt, record = read_json(RECEIPT), read_json(RECORD)
     archive = retained(S21, record['artifact_archive'])
@@ -160,6 +166,7 @@ def test_as8_c21_all_at7_artifact_bytes_are_archived():
     assert not problems, problems
 
 
+@needs('proof/s20-2026-09-08', 'proof/s21-2026-09-08')
 def test_as8_c21_browser_run_has_retained_receipt_and_database():
     receipt, record = read_json(RECEIPT), read_json(RECORD)
     browser = read_json(S21 / 'browser-observation-at7.json')

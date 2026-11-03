@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
     source = args.copy.resolve()
     assert source.is_relative_to(ROOT) and source.name == "rebuild.db"
-    contract = ROOT / "docs/library/phase2-contract"
+    contract = ROOT / "tests/fixtures/phase2-contract"
     schemas = json.loads((contract / "tool-schemas.json").read_text(encoding="utf-8"))
     validators = {}
     for tool in schemas["tools"]:

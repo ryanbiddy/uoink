@@ -1,6 +1,6 @@
 """Phase 3 gate S19 (registry parity and adversarial input) plus the consent
 receipt semantics of "Consent and enrollment". Contract:
-docs/library/PHASE3-CONTRACT-2026-09-07.md.
+PHASE3-CONTRACT-2026-09-07 (internal note).
 
 Payloads run through the direct service and the MCP adapter
 (uoink_mcp_tools.sources_call with an injected service); server.py's HTTP
@@ -47,11 +47,9 @@ def _code(result):
 
 # ---- Schemas are the contract's, on every transport --------------------------
 def test_tool_manifest_matches_contract_document():
-    doc = (Path(__file__).resolve().parents[1] / "docs" / "library"
-           / "PHASE3-CONTRACT-2026-09-07.md").read_text(encoding="utf-8")
-    start = doc.index("```json", doc.index("## Registry and dashboard contract"))
-    end = doc.index("```", start + 7)
-    frozen = json.loads(doc[start + 7:end])
+    # The frozen manifest from the phase3-v1 contract's registry section.
+    frozen = json.loads((Path(__file__).resolve().parent / "fixtures" / "phase3-contract"
+                         / "tool-manifest.json").read_text(encoding="utf-8"))
     assert ss.tool_manifest() == frozen
     for name in ss.TOOL_NAMES:
         assert tools.TOOL_REGISTRY[name].input_schema == ss.TOOL_SCHEMAS[name]
