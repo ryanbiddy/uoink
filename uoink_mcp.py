@@ -12,7 +12,9 @@ The default full toolset serves all 92 tools in TOOL_REGISTRY, with the same
 names, descriptions, schemas, titles and annotations; three schemas with a
 top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
 serves the previous 35 tools. Those tools remain first, in their original
-order, in full mode. Unknown toolset values warn on stderr and use full.
+order, in full mode. UOINK_MCP_TOOLSET=search serves 8 tools (capture a link,
+search, read, cite) for clients that cap or crowd the tool list. Unknown
+toolset values warn on stderr and use full.
 
 All handlers use the shared registry's consent and safety checks. No tools
 are excluded from stdio. Dashboard intent minting is never an MCP tool;
@@ -20,7 +22,7 @@ discovery's in-memory, origin-bound intents cannot cross into this process,
 so discovery requires the explicit agent-consent setting here. Library and
 source intents use the same token-derived trusted session as HTTP.
 
-Five resource templates and nine prompts remain available in both modes.
+Five resource templates and nine prompts remain available in every mode.
 Bounded Library admission stays alive through the concrete SDK JSON-RPC
 dump, write and flush. Other registry tools run on the
 event loop one at a time, as in v3.9.1, because they share the Index
@@ -149,8 +151,8 @@ uoink_mcp_tools.bind_backend(server)
 
 def _selected_toolset() -> str:
     value = os.environ.get("UOINK_MCP_TOOLSET", "full")
-    if value not in ("full", "core"):
-        print("Uoink MCP: unknown UOINK_MCP_TOOLSET; using full (expected full or core).",
+    if value not in uoink_mcp_tools.STDIO_TOOLSETS:
+        print("Uoink MCP: unknown UOINK_MCP_TOOLSET; using full (expected full, core or search).",
               file=sys.stderr)
         return "full"
     return value

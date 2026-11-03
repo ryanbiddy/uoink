@@ -171,7 +171,7 @@ def test_public_manifest_advertises_full_default():
     manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.10.0", tool_count=92)
     assert manifest["transports"] == ["stdio", "http"]
     assert manifest["stdio_tool_count"] == 92
-    assert manifest["stdio_toolsets"] == {"full": 92, "core": 35}
+    assert manifest["stdio_toolsets"] == {"full": 92, "core": 35, "search": 8}
 
 
 def test_inventory_checker_fails_closed_on_missing_tool(monkeypatch):
