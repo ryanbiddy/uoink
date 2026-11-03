@@ -450,7 +450,7 @@ def _inventory_finding(route, names, templates, prompts) -> list:
         findings.append(record_product_finding(
             operation="tools/list",
             input_value={"expected": list(EXPECTED_STDIO_TOOLS), "actual": names},
-            error="installed tool inventory differs from the default full 94-tool set",
+            error="installed tool inventory differs from the default full 95-tool set",
             route=route,
         ))
     if sorted(templates) != sorted(EXPECTED_TEMPLATE_NAMES):

@@ -4,6 +4,10 @@ Read retained bytes only in this checkout; historical receipt paths are identifi
 No helper, browser, model, network or live index is used.
 """
 
+from tests.private_archive import skip_module_unless
+
+skip_module_unless('proof/s21-2026-09-08')
+
 import hashlib
 import json
 

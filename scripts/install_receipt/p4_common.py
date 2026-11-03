@@ -97,6 +97,7 @@ EXPECTED_STDIO_TOOLS = (
     "get_library_brief_input",
     "publish_library_brief",
     "export_cited_range",
+    "get_transcript",
     "list_library_work",
     "claim_library_work",
     "submit_library_result",

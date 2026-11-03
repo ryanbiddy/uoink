@@ -73,14 +73,14 @@ uoink-memory.js
 ## Checks completed
 
 All Python verification used:
-`E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`.
+`<repo>/_scratch/ig-native/Scripts/python.exe`.
 Jobs ran at BelowNormal priority, one heavy job at a time. Pytest used
 `-p no:cacheprovider` with:
 
 ```text
 UOINK_URL=http://127.0.0.1:1
-IG_FORBIDDEN_LIVE=C:\Users\hello\AppData\Local\Uoink\index.db
-PYTHONPATH=E:\AI\projects\uoink\checkouts\Yoink-cws
+IG_FORBIDDEN_LIVE=C:\Users\<you>\AppData\Local\Uoink\index.db
+PYTHONPATH=<repo>
 PYTHONDONTWRITEBYTECODE=1
 ```
 

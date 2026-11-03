@@ -241,7 +241,7 @@ def build_well_known(base_url: str, *, version: str, tool_count: int) -> dict:
         "tool_count": tool_count,
         "stdio_tool_count": tool_count,
         "transports": ["stdio", "http"],
-        "stdio_toolsets": {"full": tool_count, "core": 35, "search": 8,
+        "stdio_toolsets": {"full": tool_count, "core": 36, "search": 9,
                            "research": len(uoink_mcp_tools.RESEARCH_STDIO_TOOLS)},
         "mcp_endpoint": f"{base_url}/mcp/v1",
         "openapi_spec": f"{base_url}/openapi/v1/spec.json",

@@ -27,10 +27,10 @@ def literal_pin(path: str, name: str):
 
 def check() -> None:
     names = tools.stdio_tool_names()
-    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 94
-    assert names[:35] == tools.CORE_STDIO_TOOLS
+    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 95
+    assert names[:36] == tools.CORE_STDIO_TOOLS
     assert tools.stdio_tool_names("core") == tools.CORE_STDIO_TOOLS
-    assert len(set(tools.SEARCH_STDIO_TOOLS)) == 8 and set(tools.SEARCH_STDIO_TOOLS) <= set(names), "search toolset drift"
+    assert len(set(tools.SEARCH_STDIO_TOOLS)) == 9 and set(tools.SEARCH_STDIO_TOOLS) <= set(names), "search toolset drift"
     research = tuple(n for n in tools.TOOL_REGISTRY if n.startswith("research_")) + ("uoink_url",)
     assert tools.stdio_tool_names("research") == research and len(research) <= 10
     doc = (ROOT / "docs/v2-mcp.md").read_text(encoding="utf-8")
@@ -41,7 +41,7 @@ def check() -> None:
     assert all(t["description"] == tools.TOOL_REGISTRY[t["name"]].description
                for t in manifest["tools"]), "MCPB description drift"
     assert literal_pin("tests/test_c01_mcp_stdio.py", "CANONICAL_STDIO_TOOLS") == set(names)
-    assert literal_pin("tests/test_c01_mcp_stdio.py", "CORE_STDIO_TOOLS") == names[:35]
+    assert literal_pin("tests/test_c01_mcp_stdio.py", "CORE_STDIO_TOOLS") == names[:36]
     assert literal_pin("scripts/install_receipt/p4_common.py", "EXPECTED_STDIO_TOOLS") == names
     hints = {"readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"}
     for name, spec in tools.TOOL_REGISTRY.items():
@@ -63,7 +63,7 @@ def check() -> None:
                 text = text[:releases[1].start()]
         counts = [int(n) for n in re.findall(pattern, text, re.I)]
         assert counts and all(n == len(names) for n in counts), (path, counts)
-    print(f"MCP inventory OK: full={len(names)}, core=35, search=8, research={len(research)}; docs, bundle, receipt and metadata agree")
+    print(f"MCP inventory OK: full={len(names)}, core=36, search=9, research={len(research)}; docs, bundle, receipt and metadata agree")
 
 
 if __name__ == "__main__":

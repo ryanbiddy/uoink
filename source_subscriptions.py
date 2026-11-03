@@ -663,7 +663,12 @@ class FetchResponse:
 class _BoundedRedirectHandler(urllib.request.HTTPRedirectHandler):
     """Validate every redirect target: http(s) only, no private addresses."""
 
+    def __init__(self, follow_redirects=True):
+        self.follow_redirects = follow_redirects
+
     def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not self.follow_redirects:
+            return None
         try:
             newurl, host, addresses = _admit_public_http_url(newurl)
             new = super().redirect_request(req, fp, code, msg, headers, newurl)
@@ -823,7 +828,8 @@ def _connection_host(url: str, parsed: urllib.parse.ParseResult) -> str:
 
 
 def public_http_open(url: str, *, headers: dict | None = None,
-                     timeout: float = FEED_FETCH_TIMEOUT_SEC):
+                     timeout: float = FEED_FETCH_TIMEOUT_SEC,
+                     method: str = "GET", follow_redirects: bool = True):
     """Open HTTP(S) with the shared public-network and redirect policy.
 
     Callers own/close the response and keep their existing body budgets.
@@ -831,12 +837,14 @@ def public_http_open(url: str, *, headers: dict | None = None,
     there is no environment or settings switch to relax production checks.
     Every hop connects directly to the addresses checked for it: system and
     environment proxies are not used, since a proxy would resolve again.
+    Callers with a request budget may disable automatic redirects and reopen
+    each Location through this function, counting and pacing every hop.
     """
     url, host, addresses = _admit_public_http_url(url)
     opener = urllib.request.build_opener(
         urllib.request.ProxyHandler({}), _PinnedHTTPHandler(), _PinnedHTTPSHandler(),
-        _BoundedRedirectHandler())
-    request = urllib.request.Request(url, headers=headers or {})
+        _BoundedRedirectHandler(follow_redirects=follow_redirects))
+    request = urllib.request.Request(url, headers=headers or {}, method=method)
     _pin_request(request, host, addresses)
     return opener.open(request, timeout=timeout)
 

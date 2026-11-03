@@ -17,7 +17,7 @@ import pytest
 
 from test_phase3_migration import seed_item, seed_source, seed_start
 from test_phase3_support import (
-    Backend, CONTRACT, Clock, Feed, Publication, ROOT, at,
+    Backend, CONTRACT_DDL, Clock, Feed, Publication, ROOT, at,
     digest, phase3_isolation, race, snapshot, unavailable, utc_day,
 )
 
@@ -33,10 +33,7 @@ def reference_db(phase3_isolation, monkeypatch):
     monkeypatch.setattr(index, '_MIGRATIONS_DIR', target)
     with index.Index.open(phase3_isolation / 'reference.db') as idx:
         assert idx.schema_version() == 27
-        document = CONTRACT.read_text(encoding='utf-8')
-        fence = chr(96) * 3
-        ddl = document.split(fence + 'sql\n', 1)[1].split('\n' + fence, 1)[0]
-        idx._conn.executescript(ddl)
+        idx._conn.executescript(CONTRACT_DDL.read_text(encoding='utf-8'))
         with idx.write_transaction() as conn:
             conn.execute('CREATE TABLE astra_fake_jobs(job_id TEXT PRIMARY KEY, start_id TEXT UNIQUE, owner_token TEXT)')
         yield idx

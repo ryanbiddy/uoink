@@ -179,9 +179,8 @@ def test_toolsets_schemas_annotations_and_connect(capsys):
     expected = ("research_start", "research_discover", "uoink_url")
     assert tools.stdio_tool_names("research") == expected == tools.RESEARCH_STDIO_TOOLS
     assert len(expected) <= 10
-    assert tools.stdio_tool_names()[:35] == CORE_STDIO_TOOLS
-    assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY) == 94
-    assert tuple(tools.TOOL_REGISTRY)[-2:] == expected[:2]
+    assert tools.stdio_tool_names()[:len(tools.CORE_STDIO_TOOLS)] == tools.CORE_STDIO_TOOLS
+    assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY)
     assert tools.stdio_tool_names()[-2:] == expected[:2]
     for name, rate, world in (("research_start", 20, False), ("research_discover", 10, True)):
         spec = tools.TOOL_REGISTRY[name]
@@ -195,8 +194,9 @@ def test_toolsets_schemas_annotations_and_connect(capsys):
     assert tuple(t["name"] for t in json.loads(capsys.readouterr().out)["tools"]) == expected
     entry = uoink_connect.server_entry("cursor", Path("/example/app"), Path("/example/python"), toolset="research")
     assert entry["env"]["UOINK_MCP_TOOLSET"] == "research"
-    assert openapi_bridge.build_well_known("http://127.0.0.1:18123", version="test", tool_count=94)["stdio_toolsets"] == {
-        "full": 94, "core": 35, "search": 8, "research": 3}
+    assert openapi_bridge.build_well_known("http://127.0.0.1:18123", version="test", tool_count=len(tools.TOOL_REGISTRY))["stdio_toolsets"] == {
+        "full": len(tools.TOOL_REGISTRY), "core": len(tools.CORE_STDIO_TOOLS),
+        "search": len(tools.SEARCH_STDIO_TOOLS), "research": len(tools.RESEARCH_STDIO_TOOLS)}
 
 
 def test_wire_inventory_refresh_only_allows_appending():

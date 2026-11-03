@@ -52,8 +52,8 @@ def inventory():
     frozen = copy.deepcopy(tools.list_tools())
     full, core = registry_golden(), registry_golden("core")
     assert full == GOLDEN["tools"]
-    assert core == full[:35]
-    assert len(full) == 94 and len(core) == 35
+    assert core == full[:36]
+    assert len(full) == 95 and len(core) == 36
     assert tools.list_tools() == frozen
     changed = set()
     for tool in full:

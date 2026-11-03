@@ -1605,7 +1605,7 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-94 tools, including `research_start` and `research_discover`. The two Phase 4
+95 tools, including `research_start` and `research_discover`. The two Phase 4
 brief tools, `get_library_brief_input` and the
 local-write `publish_library_brief`, joined it on 2026-09-08, run AV-2; the
 read-only Phase 6 cited export `export_cited_range` joined it on 2026-09-08,
@@ -1632,16 +1632,16 @@ to `[]`; settings keep only known network kinds and remove duplicates.
 Research tools cannot change it. Reddit search remains deferred even with consent.
 `UOINK_MCP_TOOLSET=research` serves the two research tools plus `uoink_url`.
 
-All 94 registry tools are also available over stdio by default, with
+All 95 registry tools are also available over stdio by default since 3.13.0, with
 the same handlers and client schemas. Both MCP transports flatten the three
 top-level `oneOf` schemas for client compatibility; the server still validates
-the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps the earlier 35.
+the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps 36 core tools.
 
 The six Living Library work-queue tools added on 2026-09-04 (Phase 2 stage 1,
 contract `phase2-v1-2026-09-04`) are available on both HTTP and default stdio:
 `list_library_work`, `claim_library_work`, `submit_library_result`,
 `apply_reshelving`, `pin_shelf` and `undo_library_apply`. Their input schemas
-are the frozen `docs/library/phase2-contract/tool-schemas.json` (JSON Schema
+are the frozen `tests/fixtures/phase2-contract/tool-schemas.json` (JSON Schema
 2020-12 with `$defs`, `$ref`, `oneOf` and `const`), embedded verbatim in
 `uoink_mcp_tools.py`. Every response carries `schema_version: 1`; errors use
 `{"ok": false, "schema_version": 1, "error": {"code", "message", "retryable",

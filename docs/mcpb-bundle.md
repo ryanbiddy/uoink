@@ -146,12 +146,12 @@ This bundle launches `uoink_mcp.py` over stdio. That process advertises
 different adapter; do not copy the stdio capability object onto HTTP
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md)).
 
-### 94 tools
+### 95 tools
 
 The bundle lists every tool in `uoink_mcp_tools.TOOL_REGISTRY`. Live stdio and HTTP MCP
 use the registry descriptions and flatten the same three input schemas; the
 server still validates the exact frozen schemas (see
-[v2-mcp.md](v2-mcp.md)). The previous 35 tools remain first
+[v2-mcp.md](v2-mcp.md)). The 36 core tools remain first
 in their original order. `UOINK_MCP_TOOLSET=core` serves only that earlier set
 for Cursor and other clients with tool caps; full is the default. Unknown
 values warn on stderr and use full. See the complete inventories in
@@ -244,7 +244,7 @@ CLI ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
    → confirm `dist/uoink-<VERSION>.mcpb` exists
    (the script derives `<VERSION>` from the repo `VERSION` file).
 2. Double-click it in Claude Desktop → accept the install dir → restart.
-3. In Claude, confirm the 94-tool list (the complete shared registry), the five `uoink://library/v1/`
+3. In Claude, confirm the 95-tool list (the complete shared registry), the five `uoink://library/v1/`
    templates, and the nine prompts (including `consult-library`, `evidence-brief`,
    `whats-new`, `reshelve-review`). A smoke call such as
    `list_recent_uoinks` still works. Bounded library reads

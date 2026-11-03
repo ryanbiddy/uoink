@@ -510,7 +510,7 @@ Files changed for this pass:
 | Docs | `docs/mac/BUILD.md`, `INSTALL.md`, `QUALIFICATION.md`, new `ACCEPTANCE.md`, and `docs/mac-install.md` |
 
 Windows verification used
-`E:/AI/projects/uoink/checkouts/Yoink-library/_scratch/ig-native/Scripts/python.exe`
+`<repo>/_scratch/ig-native/Scripts/python.exe`
 (Python 3.14.6) at BelowNormal priority. `PYTHONPATH` named this worktree,
 `PYTHONDONTWRITEBYTECODE=1`, and `IG_FORBIDDEN_LIVE` named the live index to
 block. A guarded source copy, home, output and temporary directories stayed

@@ -1,8 +1,8 @@
 # NLTK path-policy source backport
 
 This patch targets the six artifact APIs named by GHSA-8mgp-746c-j5xp in
-NLTK 3.10.3. Read docs/library/ASTRA-NLTK-PATHSEC-VERDICT-2026-09-12.md for
-the integration verdict, test counts and limits. It is source preparation,
+NLTK 3.10.3. The integration verdict, test counts and limits
+live in an internal review note. It is source preparation,
 not a packaged dependency or a cleared installer advisory.
 
 TransitionParser.train/parse and AveragedPerceptron.save/load now check their

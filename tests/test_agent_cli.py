@@ -151,7 +151,7 @@ def test_real_cli_and_stdio_envelopes(tmp_path):
         payload = json.loads(status.stdout)
         assert payload["data_dir"] == str((tmp_path / "profile").resolve())
         assert payload["helper_running"] is False
-        assert payload["tool_counts"] == {"full": 94, "core": 35}
+        assert payload["tool_counts"] == {"full": 95, "core": 36}
     finally:
         child.close()
 

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "version_id": "taxonomy-synthetic-v1",
+  "name": "Synthetic Test Taxonomy",
+  "description": "Made-up shelves for receipt-validator tests. Not derived from any real library.",
+  "created_at": "2026-01-01T00:00:00Z",
+  "status": "approved",
+  "parent_version_id": null,
+  "nodes": [
+    {
+      "shelf_id": "cooking",
+      "parent_shelf_id": null,
+      "name": "Cooking",
+      "path": ["Cooking"],
+      "definition": "Recipes, kitchen technique, and food preparation.",
+      "include": ["recipes", "baking", "kitchen technique"],
+      "exclude": ["restaurant reviews"],
+      "retired": 0
+    },
+    {
+      "shelf_id": "education",
+      "parent_shelf_id": null,
+      "name": "Education",
+      "path": ["Education"],
+      "definition": "Teaching, learning methods, and explanations of how things work.",
+      "include": ["lectures", "tutorials", "study methods"],
+      "exclude": ["entertainment without instructional content"],
+      "retired": 0
+    },
+    {
+      "shelf_id": "gardening",
+      "parent_shelf_id": null,
+      "name": "Gardening",
+      "path": ["Gardening"],
+      "definition": "Growing plants, soil care, and garden planning.",
+      "include": ["vegetable gardens", "composting", "pruning"],
+      "exclude": ["commercial agriculture"],
+      "retired": 0
+    }
+  ]
+}
