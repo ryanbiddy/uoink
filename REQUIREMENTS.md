@@ -1,7 +1,7 @@
 # Uoink — Manual source setup
 
 Most Windows users should use the
-[published v3.12.1 installer](https://github.com/ryanbiddy/uoink/releases/tag/v3.12.1) (`Uoink-Setup-3.12.1.exe`).
+[published v3.13.0 installer](https://github.com/ryanbiddy/uoink/releases/tag/v3.13.0) (`Uoink-Setup-3.13.0.exe`).
 Use this path when developing Uoink or testing the current source checkout.
 
 ## Prerequisites

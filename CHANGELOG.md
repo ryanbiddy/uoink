@@ -12,6 +12,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `UOINK_MCP_TOOLSET=search` serves an 8-tool set for clients with a tool
+  limit, and `uoink connect <client> --toolset {full,core,search}` writes it
+  into the client's config. Defaults are unchanged.
+
+### Security
+
+- The installer bundles Pillow 13.0.0 (fixes a JPEG decoder heap overflow,
+  GHSA-8g5g-8vmr-9782) and certifi 2026.10.23. Thumbnails only open PNG, JPEG
+  and WebP and skip images over 50 million pixels.
+- MCP results that carry saved third-party text include an `untrusted_content`
+  notice telling the agent not to follow instructions inside it.
+- The security contact is hi@uoink.app, and private vulnerability reporting
+  is on.
+
+### Fixed
+
+- Upgrading on Windows no longer shows "Uoink could not register crash
+  recovery". Task Scheduler reports a local account's task owner as the bare
+  user name, which the owner check did not match against `MACHINE\user`, so
+  every upgrade refused to refresh its own login task. The check now accepts
+  the full name, the SID, or the bare name of the current account, and still
+  refuses a task owned by another user or another install. The legacy
+  `Uoink Helper` task cleanup uses the same check. The next upgrade fixes an
+  affected install with no extra steps; login startup kept working throughout.
+
+## [3.13.0] - 2026-11-01
+
+### Added
+
 - **Import a list.** Paste a list link in Sources > **Import a list** and
   Uoink queues every video in it for a normal capture, transcripts and all.
   It reads a HackerTube playlist, category, area or the whole collection best
@@ -48,19 +77,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the default-checked finish page box. It starts with no splash, dashboard or
   ready toast. The stop file setup leaves behind no longer holds back the next
   login start, while a real Quit is still honored.
-- Upgrading on Windows no longer shows "Uoink could not register crash
-  recovery". Task Scheduler reports a local account's task owner as the bare
-  user name, which the owner check did not match against `MACHINE\user`, so
-  every upgrade refused to refresh its own login task. The check now accepts
-  the full name, the SID, or the bare name of the current account, and still
-  refuses a task owned by another user or another install. The legacy
-  `Uoink Helper` task cleanup uses the same check. The next upgrade fixes an
-  affected install with no extra steps; login startup kept working throughout.
+- The Linux container build creates an empty library before it serves MCP, so
+  a fresh container answers `resources/list` and `search_library` with empty
+  results instead of a `library_unavailable` error.
 
 ### Changed
 
 - The winget manifests and the Homebrew cask in `packaging/` point at the
   published 3.12.1 files.
+
+### Compatibility and testing
+
+- The MCP server exposes 92 tools by default (91 in 3.12.1) and still 35 with
+  `UOINK_MCP_TOOLSET=core`; `import_list` is the new one.
+- The Windows installer is about 519 MB, the same as 3.12.1, and the Mac DMG
+  about 716 MB, 4 MB more than 3.12.1.
+- The winget and Homebrew manifests in `packaging/` still point at the
+  published 3.12.1 files until 3.13.0 is published.
 
 ## [3.12.1] - 2026-11-01
 

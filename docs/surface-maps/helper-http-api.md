@@ -15,7 +15,7 @@ The helper is the stdlib-only HTTP server in `server.py`, bound to
 
 ---
 
-## MCP tool schemas (3.12.1)
+## MCP tool schemas (3.13.0)
 
 `POST /mcp/v1` with `tools/list` and `POST /mcp/v1/tools/list` advertise the
 same full name, description and input-schema list as default stdio. Both

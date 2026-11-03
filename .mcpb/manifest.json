@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.12.1",
+  "version": "3.13.0",
   "description": "Search and cite your saved YouTube and podcast transcripts in Claude, from your local Uoink library on Windows.",
   "long_description": "Use Uoink when you want Claude to find what a saved video or podcast said, cite the timestamp, capture a new link or save a research note. This bundle connects Claude Desktop to the local MCP server in your installed Uoink app for Windows 10/11, which reads your Markdown and JSON library, including YouTube transcripts, frames and comments. Install Uoink from https://uoink.app/install first. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Clients that cap tool counts can set UOINK_MCP_TOOLSET=core.",
   "author": {
