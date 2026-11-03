@@ -8,12 +8,12 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The default full toolset serves all 92 tools in TOOL_REGISTRY, with the same
+The default full toolset serves all 93 tools in TOOL_REGISTRY, with the same
 names, descriptions, schemas, titles and annotations; three schemas with a
 top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
-serves the previous 35 tools. Those tools remain first, in their original
-order, in full mode. UOINK_MCP_TOOLSET=search serves 8 tools (capture a link,
-search, read, cite) for clients that cap or crowd the tool list. Unknown
+serves 36 tools: the v3.9.1 35 plus get_transcript. Those remain first, in their
+original order, in full mode. UOINK_MCP_TOOLSET=search serves 9 tools (capture a
+link, get a transcript, search, read, cite) for clients that cap or crowd the tool list. Unknown
 toolset values warn on stderr and use full.
 
 All handlers use the shared registry's consent and safety checks. No tools

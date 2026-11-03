@@ -21,7 +21,7 @@ does not prove Claude Code installation or any current CLI capability.
    Settings → Extensions**).
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
-4. Restart Claude Desktop. The 92 stdio tools, five library resource
+4. Restart Claude Desktop. The 93 stdio tools, five library resource
    templates, and nine prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
@@ -62,11 +62,11 @@ see https://uoink.app/developers. For **Claude Code CLI**, do not use this
 
 ## What stdio advertises
 
-The launched child is `uoink_mcp.py`. On stdio it advertises **92 tools**,
+The launched child is `uoink_mcp.py`. On stdio it advertises **93 tools**,
 **five resource templates**, and **nine prompts**. HTTP MCP stays tools-only
 and is not what this bundle launches.
 
-The committed [manifest](manifest.json) lists all 92 names. The previous 35
+The committed [manifest](manifest.json) lists all 93 names. The 36 core
 remain first in `tools/list`. Set `UOINK_MCP_TOOLSET=core` for clients with tool
 caps, including Cursor. Unknown values warn on stderr and use full.
 Claude Desktop users should reinstall the 3.13.0 `.mcpb` and restart Desktop
@@ -78,7 +78,7 @@ its `@` picker. Claude Code CLI 2.1.261 has no native resource reader; that
 client uses `read_library_resource(uri)` instead
 ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)).
 
-### 92 tools
+### 93 tools
 
 **Legacy (25)**
 

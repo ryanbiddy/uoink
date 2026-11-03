@@ -3239,6 +3239,439 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
     return candidates[0]
 
 
+# ---------------------------------------------------------------------------
+# get_transcript: a YouTube transcript that does not fail silently
+# ---------------------------------------------------------------------------
+# Order: the saved library copy (no network), a transcript cached by an earlier
+# get_transcript call (no network), captions on the user's own connection, then
+# local Whisper on downloaded audio. Every result says which one answered and,
+# on any fallback, why in one plain sentence.
+
+TRANSCRIPT_CACHE_DIRNAME = "transcript-cache"
+_TRANSCRIPT_CACHE_VERSION = 1
+_TRANSCRIPT_LANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,2}$")
+_TRANSCRIPT_BARE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+_TRANSCRIPT_TRACK_KEY_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{1,8}){0,3}$")
+# At most this many caption tracks are tried before local Whisper, so a
+# blocked video costs a few caption requests, not one per listed language.
+_TRANSCRIPT_MAX_CAPTION_ATTEMPTS = 3
+
+_CAPTION_FAILURE_WHY = {
+    "captions_rate_limited": "YouTube returned 429 (too many requests) for captions",
+    "captions_bot_check": "YouTube asked for a sign-in bot check before serving captions",
+    "captions_login_required": "YouTube requires a signed-in account for this video's captions",
+    "captions_timeout": "the caption download timed out",
+    "captions_failed": "the caption download failed",
+    "no_captions": "YouTube lists no captions for this video",
+    "metadata_rate_limited": "YouTube returned 429 when Uoink asked for the video's details",
+    "metadata_bot_check": "YouTube asked for a sign-in bot check before listing captions",
+    "metadata_failed": "YouTube would not list this video's captions",
+}
+
+
+class TranscriptUnavailable(Exception):
+    """No transcript could be produced; carries a reason code and a why line."""
+
+    def __init__(self, reason: str, why: str):
+        super().__init__(why)
+        self.reason = reason
+        self.why = why
+
+
+def _transcript_video_ref(raw: object) -> tuple[str, str] | None:
+    """(video_id, canonical watch URL) for a YouTube URL or bare video ID."""
+    if not isinstance(raw, str):
+        return None
+    value = raw.strip()
+    if _TRANSCRIPT_BARE_ID_RE.fullmatch(value):
+        return value, f"https://www.youtube.com/watch?v={value}"
+    canonical = _normalize_youtube_url(value)
+    if not canonical:
+        return None
+    video_id = (parse_qs(urlparse(canonical).query).get("v") or [""])[0]
+    return (video_id, canonical) if video_id else None
+
+
+def _transcript_lang_primary(code: object) -> str:
+    return str(code or "").split("-", 1)[0].lower()
+
+
+def _transcript_clean_lang(code: object) -> str:
+    """A track key without yt-dlp's '-orig' marker."""
+    text = str(code or "")
+    return text[:-5] if text.endswith("-orig") else text
+
+
+def _transcript_duration_text(seconds: float) -> str:
+    seconds = max(0, int(round(seconds)))
+    minutes, secs = divmod(seconds, 60)
+    if minutes and secs:
+        return f"{minutes}m {secs}s"
+    return f"{minutes}m" if minutes else f"{secs}s"
+
+
+def _caption_track_candidates(metadata: dict, lang: str | None) -> list[dict]:
+    """Ordered caption tracks to try: uploader captions before YouTube's
+    auto-captions, the requested language before others, and the original
+    spoken language before machine translations (which YouTube bot-walls)."""
+    # Keys come from remote metadata and become one yt-dlp argument; accept
+    # only plain language-code shapes (no leading dash, comma or wildcard).
+    def usable(key):
+        return isinstance(key, str) and key != "live_chat" and bool(
+            _TRANSCRIPT_TRACK_KEY_RE.fullmatch(key))
+
+    manual = {k: v for k, v in (metadata.get("subtitles") or {}).items() if usable(k) and v}
+    auto = {k: v for k, v in (metadata.get("automatic_captions") or {}).items() if usable(k) and v}
+    orig_keys = [k for k in auto if k.endswith("-orig")]
+    spoken = (_transcript_clean_lang(orig_keys[0]) if orig_keys
+              else str(metadata.get("language") or "")) or None
+    spoken_auto = None
+    if orig_keys:
+        spoken_auto = orig_keys[0]
+    elif spoken:
+        same = [k for k in auto if k.lower() == spoken.lower()] or sorted(
+            k for k in auto if _transcript_lang_primary(k) == _transcript_lang_primary(spoken))
+        spoken_auto = same[0] if same else None
+    elif len(auto) == 1:
+        spoken_auto = next(iter(auto))
+        spoken = spoken_auto
+
+    out: list[dict] = []
+
+    def add(key, kind, translated=False):
+        if key and not any(c["key"] == key and c["kind"] == kind for c in out):
+            out.append({"key": key, "kind": kind, "translated": translated,
+                        "language": _transcript_clean_lang(key)})
+
+    def manual_matching(code):
+        exact = [k for k in manual if k.lower() == code.lower()]
+        loose = sorted(k for k in manual if _transcript_lang_primary(k) == _transcript_lang_primary(code))
+        return exact + [k for k in loose if k not in exact]
+
+    wanted = lang or "en"
+    # Two regional variants at most, so a broken track list cannot use up
+    # every attempt before the auto-captions are tried.
+    for key in manual_matching(wanted)[:2]:
+        add(key, "captions")
+    if spoken_auto and _transcript_lang_primary(spoken) == _transcript_lang_primary(wanted):
+        add(spoken_auto, "auto_captions")
+    if spoken is None:
+        # The spoken language is unknown, so a matching auto track cannot be
+        # told apart from a translation. Try it, unlabelled as translated.
+        for key in sorted(k for k in auto if _transcript_lang_primary(k) == _transcript_lang_primary(wanted))[:1]:
+            add(key, "auto_captions")
+    elif lang and _transcript_lang_primary(spoken) != _transcript_lang_primary(lang):
+        translated = [k for k in auto if k.lower() == lang.lower()] or sorted(
+            k for k in auto if _transcript_lang_primary(k) == _transcript_lang_primary(lang)
+            and not k.endswith("-orig"))
+        for key in translated[:1]:
+            add(key, "auto_captions", translated=True)
+    # The requested language is not available: fall back to what was said,
+    # in the language it was said in, as the other transcript servers do.
+    if spoken:
+        for key in manual_matching(spoken):
+            add(key, "captions")
+    if spoken_auto:
+        add(spoken_auto, "auto_captions")
+    for key in sorted(manual):
+        add(key, "captions")
+    return out
+
+
+def _caption_failure_reason(e: BaseException, prefix: str = "captions") -> str:
+    if isinstance(e, subprocess.TimeoutExpired):
+        return f"{prefix}_timeout" if prefix == "captions" else f"{prefix}_failed"
+    if isinstance(e, subprocess.CalledProcessError):
+        if _is_youtube_captions_refusal(e) or _is_youtube_rate_limit(e) or (
+                re.search(r"\b429\b", _subprocess_output(e))):
+            return f"{prefix}_rate_limited"
+        text = _subprocess_output(e).lower()
+        if "not a bot" in text or "confirm you" in text:
+            return f"{prefix}_bot_check"
+        if prefix == "captions" and ("sign in" in text or "login" in text
+                                     or "members-only" in text or "private video" in text):
+            return "captions_login_required"
+    return f"{prefix}_failed"
+
+
+def _download_caption_track(url: str, track: dict, tmp_dir: Path,
+                            duration: object) -> list[tuple[float, float, str]]:
+    """Download exactly one named caption track; raise on refusal."""
+    for old in tmp_dir.glob("captions.*"):
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    cmd = [
+            *YTDLP_CMD,
+            "--skip-download",
+            "--write-auto-subs" if track["kind"] == "auto_captions" else "--write-subs",
+            # One exact key, never a pattern: "en.*" also matches YouTube's
+            # rate-limited auto-translated tracks (see _fetch_video_subtitles).
+            "--sub-lang", track["key"],
+            "--convert-subs", "srt",
+            "-o", str(tmp_dir / "captions.%(ext)s"),
+            url,
+    ]
+    done = _run_subprocess(
+        cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        timeout=COMMENTS_TIMEOUT_SEC)
+    files = sorted(tmp_dir.glob("captions*.srt"))
+    if not files:
+        stderr = getattr(done, "stderr", None) or b""
+        # yt-dlp can log a subtitle 429 as a warning and still exit 0.
+        if re.search(rb"\b429\b" if isinstance(stderr, bytes) else r"\b429\b", stderr):
+            raise subprocess.CalledProcessError(1, cmd, stderr=stderr)
+        return []
+    try:
+        length = float(duration) if duration else None
+    except (TypeError, ValueError):
+        length = None
+    return list(parse_srt(files[0], duration=length))
+
+
+def _transcript_cache_path(video_id: str, lang: str | None) -> Path:
+    return DATA_ROOT / TRANSCRIPT_CACHE_DIRNAME / f"{video_id}__{(lang or 'default').lower()}.json"
+
+
+def _read_transcript_cache(video_id: str, lang: str | None) -> dict | None:
+    try:
+        data = json.loads(_transcript_cache_path(video_id, lang).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if (not isinstance(data, dict) or data.get("version") != _TRANSCRIPT_CACHE_VERSION
+            or data.get("video_id") != video_id or not isinstance(data.get("segments"), list)
+            or not data["segments"]):
+        return None
+    return data
+
+
+def _write_transcript_cache(record: dict, lang: str | None) -> None:
+    path = _transcript_cache_path(record["video_id"], lang)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        os.replace(tmp, path)
+    except OSError as e:
+        log.warning("transcript cache write skipped: %s", _sanitize_error(str(e)))
+
+
+def _library_transcript(video_id: str) -> dict | None:
+    """The saved capture's transcript, or None when nothing usable is saved."""
+    try:
+        folder, row = _folder_for_video_id(video_id)
+    except Exception:
+        return None
+    if folder is None:
+        return None
+    _path, sidecar = _read_sidecar_for_folder(folder)
+    segments = []
+    for seg in sidecar.get("transcript") or []:
+        if not isinstance(seg, dict) or not str(seg.get("text") or "").strip():
+            continue
+        start = _as_float(seg.get("start")) or 0.0
+        end = _as_float(seg.get("end"))
+        segments.append((start, end if end is not None else start, str(seg["text"]).strip()))
+    if not segments:
+        return None
+    provider = sidecar.get("transcript_source")
+    asr = sidecar.get("asr_fallback") if isinstance(sidecar.get("asr_fallback"), dict) else {}
+    transcribed_by = "whisper" if provider == "asr" else "captions"
+    language = sidecar.get("transcript_language")
+    if not language:
+        # Captures fetch English caption tracks only; Whisper captures did not
+        # record the language they detected.
+        language = "en" if transcribed_by == "captions" else "und"
+    note = None
+    if asr.get("coverage") == "sampled_sections":
+        note = "The saved copy covers sampled sections of a long video, not every minute."
+    return {
+        "video_id": video_id,
+        "title": sidecar.get("title") or (row or {}).get("title"),
+        "segments": segments,
+        "transcribed_by": transcribed_by,
+        "language": language,
+        "slug": folder.name,
+        "duration_seconds": sidecar.get("duration_seconds"),
+        "note": note,
+    }
+
+
+def _whisper_transcript(url: str, *, settings: dict) -> tuple[list, dict]:
+    """Download the audio once and transcribe it with the local model."""
+    if not bool(settings.get("asr_fallback_enabled", True)):
+        raise TranscriptUnavailable(
+            "whisper_disabled", "local Whisper fallback is turned off in Settings")
+    model_name = _selected_reliability_model(settings)
+    if not _reliability_model_status(model_name).get("cached"):
+        raise TranscriptUnavailable(
+            "whisper_model_missing",
+            f"the local Whisper model ({model_name}) is not on this computer; "
+            "download it from Settings or get_whisperx_status")
+    started = time.monotonic()
+    with tempfile.TemporaryDirectory(prefix="uoink-transcript-", ignore_cleanup_errors=True) as tmp:
+        try:
+            audio = _download_reliability_audio(url, Path(tmp))
+        except Exception as e:
+            reason = _caption_failure_reason(e, prefix="audio")
+            raise TranscriptUnavailable(
+                reason,
+                "YouTube returned 429 for the audio too" if reason == "audio_rate_limited"
+                else "YouTube asked for a sign-in bot check before serving the audio"
+                if reason == "audio_bot_check"
+                else "the audio download for local Whisper failed: " + _sanitize_error(
+                    (_subprocess_output(e).splitlines() or [""])[-1]
+                    if isinstance(e, subprocess.CalledProcessError) else str(e)))
+        info: dict = {}
+        try:
+            entries = uoink_reliability.transcribe_media(
+                audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info)
+        except Exception as e:
+            raise TranscriptUnavailable(
+                "whisper_failed", "local Whisper failed: " + _sanitize_error(str(e)))
+    if not entries:
+        raise TranscriptUnavailable("no_speech", "local Whisper found no speech in the audio")
+    return entries, {"model": model_name, "elapsed": time.monotonic() - started,
+                     "language": info.get("language") or "und"}
+
+
+def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
+    """Return one YouTube transcript record or raise TranscriptUnavailable.
+
+    The record has ``video_id``, ``url``, ``title``, ``source`` (library,
+    captions, auto_captions or whisper), ``language``, ``reason``, ``why``,
+    ``segments`` [(start, end, text)], ``cached`` and, for library hits,
+    ``transcribed_by`` and ``slug``.
+    """
+    ref = _transcript_video_ref(raw_url)
+    if ref is None:
+        raise TranscriptUnavailable(
+            "invalid_url", "get_transcript needs a YouTube video URL or 11-character video ID")
+    video_id, url = ref
+    if lang is not None and (not isinstance(lang, str) or not _TRANSCRIPT_LANG_RE.fullmatch(lang.strip())):
+        raise TranscriptUnavailable("invalid_lang", "lang must be a language code such as en, de or pt-BR")
+    lang = lang.strip() if isinstance(lang, str) else None
+
+    saved = _library_transcript(video_id)
+    if saved and (lang is None or saved["language"] == "und"
+                  or _transcript_lang_primary(saved["language"]) == _transcript_lang_primary(lang)):
+        note = saved.pop("note", None)
+        if lang and saved["language"] == "und":
+            note = " ".join(filter(None, [note, (
+                f"The saved copy's language was not recorded, so it is returned "
+                f"without checking for '{lang}'.")]))
+        return {**saved, "url": url, "source": "library", "reason": "library",
+                "why": note, "translated": False, "cached": False}
+
+    cached = _read_transcript_cache(video_id, lang)
+    if cached:
+        return {**cached, "segments": [tuple(s) for s in cached["segments"]], "cached": True}
+
+    refusal = _platform.capability_refusal(_platform.media_capability())
+    if refusal is not None:
+        raise TranscriptUnavailable(
+            "media_runtime_missing",
+            _sanitize_error(str(refusal.get("reason") or "the media runtime is not installed")))
+
+    settings = _read_settings()
+    failures: list[str] = []
+    title = None
+    duration = None
+    try:
+        metadata = _fetch_metadata(url)
+    except Exception as e:
+        metadata = None
+        failures.append(_caption_failure_reason(e, prefix="metadata"))
+    tracks = _caption_track_candidates(metadata, lang) if metadata else []
+    if metadata:
+        title = metadata.get("title")
+        duration = metadata.get("duration")
+        if not tracks:
+            failures.append("no_captions")
+
+    result = None
+    skipped_translation = None
+    with tempfile.TemporaryDirectory(prefix="uoink-captions-", ignore_cleanup_errors=True) as tmp:
+        for track in tracks[:_TRANSCRIPT_MAX_CAPTION_ATTEMPTS]:
+            try:
+                entries = _download_caption_track(url, track, Path(tmp), duration)
+            except Exception as e:
+                reason = _caption_failure_reason(e)
+                if track["translated"]:
+                    skipped_translation = (track["language"], reason)
+                    continue
+                failures.append(reason)
+                if reason in ("captions_rate_limited", "captions_bot_check"):
+                    break  # the same wall stands in front of every other track
+                continue
+            if entries:
+                result = (track, entries)
+                break
+            failures.append("captions_failed")
+
+    why_parts = []
+    if skipped_translation:
+        code, reason = skipped_translation
+        why_parts.append(
+            f"{_CAPTION_FAILURE_WHY.get(reason, 'YouTube refused')} on the machine-translated "
+            f"'{code}' track")
+    if result:
+        track, entries = result
+        why = None
+        language = track["language"]
+        mismatch = _transcript_lang_primary(language) != _transcript_lang_primary(lang or "en")
+        if mismatch:
+            wanted_text = f"'{lang}'" if lang else "English"
+            why_parts.append(f"no {wanted_text} captions could be fetched")
+            why = "; ".join(why_parts) + f"; returned the '{language}' track instead."
+        elif why_parts:
+            why = "; ".join(why_parts) + "."
+        record = {
+            "video_id": video_id, "url": url, "title": title,
+            "source": track["kind"], "language": language,
+            "translated": bool(track["translated"]),
+            "reason": "translated_captions" if track["translated"] else track["kind"],
+            "why": why, "segments": entries, "duration_seconds": duration,
+            "fetched_at": _now_iso(), "version": _TRANSCRIPT_CACHE_VERSION,
+        }
+        if not (lang and mismatch):
+            # A stand-in language is not cached, so a later call retries the
+            # requested one.
+            _write_transcript_cache(record, lang)
+        return {**record, "cached": False}
+
+    if failures:
+        caption_reason = failures[-1]
+    elif skipped_translation:
+        caption_reason = skipped_translation[1]
+    else:
+        caption_reason = "no_captions"
+    if failures or not skipped_translation:
+        why_parts.append(_CAPTION_FAILURE_WHY.get(caption_reason, "captions were unavailable"))
+    try:
+        entries, asr = _whisper_transcript(url, settings=settings)
+    except TranscriptUnavailable as e:
+        raise TranscriptUnavailable(
+            e.reason, "; ".join(why_parts) + f", and {e.why}.") from None
+    why = "; ".join(why_parts) + (
+        f"; transcribed locally with Whisper ({asr['model']}) in "
+        f"{_transcript_duration_text(asr['elapsed'])}.")
+    if (lang and asr["language"] != "und"
+            and _transcript_lang_primary(asr["language"]) != _transcript_lang_primary(lang)):
+        why += (f" Whisper wrote what was said, in '{asr['language']}'; "
+                f"translation to '{lang}' is not available yet.")
+    record = {
+        "video_id": video_id, "url": url, "title": title,
+        "source": "whisper", "language": asr["language"], "translated": False,
+        "reason": caption_reason, "why": why, "segments": entries,
+        "duration_seconds": duration, "whisper_model": asr["model"],
+        "fetched_at": _now_iso(), "version": _TRANSCRIPT_CACHE_VERSION,
+    }
+    _write_transcript_cache(record, lang)
+    return {**record, "cached": False}
+
+
 def _compute_transcript_reliability(
     video_id: str,
     *,

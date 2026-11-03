@@ -12,7 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- `UOINK_MCP_TOOLSET=search` serves an 8-tool set for clients with a tool
+- `get_transcript`: a YouTube transcript that doesn't fail silently. It reads
+  the saved library copy first (no network), then fetches captions on your own
+  connection, then transcribes the audio with the bundled local Whisper model
+  when YouTube answers 429, asks for a bot check or has no captions. Every
+  result says where the words came from (`source`: library, captions,
+  auto_captions or whisper), the `language`, and on any fallback a plain `why`.
+  It is a drop-in for the popular YouTube transcript MCP servers: same tool
+  name, `url` and `lang`, plus `include_timestamps` and `next_cursor` paging.
+  The MCP server now exposes 93 tools (36 in core mode, 9 in search mode).
+  See "Switching from a YouTube transcript MCP server" in
+  docs/connect-your-agent.md.
+- `UOINK_MCP_TOOLSET=search` serves a 9-tool set for clients with a tool
   limit, and `uoink connect <client> --toolset {full,core,search}` writes it
   into the client's config. Defaults are unchanged.
 

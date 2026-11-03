@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink serves the same tool registry over both MCP transports:
 
-- Supported stdio registry: **92 tools**.
-- Local HTTP/OpenAPI registry: **92 tools**.
+- Supported stdio registry: **93 tools**.
+- Local HTTP/OpenAPI registry: **93 tools**.
 
 Stdio uses the SDK's native dual-era runner. Existing clients can initialize
 with `2024-11-05`, `2025-03-26`, `2025-06-18` or `2025-11-25`, then send
@@ -54,8 +54,8 @@ No registry tools are excluded from stdio.
 ### Tool-capped clients
 
 `UOINK_MCP_TOOLSET=full` is the default. Set `UOINK_MCP_TOOLSET=core` in the
-client's MCP server environment to keep the previous **35 tools**. The original
-35 remain first, in their original order, in full mode. Cursor is reported to
+client's MCP server environment to keep **36 tools**: the previous 35 plus
+`get_transcript`. They remain first, in their original order, in full mode. Cursor is reported to
 pass only the first 40 tools to its agent; core mode also helps other clients
 with a tool cap. Restart the MCP connection after changing the environment.
 Unknown values emit a stderr warning and use full.
@@ -87,7 +87,7 @@ still answer.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all
-92 schemas fit; inbound requests and tool results retain their existing caps.
+93 schemas fit; inbound requests and tool results retain their existing caps.
 Work-queue mutations use their service's lease, transaction and operation-key
 bounds; they do not inherit a read timeout that could abandon a committed write.
 
@@ -1327,6 +1327,32 @@ None for Sprint 4. `extension/lib/extract.js` does not need new helpers to surfa
 - Should v2.1 persist MCP call logs or agent activity indicators in the popup? Out of scope for Sprint 4.
 
 ## Additional tools available in full mode
+
+### get_transcript
+
+Return one YouTube video's transcript with honest provenance. The order is: the
+saved library copy (no network); a transcript an earlier `get_transcript` call
+fetched (no network, `cached: true`); captions downloaded by yt-dlp on this
+computer's connection, uploader captions before auto-captions and the spoken
+language before machine translations; then local Whisper on the downloaded
+audio when YouTube answers 429, asks for a bot check or lists no captions. At
+most three caption tracks are tried, and a 429 or bot check on an original
+track goes straight to Whisper. The result carries `source` (`library`,
+`captions`, `auto_captions` or `whisper`), `language` (`und` when unknown), a
+stable `reason` code, `translated`, and a plain `why` sentence on any fallback,
+such as "YouTube returned 429 (too many requests) for captions; transcribed
+locally with Whisper (base) in 3m 12s." Library hits add `transcribed_by` and
+`slug`. When every step fails the error names what each step hit, with a
+`reason` code. Nothing is added to the library; transcript text carries the
+untrusted-content notice.
+
+Argument names match the popular YouTube transcript servers, so it is a
+drop-in: `url` (URL or bare video ID), `lang`, `include_timestamps` (adds
+`[m:ss]` lines and a `segments` list), `next_cursor` (pages of about 40,000
+characters, under the 64 KiB stdio frame) and `strip_ads` (accepted and
+ignored). Whisper writes the spoken language; translation is not available yet.
+
+Arguments: `url`, `lang`, `include_timestamps`, `next_cursor`, `strip_ads`. The registry schema in `tools/list` defines required fields and bounds.
 
 ### list_library_work
 
