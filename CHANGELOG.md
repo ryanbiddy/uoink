@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Collect YouTube Watch Later, X bookmarks and Reddit saved posts from open
+  browser pages with the extension's Uoink panel. Auto-scroll starts on click;
+  send up to 5,000 saves in batches of 50 with visible progress. Adds
+  content-script matches only, with no new permissions.
 - Import YouTube Watch Later from a Google Takeout playlist CSV, Reddit saved
   posts and comments from Reddit export CSVs, and X bookmarks from status links.
   Captures get the tags `watch later`, `reddit saved`, and `x bookmarks`.

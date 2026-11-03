@@ -379,10 +379,84 @@ function allowedTabUrl(value) {
   }
 }
 
+const SAVES_ORIGINS = {
+  watch_later: ["https://www.youtube.com"],
+  x_bookmarks: ["https://x.com", "https://twitter.com"],
+  reddit_saved: ["https://www.reddit.com", "https://old.reddit.com"],
+};
+const SAVES_URL_RE = /^uoink-saves:[0-9a-f]{16}$/;
+
+function allowedSavesSender(sender, source) {
+  if (!sender.tab || !Number.isInteger(sender.tab.id) || sender.frameId !== 0) return false;
+  if (typeof sender.url !== "string" || /[\s\\]/.test(sender.url)) return false;
+  try {
+    const url = new URL(sender.url);
+    const origins = source ? SAVES_ORIGINS[source] : Object.values(SAVES_ORIGINS).flat();
+    return !!origins && origins.includes(url.origin) && !url.username && !url.password
+      && (!sender.origin || sender.origin === url.origin)
+      && (!sender.tab.url || new URL(sender.tab.url).origin === url.origin);
+  } catch {
+    return false;
+  }
+}
+
+function savesRequestError(error) {
+  if (error && error.name === "AbortError") return "Uoink request timed out. Try again.";
+  if (error && (error.name === "TypeError" || /Failed to fetch|NetworkError|ERR_CONNECTION_REFUSED/i.test(error.message))) {
+    return "Uoink app isn't running";
+  }
+  return String(error && error.message || error || "Uoink couldn't import these saves.");
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!sender || sender.id !== chrome.runtime.id) return;
   if (!msg || typeof msg !== "object") return;
   if (msg.target === "offscreen") return;
+
+  if (msg.type === "stcStageSaves") {
+    if (typeof msg.source !== "string" || !Object.hasOwn(SAVES_ORIGINS, msg.source)
+        || !allowedSavesSender(sender, msg.source)
+        || !Array.isArray(msg.items) || msg.items.length > 5000
+        || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)) {
+      sendResponse({ ok: false, error: "Invalid saves request or page." });
+      return;
+    }
+    (async () => {
+      let staged;
+      try {
+        staged = await STC.postStageSaves(msg.source, msg.items);
+        if (!staged || !staged.ok) {
+          sendResponse(staged || { ok: false, error: "Uoink couldn't stage these saves." });
+          return;
+        }
+        if (typeof staged.url !== "string" || !SAVES_URL_RE.test(staged.url)) {
+          sendResponse({ ok: false, error: "Uoink returned an invalid saves list." });
+          return;
+        }
+        const result = await STC.postImportList(staged.url, 0, 50);
+        sendResponse({ ...staged, total: staged.count, next_offset: 0,
+          ...(result || { ok: false, error: "Uoink didn't return an import result." }), url: staged.url });
+      } catch (error) {
+        // Preserve a successful stage so Retry/Next does not create a new list.
+        sendResponse({ ...(staged && staged.ok ? {
+          url: staged.url, count: staged.count, total: staged.count, next_offset: 0,
+        } : {}), ok: false, error: savesRequestError(error) });
+      }
+    })();
+    return true;
+  }
+
+  if (msg.type === "stcImportNext") {
+    if (!allowedSavesSender(sender) || typeof msg.url !== "string" || !SAVES_URL_RE.test(msg.url)
+        || !Number.isSafeInteger(msg.offset) || msg.offset < 0) {
+      sendResponse({ ok: false, error: "Invalid saves batch or page." });
+      return;
+    }
+    STC.postImportList(msg.url, msg.offset, 50).then(sendResponse, (error) => {
+      sendResponse({ ok: false, error: savesRequestError(error) });
+    });
+    return true;
+  }
 
   // E1: a capture handed over by the popup (see enqueuePopupCapture). Only
   // extension pages can start one; content scripts keep their own routes.
