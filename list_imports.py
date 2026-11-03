@@ -425,6 +425,29 @@ def _staged_path(data_root: Path, name: str) -> Path:
     raise ImportListError("That staged saves path wasn't found.", "not_found")
 
 
+def _find_staged(data_root: Path, name: str) -> Path:
+    """Return an existing staging file by exact name from the directory
+    listing, so a client-supplied id never becomes part of a path."""
+    root = Path(data_root) / "saves-staged"
+    try:
+        with os.scandir(root) as entries:
+            for entry in entries:
+                if entry.name == name and entry.is_file(follow_symlinks=False):
+                    return Path(entry.path)
+    except OSError:
+        pass
+    raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
+
+
+def _replace_file(path: Path, data: dict) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
 def _staged_files(data_root: Path, pattern: str) -> list[Path]:
     """List only validated, contained stage or upload files for cleanup."""
     files = []
@@ -444,7 +467,7 @@ def _staged_files(data_root: Path, pattern: str) -> list[Path]:
 def _load_stage(data_root: Path | None, stage_id: str) -> dict:
     if data_root is None or not isinstance(stage_id, str) or not _SAVES_ID_RE.fullmatch(stage_id):
         raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
-    path = _staged_path(data_root, f"{stage_id}.json")
+    path = _find_staged(data_root, f"{stage_id}.json")
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         if data["source"] not in SAVE_SOURCES or not isinstance(data["items"], list):
@@ -454,18 +477,13 @@ def _load_stage(data_root: Path | None, stage_id: str) -> dict:
         raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
 
 
-def _write_stage(data_root: Path, stage_id: str, data: dict) -> Path:
-    if not isinstance(stage_id, str) or not _SAVES_ID_RE.fullmatch(stage_id):
-        raise ImportListError("That staged saves list wasn't found.", "not_found")
+def _write_new_stage(data_root: Path, data: dict) -> tuple[str, Path]:
+    """Write a new stage under a server-generated id."""
+    stage_id = secrets.token_hex(8)
     path = _staged_path(data_root, f"{stage_id}.json")
-    tmp = _staged_path(data_root, f"{stage_id}.json.tmp")
     path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-        os.replace(tmp, path)
-    finally:
-        tmp.unlink(missing_ok=True)
-    return path
+    _replace_file(path, data)
+    return stage_id, path
 
 
 def _stage_result(stage_id: str, data: dict) -> dict:
@@ -478,12 +496,11 @@ def stage_saves(data_root: Path, source: str, items: list[dict], *, filename=Non
     parsed = parse_save_items(source, items)
     if not parsed:
         raise ImportListError("Found nothing to import in that file.", "empty_file")
-    stage_id = secrets.token_hex(8)
     data = {"source": source, "items": parsed,
             "filename": Path(filename).name if filename else None,
             "truncated": bool(getattr(items, "truncated", False) or parsed.truncated)}
     with _stage_lock:
-        path = _write_stage(data_root, stage_id, data)
+        stage_id, path = _write_new_stage(data_root, data)
         older = [p for p in _staged_files(data_root, "*.json") if p != path]
         for old in older[SAVES_STAGE_CAP - 1:]:
             old.unlink(missing_ok=True)
@@ -513,14 +530,18 @@ def append_stage_items(data_root: Path, token: str, source: str, items: Iterable
             seen.add(item["item_key"])
             merged.append(item)
         data.update(items=merged, truncated=truncated)
-        _write_stage(data_root, stage_id, data)
+        _replace_file(_find_staged(data_root, f"{stage_id}.json"), data)
     return _stage_result(stage_id, data)
 
 
 def _upload_part_path(data_root: Path, upload_id: str) -> Path:
+    """An existing upload part, found by name in the staging listing."""
     if not isinstance(upload_id, str) or not _SAVES_ID_RE.fullmatch(upload_id):
         raise ImportListError("upload_id must be 16 lowercase hex characters.", "invalid_items")
-    return _staged_path(data_root, f"upload-{upload_id}.part")
+    try:
+        return _find_staged(data_root, f"upload-{upload_id}.part")
+    except ImportListError:
+        raise ImportListError("That saves upload wasn't found. Import the file again.", "not_found")
 
 
 def append_upload_chunk(data_root: Path, text: str, upload_id=None) -> dict:
@@ -531,7 +552,9 @@ def append_upload_chunk(data_root: Path, text: str, upload_id=None) -> dict:
     new = upload_id is None
     if new:
         upload_id = secrets.token_hex(8)
-    path = _upload_part_path(data_root, upload_id)
+        path = _staged_path(data_root, f"upload-{upload_id}.part")
+    else:
+        path = _upload_part_path(data_root, upload_id)
     with _stage_lock:
         try:
             received = 0 if new else path.stat().st_size
