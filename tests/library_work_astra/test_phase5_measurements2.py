@@ -4,6 +4,7 @@ This module runs the expensive supplied benchmark once, and reuses only its
 test-session observations. It does not introduce an application report cache.
 """
 
+from tests.private_archive import needs
 from tests.mcp_sdk import handler_for
 import asyncio
 import json
@@ -62,6 +63,7 @@ def benchmark_capture(tmp_path_factory):
     return records
 
 
+@needs('PHASE5-AZ-MEASUREMENTS-2026-09-08.md')
 def test_phase5_ba2_measurement_document_payloads_match_capture(benchmark_capture):
     doc = (ROOT / "docs/library/PHASE5-AZ-MEASUREMENTS-2026-09-08.md").read_text(encoding="utf-8")
     row = re.search(r"\*\*Wire Response Payload\*\*\s*\|\s*([\d,]+) bytes\s*\|\s*([\d,]+) bytes", doc)

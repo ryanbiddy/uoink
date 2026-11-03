@@ -6,7 +6,7 @@ Gates covered:
 - P4-03 (Bytes and limits: UTF-8 boundaries, wire caps, admission ceiling, honest size)
 - P4-05 (Failure bounds: storage failure, missing files, deadlines, rate/concurrency guard)
 
-Tests against the frozen module interface in docs/library/PHASE4-AV-BRIEF-2026-09-08.md:
+Tests against the frozen module interface in PHASE4-AV-BRIEF-2026-09-08 (internal note):
 - library_resources.LibraryReader, parse_uri, encode_key, decode_key, ResourceError, ParsedUri,
   CONTRACT_VERSION, RENDER_VERSION, SCHEMA_VERSION, URI_PREFIX, TEMPLATES, LIMITS.
 """

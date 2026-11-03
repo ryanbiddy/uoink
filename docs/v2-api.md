@@ -1633,7 +1633,7 @@ The six Living Library work-queue tools added on 2026-09-04 (Phase 2 stage 1,
 contract `phase2-v1-2026-09-04`) are available on both HTTP and default stdio:
 `list_library_work`, `claim_library_work`, `submit_library_result`,
 `apply_reshelving`, `pin_shelf` and `undo_library_apply`. Their input schemas
-are the frozen `docs/library/phase2-contract/tool-schemas.json` (JSON Schema
+are the frozen `tests/fixtures/phase2-contract/tool-schemas.json` (JSON Schema
 2020-12 with `$defs`, `$ref`, `oneOf` and `const`), embedded verbatim in
 `uoink_mcp_tools.py`. Every response carries `schema_version: 1`; errors use
 `{"ok": false, "schema_version": 1, "error": {"code", "message", "retryable",

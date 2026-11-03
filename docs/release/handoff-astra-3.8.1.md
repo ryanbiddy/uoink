@@ -92,7 +92,7 @@ python -m pytest tests/library_work_astra/test_phase4_aw3_acceptance.py tests/li
 
 Result: **50 passed in 42.92s**. The first attempt without a worktree
 `--basetemp` produced 50 setup errors: access denied to
-`C:\Users\hello\AppData\Local\Temp\pytest-of-hello`. No test bodies ran
+`C:\Users\<you>\AppData\Local\Temp\pytest-of-<you>`. No test bodies ran
 in that attempt. The rerun above used an allowed directory.
 
 After canonicalizing all readiness fixtures:
@@ -106,7 +106,7 @@ with TEMP and TMP set to an actual Windows 8.3 alias obtained via
 `GetShortPathNameW`:
 
 ```text
-C:\Users\hello\AppData\Local\AGENTC~1\WORKTR~1\UOINK-~3\5A4DD3~1\codex\_scratch\READIN~1
+<worktree>\codex\_scratch\READIN~1
 ```
 
 The short-path run used a child `python -m pytest` process with that environment;

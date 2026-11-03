@@ -12,6 +12,7 @@ Tests:
 """
 from __future__ import annotations
 
+from tests.private_archive import needs
 import json
 import os
 import shutil
@@ -41,6 +42,7 @@ def test_tmp_dir():
         shutil.rmtree(p, ignore_errors=True)
 
 
+@needs('proof/run-2026-09-05/receipts.json')
 def test_induce_mock_run_end_to_end(test_tmp_dir):
     """Verifies that induce_run.py --mock produces valid proposal and receipts."""
     out_proposal = test_tmp_dir / "taxonomy-v2-proposal.json"
