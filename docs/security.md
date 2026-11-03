@@ -700,7 +700,7 @@ Uoink v3 ships **claim extraction + verification assistance** inspired by [Libr-
 
 ## Reporting
 
-If you find a vulnerability, please open a private GitHub Security Advisory or report it to **hi@uoink.video**. Do not open a public issue with reproduction details until a fix is shipped.
+If you find a vulnerability, please open a private GitHub Security Advisory or report it to **hi@uoink.app**. Do not open a public issue with reproduction details until a fix is shipped.
 
 ## ScrapeCreators outbound requests
 

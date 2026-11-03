@@ -21,7 +21,7 @@ def test_installer_lock_is_complete_and_exact() -> None:
 
     assert len(locked) >= 100
     assert locked["yt-dlp"] == "2026.8.19"
-    assert locked["pillow"] == "12.3.0"
+    assert locked["pillow"] == "13.0.0"
     assert locked["mcp"] == "2.3.0"
     assert locked["mcp-types"] == "2.3.0"
     assert locked["httpx2"] == locked["httpcore2"] == "2.16.0"
