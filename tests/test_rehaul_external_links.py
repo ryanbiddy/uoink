@@ -443,7 +443,7 @@ def test_dashboard_init_does_not_request_remote_features():
         "loadLibrary", "loadLibraryActivity", "startLibraryActivityTimer",
         "loadResume", "loadForYou", "loadWriting", "renderSources",
         "refreshActivity", "connectJobsStream",
-        "showUsagePrompt", "syncDashboardTheme",
+        "showUsagePrompt", "syncDashboardTheme", "loadLibraryAvailability",
     ]
     _run_js(f"""
 const calls = [], requests = [];
@@ -456,6 +456,7 @@ vm.runInContext({json.dumps(_function('init'))}, context);
 await context.init();
 assert.deepEqual(requests, []);
 assert.ok(calls.includes('loadLibrary'));
+assert.ok(calls.includes('loadLibraryAvailability'));
 assert.ok(calls.includes('connectJobsStream'));
 console.log('PASS dashboard init without remote requests');
 """)

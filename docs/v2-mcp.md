@@ -371,6 +371,11 @@ opaque response keys; product copy and human-readable messages use Uoink.
 
 Keyword search across saved Uoink markdown corpora.
 
+Each result carries `source_status` (`available`, `deleted`, `private`,
+`region_blocked`, or `unknown`) and `source_last_checked` (an ISO timestamp or
+null). The agent can tell the user a source is no longer online and quote
+the saved copy, using the verified passage described below.
+
 `match` is optional: `"forgiving"` (default) drops common English words and
 matches any remaining word; `"strict"` requires every word, as before.
 Both treat punctuation and FTS operators as text and prefix-match the last
@@ -442,6 +447,11 @@ same handler.
 Optional `match: "forgiving" | "strict"` uses the same defaults and ranking
 as `search_uoinks`. Each result includes its stored `clip_id`, `video_id`,
 verbatim `text`, and `start`/`end` in seconds where timing exists.
+
+Each result also carries `source_status` (`available`, `deleted`, `private`,
+`region_blocked`, or `unknown`) and `source_last_checked` (an ISO timestamp or
+null). The agent can tell the user a source is no longer online and quote
+the saved clip when `passage_verified` is true.
 
 Parameters:
 

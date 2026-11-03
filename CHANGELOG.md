@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Saved sources get polite weekly availability checks from your own machine:
+  YouTube, X, Reddit, podcasts and web pages. Two matching checks confirm a
+  source is gone. Runs make at most 25 requests, no more than once an hour,
+  with a 7-day recheck and 2 seconds between requests to the same host.
+  HTTP 429/503 responses trigger backoff honoring `Retry-After`. Checks are
+  on by default; turn them off in **Check if saved sources go offline**.
+  Library badges, a **Gone from the web** filter and a dismissible monthly
+  notice show which sources are still saved after going offline.
+  MCP `search_uoinks` and `search_clips` return `source_status` and
+  `source_last_checked` per result. Migration `0033_source_availability.sql`
+  stores availability separately from saved content.
 - `get_transcript`: a YouTube transcript that doesn't fail silently. It reads
   the saved library copy first (no network), then fetches captions on your own
   connection, then transcribes the audio with the bundled local Whisper model

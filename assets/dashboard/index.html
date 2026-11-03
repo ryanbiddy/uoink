@@ -1244,6 +1244,16 @@
     .health-exception.warn { color: var(--acid); }
     .health-exception.fail { color: var(--vermillion); }
 
+    .source-availability-badge {
+      display: inline-flex;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      padding: var(--space-1) var(--space-2);
+      color: var(--text-2);
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
     /* The badge is a button: it opens the drawer that says why. */
     button.health-exception {
       border: 0;
@@ -3675,6 +3685,23 @@
       gap: var(--space-2);
     }
 
+    .library-availability-notice {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) 0;
+      margin-bottom: var(--space-4);
+      border-bottom: 1px solid var(--line);
+      color: var(--text-2);
+      font-size: 13px;
+    }
+
+    .library-availability-notice p {
+      flex: 1 1 300px;
+      margin: 0;
+    }
+
     .kind-chip {
       min-height: var(--target-chip);
       border: 1px solid var(--line-strong);
@@ -5254,6 +5281,11 @@
               <button class="button link" type="button" id="newYoink">Open YouTube</button>
             </div>
           </div>
+          <div class="library-availability-notice hidden" id="libraryAvailabilityNotice">
+            <p id="libraryAvailabilityMessage" role="status" aria-live="polite"></p>
+            <button class="button ghost" type="button" data-show-gone-sources>Show saved sources</button>
+            <button class="button link" type="button" data-dismiss-availability aria-label="Dismiss source availability notice for this month">Dismiss</button>
+          </div>
           <div class="control-grid">
             <div class="library-omnibox">
               <div class="omnibox-row">
@@ -5268,6 +5300,7 @@
               <button class="kind-chip" type="button" data-library-kind="posts" aria-pressed="false">Posts</button>
               <button class="kind-chip" type="button" data-library-kind="notes" aria-pressed="false">Notes</button>
               <button class="kind-chip" type="button" data-library-kind="podcasts" aria-pressed="false">Podcasts</button>
+              <button class="kind-chip" type="button" id="libraryAvailabilityFilter" data-library-availability="gone" aria-pressed="false" aria-label="Gone from the web, still in your library">Gone from the web</button>
             </div>
             <details class="library-more-filters" id="libraryMoreFilters">
               <summary class="control library-filter-summary">Filters <span class="library-filter-count" id="advancedFilterCount">0</span></summary>
@@ -5895,6 +5928,13 @@
               <p class="setting-copy">Only works over sources you already track &mdash; no web crawling, no new accounts. Capture uses the same local download + transcription as a manual save, so there is <strong>no AI spend</strong>. Reversible: turn it off any time, and auto-captured uoinks are ordinary uoinks you can delete.</p>
             </div>
 
+            <div class="setting-block" id="source-availability">
+              <h2>Check if saved sources go offline</h2>
+              <p class="setting-copy">On by default. About once a week, Uoink asks each source's site whether it is still up, from this computer only. It makes a few requests at a time and backs off when a site asks it to slow down. Nothing about your library is sent anywhere. Turn it off any time.</p>
+              <label class="inline-row"><input id="sourceAvailabilityToggle" type="checkbox" checked aria-describedby="sourceAvailabilityToggleSaveStatus"> Check if saved sources go offline</label>
+              <div class="setting-feedback"><span class="setting-status" id="sourceAvailabilityToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="sourceAvailabilityToggleSaveRetry" type="button" data-setting-retry="sourceAvailabilityToggle">Retry save</button></div>
+            </div>
+
             <div class="setting-block">
               <h2>Podcast feeds</h2>
               <p class="setting-copy" id="podcastFeedStatus">Checking podcast feeds...</p>
@@ -6519,6 +6559,7 @@
         match: "forgiving",
         // Re-haul type chips: "" (All), videos, posts, notes, podcasts.
         kind: "",
+        availability: "",
       },
       // Re-haul: the last step each in-flight capture showed, so only a
       // step that just advanced animates.
@@ -6814,6 +6855,9 @@
       libraryCaptureButton: document.getElementById("libraryCaptureButton"),
       libraryCaptureNote: document.getElementById("libraryCaptureNote"),
       libraryKinds: document.getElementById("libraryKinds"),
+      libraryAvailabilityFilter: document.getElementById("libraryAvailabilityFilter"),
+      libraryAvailabilityNotice: document.getElementById("libraryAvailabilityNotice"),
+      libraryAvailabilityMessage: document.getElementById("libraryAvailabilityMessage"),
       libraryCaptures: document.getElementById("libraryCaptures"),
       libraryGrid: document.getElementById("libraryGrid"),
       libraryEmpty: document.getElementById("libraryEmpty"),
@@ -11852,6 +11896,7 @@
       // Re-haul: the type chip and the one sort control are answered by the
       // helper over every match, not re-sorted on the loaded page (D26).
       if (state.filters.kind) params.set("kind", state.filters.kind);
+      if (state.filters.availability) params.set("availability", state.filters.availability);
       params.set("sort", state.filters.sort || "newest");
       params.set("match", state.filters.match || "forgiving");
       params.set("limit", String(extra.limit ?? state.limit));
@@ -11892,10 +11937,10 @@
       "hook_type", "format", "performance", "length", "date_from", "date_to",
     ]);
 
-    // The type chips show their own state, so the kind is no removable chip.
+    // The type and availability chips show their own state.
     function activeLibraryFilterEntries() {
       return Object.entries(state.filters)
-        .filter(([key, value]) => key !== "sort" && key !== "kind" && key !== "match" && String(value || "").trim())
+        .filter(([key, value]) => key !== "sort" && key !== "kind" && key !== "availability" && key !== "match" && String(value || "").trim())
         .map(([key, value]) => ({
           key,
           label: libraryFilterLabel(key),
@@ -11904,6 +11949,7 @@
     }
 
     function renderLibraryFilterChips() {
+      if (els.libraryAvailabilityFilter) els.libraryAvailabilityFilter.setAttribute("aria-pressed", String(state.filters.availability === "gone"));
       const entries = activeLibraryFilterEntries();
       els.activeFilters.innerHTML = entries.map((entry) => `
         <button class="library-filter-chip" type="button" data-remove-library-filter="${htmlEscape(entry.key)}" aria-label="Remove ${htmlEscape(entry.label)} filter">
@@ -12051,7 +12097,7 @@
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
       els.matchFilter.value = "forgiving";
-      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "forgiving", kind: "" };
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "forgiving", kind: "", availability: "" };
       setLibraryDateError("");
       els.libraryMoreFilters.removeAttribute("open");
       resetLibraryCapture();
@@ -12281,6 +12327,20 @@
       return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Done</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
     }
 
+    function sourceAvailabilityLabel(row) {
+      switch (row && row.source_status && row.source_status.status) {
+        case "deleted": return "Gone from the web";
+        case "private": return "Now private";
+        case "region_blocked": return "Blocked in your region";
+        default: return "";
+      }
+    }
+
+    function sourceAvailabilityBadge(row) {
+      const label = sourceAvailabilityLabel(row);
+      return label ? `<span class="source-availability-badge" title="${label}, still in your library">${label}</span>` : "";
+    }
+
     // Re-haul list row: real thumbnail (or a neutral block naming the kind),
     // title, source · platform · time, then one state line. Write from this
     // and the hook stay on the row, shown on hover and keyboard focus.
@@ -12291,6 +12351,7 @@
       const platform = platformOf(row);
       const variant = cardVariantClass(row);
       const title = htmlEscape(firstValue(row.episode_title, row.title, "Untitled uoink"));
+      const availabilityLabel = sourceAvailabilityLabel(row);
       // Phase 2: the real author is the "who" (X author, r/<sub>, YouTube
       // channel), never the bare host.
       const author = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
@@ -12305,7 +12366,7 @@
       const current = state.activeTab === "yoink" && videoIdOf(state.selectedYoink) === String(row.video_id || row.slug || "")
         ? ' aria-current="true"' : "";
       return `
-        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}"${current}>
+        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}"${current}>
           <div class="row-thumb" aria-hidden="true">
             <img alt="" data-thumb-for="${id}" class="hidden">
             <span class="source-type-chip">${sourceType}</span>
@@ -12313,7 +12374,7 @@
           <div class="row-body">
             <div class="card-title">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
-            <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}</div>
+            <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
           </div>
           <div class="row-actions">
             ${hookChip}
@@ -12666,6 +12727,54 @@
       state.filters.kind = next;
       renderLibraryKinds();
       loadLibrary({ reset: true });
+    }
+
+    function setLibraryAvailability(enabled) {
+      state.filters.availability = enabled ? "gone" : "";
+      renderLibraryFilterChips();
+      loadLibrary({ reset: true });
+    }
+
+    const AVAILABILITY_DISMISSED_KEY = "uoink.dashboard.availabilityDismissedMonth";
+    let availabilityDismissedMonth = "";
+    let libraryAvailabilityRequest = 0;
+
+    function availabilityMonth() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function renderLibraryAvailability(data) {
+      if (!els.libraryAvailabilityNotice) return;
+      const month = availabilityMonth();
+      let dismissed = availabilityDismissedMonth === month;
+      try { dismissed = dismissed || localStorage.getItem(AVAILABILITY_DISMISSED_KEY) === month; } catch (_) {}
+      const count = Math.max(0, Math.floor(Number(data && data.gone_this_month) || 0));
+      const visible = Boolean(data && data.enabled && count > 0
+        && !(state.settings && state.settings.source_availability_check_enabled === false)
+        && !dismissed);
+      els.libraryAvailabilityNotice.classList.toggle("hidden", !visible);
+      els.libraryAvailabilityMessage.textContent = visible
+        ? (count === 1 ? "1 source you saved went offline this month. You still have it."
+          : `${count} sources you saved went offline this month. You still have them.`)
+        : "";
+    }
+
+    async function loadLibraryAvailability() {
+      const request = ++libraryAvailabilityRequest;
+      try {
+        const data = await authFetch("/library/availability");
+        if (request === libraryAvailabilityRequest) renderLibraryAvailability(data);
+      } catch (_) {
+        if (request === libraryAvailabilityRequest) renderLibraryAvailability(null);
+      }
+    }
+
+    function dismissLibraryAvailability() {
+      availabilityDismissedMonth = availabilityMonth();
+      try { localStorage.setItem(AVAILABILITY_DISMISSED_KEY, availabilityDismissedMonth); } catch (_) {}
+      renderLibraryAvailability(null);
+      if (els.libraryAvailabilityFilter) els.libraryAvailabilityFilter.focus();
     }
 
     // ---- Re-haul Library: captures still on their way --------------------
@@ -16539,6 +16648,7 @@
       writingScreenshotPickerToggle: ["writing_show_screenshot_picker", true],
       writingAttachAllToggle: ["writing_default_attach_all_screenshots", false],
       autoUoinkToggle: ["auto_uoink_enabled", false],
+      sourceAvailabilityToggle: ["source_availability_check_enabled", true],
       outputFolder: ["output_dir", ""],
       defaultEvidenceSources: ["default_evidence_sources", []],
       defaultTargetLength: ["default_target_length", "5m"],
@@ -16804,6 +16914,10 @@
         if (field === "output_dir") renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         if (field === "voice_dna_warnings_enabled") els.writingShowWarnings.checked = patch[field];
         if (field === "auto_uoink_enabled") renderAutoUoinkStatus();
+        if (field === "source_availability_check_enabled") {
+          renderLibraryAvailability(null);
+          loadLibraryAvailability();
+        }
         if (field === "writing_show_screenshot_picker") renderWritingScreenshots();
         if (field === "card_image") {
           loadLibrary({ reset: true }).catch(() => {});
@@ -17852,6 +17966,7 @@
       markOpenLibraryRow();
       syncSidebarTopics();
       if (tab === "library") {
+        loadLibraryAvailability();
         loadLibraryActivity(false);
         startLibraryActivityTimer();
       } else {
@@ -18448,6 +18563,18 @@
           return;
         }
         // Re-haul Library: type chips, the box, and the capture rows.
+        if (event.target.closest("[data-library-availability]")) {
+          setLibraryAvailability(state.filters.availability !== "gone");
+          return;
+        }
+        if (event.target.closest("[data-show-gone-sources]")) {
+          setLibraryAvailability(true);
+          return;
+        }
+        if (event.target.closest("[data-dismiss-availability]")) {
+          dismissLibraryAvailability();
+          return;
+        }
         const kindChip = event.target.closest("[data-library-kind]");
         if (kindChip) {
           setLibraryKind(kindChip.dataset.libraryKind || "");
@@ -18818,6 +18945,7 @@
       await loadLibraryFacets();
       // After the first token-gated call, so it reuses that token: the
       // helper rate-limits /token.
+      loadLibraryAvailability();
       syncDashboardTheme();
       await refreshJobs();
       await loadLibrary({ reset: true });
