@@ -13,7 +13,7 @@ from contextlib import closing
 import pytest
 
 from test_phase3_support import (
-    CONTRACT, TABLES, at, digest, ledger, migration_dir, phase3_db,
+    CONTRACT_TOOLS, TABLES, at, digest, ledger, migration_dir, phase3_db,
     phase3_isolation, phase3_module, rig, rows, source_row, utc_day,
 )
 
@@ -236,8 +236,7 @@ def test_s14_sql_backend_binding_and_source_item_fk(phase3_db):
 
 def test_registry_tool_schemas_match_frozen_contract(phase3_module):
     import uoink_mcp_tools
-    document = CONTRACT.read_text(encoding='utf-8')
-    frozen = json.loads(document.split('```json\n', 1)[1].split('\n```', 1)[0])
+    frozen = json.loads(CONTRACT_TOOLS.read_text(encoding='utf-8'))
     actual = {tool['name']: tool['inputSchema'] for tool in uoink_mcp_tools.list_tools()}
     for tool in frozen['tools']:
         assert actual.get(tool['name']) == tool['inputSchema'], tool['name']

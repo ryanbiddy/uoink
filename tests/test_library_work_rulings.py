@@ -1,6 +1,6 @@
 """tests/test_library_work_rulings.py - Independent verification tests for Phase 2 rulings R1-R5.
 
-Written strictly from docs/library/PHASE2-RULINGS-BRIEF-2026-09-04.md:
+Written strictly from PHASE2-RULINGS-BRIEF-2026-09-04 (internal note):
 - R1 (OBS-2): Unpin and undo invalidate every work row for the item in every run that contains it
   (work blocked, manifest pinned/changed, proposals and previews deleted, run_revision bumped).
 - R2 (OBS-4): _ready returns recovery_conflict when recovery_state='conflict' and recovery_pending

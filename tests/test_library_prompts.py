@@ -4,7 +4,7 @@ Gate covered:
 - P4-07 (Prompts: exact names, argument validation, no-match & missing-history handling,
   stale/oversized preview refusal, database immutability verification, report-only queries).
 
-Tests against the frozen module interface in docs/library/PHASE4-AV-BRIEF-2026-09-08.md:
+Tests against the frozen module interface in PHASE4-AV-BRIEF-2026-09-08 (internal note):
 - library_prompts.PROMPTS, library_prompts.get_prompt
 - library_resources.LibraryReader, ResourceError
 """

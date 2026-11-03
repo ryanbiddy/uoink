@@ -73,7 +73,7 @@ CLIENTS = {
                              "https://modelcontextprotocol.io/docs/develop/connect-local-servers",
                              mac_location="~/Library/Application Support/Claude/claude_desktop_config.json"),
     "cursor": recipe("json", "~/.cursor/mcp.json", "https://cursor.com/docs/mcp",
-                     note="Uses UOINK_MCP_TOOLSET=core to reduce the tool count. Add --toolset search for 8 tools."),
+                     note="Uses UOINK_MCP_TOOLSET=core to reduce the tool count. Add --toolset search for 9 tools."),
     "codex": recipe("toml", "~/.codex/config.toml", "https://developers.openai.com/codex/mcp", "mcp_servers",
                     note="Use CODEX_HOME/config.toml if you set CODEX_HOME."),
     "gemini": recipe("json", "~/.gemini/settings.json", "https://geminicli.com/docs/tools/mcp-server/"),

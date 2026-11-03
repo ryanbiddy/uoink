@@ -46,11 +46,13 @@ def citation_fields(row, *, copy_row=True):
     return unverified(row, copy_row=False)
 
 
-def select_mode(index, mode):
+def select_mode(index, mode, *, filters=None):
     if mode not in MODES:
         raise ValueError("mode must be auto, keyword, semantic or hybrid")
     if mode == "keyword":
         return "keyword", None
+    if (filters or {}).get("availability"):
+        return "keyword", "Availability filtering uses keyword search."
     engine = getattr(index, "_local_search", None)
     try:
         if engine is None or not engine.enabled:
@@ -140,10 +142,9 @@ def search(index, query, *, mode="auto", limit=50, offset=0, filters=None,
     Hybrid fuses 100 forgiving keyword and 100 semantic candidates with k=60.
     Counts describe that candidate pool. Exact titles retain the pass 1 guard.
     """
-    actual, reason = select_mode(index, mode)
+    actual, reason = select_mode(index, mode, filters=filters)
     if not (query or "").strip():
-        actual = "keyword"
-        reason = "Enter search text to use semantic search." if mode in ("semantic", "hybrid") else None
+        actual, reason = "keyword", None
     if actual != "keyword":
         try:
             from index import _search_title_key

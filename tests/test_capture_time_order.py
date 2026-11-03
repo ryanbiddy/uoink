@@ -141,7 +141,7 @@ def test_semantic_results_resort_by_real_time(library, monkeypatch):
     import uoink_core.search_service as search_service
     rows = [{"video_id": vid, "yoinked_at": stamp} for vid, stamp in library._conn.execute(
         "SELECT video_id, yoinked_at FROM yoinks ORDER BY video_id")]
-    monkeypatch.setattr(search_service, "select_mode", lambda idx, mode: ("semantic", None))
+    monkeypatch.setattr(search_service, "select_mode", lambda idx, mode, **kwargs: ("semantic", None))
     monkeypatch.setattr(library, "search_mode",
                         lambda *args, **kwargs: {"results": list(rows), "search_mode": "semantic"})
     page = server._library_search(library, q="moon", filters={}, kind=None, sort="newest",

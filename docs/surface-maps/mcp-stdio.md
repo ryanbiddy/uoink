@@ -37,7 +37,7 @@ working as-is.
 3. Swap `sys.stdout` to stderr while importing `server` (server.py wires a
    stdout log handler at import time; stdout belongs to the protocol).
 4. `uoink_mcp_tools.bind_backend(server)`, build the FastMCP app, and
-   advertise all 92 tools directly from `TOOL_REGISTRY`. The six Yoink-era aliases
+   advertise all 93 tools directly from `TOOL_REGISTRY`. The six Yoink-era aliases
    completed their compatibility window in v2.5 and are absent in v3.
 
 ## How it can never silently regress
@@ -46,7 +46,7 @@ working as-is.
   any interpreter with `python -P` (PYTHONSAFEPATH withholds the script
   dir, same effect as the `._pth`), from a non-repo cwd, and drives the
   real client handshake: initialize -> notifications/initialized ->
-  tools/list (exactly 92 canonical tools) -> tools/call
+  tools/list (exactly 93 canonical tools) -> tools/call
   `list_recent_uoinks` against an
   isolated data root (`LOCALAPPDATA`/`XDG_DATA_HOME`/`UOINK_OUTPUT_DIR`
   pointed at a temp dir; the test never touches a real index). CI's
@@ -80,14 +80,14 @@ Gate run 2026-07-04/05 against the installed embeddable interpreter
 tools/list returned 20 at the time because six deprecated aliases were still
 registered; `tools/call list_recent_uoinks` returned
 `{"ok": true, "yoinks": []}` against an isolated temp index. The v3
-regression gate now requires exactly 92 canonical names and rejects the six
+regression gate now requires exactly 93 canonical names and rejects the six
 removed names. The same sequence on the original C-01 file exits 1 with the
 ModuleNotFoundError.
 
 ## 3.13.0 toolsets
 
 `UOINK_MCP_TOOLSET=full` serves all registry tools; `core` preserves the previous
-35 in their original order. Full keeps that prefix. Unknown values warn on
+35 in their original order, then `get_transcript`. Full keeps that prefix. Unknown values warn on
 stderr and use full. Cursor and other clients with tool caps can select core.
 Both modes use registry schemas and consent gates. Three registry schemas use a top-level `oneOf` (`claim_library_work`, `apply_reshelving`, `set_source_consent`). Claude Code and the Anthropic API reject that shape and Claude Code then shows none of the server's tools, so both stdio and HTTP MCP advertise each as one object whose properties merge the variants. The server still validates every call against the exact frozen registry schema.
 Registry handlers run on the event loop one at a time, as in v3.9.1, because they

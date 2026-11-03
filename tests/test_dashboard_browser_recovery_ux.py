@@ -1,7 +1,7 @@
 
 """Regression tests for browser recovery source detail display and minimal API repair.
 
-Governed by docs/library/BROWSER-RECOVERY-UX-REPAIR-BRIEF-2026-09-10.md.
+Governed by BROWSER-RECOVERY-UX-REPAIR-BRIEF-2026-09-10 (internal note).
 Tests:
 1. Disposable failed-start fixture recreating package-05 post-restart state.
 2. Bounded API output in list_sources and source_status (consent revision, capture outcome,

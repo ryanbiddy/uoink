@@ -2,7 +2,7 @@
 race), S10 (atomic daily allowance), S11 (failure/retry accounting), S12 (UTC
 boundary and clock), S13 (restart reservation), S14 (queue atomicity and
 fencing), S15 (cross-source deduplication).
-Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md, "Atomic starts, failure,
+Contract: PHASE3-CONTRACT-2026-09-07 (internal note), "Atomic starts, failure,
 and restart".
 
 Run: python -m pytest -q tests/test_source_subscriptions_ledger.py

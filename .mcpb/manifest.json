@@ -198,6 +198,10 @@
       "description": "Export verbatim stored transcript cues with speaker provenance, overlapping chapters, safe links and evidence references. Use after search_clips identifies a passage; use get_citation_map for all citation rows or read_library_resource for an existing resource URI. Select exact cue-aligned bounds or a current excerpt, at most 120 seconds and 200 cues. Returns source/media revisions; refusals include next_step. It does not fetch media or recompute transcription."
     },
     {
+      "name": "get_transcript",
+      "description": "Get the transcript of one YouTube video, with honest provenance. Use when you need what a video says; use search_clips to find passages across saved items or uoink_video to save a video with screenshots. Order: the saved library copy (no network), then captions fetched on this computer's own connection, then local Whisper on the audio when YouTube refuses captions (429, bot check) or has none. Returns source (library, captions, auto_captions or whisper), language, a plain why on any fallback, and the text; long transcripts page with next_cursor. Nothing is added to the library."
+    },
+    {
       "name": "list_library_work",
       "description": "List Librarian assignment counts and one cursor page of work for a run. Use to inspect readiness before claim_library_work; use get_library_activity for aggregate library metrics. Listing expires stale leases and can update work state. Returns run revision, work states, manifest dispositions and waiting-client status. The server does not perform the Librarian's model work."
     },

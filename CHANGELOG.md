@@ -21,7 +21,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   with `next_offset`. Already-saved items are skipped. X and Reddit posts
   capture one at a time, at least 15 seconds apart; X requires text capture
   to be enabled.
-- `UOINK_MCP_TOOLSET=search` serves an 8-tool set for clients with a tool
+- Saved sources get polite weekly availability checks from your own machine:
+  YouTube, X, Reddit, podcasts and web pages. Two matching checks confirm a
+  source is gone. Runs make at most 25 requests, no more than once an hour,
+  with a 7-day recheck and 2 seconds between requests to the same host.
+  HTTP 429/503 responses trigger backoff honoring `Retry-After`. Checks are
+  on by default; turn them off in **Check if saved sources go offline**.
+  Library badges, a **Gone from the web** filter and a dismissible monthly
+  notice show which sources are still saved after going offline.
+  MCP `search_uoinks` and `search_clips` return `source_status` and
+  `source_last_checked` per result. Migration `0033_source_availability.sql`
+  stores availability separately from saved content.
+- `get_transcript`: a YouTube transcript that doesn't fail silently. It reads
+  the saved library copy first (no network), then fetches captions on your own
+  connection, then transcribes the audio with the bundled local Whisper model
+  when YouTube answers 429, asks for a bot check or has no captions. Every
+  result says where the words came from (`source`: library, captions,
+  auto_captions or whisper), the `language`, and on any fallback a plain `why`.
+  It is a drop-in for the popular YouTube transcript MCP servers: same tool
+  name, `url` and `lang`, plus `include_timestamps` and `next_cursor` paging.
+  The MCP server now exposes 93 tools (36 in core mode, 9 in search mode).
+  See "Switching from a YouTube transcript MCP server" in
+  docs/connect-your-agent.md.
+- `UOINK_MCP_TOOLSET=search` serves a 9-tool set for clients with a tool
   limit, and `uoink connect <client> --toolset {full,core,search}` writes it
   into the client's config. Defaults are unchanged.
 
@@ -991,7 +1013,7 @@ The MCP server still exposes 35 tools over stdio.
   the latter a local write under `reach/briefs`), five `uoink://library/v1/`
   resource templates and four prompts; the HTTP/OpenAPI registry grows to 87
   with the four source-subscription tools and the same additions.
-  Contracts `phase3-v1`, `phase4-v1` and `phase5-v1` under `docs/library/`.
+  Contracts `phase3-v1`, `phase4-v1` and `phase5-v1` (internal design notes).
 - **`search_clips` and `get_evidence_card` on stdio.** The two Phase 1 clip
   tools join the curated stdio MCP surface (23 → 25 tools); they call the
   same handlers as the HTTP/OpenAPI registry and return the same shapes.

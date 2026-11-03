@@ -43,7 +43,7 @@ def test_controls_have_real_names() -> None:
 def test_cards_keyboard_activate_detail() -> None:
     for marker in (
         'class="uoink-card ${htmlEscape(variant)}"',
-        'tabindex="0" role="button" aria-label="Open ${title}"',
+        'tabindex="0" role="button" aria-label="Open ${title}${availabilityLabel ?',
         'class="insight-card"',
         'tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}"',
         'document.addEventListener("keydown", (event) => {',

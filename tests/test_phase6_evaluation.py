@@ -47,7 +47,8 @@ import _platform
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACT = ROOT / "docs/library/PHASE6-CONTRACT-2026-09-08.md"
+# The phase6-v1 contract froze Migration 0030; the shipped file is that DDL.
+MIGRATION_0030 = ROOT / "migrations" / "0030_media_depth.sql"
 FORBIDDEN_IMPORTS = {
     "server", "whisper_runner", "whisperx", "whisper", "faster_whisper",
     "torch", "torchaudio", "pyannote", "transformers", "openai", "anthropic",
@@ -209,9 +210,7 @@ def sandbox(monkeypatch, tmp_path):
 
 
 def _ddl():
-    text = CONTRACT.read_text(encoding="utf-8")
-    section = text.split("## Migration 0030\n", 1)[1].split("## Canonical data", 1)[0]
-    ddl = re.search(r"```sql\n(.*?)\n```", section, re.S).group(1) + "\n"
+    ddl = MIGRATION_0030.read_text(encoding="utf-8").strip() + "\n"
     creates = [stmt for stmt in index_mod._iter_sql_statements(ddl)
                if re.match(r"CREATE\b", stmt, re.I)]
     assert len(creates) == 7

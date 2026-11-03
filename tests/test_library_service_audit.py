@@ -1,7 +1,7 @@
 """Service audit, first pass (run K, 2026-09-04): Claude reading Astra's library_work.py.
 
 Frozen Python surface: PHASE2-RECONCILIATION-BRIEF-2026-09-04 (phase2-v1.1). Plan:
-docs/library/SERVICE-AUDIT-PLAN-2026-09-04.md. Findings: docs/library/SERVICE-AUDIT-2026-09-04.md.
+SERVICE-AUDIT-PLAN-2026-09-04 (internal note). Findings: SERVICE-AUDIT-2026-09-04 (internal note).
 
 Scope of this pass, per the brief: transaction boundaries (A1, A5, A6, A12), the three
 durable boundaries (B1, B3, B4, B6, B8), attempt-token and apply-key semantics (A2, A3, A4,
