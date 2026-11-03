@@ -15115,10 +15115,17 @@ class Handler(BaseHTTPRequestHandler):
         origin = self.headers.get("Origin")
         if not origin:
             return None
-        if origin in ALLOWED_ORIGINS:
-            return origin
-        if self._is_allowed_extension_origin(origin):
-            return origin
+        # Echo back our own copy of the allowed origin, never the request
+        # header, so nothing from the client reaches a response header.
+        for allowed in ALLOWED_ORIGINS:
+            if origin == allowed:
+                return allowed
+        match = re.fullmatch(r"(chrome|moz)-extension://([a-z0-9_-]+)", origin)
+        if match:
+            scheme = "chrome-extension" if match.group(1) == "chrome" else "moz-extension"
+            for ext_id in _allowed_extension_ids():
+                if match.group(2) == ext_id:
+                    return f"{scheme}://{ext_id}"
         return None
 
     def _send_cors(self, origin: str | None):
