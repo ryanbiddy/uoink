@@ -27,13 +27,13 @@ an existing config without replacing unrelated settings or servers.
 
 | Toolset | Tools | Use it when |
 |---|---|---|
-| `full` (default) | 92 | Claude Code, Claude Desktop, Codex and other clients without a tool cap. |
-| `core` | 35 | The client caps tools across servers. `uoink connect cursor` uses it by default. |
-| `search` | 8 | You want the library only: capture a link, search, read and cite. |
+| `full` (default) | 93 | Claude Code, Claude Desktop, Codex and other clients without a tool cap. |
+| `core` | 36 | The client caps tools across servers. `uoink connect cursor` uses it by default. |
+| `search` | 9 | You want the library only: capture a link, get a transcript, search, read and cite. |
 
-`search` serves `uoink_url`, `search_library`, `get_library_item`,
-`read_library_resource`, `search_clips`, `get_citation_map`,
-`list_recent_uoinks` and `uoink_note`. Cursor users have reported a limit of
+`search` serves `uoink_url`, `get_transcript`, `search_library`,
+`get_library_item`, `read_library_resource`, `search_clips`,
+`get_citation_map`, `list_recent_uoinks` and `uoink_note`. Cursor users have reported a limit of
 40 tools across all connected servers
 ([forum](https://forum.cursor.com/t/tools-limited-to-40-total/67976)), so with
 other servers connected even `core` can push tools out of view. Pick a toolset
@@ -149,6 +149,52 @@ Malformed or unreadable files report disconnected
 with a reason. Detection does not scan workspace configs or resolve Continue
 Hub references.
 
+## Switching from a YouTube transcript MCP server
+
+If you use [mcp-server-youtube-transcript](https://github.com/kimtaeyoon83/mcp-server-youtube-transcript)
+or [mcp-youtube-transcript](https://github.com/jkawamoto/mcp-youtube-transcript)
+and it fails with HTTP 429, "Could not find captions" or a bot check, Uoink's
+`get_transcript` is a drop-in. It has the same tool name and the same `url`
+and `lang` arguments, so prompts that say "get the transcript of <link>" keep
+working.
+
+1. Print the recipe for your client, for example
+   `uoink connect claude-desktop --toolset search` (or `core` or `full`).
+   All three toolsets include `get_transcript`.
+2. Add the `uoink` entry and remove (or disable) the old transcript server,
+   so the agent doesn't pick the broken one. Restart the client.
+
+| Their argument | Uoink | Notes |
+|---|---|---|
+| `url` | `url` | Watch, youtu.be, Shorts or embed URL, or a bare 11-character video ID. |
+| `lang` | `lang` | Default: English when YouTube has it, otherwise the spoken language. A missing language falls back to what's available and `why` says so. |
+| `include_timestamps` | `include_timestamps` | `[m:ss] text` lines, plus a `segments` list with start and end seconds. |
+| `next_cursor` | `next_cursor` | Long transcripts come in pages of about 40,000 characters. Pass back the returned `next_cursor` until it is `null`. |
+| `strip_ads` | accepted, ignored | Uoink returns every word. |
+
+Why it keeps working where they stop:
+
+1. **Library first.** If you already saved the video, the transcript comes
+   from disk with no network call (`source: "library"`, plus `transcribed_by`).
+   An earlier `get_transcript` result is also reused offline (`cached: true`).
+2. **Your own connection.** Captions are fetched by yt-dlp on your computer's
+   home connection, not a cloud IP. Uploader captions come before YouTube's
+   auto-captions (`source: "captions"` or `"auto_captions"`), and the spoken
+   language before machine translations, which YouTube rate-limits separately.
+3. **Local Whisper.** When YouTube answers 429, asks for a bot check, or has
+   no captions, Uoink downloads the audio and transcribes it with the bundled
+   Whisper model (`source: "whisper"`). This takes about 10 to 15 minutes per
+   hour of audio on a typical laptop.
+
+Every result carries `source`, `language` and a stable `reason` code. When a
+fallback ran, `why` explains it in one sentence, for example "YouTube returned
+429 (too many requests) for captions; transcribed locally with Whisper (base)
+in 3m 12s." When nothing works, the error says what each step hit instead of
+returning an empty transcript.
+
+`get_transcript` doesn't add the video to your library. Use `uoink_video` to
+save it with screenshots so search and citations can find it later.
+
 ## One launch command for any MCP client
 
 Uoink 3.12.1 and later add `uoink mcp`. It runs the same stdio server as
@@ -169,7 +215,7 @@ no install path:
 On Windows, the PATH command is `cli\uoink.cmd`. A client that starts commands
 without a shell cannot run a `.cmd` file; give it `"command": "cmd"` and
 `"args": ["/c", "uoink", "mcp"]` instead. For clients with tool caps, set
-`UOINK_MCP_TOOLSET=core` (35 tools) or `search` (8 tools) in the entry's
+`UOINK_MCP_TOOLSET=core` (36 tools) or `search` (9 tools) in the entry's
 environment, as with the recipes.
 Stdout carries only JSON-RPC; startup messages and logs go to stderr.
 
@@ -379,7 +425,7 @@ The dashboard's **Settings > Agents (MCP) > Agent connection** section offers
 **Add to Cursor** and **Add to VS Code**. They open each client's review flow
 with the current installation's absolute paths. Cursor receives the `core`
 toolset; `uoink connect cursor --deeplink --toolset search` prints a link with
-the 8-tool `search` set instead. The links contain paths, isolation arguments
+the 9-tool `search` set instead. The links contain paths, isolation arguments
 when active, and UTF-8 settings, with no API token. These commands only print the same links:
 
 ```powershell

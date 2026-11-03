@@ -1605,7 +1605,7 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-92 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
+93 tools (the two Phase 4 brief tools, `get_library_brief_input` and the
 local-write `publish_library_brief`, joined it on 2026-09-08, run AV-2; the
 read-only Phase 6 cited export `export_cited_range` joined it on 2026-09-08,
 run BC-2, and is also on stdio; `get_playbook_input` adds local research packets,
@@ -1624,10 +1624,10 @@ stdio-only; HTTP clients use this tool. The existing token gate still applies.
 consent checks, rate limits and standard error envelopes as stdio. See
 [discovery arguments and results](v2-mcp.md#discover_candidates).
 
-All 92 registry tools are also available over stdio by default in 3.13.0, with
+All 93 registry tools are also available over stdio by default since 3.13.0, with
 the same handlers and client schemas. Both MCP transports flatten the three
 top-level `oneOf` schemas for client compatibility; the server still validates
-the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps the earlier 35.
+the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps 36 core tools.
 
 The six Living Library work-queue tools added on 2026-09-04 (Phase 2 stage 1,
 contract `phase2-v1-2026-09-04`) are available on both HTTP and default stdio:

@@ -80,6 +80,7 @@ CORE_STDIO_TOOLS = (
     "get_library_brief_input",
     "publish_library_brief",
     "export_cited_range",
+    "get_transcript",
 )
 
 CANONICAL_STDIO_TOOLS = {
@@ -118,6 +119,7 @@ CANONICAL_STDIO_TOOLS = {
     "get_library_brief_input",
     "publish_library_brief",
     "export_cited_range",
+    "get_transcript",
     "list_library_work",
     "claim_library_work",
     "submit_library_result",
@@ -305,7 +307,7 @@ def test_stdio_handshake_under_embeddable_path_rules():
                     "stdio tool surface drift: "
                     f"missing={sorted(CANONICAL_STDIO_TOOLS - set(names))}, "
                     f"extra={sorted(set(names) - CANONICAL_STDIO_TOOLS)}")
-            _assert(tuple(names[:35]) == CORE_STDIO_TOOLS, "legacy tool order drift")
+            _assert(tuple(names[:36]) == CORE_STDIO_TOOLS, "legacy tool order drift")
             _assert(set(names) == set(uoink_registry_names()), "registry inventory drift")
             _assert(not REMOVED_STDIO_ALIASES.intersection(names),
                     f"removed aliases returned by tools/list: {names}")

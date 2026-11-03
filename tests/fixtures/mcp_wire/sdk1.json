@@ -1252,6 +1252,48 @@
     },
     {
       "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "description": "Get the transcript of one YouTube video, with honest provenance. Use when you need what a video says; use search_clips to find passages across saved items or uoink_video to save a video with screenshots. Order: the saved library copy (no network), then captions fetched on this computer's own connection, then local Whisper on the audio when YouTube refuses captions (429, bot check) or has none. Returns source (library, captions, auto_captions or whisper), language, a plain why on any fallback, and the text; long transcripts page with next_cursor. Nothing is added to the library.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "YouTube video URL (watch, youtu.be, Shorts, embed) or 11-character video ID."
+          },
+          "lang": {
+            "type": "string",
+            "description": "Preferred language code such as en, de or pt-BR. Default: English when YouTube has it, else the spoken language. Falls back to the available language and says so in why."
+          },
+          "include_timestamps": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, each line starts with [m:ss] and segments carries start/end seconds."
+          },
+          "next_cursor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Segment index from the previous response's next_cursor, to read the next page of a long transcript."
+          },
+          "strip_ads": {
+            "type": "boolean",
+            "description": "Accepted for compatibility with other transcript servers and ignored: Uoink returns every word."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "name": "get_transcript",
+      "title": "Get transcript"
+    },
+    {
+      "annotations": {
         "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false,

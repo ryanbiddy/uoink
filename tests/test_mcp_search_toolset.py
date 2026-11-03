@@ -1,4 +1,4 @@
-"""The opt-in 8-tool `search` toolset: registry, stdio, CLI and connect recipes."""
+"""The opt-in 9-tool `search` toolset: registry, stdio, CLI and connect recipes."""
 from __future__ import annotations
 
 import base64
@@ -16,24 +16,25 @@ import uoink_mcp_tools as tools
 from tests.test_c01_mcp_stdio import ROOT, _StdioClient, _isolated_env
 
 SEARCH = ("uoink_url", "search_library", "get_library_item", "read_library_resource",
-          "search_clips", "get_citation_map", "list_recent_uoinks", "uoink_note")
+          "search_clips", "get_citation_map", "list_recent_uoinks", "uoink_note",
+          "get_transcript")
 
 
 def test_search_inventory_is_small_known_and_leaves_other_sets_alone():
     names = tools.stdio_tool_names("search")
     assert names == SEARCH == tools.SEARCH_STDIO_TOOLS
-    assert len(set(names)) == 8 and set(names) <= tools.TOOL_REGISTRY.keys()
+    assert len(set(names)) == 9 and set(names) <= tools.TOOL_REGISTRY.keys()
     # Read and cite tools are read-only; the two capture tools are the only writers.
     writers = {n for n in names if not tools.TOOL_REGISTRY[n].annotations["readOnlyHint"]}
     assert writers == {"uoink_url", "uoink_note"}
     # Adding a toolset must not reorder or shrink the frozen ones.
     assert tools.stdio_tool_names("core") == tools.CORE_STDIO_TOOLS
-    assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY) == 92
+    assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY) == 93
     assert tools.STDIO_TOOLSETS == cli.TOOLSETS == ("full", "core", "search")
 
 
 def test_well_known_reports_the_search_count():
-    doc = openapi_bridge.build_well_known("http://127.0.0.1:18150", version="x", tool_count=92)
+    doc = openapi_bridge.build_well_known("http://127.0.0.1:18150", version="x", tool_count=93)
     assert doc["stdio_toolsets"]["search"] == len(tools.SEARCH_STDIO_TOOLS)
 
 
