@@ -298,12 +298,18 @@ def test_failure_backoff_preserved_on_reimport_then_final_failure(helper, monkey
     assert next(iter(registry().values()))["attempts"] == 0
 
 
-def test_x_capture_disabled_fails_without_extraction(helper, monkeypatch):
+def test_x_capture_disabled_waits_without_extraction(helper, monkeypatch):
     monkeypatch.setattr(server.x_extractor, "extract_x_thread", lambda _: pytest.fail("disabled X must not fetch"))
     server._list_import_start(stage("x_bookmarks", [X_URL]))
-    assert server._saves_capture_one(now=100)
+    assert not server._saves_capture_one(now=100)
     row = next(iter(registry().values()))
-    assert row["status"] == "failed" and row["error"] == "disabled"
+    assert row["status"] == "queued" and row.get("attempts", 0) == 0
+
+
+def test_stage_token_prefix_is_case_insensitive(helper):
+    token = stage("watch_later", ["dQw4w9WgXcQ"])
+    spec = li.classify(token.upper().replace("UOINK-SAVES:", "Uoink-Saves:"), data_root=server.DATA_ROOT)
+    assert spec["url"] == token.lower()
 
 
 def test_registry_cap_never_evicts_queued_posts(helper, monkeypatch):

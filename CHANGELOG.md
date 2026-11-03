@@ -19,8 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   can pass `file`, `items`, and `source` to the existing `import_list` tool.
   Preview and import up to 50 items at a time, then reuse the staged list token
   with `next_offset`. Already-saved items are skipped. X and Reddit posts
-  capture one at a time, at least 15 seconds apart; X requires text capture
-  to be enabled.
+  capture one at a time, at least 15 seconds apart; X posts wait in the
+  queue while X text capture is off.
 - Saved sources get polite weekly availability checks from your own machine:
   YouTube, X, Reddit, podcasts and web pages. Two matching checks confirm a
   source is gone. Runs make at most 25 requests, no more than once an hour,

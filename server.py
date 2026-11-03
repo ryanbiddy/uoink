@@ -14528,11 +14528,15 @@ def _saves_capture_one(now=None) -> bool:
         return False
     try:
         now = time.time() if now is None else float(now)
+        # X posts wait in the queue (not failed) while X text capture is off,
+        # so turning the setting back on resumes them.
+        x_enabled = bool((_read_settings() or {}).get("x_text_capture_enabled"))
         with list_imports._registry_lock:
             registry = list_imports.load_registry(DATA_ROOT)
             due = [(key, dict(row)) for key, row in registry["items"].items()
                    if row.get("kind") == "post" and row.get("status") == "queued"
-                   and (row.get("retry_after") or 0) <= now]
+                   and (row.get("retry_after") or 0) <= now
+                   and (x_enabled or row.get("source") != list_imports.SOURCE_X_BOOKMARKS)]
         if not due:
             return False
         key, item = min(due, key=lambda pair: pair[1].get("imported_at") or "")
@@ -14540,16 +14544,13 @@ def _saves_capture_one(now=None) -> bool:
         video_id = None
         try:
             if item["source"] == list_imports.SOURCE_X_BOOKMARKS:
-                if not (_read_settings() or {}).get("x_text_capture_enabled"):
-                    error = "disabled"
+                result = x_extractor.extract_x_thread(item["url"])
+                if result.get("ok"):
+                    video_id = _persist_x_thread(result)
+                    if video_id:
+                        _save_x_video_poster(video_id, result)
                 else:
-                    result = x_extractor.extract_x_thread(item["url"])
-                    if result.get("ok"):
-                        video_id = _persist_x_thread(result)
-                        if video_id:
-                            _save_x_video_poster(video_id, result)
-                    else:
-                        error = result.get("code") or "capture_failed"
+                    error = result.get("code") or "capture_failed"
             elif item["source"] == list_imports.SOURCE_REDDIT_SAVED:
                 result = reddit_extractor.extract_reddit_thread(item["url"])
                 if result.get("ok"):
@@ -14567,11 +14568,16 @@ def _saves_capture_one(now=None) -> bool:
             error = "capture_failed"
         with list_imports._registry_lock:
             data = json.loads(json.dumps(list_imports.load_registry(DATA_ROOT)))
-            row = data["items"][key]
+            row = data["items"].get(key)
+            if row is None:
+                # The registry changed under us (unreadable or rewritten);
+                # never write back a view that lost the other items.
+                log.warning("saves capture: registry row %s vanished; not saving", key)
+                return True
             attempts = row.get("attempts", 0) + 1
             row.update(attempts=attempts, error=error)
             if error:
-                row["status"] = "failed" if attempts >= 3 or error == "disabled" else "queued"
+                row["status"] = "failed" if attempts >= 3 else "queued"
                 row["retry_after"] = now + _SAVES_BACKOFF[min(attempts - 1, 2)]
             else:
                 row.update(status="captured", captured_video_id=video_id, retry_after=0, applied=True)

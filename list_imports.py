@@ -102,7 +102,7 @@ REGISTRY_ITEM_CAP = 5000
 SAVES_STAGE_MAX = 5000
 SAVES_STAGE_CAP = 20
 SAVES_FILE_MAX_BYTES = 5 * 1024 * 1024
-_STAGE_TOKEN_RE = re.compile(r"uoink-saves:([0-9a-fA-F]{16})")
+_STAGE_TOKEN_RE = re.compile(r"uoink-saves:([0-9a-f]{16})", re.IGNORECASE)
 _stage_lock = threading.Lock()
 USER_AGENT = "uoink/1.0 (local corpus tool; +https://uoink.app)"
 
