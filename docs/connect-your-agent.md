@@ -23,6 +23,30 @@ running helper. Location, documentation status, sources and check date go to
 stderr. Stdout contains the config, command or setup steps. Merge entries into
 an existing config without replacing unrelated settings or servers.
 
+### Choosing a toolset
+
+| Toolset | Tools | Use it when |
+|---|---|---|
+| `full` (default) | 92 | Claude Code, Claude Desktop, Codex and other clients without a tool cap. |
+| `core` | 35 | The client caps tools across servers. `uoink connect cursor` uses it by default. |
+| `search` | 8 | You want the library only: capture a link, search, read and cite. |
+
+`search` serves `uoink_url`, `search_library`, `get_library_item`,
+`read_library_resource`, `search_clips`, `get_citation_map`,
+`list_recent_uoinks` and `uoink_note`. Cursor users have reported a limit of
+40 tools across all connected servers
+([forum](https://forum.cursor.com/t/tools-limited-to-40-total/67976)), so with
+other servers connected even `core` can push tools out of view. Pick a toolset
+when printing a recipe:
+
+```powershell
+uoink connect cursor --toolset search
+uoink connect claude-code --toolset search
+```
+
+The recipe sets `UOINK_MCP_TOOLSET` in the entry's environment; `full` sets
+nothing. `uoink call` still reaches every registry tool whatever the toolset.
+
 **Verified docs: Yes** means the linked official documentation establishes the
 printed format or UI route. For Ollama, Obsidian, Make and Zapier it describes
 the documented route or limit, not an MCP config file. Every client connection
@@ -145,7 +169,8 @@ no install path:
 On Windows, the PATH command is `cli\uoink.cmd`. A client that starts commands
 without a shell cannot run a `.cmd` file; give it `"command": "cmd"` and
 `"args": ["/c", "uoink", "mcp"]` instead. For clients with tool caps, set
-`UOINK_MCP_TOOLSET=core` in the entry's environment, as with the recipes.
+`UOINK_MCP_TOOLSET=core` (35 tools) or `search` (8 tools) in the entry's
+environment, as with the recipes.
 Stdout carries only JSON-RPC; startup messages and logs go to stderr.
 
 The client must see `uoink` on its PATH. On Windows, leave the installer's
@@ -353,8 +378,9 @@ recipes. A local skill or file does not give a cloud runner access to this host.
 The dashboard's **Settings > Agents (MCP) > Agent connection** section offers
 **Add to Cursor** and **Add to VS Code**. They open each client's review flow
 with the current installation's absolute paths. Cursor receives the `core`
-toolset. The links contain paths, isolation arguments when active, and UTF-8
-settings, with no API token. These commands only print the same links:
+toolset; `uoink connect cursor --deeplink --toolset search` prints a link with
+the 8-tool `search` set instead. The links contain paths, isolation arguments
+when active, and UTF-8 settings, with no API token. These commands only print the same links:
 
 ```powershell
 uoink connect cursor --deeplink
@@ -411,6 +437,7 @@ uoink get "ITEM_ID_FROM_SEARCH"
 uoink note "A useful thought" --title "Research note"
 uoink capture "https://example.com/article"
 uoink tools --toolset full --json
+uoink tools --toolset search
 uoink call search_library query="working memory" limit=5
 uoink call search_library --args-file .\arguments.json
 ```

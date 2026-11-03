@@ -3848,6 +3848,21 @@ CORE_STDIO_TOOLS = (
 )
 
 
+# Smallest toolset: capture a link, find it, cite it. For clients that cap or
+# crowd the tool list (Cursor users report a 40-tool limit across servers) and
+# for users who only want "ask my library". Opt in with UOINK_MCP_TOOLSET=search.
+STDIO_TOOLSETS = ("full", "core", "search")
+SEARCH_STDIO_TOOLS = (
+    "uoink_url",
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
+    "search_clips",
+    "get_citation_map",
+    "list_recent_uoinks",
+    "uoink_note",
+)
+
 DESCRIPTIONS = {
     "uoink_video": "Capture one YouTube video into a saved Markdown corpus with screenshots. Use for a single video; use uoink_playlist for a batch or uoink_url for other supported video platforms and long-video modes. Runs synchronously and needs the local media runtime. Returns the saved corpus and file paths; failures can leave partial capture files. Recapturing a source can replace its saved corpus and metadata.",
     "uoink_playlist": "Start a background capture job for the videos in a YouTube playlist. Use for a one-time batch; use add_monitored_playlist for ongoing metadata monitoring or uoink_video for one video. Returns a job_id for get_job_status and cancel_job. Requires the local media runtime; the job can produce partial outputs before completion or cancellation. Recapturing a source can replace its saved corpus and metadata.",
@@ -6132,13 +6147,17 @@ def _label_untrusted(name: str, result: Any) -> Any:
 
 
 def stdio_tool_names(toolset: str = "full") -> tuple[str, ...]:
-    """Full registry, with the v3.9.1 prefix preserved; core is opt-in."""
+    """Full registry, with the v3.9.1 prefix preserved; core and search are opt-in."""
     if len(CORE_STDIO_TOOLS) != 35 or len(set(CORE_STDIO_TOOLS)) != 35:
         raise RuntimeError("Invalid core stdio inventory")
     if not set(CORE_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
         raise RuntimeError("Core stdio tool missing from registry")
     if toolset == "core":
         return CORE_STDIO_TOOLS
+    if toolset == "search":
+        if len(set(SEARCH_STDIO_TOOLS)) != 8 or not set(SEARCH_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
+            raise RuntimeError("Invalid search stdio inventory")
+        return SEARCH_STDIO_TOOLS
     return CORE_STDIO_TOOLS + tuple(name for name in TOOL_REGISTRY if name not in CORE_STDIO_TOOLS)
 
 

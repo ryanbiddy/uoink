@@ -73,7 +73,7 @@ CLIENTS = {
                              "https://modelcontextprotocol.io/docs/develop/connect-local-servers",
                              mac_location="~/Library/Application Support/Claude/claude_desktop_config.json"),
     "cursor": recipe("json", "~/.cursor/mcp.json", "https://cursor.com/docs/mcp",
-                     note="Uses UOINK_MCP_TOOLSET=core to reduce the tool count."),
+                     note="Uses UOINK_MCP_TOOLSET=core to reduce the tool count. Add --toolset search for 8 tools."),
     "codex": recipe("toml", "~/.codex/config.toml", "https://developers.openai.com/codex/mcp", "mcp_servers",
                     note="Use CODEX_HOME/config.toml if you set CODEX_HOME."),
     "gemini": recipe("json", "~/.gemini/settings.json", "https://geminicli.com/docs/tools/mcp-server/"),
@@ -269,7 +269,12 @@ def python_command(app_dir: Path) -> Path:
     return (bundled if bundled.is_file() else Path(sys.executable)).resolve()
 
 
-def server_entry(client: str, app_dir: Path, python: Path, isolation_args=()) -> dict:
+def default_toolset(client: str) -> str:
+    """Cursor caps tools across all servers, so it gets core unless overridden."""
+    return "core" if client == "cursor" else "full"
+
+
+def server_entry(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=None) -> dict:
     command = str(python.resolve())
     args = [str((app_dir / "uoink_mcp.py").resolve()), *isolation_args]
     if sys.platform == "darwin":
@@ -277,13 +282,14 @@ def server_entry(client: str, app_dir: Path, python: Path, isolation_args=()) ->
         command = str(python_command(resources))
         args = ["-B", "-s", str(resources / "uoink_mcp.py"), *isolation_args]
     env = {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
-    if client == "cursor":
-        env["UOINK_MCP_TOOLSET"] = "core"
+    toolset = toolset or default_toolset(client)
+    if toolset != "full":
+        env["UOINK_MCP_TOOLSET"] = toolset
     return {"command": command, "args": args, "env": env}
 
 
-def deeplink(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
-    entry = server_entry(client, app_dir, python, isolation_args)
+def deeplink(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=None) -> str:
+    entry = server_entry(client, app_dir, python, isolation_args, toolset)
     if client == "cursor":
         config = base64.b64encode(json.dumps(entry, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).decode("ascii")
         return "cursor://anysphere.cursor-deeplink/mcp/install?" + urlencode({"name": "uoink", "config": config})
@@ -292,10 +298,10 @@ def deeplink(client: str, app_dir: Path, python: Path, isolation_args=()) -> str
     raise ValueError("deeplinks require cursor or vscode")
 
 
-def render(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
+def render(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=None) -> str:
     require_platform(client)
     spec = client_spec(client)
-    entry = server_entry(client, app_dir, python, isolation_args)
+    entry = server_entry(client, app_dir, python, isolation_args, toolset)
     command, args, env = entry["command"], entry["args"], entry["env"]
     if spec.format == "text":
         launcher = str((app_dir / "cli" / "uoink.cmd").resolve())
@@ -312,7 +318,8 @@ def render(client: str, app_dir: Path, python: Path, isolation_args=()) -> str:
         # PowerShell single quotes preserve spaces, $, backticks and apostrophes.
         quote = (lambda s: "'" + s.replace("'", "''") + "'") if sys.platform == "win32" else shlex.quote
         return ("claude mcp add --scope user "
-                "-e PYTHONIOENCODING=utf-8 -e PYTHONUTF8=1 --transport stdio uoink -- "
+                + "".join(f"-e {key}={value} " for key, value in env.items())
+                + "--transport stdio uoink -- "
                 + " ".join(quote(s) for s in [command, *args]))
     if spec.format == "crushrc":
         return shlex.join(["mcp", "add", "uoink", "--command", command, "--args", *args,
