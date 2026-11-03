@@ -25,7 +25,7 @@ import uoink_install_isolation as isolation  # noqa: E402
 
 
 # Mirrors uoink_mcp_tools.STDIO_TOOLSETS without importing the registry at parse time.
-TOOLSETS = ("full", "core", "search")
+TOOLSETS = ("full", "core", "search", "research")
 
 
 class UsageError(ValueError):
@@ -80,7 +80,7 @@ def parser():
     connect.add_argument("--list", action="store_true")
     connect.add_argument("--deeplink", action="store_true", help="print a Cursor or VS Code install link")
     connect.add_argument("--toolset", choices=TOOLSETS, default=None,
-                         help="tools to serve: full (92), core (35) or search (8); default full, core for Cursor")
+                         help="tools to serve: full (94), core (35), search (8) or research (3); default full, core for Cursor")
     skill = command("skill")
     skill_sub = skill.add_subparsers(dest="skill_command", required=True)
     skill_sub.add_parser("path")
@@ -95,7 +95,7 @@ def parser():
                    formatter_class=argparse.RawDescriptionHelpFormatter,
                    description="Run the stdio MCP server in this process, the same server as uoink_mcp.py.\n"
                                "Stdout carries only JSON-RPC; logs and warnings go to stderr.\n"
-                               "UOINK_MCP_TOOLSET=core or search serves a smaller toolset (default: full).",
+                               "UOINK_MCP_TOOLSET=core, search or research serves a smaller toolset (default: full).",
                    epilog='Client config: "command": "uoink", "args": ["mcp"]\n'
                           'Windows clients that cannot start .cmd files: "command": "cmd", '
                           '"args": ["/c", "uoink", "mcp"]')

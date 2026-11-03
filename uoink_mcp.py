@@ -8,13 +8,14 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The default full toolset serves all 92 tools in TOOL_REGISTRY, with the same
+The default full toolset serves all 94 tools in TOOL_REGISTRY, with the same
 names, descriptions, schemas, titles and annotations; three schemas with a
 top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
 serves the previous 35 tools. Those tools remain first, in their original
 order, in full mode. UOINK_MCP_TOOLSET=search serves 8 tools (capture a link,
 search, read, cite) for clients that cap or crowd the tool list. Unknown
-toolset values warn on stderr and use full.
+toolset values warn on stderr and use full. UOINK_MCP_TOOLSET=research serves
+research tools plus uoink_url (3 tools).
 
 All handlers use the shared registry's consent and safety checks. No tools
 are excluded from stdio. Dashboard intent minting is never an MCP tool;
@@ -27,7 +28,7 @@ Bounded Library admission stays alive through the concrete SDK JSON-RPC
 dump, write and flush. Other registry tools run on the
 event loop one at a time, as in v3.9.1, because they share the Index
 connection with Library reads; a long capture holds the session until it
-returns. Paid discovery runs in a worker thread, as in v3.9.1.
+returns. Paid discovery and research discovery run in worker threads.
 """
 
 from __future__ import annotations
@@ -152,7 +153,7 @@ uoink_mcp_tools.bind_backend(server)
 def _selected_toolset() -> str:
     value = os.environ.get("UOINK_MCP_TOOLSET", "full")
     if value not in uoink_mcp_tools.STDIO_TOOLSETS:
-        print("Uoink MCP: unknown UOINK_MCP_TOOLSET; using full (expected full, core or search).",
+        print("Uoink MCP: unknown UOINK_MCP_TOOLSET; using full (expected full, core, search or research).",
               file=sys.stderr)
         return "full"
     return value
@@ -182,13 +183,12 @@ class RegistryMCP(Server):
     async def call_tool(self, name, arguments):
         if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):
             envelope = {"ok": False, "error": "tool not found"}
-        elif name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES:
-            # Paid discovery has its own 8 s/page timeout, not the 2 s
-            # library-read deadline. Keep stdio responsive to other calls
-            # and cancellation while the bounded worker finishes (as in v3.9.1).
+        elif name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES or name == "research_discover":
+            # Discovery uses bounded network/subprocess work. Keep stdio
+            # responsive to other calls and cancellation while it finishes.
             state = _active_stdio_request.get()
             if state is not None:
-                # Peer cancellation cannot stop a paid worker thread. AnyIO
+                # Peer cancellation cannot stop a discovery worker thread. AnyIO
                 # waits for that worker before the unanswered callback settles
                 # the request, keeping its ID reserved throughout the work.
                 envelope = await anyio.to_thread.run_sync(uoink_mcp_tools.call_tool, name, arguments)

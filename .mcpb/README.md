@@ -21,7 +21,7 @@ does not prove Claude Code installation or any current CLI capability.
    Settings → Extensions**).
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
-4. Restart Claude Desktop. The 92 stdio tools, five library resource
+4. Restart Claude Desktop. The 94 stdio tools, five library resource
    templates, and nine prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
@@ -62,11 +62,11 @@ see https://uoink.app/developers. For **Claude Code CLI**, do not use this
 
 ## What stdio advertises
 
-The launched child is `uoink_mcp.py`. On stdio it advertises **92 tools**,
+The launched child is `uoink_mcp.py`. On stdio it advertises **94 tools**,
 **five resource templates**, and **nine prompts**. HTTP MCP stays tools-only
 and is not what this bundle launches.
 
-The committed [manifest](manifest.json) lists all 92 names. The previous 35
+The committed [manifest](manifest.json) lists all 94 names. The previous 35
 remain first in `tools/list`. Set `UOINK_MCP_TOOLSET=core` for clients with tool
 caps, including Cursor. Unknown values warn on stderr and use full.
 Claude Desktop users should reinstall the 3.13.0 `.mcpb` and restart Desktop
@@ -78,7 +78,7 @@ its `@` picker. Claude Code CLI 2.1.261 has no native resource reader; that
 client uses `read_library_resource(uri)` instead
 ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)).
 
-### 92 tools
+### 94 tools
 
 **Legacy (25)**
 
@@ -201,6 +201,13 @@ client uses `read_library_resource(uri)` instead
 | `list_allowed_sites` | List allowed sites. |
 | `add_allowed_site` | Add allowed site. |
 | `remove_allowed_site` | Remove allowed site. |
+
+**Research runs and discovery (2)**
+
+| Tool | Role |
+|---|---|
+| `research_start` | Save a research question, scope and budgets; report missing network consent. |
+| `research_discover` | Search consented sources and save a ranked candidate pool. |
 
 ### Five resource templates (`uoink://library/v1/`)
 

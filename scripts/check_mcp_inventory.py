@@ -27,10 +27,12 @@ def literal_pin(path: str, name: str):
 
 def check() -> None:
     names = tools.stdio_tool_names()
-    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 92
+    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 94
     assert names[:35] == tools.CORE_STDIO_TOOLS
     assert tools.stdio_tool_names("core") == tools.CORE_STDIO_TOOLS
     assert len(set(tools.SEARCH_STDIO_TOOLS)) == 8 and set(tools.SEARCH_STDIO_TOOLS) <= set(names), "search toolset drift"
+    research = tuple(n for n in tools.TOOL_REGISTRY if n.startswith("research_")) + ("uoink_url",)
+    assert tools.stdio_tool_names("research") == research and len(research) <= 10
     doc = (ROOT / "docs/v2-mcp.md").read_text(encoding="utf-8")
     headings = re.findall(r"^### ([a-z][a-z_]+)$", doc, re.M)
     assert len(headings) == len(names) and set(headings) == set(names), "tool reference drift"
@@ -61,7 +63,7 @@ def check() -> None:
                 text = text[:releases[1].start()]
         counts = [int(n) for n in re.findall(pattern, text, re.I)]
         assert counts and all(n == len(names) for n in counts), (path, counts)
-    print(f"MCP inventory OK: full={len(names)}, core=35, search=8; docs, bundle, receipt and metadata agree")
+    print(f"MCP inventory OK: full={len(names)}, core=35, search=8, research={len(research)}; docs, bundle, receipt and metadata agree")
 
 
 if __name__ == "__main__":

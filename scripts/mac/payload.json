@@ -38,6 +38,7 @@
     "media_handoff.py",
     "memory_layer.py",
     "list_imports.py",
+    "research.py",
     "migrate_install.py",
     "migrations",
     "mobile_playlists.py",

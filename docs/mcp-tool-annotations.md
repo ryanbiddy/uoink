@@ -1,6 +1,6 @@
 # MCP tool annotations
 
-All 92 stdio tools have a title and explicit MCP hints. HTTP tools with the same
+All 94 stdio tools have a title and explicit MCP hints. HTTP tools with the same
 names carry identical titles and hints in `uoink_mcp_tools.TOOL_REGISTRY`.
 
 Hints describe successful calls and their possible effects, including queued
@@ -43,6 +43,8 @@ saved analysis, transcripts or published corpora also use `destructiveHint=true`
 | `read_library_resource` | Read library resource | true | false | true | false | Reads a bounded local library resource. |
 | `get_library_brief_input` | Prepare library brief input | true | false | true | false | Reads and hashes brief inputs without acquiring a lease or changing data. |
 | `publish_library_brief` | Publish library brief | false | false | true | false | Creates an immutable local brief; submission_key deduplicates retries. |
+| `research_start` | Start a research run | false | false | false | false | Creates a local run; performs no network requests. |
+| `research_discover` | Discover research sources | false | false | false | true | Searches consented sources and saves candidates and query history. |
 | `export_cited_range` | Export cited transcript range | true | false | true | false | Returns stored cues and citations without fetching, transcribing or saving. |
 | `get_playbook_input` | Prepare research playbook input | true | false | true | false | Reads local research evidence and computes metrics; no model, network or writes. |
 | `discover_candidates` | Discover capture candidates | false | false | false | true | Spends confirmed ScrapeCreators credits and saves candidates; requires enabled discovery and agent consent or a dashboard intent. |

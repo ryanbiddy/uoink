@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink serves the same tool registry over both MCP transports:
 
-- Supported stdio registry: **92 tools**.
-- Local HTTP/OpenAPI registry: **92 tools**.
+- Supported stdio registry: **94 tools**.
+- Local HTTP/OpenAPI registry: **94 tools**.
 
 Stdio uses the SDK's native dual-era runner. Existing clients can initialize
 with `2024-11-05`, `2025-03-26`, `2025-06-18` or `2025-11-25`, then send
@@ -87,7 +87,7 @@ still answer.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all
-92 schemas fit; inbound requests and tool results retain their existing caps.
+94 schemas fit; inbound requests and tool results retain their existing caps.
 Work-queue mutations use their service's lease, transaction and operation-key
 bounds; they do not inherit a read timeout that could abandon a committed write.
 
@@ -1657,3 +1657,49 @@ Arguments: `url_pattern`. The registry schema in `tools/list` defines required f
 Remove a hostname or wildcard pattern from the allowlist.
 
 Arguments: `url_pattern`. The registry schema in `tools/list` defines required fields and bounds.
+
+### research_start
+
+Save a local research run for a question. Returns `run_id`, normalized `scope`
+and `needs_consent`. The question is required (1–500 characters); defaults are
+12 sources and 120 ASR minutes. Source choices are `library`, `youtube`,
+`podcast`, `hn`, `hackertube` and `reddit`; the default excludes Reddit.
+Only settings can grant network consent through `research_network_sources`
+(default `[]`). Starting a run makes no network requests.
+
+Arguments: `question`, `max_sources`, `source_kinds`, `since`, `max_asr_minutes`. The registry schema in `tools/list` defines required fields and bounds.
+
+### research_discover
+
+Search a saved run using 1–8 queries, each at most 200 characters. Returns up to
+twice `max_sources` candidates, merged with prior discoveries by stable key.
+Each candidate includes metadata, source signals, a deterministic score with
+`why_ranked`, and an estimated capture cost. BM25 relevance, HN points, length,
+library/caption availability and HackerTube quality contribute to ranking.
+When `since` is set, known older items are dropped and recency adds a bonus;
+unknown publication dates remain eligible. At most three candidates per named
+channel are returned; candidates without a channel are exempt. `capped_by_channel`
+counts channel drops across the full saved pool, before the response limit.
+
+Library search runs first. Network sources without settings consent are skipped
+with `needs_consent`; Reddit always reports `reddit_search_off_in_mvp`.
+Each call makes at most four iTunes searches, spaced by three seconds, and
+fetches the HackerTube listing once. Query failures appear in `errors` with their
+source and query; later queries continue unless the source is rate limited.
+`by_source` counts distinct matches before
+ranking and caps. HN podcast links and iTunes episodes without audio URLs are
+marked `capturable: false`. HackerTube candidates retain their ODC-By credit.
+HN discovery extracts YouTube links from story URLs and story text.
+HN comment mining is not yet supported.
+
+The call saves candidates and query history in
+`DATA_ROOT/research/<run_id>/run.json`. `candidates_pool` retains up to 500 entries
+by score before channel and response limits. Ranking uses all queries from the
+run's discovery history. YouTube matches already in the library are marked
+`in_library` even when library search is disabled.
+Large responses return a shorter ranked list to fit the MCP response limit;
+`omitted_candidates` counts entries removed from that call's shortlist for size.
+Titles and descriptions are untrusted content. Discovery captures nothing.
+The `research` stdio toolset includes these two tools and `uoink_url`.
+
+Arguments: `run_id`, `queries`, `per_query`. The registry schema in `tools/list` defines required fields and bounds.

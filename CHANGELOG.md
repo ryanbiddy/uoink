@@ -10,6 +10,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added — Deep research, part 1: research runs and source discovery
+
+- `research_start` saves a question, source choices and budgets in a local run.
+  `research_discover` merges library, YouTube, HN, HackerTube and podcast results,
+  ranks them with score explanations, and limits each channel to three candidates.
+- `UOINK_MCP_TOOLSET=research` serves these two tools plus `uoink_url`.
+  The MCP server now exposes 94 tools in the full toolset; core keeps its 35-tool order.
+- Network discovery requires the user's `research_network_sources` setting,
+  which defaults to `[]`. Research tools cannot grant consent. Reddit search is
+  deferred; capture, evidence retrieval and reports follow in later parts.
+
 ### Added
 
 - `UOINK_MCP_TOOLSET=search` serves an 8-tool set for clients with a tool

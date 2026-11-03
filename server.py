@@ -109,6 +109,7 @@ import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
+import research  # noqa: E402  -- Research run storage and source discovery
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
@@ -1030,6 +1031,7 @@ def _default_settings() -> dict:
         "scrapecreators_enabled": False,
         "scrapecreators_agent_calls_enabled": False,
         "scrapecreators_daily_credit_cap": 25,
+        "research_network_sources": [],
         "scrapecreators_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
@@ -1174,6 +1176,7 @@ def _normalize_settings(data: dict) -> dict:
     clean = _default_settings()
     if isinstance(data, dict):
         clean.update(data)
+    clean["research_network_sources"] = research.normalize_consent(clean.get("research_network_sources"))
     clean.pop("anthropic_key", None)
     clean.pop("scrapecreators_key", None)
     clean.pop("relay_token", None)
@@ -1698,6 +1701,7 @@ def _public_settings(data: dict | None = None) -> dict:
         "scrapecreators_enabled": data.get("scrapecreators_enabled") is True,
         "scrapecreators_agent_calls_enabled": data.get("scrapecreators_agent_calls_enabled") is True,
         "scrapecreators_daily_credit_cap": normalized["scrapecreators_daily_credit_cap"],
+        "research_network_sources": normalized["research_network_sources"],
         "scrapecreators_key_set": bool(_get_saved_scrapecreators_key()),
         "scrapecreators_key_invalid": data.get("scrapecreators_key_invalid") is True,
         # Tier 2 dashboard Settings tab additions:
@@ -4324,7 +4328,11 @@ def _is_youtube_ytdlp_call(cmd: list[str]) -> bool:
     if cmd[:len(YTDLP_CMD)] != YTDLP_CMD:
         return False
     for arg in cmd[len(YTDLP_CMD):]:
-        if not isinstance(arg, str) or not arg.lower().startswith(("http://", "https://")):
+        if not isinstance(arg, str):
+            continue
+        if re.match(r"^ytsearch(?:date)?\d*:", arg):
+            return True
+        if not arg.lower().startswith(("http://", "https://")):
             continue
         try:
             host = (urlparse(arg).hostname or "").lower().rstrip(".")
@@ -14004,6 +14012,82 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
 _LIST_IMPORT_INTERVAL_SEC = 30
 
 
+def _research_ytsearch(query: str, n: int) -> dict:
+    if not _platform.media_capability()["available"]:
+        raise research.ResearchError("YouTube search needs the local media tools.", "unavailable")
+    try:
+        cp = _run_subprocess(
+            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", "--", f"ytsearch{n}:{query}"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", timeout=COMMENTS_TIMEOUT_SEC)
+        return json.loads(cp.stdout)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired,
+            json.JSONDecodeError, OSError) as error:
+        code = "rate_limited" if _is_rate_limit_error(error) else "fetch_failed"
+        raise research.ResearchError("YouTube search could not complete.", code) from None
+
+
+def _research_library_search(query: str, limit: int) -> list[dict]:
+    # Obtain the shared index in this worker; search_mode and get_yoink use
+    # the Index's locked methods/snapshots rather than a raw shared connection.
+    rows = _get_index().search_mode(query, limit, mode="auto", passages=False)["results"]
+    out = []
+    for row in rows:
+        try:
+            metadata = json.loads(row.get("metadata_json") or "{}")
+        except (ValueError, TypeError):
+            metadata = {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+        out.append({
+            "video_id": row.get("video_id"), "title": row.get("title"),
+            "channel": row.get("channel"),
+            "duration": row.get("duration_seconds") or metadata.get("duration_seconds") or metadata.get("duration"),
+            "source_url": row.get("source_url") or metadata.get("source_url"),
+            "url": row.get("url") or metadata.get("url"),
+            "enclosure_url": (metadata.get("enclosure_url") or metadata.get("audio_url")
+                              or metadata.get("episodeUrl")),
+            "published": row.get("published") or metadata.get("published") or metadata.get("upload_date"),
+            "description": metadata.get("description"),
+        })
+    return out
+
+
+def _research_start(args: dict) -> dict:
+    run = research.create_run(DATA_ROOT, args)
+    consent = research.normalize_consent(_read_settings().get("research_network_sources"))
+    return {"ok": True, "run_id": run["run_id"], "scope": run["scope"],
+            "needs_consent": [k for k in run["scope"]["source_kinds"]
+                              if k in research.NETWORK_KINDS and k not in consent]}
+
+
+def _research_discover(args: dict) -> dict:
+    args = research.normalize_discovery(args)
+    run = research.load_run(DATA_ROOT, args["run_id"])
+    collected = research.collect(
+        run, args["queries"], args["per_query"],
+        fetchers={"library": _research_library_search, "youtube": _research_ytsearch},
+        consented_kinds=_read_settings().get("research_network_sources", []))
+    # Fetches hold no run/store lock. Reload inside this run's merge lock so
+    # concurrent discoveries keep each other's candidates and query history.
+    with research.run_lock(args["run_id"]):
+        run = research.load_run(DATA_ROOT, args["run_id"])
+        now = research.timestamp()
+        merged = research.merge_candidates([
+            *run.get("candidates_pool", run.get("candidates", [])), *collected["candidates"]])
+        library_ids = {c["key"][3:] for c in merged
+                       if c["key"].startswith("yt:") and _list_import_in_library(c["key"][3:])}
+        result = research.merge_and_rank(
+            run, collected, args["queries"], library_ids=library_ids,
+            now=datetime.fromisoformat(now.replace("Z", "+00:00")))
+        run["candidates"] = result["candidates"]
+        run["candidates_pool"] = result.pop("candidates_pool")
+        run["discover_calls"].append({"queries": args["queries"], "timestamp": now,
+                                      "per_query": args["per_query"]})
+        research.save_run(DATA_ROOT, run)
+    return {"ok": True, "run_id": run["run_id"], **result}
+
+
 def _list_import_ytdlp(url: str, start: int, end: int) -> dict:
     """List one window of a YouTube playlist with yt-dlp's flat mode."""
     capability = _platform.media_capability()
@@ -17630,6 +17714,7 @@ class Handler(BaseHTTPRequestHandler):
         integer_fields = ("clipboard_screenshot_cap", "scrapecreators_daily_credit_cap",
                           "relay_poll_minutes")
         extra_fields = ("output_dir", "autostart", "topics",
+                         "research_network_sources",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
                          "live_stream_behavior",  # v3.1 live
@@ -17681,6 +17766,8 @@ class Handler(BaseHTTPRequestHandler):
                     "error": "anthropic_key is too long",
                 })
 
+        if "research_network_sources" in body and not isinstance(body["research_network_sources"], list):
+            return self._send_json(400, {"ok": False, "error": "research_network_sources must be a list"})
         if "scrapecreators_daily_credit_cap" in body:
             cap = body["scrapecreators_daily_credit_cap"]
             if type(cap) is not int or not 1 <= cap <= 500:
@@ -17712,6 +17799,8 @@ class Handler(BaseHTTPRequestHandler):
                                            "characters with no spaces, or null to clear")})
 
         data = _read_settings()
+        if "research_network_sources" in body:
+            data["research_network_sources"] = research.normalize_consent(body["research_network_sources"])
         if "scrapecreators_daily_credit_cap" in body:
             data["scrapecreators_daily_credit_cap"] = body["scrapecreators_daily_credit_cap"]
         if "scrapecreators_key" in body:
