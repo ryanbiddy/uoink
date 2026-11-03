@@ -1,8 +1,8 @@
 """Living Library Phase 2 stage 1 (run J, 2026-09-04): adapter, transport
 parity, default-off apply, /health and user-intent route tests.
 
-Written against the frozen contract (docs/library/PHASE2-CONTRACT-2026-09-04.md,
-docs/library/phase2-contract/tool-schemas.json) with the deterministic
+Written against the frozen contract (PHASE2-CONTRACT-2026-09-04 (internal note),
+tests/fixtures/phase2-contract/tool-schemas.json) with the deterministic
 stand-in in tests/library_service_fake.py injected through the one seam,
 uoink_mcp_tools.set_library_service. No sockets, no subprocesses, no model,
 no network, and the live index is never opened: server._get_index is replaced
@@ -10,7 +10,7 @@ by a sentinel in every test that reaches the request context.
 
 The stand-in is fixture evidence for the ADAPTERS only. It certifies nothing
 about library_work.py; Gemini's tests/test_library_work_*.py and the service
-audit (docs/library/SERVICE-AUDIT-PLAN-2026-09-04.md) cover that.
+audit (SERVICE-AUDIT-PLAN-2026-09-04 (internal note)) cover that.
 """
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ from library_service_fake import (  # noqa: E402
 )
 
 CONTRACT = json.loads(
-    (ROOT / "docs" / "library" / "phase2-contract" / "tool-schemas.json").read_text(encoding="utf-8")
+    (ROOT / "tests" / "fixtures" / "phase2-contract" / "tool-schemas.json").read_text(encoding="utf-8")
 )
 HASH = "a" * 64
 TOKEN43 = "A" * 43
@@ -187,7 +187,7 @@ def test_registry_schemas_are_the_frozen_contract_file():
             "application/json"]["schema"]
         assert published is tools.TOOL_REGISTRY[name].input_schema
     json.dumps(spec)
-    assert len(tools.TOOL_REGISTRY) == 92  # 77 + four Phase 3 source tools + one Phase 5 activity tool + three Phase 4 read tools + two Phase 4 brief tools + one Phase 6 export tool (BC-2), +1 local playbook input (T3), +1 import_list
+    assert len(tools.TOOL_REGISTRY) == 93  # 77 + four Phase 3 source tools + one Phase 5 activity tool + three Phase 4 read tools + two Phase 4 brief tools + one Phase 6 export tool (BC-2), +1 local playbook input (T3), +1 import_list
 
 
 def test_library_tools_are_on_stdio_with_the_same_registry():

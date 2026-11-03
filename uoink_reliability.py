@@ -435,8 +435,13 @@ def _transcript_entries_from_segments(
 def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
-                     _transcribe=None) -> list[tuple[float, float, str]]:
+                     _transcribe=None,
+                     info: dict | None = None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
+
+    Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
+    as ``language`` and ``language_probability``; the return value is the
+    same either way.
 
     This path is used only as a fallback when a video source exposes no
     captions. The model is the user's downloaded copy or the bundled one
@@ -456,12 +461,16 @@ def transcribe_media(media_path: str | Path, *,
             model_root,
             local_files_only=True,
         )
-        segments, _info = model.transcribe(
+        segments, detected = model.transcribe(
             str(media),
             beam_size=1,
             best_of=1,
             vad_filter=True,
         )
+        if info is not None:
+            info["language"] = getattr(detected, "language", None)
+            info["language_probability"] = getattr(
+                detected, "language_probability", None)
     return _transcript_entries_from_segments(segments)
 
 

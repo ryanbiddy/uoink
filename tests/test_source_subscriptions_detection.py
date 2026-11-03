@@ -1,6 +1,6 @@
 """Phase 3 detection gates: S03 (initial cohort), S06 (resume gap), S07
 (durable independent detection), S08 (poll failure and coverage), S09
-(due-time concurrency). Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md.
+(due-time concurrency). Contract: PHASE3-CONTRACT-2026-09-07 (internal note).
 
 Run: python -m pytest -q tests/test_source_subscriptions_detection.py
 """

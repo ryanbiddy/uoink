@@ -3825,6 +3825,108 @@ EXPORT_CITED_RANGE_DESCRIPTION = (
 )
 
 
+# get_transcript: drop-in for the popular YouTube transcript MCP servers
+# (kimtaeyoon83/mcp-server-youtube-transcript, jkawamoto/mcp-youtube-transcript):
+# same tool name and url/lang arguments, plus their include_timestamps,
+# next_cursor and strip_ads options. The cascade lives in server.py.
+# JSON-escaped characters per page. The result is JSON text inside the
+# JSON-RPC frame, so escapes can grow again; 24,000 stays well under 64 KiB.
+GET_TRANSCRIPT_PAGE_BUDGET = 24_000
+GET_TRANSCRIPT_SEGMENT_MAX_CHARS = 2_000  # longer cues are split, same timing
+GET_TRANSCRIPT_DESCRIPTION = (
+    "Get the transcript of one YouTube video, with honest provenance. Use when "
+    "you need what a video says; use search_clips to find passages across saved "
+    "items or uoink_video to save a video with screenshots. Order: the saved "
+    "library copy (no network), then captions fetched on this computer's own "
+    "connection, then local Whisper on the audio when YouTube refuses captions "
+    "(429, bot check) or has none. Returns source (library, captions, "
+    "auto_captions or whisper), language, a plain why on any fallback, and the "
+    "text; long transcripts page with next_cursor. Nothing is added to the library."
+)
+
+
+def _transcript_clock(seconds: float) -> str:
+    total = max(0, int(seconds))
+    hours, rest = divmod(total, 3600)
+    minutes, secs = divmod(rest, 60)
+    return f"{hours}:{minutes:02d}:{secs:02d}" if hours else f"{minutes}:{secs:02d}"
+
+
+def _split_long_segments(segments: list) -> list:
+    """Split an over-long cue (an unpunctuated ASR run) so one page can hold it."""
+    out = []
+    size = GET_TRANSCRIPT_SEGMENT_MAX_CHARS
+    for start, end, text in segments:
+        if len(text) <= size:
+            out.append((start, end, text))
+            continue
+        out.extend((start, end, text[i:i + size]) for i in range(0, len(text), size))
+    return out
+
+
+def _transcript_page(segments: list, cursor: int, include_timestamps: bool):
+    """One page of segments that fits the stdio frame, and the next cursor."""
+    page = []
+    used = 0
+    index = cursor
+    while index < len(segments):
+        start, end, text = segments[index]
+        cost = len(json.dumps(text)) * (2 if include_timestamps else 1) + (80 if include_timestamps else 2)
+        if page and used + cost > GET_TRANSCRIPT_PAGE_BUDGET:
+            break
+        page.append((start, end, text))
+        used += cost
+        index += 1
+    return page, (index if index < len(segments) else None)
+
+
+def get_transcript(args: dict[str, Any]) -> dict[str, Any]:
+    b = _b()
+    cursor = args.get("next_cursor", 0)
+    if isinstance(cursor, str) and cursor.strip().isdigit():
+        cursor = int(cursor.strip())
+    if cursor is None:
+        cursor = 0
+    if not isinstance(cursor, int) or isinstance(cursor, bool) or cursor < 0:
+        return _err("next_cursor must be a non-negative integer from an earlier get_transcript call")
+    include_timestamps = args.get("include_timestamps") is True
+    try:
+        record = b.get_transcript_cascade(args.get("url"), args.get("lang"))
+    except b.TranscriptUnavailable as e:
+        return {"ok": False, "error": e.why[:1].upper() + e.why[1:], "reason": e.reason}
+    segments = _split_long_segments(list(record.get("segments") or []))
+    if cursor >= len(segments) and cursor:
+        return _err("next_cursor is past the end of this transcript")
+    page, next_cursor = _transcript_page(segments, cursor, include_timestamps)
+    if include_timestamps:
+        text = "\n".join(f"[{_transcript_clock(s)}] {t}" for s, _e, t in page)
+    else:
+        text = " ".join(t for _s, _e, t in page)
+    out = {
+        "video_id": record["video_id"],
+        "url": record["url"],
+        "title": record.get("title"),
+        "source": record["source"],
+        "language": record.get("language") or "und",
+        "why": record.get("why"),
+        "reason": record.get("reason"),
+        "translated": bool(record.get("translated")),
+        "cached": bool(record.get("cached")),
+        "transcript": text,
+        "segment_count": len(segments),
+        "next_cursor": next_cursor,
+    }
+    if record["source"] == "library":
+        out["transcribed_by"] = record.get("transcribed_by")
+        out["slug"] = record.get("slug")
+    if record.get("whisper_model"):
+        out["whisper_model"] = record["whisper_model"]
+    if include_timestamps:
+        out["segments"] = [{"start": round(float(s), 3), "end": round(float(e), 3), "text": t}
+                           for s, e, t in page]
+    return _ok(**out)
+
+
 # Stable v3.9.1 wire order. Keep these first for clients that cap tool counts.
 CORE_STDIO_TOOLS = (
     "uoink_video",
@@ -3862,10 +3964,12 @@ CORE_STDIO_TOOLS = (
     "get_library_brief_input",
     "publish_library_brief",
     "export_cited_range",
+    # 3.14: appended, so the v3.9.1 prefix above keeps its order.
+    "get_transcript",
 )
 
 
-# Smallest toolset: capture a link, find it, cite it. For clients that cap or
+# Smallest toolset: capture a link, get a transcript, find it, cite it. For clients that cap or
 # crowd the tool list (Cursor users report a 40-tool limit across servers) and
 # for users who only want "ask my library". Opt in with UOINK_MCP_TOOLSET=search.
 STDIO_TOOLSETS = ("full", "core", "search")
@@ -3878,6 +3982,7 @@ SEARCH_STDIO_TOOLS = (
     "get_citation_map",
     "list_recent_uoinks",
     "uoink_note",
+    "get_transcript",
 )
 
 DESCRIPTIONS = {
@@ -3917,6 +4022,7 @@ DESCRIPTIONS = {
     "publish_library_brief": "Save a client-written daily brief as an immutable local artifact. Use only for the user's requested brief job after get_library_brief_input; use read_library_resource to read a published brief. Validates the exact packet against current data and binds quotes to supplied evidence. An identical submission_key retry returns the saved result; stale_brief requires fresh input. Writes under reach/briefs without applying labels or changing the assignment queue.",
     "import_list": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note.",
     "export_cited_range": "Export verbatim stored transcript cues with speaker provenance, overlapping chapters, safe links and evidence references. Use after search_clips identifies a passage; use get_citation_map for all citation rows or read_library_resource for an existing resource URI. Select exact cue-aligned bounds or a current excerpt, at most 120 seconds and 200 cues. Returns source/media revisions; refusals include next_step. It does not fetch media or recompute transcription.",
+    "get_transcript": GET_TRANSCRIPT_DESCRIPTION,
     "list_library_work": "List Librarian assignment counts and one cursor page of work for a run. Use to inspect readiness before claim_library_work; use get_library_activity for aggregate library metrics. Listing expires stale leases and can update work state. Returns run revision, work states, manifest dispositions and waiting-client status. The server does not perform the Librarian's model work.",
     "claim_library_work": "Lease Librarian evidence packets, or renew, release or cancel your current attempts. Use after list_library_work to acquire work; use submit_library_result to store an assignment. Claim returns up to twelve packets with attempt tokens. Renew/release/cancel require the work_id and attempt_token from that claim. Leases last 60-900 seconds, never beyond one hour from first claim; three attempts exhaust a row.",
     "submit_library_result": "Store a client's shelf-assignment result for one currently leased Librarian item. Use after claim_library_work; use apply_reshelving to preview accepted assignments as label changes. Copy the packet's identifiers and revision hashes unchanged, and quote its evidence. Submission stages results without changing current labels; an identical submission_key retry replays the recorded response. Report unavailable usage honestly instead of inventing zero usage.",
@@ -4215,6 +4321,20 @@ def _field(kind, description, **extra):
 
 
 OUTPUT_SCHEMAS = {
+    "get_transcript": _output({
+        "video_id": _field("string", "YouTube video ID."),
+        "url": _field("string", "Canonical watch URL."),
+        "title": _field(["string", "null"], "Video title when known."),
+        "source": _field("string", "Where the words came from.", enum=["library", "captions", "auto_captions", "whisper"]),
+        "language": _field("string", "Language code of the returned text; und when unknown."),
+        "why": _field(["string", "null"], "Plain sentence explaining any fallback, such as a 429 on captions and the Whisper run time; null when the first choice answered."),
+        "reason": _field(["string", "null"], "Stable reason code, such as library, captions, auto_captions or captions_rate_limited."),
+        "translated": _field("boolean", "True when the text is YouTube's machine translation."),
+        "cached": _field("boolean", "True when an earlier get_transcript call's result was reused without network."),
+        "transcript": _field("string", "Transcript text for this page; [m:ss] lines with include_timestamps."),
+        "segment_count": _field("integer", "Total segments across all pages."),
+        "next_cursor": _field(["integer", "null"], "Pass back as next_cursor for the next page, or null on the last page."),
+    }),
     "uoink_video": _output({
         "slug": _field("string", "Saved capture's folder slug for later corpus reads."),
         "folder": _field("string", "Absolute local capture folder."),
@@ -4329,6 +4449,14 @@ for _name, _key, _meaning in (
     ("add_allowed_site", "site", "New or existing allowlist rule, unchanged on a duplicate."),
 ):
     OUTPUT_SCHEMAS[_name] = _output({_key: _field("object", _meaning)})
+
+# Optional get_transcript fields: present only for some sources or options.
+OUTPUT_SCHEMAS["get_transcript"]["properties"].update({
+    "transcribed_by": _field("string", "Library hits only: captions or whisper, how the saved copy was made."),
+    "slug": _field("string", "Library hits only: the saved item's slug."),
+    "whisper_model": _field("string", "Whisper results only: the local model used."),
+    "segments": _field("array", "With include_timestamps: this page's cues as start, end (seconds) and text.", items={"type": "object"}),
+})
 
 for _name in ("remove_podcast_feed", "remove_monitored_playlist"):
     OUTPUT_SCHEMAS[_name] = _output({"removed": _field("boolean", "Whether the registration was archived/disabled or deleted.")})
@@ -6087,6 +6215,30 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         input_schema=EXPORT_CITED_RANGE_SCHEMA,
         handler=_library_media_export,
     ),
+    # Transcript that never fails silently: library, captions, local Whisper.
+    "get_transcript": ToolSpec(
+        name="get_transcript",
+        title="Get transcript",
+        annotations={
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": True,
+        },
+        description=DESCRIPTIONS["get_transcript"],
+        input_schema=_schema({
+            "url": {"type": "string",
+                    "description": "YouTube video URL (watch, youtu.be, Shorts, embed) or 11-character video ID."},
+            "lang": {"type": "string",
+                     "description": "Preferred language code such as en, de or pt-BR. Default: English when YouTube has it, else the spoken language. Falls back to the available language and says so in why."},
+            "include_timestamps": {"type": "boolean", "default": False,
+                                   "description": "When true, each line starts with [m:ss] and segments carries start/end seconds."},
+            "next_cursor": {"type": "integer", "minimum": 0,
+                            "description": "Segment index from the previous response's next_cursor, to read the next page of a long transcript."},
+            "strip_ads": {"type": "boolean",
+                          "description": "Accepted for compatibility with other transcript servers and ignored: Uoink returns every word."},
+        }, ["url"]),
+        handler=get_transcript,
+        rate_limiter=_RateLimiter(20),
+    ),
 }
 
 
@@ -6142,6 +6294,7 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
 # planted in a saved page reads as quoted data. The JSON text contract stays:
 # this is one added key, first in the object.
 UNTRUSTED_CONTENT_TOOL_NAMES = frozenset({
+    "get_transcript",
     "get_uoink_corpus",
     "search_uoinks",
     "search_clips",
@@ -6165,14 +6318,14 @@ def _label_untrusted(name: str, result: Any) -> Any:
 
 def stdio_tool_names(toolset: str = "full") -> tuple[str, ...]:
     """Full registry, with the v3.9.1 prefix preserved; core and search are opt-in."""
-    if len(CORE_STDIO_TOOLS) != 35 or len(set(CORE_STDIO_TOOLS)) != 35:
+    if len(CORE_STDIO_TOOLS) != 36 or len(set(CORE_STDIO_TOOLS)) != 36:
         raise RuntimeError("Invalid core stdio inventory")
     if not set(CORE_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
         raise RuntimeError("Core stdio tool missing from registry")
     if toolset == "core":
         return CORE_STDIO_TOOLS
     if toolset == "search":
-        if len(set(SEARCH_STDIO_TOOLS)) != 8 or not set(SEARCH_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
+        if len(set(SEARCH_STDIO_TOOLS)) != 9 or not set(SEARCH_STDIO_TOOLS) <= TOOL_REGISTRY.keys():
             raise RuntimeError("Invalid search stdio inventory")
         return SEARCH_STDIO_TOOLS
     return CORE_STDIO_TOOLS + tuple(name for name in TOOL_REGISTRY if name not in CORE_STDIO_TOOLS)

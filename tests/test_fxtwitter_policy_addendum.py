@@ -1,4 +1,8 @@
 """SEC-05 addendum contract: posture is documented, not implemented here."""
+from tests.private_archive import skip_module_unless
+
+skip_module_unless('POLICY-MEMO-2026-09-04.md')
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]

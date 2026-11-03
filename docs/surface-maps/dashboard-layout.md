@@ -122,7 +122,7 @@ Routes consumed:
 
 ## Regression Checks
 
-The permanent clipping probe lives at `E:\AI\projects\uoink\handoff\qa-harness-playwright\u10-clipping-sweep-check.js`.
+The permanent clipping probe lives at `<workspace>\handoff\qa-harness-playwright\u10-clipping-sweep-check.js`.
 
 It serves the dashboard HTML with mocked routes, captures 1280x800, 1100x800, and 900x800 screenshots, and checks:
 

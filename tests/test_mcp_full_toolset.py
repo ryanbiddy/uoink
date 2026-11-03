@@ -35,7 +35,7 @@ def call(name, args):
     return body
 
 
-@pytest.mark.parametrize("mode,count", [("default", 92), ("full", 92), ("core", 35), ("unknown", 92)])
+@pytest.mark.parametrize("mode,count", [("default", 93), ("full", 93), ("core", 36), ("unknown", 93)])
 def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
     env = _isolated_env(str(tmp_path))
     if mode == "default":
@@ -52,7 +52,7 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
         client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
         listed = client.wait_for(2)["result"]["tools"]
         names = [t["name"] for t in listed]
-        assert len(names) == count and tuple(names[:35]) == CORE_STDIO_TOOLS
+        assert len(names) == count and tuple(names[:36]) == CORE_STDIO_TOOLS
         assert tuple(names) == tools.stdio_tool_names("core" if mode == "core" else "full")
         for tool in listed:
             spec = tools.TOOL_REGISTRY[tool["name"]]
@@ -106,7 +106,7 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
                     else:
                         assert "tool failed:" not in error and "has no attribute" not in error, (name, body)
             print("helper-down smoke: all 56 new handlers answered; local writes used the temp profile")
-        print(f"stdio smoke: mode={mode}, tools={count}, core-prefix=35, schemas=exact, helper-down=actionable")
+        print(f"stdio smoke: mode={mode}, tools={count}, core-prefix=36, schemas=exact, helper-down=actionable")
     finally:
         client.close()
 
@@ -168,10 +168,10 @@ def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):
 
 
 def test_public_manifest_advertises_full_default():
-    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.10.0", tool_count=92)
+    manifest = openapi_bridge.build_well_known("http://example.invalid", version="3.10.0", tool_count=93)
     assert manifest["transports"] == ["stdio", "http"]
-    assert manifest["stdio_tool_count"] == 92
-    assert manifest["stdio_toolsets"] == {"full": 92, "core": 35, "search": 8}
+    assert manifest["stdio_tool_count"] == 93
+    assert manifest["stdio_toolsets"] == {"full": 93, "core": 36, "search": 9}
 
 
 def test_inventory_checker_fails_closed_on_missing_tool(monkeypatch):
@@ -257,7 +257,7 @@ def test_http_and_stdio_list_identical_client_schemas(local_backend, monkeypatch
     fields = ("name", "description", "inputSchema")
     assert [{k: t[k] for k in fields} for t in listed] == [
         {k: t[k] for k in fields} for t in stdio]
-    assert len(listed) == len(tools.TOOL_REGISTRY) == 92
+    assert len(listed) == len(tools.TOOL_REGISTRY) == 93
     changed = set()
     for tool in listed:
         schema = tool["inputSchema"]

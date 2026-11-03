@@ -123,7 +123,7 @@ def _prove_real_child_stall(session) -> dict:
     Integrator Windows venv: Popen PID can be a launcher. The retained AW-8
     topology recorded session 72308 launching writer 60848. Suspending only
     the launcher is not a writer stall. Original failed stall observations
-    remain in docs/library/proof/aw8-2026-09-08/.
+    remain in the internal AW-8 evaluation archive.
     """
     assert session is not None
     assert session.physically_alive() if hasattr(session, "physically_alive") else session.alive

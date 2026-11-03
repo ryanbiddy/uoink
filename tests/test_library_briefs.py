@@ -13,7 +13,7 @@ Gate covered:
   - Rendered brief read and dependency invalidation on source deletion
   - Hard purge of dependents (removes owned artifacts and stored packets, keeps content-free receipt hashes)
 
-Tests against the frozen interface in docs/library/PHASE4-AV2-BRIEF-2026-09-08.md:
+Tests against the frozen interface in PHASE4-AV2-BRIEF-2026-09-08 (internal note):
 - library_briefs.BriefStore, CONTRACT_VERSION, BRIEF_DIR
 """
 from __future__ import annotations

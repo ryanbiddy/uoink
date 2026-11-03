@@ -6,7 +6,7 @@ network, no subprocess, no model, no live index: every test opens a temporary
 ``index.db`` through ``index.Index.open`` (which runs migration 0028 through the
 real runner) or a standalone connection through ``source_subscriptions.open_service``.
 
-Adapter budgets recorded here match docs/library/PHASE3-ADAPTER-LIMITS-2026-09-07.md
+Adapter budgets recorded here match PHASE3-ADAPTER-LIMITS-2026-09-07 (internal note)
 section 3.3 and the module constants: HTTP timeout 8 s, response bound 8 MiB,
 podcast parser window 50 entries, YouTube Atom window ~15 entries.
 """
