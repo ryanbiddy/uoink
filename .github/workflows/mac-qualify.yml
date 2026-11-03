@@ -200,7 +200,7 @@ jobs:
           bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
           xcrun --show-sdk-version >> "$RUNNER_TEMP/mac-evidence/environment.txt"
           clang --version >> "$RUNNER_TEMP/mac-evidence/environment.txt"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: mac-qualified-wheels
           path: ${{ runner.temp }}/mac-wheels
@@ -307,7 +307,7 @@ jobs:
         run: bash scripts/mac/runner-env.sh
       - name: Record signing runner and assert arm64
         run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-signed-evidence/environment.txt"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: uoink-macos-arm64-adhoc
           path: ${{ runner.temp }}/mac-sign-input
@@ -395,7 +395,7 @@ jobs:
       - name: Record runner and Python
         run: bash scripts/mac/runner-info.sh "$RUNNER_TEMP/mac-evidence/environment.txt"
       - name: Fetch the wheels and inventory from Job B
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: mac-qualified-wheels
           path: ${{ runner.temp }}/mac-wheels
