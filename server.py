@@ -13739,7 +13739,11 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
     source-type group (``kind``) and an order over every match: newest,
     oldest, title (A to Z), or relevance (FTS rank; newest without q)."""
     from uoink_core.search_service import citation_fields, select_mode
+    if filters.get("availability") and filters["availability"] != "gone":
+        raise ValueError("availability must be gone")
     actual, reason = select_mode(idx, mode, filters=filters)
+    if not (q or "").strip():
+        actual, reason = "keyword", None
     if actual != "keyword" and q:
         result = idx.search_mode(q, max(200, offset + limit), mode=mode, match=match, filters=filters, passages=False,
                                 source_types=_LIBRARY_KINDS.get(kind or ""),

@@ -41,11 +41,12 @@ def idx(tmp_path):
         yield index
 
 
-def save(idx, video_id="item", *, platform="web", url="https://example.com/item", **metadata):
+def save(idx, video_id="item", *, platform="web", source_type=None, url="https://example.com/item", **metadata):
     record = {"video_id": video_id, "slug": video_id, "title": video_id, "yoinked_at": iso(),
               "corpus_path": str(idx._path.parent / f"{video_id}.md"),
               "sidecar_path": str(idx._path.parent / f"{video_id}.json"),
-              "platform": platform, "metadata_json": json.dumps({"url": url, **metadata})}
+              "platform": platform, "source_type": source_type,
+              "metadata_json": json.dumps({"url": url, **metadata})}
     idx.upsert_yoink(record)
     return record
 
@@ -95,6 +96,7 @@ def reddit(**fields):
     ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(401), response(200, player("UNPLAYABLE", "Blocked in this region"))], "region_blocked"),
     ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(401), response(200, player("OK"))], "available"),
     ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(403), response(200, player("ERROR", "Video unavailable"))], "deleted"),
+    ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(403), response(200, player("ERROR", "An error occurred. Try again later."))], "unknown"),
     ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(401), response(200, player("LOGIN_REQUIRED", "Sign in to confirm your age"))], "unknown"),
     ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(403), response(200, b"consent page")], "unknown"),
     ("youtube", "https://www.youtube.com/watch?v=abcdefghijk", [response(401), response(403)], "unknown"),
@@ -104,9 +106,12 @@ def reddit(**fields):
     ("x", "https://x.com/user/status/123", [response(200)], "available"),
     ("x", "https://x.com/user/status/123", [response(500)], "unknown"),
     ("reddit", "https://www.reddit.com/r/test/comments/abc123/title", [response(200, reddit(removed_by_category="moderator"))], "deleted"),
-    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(author="[deleted]"))], "deleted"),
+    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(author="[deleted]"))], "available"),
+    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(author="[removed]"))], "available"),
     ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(selftext="[removed]"))], "deleted"),
-    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(selftext="[deleted]"))], "deleted"),
+    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(selftext="[deleted]"))], "available"),
+    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(author="[deleted]", selftext="[deleted]"))], "deleted"),
+    ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit(author="[deleted]", selftext="[removed] "))], "available"),
     ("reddit", "https://www.reddit.com/comments/abc123", [response(200, reddit())], "available"),
     ("reddit", "https://redd.it/abc123", [response(404)], "deleted"),
     ("reddit", "https://www.reddit.com/comments/abc123", [response(403, {"reason": "private"})], "private"),
@@ -166,6 +171,58 @@ def test_checker_uses_url_when_platform_is_missing(idx, url, checker):
     assert idx.availability_record("item")["checker"] == checker
 
 
+@pytest.mark.parametrize("url,video_id", [
+    ("https://www.youtube.com/watch", "item"),
+    ("https://www.youtube.com/watch?v=short", "item"),
+    ("https://www.youtube.com/watch?v=abcdefghijkl", "item"),
+    ("https://www.youtube.com/watch?v=abcdefghij%2F", "item"),
+    ("https://youtu.be/abcdefghij%21", "item"),
+    ("https://www.youtube.com/shorts/invalid", "item"),
+    ("https://www.youtube.com/channel/saved", "abcdefghijé"),
+])
+def test_invalid_youtube_id_makes_no_request(idx, url, video_id):
+    save(idx, video_id, platform="youtube", url=url)
+    fetch = Fetch()
+    summary = run(idx, fetch)
+    row = idx.availability_record(video_id)
+    assert summary["requests"] == 0 and summary["checked"] == 1
+    assert row["status"] == "unknown" and row["pending_status"] is None
+    assert row["detail"] == "No YouTube video ID" and row["http_status"] is None
+    assert fetch.calls == []
+    assert idx._conn.execute("SELECT COUNT(*) FROM source_availability_hosts").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize("url", [
+    "https://youtu.be/Abcde_fgh-1?t=30",
+    "https://www.youtube.com/embed/Abcde_fgh-1",
+    "https://www.youtube.com/live/Abcde_fgh-1",
+    "https://www.youtube.com/watch?v=Abcde_fgh-1&list=playlist",
+    "https://example.com/source",
+])
+def test_youtube_fallback_only_requests_canonical_watch_url(idx, url):
+    save(idx, "Abcde_fgh-1", platform="youtube", url=url)
+    fetch = Fetch(response(403), response(200, player("OK")))
+    run(idx, fetch)
+    canonical = "https://www.youtube.com/watch?v=Abcde_fgh-1"
+    assert parse_qs(urlsplit(fetch.calls[0].url).query)["url"] == [canonical]
+    assert fetch.calls[1].method == "GET" and fetch.calls[1].url == canonical
+    assert fetch.calls[1].max_bytes == 512 * 1024
+
+
+@pytest.mark.parametrize("wording,expected", [
+    ("Video unavailable", "deleted"), ("This video was removed", "deleted"),
+    ("Account terminated", "deleted"), ("Video does not exist", "deleted"),
+    ("No longer available", "deleted"), ("Please try again later", "unknown"),
+    ("Sign in to continue", "unknown"), ("", "unknown"),
+])
+@pytest.mark.parametrize("field", ["reason", "messages"])
+def test_youtube_error_requires_removal_wording(field, wording, expected):
+    body = json.dumps({"playabilityStatus": {
+        "status": "ERROR", field: [wording] if field == "messages" else wording,
+    }}).encode()
+    assert availability._playability(body) == expected
+
+
 @pytest.mark.parametrize("meta,expected", [
     ({"url": "https://show.example/page", "audio_url": "https://cdn.example/audio.mp3"}, "https://cdn.example/audio.mp3"),
     ({"url": None, "audio_url": "https://cdn.example/audio.mp3"}, "https://cdn.example/audio.mp3"),
@@ -200,6 +257,55 @@ def test_confirmation_requires_matching_observation_at_least_twenty_hours_later(
     assert row["gone_since"] == row["status_changed_at"] == iso(confirm)
     assert summary["confirmed_gone"] == 1 and summary["newly_gone"] == ["item"]
     assert row["next_check_at"] == iso(confirm + timedelta(days=7))
+
+
+@pytest.mark.parametrize("age,expired", [
+    (timedelta(days=7), False), (timedelta(days=7, seconds=1), True), (timedelta(days=8), True),
+])
+def test_pending_gone_expires_after_seven_days(idx, age, expired):
+    save(idx)
+    idx.record_availability("item", status="available")
+    run(idx, Fetch(response(404)))
+    observed_at = T0 + age
+    summary = run(idx, Fetch(response(404)), observed_at)
+    row = idx.availability_record("item")
+    assert row["last_checked_at"] == iso(observed_at)
+    assert summary["confirmed_gone"] == (0 if expired else 1)
+    if expired:
+        assert row["status"] == "available" and row["pending_status"] == "deleted"
+        assert row["pending_since"] == iso(observed_at) and row["gone_since"] is None
+        assert row["next_check_at"] == iso(observed_at + timedelta(days=1))
+        confirmed_at = observed_at + timedelta(days=1)
+        assert run(idx, Fetch(response(404)), confirmed_at)["newly_gone"] == ["item"]
+        assert idx.availability_record("item")["gone_since"] == iso(confirmed_at)
+    else:
+        assert row["status"] == "deleted" and row["pending_since"] is None
+
+
+def test_timestamps_use_each_items_observation_time(idx):
+    for video_id in ("a", "b", "c", "d"):
+        save(idx, video_id, url=f"https://{video_id}.example/item")
+    idx.record_availability("c", status="available", pending_status="deleted",
+                            pending_since=iso(T0 - timedelta(days=1)))
+    clock = SimpleNamespace(now=T0)
+    answers = Fetch(response(200), response(404), response(404), TimeoutError("offline"))
+
+    def fetch(*args):
+        clock.now += timedelta(minutes=7)
+        return answers(*args)
+
+    summary = run(idx, fetch, now=lambda: clock.now)
+    assert summary["checked"] == 4 and summary["newly_gone"] == ["c"]
+    for n, video_id in enumerate(("a", "b", "c", "d"), start=1):
+        assert idx.availability_record(video_id)["last_checked_at"] == iso(T0 + timedelta(minutes=7 * n))
+    assert idx.availability_record("a")["status_changed_at"] == iso(T0 + timedelta(minutes=7))
+    pending = idx.availability_record("b")
+    assert pending["pending_since"] == iso(T0 + timedelta(minutes=14))
+    assert pending["next_check_at"] == iso(T0 + timedelta(days=1, minutes=14))
+    confirmed = idx.availability_record("c")
+    assert confirmed["gone_since"] == confirmed["status_changed_at"] == iso(T0 + timedelta(minutes=21))
+    assert idx.availability_run_state()["last_run_started_at"] == iso()
+    assert idx.availability_run_state()["last_run_finished_at"] == iso(clock.now)
 
 
 def test_different_gone_observation_restarts_confirmation_and_preserves_original_gone_since(idx):
@@ -329,6 +435,8 @@ def test_same_host_spacing_uses_fake_sleep_and_persisted_last_request(idx):
     summary = availability.run_once(idx, fetch=Fetch(*[response(200)] * 3), now=T0, sleep=waits.append)
     assert summary["requests"] == 3 and waits == [1.0, 2.0, 2.0]
     assert idx.availability_host("example.com")["last_request_at"] == iso(T0 + timedelta(seconds=5))
+    assert [idx.availability_record(str(n))["last_checked_at"] for n in range(3)] == [
+        iso(T0 + timedelta(seconds=seconds)) for seconds in (1, 3, 5)]
 
 
 def test_redirects_are_counted_paced_and_checked_on_destination_host(idx):
@@ -355,6 +463,99 @@ def test_redirect_destination_in_backoff_and_redirect_cap_leave_items_due(idx):
     assert summary["requests"] == 1 and summary["checked"] == 0
 
 
+@pytest.mark.parametrize("final_code", [200, 302])
+def test_redirect_hop_cap(idx, final_code):
+    save(idx)
+    redirect = response(302, headers={"Location": "/again"})
+    fetch = Fetch(*[redirect] * 10, response(final_code, headers={"Location": "/again"}))
+    summary = run(idx, fetch)
+    row = idx.availability_record("item")
+    assert summary["requests"] == 11 and summary["checked"] == 1 and not summary["aborted"]
+    assert len(fetch.calls) == 11
+    assert row["status"] == ("available" if final_code == 200 else "unknown")
+    assert row["detail"] == ("HTTP 200" if final_code == 200 else "Too many redirects")
+    assert row["consecutive_errors"] == (0 if final_code == 200 else 1)
+    assert row["pending_status"] is None
+
+
+@pytest.mark.parametrize("final_error", [False, True])
+def test_admission_refusals_do_not_count_toward_offline_abort_or_budget(idx, monkeypatch, final_error):
+    import source_subscriptions as ss
+    refused = ["http://127.0.0.1/item", "http://localhost/item", "http://10.0.0.1/item",
+               "http://169.254.169.254/item", "http://[::1]/item", "https://bad..example/item"]
+    for n in range(4):
+        save(idx, f"a{n}", url="https://offline.example/item")
+    for n, url in enumerate(refused):
+        save(idx, f"b{n}", url=url)
+    save(idx, "z", url="https://last.example/item")
+
+    def open_safe(url, **kwargs):
+        host = urlsplit(url).hostname
+        if host == "offline.example" or (host == "last.example" and final_error):
+            raise TimeoutError("offline")
+        if host == "last.example":
+            return HTTPError(url, 200, "OK", {}, BytesIO())
+        ss._admit_public_http_url(url)  # All these targets fail before DNS or a connection.
+        pytest.fail("Expected public-address admission to refuse this target")
+
+    monkeypatch.setattr(ss, "public_http_open", open_safe)
+    summary = run(idx, availability.default_fetch, max_requests=5)
+    assert summary["aborted"] is final_error
+    assert summary["requests"] == 5 and summary["checked"] == 11
+    for n, url in enumerate(refused):
+        row = idx.availability_record(f"b{n}")
+        assert row["status"] == "unknown" and row["detail"] == "Not a public address"
+        assert row["http_status"] is None and row["pending_status"] is None
+        assert idx.availability_host(urlsplit(url).hostname) == {}
+    assert {r[0] for r in idx._conn.execute("SELECT host FROM source_availability_hosts")} == {
+        "offline.example", "last.example"}
+    if final_error:
+        assert idx.availability_record("z") == {}
+    else:
+        assert idx.availability_record("z")["status"] == "available"
+
+
+@pytest.mark.parametrize("target", ["http://127.0.0.1/private", "http://[::1]/private",
+                                   "file:///private", "http:///", "http://[malformed"])
+def test_redirect_admission_refusal_leaves_no_destination_host_state(idx, monkeypatch, target):
+    import source_subscriptions as ss
+    save(idx)
+
+    def open_safe(url, **kwargs):
+        if url == "https://example.com/item":
+            raise HTTPError(url, 302, "redirect", {"Location": target}, BytesIO(b"ignored"))
+        ss._admit_public_http_url(url)
+        pytest.fail("Expected redirect admission to fail")
+
+    monkeypatch.setattr(ss, "public_http_open", open_safe)
+    summary = run(idx, availability.default_fetch)
+    assert summary["requests"] == summary["checked"] == 1 and not summary["aborted"]
+    assert idx.availability_record("item")["detail"] == "Not a public address"
+    assert [r[0] for r in idx._conn.execute("SELECT host FROM source_availability_hosts")] == ["example.com"]
+
+
+@pytest.mark.parametrize("url", ["file:///item", "https:///item", "http://[malformed", "relative/path"])
+def test_request_validates_url_shape_before_accessing_host_state(idx, monkeypatch, url):
+    def forbidden(*args, **kwargs):
+        pytest.fail("Invalid HTTP URLs must not reach host state")
+
+    monkeypatch.setattr(idx, "availability_host", forbidden)
+    summary = {"requests": 0}
+    requests = availability._Requests(idx, Fetch(), lambda: T0, forbidden, 25, summary)
+    with pytest.raises(availability._AdmissionRefused):
+        requests("HEAD", url)
+    assert requests.transport_errors == summary["requests"] == 0
+
+
+def test_dns_service_errors_still_count_as_transport_errors(idx):
+    from source_subscriptions import ServiceError
+    for n in range(6):
+        save(idx, str(n))
+    summary = run(idx, Fetch(*[ServiceError("feed_unreachable", "DNS resolution failed") for _ in range(5)]))
+    assert summary["aborted"] and summary["requests"] == summary["checked"] == 5
+    assert all(idx.availability_record(str(n)) == {} for n in range(6))
+
+
 def test_skipped_hosts_do_not_starve_later_candidate_pages(idx):
     for n in range(30):
         save(idx, f"a{n:02}")
@@ -365,26 +566,61 @@ def test_skipped_hosts_do_not_starve_later_candidate_pages(idx):
     assert idx.availability_record("z")["status"] == "available"
 
 
-def test_offline_abort_leaves_all_statuses_untouched_including_earlier_success(idx):
+@pytest.mark.parametrize("skipped", ["unparseable_reddit", "host_backoff"])
+def test_run_examines_at_most_one_hundred_rows_without_requests(idx, monkeypatch, skipped):
+    for n in range(105):
+        save(idx, f"item{n:03}", platform="reddit" if skipped == "unparseable_reddit" else "web")
+    if skipped == "host_backoff":
+        idx.set_availability_host("example.com", backoff_until=iso(T0 + timedelta(hours=1)))
+    examined = []
+    original = availability._check
+
+    def check(row, request):
+        examined.append(row["video_id"])
+        return original(row, request)
+
+    monkeypatch.setattr(availability, "_check", check)
+    summary = run(idx, Fetch())
+    assert availability.MAX_ROWS_PER_RUN == 100
+    assert examined == [f"item{n:03}" for n in range(100)]
+    assert summary["requests"] == 0 and not summary["aborted"]
+    assert summary["checked"] == (100 if skipped == "unparseable_reddit" else 0)
+    assert idx.availability_record("item100") == {}
+
+
+@pytest.mark.parametrize("code,platform,expected", [(200, "web", "available"), (404, "web", "deleted"),
+                                                   (403, "x", "private"), (451, "web", "region_blocked")])
+def test_offline_abort_keeps_earlier_definitive_observations_and_discards_streak(idx, code, platform, expected):
     for n in range(7):
-        save(idx, str(n))
-        idx.record_availability(str(n), status="deleted", gone_since=iso(T0 - timedelta(days=2)),
+        save(idx, str(n), platform=platform)
+        idx.record_availability(str(n), status="available" if expected in availability.GONE else "deleted",
+                                gone_since=None if expected in availability.GONE else iso(T0 - timedelta(days=2)),
                                 status_changed_at=iso(T0 - timedelta(days=2)),
-                                pending_status="private", pending_since=iso(T0 - timedelta(days=1)))
-    before = idx.availability_for([str(n) for n in range(7)])
-    fetch = Fetch(response(200), *[TimeoutError("offline") for _ in range(5)])
+                                pending_status=expected if expected in availability.GONE else "private",
+                                pending_since=iso(T0 - timedelta(days=1)), consecutive_errors=2)
+    before = {str(n): idx.availability_record(str(n)) for n in range(7)}
+    fetch = Fetch(response(code), *[TimeoutError("offline") for _ in range(5)])
     summary = run(idx, fetch)
     assert summary["aborted"] and summary["requests"] == summary["checked"] == 6
-    assert summary["confirmed_gone"] == 0 and summary["newly_gone"] == []
-    for video_id, original in before.items():
-        row = idx.availability_record(video_id)
-        assert row["status"] == original["status"]
-        assert row["gone_since"] == original["gone_since"]
-        assert row["status_changed_at"] == original["status_changed_at"]
-        assert row["pending_status"] == "private"
-    assert idx.availability_record("6")["last_checked_at"] is None
-    assert idx.availability_record("1")["consecutive_errors"] == 1
+    assert summary["confirmed_gone"] == (1 if expected in availability.GONE else 0)
+    assert summary["newly_gone"] == (["0"] if expected in availability.GONE else [])
+    first = idx.availability_record("0")
+    assert first["status"] == expected and first["pending_status"] is None
+    assert first["consecutive_errors"] == 0 and first["last_checked_at"] == iso()
+    assert first["gone_since"] == (iso() if expected in availability.GONE else None)
+    for n in range(1, 7):
+        assert idx.availability_record(str(n)) == before[str(n)]
     assert json.loads(idx.availability_run_state()["last_run_json"]) == summary
+
+
+def test_offline_abort_discards_only_the_final_error_streak(idx):
+    for n in range(7):
+        save(idx, str(n))
+    summary = run(idx, Fetch(TimeoutError("earlier failure"), response(500), *[OSError("offline")] * 5))
+    assert summary["aborted"]
+    assert idx.availability_record("0")["consecutive_errors"] == 1
+    assert idx.availability_record("1")["consecutive_errors"] == 1
+    assert all(idx.availability_record(str(n)) == {} for n in range(2, 7))
 
 
 def test_success_resets_consecutive_transport_errors(idx):
@@ -416,7 +652,28 @@ def test_due_order_filters_and_weekly_recheck(idx):
     assert set(idx.availability_due(iso(), 1)[0]) == {"video_id", "platform", "source_type", "metadata_json"}
     run(idx, Fetch(*[response(200)] * 4))
     assert [r["video_id"] for r in idx.availability_due(iso(T0 + timedelta(days=7) - timedelta(seconds=1)), 20)] == ["future"]
-    assert len(idx.availability_due(iso(T0 + timedelta(days=7)), 20)) == 5
+    assert len(idx.availability_due(iso(T0 + timedelta(days=7)), 20)) == 2
+    assert len(idx.availability_due(iso(T0 + timedelta(days=7, seconds=6)), 20)) == 5
+
+
+@pytest.mark.parametrize("column", ["platform", "source_type"])
+@pytest.mark.parametrize("kind", ["note", "image", " NoTe ", " ImAgE "])
+def test_due_excludes_notes_and_images_by_platform_or_source_type(idx, column, kind):
+    save(idx, "excluded", **{column: kind})
+    save(idx, "included")
+    assert [r["video_id"] for r in idx.availability_due(iso(), 25)] == ["included"]
+
+
+@pytest.mark.parametrize("platform,source_type", [(" PoDcAsT ", None), (None, " EpIsOdE ")])
+@pytest.mark.parametrize("url_field", ["audio_url", "episode_page_url"])
+def test_due_and_checker_normalize_podcast_and_episode_types(idx, platform, source_type, url_field):
+    save(idx, platform=platform, source_type=source_type, url=None,
+         **{url_field: "https://show.example/episode"})
+    assert [r["video_id"] for r in idx.availability_due(iso(), 25)] == ["item"]
+    fetch = Fetch(response(200))
+    assert run(idx, fetch)["checked"] == 1
+    assert fetch.calls[0].method == "HEAD" and fetch.calls[0].url == "https://show.example/episode"
+    assert idx.availability_record("item")["checker"] == "podcast"
 
 
 def test_availability_for_is_one_query_and_upsert_preserves_state(idx):
@@ -508,22 +765,33 @@ def test_run_state_interval_and_utc_clock(idx):
     assert not availability.is_due_to_run(idx, T0 + timedelta(hours=2, minutes=30))
 
 
-@pytest.mark.parametrize("method,code", [("GET", 200), ("GET", 404), ("HEAD", 403)])
+@pytest.mark.parametrize("method,code", [("GET", 200), ("GET", 404), ("HEAD", 403), ("HEAD", 302),
+                                        *[("GET", code) for code in (300, 301, 302, 303, 304, 307, 308, 399)]])
 def test_default_fetch_uses_safe_opener_and_closes_bounded_response(monkeypatch, method, code):
     import source_subscriptions
     seen = []
+    reads = []
     stream = BytesIO(b"payload longer than budget")
+    read = stream.read
+
+    def read_body(size=-1):
+        reads.append(size)
+        return read(size)
+
+    monkeypatch.setattr(stream, "read", read_body)
     error = HTTPError("https://example.com/item", code, "test", {"Retry-After": "3600"}, stream)
 
     def open_safe(url, **kwargs):
         seen.append((url, kwargs))
-        if code >= 400:
+        if code >= 300:
             raise error
         return error
 
     monkeypatch.setattr(source_subscriptions, "public_http_open", open_safe)
     actual = availability.default_fetch(method, "https://example.com/item", {}, 10, 7)
-    assert actual == (code, {"Retry-After": "3600"}, b"payload" if method == "GET" else b"")
+    expects_body = method == "GET" and not 300 <= code < 400
+    assert actual == (code, {"Retry-After": "3600"}, b"payload" if expects_body else b"")
+    assert reads == ([7] if expects_body else [])
     assert stream.closed
     assert seen[0][1] == {"method": method, "headers": {"User-Agent": availability.USER_AGENT},
                           "timeout": 10, "follow_redirects": False}
@@ -565,6 +833,53 @@ def helper(tmp_path, monkeypatch):
     monkeypatch.setattr(server.whisper_runner, "is_whisperx_available", lambda: False)
     monkeypatch.setattr(server, "_source_availability_lock", threading.Lock())
     return server
+
+
+@pytest.mark.parametrize("mode", ["keyword", "auto", "semantic", "hybrid"])
+def test_clips_only_search_ignores_availability_filter(idx, mode):
+    save(idx)
+    idx.record_availability("item", status="available")
+    idx.insert_citations("item", [{"kind": "transcript_chunk", "seq": 0,
+                                  "timestamp_start": 0, "timestamp_end": 10, "text": "Needle clip"}])
+    filters = {"availability": "gone"}
+    page = idx.search_mode("needle", mode=mode, clips_only=True, filters=filters)
+    assert page["total"] == 1 and page["results"][0]["video_id"] == "item"
+    assert filters == {"availability": "gone"}
+
+
+@pytest.mark.parametrize("mode", ["keyword", "auto", "semantic", "hybrid"])
+@pytest.mark.parametrize("query", [None, "", " "])
+@pytest.mark.parametrize("entrypoint", ["index", "library"])
+def test_empty_search_has_no_availability_fallback_reason(idx, helper, mode, query, entrypoint):
+    save(idx)
+    idx.record_availability("item", status="deleted")
+    if entrypoint == "index":
+        page = idx.search_mode(query, mode=mode, filters={"availability": "gone"})
+    else:
+        page = helper._library_search(idx, q=query, filters={"availability": "gone"}, kind=None,
+                                      sort="newest", limit=10, offset=0, mode=mode)
+    assert page["search_mode"] == "keyword" and page["requested_mode"] == mode
+    assert page["fallback_reason"] is None
+
+
+@pytest.mark.parametrize("query", [None, "needle"])
+@pytest.mark.parametrize("value", ["available", "deleted", "private", "unknown", "Gone", "gone,private"])
+def test_library_search_rejects_invalid_availability_like_index(idx, helper, query, value):
+    with pytest.raises(ValueError, match="availability must be gone"):
+        idx.search_yoinks_for_memory(q=query, availability=value)
+    with pytest.raises(ValueError, match="availability must be gone"):
+        helper._library_search(idx, q=query, filters={"availability": value}, kind=None,
+                               sort="newest", limit=10, offset=0)
+
+
+@pytest.mark.parametrize("value", [None, ""])
+def test_library_search_ignores_unset_availability_like_index(idx, helper, value):
+    save(idx)
+    expected = idx.search_yoinks_for_memory(availability=value)
+    actual = helper._library_search(idx, q=None, filters={"availability": value}, kind=None,
+                                    sort="newest", limit=10, offset=0)
+    assert actual["total"] == expected["total"] == 1
+    assert actual["results"] == expected["results"]
 
 
 def test_setting_defaults_normalizes_is_public_and_saves_as_boolean(helper, monkeypatch):

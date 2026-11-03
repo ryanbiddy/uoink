@@ -144,9 +144,7 @@ def search(index, query, *, mode="auto", limit=50, offset=0, filters=None,
     """
     actual, reason = select_mode(index, mode, filters=filters)
     if not (query or "").strip():
-        actual = "keyword"
-        if not (filters or {}).get("availability"):
-            reason = "Enter search text to use semantic search." if mode in ("semantic", "hybrid") else None
+        actual, reason = "keyword", None
     if actual != "keyword":
         try:
             from index import _search_title_key

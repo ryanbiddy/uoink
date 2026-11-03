@@ -1294,7 +1294,7 @@ class Index:
         filters = dict(filters or {})
         # An unset availability filter must not reach the semantic engine's
         # allowlist; a set filter is routed to keyword by search_service.
-        if not filters.get("availability"):
+        if clips_only or not filters.get("availability"):
             filters.pop("availability", None)
         if keyword is None:
             def keyword(count, start, override):
@@ -1437,14 +1437,16 @@ class Index:
                 "WITH sources AS (SELECT video_id, platform, source_type, metadata_json, "
                 "CASE WHEN json_valid(metadata_json) THEN metadata_json ELSE '{}' END AS meta "
                 "FROM yoinks WHERE deleted_at IS NULL "
-                "AND lower(trim(coalesce(platform, ''))) NOT IN ('note', 'image')) "
+                "AND lower(trim(coalesce(platform, ''))) NOT IN ('note', 'image') "
+                "AND lower(trim(coalesce(source_type, ''))) NOT IN ('note', 'image')) "
                 "SELECT y.video_id, y.platform, y.source_type, y.metadata_json "
                 "FROM sources y LEFT JOIN source_availability a USING(video_id) "
                 "WHERE (a.video_id IS NULL OR a.next_check_at IS NULL "
                 "OR julianday(a.next_check_at) <= julianday(?)) "
                 "AND (lower(trim(json_extract(y.meta, '$.url'))) LIKE 'http://_%' "
                 "OR lower(trim(json_extract(y.meta, '$.url'))) LIKE 'https://_%' "
-                "OR ((lower(coalesce(y.platform, '')) = 'podcast' OR y.source_type = 'episode') "
+                "OR ((lower(trim(coalesce(y.platform, ''))) = 'podcast' "
+                "OR lower(trim(coalesce(y.source_type, ''))) = 'episode') "
                 "AND (lower(trim(json_extract(y.meta, '$.audio_url'))) LIKE 'http://_%' "
                 "OR lower(trim(json_extract(y.meta, '$.audio_url'))) LIKE 'https://_%' "
                 "OR lower(trim(json_extract(y.meta, '$.episode_page_url'))) LIKE 'http://_%' "

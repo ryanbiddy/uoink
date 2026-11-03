@@ -14,6 +14,7 @@ from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 STATUSES = {"available", "deleted", "private", "region_blocked", "unknown"}
 GONE = {"deleted", "private", "region_blocked"}
 MAX_REQUESTS_PER_RUN = 25
+MAX_ROWS_PER_RUN = 100
 RECHECK_DAYS = 7
 RUN_INTERVAL_MIN = 60
 HOST_INTERVAL_SEC = 2.0
@@ -61,7 +62,8 @@ def default_fetch(method, url, headers, timeout, max_bytes):
         response = exc
     with response:
         return (response.code, dict(response.headers.items()),
-                response.read(max_bytes) if method != "HEAD" and max_bytes else b"")
+                response.read(max_bytes)
+                if method != "HEAD" and max_bytes and not 300 <= response.code < 400 else b"")
 
 
 def _json(body):
@@ -90,7 +92,7 @@ def _on_host(host: str, domain: str) -> bool:
 def _checker(row, url):
     platform = str(row.get("platform") or "").strip().lower()
     host = (urlsplit(url).hostname or "").lower().rstrip(".")
-    if platform == "podcast" or row.get("source_type") == "episode":
+    if platform == "podcast" or str(row.get("source_type") or "").strip().lower() == "episode":
         return "podcast"
     if platform == "youtube" or any(_on_host(host, d) for d in ("youtube.com", "youtu.be", "youtube-nocookie.com")):
         return "youtube"
@@ -109,9 +111,10 @@ def _watch_url(url, video_id):
         candidate = parts[0]
     elif len(parts) > 1 and parts[0] in ("shorts", "embed", "live"):
         candidate = parts[1]
-    if not candidate and re.fullmatch(r"[\w-]{11}", video_id):
-        candidate = video_id
-    return "https://www.youtube.com/watch?" + urlencode({"v": candidate}) if candidate else url
+    candidate = candidate or video_id
+    if not isinstance(candidate, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", candidate):
+        return ""
+    return "https://www.youtube.com/watch?" + urlencode({"v": candidate})
 
 
 def _playability(body):
@@ -124,14 +127,15 @@ def _playability(body):
         if not isinstance(data, dict):
             continue
         status = data.get("status")
-        wording = json.dumps(data).lower()
+        wording = json.dumps({key: data.get(key) for key in ("reason", "messages", "errorScreen")}).lower()
         if status == "OK":
             return "available"
         if status == "LOGIN_REQUIRED" and "private" in wording:
             return "private"
         if status == "UNPLAYABLE" and ("country" in wording or "region" in wording):
             return "region_blocked"
-        if status == "ERROR":
+        if status == "ERROR" and re.search(
+                r"\b(?:unavailable|removed|terminated|does not exist|no longer available)\b", wording):
             return "deleted"
     return "unknown"
 
@@ -154,6 +158,8 @@ def _check(row, request):
 
     if checker == "youtube":
         watch = _watch_url(url, row["video_id"])
+        if not watch:
+            return "unknown", None, "No YouTube video ID", checker
         code, _, _ = request("GET", "https://www.youtube.com/oembed?" +
                              urlencode({"url": watch, "format": "json"}), max_bytes=64 * 1024)
         observed = {200: "available", 404: "deleted"}.get(code, "unknown")
@@ -184,8 +190,8 @@ def _check(row, request):
             try:
                 post = data[0]["data"]["children"][0]["data"]
                 removed = (post.get("removed_by_category") or
-                           post.get("author") in ("[deleted]", "[removed]") or
-                           post.get("selftext") in ("[deleted]", "[removed]"))
+                           post.get("selftext") == "[removed]" or
+                           (post.get("selftext") == "[deleted]" and post.get("author") == "[deleted]"))
                 observed = "deleted" if removed else "available"
             except (TypeError, KeyError, IndexError, AttributeError):
                 pass  # A truncated JSON response is not evidence of removal.
@@ -202,6 +208,18 @@ class _RequestLimit(Exception):
 
 
 class _HostBackoff(Exception):
+    pass
+
+
+class _AdmissionRefused(Exception):
+    pass
+
+
+class _TransportError(Exception):
+    pass
+
+
+class _TooManyRedirects(Exception):
     pass
 
 
@@ -234,7 +252,12 @@ class _Requests:
         return self.logical_now
 
     def __call__(self, method, url, *, headers=None, max_bytes=MAX_BODY_BYTES):
+        from source_subscriptions import ServiceError
+
         for _ in range(11):  # Redirects consume the same run budget as every other request.
+            url = _http_url(url)
+            if not url:
+                raise _AdmissionRefused
             if self.summary["requests"] >= self.limit:
                 raise _RequestLimit
             host = (urlsplit(url).hostname or "").lower().rstrip(".")
@@ -252,17 +275,20 @@ class _Requests:
                     # Frozen injected clocks still advance by the requested sleep.
                     self.logical_now = now + timedelta(seconds=delay)
                     now = self.moment()
-            self.index.set_availability_host(
-                host, backoff_until=state.get("backoff_until"), strikes=state.get("strikes", 0),
-                last_request_at=_iso(now))
-            self.summary["requests"] += 1
             try:
                 code, response_headers, body = self.fetch(
                     method, url, {"User-Agent": USER_AGENT, "Accept-Encoding": "identity", **(headers or {})},
                     TIMEOUT_SEC, max_bytes)
-            except Exception:
+            except Exception as exc:
+                if isinstance(exc, ServiceError) and exc.code in ("unsupported_source", "validation_error"):
+                    raise _AdmissionRefused from exc
+                self.summary["requests"] += 1
+                self.index.set_availability_host(
+                    host, backoff_until=state.get("backoff_until"), strikes=state.get("strikes", 0),
+                    last_request_at=_iso(now))
                 self.transport_errors += 1
-                raise
+                raise _TransportError(type(exc).__name__) from exc
+            self.summary["requests"] += 1
             self.transport_errors = 0
             response_headers = {key.lower(): value for key, value in response_headers.items()}
             if code in (429, 503):
@@ -278,13 +304,16 @@ class _Requests:
                 host, strikes=0 if 200 <= code < 300 else state.get("strikes", 0),
                 last_request_at=_iso(now))
             if code in (301, 302, 303, 307, 308) and response_headers.get("location"):
-                target = _http_url(urljoin(url, response_headers["location"]))
+                try:
+                    target = _http_url(urljoin(url, response_headers["location"]))
+                except ValueError:
+                    target = ""
                 if not target:
-                    return code, response_headers, b""
+                    raise _AdmissionRefused
                 url = target
                 continue
             return code, response_headers, body
-        return code, response_headers, b""
+        raise _TooManyRedirects
 
 
 def _record(index, video_id, observation, now, summary):
@@ -300,7 +329,8 @@ def _record(index, video_id, observation, now, summary):
         fields.update(consecutive_errors=0, next_check_at=_iso(now + timedelta(days=RECHECK_DAYS)))
         pending_since = _stamp(previous.get("pending_since"))
         if observed in GONE and observed != status:
-            if previous.get("pending_status") != observed or pending_since is None:
+            if (previous.get("pending_status") != observed or pending_since is None
+                    or now - pending_since > timedelta(days=7)):
                 fields.update(pending_status=observed, pending_since=_iso(now),
                               next_check_at=_iso(now + timedelta(days=1)))
             elif now - pending_since < timedelta(hours=20):
@@ -324,9 +354,8 @@ def _record(index, video_id, observation, now, summary):
 def run_once(index, *, fetch=None, now=None, sleep=None, max_requests=MAX_REQUESTS_PER_RUN):
     """Check a bounded batch. ``now`` accepts a UTC datetime, ISO string or clock.
 
-    Definitive observations wait until the offline guard passes. An aborted
-    run records unknown/error attempts but leaves every confirmed status and
-    pending observation intact. Backed-off and unfinished items stay due.
+    An offline abort discards the final transport-error streak while keeping
+    earlier observations. Backed-off and unfinished items stay due.
     """
     clock = now if callable(now) else lambda: _utc(now)
     started = _utc(clock())
@@ -337,11 +366,13 @@ def run_once(index, *, fetch=None, now=None, sleep=None, max_requests=MAX_REQUES
     index.set_availability_run_state(last_run_started_at=_iso(started),
                                      last_run_finished_at=None, last_run_json=None)
     observations = []
+    error_streak = set()
     try:
         offset = 0
         exhausted = False
-        while summary["requests"] < requests.limit and not exhausted:
-            rows = index.availability_due(_iso(started), MAX_REQUESTS_PER_RUN, offset=offset)
+        while summary["requests"] < requests.limit and offset < MAX_ROWS_PER_RUN and not exhausted:
+            rows = index.availability_due(
+                _iso(started), min(MAX_REQUESTS_PER_RUN, MAX_ROWS_PER_RUN - offset), offset=offset)
             if not rows:
                 break
             offset += len(rows)
@@ -356,16 +387,27 @@ def run_once(index, *, fetch=None, now=None, sleep=None, max_requests=MAX_REQUES
                     break
                 except _HostBackoff:
                     continue
+                except _AdmissionRefused:
+                    observation = ("unknown", None, "Not a public address", "admission")
+                except _TooManyRedirects:
+                    observation = ("unknown", None, "Too many redirects", "redirect")
+                except _TransportError as exc:
+                    if requests.transport_errors == 1:
+                        error_streak.clear()
+                    error_streak.add(len(observations))
+                    observation = ("unknown", None, str(exc), "transport")
                 except Exception as exc:
                     observation = ("unknown", None, type(exc).__name__, "transport")
-                observations.append((row["video_id"], observation))
+                if requests.transport_errors == 0:
+                    error_streak.clear()
+                observations.append((row["video_id"], observation, requests.moment()))
                 summary["checked"] += 1
                 if requests.transport_errors >= 5:
                     summary["aborted"] = exhausted = True
                     break
-        for video_id, observation in observations:
-            if not summary["aborted"] or observation[0] == "unknown":
-                _record(index, video_id, observation, started, summary)
+        for position, (video_id, observation, observed_at) in enumerate(observations):
+            if not summary["aborted"] or position not in error_streak:
+                _record(index, video_id, observation, observed_at, summary)
         return summary
     except Exception:
         summary["aborted"] = True
