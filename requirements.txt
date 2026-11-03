@@ -4,7 +4,7 @@ httpx2==2.16.0
 httpcore2==2.16.0
 truststore==0.10.5
 keyring==25.7.0
-Pillow==12.3.0
+Pillow==13.0.0
 pystray==0.19.5
 pywebview==5.4
 pythonnet==3.0.5

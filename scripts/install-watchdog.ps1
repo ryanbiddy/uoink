@@ -12,6 +12,24 @@ if ($env:UOINK_ISOLATED_PROFILE -or (Test-Path -LiteralPath (Join-Path $InstallD
     throw 'Isolated Uoink does not change login startup.'
 }
 $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+function Test-CurrentUserPrincipal([string]$UserId) {
+    # Task Scheduler reads a local account back as the bare user name, while
+    # WindowsIdentity reports MACHINE\user. Compare SIDs when the name
+    # resolves. Otherwise accept only the full name, the SID, or the bare name
+    # of this account. A different user, or the same account name under another
+    # machine or domain, is still not ours.
+    if (-not $UserId) { return $false }
+    $candidate = $UserId.Trim()
+    if ($candidate -ieq $identity.User.Value -or $candidate -ieq $identity.Name) { return $true }
+    try {
+        $sid = ([System.Security.Principal.NTAccount]::new($candidate)).Translate(
+            [System.Security.Principal.SecurityIdentifier]).Value
+        return $sid -eq $identity.User.Value
+    } catch {
+        $account = ($identity.Name -split '\\', 2)[-1]
+        return ($candidate -notlike '*\*') -and ($candidate -ieq $account)
+    }
+}
 $taskName = 'Uoink Helper-' + $identity.User.Value
 $installRoot = (Resolve-Path -LiteralPath $InstallDir).Path
 $supervisorPath = Join-Path $installRoot 'uoink_supervisor.py'
@@ -20,13 +38,13 @@ $expectedRun = '"{0}" "{1}"' -f (Join-Path $installRoot 'python\pythonw.exe'), (
 $existing = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 if ($existing) {
     $owned = @($existing.Actions | Where-Object { $_.Arguments -eq ('"{0}" --startup' -f $supervisorPath) })
-    if ($owned.Count -ne 1 -or $existing.Principal.UserId -notin @($identity.Name, $identity.User.Value)) {
+    if ($owned.Count -ne 1 -or -not (Test-CurrentUserPrincipal $existing.Principal.UserId)) {
         throw 'The helper task belongs to another install. Login startup was not changed.'
     }
 }
 $oldTask = Get-ScheduledTask -TaskName 'Uoink Helper' -ErrorAction SilentlyContinue
 $oldArgument = '"{0}"' -f (Join-Path $installRoot 'server.py')
-$ownedOldTask = $oldTask -and $oldTask.Principal.UserId -in @($identity.Name, $identity.User.Value) -and
+$ownedOldTask = $oldTask -and (Test-CurrentUserPrincipal $oldTask.Principal.UserId) -and
     @($oldTask.Actions | Where-Object { $_.Arguments -eq $oldArgument }).Count -eq 1
 if ($Mode -eq 'Status') {
     if ($existing -and $existing.State -ne 'Disabled') { Write-Output 'enabled' } else { Write-Output 'disabled' }

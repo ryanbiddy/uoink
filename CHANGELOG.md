@@ -10,6 +10,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `UOINK_MCP_TOOLSET=search` serves an 8-tool set for clients with a tool
+  limit, and `uoink connect <client> --toolset {full,core,search}` writes it
+  into the client's config. Defaults are unchanged.
+
+### Security
+
+- The installer bundles Pillow 13.0.0 (fixes a JPEG decoder heap overflow,
+  GHSA-8g5g-8vmr-9782) and certifi 2026.10.23. Thumbnails only open PNG, JPEG
+  and WebP and skip images over 50 million pixels.
+- MCP results that carry saved third-party text include an `untrusted_content`
+  notice telling the agent not to follow instructions inside it.
+- The security contact is hi@uoink.app, and private vulnerability reporting
+  is on.
+
+### Fixed
+
+- Upgrading on Windows no longer shows "Uoink could not register crash
+  recovery". Task Scheduler reports a local account's task owner as the bare
+  user name, which the owner check did not match against `MACHINE\user`, so
+  every upgrade refused to refresh its own login task. The check now accepts
+  the full name, the SID, or the bare name of the current account, and still
+  refuses a task owned by another user or another install. The legacy
+  `Uoink Helper` task cleanup uses the same check. The next upgrade fixes an
+  affected install with no extra steps; login startup kept working throughout.
+
 ## [3.13.0] - 2026-11-01
 
 ### Added

@@ -9,7 +9,7 @@ details of what the helper does and does not do.
 
 ## Reporting a vulnerability
 
-If you find a vulnerability, please **report it to hi@uoink.video** or open a
+If you find a vulnerability, please **report it to hi@uoink.app** or open a
 private [GitHub Security Advisory](https://github.com/ryanbiddy/uoink/security/advisories).
 
 Please do not open a public issue with reproduction details until a fix has

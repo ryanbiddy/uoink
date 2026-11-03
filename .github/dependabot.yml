@@ -1,0 +1,36 @@
+# Dependabot version updates. Each PR still goes through the normal review;
+# the installer lock (requirements-installer-lock.txt) is re-qualified by hand
+# from a clean build, so pip PRs here are a prompt to do that, not a merge.
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      python-runtime:
+        patterns: ["*"]
+  - package-ecosystem: "pip"
+    directory: "/relay"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+  - package-ecosystem: "npm"
+    directories:
+      - "/tauri-ui"
+      - "/integrations/obsidian"
+      - "/integrations/raycast"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+  - package-ecosystem: "cargo"
+    directory: "/tauri-ui/src-tauri"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
