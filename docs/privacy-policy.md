@@ -308,7 +308,7 @@ in-app notice or the release notes of the extension update that introduces it.
 
 ## 8. Contact
 
-Questions, concerns, or corrections: **hi@uoink.video**
+Questions, concerns, or corrections: **hi@uoink.app**
 
 ---
 

@@ -73,6 +73,14 @@ _MIME_EXT = {
     "image/webp": "webp",
 }
 
+# Pillow decoders the thumbnail step may use. Matches sniff_mime above so a
+# file that slipped past the magic-byte gate can't route to another decoder.
+_PIL_FORMATS = ("PNG", "JPEG", "WEBP")
+# Thumbnail decode ceiling (an 8K screenshot is about 33 million pixels).
+# Bigger images still save; they just get no preview, so a small file that
+# claims huge dimensions can't make the helper decode it.
+MAX_THUMBNAIL_PIXELS = 50_000_000
+
 _SLUG_STRIP_RE = re.compile(r"[^a-z0-9]+")
 _LEAD_MARKER_RE = re.compile(r"^\s*(?:#{1,6}\s+|>\s+|[-*+]\s+|\d+\.\s+)")
 
@@ -193,8 +201,12 @@ def _write_thumbnail(image_path: Path, thumb_path: Path,
         log.info("Pillow not installed; skipping image thumbnail")
         return None, None
     try:
-        with Image.open(image_path) as img:
+        with Image.open(image_path, formats=_PIL_FORMATS) as img:
             width, height = img.width, img.height
+            if width * height > MAX_THUMBNAIL_PIXELS:
+                log.warning("image thumbnail skipped: %dx%d is over the "
+                            "decode limit", width, height)
+                return width, height
             preview = img.convert("RGB") if img.mode != "RGB" else img.copy()
         if preview.width > max_width:
             new_h = max(1, int(preview.height * (max_width / preview.width)))

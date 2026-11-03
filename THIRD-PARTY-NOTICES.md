@@ -16,7 +16,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | attrs | 26.1.0 | MIT | https://www.attrs.org/en/stable/changelog.html |
 | av | 18.0.0 | BSD-3-Clause | https://pyav.basswood.io |
 | bottle | 0.13.4 | MIT License | http://bottlepy.org/ |
-| certifi | 2026.7.22 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
+| certifi | 2026.10.23 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
 | cffi | 2.1.0 | MIT-0 | https://cffi.readthedocs.io/en/latest/whatsnew.html |
 | charset-normalizer | 3.4.9 | MIT | https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md |
 | click | 8.4.2 | BSD-3-Clause | https://github.com/pallets/click/ |
@@ -82,7 +82,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | optuna | 4.9.0 | MIT License | https://optuna.org/ |
 | packaging | 26.2 | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging |
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
-| pillow | 12.3.0 | MIT-CMU | https://python-pillow.github.io |
+| pillow | 13.0.0 | MIT-CMU | https://python-pillow.github.io |
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
 | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
 | protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
