@@ -139,6 +139,7 @@ jobs:
         run: |
           docker build -f docker/capture.Dockerfile -t uoink-capture:ci .
           docker image ls uoink-capture:ci --format '{{.Size}}'
+          docker run --rm --entrypoint du uoink-capture:ci -sh /opt/uoink /opt/uoink/python /opt/uoink/models
       - name: Check media and bundled model status
         run: |
           docker run --rm --network none uoink-capture:ci status > capture-status.json

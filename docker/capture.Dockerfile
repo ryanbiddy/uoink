@@ -12,21 +12,23 @@ RUN apt-get update \
 FROM runtime AS build
 WORKDIR /build/uoink
 COPY . .
+# Permissions are final here: a chmod in the runtime stage would copy every
+# file of /opt/uoink into a second layer and double the image.
 RUN XDG_CACHE_HOME=/tmp/uoink-build-cache \
     sh scripts/linux/install.sh --prefix /opt/uoink --bin-dir /usr/local/bin --python python3 \
     && rm -rf /tmp/uoink-build-cache /build/uoink \
-    && /opt/uoink/python/bin/python3 -m compileall -q /opt/uoink
+    && /opt/uoink/python/bin/python3 -m compileall -q /opt/uoink \
+    && chmod -R a+rX,a-w /opt/uoink
 
 FROM runtime
-COPY --from=build /opt/uoink /opt/uoink
 # The app folder stays root-owned and read-only; Linux keeps all state in
 # XDG_DATA_HOME/Uoink.
+COPY --from=build /opt/uoink /opt/uoink
 RUN ln -s /opt/uoink/uoink /usr/local/bin/uoink \
     && groupadd --gid 10001 uoink \
     && useradd --uid 10001 --gid 10001 --create-home --home-dir /home/uoink --shell /usr/sbin/nologin uoink \
     && install -d -o uoink -g uoink /home/uoink/.local /home/uoink/.local/share \
-        /home/uoink/.local/share/Uoink /home/uoink/.cache \
-    && chmod -R a+rX,a-w /opt/uoink
+        /home/uoink/.local/share/Uoink /home/uoink/.cache
 
 ENV HOME=/home/uoink \
     XDG_DATA_HOME=/home/uoink/.local/share \
