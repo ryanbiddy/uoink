@@ -29,12 +29,12 @@ def test_search_inventory_is_small_known_and_leaves_other_sets_alone():
     assert writers == {"uoink_url", "uoink_note"}
     # Adding a toolset must not reorder or shrink the frozen ones.
     assert tools.stdio_tool_names("core") == tools.CORE_STDIO_TOOLS
-    assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY) == 95
+    assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY) == 97
     assert tools.STDIO_TOOLSETS == cli.TOOLSETS == ("full", "core", "search", "research")
 
 
 def test_well_known_reports_the_search_count():
-    doc = openapi_bridge.build_well_known("http://127.0.0.1:18150", version="x", tool_count=95)
+    doc = openapi_bridge.build_well_known("http://127.0.0.1:18150", version="x", tool_count=97)
     assert doc["stdio_toolsets"]["search"] == len(tools.SEARCH_STDIO_TOOLS)
 
 

@@ -35,7 +35,8 @@ def retry(publication):
     state.real_extract = scope["_run_extraction"]
     state.real_record = scope["_record_single_extract_job"]
     state.extract = Mock(return_value={
-        "ok": True, "folder": str(state.folder), "title": "Recorded", "screenshot_count": 1})
+        "ok": True, "folder": str(state.folder), "title": "Recorded", "screenshot_count": 1,
+        "transcript_source": "captions", "captions_refused": False})
     state.record = Mock(return_value={"id": "retry-job"})
 
     class Clock(datetime):
@@ -205,6 +206,7 @@ def test_retry_rechecks_live_state_without_spending_attempts(retry, behavior, li
     assert isinstance(event, threading.Event) and not event.is_set()
     assert _row(retry)["status"] == "succeeded"
     assert _row(retry)["attempt_count"] == 2
+    assert retry.scope["_retry_pending_last_outcome"] == (_row(retry)["pending_id"], "succeeded")
     assert retry.idx._pending_cancel_events == {}
 
 

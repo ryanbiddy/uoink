@@ -10,16 +10,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added — Deep research, part 2: capture and status
+
+- `research_capture` queues selected sources through the existing capture worker,
+  reserves the run's ASR budget and reuses saved or already queued sources.
+  `transcript_only` defaults to lite mode: full transcript, sparse screenshots,
+  no comments. Unknown durations reserve an assumed 15 ASR minutes.
+- `research_status` reports queue progress, saved transcript provenance, ready
+  counts and estimated ASR usage. Direct podcast audio capture is deferred.
+- Active research runs can drain captioned sources serially with a 2-second
+  pause, up to 10 captures before normal pacing resumes. Failures and rate limits
+  always retain normal pacing and backoff.
+- The `research` toolset now serves four research tools plus `uoink_url`.
+
 ### Added — Deep research, part 1: research runs and source discovery
 
 - `research_start` saves a question, source choices and budgets in a local run.
   `research_discover` merges library, YouTube, HN, HackerTube and podcast results,
   ranks them with score explanations, and limits each channel to three candidates.
-- `UOINK_MCP_TOOLSET=research` serves these two tools plus `uoink_url`.
-  The MCP server now exposes 95 tools in the full toolset; core keeps its 36-tool order.
+- Introduced `UOINK_MCP_TOOLSET=research` with these two tools plus `uoink_url`.
+  The MCP server now exposes 97 tools in the full toolset; core keeps its 36-tool order.
 - Network discovery requires the user's `research_network_sources` setting,
   which defaults to `[]`. Research tools cannot grant consent. Reddit search is
-  deferred; capture, evidence retrieval and reports follow in later parts.
+  deferred; evidence retrieval and reports follow in later parts.
 
 ### Added
 

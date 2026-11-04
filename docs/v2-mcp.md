@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink serves the same tool registry over both MCP transports:
 
-- Supported stdio registry: **95 tools**.
-- Local HTTP/OpenAPI registry: **95 tools**.
+- Supported stdio registry: **97 tools**.
+- Local HTTP/OpenAPI registry: **97 tools**.
 
 Stdio uses the SDK's native dual-era runner. Existing clients can initialize
 with `2024-11-05`, `2025-03-26`, `2025-06-18` or `2025-11-25`, then send
@@ -87,7 +87,7 @@ still answer.
 The existing bounded Library tools keep their two-second deadline, response
 budget and AZ-5h admission lifetime through final JSON-RPC serialization.
 Only the server-generated tool inventory has a larger 256 KiB frame cap so all
-95 schemas fit; inbound requests and tool results retain their existing caps.
+97 schemas fit; inbound requests and tool results retain their existing caps.
 Work-queue mutations use their service's lease, transaction and operation-key
 bounds; they do not inherit a read timeout that could abandon a committed write.
 
@@ -1771,6 +1771,68 @@ run's discovery history. YouTube matches already in the library are marked
 Large responses return a shorter ranked list to fit the MCP response limit;
 `omitted_candidates` counts entries removed from that call's shortlist for size.
 Titles and descriptions are untrusted content. Discovery captures nothing.
-The `research` stdio toolset includes these two tools and `uoink_url`.
+The `research` stdio toolset includes all four research tools and `uoink_url`.
 
 Arguments: `run_id`, `queries`, `per_query`. The registry schema in `tools/list` defines required fields and bounds.
+
+### research_capture
+
+Queue sources from a saved run: provide `run_id` and exactly one of `keys`
+(1–30 distinct candidate keys, in the desired order) or `top` (1–30, descending
+score order from the shortlist). `transcript_only` defaults to `true` and uses
+the existing **lite** mode: it keeps the full captions/transcript, still takes
+sparse screenshots and skips the comments fetch. `false` uses full mode.
+A pending row reused from an earlier request keeps its original mode. Captures
+enter the library through the existing queue; the transcript cache alone is
+not a saved library item.
+
+Returns `queued`, `already` and `skipped` arrays with keys and reasons, plus
+`asr_minutes_committed`, `asr_minutes_left` and `eta` (`min_minutes`,
+`max_minutes`). Queue rows include `pending_id` and `already_queued`.
+Library membership and saved transcripts are checked again at capture time.
+Only items with a usable transcript return as `already`; transcriptless items
+are queued subject to the budget. Library picks are retained in the run for
+later evidence retrieval; repeated active picks reserve no extra budget.
+Without a resident helper, stdio still queues the picks and returns
+`warnings: ["helper_not_running"]` with a message that captures start when
+Uoink is running.
+
+Candidates without `has_captions: true` reserve the discovery ASR estimate:
+duration in seconds divided by 300, rounded up, at least 1 minute. An unknown
+duration reserves **15 minutes, an assumption**. A pick that exceeds
+`max_asr_minutes` is skipped with `asr_budget`; zero allows candidates known
+to have captions and library items with usable transcripts. `research_status` releases reservations
+when captions land or a capture fails or is cancelled without a transcript.
+Re-capturing a failed or cancelled pick replaces its reservation. ETA assumes serial
+work: 0.5–1 minute per captioned source and 10–15 minutes per audio hour for ASR.
+For unknown durations, ETA assumes 75 minutes of audio from the 15-minute reserve.
+
+Other skips are `unknown_key`, `not_capturable` and `podcast_capture_later`.
+The video worker requires video files and screenshots, so direct podcast audio
+enclosures are deferred. Podcast pages without audio URLs are not capturable.
+After a research capture saves captions without a caption refusal or ASR fallback,
+the next research item with captions or unknown caption availability can start
+after 2 seconds. The queue head is checked again after that pause; if it changed
+to an ineligible row, the worker waits out the normal interval.
+Bursts stop at 10 captures; failures, degraded successes and rate limits
+keep the normal 30-second pacing and existing retry backoff. Runs older than
+7 days do not qualify for bursts. Titles and channels are untrusted content.
+
+### research_status
+
+Provide `run_id` to read local capture progress. Returns `items` with `key`,
+`title`, `channel`, `url`, `video_id`, `state`, `transcript_source` and `error`,
+plus `counts`, `ready_count`, `asr_minutes_used`, `asr_minutes_left` and `done`.
+States are `queued`, `capturing`, `asr_running`, `ready`, `captioned` and `failed`.
+Only non-deleted library items with a saved transcript count as ready.
+Saved provenance identifies `captions` or `whisper`; captions use the
+`captioned` state. Unknown provenance remains `ready` with a null source.
+
+`asr_minutes_used` sums estimates only for captures that reached ready with a
+saved Whisper transcript; it is not measured runtime. `asr_minutes_left`
+subtracts the remaining reservations, including queued work. Reconciliation
+is saved in the run. `done` means nothing remains queued, capturing or running
+ASR; failures still count as done. Failed queue
+items return safe error codes, never raw downloader diagnostics. A failed queue
+row with an unsettled publication retry reports `capturing` until that retry settles.
+This tool fetches nothing. Titles and channels are untrusted content.

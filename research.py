@@ -34,8 +34,12 @@ SOURCE_KINDS = ("library", "youtube", "podcast", "hn", "hackertube", "reddit")
 NETWORK_KINDS = SOURCE_KINDS[1:]
 DEFAULT_SOURCE_KINDS = SOURCE_KINDS[:-1]
 RUN_ID_PATTERN = r"^rr_[0-9]{14}_[0-9a-f]{8}$"
+CANDIDATE_KEY_PATTERN = r"^(?:yt:[A-Za-z0-9_-]{11}|pod:[0-9a-f]{12}|hn:[0-9]+|lib:[^\x00-\x1f\x7f]{1,200})$"
 RUN_LOCK = threading.RLock()
 _RUN_LOCKS: dict[str, threading.Lock] = {}
+_ACTIVE_RUN_CACHE: dict[Path, tuple[tuple[int, int], datetime, dict[int, bool | None]]] = {}
+ACTIVE_RUN_DAYS = 7
+UNKNOWN_ASR_MINUTES = 15  # Assumption for sources without a known duration.
 MAX_CANDIDATES_POOL = 500
 USER_AGENT = list_imports.USER_AGENT
 FETCH_TIMEOUT_SEC = 20
@@ -146,7 +150,8 @@ def create_run(data_root: Path, scope: dict, *, now=None) -> dict:
             if not _run_path(data_root, run_id).parent.exists():
                 break
         run = {"run_id": run_id, "scope": scope, "created_at": timestamp(now),
-               "candidates": [], "candidates_pool": [], "discover_calls": []}
+               "candidates": [], "candidates_pool": [], "discover_calls": [],
+               "captures": {}, "asr_minutes_committed": 0}
         save_run(data_root, run)
         return run
 
@@ -215,6 +220,271 @@ def normalize_discovery(args: dict) -> dict:
         raise ResearchError("queries must contain 1 to 8 strings of 1 to 200 characters.")
     return {"run_id": run_id, "queries": [q.strip() for q in queries],
             "per_query": _integer(args.get("per_query", 10), "per_query", 1, 20)}
+
+
+def normalize_capture(args: dict) -> dict:
+    if not isinstance(args, dict) or set(args) - {"run_id", "keys", "top", "transcript_only"}:
+        raise ResearchError("Capture accepts only run_id, keys, top and transcript_only.")
+    run_id = validate_run_id(args.get("run_id"))
+    if ("keys" in args) == ("top" in args):
+        raise ResearchError("Provide exactly one of keys or top.")
+    normalized = {"run_id": run_id, "transcript_only": args.get("transcript_only", True)}
+    if type(normalized["transcript_only"]) is not bool:
+        raise ResearchError("transcript_only must be a boolean.")
+    if "keys" in args:
+        keys = args["keys"]
+        if (not isinstance(keys, list) or not 1 <= len(keys) <= 30
+                or any(not isinstance(k, str) or not re.fullmatch(CANDIDATE_KEY_PATTERN, k) for k in keys)
+                or len(set(keys)) != len(keys)):
+            raise ResearchError("keys must contain 1 to 30 distinct candidate keys.")
+        normalized["keys"] = list(keys)
+    else:
+        normalized["top"] = _integer(args["top"], "top", 1, 30)
+    return normalized
+
+
+def normalize_status(args: dict) -> dict:
+    if not isinstance(args, dict) or set(args) != {"run_id"}:
+        raise ResearchError("Status accepts only run_id.")
+    return {"run_id": validate_run_id(args.get("run_id"))}
+
+
+def estimated_asr_minutes(candidate: dict) -> int:
+    """The discovery estimate (12 minutes/hour), with a 15-minute unknown assumption."""
+    duration = _number(candidate.get("duration_s"))
+    return max(1, math.ceil(duration / 300)) if duration else UNKNOWN_ASR_MINUTES
+
+
+def _asr_expected(candidate: dict, *, in_library: bool = False) -> bool | None:
+    if in_library:
+        return False
+    if candidate.get("kind") == "podcast" or candidate.get("has_captions") is False:
+        return True
+    if candidate.get("has_captions") is True:
+        return False
+    return None
+
+
+def _reserved_minutes(capture: dict) -> int:
+    # Read runs saved before reservations became per-entry too.
+    return capture.get("asr_minutes_reserved", capture.get("est_asr_minutes", 0))
+
+
+def _committed_minutes(run: dict) -> int:
+    return sum(_reserved_minutes(c) for c in run.get("captures", {}).values())
+
+
+def capture(data_root: Path, args: dict, *, index, library_lookup, library_transcript,
+            publication_pending, asr_expectation, queue_now,
+            interval: int = 30, now=None) -> dict:
+    """Reserve the run budget and hand picks to the existing serial queue."""
+    args = normalize_capture(args)
+    with run_lock(args["run_id"]):
+        run = load_run(data_root, args["run_id"])
+        before = deepcopy(run)
+        _reconcile_captures(run, index=index, library_transcript=library_transcript,
+                            publication_pending=publication_pending)
+        candidates = {c["key"]: c for c in [*run.get("candidates_pool", []), *run.get("candidates", [])]}
+        keys = args.get("keys")
+        if keys is None:
+            keys = [c["key"] for c in sorted(run.get("candidates", []),
+                    key=lambda c: (-c.get("score", 0), c["key"]))[:args["top"]]]
+        captures = run.setdefault("captures", {})
+        committed = _committed_minutes(run)
+        budget = run["scope"]["max_asr_minutes"]
+        queued, already, skipped = [], [], []
+        eta_min = eta_max = 0.0
+        for key in keys:
+            candidate = candidates.get(key)
+            if candidate is None:
+                skipped.append({"key": key, "reason": "unknown_key"})
+                continue
+            item = {field: candidate.get(field) for field in ("key", "title", "channel", "url")}
+            row = library_lookup(candidate)
+            previous = captures.get(key, {})
+            transcript = library_transcript(row["video_id"]) if row and not row.get("deleted_at") else None
+            if transcript:
+                # Keep library picks in the run for the later evidence step too.
+                captures[key] = {**item, **previous, "url": candidate["url"],
+                    "video_id": row["video_id"], "pending_id": previous.get("pending_id"),
+                    "queued_at": previous.get("queued_at"),
+                    "transcript_only": previous.get("transcript_only", args["transcript_only"]),
+                    "est_asr_minutes": previous.get("est_asr_minutes", 0),
+                    "asr_minutes_reserved": _reserved_minutes(previous),
+                    "asr_expected": _asr_expected(candidate, in_library=True)}
+                save_run(data_root, run)
+                already.append({**item, "video_id": row["video_id"], "reason": "in_library"})
+                continue
+            if candidate.get("capturable") is False:
+                skipped.append({"key": key, "reason": "not_capturable"})
+                continue
+            if candidate.get("kind") == "podcast":
+                # The video queue requires a video container and screenshots.
+                skipped.append({"key": key, "reason": "podcast_capture_later"})
+                continue
+            video_id = key[3:] if key.startswith("yt:") else None
+            if not video_id:
+                skipped.append({"key": key, "reason": "not_capturable"})
+                continue
+            pending = index.get_pending(previous["pending_id"]) if previous.get("pending_id") else None
+            reuse = pending and (pending["status"] in {"pending", "running", "publishing"}
+                                 or (pending["status"] == "failed" and publication_pending(pending["pending_id"])))
+            expected = previous.get("asr_expected", _asr_expected(candidate)) if reuse else _asr_expected(candidate)
+            estimate = previous["est_asr_minutes"] if reuse else estimated_asr_minutes(candidate)
+            reservation = _reserved_minutes(previous) if reuse else estimate if expected is not False else 0
+            replacement_total = committed - _reserved_minutes(previous) + reservation
+            if replacement_total > budget:
+                skipped.append({"key": key, "reason": "asr_budget"})
+                continue
+            url = list_imports.watch_url(video_id)
+            if reuse:
+                pending_id, inserted = pending["pending_id"], False
+            else:
+                pending_id, inserted = index.enqueue_pending_once(
+                    url, interval, retry_after=queue_now(),
+                    long_video_mode="lite" if args["transcript_only"] else "full")
+            pending_row = index.get_pending(pending_id)
+            captures[key] = {**(previous if reuse else {}), **item,
+                "url": url, "video_id": video_id, "pending_id": pending_id,
+                "queued_at": previous.get("queued_at") if reuse else timestamp(now),
+                "transcript_only": pending_row["long_video_mode"] == "lite",
+                "est_asr_minutes": estimate, "asr_minutes_reserved": reservation,
+                "asr_expected": expected}
+            committed = run["asr_minutes_committed"] = _committed_minutes(run)
+            # Persist each handoff so a later failure cannot lose earlier picks.
+            save_run(data_root, run)
+            queued.append({**item, "url": url, "video_id": video_id, "pending_id": pending_id,
+                           "already_queued": not inserted, "reason": "already_queued" if not inserted else "queued"})
+            if expected is not False:
+                expectation = asr_expectation(candidate.get("duration_s") or estimate * 300)
+                eta_min += expectation["estimated_minutes_min"]
+                eta_max += expectation["estimated_minutes_max"]
+            else:
+                eta_min += 0.5
+                eta_max += 1.0
+        if run != before:
+            save_run(data_root, run)
+        return {"ok": True, "run_id": run["run_id"], "queued": queued, "already": already,
+                "skipped": skipped, "asr_minutes_committed": committed,
+                "asr_minutes_left": max(0, budget - committed),
+                "eta": {"min_minutes": round(eta_min, 1), "max_minutes": round(eta_max, 1)}}
+
+
+def _capture_error(pending: dict) -> str:
+    """Only stable codes leave the queue; never return downloader text or paths."""
+    if pending.get("status") == "cancelled":
+        return "cancelled"
+    error = str(pending.get("last_error") or "")
+    if "429" in error or "rate_limit" in error or "rate-limit" in error:
+        return "rate_limited"
+    safe = {"capture_ownership_unavailable", "source_identity_conflict", "transcript_unavailable",
+            "download_failed", "capture_failed", "publication_failed"}
+    return error if error in safe else "capture_failed"
+
+
+def _reconcile_captures(run: dict, *, index, library_transcript, publication_pending) -> dict:
+    """Reconcile reservations from saved transcripts and SQLite queue state."""
+    candidates = {c["key"]: c for c in [*run.get("candidates_pool", []), *run.get("candidates", [])]}
+    items, used = [], 0
+    counts = dict.fromkeys(("queued", "capturing", "asr_running", "ready", "captioned", "failed"), 0)
+    for key, capture in run.get("captures", {}).items():
+        candidate = {**candidates.get(key, {}), **capture}
+        video_id = capture.get("video_id")
+        row = index.get_yoink(video_id) if video_id else None
+        pending = index.get_pending(capture["pending_id"]) if capture.get("pending_id") else None
+        transcript = library_transcript(video_id) if row and not row.get("deleted_at") else None
+        capture.setdefault("asr_expected", _asr_expected(candidate))
+        attempted = bool(pending and (pending.get("attempt_count", 0) > 0
+                         or pending.get("last_attempt_at")
+                         or pending["status"] in {"running", "publishing", "failed", "succeeded"}))
+        source, error = None, None
+        handoff = pending and pending["status"] == "failed" and publication_pending(pending["pending_id"])
+        if handoff:
+            state = "capturing"
+        elif transcript:
+            source = transcript.get("transcript_source")
+            source = source if source in {"captions", "whisper"} else None
+            state = "captioned" if source == "captions" else "ready"
+        elif pending and pending["status"] == "pending":
+            state = "queued"
+        elif pending and pending["status"] in {"running", "publishing"}:
+            state = ("asr_running" if pending["status"] == "running" and attempted
+                     and capture["asr_expected"] is True else "capturing")
+        else:
+            state = "failed"
+            error = (_capture_error(pending) if pending and pending["status"] in {"failed", "cancelled"}
+                     else "transcript_unavailable" if row or (pending and pending["status"] == "succeeded")
+                     else "pending_not_found")
+        reserved = _reserved_minutes(capture)
+        if source == "captions" or (state == "failed" and not transcript):
+            reserved = 0
+        elif state == "ready" and source == "whisper" and capture.get("pending_id"):
+            # Known captions can still fall back to ASR. Count only saved words,
+            # using the original estimate, or saved duration for older entries.
+            minutes = capture.get("est_asr_minutes") or estimated_asr_minutes({
+                "duration_s": transcript.get("duration_seconds") or candidate.get("duration_s")})
+            used += minutes
+            reserved = minutes
+        elif state in {"queued", "capturing", "asr_running"} and capture["asr_expected"] is not False:
+            reserved = capture.get("est_asr_minutes", reserved)
+        capture["asr_minutes_reserved"] = reserved
+        counts[state] += 1
+        items.append({"key": key, "title": candidate.get("title") or "",
+                      "channel": candidate.get("channel") or "", "url": capture["url"],
+                      "video_id": video_id, "state": state, "transcript_source": source, "error": error})
+    run["asr_minutes_committed"] = _committed_minutes(run)
+    return {"ok": True, "run_id": run["run_id"], "items": items, "counts": counts,
+            "ready_count": counts["ready"] + counts["captioned"], "asr_minutes_used": used,
+            "asr_minutes_left": max(0, run["scope"]["max_asr_minutes"] - run.get("asr_minutes_committed", 0)),
+            "done": not any(counts[s] for s in ("queued", "capturing", "asr_running"))}
+
+
+def status(data_root: Path, args: dict, *, index, library_transcript, publication_pending) -> dict:
+    """Read local progress and persist reservation reconciliation; never fetch."""
+    args = normalize_status(args)
+    with run_lock(args["run_id"]):
+        run = load_run(data_root, args["run_id"])
+        before = deepcopy(run)
+        result = _reconcile_captures(run, index=index, library_transcript=library_transcript,
+                                     publication_pending=publication_pending)
+        if run != before:
+            save_run(data_root, run)
+        return result
+
+
+def active_research_pending_ids(data_root: Path, *, now=None) -> dict[int, bool | None]:
+    """Recent run membership, cached by each run file's mtime/size; no queue I/O."""
+    root = Path(data_root).resolve() / "research"
+    current = _utc(now)
+    result, seen = {}, set()
+    with RUN_LOCK:
+        for path in root.glob("rr_*/run.json"):
+            if not re.fullmatch(RUN_ID_PATTERN, path.parent.name):
+                continue
+            try:
+                path = _run_path(data_root, path.parent.name)
+                stat = path.stat()
+                signature = (stat.st_mtime_ns, stat.st_size)
+                seen.add(path)
+                cached = _ACTIVE_RUN_CACHE.get(path)
+                if cached is None or cached[0] != signature:
+                    run = load_run(data_root, path.parent.name)
+                    created = _utc(datetime.fromisoformat(run["created_at"].replace("Z", "+00:00")))
+                    ids = {c["pending_id"]: c.get("asr_expected", c.get("expects_asr"))
+                           for c in run.get("captures", {}).values()
+                           if type(c.get("pending_id")) is int}
+                    cached = _ACTIVE_RUN_CACHE[path] = (signature, created, ids)
+                if 0 <= (current - cached[1]).total_seconds() <= ACTIVE_RUN_DAYS * 86400:
+                    for pending_id, expected in cached[2].items():
+                        previous = result.get(pending_id, False)
+                        result[pending_id] = (True if previous is True or expected is True else
+                                              None if previous is None or expected is None else False)
+            except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                continue
+        for path in list(_ACTIVE_RUN_CACHE):
+            if path.parent.parent == root and path not in seen:
+                del _ACTIVE_RUN_CACHE[path]
+    return result
 
 
 def _text(value, cap=4000):
@@ -405,19 +675,21 @@ def parse_library(rows: Any) -> list[dict]:
         if not isinstance(row, dict):
             continue
         ident = _text(row.get("video_id"), 200)
-        audio = (_url(row.get("enclosure_url")) or _url(row.get("url"))) if ident.startswith("ep_") else ""
+        podcast = ident.startswith(("ep_", "episode_"))
+        audio = (_url(row.get("enclosure_url")) or _url(row.get("url"))) if podcast else ""
         url = _url(row.get("source_url")) or _url(row.get("url"))
         video_id = _youtube_id(url) or (ident if not url and _YT_ID.fullmatch(ident) else None)
         if not (ident or url):
             continue
         key = ("pod:" + hashlib.sha1(audio.encode("utf-8")).hexdigest()[:12] if audio else
                "yt:" + video_id if video_id else "lib:" + (ident or hashlib.sha1(url.encode()).hexdigest()[:12]))
-        candidate = _candidate(key, "podcast" if audio else "youtube" if video_id else "library",
+        candidate = _candidate(key, "podcast" if podcast else "youtube" if video_id else "library",
                                audio or (list_imports.watch_url(video_id) if video_id else url),
                                row.get("title"), row.get("channel"), row.get("duration"),
                                row.get("published"), row.get("description"), in_library=True)
         if type(row.get("has_captions")) is bool:
             candidate["has_captions"] = row["has_captions"]
+        candidate["video_id"] = ident or video_id
         if audio:
             candidate["episodeUrl"] = audio
         out.append(candidate)
@@ -491,7 +763,7 @@ def _rank_pool(candidates: list[dict], queries: list[str], scope: dict, *, now) 
         candidate["est_capture"] = (
             "unknown" if not candidate["capturable"] and not candidate["in_library"] else
             "captions" if candidate["in_library"] or candidate["has_captions"] is True else
-            f"asr ~{max(1, math.ceil(duration / 300))} min" if duration is not None and duration > 0 else
+            f"asr ~{estimated_asr_minutes(candidate)} min" if duration is not None and duration > 0 else
             "unknown")
     pool.sort(key=lambda c: (-c["score"], c["key"]))
     return pool

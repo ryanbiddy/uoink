@@ -96,4 +96,9 @@ def call_tool(name, arguments, backend, *, running=None):
             running() if running is not None else helper_running(backend)):
         return {"ok": False, "error": "Open Uoink first, then retry polling the monitored playlist. "
                 "Its scheduled captures need the running Uoink helper."}
-    return dispatch_search(name, arguments, backend, lambda: registry.call_tool(name, arguments), running=running)
+    result = dispatch_search(name, arguments, backend, lambda: registry.call_tool(name, arguments), running=running)
+    if name == "research_capture" and result.get("ok") is True and not (
+            running() if running is not None else helper_running(backend)):
+        result["warnings"] = ["helper_not_running"]
+        result["message"] = "Captures are queued and start when Uoink is running."
+    return result
