@@ -49,7 +49,7 @@ and does not proxy through the helper
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md), Capabilities / client
 artifacts). Do not put a helper URL in this configuration.
 
-Uoink advertises all 93 registry tools by default, with the 36 core
+Uoink advertises all 95 registry tools by default, with the 36 core
 first in their original order. Set `UOINK_MCP_TOOLSET=core` in the MCP server's
 `env` object for clients with tool caps, including Cursor. Unknown values warn
 on stderr and use full. Restart the connection after changing it. Consent gates
