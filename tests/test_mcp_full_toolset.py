@@ -198,6 +198,7 @@ def test_resident_helper_pid_requires_live_original_process(tmp_path, monkeypatc
     iso = uoink_mcp._install_isolation
     monkeypatch.setattr(iso, "current_binding", lambda: None)
     monkeypatch.setattr(server, "HERE", tmp_path)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     pid_path = tmp_path / "server.pid"
     pid_path.write_text("77", encoding="utf-8")
     created_ms = pid_path.stat().st_mtime_ns // 1_000_000 + (1000 if reused else -1000)

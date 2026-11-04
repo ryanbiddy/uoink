@@ -712,6 +712,10 @@ def test_stdio_inherits_isolated_profile(tmp_path):
 def test_spawn_dashboard_passes_isolation_argv(tmp_path, monkeypatch):
     import server
 
+    if sys.platform.startswith("linux"):
+        pytest.skip("Linux never spawns a dashboard window; it logs the URL "
+                    "(tests/test_linux_headless.py)")
+
     profile = tmp_path / "profile"
     profile.mkdir()
     port = _free_loopback_port()

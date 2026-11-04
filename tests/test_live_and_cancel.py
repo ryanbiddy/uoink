@@ -511,6 +511,9 @@ def test_terminal_settlement_errors_preserve_activity_unless_cancelled(
         retry, monkeypatch, caplog, outcome, cancel, platform):
     monkeypatch.setattr(retry.scope["_platform"], "sys",
                         SimpleNamespace(platform=platform, executable=str(ROOT / "dev-python")))
+    # Simulated Linux reaches the injected outcome only with media tools present;
+    # the runner itself may have no ffmpeg (the Windows CI image does not).
+    monkeypatch.setattr(retry.scope["_platform"], "linux_media_tools_present", lambda: True)
     attempts_before = 2 if outcome == "final_rate_limit" else 0
     pending_id = _enqueue(retry, attempts=attempts_before)
     retry.record.side_effect = retry.real_record

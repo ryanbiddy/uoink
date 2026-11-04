@@ -1,0 +1,14 @@
+# Headless Linux runtime; versions come from requirements-installer-lock.txt.
+# Capture ASR for caption-less videos uses faster-whisper on CPU, the same
+# engine and pinned base model bundled by the Windows installer.
+# Podcast diarization uses optional WhisperX: install.sh --with-whisperx adds
+# requirements-linux-whisperx.txt (CPU torch from https://download.pytorch.org/whl/cpu).
+mcp==2.3.0
+mcp-types==2.3.0
+httpx2==2.16.0
+httpcore2==2.16.0
+truststore==0.10.5
+yt-dlp==2026.8.19
+Pillow==13.0.0
+PyYAML==6.0.3
+faster-whisper==1.2.1

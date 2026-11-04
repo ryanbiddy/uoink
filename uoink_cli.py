@@ -418,7 +418,7 @@ def main(argv=None):
                            "data_dir": str(server.DATA_ROOT.resolve()),
                            "helper_running": runtime.helper_running(server),
                            "tool_counts": {mode: len(registry.stdio_tool_names(mode)) for mode in ("full", "core")}}
-                if sys.platform == "darwin":
+                if sys.platform == "darwin" or sys.platform.startswith("linux"):
                     payload["capabilities"] = server._platform.platform_capabilities()
             else:
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)

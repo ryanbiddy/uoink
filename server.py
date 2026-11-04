@@ -2472,6 +2472,8 @@ def _get_output_root() -> Path:
         except OSError:
             pass
     desktop = _get_desktop_dir()
+    if sys.platform.startswith("linux") and not desktop.is_dir():
+        return DATA_ROOT / "output"
     new_root = desktop / "Uoink"
     legacy_root = desktop / "Yoink"
     if new_root.exists():
@@ -22280,6 +22282,10 @@ def _is_installed_layout() -> bool:
 
 def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
+    if sys.platform.startswith("linux"):
+        url = _install_isolation.helper_url("/dashboard") + ("#settings" if settings else "")
+        log.info("dashboard: %s (%s)", url, reason)
+        return True
     try:
         # Source checkouts on macOS keep the script path below; the bundle
         # spawner requires the installed app's interpreter.
@@ -22546,7 +22552,7 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # system tray) degrades to "no tray, server still runs" -- the boot balloon
     # below is the fallback "it's running" affordance.
     # Darwin owns AppKit in separate processes with parent-death lifelines.
-    if _is_installed_layout() and sys.platform != "darwin":
+    if _is_installed_layout() and sys.platform == "win32":
         try:
             import uoink_tray
 
@@ -22633,6 +22639,8 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         log.info("toast: skipped regular ready toast while first-run splash is visible")
     elif _desktop_alerts_for_results_only():
         log.info("toast: skipped ready toast on macOS")
+    elif sys.platform.startswith("linux") and _platform.is_headless():
+        log.info("toast: skipped ready toast on headless Linux")
     elif not _maybe_post_migration_toast():
         maybe_toast(
             "Uoink is Active & Ready ✓",

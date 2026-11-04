@@ -312,10 +312,9 @@ def test_duplicate_darwin_launch_falls_back_when_helper_refuses(supervisor, monk
     assert len(seen) == 1
 
 
-@pytest.mark.parametrize("platform", ["win32", "linux"])
-def test_duplicate_launch_off_darwin_still_spawns_dashboard_script(monkeypatch, tmp_path, platform):
+def test_duplicate_windows_launch_still_spawns_dashboard_script(monkeypatch, tmp_path):
     import uoink_supervisor
-    monkeypatch.setattr(uoink_supervisor.sys, "platform", platform)
+    monkeypatch.setattr(uoink_supervisor.sys, "platform", "win32")
     spawned = []
     monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda args, **k: spawned.append(args))
     assert uoink_supervisor.show_running_dashboard(tmp_path) is True

@@ -49,13 +49,14 @@ def test_state_locations_preserve_other_platforms(monkeypatch, tmp_path, platfor
     app, data = tmp_path / "app", tmp_path / "data"
     for name in ("token.txt", "server.log", "server.pid", "topics.json"):
         assert _platform.app_state_path(app, data, name) == (
-            data if platform == "darwin" else app) / name
+            data if platform in ("darwin", "linux") else app) / name
     _platform.prepare_app_state(data)
-    assert data.exists() == (platform == "darwin")
+    assert data.exists() == (platform in ("darwin", "linux"))
 
 
-def test_topics_first_edit_preserves_defaults_then_reads_override(monkeypatch, tmp_path):
-    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="darwin"))
+@pytest.mark.parametrize("platform", ["darwin", "linux"])
+def test_topics_first_edit_preserves_defaults_then_reads_override(monkeypatch, tmp_path, platform):
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
     app, data = tmp_path / "app", tmp_path / "data"
     app.mkdir()
     data.mkdir()

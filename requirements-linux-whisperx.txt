@@ -1,0 +1,5 @@
+# Optional podcast diarization; versions come from requirements-installer-lock.txt.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.8.0
+torchaudio==2.8.0
+whisperx==3.8.6

@@ -266,6 +266,9 @@ def python_command(app_dir: Path) -> Path:
         # Keep the documented bin/python3 launch path even if it is a symlink.
         return bundled
     bundled = app_dir / "python" / ("python.exe" if sys.platform == "win32" else "bin/python3")
+    if sys.platform.startswith("linux"):
+        # Resolving a venv symlink selects system Python without its packages.
+        return (bundled if bundled.is_file() else Path(sys.executable)).absolute()
     return (bundled if bundled.is_file() else Path(sys.executable)).resolve()
 
 
@@ -275,7 +278,7 @@ def default_toolset(client: str) -> str:
 
 
 def server_entry(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=None) -> dict:
-    command = str(python.resolve())
+    command = str(python.absolute() if sys.platform.startswith("linux") else python.resolve())
     args = [str((app_dir / "uoink_mcp.py").resolve()), *isolation_args]
     if sys.platform == "darwin":
         resources = bundle_resources(app_dir) or app_dir.resolve()
@@ -306,7 +309,7 @@ def render(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=
     entry = server_entry(client, app_dir, python, isolation_args, toolset)
     command, args, env = entry["command"], entry["args"], entry["env"]
     if spec.format == "text":
-        launcher = str((app_dir / "cli" / "uoink.cmd").resolve())
+        launcher = str((app_dir / "cli" / ("uoink" if sys.platform.startswith("linux") else "uoink.cmd")).resolve())
         resources = bundle_resources(app_dir)
         if resources is not None:
             launcher = str(resources.parent / "Helpers/uoink")
