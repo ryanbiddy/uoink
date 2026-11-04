@@ -19,10 +19,15 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.request
 
 MAC = Path(__file__).resolve().parent
 FINGERPRINT = "FCF986EA15E6E293A5644F10B4322F04D67658D8"
+# Unmodified copies of the pinned tarballs, used only when ffmpeg.org refuses
+# the runner. extract_source applies the same size and SHA-256 pin to either.
+SOURCE_MIRROR = "https://github.com/ryanbiddy/uoink/releases/download/ffmpeg-sources/"
+PRIMARY_ATTEMPTS = 3
 LIBRARIES = {"avcodec": 61, "avformat": 61, "avutil": 59, "swresample": 5,
              "swscale": 8, "avfilter": 10, "avdevice": 61}
 BASE_FLAGS = {"--disable-gpl", "--disable-nonfree",
@@ -212,6 +217,22 @@ def verify_output(output: Path, config: dict) -> dict:
     return receipt
 
 
+def fetch_source(pin: dict, archive: Path) -> None:
+    """Download a pinned tarball, retrying ffmpeg.org before the mirror."""
+    mirror = SOURCE_MIRROR + f"ffmpeg-{pin['version']}.tar.xz"
+    urls = [pin["url"]] * PRIMARY_ATTEMPTS + [mirror]
+    for attempt, url in enumerate(urls):
+        try:
+            with urllib.request.urlopen(url, timeout=120) as response, archive.open("wb") as target:
+                shutil.copyfileobj(response, target)
+            return
+        except OSError as error:
+            if attempt == len(urls) - 1:
+                raise
+            print(f"FFmpeg source download from {url} failed: {error}", file=sys.stderr)
+            time.sleep(min(30 * (attempt + 1), 90))
+
+
 def build(output: Path) -> None:
     if sys.platform != "darwin" or platform.machine() != "arm64":
         raise RuntimeError("FFmpeg build requires native macOS arm64")
@@ -232,8 +253,7 @@ def build(output: Path) -> None:
         for role in ("cli", "shared"):
             pin = config[role]
             archive = scratch / f"ffmpeg-{pin['version']}.tar.xz"
-            with urllib.request.urlopen(pin["url"], timeout=120) as response, archive.open("wb") as target:
-                shutil.copyfileobj(response, target)
+            fetch_source(pin, archive)
             source = extract_source(archive, scratch / role, pin)
             prefix = output / role
             evidence = output / "notices" / role
