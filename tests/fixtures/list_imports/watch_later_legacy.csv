@@ -1,0 +1,9 @@
+Playlist Id,Channel Id,Title
+synthetic-playlist,synthetic-channel,Watch later
+
+Video Id,Time Added
+save0000001,2026-01-01T00:00:00Z
+save0000002,2026-01-02T00:00:00Z
+save0000001,2026-01-03T00:00:00Z
+not-valid,2026-01-04T00:00:00Z
+https://www.youtube.com/watch?v=save0000003,2026-01-05T00:00:00Z

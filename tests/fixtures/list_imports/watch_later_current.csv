@@ -1,0 +1,7 @@
+Video ID,Playlist Video Creation Timestamp
+save0000001,2026-01-01T00:00:00Z
+too_short,2026-01-02T00:00:00Z
+save0000002,2026-01-03T00:00:00Z
+save0000001,2026-01-04T00:00:00Z
+https://youtu.be/save0000003?t=2,2026-01-05T00:00:00Z
+invalid-id-is-too-long,2026-01-06T00:00:00Z

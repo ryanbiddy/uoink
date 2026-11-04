@@ -1,4 +1,4 @@
-"""Import a list: queue every video from a list source for normal capture.
+"""Import a list: queue videos and saved platform posts for normal capture.
 
 Supported sources (one pasted link each):
 
@@ -17,7 +17,7 @@ Supported sources (one pasted link each):
   a time with an offset.
 
 This module owns parsing, previewing and the small import registry. The
-capture itself goes through the helper's existing download queue
+Video capture goes through the helper's existing download queue
 (pending_yoinks + the retry worker), which takes one video per pass, so a
 50-video batch is throttled the same way every other queued capture is.
 
@@ -27,17 +27,24 @@ note and the credit line. When the capture lands in the library the helper
 calls ``apply_on_index`` to add a source tag, and the Library and For You read
 the note back from here. No database migration is needed.
 
-Parsers are pure functions over already-fetched JSON so tests run against
-saved fixtures with no network.
+Platform saves can also be staged from local CSV/text or extension items.
+Watch Later uses the video queue; X bookmarks and Reddit saves use the
+helper's serial post worker and keep their status in this registry.
+Parsers are pure functions over supplied JSON/text, with no network.
 """
 from __future__ import annotations
 
+import csv
+import hashlib
 import html
+import io
 import json
 import logging
 import os
 import re
+import secrets
 import threading
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -51,13 +58,20 @@ SOURCE_HACKERTUBE = "hackertube"
 SOURCE_HN = "hn_thread"
 SOURCE_REDDIT = "reddit_thread"
 SOURCE_PLAYLIST = "youtube_playlist"
-SOURCES = (SOURCE_HACKERTUBE, SOURCE_HN, SOURCE_REDDIT, SOURCE_PLAYLIST)
+SOURCE_WATCH_LATER = "watch_later"
+SOURCE_X_BOOKMARKS = "x_bookmarks"
+SOURCE_REDDIT_SAVED = "reddit_saved"
+SAVE_SOURCES = (SOURCE_WATCH_LATER, SOURCE_X_BOOKMARKS, SOURCE_REDDIT_SAVED)
+SOURCES = (SOURCE_HACKERTUBE, SOURCE_HN, SOURCE_REDDIT, SOURCE_PLAYLIST, *SAVE_SOURCES)
 
 SOURCE_LABELS = {
     SOURCE_HACKERTUBE: "HackerTube",
     SOURCE_HN: "HN thread",
     SOURCE_REDDIT: "Reddit thread",
     SOURCE_PLAYLIST: "YouTube playlist",
+    SOURCE_WATCH_LATER: "YouTube Watch Later",
+    SOURCE_X_BOOKMARKS: "X bookmarks",
+    SOURCE_REDDIT_SAVED: "Reddit saved",
 }
 # Library tags (index.add_tags lower-cases them).
 SOURCE_TAGS = {
@@ -65,6 +79,9 @@ SOURCE_TAGS = {
     SOURCE_HN: "hn thread",
     SOURCE_REDDIT: "reddit thread",
     SOURCE_PLAYLIST: "youtube playlist",
+    SOURCE_WATCH_LATER: "watch later",
+    SOURCE_X_BOOKMARKS: "x bookmarks",
+    SOURCE_REDDIT_SAVED: "reddit saved",
 }
 TAG_SOURCE = "list_import"
 
@@ -83,6 +100,14 @@ NOTE_MAX_CHARS = 400
 FETCH_TIMEOUT_SEC = 20
 FETCH_MAX_BYTES = 24 * 1024 * 1024
 REGISTRY_ITEM_CAP = 5000
+SAVES_STAGE_MAX = 5000
+SAVES_STAGE_CAP = 20
+SAVES_FILE_MAX_BYTES = 5 * 1024 * 1024
+SAVES_UPLOAD_CAP = 5
+SAVES_UPLOAD_TTL_SEC = 60 * 60
+_SAVES_ID_RE = re.compile(r"[0-9a-f]{16}")
+_STAGE_TOKEN_RE = re.compile(r"uoink-saves:([0-9a-f]{16})", re.IGNORECASE)
+_stage_lock = threading.Lock()
 USER_AGENT = "uoink/1.0 (local corpus tool; +https://uoink.app)"
 
 _YT_ID = r"[A-Za-z0-9_-]{11}"
@@ -149,12 +174,19 @@ def _strip_html(text: str) -> str:
 # Source classification
 # ---------------------------------------------------------------------------
 
-def classify(text: str) -> dict:
+def classify(text: str, data_root: Path | None = None) -> dict:
     """Map pasted text to a source spec, or raise ImportListError.
 
     Returns {"kind", "url", ...kind specific fields}.
     """
     raw = (text or "").strip()
+    if raw.lower().startswith("uoink-saves:"):
+        match = _STAGE_TOKEN_RE.fullmatch(raw)
+        if not match:
+            raise ImportListError("That saves token isn't valid.", "invalid_url")
+        stage_id = match.group(1).lower()
+        kind = _load_stage(data_root, stage_id)["source"] if data_root is not None else "saves_staged"
+        return {"kind": kind, "stage_id": stage_id, "url": f"uoink-saves:{stage_id}"}
     if not raw:
         raise ImportListError("Paste a HackerTube, Hacker News, Reddit or YouTube playlist link.",
                               "empty")
@@ -257,6 +289,8 @@ def _item(video_id: str, *, title: str = "", channel: str = "", note: str = "",
         q = None
     return {
         "video_id": video_id,
+        "kind": "video",
+        "item_key": video_id,
         "url": watch_url(video_id),
         "title": _clean(title, 300),
         "channel": _clean(channel, 200),
@@ -264,6 +298,352 @@ def _item(video_id: str, *, title: str = "", channel: str = "", note: str = "",
         "duration_seconds": duration_s,
         "quality_score": q,
     }
+
+
+class _SaveItems(list):
+    """A normal item list that also remembers whether parsing hit the cap."""
+    truncated = False
+
+
+def _save_item(source: str, value: Any) -> dict | None:
+    import reddit_extractor
+    import x_extractor
+
+    row = value if isinstance(value, dict) else {}
+    raw = (row.get("url") or row.get("id")) if row else value
+    if not isinstance(raw, str):
+        return None
+    raw = raw.strip().lstrip("\ufeff")
+    fields = {"title": row.get("title"), "channel": row.get("channel") or row.get("author"),
+              "note": row.get("note")}
+    if source == SOURCE_WATCH_LATER:
+        ids = [raw] if _YT_ID_RE.fullmatch(raw) else extract_youtube_ids(raw)
+        return _item(ids[0], **fields) if len(ids) == 1 else None
+    try:
+        if source == SOURCE_X_BOOKMARKS:
+            if re.fullmatch(r"[0-9]+", raw):
+                raw = f"https://x.com/i/status/{raw}"
+            if not x_extractor.is_x_status_url(raw):
+                return None
+            parsed = urlparse(raw)
+            path = re.fullmatch(r"/([A-Za-z0-9_]{1,15})/status(?:es)?/([0-9]+)/?", parsed.path)
+            ident = x_extractor.tweet_id_from_url(raw)
+            if not path or not ident or parsed.username or parsed.port:
+                return None
+            url = f"https://x.com/{path.group(1)}/status/{ident}"
+            key, prefix, library_url = f"x:{ident}", "x", url
+        else:
+            if raw.startswith("/r/"):
+                raw = "https://www.reddit.com" + raw
+            if not reddit_extractor.is_reddit_thread_url(raw):
+                return None
+            parsed = urlparse(raw)
+            path = re.fullmatch(
+                r"/r/([A-Za-z0-9_]+)/comments/([A-Za-z0-9]+)/([^/\s?#]+)(?:/([A-Za-z0-9]+))?/?",
+                parsed.path)
+            if not path or parsed.username or parsed.port or path.group(3) in (".", ".."):
+                return None
+            sub, post, slug, comment = path.groups()
+            library_url = f"https://www.reddit.com/r/{sub}/comments/{post}/{slug}/"
+            url = library_url + (f"{comment}/" if comment else "")
+            key = f"reddit:{post.lower()}" + (f":{comment.lower()}" if comment else "")
+            prefix = "reddit"
+    except ValueError:
+        return None
+    return {
+        "item_key": key, "kind": "post", "url": url,
+        "video_id": f"{prefix}_{hashlib.sha1(library_url.encode('utf-8')).hexdigest()[:11]}",
+        "title": _clean(fields["title"], 300), "channel": _clean(fields["channel"], 200),
+        "note": _clean(fields["note"]), "duration_seconds": None, "quality_score": None,
+    }
+
+
+def parse_save_items(source: str, values: Iterable[Any]) -> list[dict]:
+    """Validate extension/file items, dedupe in order, and keep at most 5,000."""
+    if source not in SAVE_SOURCES:
+        raise ImportListError("Choose watch_later, x_bookmarks or reddit_saved.", "unsupported")
+    if isinstance(values, (str, bytes, dict)) or not isinstance(values, Iterable):
+        raise ImportListError("items must be an array.", "invalid_items")
+    out = _SaveItems()
+    seen: set[str] = set()
+    for value in values:
+        item = _save_item(source, value)
+        if not item or item["item_key"] in seen:
+            continue
+        if len(out) == SAVES_STAGE_MAX:
+            out.truncated = True
+            break
+        seen.add(item["item_key"])
+        out.append(item)
+    return out
+
+
+def _csv_rows(text: str) -> Iterable[list[str]]:
+    reader = csv.reader(io.StringIO(text.lstrip("\ufeff"), newline=""))
+    while True:
+        try:
+            yield next(reader)
+        except StopIteration:
+            return
+        except csv.Error:
+            continue  # Invalid/oversized rows don't hide the remaining saves.
+
+
+def _csv_values(text: str, header: str) -> Iterable[str]:
+    """Find the real header after optional Takeout playlist metadata."""
+    column = None
+    for row in _csv_rows(text):
+        cells = [cell.strip() for cell in row]
+        lowered = [cell.lower() for cell in cells]
+        if header in lowered:
+            column = lowered.index(header)
+        elif column is not None and len(cells) > column:
+            yield cells[column]
+        elif len(cells) == 1:
+            yield cells[0]
+
+
+def parse_watch_later_csv(text: str) -> list[dict]:
+    """Current/legacy Takeout playlist CSV, or one YouTube link per line."""
+    return parse_save_items(SOURCE_WATCH_LATER, _csv_values(text, "video id"))
+
+
+def parse_reddit_saved_csv(text: str) -> list[dict]:
+    """Reddit saved_posts.csv / saved_comments.csv, or permalinks per line."""
+    return parse_save_items(SOURCE_REDDIT_SAVED, _csv_values(text, "permalink"))
+
+
+def _staged_path(data_root: Path, name: str) -> Path:
+    """Resolve a direct child of the staging directory before using it."""
+    try:
+        root = (Path(data_root) / "saves-staged").resolve()
+        path = (root / name).resolve()
+        if os.path.commonpath([str(root), str(path)]) == str(root) and path.parent == root:
+            return path
+    except (OSError, ValueError, RuntimeError):
+        pass
+    raise ImportListError("That staged saves path wasn't found.", "not_found")
+
+
+def _find_staged(data_root: Path, name: str) -> Path:
+    """Return an existing staging file by exact name from the directory
+    listing, so a client-supplied id never becomes part of a path."""
+    root = Path(data_root) / "saves-staged"
+    try:
+        with os.scandir(root) as entries:
+            for entry in entries:
+                if entry.name == name and entry.is_file(follow_symlinks=False):
+                    return Path(entry.path)
+    except OSError:
+        pass
+    raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
+
+
+def _replace_file(path: Path, data: dict) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def _staged_files(data_root: Path, pattern: str) -> list[Path]:
+    """List only validated, contained stage or upload files for cleanup."""
+    files = []
+    for entry in (Path(data_root) / "saves-staged").glob(pattern):
+        ident = entry.stem.removeprefix("upload-") if entry.suffix == ".part" else entry.stem
+        if not _SAVES_ID_RE.fullmatch(ident):
+            continue
+        try:
+            path = _staged_path(data_root, entry.name)
+            if path.is_file():
+                files.append(path)
+        except ImportListError:
+            continue
+    return sorted(files, key=lambda p: (p.stat().st_mtime_ns, p.name), reverse=True)
+
+
+def _load_stage(data_root: Path | None, stage_id: str) -> dict:
+    if data_root is None or not isinstance(stage_id, str) or not _SAVES_ID_RE.fullmatch(stage_id):
+        raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
+    path = _find_staged(data_root, f"{stage_id}.json")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if data["source"] not in SAVE_SOURCES or not isinstance(data["items"], list):
+            raise ValueError("invalid stage")
+        return data
+    except (OSError, ValueError, KeyError, TypeError):
+        raise ImportListError("That staged saves list wasn't found. Import the file again.", "not_found")
+
+
+def _write_new_stage(data_root: Path, data: dict) -> tuple[str, Path]:
+    """Write a new stage under a server-generated id."""
+    stage_id = secrets.token_hex(8)
+    path = _staged_path(data_root, f"{stage_id}.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _replace_file(path, data)
+    return stage_id, path
+
+
+def _stage_result(stage_id: str, data: dict) -> dict:
+    return {"stage_id": stage_id, "url": f"uoink-saves:{stage_id}", "count": len(data["items"]),
+            "source": data["source"], "truncated": bool(data.get("truncated"))}
+
+
+def stage_saves(data_root: Path, source: str, items: list[dict], *, filename=None) -> dict:
+    """Atomically stage a bounded list; keep the newest 20 lists."""
+    parsed = parse_save_items(source, items)
+    if not parsed:
+        raise ImportListError("Found nothing to import in that file.", "empty_file")
+    data = {"source": source, "items": parsed,
+            "filename": Path(filename).name if filename else None,
+            "truncated": bool(getattr(items, "truncated", False) or parsed.truncated)}
+    with _stage_lock:
+        stage_id, path = _write_new_stage(data_root, data)
+        older = [p for p in _staged_files(data_root, "*.json") if p != path]
+        for old in older[SAVES_STAGE_CAP - 1:]:
+            old.unlink(missing_ok=True)
+    return _stage_result(stage_id, data)
+
+
+def append_stage_items(data_root: Path, token: str, source: str, items: Iterable[Any]) -> dict:
+    """Append unique items to a stage, preserving its order and token."""
+    match = _STAGE_TOKEN_RE.fullmatch(token) if isinstance(token, str) else None
+    if not match:
+        raise ImportListError("That saves token isn't valid.", "invalid_url")
+    stage_id = match.group(1).lower()
+    with _stage_lock:
+        data = _load_stage(data_root, stage_id)
+        if source != data["source"]:
+            raise ImportListError("source must match the staged saves list.", "invalid_items")
+        parsed = parse_save_items(source, items)
+        merged = list(data["items"])
+        seen = {item["item_key"] for item in merged}
+        truncated = bool(data.get("truncated") or getattr(items, "truncated", False) or parsed.truncated)
+        for item in parsed:
+            if item["item_key"] in seen:
+                continue
+            if len(merged) == SAVES_STAGE_MAX:
+                truncated = True
+                break
+            seen.add(item["item_key"])
+            merged.append(item)
+        data.update(items=merged, truncated=truncated)
+        _replace_file(_find_staged(data_root, f"{stage_id}.json"), data)
+    return _stage_result(stage_id, data)
+
+
+def _upload_part_path(data_root: Path, upload_id: str) -> Path:
+    """An existing upload part, found by name in the staging listing."""
+    if not isinstance(upload_id, str) or not _SAVES_ID_RE.fullmatch(upload_id):
+        raise ImportListError("upload_id must be 16 lowercase hex characters.", "invalid_items")
+    try:
+        return _find_staged(data_root, f"upload-{upload_id}.part")
+    except ImportListError:
+        raise ImportListError("That saves upload wasn't found. Import the file again.", "not_found")
+
+
+def append_upload_chunk(data_root: Path, text: str, upload_id=None) -> dict:
+    """Append UTF-8 text to a bounded upload, keeping at most five parts."""
+    if not isinstance(text, str):
+        raise ImportListError("csv_text must be a string.", "invalid_items")
+    chunk = text.encode("utf-8")
+    new = upload_id is None
+    if new:
+        upload_id = secrets.token_hex(8)
+        path = _staged_path(data_root, f"upload-{upload_id}.part")
+    else:
+        path = _upload_part_path(data_root, upload_id)
+    with _stage_lock:
+        try:
+            received = 0 if new else path.stat().st_size
+        except OSError:
+            raise ImportListError("That saves upload wasn't found. Import the file again.", "not_found")
+        received += len(chunk)
+        if received > SAVES_FILE_MAX_BYTES:
+            path.unlink(missing_ok=True)
+            raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("ab") as stream:
+            stream.write(chunk)
+        if new:
+            cutoff = time.time() - SAVES_UPLOAD_TTL_SEC
+            kept = 1
+            for old in _staged_files(data_root, "upload-*.part"):
+                if old == path:
+                    continue
+                if old.stat().st_mtime < cutoff or kept >= SAVES_UPLOAD_CAP:
+                    old.unlink(missing_ok=True)
+                else:
+                    kept += 1
+    return {"ok": True, "upload_id": upload_id, "received_bytes": received}
+
+
+def finish_upload(data_root: Path, text: str, upload_id=None, *, source=None, filename=None) -> dict:
+    """Consume an upload's part file and stage the combined text."""
+    if not isinstance(text, str):
+        raise ImportListError("csv_text must be a string.", "invalid_items")
+    if upload_id is not None:
+        path = _upload_part_path(data_root, upload_id)
+        with _stage_lock:
+            try:
+                if path.stat().st_size + len(text.encode("utf-8")) > SAVES_FILE_MAX_BYTES:
+                    raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+                with path.open("rb") as stream:
+                    prefix = stream.read(SAVES_FILE_MAX_BYTES + 1)
+            except OSError:
+                raise ImportListError("That saves upload wasn't found. Import the file again.", "not_found")
+            finally:
+                path.unlink(missing_ok=True)
+        text = prefix.decode("utf-8") + text
+    return stage_saves_text(data_root, text, source=source, filename=filename)
+
+
+def stage_saves_text(data_root: Path, text: str, source=None, filename=None) -> dict:
+    if not isinstance(text, str):
+        raise ImportListError("csv_text must be a string.", "invalid_items")
+    if len(text.encode("utf-8")) > SAVES_FILE_MAX_BYTES:
+        raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+    if source is None:
+        headers = {cell.strip().lower() for row in _csv_rows(text)
+                   for cell in row}
+        if "video id" in headers:
+            source = SOURCE_WATCH_LATER
+        elif "permalink" in headers:
+            source = SOURCE_REDDIT_SAVED
+        elif extract_youtube_ids(text):
+            source = SOURCE_WATCH_LATER
+        elif parse_reddit_saved_csv(text):
+            source = SOURCE_REDDIT_SAVED
+        elif parse_save_items(SOURCE_X_BOOKMARKS, text.splitlines()):
+            source = SOURCE_X_BOOKMARKS
+        else:
+            raise ImportListError("Found nothing to import in that file.", "empty_file")
+    if source == SOURCE_WATCH_LATER:
+        items = parse_watch_later_csv(text)
+    elif source == SOURCE_REDDIT_SAVED:
+        items = parse_reddit_saved_csv(text)
+    else:
+        items = parse_save_items(source, text.splitlines())
+    return stage_saves(data_root, source, items, filename=filename)
+
+
+def stage_saves_file(data_root: Path, path, source=None) -> dict:
+    path = Path(path)
+    if path.suffix.lower() not in (".csv", ".txt"):
+        raise ImportListError("Choose a .csv or .txt saves file.", "unsupported")
+    try:
+        if path.stat().st_size > SAVES_FILE_MAX_BYTES:
+            raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+        with path.open("rb") as stream:
+            raw = stream.read(SAVES_FILE_MAX_BYTES + 1)
+    except OSError:
+        raise ImportListError("That saves file wasn't found or couldn't be read.", "not_found")
+    if len(raw) > SAVES_FILE_MAX_BYTES:
+        raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
+    return stage_saves_text(data_root, raw.decode("utf-8-sig", errors="replace"),
+                            source=source, filename=path.name)
 
 
 def parse_hackertube_videos(rows: Any) -> list[dict]:
@@ -443,6 +823,7 @@ def _slice(items: list[dict], offset: int, limit: int) -> list[dict]:
 
 
 def fetch_source(spec: dict, *, offset: int, limit: int,
+                 data_root: Path | None = None,
                  fetch_json: Callable[[str], Any] | None = None,
                  reddit_fetch: Callable[[str], Any] | None = None,
                  ytdlp_playlist: Callable[[str, int, int], Any] | None = None) -> dict:
@@ -450,6 +831,11 @@ def fetch_source(spec: dict, *, offset: int, limit: int,
     select the window; ``total`` is the full list size when known."""
     fetch_json = fetch_json or http_get_json
     kind = spec["kind"]
+    if "stage_id" in spec:
+        stage = _load_stage(data_root, spec["stage_id"])
+        return {"source": stage["source"], "title": SOURCE_LABELS[stage["source"]],
+                "items": _slice(stage["items"], clamp_offset(offset), clamp_limit(limit)),
+                "total": len(stage["items"]), "credit": None}
     if kind == SOURCE_HACKERTUBE:
         mode = spec["mode"]
         if mode == "playlist":
@@ -522,22 +908,29 @@ def fetch_source(spec: dict, *, offset: int, limit: int,
 # ---------------------------------------------------------------------------
 
 def build_preview(spec: dict, batch: dict, *, offset: int, limit: int,
-                  in_library: Callable[[str], bool]) -> dict:
+                  in_library: Callable[[str], bool], data_root: Path | None = None) -> dict:
     items = []
     already = 0
+    registry = load_registry(data_root)["items"] if data_root is not None else {}
+    captured_ids = {key for key, row in registry.items()
+                    if row.get("kind") == "post" and row.get("status") == "captured"}
+    captured_keys = {row.get("item_key") for row in registry.values()
+                     if row.get("kind") == "post" and row.get("status") == "captured"}
     for it in batch["items"]:
         have = False
         try:
             have = bool(in_library(it["video_id"]))
         except Exception:
             have = False
+        if it.get("kind") == "post":
+            have = have or it["video_id"] in captured_ids or it["item_key"] in captured_keys
         already += int(have)
         items.append({**it, "in_library": have})
     found = len(items)
     total = batch.get("total")
     end = offset + found
     has_more = (total is not None and end < total) or (total is None and found >= limit)
-    kind = spec["kind"]
+    kind = batch.get("source", spec["kind"])
     new_count = found - already
     return {
         "ok": True,
@@ -556,16 +949,17 @@ def build_preview(spec: dict, batch: dict, *, offset: int, limit: int,
         "new": new_count,
         "has_more": bool(has_more and found > 0),
         "next_offset": end if (has_more and found > 0) else None,
-        "message": preview_message(found, already, total=total, offset=offset),
+        "message": preview_message(found, already, total=total, offset=offset,
+                                   noun="post" if kind in (SOURCE_X_BOOKMARKS, SOURCE_REDDIT_SAVED) else "video"),
         "videos": items,
     }
 
 
 def preview_message(found: int, already: int, *, total: int | None = None,
-                    offset: int = 0) -> str:
+                    offset: int = 0, noun: str = "video") -> str:
     if found == 0:
-        return "Found no videos in this list." if offset == 0 else "No more videos in this list."
-    noun = "video" if found == 1 else "videos"
+        return f"Found no {noun}s in this list." if offset == 0 else f"No more {noun}s in this list."
+    noun = noun if found == 1 else noun + "s"
     text = f"Found {found} {noun}"
     if total is not None and (total > found or offset):
         text += f" ({offset + 1}-{offset + found} of {total})"
@@ -615,9 +1009,13 @@ def _save_registry(data_root: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     items = data.get("items") or {}
     if len(items) > REGISTRY_ITEM_CAP:
-        keep = sorted(items.items(), key=lambda kv: kv[1].get("imported_at") or "",
-                      reverse=True)[:REGISTRY_ITEM_CAP]
-        data["items"] = dict(keep)
+        # Queued posts are the durable work queue: never evict unfinished work,
+        # even when the queue alone exceeds the normal history cap.
+        queued = {key: row for key, row in items.items()
+                  if row.get("kind") == "post" and row.get("status") == "queued"}
+        history = sorted(((key, row) for key, row in items.items() if key not in queued),
+                         key=lambda kv: kv[1].get("imported_at") or "", reverse=True)
+        data["items"] = {**queued, **dict(history[:max(0, REGISTRY_ITEM_CAP - len(queued))])}
     data["imports"] = (data.get("imports") or [])[-200:]
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -626,8 +1024,12 @@ def _save_registry(data_root: Path, data: dict) -> None:
 
 
 def record_import(data_root: Path, preview: dict, queued: list[dict]) -> dict:
-    """Remember each queued video's origin. ``queued`` rows carry
-    {video_id, title, channel, note, quality_score, pending_id}."""
+    """Remember origins and enqueue posts under the registry lock.
+
+    Post rows are annotated in place with already_queued/in_library so the
+    caller's counts also reflect imports or captures since its preview.
+    Video rows additionally carry their existing pending_id.
+    """
     src = preview["source"]
     now = _now_iso()
     import_id = "imp_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -635,6 +1037,17 @@ def record_import(data_root: Path, preview: dict, queued: list[dict]) -> dict:
         data = load_registry(data_root)
         data = json.loads(json.dumps(data))  # never mutate the cached copy
         for row in queued:
+            if row.get("kind") == "post":
+                # Match stable item keys as well as best-effort library hashes:
+                # X can return a different handle; Reddit comments share a post.
+                prev = next((entry for key, entry in data["items"].items()
+                             if (key == row["video_id"] or entry.get("item_key") == row["item_key"])
+                             and entry.get("status") in ("queued", "captured")), {})
+                if prev.get("status") in ("queued", "captured"):
+                    row["already_queued"] = prev["status"] == "queued"
+                    row["in_library"] = prev["status"] == "captured"
+                    continue
+                row["already_queued"] = False
             prev = data["items"].get(row["video_id"]) or {}
             data["items"][row["video_id"]] = {
                 "source": src["kind"],
@@ -652,10 +1065,14 @@ def record_import(data_root: Path, preview: dict, queued: list[dict]) -> dict:
                 "imported_at": now,
                 "applied": bool(prev.get("applied")),
             }
+            if row.get("kind") == "post":
+                data["items"][row["video_id"]].update(
+                    kind="post", item_key=row["item_key"], url=row["url"], status="queued",
+                    attempts=0, error=None, retry_after=0, captured_video_id=None, applied=False)
         data["imports"].append({
             "id": import_id, "source": src["kind"], "title": src.get("title"),
             "url": src.get("url"), "offset": preview.get("offset"),
-            "queued": len(queued), "at": now,
+            "queued": sum(not row.get("in_library") for row in queued), "at": now,
         })
         _save_registry(data_root, data)
     return {"import_id": import_id, "imported_at": now}
@@ -664,7 +1081,9 @@ def record_import(data_root: Path, preview: dict, queued: list[dict]) -> dict:
 def lookup(data_root: Path, video_id: str) -> dict | None:
     if not video_id:
         return None
-    item = load_registry(data_root)["items"].get(video_id)
+    items = load_registry(data_root)["items"]
+    item = items.get(video_id) or next(
+        (row for row in items.values() if row.get("captured_video_id") == video_id), None)
     return dict(item) if isinstance(item, dict) else None
 
 
@@ -683,7 +1102,8 @@ def public_origin(item: dict | None) -> dict | None:
 
 
 def imported_video_ids(data_root: Path) -> set[str]:
-    return set(load_registry(data_root)["items"].keys())
+    return {row.get("captured_video_id") or key
+            for key, row in load_registry(data_root)["items"].items()}
 
 
 def apply_on_index(idx, data_root: Path, video_id: str) -> bool:
