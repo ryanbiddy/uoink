@@ -593,8 +593,15 @@ def evidence(data_root: Path, args: dict, *, index, source_reader=read_source, n
 
 
 def _report_path(data_root, run_id, name):
-    directory = Path(data_root).resolve() / "research" / validate_run_id(run_id)
-    path = directory / name
+    validate_run_id(run_id)
+    # normpath + prefix check is the containment guard CodeQL recognizes;
+    # the resolve() comparison below also rejects symlinked directories.
+    root = os.path.normpath(os.path.join(str(Path(data_root).resolve()), "research"))
+    full = os.path.normpath(os.path.join(root, run_id, name))
+    if not full.startswith(root + os.sep):
+        raise ResearchError("Invalid research report location.", "invalid_run_id")
+    path = Path(full)
+    directory = path.parent
     if directory.resolve() != directory or path.resolve() != path:
         raise ResearchError("Invalid research report location.", "invalid_run_id")
     return path
