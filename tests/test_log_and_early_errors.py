@@ -60,6 +60,7 @@ def http(tmp_path):
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "test",
             is_whisperx_available=lambda: False,
+            transcription_engine=lambda: None,
             is_model_downloaded=lambda *args: False),
         "images": SimpleNamespace(MAX_IMAGE_BYTES=1024 * 1024),
     }

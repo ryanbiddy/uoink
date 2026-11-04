@@ -168,13 +168,17 @@ def test_linux_status_reports_missing_ffmpeg(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="linux"))
     monkeypatch.setattr(_platform.shutil, "which", lambda _: None)
     monkeypatch.setattr(cli.isolation, "apply_from_process", lambda *args: None)
-    monkeypatch.setattr(cli, "backend", lambda: SimpleNamespace(VERSION="1.0.0", DATA_ROOT=tmp_path, _platform=_platform))
+    model_status = {"cached": False, "bundled_model": None, "source": None}
+    monkeypatch.setattr(cli, "backend", lambda: SimpleNamespace(
+        VERSION="1.0.0", DATA_ROOT=tmp_path, _platform=_platform,
+        _reliability_model_status=lambda: model_status))
     monkeypatch.setattr(runtime, "helper_running", lambda _: False)
     assert cli.main(["status"]) == 0
     result = json.loads(capsys.readouterr().out)
     assert result["ok"] is True
     assert result["capabilities"]["media"]["available"] is False
     assert result["capabilities"]["media"]["code"] == "media_requires_ffmpeg"
+    assert result["reliability_model"] == model_status
 
 
 @pytest.mark.parametrize("display", ["", ":0"])

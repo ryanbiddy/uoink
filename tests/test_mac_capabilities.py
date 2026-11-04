@@ -239,7 +239,7 @@ def test_settings_and_transcription_fields_are_darwin_only(monkeypatch, platform
     assert ("media_capability" in settings) is (platform == "darwin")
     monkeypatch.setattr(uoink_mcp_tools, "_b", lambda: server)
     result = uoink_mcp_tools.get_whisperx_status({})
-    assert ("media_capability" in result) is (platform == "darwin")
+    assert ("media_capability" in result) is (platform in ("darwin", "linux"))
 
 
 @pytest.fixture

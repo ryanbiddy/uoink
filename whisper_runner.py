@@ -39,6 +39,7 @@ but the endpoint can be wrapped in a thread by server.py."""
 from __future__ import annotations
 
 import json
+import importlib.util
 import logging
 import os
 import inspect
@@ -46,7 +47,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 log = logging.getLogger("uoink.whisper_runner")
 
@@ -149,6 +150,22 @@ def is_whisperx_available() -> bool:
     in v3.1.2. This is now a single import at module load time -- the
     per-call cost is a Python dict lookup."""
     return _WHISPERX_AVAILABLE
+
+
+def transcription_engine() -> Literal["whisperx", "faster-whisper"] | None:
+    """Select a podcast runtime without importing faster-whisper."""
+    if is_whisperx_available():
+        return "whisperx"
+    if sys.platform.startswith("linux"):
+        import _platform
+        if (_platform.media_capability()["available"]
+                and importlib.util.find_spec("faster_whisper") is not None):
+            return "faster-whisper"
+    return None
+
+
+def is_transcription_available() -> bool:
+    return transcription_engine() is not None
 
 
 # Repository identities from the pinned faster-whisper 1.2.1 mapping.
@@ -433,6 +450,32 @@ def transcribe_audio(audio_path: Path, *,
         alignment = _platform.alignment_capability()
         if not alignment["available"]:
             raise RuntimeError(f"{alignment['code']}: {alignment['reason']}")
+
+    if transcription_engine() == "faster-whisper":
+        import uoink_reliability
+        model_path = _prepare_model_snapshot(
+            data_root, model_size, consent_given=consent_given)
+        if (model_path != _bundled_snapshot(model_size)
+                and _checked_model_snapshot(data_root, model_size, model_path) is None):
+            raise RuntimeError("Local ASR snapshot changed before model construction")
+        if diarize:
+            log.warning("Diarization needs install.sh --with-whisperx; "
+                        "continuing with transcript-only faster-whisper.")
+        info: dict[str, Any] = {}
+        # model_root is a Hub cache, not a snapshot. Passing the resolved path
+        # as the model source preserves podcast cache/consent precedence and
+        # reuses reliability's local-only CPU/int8 loader without a cache write.
+        entries = uoink_reliability.transcribe_media(
+            audio_path, model_name=str(model_path), language=language, info=info)
+        return {
+            "model": model_size,
+            "language": info.get("language") or language or "en",
+            "diarization_ran": False,
+            "segments": [{"start": start, "end": end, "text": text}
+                         for start, end, text in entries],
+            "generated_at": _now_iso(),
+            "engine": "faster-whisper",
+        }
 
     # Short-circuit on the cached cold-boot probe result. If whisperx
     # failed to import at module-top, re-trying here would pay the same

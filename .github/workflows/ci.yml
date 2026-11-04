@@ -121,6 +121,47 @@ jobs:
           assert status["capabilities"]["media"]["code"] == "media_requires_ffmpeg"
           PY
 
+  linux-capture-image:
+    name: offline Linux podcast capture image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Generate speech fixture
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y espeak-ng ffmpeg
+          mkdir fixture
+          espeak-ng -s 140 -w fixture/episode.wav "Sourdough bread needs a hungry starter, patience, and a long cold rise in the fridge overnight."
+          ffmpeg -i fixture/episode.wav -ac 1 -ar 22050 -b:a 64k fixture/episode.mp3
+          printf 'sourdough\nbread\n' > fixture/expected.txt
+      - name: Build capture image
+        run: |
+          docker build -f docker/capture.Dockerfile -t uoink-capture:ci .
+          docker image ls uoink-capture:ci --format '{{.Size}}'
+      - name: Check media and bundled model status
+        run: |
+          docker run --rm --network none uoink-capture:ci status > capture-status.json
+          cat capture-status.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          status = json.loads(Path("capture-status.json").read_text())
+          assert status["ok"] is True, status
+          assert status["capabilities"]["media"]["available"] is True, status
+          model = status["reliability_model"]
+          assert model["cached"] is True and model["source"] == "bundled", model
+          assert model["bundled_model"] == "base", model
+          assert model["bundled_path"] == "/opt/uoink/models/whisper-bundled/base", model
+          PY
+      - name: Capture, transcribe, publish and search offline
+        run: >-
+          docker run --rm --network none --read-only
+          --tmpfs /tmp --tmpfs /home/uoink:uid=10001,gid=10001 -e HF_HUB_OFFLINE=1
+          -v "$PWD/fixture:/fixture:ro" -v "$PWD/scripts/linux:/smoke:ro"
+          --entrypoint /opt/uoink/python/bin/python3
+          uoink-capture:ci /smoke/smoke_capture.py --fixture /fixture
+
   mcp-linux-container:
     name: offline Linux MCP introspection
     runs-on: ubuntu-latest

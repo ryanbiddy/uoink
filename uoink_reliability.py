@@ -436,15 +436,16 @@ def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
                      _transcribe=None,
-                     info: dict | None = None) -> list[tuple[float, float, str]]:
+                     info: dict | None = None,
+                     language: str | None = None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
 
     Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
     as ``language`` and ``language_probability``; the return value is the
     same either way.
 
-    This path is used only as a fallback when a video source exposes no
-    captions. The model is the user's downloaded copy or the bundled one
+    Used for caption-less video and lean Linux podcast transcription.
+    The model is the user's downloaded copy or the bundled one
     (``resolve_model``). ``local_files_only=True`` is intentional: capture
     must not become an implicit model download. ``ensure_model`` remains the
     explicit user-triggered download path.
@@ -466,6 +467,7 @@ def transcribe_media(media_path: str | Path, *,
             beam_size=1,
             best_of=1,
             vad_filter=True,
+            **({"language": language} if language is not None else {}),
         )
         if info is not None:
             info["language"] = getattr(detected, "language", None)

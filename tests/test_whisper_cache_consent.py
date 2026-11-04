@@ -47,6 +47,7 @@ def runner_functions(source):
         # has its own tests (test_bundled_whisper_model.py); none here.
         "_bundled_snapshot": lambda model_size: None,
         "_compute_type": lambda device: "int8", "_now_iso": lambda: "synthetic-time",
+        "transcription_engine": lambda: "whisperx" if scope["_WHISPERX_AVAILABLE"] else None,
     }
     future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
     module = ast.fix_missing_locations(ast.Module(body=[future, *nodes], type_ignores=[]))

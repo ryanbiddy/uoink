@@ -1491,6 +1491,7 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
         "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
             "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"}),
         "whisper_runner": SimpleNamespace(is_whisperx_available=lambda: True,
+                                           is_transcription_available=lambda: True,
                                            normalize_model=lambda value: value or "base",
                                            is_model_downloaded=lambda root, model: False,
                                            update_episode_transcript_state=_blocked),
