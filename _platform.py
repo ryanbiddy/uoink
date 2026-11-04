@@ -159,10 +159,14 @@ def _media_self_test(ffmpeg: str, ffprobe: str, identities: tuple) -> bool:
         return False
 
 
+def linux_media_tools_present() -> bool:
+    """System ffmpeg and ffprobe on PATH; Linux installs use the distro's."""
+    return all(shutil.which(name) is not None for name in ("ffmpeg", "ffprobe"))
+
+
 def media_capability() -> dict:
     """Only a bundled runtime requires the app-owned executable self-test."""
-    if sys.platform.startswith("linux") and any(
-            shutil.which(name) is None for name in ("ffmpeg", "ffprobe")):
+    if sys.platform.startswith("linux") and not linux_media_tools_present():
         return {"available": False, "code": "media_requires_ffmpeg",
                 "reason": "ffmpeg and ffprobe are required. Install them: "
                           "sudo apt-get install ffmpeg (Debian/Ubuntu), "
