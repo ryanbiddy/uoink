@@ -1,4 +1,6 @@
-# Install Uoink with an AI agent on Windows
+# Install Uoink with an AI agent
+
+## Windows
 
 For Cline or another agent with a local PowerShell shell on Windows 10/11.
 Run these steps on the person's PC. See [README](README.md#install) for details.
@@ -78,3 +80,77 @@ Run these steps on the person's PC. See [README](README.md#install) for details.
    and pin **Uoink**. The Chrome Web Store listing is pending.
 
 Chrome (tested); other Chromium browsers such as Edge and Brave may work but are not tested.
+
+## Linux
+
+For agents with a shell on a Linux desktop, server or headless sandbox. Run
+these steps where the agent will run Uoink. See the [Linux guide](docs/linux.md)
+for installer options, Docker, storage paths and capture limits.
+
+1. Install Git, Python 3.11 or newer, venv support, ffmpeg and ffprobe. On
+   Debian or Ubuntu, use the commands below. Other distributions are listed
+   in the Linux guide.
+
+   ```sh
+   sudo apt-get update
+   sudo apt-get install git python3 python3-venv
+   sudo apt-get install ffmpeg
+   ```
+
+2. Install from a checkout.
+
+   ```sh
+   git clone https://github.com/ryanbiddy/uoink && sh uoink/scripts/linux/install.sh
+   ```
+
+   The app goes in `~/.local/lib/uoink` and the command symlink in
+   `~/.local/bin/uoink`. The installer stages a pinned, SHA-256-checked
+   Whisper `base` model for CPU transcription. Add `--with-whisperx` only
+   if podcast speaker labels are needed; it adds CPU torch and a large
+   download. Without it, podcast transcripts have no diarization.
+
+3. Add the command folder to this shell's PATH and check the install.
+
+   ```sh
+   export PATH="$HOME/.local/bin:$PATH"
+   ~/.local/bin/uoink status
+   uoink tools
+   uoink connect --list
+   ```
+
+   `capabilities.media.available` should be `true`. Code
+   `media_requires_ffmpeg` means ffmpeg or ffprobe is missing from PATH.
+   After a default install, `reliability_model.cached` should be `true`
+   with source `"bundled"` and bundled model `"base"`.
+
+4. Print the recipe for the person's client. These commands only print
+   instructions; they do not edit client files.
+
+   ```sh
+   uoink connect claude-code
+   uoink connect codex
+   uoink connect cursor
+   ```
+
+   For Claude Code, run the printed `claude mcp add` command in the shell.
+   For Codex, merge the printed tables into `~/.codex/config.toml`, or
+   `CODEX_HOME/config.toml` if configured. For Cursor, merge the `uoink`
+   entry into `~/.cursor/mcp.json`. Preserve other settings and servers.
+   Restart the client's MCP connection and confirm it lists Uoink's tools.
+
+5. Start the helper only if HTTP access or the dashboard is needed. Stdio
+   MCP and CLI tool calls work without it.
+
+   ```sh
+   UOINK_HEADLESS=1 uoink serve
+   ```
+
+In a cloud sandbox, put the dependency and install commands in its setup
+script. Ensure the agent process also has `~/.local/bin` on PATH, or use the
+absolute paths printed by `connect`. The data folder
+`${XDG_DATA_HOME:-$HOME/.local/share}/Uoink` holds the library; keep it on
+persistent storage if the sandbox will be discarded. Re-run the installer
+from an updated checkout to upgrade.
+
+YouTube can block cloud IPs. Whisper fallback also fails when the audio
+cannot be downloaded. Linux has no browser extension, tray or app windows.

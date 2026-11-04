@@ -15,6 +15,20 @@ for a default install. For a custom install, use its `cli\uoink.cmd` instead.
 Local library reads need neither a provider API key nor a running Uoink window.
 Capture and paid tools keep their own requirements.
 
+## Linux
+
+Follow the [Linux guide](linux.md) for desktops, Docker and headless agent
+sandboxes. After installing, add `~/.local/bin` to PATH and check the CLI.
+
+```sh
+~/.local/bin/uoink status
+uoink connect --list
+```
+
+`uoink connect <client>` prints Linux paths for supported recipes. Stdio MCP
+and CLI tool calls work without the optional `uoink serve` helper. The Linux
+guide includes Docker config and the limits of capture from cloud IPs.
+
 ## Client recipes and documentation checks
 
 `uoink connect <client>` prints a recipe with this installation's absolute paths.
@@ -131,7 +145,8 @@ and `Contents/Resources/uoink_mcp.py`, including custom app locations. BoltAI,
 Alfred and Perplexity local MCP are Mac-only. Auggie documents Windows through
 WSL; Uoink does not print a native Windows recipe or guess WSL path translation.
 
-Claude Code prints a PowerShell command on Windows and a shell command on Mac.
+Claude Code prints a PowerShell command on Windows and a shell command on
+Mac and Linux.
 Crush prints a line for its current **crushrc** file, interpreted by Crush's
 built-in Bash on both platforms. Do not run that line in PowerShell. Current
 Antigravity uses `~/.gemini/config/mcp_config.json`, shared by its App, IDE and
@@ -184,8 +199,8 @@ Why it keeps working where they stop:
 1. **Library first.** If you already saved the video, the transcript comes
    from disk with no network call (`source: "library"`, plus `transcribed_by`).
    An earlier `get_transcript` result is also reused offline (`cached: true`).
-2. **Your own connection.** Captions are fetched by yt-dlp on your computer's
-   home connection, not a cloud IP. Uploader captions come before YouTube's
+2. **Your own connection.** Captions are fetched by yt-dlp from the machine
+   running Uoink. Uploader captions come before YouTube's
    auto-captions (`source: "captions"` or `"auto_captions"`), and the spoken
    language before machine translations, which YouTube rate-limits separately.
 3. **Local Whisper.** When YouTube answers 429, asks for a bot check, or has
@@ -198,6 +213,9 @@ fallback ran, `why` explains it in one sentence, for example "YouTube returned
 429 (too many requests) for captions; transcribed locally with Whisper (base)
 in 3m 12s." When nothing works, the error says what each step hit instead of
 returning an empty transcript.
+
+Cloud IP blocks can prevent both caption fetches and audio downloads, so
+Whisper fallback may fail too. See [Linux capture limits](linux.md#what-does-not-work-or-may-not).
 
 `get_transcript` doesn't add the video to your library. Use `uoink_video` to
 save it with screenshots so search and citations can find it later.

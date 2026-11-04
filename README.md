@@ -1,16 +1,16 @@
 # Uoink
 
 [![Release](https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release)](https://github.com/ryanbiddy/uoink/releases/latest)
-[![Platform: Windows and Mac](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B-0A0A0A.svg)](https://uoink.app/get)
+[![Platform: Windows, Mac and Linux](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B%20%7C%20Linux-0A0A0A.svg)](https://uoink.app/get)
 [![ryanbiddy/uoink MCP server](https://glama.ai/mcp/servers/ryanbiddy/uoink/badges/score.svg)](https://glama.ai/mcp/servers/ryanbiddy/uoink)
 
 **A YouTube transcript MCP server that remembers.** Uoink saves YouTube videos, podcasts, X posts, Reddit threads and web pages with their full transcripts to a library on your computer. Claude, Cursor or Codex then searches all of it and cites the exact timestamp.
 
-Free and open source (MIT). Windows 10/11 and Mac (Apple silicon, macOS 15+). No account, no Uoink cloud. Videos without captions are transcribed on your machine with Whisper.
+Free and open source (MIT). Windows 10/11 and Mac (Apple silicon, macOS 15+). Linux desktops and headless sandboxes use the [Linux install](docs/linux.md). No account, no Uoink cloud. Videos without captions are transcribed on your machine with Whisper.
 
 ## Quick start
 
-1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`.
+1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`. For Linux, see [the Linux guide](docs/linux.md).
 2. **Connect your AI:** `uoink connect claude-code`. For other clients run `uoink connect --list`; Claude Desktop can use the `.mcpb` extension from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
 3. **Ask:** *"uoink https://youtu.be/… and tell me where they explain the eval setup."* Later: *"which of my saved talks disagreed about that?"*
 
@@ -35,7 +35,7 @@ The corpus compounds. Every source you save lands in one local library your AI c
 |---|---|
 | **YouTube** (flagship) | Timestamped transcript, screenshots, top comments, channel context, full metadata, JSON sidecar |
 | **X / Twitter video + text** | Video transcript and post text, author credit, thread context |
-| **Podcasts** | Automatic RSS/Atom metadata watching; optional per-feed Auto-ingest for local MP3 download, WhisperX transcription, and corpus publishing |
+| **Podcasts** | Automatic RSS/Atom metadata watching; optional per-feed Auto-ingest for local MP3 download, WhisperX transcription (faster-whisper on Linux without WhisperX), and corpus publishing |
 | **Web pages / articles** | Readable text extraction into the same corpus format |
 | **Reddit** | Thread + top comments as Markdown |
 
@@ -106,6 +106,12 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 **On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.13.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
 
 The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
+
+On Linux, including Docker and headless agent sandboxes, see [docs/linux.md](docs/linux.md).
+
+```sh
+git clone https://github.com/ryanbiddy/uoink && sh uoink/scripts/linux/install.sh
+```
 
 For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` (see [docs/build-installer.md](./docs/build-installer.md)).
 
