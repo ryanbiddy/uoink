@@ -80,7 +80,7 @@ def parser():
     connect.add_argument("--list", action="store_true")
     connect.add_argument("--deeplink", action="store_true", help="print a Cursor or VS Code install link")
     connect.add_argument("--toolset", choices=TOOLSETS, default=None,
-                         help="tools to serve: full (95), core (36), search (9) or research (3); default full, core for Cursor")
+                         help="tools to serve: full (97), core (36), search (9) or research (5); default full, core for Cursor")
     skill = command("skill")
     skill_sub = skill.add_subparsers(dest="skill_command", required=True)
     skill_sub.add_parser("path")

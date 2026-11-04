@@ -113,6 +113,7 @@ def test_media_429_retry_schedule(retry_queue, caplog, failed_retries, delay_min
         caplog.clear()
         assert server._retry_pending_one() is True
         row = _row(state)
+        assert server._retry_pending_last_outcome == (row["pending_id"], "rate_limited")
 
     expected = state.now + timedelta(minutes=delay_minutes)
     assert row["status"] == "pending"
@@ -124,6 +125,7 @@ def test_media_429_retry_schedule(retry_queue, caplog, failed_retries, delay_min
 
     state.now = expected - timedelta(seconds=1)
     assert server._retry_pending_one() is False
+    assert server._retry_pending_last_outcome == (None, "idle")
     assert state.extract.call_count == failed_retries + 1
 
 
@@ -167,6 +169,7 @@ def test_capture_lock_failure_keeps_existing_backoff(retry_queue):
     assert row["status"] == "pending"
     assert row["attempt_count"] == 1
     assert row["last_error"] == "capture_ownership_unavailable"
+    assert server._retry_pending_last_outcome == (row["pending_id"], "failed")
     assert datetime.fromisoformat(row["retry_after"]) == state.now + timedelta(minutes=2)
     state.extract.assert_not_called()
 

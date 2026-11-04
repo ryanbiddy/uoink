@@ -7934,6 +7934,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         "caption_count": platform_caption_count,
         "transcript_segment_count": len(entries),
         "transcript_source": transcript_source,
+        "captions_refused": captions_refused,
         "asr_fallback": asr_fallback,
         "transcript_note": transcript_note,
         "topic": topic,
@@ -13637,6 +13638,9 @@ def _start_trash_purge_thread() -> None:
 # Poll the queue this often. The retry_after column is the real gate -- this
 # is just how soon the worker notices a row that becomes eligible.
 _RETRY_POLL_INTERVAL_SEC = 30
+_RESEARCH_RETRY_PAUSE_SEC = 2
+_RESEARCH_RETRY_BURST_LIMIT = 10
+_retry_pending_last_outcome: tuple[int | None, str] = (None, "idle")
 # Capture-lock backoff; media 429s use _RATE_LIMIT_BACKOFF_SEC instead.
 _RETRY_INITIAL_BACKOFF_SEC = 60
 _RETRY_MAX_BACKOFF_SEC = 15 * 60
@@ -13675,6 +13679,8 @@ def _retry_pending_one() -> bool:
     retry_after has arrived, attempt the extract, and update the queue
     accordingly. Returns True when a row was processed (regardless of
     outcome) so the caller can loop / log."""
+    global _retry_pending_last_outcome
+    _retry_pending_last_outcome = (None, "idle")
     idx = _get_index()
     try:
         row = idx.next_pending(_now_iso())
@@ -13684,6 +13690,9 @@ def _retry_pending_one() -> bool:
     if not row:
         return False
     pending_id = row["pending_id"]
+    # Fail closed for every early return, cancellation or exception. Only a
+    # successfully settled capture below may authorize a research burst.
+    _retry_pending_last_outcome = (pending_id, "failed")
     url = row["url"]
     interval = row["interval_seconds"] or 30
     attempts_before = row["attempt_count"] or 0
@@ -13807,6 +13816,7 @@ def _retry_pending_one() -> bool:
                                 pending_id, _sanitize_error(msg))
                     return True
                 if _is_youtube_rate_limit(e):
+                    _retry_pending_last_outcome = (pending_id, "rate_limited")
                     detail = _youtube_rate_limit_detail(e)
                     attempts = attempts_before + 1
                     if attempts >= index._PENDING_MAX_ATTEMPTS:
@@ -13912,15 +13922,51 @@ def _retry_pending_one() -> bool:
         _record_single_extract_job(url, started_at, result=result, job_id=job_id)
         _pending_long_video_mode(pending_id, remove=True)
         log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
+        if settled is True:
+            # Only verified captions, without a refusal, permit faster draining.
+            asr = result.get("asr_fallback") or {}
+            outcome = ("succeeded" if result.get("transcript_source") == "captions"
+                       and not result.get("captions_refused")
+                       and asr.get("status") in (None, "not_needed") else "succeeded_degraded")
+            _retry_pending_last_outcome = (pending_id, outcome)
         return True
     finally:
         idx.release_pending_cancel_event(pending_id, cancel_event)
 
 
+def _retry_pending_delay(outcome: tuple[int | None, str], consecutive: int,
+                         active: dict[int, bool | None], next_row: dict | None) -> tuple[int, int]:
+    """Pure pacing decision: bounded caption bursts, never after a failure/429."""
+    pending_id, state = outcome
+    if (state == "succeeded" and pending_id in active and next_row
+            and next_row["pending_id"] in active and active[next_row["pending_id"]] is not True
+            and consecutive + 1 < _RESEARCH_RETRY_BURST_LIMIT):
+        return _RESEARCH_RETRY_PAUSE_SEC, consecutive + 1
+    return _RETRY_POLL_INTERVAL_SEC, 0
+
+
+def _retry_pending_wait(delay: int, consecutive: int, expected_pending_id: int | None,
+                        *, sleep=None, clock=None) -> int:
+    """Recheck a burst's queue head after the pause, before the next serial pass."""
+    sleep = sleep or time.sleep
+    clock = clock or time.monotonic
+    started = clock()
+    sleep(delay)
+    if delay == _RESEARCH_RETRY_PAUSE_SEC:
+        next_row = _get_index().next_pending(_now_iso())
+        active = research.active_research_pending_ids(DATA_ROOT)
+        next_id = next_row["pending_id"] if next_row else None
+        eligible = next_id in active and active[next_id] is not True
+        if next_id == expected_pending_id and eligible:
+            return consecutive
+        if not eligible:
+            sleep(max(0, _RETRY_POLL_INTERVAL_SEC - (clock() - started)))
+            return 0
+    return consecutive
+
+
 def _start_retry_pending_thread() -> None:
-    """Daemon thread: every 30s, process at most one pending URL. One row
-    per pass keeps the lock window short and gives breathing room between
-    attempts so we don't ourselves drive YouTube into a deeper rate-limit."""
+    """Serial queue worker with short, bounded bursts for research captions."""
     def _runner():
         try:
             # Settled publication receipts must not keep transcripts or
@@ -13928,16 +13974,32 @@ def _start_retry_pending_thread() -> None:
             index.PublicationRetryQueue(DATA_ROOT / "publication-retries").compact_settled()
         except Exception:
             log.exception("publication retry compaction failed")
+        consecutive = 0
         while True:
+            delay = _RETRY_POLL_INTERVAL_SEC
+            expected_pending_id = None
             try:
                 _retry_publication_one()
             except Exception:
                 log.exception("publication retry worker pass crashed")
             try:
                 _retry_pending_one()
+                active = (research.active_research_pending_ids(DATA_ROOT)
+                          if _retry_pending_last_outcome[1] == "succeeded" else {})
+                next_row = _get_index().next_pending(_now_iso()) if active else None
+                delay, consecutive = _retry_pending_delay(
+                    _retry_pending_last_outcome, consecutive, active, next_row)
+                if delay == _RESEARCH_RETRY_PAUSE_SEC:
+                    expected_pending_id = next_row["pending_id"]
             except Exception:
+                consecutive = 0
                 log.exception("retry worker pass crashed")
-            time.sleep(_RETRY_POLL_INTERVAL_SEC)
+            try:
+                consecutive = _retry_pending_wait(delay, consecutive, expected_pending_id)
+            except Exception:
+                consecutive = 0
+                log.exception("retry worker pacing check failed")
+                time.sleep(_RETRY_POLL_INTERVAL_SEC)
 
     threading.Thread(
         target=_runner, name="retry-pending", daemon=True).start()
@@ -14582,6 +14644,76 @@ def _research_discover(args: dict) -> dict:
                                       "per_query": args["per_query"]})
         research.save_run(DATA_ROOT, run)
     return {"ok": True, "run_id": run["run_id"], **result}
+
+
+def _research_library_lookup(candidate: dict) -> dict | None:
+    """Recheck current library identity, including saved podcast enclosures."""
+    idx = _get_index()
+    key = candidate["key"]
+    video_id = candidate.get("video_id") or (key[3:] if key.startswith("yt:") else
+                                              key[4:] if key.startswith("lib:") else None)
+    if video_id:
+        row = idx.get_yoink(video_id)
+        if row and not row.get("deleted_at"):
+            return row
+    if key.startswith("pod:"):
+        row = idx.podcast_capture_for_audio_url(candidate["url"])
+        if row:
+            return row
+        for saved in idx.list_capture_sources():
+            try:
+                metadata = json.loads(saved.get("metadata_json") or "{}")
+            except (ValueError, TypeError):
+                continue
+            if isinstance(metadata, dict) and candidate["url"] in [
+                    metadata.get(field) for field in
+                    ("url", "source_url", "audio_url", "enclosure_url", "episodeUrl")]:
+                row = idx.get_yoink(saved["video_id"])
+                if row and not row.get("deleted_at"):
+                    return row
+    return None
+
+
+def _research_capture(args: dict) -> dict:
+    return research.capture(DATA_ROOT, args, index=_get_index(),
+                            library_lookup=_research_library_lookup,
+                            library_transcript=_research_library_transcript,
+                            publication_pending=index.PublicationRetryQueue(
+                                DATA_ROOT / "publication-retries").has_pending_id,
+                            asr_expectation=_asr_duration_expectation, queue_now=_now_iso,
+                            interval=_LIST_IMPORT_INTERVAL_SEC)
+
+
+def _research_status(args: dict) -> dict:
+    return research.status(DATA_ROOT, args, index=_get_index(),
+                           library_transcript=_research_library_transcript,
+                           publication_pending=index.PublicationRetryQueue(
+                               DATA_ROOT / "publication-retries").has_pending_id)
+
+
+def _research_library_transcript(video_id: str) -> dict | None:
+    """Read saved research evidence without assuming missing provenance is captions."""
+    try:
+        folder, _row = _folder_for_video_id(video_id)
+    except Exception:
+        return None
+    if folder is None:
+        return None
+    _path, sidecar = _read_sidecar_for_folder(folder)
+    if not any(isinstance(segment, dict) and str(segment.get("text") or "").strip()
+               for segment in sidecar.get("transcript") or []):
+        return None
+    depth = sidecar.get("media_depth")
+    kind = depth.get("transcript_kind") if isinstance(depth, dict) else None
+    provider = sidecar.get("transcript_source")
+    if (provider == "asr" or kind == "local_asr" or sidecar.get("source_type") == "episode"
+            or sidecar.get("platform") == "podcast"):
+        source = "whisper"
+    elif provider == "captions" or kind == "captions":
+        source = "captions"
+    else:
+        source = None
+    return {"transcript_source": source, "duration_seconds": sidecar.get("duration_seconds")}
 
 
 def _list_import_ytdlp(url: str, start: int, end: int) -> dict:

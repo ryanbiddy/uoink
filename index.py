@@ -295,6 +295,25 @@ class PublicationRetryQueue:
             return path.stem, record
         return None
 
+    def has_pending_id(self, pending_id: int) -> bool:
+        """Whether a capture still has an unsettled publication receipt.
+
+        This read-only check includes claimed retries. Only a complete result
+        or a tombstone settles one; an unreadable outcome is still unresolved.
+        """
+        for path in self.root.glob("*.json"):
+            if path.name.endswith((".result.json", ".attempt.json")):
+                continue
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if (isinstance(record, dict) and not record.get("tombstone")
+                    and record.get("pending_id") == pending_id
+                    and self._outcome(path.stem)[0] != "complete"):
+                return True
+        return False
+
     def claim(self, receipt_id: str) -> bool:
         self._valid_id(receipt_id)
         try:
@@ -2069,6 +2088,17 @@ class Index:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    def podcast_capture_for_audio_url(self, audio_url: str) -> dict | None:
+        """Find a live saved episode by its RSS enclosure without fetching."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT y.* FROM podcast_episodes e JOIN yoinks y "
+                "ON y.video_id=e.yoink_video_id "
+                "WHERE e.audio_url=? AND y.deleted_at IS NULL ORDER BY e.id LIMIT 1",
+                (audio_url,),
+            ).fetchone()
+        return dict(row) if row else None
+
     def update_content_paths(self, video_id: str, *, corpus_path: str,
                              sidecar_path: str) -> None:
         """Re-point one row's on-disk paths (C-05 stale-path heal)."""
@@ -2903,7 +2933,7 @@ class Index:
             try:
                 row = self._conn.execute(
                     "SELECT pending_id FROM pending_yoinks WHERE url=? "
-                    "AND status IN ('pending','running') ORDER BY pending_id DESC LIMIT 1",
+                    "AND status IN ('pending','running','publishing') ORDER BY pending_id DESC LIMIT 1",
                     (url,),
                 ).fetchone()
                 if row is not None:
@@ -2963,8 +2993,16 @@ class Index:
             row = self._conn.execute(
                 "SELECT * FROM pending_yoinks "
                 "WHERE status='pending' AND retry_after <= ? "
-                "ORDER BY queued_at LIMIT 1",
+                "ORDER BY queued_at, pending_id LIMIT 1",
                 (now,),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def get_pending(self, pending_id: int) -> dict | None:
+        """Read one queue row, including terminal states, without changing it."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM pending_yoinks WHERE pending_id=?", (pending_id,),
             ).fetchone()
         return dict(row) if row else None
 

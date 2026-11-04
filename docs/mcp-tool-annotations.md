@@ -1,6 +1,6 @@
 # MCP tool annotations
 
-All 95 stdio tools have a title and explicit MCP hints. HTTP tools with the same
+All 97 stdio tools have a title and explicit MCP hints. HTTP tools with the same
 names carry identical titles and hints in `uoink_mcp_tools.TOOL_REGISTRY`.
 
 Hints describe successful calls and their possible effects, including queued
@@ -45,6 +45,8 @@ saved analysis, transcripts or published corpora also use `destructiveHint=true`
 | `publish_library_brief` | Publish library brief | false | false | true | false | Creates an immutable local brief; submission_key deduplicates retries. |
 | `research_start` | Start a research run | false | false | false | false | Creates a local run; performs no network requests. |
 | `research_discover` | Discover research sources | false | false | false | true | Searches consented sources and saves candidates and query history. |
+| `research_capture` | Capture research sources | false | false | false | true | Reserves ASR budget and queues selected sources for capture. |
+| `research_status` | Research run status | true | false | true | false | Reads queue progress and saved transcript provenance. |
 | `export_cited_range` | Export cited transcript range | true | false | true | false | Returns stored cues and citations without fetching, transcribing or saving. |
 | `get_transcript` | Get transcript | true | false | true | true | Reads the library copy or fetches captions or audio from YouTube on the user's connection; writes only a local transcript cache, never the library. |
 | `get_playbook_input` | Prepare research playbook input | true | false | true | false | Reads local research evidence and computes metrics; no model, network or writes. |
