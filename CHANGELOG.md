@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added ? Deep research, part 3: evidence, verified publish and reports
+
+- `research_evidence` searches only ready sources in a saved run and returns
+  fenced, cue-aligned excerpts with revision bindings and ASR doubt spans.
+- `research_publish` checks quotes and timestamps, records judge and counter-evidence
+  results, enforces quotation caps, and saves Markdown, HTML and a verification ledger.
+- The `deep-research` prompt guides discovery through a separate judge pass and
+  local publishing. The research toolset has six research tools plus `uoink_url`.
+- The MCP server now exposes 99 tools; stdio also has ten prompts. Core remains at 36.
+
 ### Added — Deep research, part 2: capture and status
 
 - `research_capture` queues selected sources through the existing capture worker,
@@ -29,10 +39,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `research_discover` merges library, YouTube, HN, HackerTube and podcast results,
   ranks them with score explanations, and limits each channel to three candidates.
 - Introduced `UOINK_MCP_TOOLSET=research` with these two tools plus `uoink_url`.
-  The MCP server now exposes 97 tools in the full toolset; core keeps its 36-tool order.
+  The full registry gained the first two research tools; core kept its 36-tool order.
 - Network discovery requires the user's `research_network_sources` setting,
   which defaults to `[]`. Research tools cannot grant consent. Reddit search is
-  deferred; evidence retrieval and reports follow in later parts.
+  deferred. Evidence retrieval and reports arrived in part 3.
 
 ### Added
 

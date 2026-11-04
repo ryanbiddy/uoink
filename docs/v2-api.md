@@ -1605,8 +1605,8 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-97 tools, including `research_start`, `research_discover`, `research_capture`
-and `research_status`. The two Phase 4
+99 tools, including `research_start`, `research_discover`, `research_capture`
+`research_status`, `research_evidence` and `research_publish`. The two Phase 4
 brief tools, `get_library_brief_input` and the
 local-write `publish_library_brief`, joined it on 2026-09-08, run AV-2; the
 read-only Phase 6 cited export `export_cited_range` joined it on 2026-09-08,
@@ -1627,14 +1627,14 @@ consent checks, rate limits and standard error envelopes as stdio. See
 [discovery arguments and results](v2-mcp.md#discover_candidates).
 
 Research runs use `research_start`, `research_discover`, `research_capture`
-and `research_status` through the same
+`research_status`, `research_evidence` and `research_publish` through the same
 tool routes. The user enables network kinds with
 `POST /settings {"research_network_sources":["youtube","hn"]}`. This list defaults
 to `[]`; settings keep only known network kinds and remove duplicates.
 Research tools cannot change it. Reddit search remains deferred even with consent.
-`UOINK_MCP_TOOLSET=research` serves the four research tools plus `uoink_url`.
+`UOINK_MCP_TOOLSET=research` serves the six research tools plus `uoink_url`.
 
-All 97 registry tools are also available over stdio by default since 3.13.0, with
+All 99 registry tools are also available over stdio by default since 3.13.0, with
 the same handlers and client schemas. Both MCP transports flatten the three
 top-level `oneOf` schemas for client compatibility; the server still validates
 the exact frozen schemas. `UOINK_MCP_TOOLSET=core` keeps 36 core tools.

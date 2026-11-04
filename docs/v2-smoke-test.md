@@ -224,7 +224,7 @@ Total checkpoints: 127.
 - [ ] On an isolated fixture library, `tools/list` lists exactly 91 stdio tools by default (35 with `UOINK_MCP_TOOLSET=core`)
   and 91 HTTP tools. `get_playbook_input` has hints true/false/true/false
   (read-only/destructive/idempotent/open-world) on both surfaces.
-- [ ] `prompts/list` lists 9 prompts: the four library prompts and all five
+- [ ] `prompts/list` lists 10 prompts: the deep-research prompt, four library prompts and all five
   playbooks. `prompts/get` works for each playbook with valid fixture arguments;
   each returns a fixed instruction and a fenced data message.
 - [ ] Compare each prompt packet with `get_playbook_input` over stdio and HTTP:

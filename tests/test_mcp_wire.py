@@ -53,7 +53,7 @@ def inventory():
     full, core = registry_golden(), registry_golden("core")
     assert full == GOLDEN["tools"]
     assert core == full[:36]
-    assert len(full) == 97 and len(core) == 36
+    assert len(full) == 99 and len(core) == 36
     assert tools.list_tools() == frozen
     changed = set()
     for tool in full:
@@ -98,7 +98,7 @@ def test_legacy_stdio_wire_golden(tmp_path, version, toolset, inventory):
                 assert client.request(request_id, method, params) == {
                     "jsonrpc": "2.0", "id": request_id, "result": GOLDEN[label]}
             assert len(GOLDEN["templates"]["resourceTemplates"]) == 5
-            assert len(GOLDEN["prompts"]["prompts"]) == 9
+            assert len(GOLDEN["prompts"]["prompts"]) == 10
             for label, ok in (("success", True), ("invalid", False)):
                 result = GOLDEN[label]
                 assert "structuredContent" not in result

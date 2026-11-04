@@ -5093,6 +5093,226 @@
       },
       "name": "research_status",
       "title": "Research run status"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "description": "Find cue-aligned evidence only in a research run's selected ready sources. Returns untrusted excerpts inside the library's escaped JSON fence, revision-bound ids, timestamp links and ASR doubt spans. Quotes are the unescaped words, not the escape sequences. Saves excerpt membership and call history locally. Windows are at most 120 seconds and 200 cues. Counter stance only expands the search query. Each call consumes one of the run's 10 evidence calls; no network or library writes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^rr_[0-9]{14}_[0-9a-f]{8}$",
+            "description": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed."
+          },
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "Nonempty search text to match against saved content."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 12,
+            "description": "Maximum rows to return in this response; does not change stored data."
+          },
+          "stance_hint": {
+            "type": "string",
+            "enum": [
+              "support",
+              "counter"
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "name": "research_evidence",
+      "title": "Find research evidence"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "description": "Verify research claims against this run's stored excerpts and current transcript revisions, then write a local Markdown report, escaped HTML report and verification ledger. Submit quotes as unescaped words, not escape sequences. Renders only matched stored text; drops unbound or ambiguous quotes and judge=no claims. Flags ASR doubt, unconfirmed speakers, overstatement, low overlap and one-sided search. Enforces quote/source caps. Reuses a saved result only when the payload, source revisions, run evidence and output paths are unchanged. No network; writes only inside the research run.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^rr_[0-9]{14}_[0-9a-f]{8}$",
+            "description": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Display title for the saved content; omit to use the handler's derived/default title."
+          },
+          "summary_md": {
+            "type": "string",
+            "maxLength": 1500
+          },
+          "claims": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 60,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                },
+                "section": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "excerpt_refs": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "excerpt_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "quote": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 280
+                      }
+                    },
+                    "required": [
+                      "excerpt_id",
+                      "quote"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "attribution": {
+                  "type": "string",
+                  "enum": [
+                    "speaker",
+                    "channel"
+                  ],
+                  "default": "channel"
+                },
+                "contested": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "counter_refs": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 4,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "excerpt_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "quote": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 280
+                      }
+                    },
+                    "required": [
+                      "excerpt_id",
+                      "quote"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "judge": {
+                  "type": "string",
+                  "enum": [
+                    "supports",
+                    "partial",
+                    "no"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "section",
+                "excerpt_refs"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Agent-extracted objects with claim_text, optional check_worthiness from 0 to 1 and optional context object. Invalid entries are skipped and reported in errors."
+          },
+          "disagreements": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "claim_ids": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 6,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                }
+              },
+              "required": [
+                "topic",
+                "claim_ids"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "run_id",
+          "title",
+          "summary_md",
+          "claims"
+        ],
+        "additionalProperties": false
+      },
+      "name": "research_publish",
+      "title": "Publish research report"
     }
   ],
   "stdio_initialize": {
@@ -5153,153 +5373,164 @@
   "prompts": {
     "prompts": [
       {
-        "name": "consult-library",
-        "description": "Answer a question from cited library evidence: up to 5 bounded excerpt previews for a topic with revision-bound follow-up URIs.",
         "arguments": [
           {
-            "name": "topic",
             "description": "Topic or question to look up (at most 512 characters).",
+            "name": "topic",
             "required": true
           }
-        ]
+        ],
+        "description": "Answer a question from cited library evidence: up to 5 bounded excerpt previews for a topic with revision-bound follow-up URIs.",
+        "name": "consult-library"
       },
       {
-        "name": "evidence-brief",
-        "description": "Compose a citable brief from up to 5 bounded Librarian cards on a topic, optionally limited to items captured on or after a UTC date.",
         "arguments": [
           {
-            "name": "topic",
             "description": "Topic of the brief (at most 512 characters).",
-            "required": true
-          },
-          {
-            "name": "since",
-            "description": "UTC capture date YYYY-MM-DD; only items captured on or after it.",
-            "required": false
-          }
-        ]
-      },
-      {
-        "name": "whats-new",
-        "description": "Deterministic counts and up to 20 recorded events (captures, shelf revisions, applied membership changes) for the last N days.",
-        "arguments": [
-          {
-            "name": "days",
-            "description": "Window length in days, 1-30 (default 7).",
-            "required": false
-          }
-        ]
-      },
-      {
-        "name": "reshelve-review",
-        "description": "Read an existing stored reshelving preview for review: run, revisions, delta hash, expiry, changes, pins, exclusions and churn. Never applies or approves anything.",
-        "arguments": [
-          {
-            "name": "preview_id",
-            "description": "The preview id returned by apply_reshelving in preview mode.",
-            "required": true
-          }
-        ]
-      },
-      {
-        "name": "outlier-posts",
-        "description": "Find posts above a creator's local median, with cited metrics and hooks.",
-        "arguments": [
-          {
-            "name": "author",
-            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
-            "required": true
-          },
-          {
-            "name": "platform",
-            "description": "youtube, tiktok, instagram or reddit.",
-            "required": false
-          },
-          {
-            "name": "since",
-            "description": "UTC capture date YYYY-MM-DD, not in the future.",
-            "required": false
-          }
-        ]
-      },
-      {
-        "name": "transcript-intel",
-        "description": "Extract hooks, ideas, quotes and CTAs from saved transcripts.",
-        "arguments": [
-          {
-            "name": "video_ids",
-            "description": "Comma-separated capture IDs, at most 8.",
-            "required": false
-          },
-          {
             "name": "topic",
-            "description": "FTS query, at most 512 characters.",
-            "required": false
+            "required": true
           },
           {
-            "name": "author",
-            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
-            "required": false
-          },
-          {
+            "description": "UTC capture date YYYY-MM-DD; only items captured on or after it.",
             "name": "since",
-            "description": "UTC capture date YYYY-MM-DD, not in the future.",
             "required": false
           }
-        ]
+        ],
+        "description": "Compose a citable brief from up to 5 bounded Librarian cards on a topic, optionally limited to items captured on or after a UTC date.",
+        "name": "evidence-brief"
       },
       {
-        "name": "comment-mining",
-        "description": "Mine saved comments for customer language or demand signals.",
         "arguments": [
           {
-            "name": "video_ids",
-            "description": "Comma-separated capture IDs, at most 10.",
-            "required": false
-          },
-          {
-            "name": "author",
-            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
-            "required": false
-          },
-          {
-            "name": "lens",
-            "description": "voc (default) or demand.",
+            "description": "Window length in days, 1-30 (default 7).",
+            "name": "days",
             "required": false
           }
-        ]
+        ],
+        "description": "Deterministic counts and up to 20 recorded events (captures, shelf revisions, applied membership changes) for the last N days.",
+        "name": "whats-new"
       },
       {
-        "name": "creator-teardown",
-        "description": "Analyze a creator's saved posts, positioning, formats and cadence.",
         "arguments": [
           {
-            "name": "author",
+            "description": "The preview id returned by apply_reshelving in preview mode.",
+            "name": "preview_id",
+            "required": true
+          }
+        ],
+        "description": "Read an existing stored reshelving preview for review: run, revisions, delta hash, expiry, changes, pins, exclusions and churn. Never applies or approves anything.",
+        "name": "reshelve-review"
+      },
+      {
+        "arguments": [
+          {
             "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
+            "name": "author",
             "required": true
           },
           {
-            "name": "platform",
             "description": "youtube, tiktok, instagram or reddit.",
+            "name": "platform",
+            "required": false
+          },
+          {
+            "description": "UTC capture date YYYY-MM-DD, not in the future.",
+            "name": "since",
             "required": false
           }
-        ]
+        ],
+        "description": "Find posts above a creator's local median, with cited metrics and hooks.",
+        "name": "outlier-posts"
       },
       {
-        "name": "repurpose-pack",
-        "description": "Prepare cited content atoms and credited drafts from saved captures.",
         "arguments": [
           {
+            "description": "Comma-separated capture IDs, at most 8.",
             "name": "video_ids",
-            "description": "Comma-separated capture IDs, 1-5.",
+            "required": false
+          },
+          {
+            "description": "FTS query, at most 512 characters.",
+            "name": "topic",
+            "required": false
+          },
+          {
+            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
+            "name": "author",
+            "required": false
+          },
+          {
+            "description": "UTC capture date YYYY-MM-DD, not in the future.",
+            "name": "since",
+            "required": false
+          }
+        ],
+        "description": "Extract hooks, ideas, quotes and CTAs from saved transcripts.",
+        "name": "transcript-intel"
+      },
+      {
+        "arguments": [
+          {
+            "description": "Comma-separated capture IDs, at most 10.",
+            "name": "video_ids",
+            "required": false
+          },
+          {
+            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
+            "name": "author",
+            "required": false
+          },
+          {
+            "description": "voc (default) or demand.",
+            "name": "lens",
+            "required": false
+          }
+        ],
+        "description": "Mine saved comments for customer language or demand signals.",
+        "name": "comment-mining"
+      },
+      {
+        "arguments": [
+          {
+            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
+            "name": "author",
             "required": true
           },
           {
-            "name": "kinds",
-            "description": "Comma-separated tweet, thread, linkedin, script, newsletter; default tweet,thread.",
+            "description": "youtube, tiktok, instagram or reddit.",
+            "name": "platform",
             "required": false
           }
-        ]
+        ],
+        "description": "Analyze a creator's saved posts, positioning, formats and cadence.",
+        "name": "creator-teardown"
+      },
+      {
+        "arguments": [
+          {
+            "description": "Comma-separated capture IDs, 1-5.",
+            "name": "video_ids",
+            "required": true
+          },
+          {
+            "description": "Comma-separated tweet, thread, linkedin, script, newsletter; default tweet,thread.",
+            "name": "kinds",
+            "required": false
+          }
+        ],
+        "description": "Prepare cited content atoms and credited drafts from saved captures.",
+        "name": "repurpose-pack"
+      },
+      {
+        "arguments": [
+          {
+            "description": "Question to research (1 to 500 characters).",
+            "name": "question",
+            "required": true
+          }
+        ],
+        "description": "Research a question from videos and podcasts, then publish locally verified timestamped receipts.",
+        "name": "deep-research"
       }
     ]
   },

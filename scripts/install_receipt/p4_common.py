@@ -159,6 +159,8 @@ EXPECTED_STDIO_TOOLS = (
     "research_discover",
     "research_capture",
     "research_status",
+    "research_evidence",
+    "research_publish",
 )
 EXPECTED_PROMPTS = (
     "consult-library",
@@ -170,6 +172,7 @@ EXPECTED_PROMPTS = (
     "comment-mining",
     "creator-teardown",
     "repurpose-pack",
+    "deep-research",
 )
 EXPECTED_TEMPLATE_NAMES = (
     "library-card",

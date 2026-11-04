@@ -176,12 +176,12 @@ def test_youtube_runner_and_unavailable_error(backend, monkeypatch):
 
 
 def test_toolsets_schemas_annotations_and_connect(capsys):
-    expected = ("research_start", "research_discover", "research_capture", "research_status", "uoink_url")
+    expected = ("research_start", "research_discover", "research_capture", "research_status", "research_evidence", "research_publish", "uoink_url")
     assert tools.stdio_tool_names("research") == expected == tools.RESEARCH_STDIO_TOOLS
     assert len(expected) <= 10
     assert tools.stdio_tool_names()[:len(tools.CORE_STDIO_TOOLS)] == tools.CORE_STDIO_TOOLS
     assert len(tools.stdio_tool_names()) == len(tools.TOOL_REGISTRY)
-    assert tools.stdio_tool_names()[-4:] == expected[:4]
+    assert tools.stdio_tool_names()[-6:] == expected[:6]
     for name, rate, world in (("research_start", 20, False), ("research_discover", 10, True)):
         spec = tools.TOOL_REGISTRY[name]
         assert spec.input_schema["additionalProperties"] is False
@@ -394,7 +394,7 @@ def test_stdio_research_discovery_keeps_event_loop_responsive(backend, monkeypat
             assert len(worker_threads) == 1 and worker_threads[0] != threading.get_ident()
             assert not pending.done()
             listed = await asyncio.wait_for(uoink_mcp.mcp.list_tools(), 1)
-            assert {tool.name for tool in listed} == {"research_start", "research_discover", "research_capture", "research_status", "uoink_url"}
+            assert {tool.name for tool in listed} == {"research_start", "research_discover", "research_capture", "research_status", "research_evidence", "research_publish", "uoink_url"}
             assert not pending.done()
             release.set()
             response = await asyncio.wait_for(pending, 2)

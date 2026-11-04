@@ -146,7 +146,7 @@ This bundle launches `uoink_mcp.py` over stdio. That process advertises
 different adapter; do not copy the stdio capability object onto HTTP
 ([contract](library/PHASE4-CONTRACT-2026-09-08.md)).
 
-### 97 tools
+### 99 tools
 
 The bundle lists every tool in `uoink_mcp_tools.TOOL_REGISTRY`. Live stdio and HTTP MCP
 use the registry descriptions and flatten the same three input schemas; the
@@ -188,13 +188,14 @@ that pair uses `read_library_resource(uri)`
 [`docs/claude-code-mcp.md`](claude-code-mcp.md)). That CLI gap is not a
 Desktop-bundle defect.
 
-### Nine prompts
+### Ten prompts
 
-Stdio advertises nine prompts (`prompts/list` / `prompts/get`): the four Library
-prompts below and five research playbooks.
+Stdio advertises ten prompts (`prompts/list` / `prompts/get`): the four Library
+prompts below, five research playbooks and `deep-research`.
 
 | Prompt | Arguments |
 |---|---|
+| `deep-research` | Required `question` (1?500 characters). Guides the agent through capture, bounded evidence, a fresh-context judge and local publishing. |
 | `consult-library` | Required `topic`. |
 | `evidence-brief` | Required `topic`; optional `since` as UTC `YYYY-MM-DD`. |
 | `whats-new` | Optional `days`, canonical decimal 1–30, default `7`. |
@@ -244,8 +245,8 @@ CLI ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
    → confirm `dist/uoink-<VERSION>.mcpb` exists
    (the script derives `<VERSION>` from the repo `VERSION` file).
 2. Double-click it in Claude Desktop → accept the install dir → restart.
-3. In Claude, confirm the 97-tool list (the complete shared registry), the five `uoink://library/v1/`
-   templates, and the nine prompts (including `consult-library`, `evidence-brief`,
+3. In Claude, confirm the 99-tool list (the complete shared registry), the five `uoink://library/v1/`
+   templates, and the ten prompts (including `consult-library`, `evidence-brief`,
    `whats-new`, `reshelve-review`). A smoke call such as
    `list_recent_uoinks` still works. Bounded library reads
    (`search_library` / `get_library_item`) do not require the resident HTTP

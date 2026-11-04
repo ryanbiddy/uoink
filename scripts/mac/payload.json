@@ -39,6 +39,8 @@
     "memory_layer.py",
     "list_imports.py",
     "research.py",
+    "research_verify.py",
+    "research_report.py",
     "migrate_install.py",
     "migrations",
     "mobile_playlists.py",

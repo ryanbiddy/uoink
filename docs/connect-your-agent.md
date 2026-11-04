@@ -27,13 +27,13 @@ an existing config without replacing unrelated settings or servers.
 
 | Toolset | Tools | Use it when |
 |---|---|---|
-| `full` (default) | 97 | Claude Code, Claude Desktop, Codex and other clients without a tool cap. |
+| `full` (default) | 99 | Claude Code, Claude Desktop, Codex and other clients without a tool cap. |
 | `core` | 36 | The client caps tools across servers. `uoink connect cursor` uses it by default. |
 | `search` | 9 | You want the library only: capture a link, get a transcript, search, read and cite. |
-| `research` | 5 | Start a run, discover sources, queue captures and track progress. |
+| `research` | 7 | Discover and capture sources, retrieve evidence, then publish verified reports. |
 
 `research` serves `research_start`, `research_discover`, `research_capture`,
-`research_status` and `uoink_url`.
+`research_status`, `research_evidence`, `research_publish` and `uoink_url`.
 Use `uoink connect <client> --toolset research` to select it. Network discovery
 uses only sources enabled by the user's `research_network_sources` setting
 (default `[]`); the tools cannot grant consent. Reddit search is deferred.
