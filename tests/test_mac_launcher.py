@@ -56,7 +56,7 @@ def startup(monkeypatch, tmp_path):
                  "_heal_stale_corpus_paths_at_boot", "_restore_jobs_from_disk",
                  "_source_startup_reconciliation", "_resume_podcast_transcription_jobs",
                  "_start_backfill_thread", "_start_trash_purge_thread",
-                 "_start_retry_pending_thread", "_start_podcast_feed_scheduler_thread",
+                 "_start_retry_pending_thread", "_start_saves_thread", "_start_podcast_feed_scheduler_thread",
                  "_start_relay_inbox_thread", "_stop_relay_inbox_thread", "maybe_toast"):
         monkeypatch.setattr(server, name, lambda *a, **k: None)
     monkeypatch.setattr(server, "_maybe_post_migration_toast", lambda: True)
