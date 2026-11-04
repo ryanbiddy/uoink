@@ -1,0 +1,14 @@
+{
+  "title": "Testing agent evaluations",
+  "channel": "Fixture talks",
+  "transcript_source": "captions",
+  "cues": [
+    {"start": 0, "end": 8, "text": "Welcome to our discussion of agent evaluations."},
+    {"start": 10, "end": 20, "text": "We compare tasks before choosing an evaluation method."},
+    {"start": 27.8, "end": 36, "text": "evals catch regressions before deployment"},
+    {"start": 38, "end": 46, "text": "however benchmarks miss failures in real workflows"},
+    {"start": 48, "end": 58, "text": "Human review catches failures that automated checks miss."},
+    {"start": 190, "end": 198, "text": "The final evaluation uses a separate test set."}
+  ],
+  "reliability": {"spans": [{"start": 49, "end": 52, "reason": "low_confidence", "confidence": 0.3}]}
+}

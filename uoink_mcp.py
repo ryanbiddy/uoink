@@ -8,14 +8,14 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The default full toolset serves all 97 tools in TOOL_REGISTRY, with the same
+The default full toolset serves all 99 tools in TOOL_REGISTRY, with the same
 names, descriptions, schemas, titles and annotations; three schemas with a
 top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
 serves 36 tools: the v3.9.1 35 plus get_transcript. Those remain first, in their
 original order, in full mode. UOINK_MCP_TOOLSET=search serves 9 tools (capture a
 link, get a transcript, search, read, cite) for clients that cap or crowd the tool list. Unknown
 toolset values warn on stderr and use full. UOINK_MCP_TOOLSET=research serves
-research tools plus uoink_url (5 tools).
+research tools plus uoink_url (7 tools).
 
 All handlers use the shared registry's consent and safety checks. No tools
 are excluded from stdio. Dashboard intent minting is never an MCP tool;
@@ -23,7 +23,7 @@ discovery's in-memory, origin-bound intents cannot cross into this process,
 so discovery requires the explicit agent-consent setting here. Library and
 source intents use the same token-derived trusted session as HTTP.
 
-Five resource templates and nine prompts remain available in every mode.
+Five resource templates and ten prompts remain available in every mode.
 Bounded Library admission stays alive through the concrete SDK JSON-RPC
 dump, write and flush. Other registry tools run on the
 event loop one at a time, as in v3.9.1, because they share the Index
@@ -184,7 +184,7 @@ class RegistryMCP(Server):
         if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):
             envelope = {"ok": False, "error": "tool not found"}
         elif name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES or name in {
-                "research_discover", "research_capture", "research_status"}:
+                "research_discover", "research_capture", "research_status", "research_evidence", "research_publish"}:
             # Discovery and research use blocking work and run/store locks.
             # Keep stdio responsive while a worker finishes.
             state = _active_stdio_request.get()
@@ -450,7 +450,7 @@ def get_library_activity(
 # isError set from the envelope, never wrapped in the SDK's "Error executing
 # tool" string. Resources and prompts use low-level handlers on
 # the owned public Server so the curated list,
-# the five templates, the nine prompts and the JSON-RPC error codes are ours:
+# the five templates, the ten prompts and the JSON-RPC error codes are ours:
 # -32602 invalid parameters, -32002 missing or deleted resource, -32603 any
 # other refusal, each carrying the domain envelope in error.data. The SDK
 # advertises resources {subscribe:false, listChanged:false} and prompts
@@ -562,6 +562,7 @@ def _register_phase4_stdio() -> None:
         import library_prompts
         import library_resources
         import research_playbooks
+        import research
     except ImportError as exc:
         raise RuntimeError("Uoink MCP: required Library modules unavailable; repair the installation.") from exc
     try:
@@ -643,13 +644,15 @@ def _register_phase4_stdio() -> None:
         return mcp_types.ListPromptsResult(prompts=[mcp_types.Prompt(
             name=prompt["name"], description=prompt["description"],
             arguments=[mcp_types.PromptArgument(**argument) for argument in prompt["arguments"]],
-        ) for prompt in (*library_prompts.PROMPTS, *research_playbooks.PLAYBOOKS)])
+        ) for prompt in (*library_prompts.PROMPTS, *research_playbooks.PLAYBOOKS, *research.PROMPTS)])
 
     async def _phase4_get_prompt(ctx, params):
         name, arguments = params.name, params.arguments
         try:
             active = reader()
-            if name in {p["name"] for p in research_playbooks.PLAYBOOKS}:
+            if name == "deep-research":
+                result = research.get_prompt(arguments)
+            elif name in {p["name"] for p in research_playbooks.PLAYBOOKS}:
                 result = research_playbooks.get_prompt(active, name, arguments)
             else:
                 result = library_prompts.get_prompt(active, work_service(active), name, arguments)

@@ -181,6 +181,8 @@ CANONICAL_STDIO_TOOLS = {
     "research_discover",
     "research_capture",
     "research_status",
+    "research_evidence",
+    "research_publish",
 }
 
 REMOVED_STDIO_ALIASES = {

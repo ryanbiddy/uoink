@@ -21,8 +21,8 @@ does not prove Claude Code installation or any current CLI capability.
    Settings → Extensions**).
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
-4. Restart Claude Desktop. The 97 stdio tools, five library resource
-   templates, and nine prompts below appear from the launched child.
+4. Restart Claude Desktop. The 99 stdio tools, five library resource
+   templates, and ten prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
 
@@ -62,11 +62,11 @@ see https://uoink.app/developers. For **Claude Code CLI**, do not use this
 
 ## What stdio advertises
 
-The launched child is `uoink_mcp.py`. On stdio it advertises **97 tools**,
-**five resource templates**, and **nine prompts**. HTTP MCP stays tools-only
+The launched child is `uoink_mcp.py`. On stdio it advertises **99 tools**,
+**five resource templates**, and **ten prompts**. HTTP MCP stays tools-only
 and is not what this bundle launches.
 
-The committed [manifest](manifest.json) lists all 97 names. The 36 core
+The committed [manifest](manifest.json) lists all 99 names. The 36 core
 remain first in `tools/list`. Set `UOINK_MCP_TOOLSET=core` for clients with tool
 caps, including Cursor. Unknown values warn on stderr and use full.
 Claude Desktop users should reinstall the 3.13.0 `.mcpb` and restart Desktop
@@ -78,7 +78,7 @@ its `@` picker. Claude Code CLI 2.1.261 has no native resource reader; that
 client uses `read_library_resource(uri)` instead
 ([docs/claude-code-mcp.md](../docs/claude-code-mcp.md)).
 
-### 97 tools
+### 99 tools
 
 **Legacy (25)**
 
@@ -210,6 +210,8 @@ client uses `read_library_resource(uri)` instead
 | `research_discover` | Search consented sources and save a ranked candidate pool. |
 | `research_capture` | Queue selected sources within the run's ASR budget; lite mode by default. |
 | `research_status` | Read capture progress, saved transcript provenance and estimated ASR usage. |
+| `research_evidence` | Find fenced, revision-bound excerpts from this run. |
+| `research_publish` | Verify claims and write local Markdown/HTML reports and a verification ledger. |
 
 ### Five resource templates (`uoink://library/v1/`)
 
@@ -224,10 +226,11 @@ hashes.
 | `shelves/{shelf_key}/{taxonomy_revision}/{projection_revision}/{shelf_revision}/{offset}` | Shelf definition and a page of current members. |
 | `briefs/{date}/{brief_hash}` | One persisted client-produced brief. |
 
-### Nine prompts
+### Ten prompts
 
 | Prompt | Arguments |
 |---|---|
+| `deep-research` | Required `question` (1?500 characters). Guides the agent through capture, bounded evidence, a fresh-context judge and local publishing. |
 | `consult-library` | Required `topic`. |
 | `evidence-brief` | Required `topic`; optional `since` as UTC `YYYY-MM-DD`. |
 | `whats-new` | Optional `days`, canonical decimal 1–30, default `7`. |

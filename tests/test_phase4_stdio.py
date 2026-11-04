@@ -1,7 +1,7 @@
 """tests/test_phase4_stdio.py - Living Library Stdio MCP & Compatibility Tests (AV-1a).
 
 Gates covered:
-- P4-06 (Capabilities: advertised methods, 5 templates, 9 prompts, curated <= 41, 97 tools,
+- P4-06 (Capabilities: advertised methods, 5 templates, 10 prompts, curated <= 41, 99 tools,
   no promised notifications/subscriptions, JSON-RPC error codes -32602, -32002, -32603)
 - P4-13 stdio part (Installed compatibility: python -P embeddable rules, spaced paths, clean stdout,
   diagnostic stderr separation, restart resilience, missing storage handling)
@@ -40,6 +40,7 @@ from library_resources import (
 import library_prompts
 from library_prompts import PROMPTS, get_prompt
 import research_playbooks
+import research
 from tests.test_research_playbooks import library as playbook_library  # noqa: F401 -- fixture
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -203,8 +204,8 @@ class TestP406CapabilitiesAndDiscovery:
             assert "result" in resp
             prompts = resp["result"]["prompts"]
             prompt_names = {p["name"] for p in prompts}
-            assert len(prompts) == 9
-            assert prompt_names == {p["name"] for p in (*PROMPTS, *research_playbooks.PLAYBOOKS)}
+            assert len(prompts) == 10
+            assert prompt_names == {p["name"] for p in (*PROMPTS, *research_playbooks.PLAYBOOKS, *research.PROMPTS)}
         finally:
             client.close()
 
@@ -234,7 +235,7 @@ class TestP406CapabilitiesAndDiscovery:
             assert NEW_PHASE4_BRIEF_TOOLS.issubset(names)
             assert NEW_PHASE6_EXPORT_TOOLS.issubset(names)
             assert names == set(__import__("uoink_mcp_tools").TOOL_REGISTRY)
-            assert len(names) == 97
+            assert len(names) == 99
         finally:
             client.close()
 
@@ -544,8 +545,8 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
         client.initialize()
         listed = client.request(2, "tools/list")["result"]["tools"]
         prompts = client.request(3, "prompts/list")["result"]["prompts"]
-    assert len(listed) == 97
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 97
+    assert len(listed) == 99
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 99
     _assert_tool_metadata(listed)
     tool = next(t for t in listed if t["name"] == "get_playbook_input")
     spec = uoink_mcp_tools.TOOL_REGISTRY[tool["name"]]
@@ -559,8 +560,8 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
                                 "idempotentHint": True, "openWorldHint": False}
     assert spec.rate_limiter is None
     assert len(PROMPTS) == 4
-    assert len(prompts) == 9
-    expected = [*PROMPTS, *research_playbooks.PLAYBOOKS]
+    assert len(prompts) == 10
+    expected = [*PROMPTS, *research_playbooks.PLAYBOOKS, *research.PROMPTS]
     assert prompts == expected
 
 

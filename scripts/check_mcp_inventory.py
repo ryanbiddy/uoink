@@ -27,7 +27,7 @@ def literal_pin(path: str, name: str):
 
 def check() -> None:
     names = tools.stdio_tool_names()
-    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 97
+    assert len(names) == len(set(names)) == len(tools.TOOL_REGISTRY) == 99
     assert names[:36] == tools.CORE_STDIO_TOOLS
     assert tools.stdio_tool_names("core") == tools.CORE_STDIO_TOOLS
     assert len(set(tools.SEARCH_STDIO_TOOLS)) == 9 and set(tools.SEARCH_STDIO_TOOLS) <= set(names), "search toolset drift"

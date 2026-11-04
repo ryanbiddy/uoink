@@ -3,8 +3,8 @@
 Run with the repository on PYTHONPATH and an isolated parent environment:
     python -B tests/update_mcp_wire_goldens.py
 The full protocol baseline still requires SDK 1.28.1. On SDK 2, the default
-refresh only appends new tools after checking that every existing tool entry
-is unchanged. It preserves all non-tool protocol fixtures. Search-only refresh is:
+refresh only appends new tools and prompts after checking that every existing
+entry is unchanged. It preserves all other protocol fixtures. Search-only refresh is:
     python -B tests/update_mcp_wire_goldens.py --search-only
 This uses the real stdio server with a disposable seeded library. It updates
 only the four search tools' schemas/descriptions and the embedded search data
@@ -55,9 +55,17 @@ def update_inventory_only():
             client.initialize()
             tools = client.request(2, "tools/list")["result"]["tools"]
             assert tools == registry_golden(), "Wire registry differs from product schemas"
+            prompts = client.request(3, "prompts/list")["result"]["prompts"]
     updated = refresh_inventory(golden, tools)
+    previous_prompts = golden["prompts"]["prompts"]
+    assert prompts[:len(previous_prompts)] == previous_prompts, "Existing prompt metadata or order changed"
+    from library_prompts import PROMPTS
+    from research_playbooks import PLAYBOOKS
+    from research import PROMPTS as RESEARCH_PROMPTS
+    assert prompts == list((*PROMPTS, *PLAYBOOKS, *RESEARCH_PROMPTS))
+    updated["prompts"]["prompts"] = prompts
     target.write_text(json.dumps(updated, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Inventory refresh: {len(tools)} tools; existing tools and protocol fixtures unchanged")
+    print(f"Inventory refresh: {len(tools)} tools, {len(prompts)} prompts; existing entries and other fixtures unchanged")
 
 
 def refresh_metadata(golden, tools):
@@ -181,6 +189,7 @@ def main():
     from library_resources import TEMPLATES
     from library_prompts import PROMPTS
     from research_playbooks import PLAYBOOKS
+    from research import PROMPTS as RESEARCH_PROMPTS
 
     scratch = ROOT / "_scratch/sdk2/m2"
     scratch.mkdir(parents=True, exist_ok=True)
@@ -201,7 +210,7 @@ def main():
             for n, (label, method, params) in enumerate(cases, 3):
                 golden[label] = client.request(n, method, params)["result"]
             assert golden["templates"]["resourceTemplates"] == list(TEMPLATES)
-            assert golden["prompts"]["prompts"] == list((*PROMPTS, *PLAYBOOKS))
+            assert golden["prompts"]["prompts"] == list((*PROMPTS, *PLAYBOOKS, *RESEARCH_PROMPTS))
             golden["unknown_stdio"] = client.request(9, "m2/unknown")["error"]
             client.send_raw("{")
             golden["parser_notification"] = client.receive()
@@ -224,7 +233,7 @@ def main():
     target = Path(__file__).parent / "fixtures/mcp_wire/sdk1.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(golden, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {target}: 97 tools, 5 templates, 9 prompts, stdio and HTTP baseline")
+    print(f"Wrote {target}: 99 tools, 5 templates, 10 prompts, stdio and HTTP baseline")
 
 
 if __name__ == "__main__":
