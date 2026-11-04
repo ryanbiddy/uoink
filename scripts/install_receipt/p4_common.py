@@ -157,6 +157,8 @@ EXPECTED_STDIO_TOOLS = (
     "remove_allowed_site",
     "research_start",
     "research_discover",
+    "research_capture",
+    "research_status",
 )
 EXPECTED_PROMPTS = (
     "consult-library",

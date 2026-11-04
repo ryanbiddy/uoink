@@ -8,14 +8,14 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The default full toolset serves all 95 tools in TOOL_REGISTRY, with the same
+The default full toolset serves all 97 tools in TOOL_REGISTRY, with the same
 names, descriptions, schemas, titles and annotations; three schemas with a
 top-level oneOf are flattened for client compatibility (client_input_schema). UOINK_MCP_TOOLSET=core
 serves 36 tools: the v3.9.1 35 plus get_transcript. Those remain first, in their
 original order, in full mode. UOINK_MCP_TOOLSET=search serves 9 tools (capture a
 link, get a transcript, search, read, cite) for clients that cap or crowd the tool list. Unknown
 toolset values warn on stderr and use full. UOINK_MCP_TOOLSET=research serves
-research tools plus uoink_url (3 tools).
+research tools plus uoink_url (5 tools).
 
 All handlers use the shared registry's consent and safety checks. No tools
 are excluded from stdio. Dashboard intent minting is never an MCP tool;
@@ -183,17 +183,18 @@ class RegistryMCP(Server):
     async def call_tool(self, name, arguments):
         if name not in uoink_mcp_tools.stdio_tool_names(STDIO_TOOLSET):
             envelope = {"ok": False, "error": "tool not found"}
-        elif name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES or name == "research_discover":
-            # Discovery uses bounded network/subprocess work. Keep stdio
-            # responsive to other calls and cancellation while it finishes.
+        elif name in uoink_mcp_tools.DISCOVERY_TOOL_NAMES or name in {
+                "research_discover", "research_capture", "research_status"}:
+            # Discovery and research use blocking work and run/store locks.
+            # Keep stdio responsive while a worker finishes.
             state = _active_stdio_request.get()
             if state is not None:
                 # Peer cancellation cannot stop a discovery worker thread. AnyIO
                 # waits for that worker before the unanswered callback settles
                 # the request, keeping its ID reserved throughout the work.
-                envelope = await anyio.to_thread.run_sync(uoink_mcp_tools.call_tool, name, arguments)
+                envelope = await anyio.to_thread.run_sync(_call_stdio_registry, name, arguments)
             else:
-                envelope = await asyncio.to_thread(uoink_mcp_tools.call_tool, name, arguments)
+                envelope = await asyncio.to_thread(_call_stdio_registry, name, arguments)
         else:
             # Registry handlers share one Index connection with the Library
             # read, prompt and resource handlers, and several read idx._conn

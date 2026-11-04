@@ -179,6 +179,8 @@ CANONICAL_STDIO_TOOLS = {
     "remove_allowed_site",
     "research_start",
     "research_discover",
+    "research_capture",
+    "research_status",
 }
 
 REMOVED_STDIO_ALIASES = {
