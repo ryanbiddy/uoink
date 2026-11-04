@@ -939,8 +939,10 @@ def get_whisperx_status(_args: dict[str, Any]) -> dict[str, Any]:
     settings = server._read_settings() or {}
     return _ok(
         whisperx_available=_wr.is_whisperx_available(),
+        transcription_engine=_wr.transcription_engine(),
         **({"media_capability": _platform.media_capability()}
-           if _platform.sys.platform == "darwin" else {}),
+           if (_platform.sys.platform == "darwin"
+               or _platform.sys.platform.startswith("linux")) else {}),
         selected_model=settings.get("whisper_model") or "base",
         supported_models=list(_wr._MODELS),
         diarization_default=bool(settings.get("diarization_default")),

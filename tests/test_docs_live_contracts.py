@@ -170,7 +170,10 @@ def test_documented_ping_keys_match_the_real_handler(monkeypatch, platform) -> N
         match = re.search(pattern, text, re.DOTALL)
         assert match is not None, f"{path.name} has no public-probe JSON schema"
         documented = json.loads(match.group(1))
-        expected = set(documented) | ({"capabilities"} if platform == "darwin" else set())
+        # PR 2 adds runtime selection; the documentation refresh is PR 3.
+        expected = set(documented) | {"transcription_engine"} | (
+            {"capabilities"} if platform == "darwin" else set())
+        assert probe.payload["transcription_engine"] == server.whisper_runner.transcription_engine()
         assert expected == set(probe.payload), path
         if platform == "darwin":
             assert probe.payload["capabilities"] == server._platform.platform_capabilities()

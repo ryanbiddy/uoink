@@ -420,6 +420,8 @@ def main(argv=None):
                            "tool_counts": {mode: len(registry.stdio_tool_names(mode)) for mode in ("full", "core")}}
                 if sys.platform == "darwin" or sys.platform.startswith("linux"):
                     payload["capabilities"] = server._platform.platform_capabilities()
+                if sys.platform.startswith("linux"):
+                    payload["reliability_model"] = server._reliability_model_status()
             else:
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)
                 existing_threads = set(threading.enumerate())

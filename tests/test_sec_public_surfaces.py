@@ -135,6 +135,7 @@ def helper(surface_code):
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "base",
             is_whisperx_available=lambda: True,
+            transcription_engine=lambda: "whisperx",
             is_model_downloaded=lambda root, model: False),
         "suite_service": SimpleNamespace(
             MANIFEST_PATH="/.well-known/suite-service.json",

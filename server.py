@@ -1743,6 +1743,7 @@ def _public_settings(data: dict | None = None) -> dict:
         # "WhisperX not installed -- install via Setup" without a
         # separate endpoint roundtrip.
         "whisperx_runtime_available": whisper_runner.is_whisperx_available(),
+        "transcription_engine": whisper_runner.transcription_engine(),
         # v3.2 Writing Studio settings.
         "voice_dna_warnings_enabled": bool(
             data.get("voice_dna_warnings_enabled", True)),
@@ -10736,9 +10737,10 @@ def _queue_podcast_transcription(
             "ok": True, "job_id": existing["id"], "job": existing,
             "reused_existing": True,
         }, 202
-    if not whisper_runner.is_whisperx_available():
+    if not whisper_runner.is_transcription_available():
         return {
             "ok": False, "whisperx_available": False,
+            "transcription_engine": None,
             "error": "whisperx runtime is unavailable or damaged",
         }, 503
     selected_model = whisper_runner.normalize_model(model)
@@ -11053,7 +11055,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             if not media["available"]:
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code=media["code"], terminal=True)
-            if not whisper_runner.is_whisperx_available():
+            if not whisper_runner.is_transcription_available():
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_transcription_setup")
             model = whisper_runner.normalize_model(
@@ -15660,6 +15662,7 @@ class Handler(BaseHTTPRequestHandler):
                 # success stamp. `--doctor` reads the same block.
                 "heartbeat": _heartbeat_payload(),
                 "whisperx_available": whisper_runner.is_whisperx_available(),
+                "transcription_engine": whisper_runner.transcription_engine(),
                 "whisper_model": whisper_model,
                 "whisperx_model_loaded": whisper_runner.is_model_downloaded(
                     DATA_ROOT, whisper_model),
@@ -17391,8 +17394,10 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {
             "ok": True,
             "whisperx_available": whisper_runner.is_whisperx_available(),
+            "transcription_engine": whisper_runner.transcription_engine(),
             **({"media_capability": _platform.media_capability()}
-               if _platform.sys.platform == "darwin" else {}),
+               if (_platform.sys.platform == "darwin"
+                   or _platform.sys.platform.startswith("linux")) else {}),
             "selected_model": settings.get("whisper_model") or "base",
             "supported_models": list(whisper_runner._MODELS),
             "diarization_default": bool(settings.get("diarization_default")),
