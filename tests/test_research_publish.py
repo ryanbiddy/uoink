@@ -272,7 +272,8 @@ def golden_report():
 def test_golden_reports_and_no_duplicate_quotations():
     report = golden_report()
     for name, render in (("golden_report.md", research_report.render_markdown), ("golden_report.html", research_report.render_html)):
-        assert render(report).encode("utf-8") == (FIXTURES / name).read_bytes()
+        # Checkouts may convert fixtures to CRLF (core.autocrlf); compare LF bytes.
+        assert render(report).encode("utf-8") == (FIXTURES / name).read_bytes().replace(b"\r\n", b"\n")
     assert research_report.render_html(report).count("<blockquote>") == 2
     assert "Receipts by Uoink" in research_report.render_html(report)
     assert "Receipts by Uoink" not in research_report.render_html(report, footer=False)
