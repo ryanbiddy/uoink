@@ -301,7 +301,14 @@ def legacy_user_data_dir() -> Path:
 
 
 def app_state_path(app: Path, data: Path, name: str) -> Path:
-    """Keep mutable state outside read-only Darwin and Linux app folders."""
+    """Keep mutable state outside read-only Darwin and Linux app folders.
+
+    A Linux source checkout keeps the source-adjacent location it had before
+    the installer, so harnesses that run server.py from a clone still find
+    token.txt next to it.
+    """
+    if sys.platform.startswith("linux") and (app / ".git").exists():
+        return app / name
     return (data if sys.platform == "darwin" or sys.platform.startswith("linux") else app) / name
 
 
