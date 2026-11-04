@@ -1,0 +1,8 @@
+{
+  "hits": [
+    {"objectID": "90000001", "title": "Agent evals: measuring useful work", "url": "https://www.youtube.com/watch?v=evaltalk001", "points": 140, "num_comments": 52, "created_at": "2026-10-03T12:00:00Z"},
+    {"objectID": "90000002", "title": "Agent evals after deployment", "url": "https://youtu.be/evaltalk002", "points": 80, "num_comments": 21},
+    {"objectID": "90000003", "title": "A podcast on agent evals", "url": "https://open.spotify.com/episode/example-evals", "points": 34, "num_comments": 9},
+    {"objectID": "90000004", "title": "An evals blog post", "url": "https://example.org/blog/evals", "points": 500, "num_comments": 100}
+  ]
+}

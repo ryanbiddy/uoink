@@ -1,0 +1,7 @@
+{
+  "resultCount": 2,
+  "results": [
+    {"trackName": "What agent evals miss", "collectionName": "Practical Systems Podcast", "trackTimeMillis": 3000000, "releaseDate": "2026-10-12T08:00:00Z", "episodeUrl": "https://audio.example.org/agent-evals.mp3", "trackViewUrl": "https://podcasts.apple.com/us/podcast/example/id900000001?i=900000002", "feedUrl": "https://audio.example.org/feed.xml", "description": "A discussion of agent evals, feedback loops and tests."},
+    {"trackName": "Evals without a leaderboard", "collectionName": "Engineering Conversations", "trackTimeMillis": 2100000, "releaseDate": "2026-09-20T08:00:00Z", "trackViewUrl": "https://podcasts.apple.com/us/podcast/example/id900000003?i=900000004", "description": "A catalog result without an enclosure URL."}
+  ]
+}

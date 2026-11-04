@@ -283,6 +283,8 @@ def server_entry(client: str, app_dir: Path, python: Path, isolation_args=(), to
         args = ["-B", "-s", str(resources / "uoink_mcp.py"), *isolation_args]
     env = {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
     toolset = toolset or default_toolset(client)
+    if toolset not in ("full", "core", "search", "research"):
+        raise ValueError("toolset must be full, core, search or research")
     if toolset != "full":
         env["UOINK_MCP_TOOLSET"] = toolset
     return {"command": command, "args": args, "env": env}

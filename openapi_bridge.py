@@ -230,6 +230,8 @@ def build_spec(base_url: str, *, tool_registry: dict, version: str) -> dict:
 def build_well_known(base_url: str, *, version: str, tool_count: int) -> dict:
     """Discovery doc at /.well-known/uoink-mcp.json so an agent that lands on
     the host can find both the MCP endpoint and the OpenAPI spec."""
+    import uoink_mcp_tools
+
     return {
         "name": "Uoink",
         "version": version,
@@ -239,7 +241,8 @@ def build_well_known(base_url: str, *, version: str, tool_count: int) -> dict:
         "tool_count": tool_count,
         "stdio_tool_count": tool_count,
         "transports": ["stdio", "http"],
-        "stdio_toolsets": {"full": tool_count, "core": 36, "search": 9},
+        "stdio_toolsets": {"full": tool_count, "core": 36, "search": 9,
+                           "research": len(uoink_mcp_tools.RESEARCH_STDIO_TOOLS)},
         "mcp_endpoint": f"{base_url}/mcp/v1",
         "openapi_spec": f"{base_url}/openapi/v1/spec.json",
         "tools_endpoint_template": f"{base_url}/tools/{{tool_name}}",
