@@ -1,6 +1,6 @@
 """UI re-haul: the dashboard shell (SPEC "Dashboard IA").
 
-Nav (5): Library, Activity (badge "N failed" when > 0), Generate, Sources,
+Nav (6): Library, Activity (badge "N failed" when > 0), Generate, Research, Sources,
 Settings. The helper status sits at the bottom of the sidebar ("Running on
 this PC" with a dot; offline says what to do on this OS). About and Star on
 GitHub moved into Settings > App > About, Stop Uoink into Settings > App with
@@ -88,7 +88,7 @@ def _settings_section(key: str) -> str:
     return _between(_panel("settings"), f'id="settings-{key}"', "</section>")
 
 
-def test_nav_is_the_five_spec_items_in_order():
+def test_nav_includes_research_with_the_existing_items_in_order():
     nav = _between(MARKUP, '<nav class="nav" aria-label="Sections">', "</nav>")
     buttons = re.findall(
         r'<button class="nav-button[^"]*" type="button" data-tab-button="([^"]+)" data-nav-label="([^"]+)"', nav)
@@ -96,15 +96,16 @@ def test_nav_is_the_five_spec_items_in_order():
         ("library", "Library"),
         ("activity", "Activity"),
         ("writing", "Generate"),
+        ("research", "Research"),
         ("sources", "Sources"),
         ("settings", "Settings"),
     ], buttons
-    assert nav.count("<button") == 5
+    assert nav.count("<button") == 6
     # Library opens first and says so to assistive tech too.
     assert 'data-tab-button="library" data-nav-label="Library" aria-current="page"' in nav
     # The nav is the only tab switcher left (About, For You and the sidebar
     # Activity button are gone from it).
-    assert MARKUP.count("data-tab-button=") == 5
+    assert MARKUP.count("data-tab-button=") == 6
     assert 'btn.addEventListener("click", () => switchTab(btn.dataset.tabButton))' in SCRIPT
     switch = _between(SCRIPT, "function switchTab(tab, options = {})", "function applyRoute(route)")
     assert 'btn.setAttribute("aria-current", "page")' in switch
@@ -260,7 +261,7 @@ def test_dead_panels_and_the_features_tab_are_gone():
 def test_hash_routes_and_back_are_wired():
     tabs = _between(SCRIPT, "const ROUTE_TABS = {", "};")
     for head, tab in (("library", "library"), ("activity", "activity"), ("generate", "writing"),
-                      ("sources", "sources"), ("settings", "settings")):
+                      ("research", "research"), ("sources", "sources"), ("settings", "settings")):
         assert f'{head}: "{tab}",' in tabs, head
     parse = _between(SCRIPT, "function parseRoute(hash)", "function routeForTab(")
     assert 'if (head === "item")' in parse and 'if (head === "settings")' in parse

@@ -15770,6 +15770,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/research" or bare.startswith("/research/"):
+            return self._handle_research_get(bare)
         if bare == "/relay/status":
             return self._send_json(200, _relay_status_payload())
         if bare == "/search/status":
@@ -16000,6 +16002,44 @@ class Handler(BaseHTTPRequestHandler):
             SPLASH_PATH,
             "text/html; charset=utf-8",
         )
+
+    # ---- Read-only research dashboard data and fixed exports ----
+    def _handle_research_get(self, bare):
+        import research
+
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "dashboard origin required"})
+        try:
+            if bare == "/research":
+                return self._send_json(200, research.recent_runs(DATA_ROOT))
+            parts = bare.split("/")
+            if len(parts) not in (3, 4):
+                raise research.ResearchError("Invalid research route.", "invalid_run_id")
+            run_id = research.validate_run_id(parts[2])
+            if len(parts) == 3:
+                return self._send_json(200, research.run_view(DATA_ROOT, run_id))
+            # Do not accept filenames, paths, URLs or a caller-selected root.
+            if parts[3] == "markdown":
+                content = research.report_file(DATA_ROOT, run_id, "md").read_text(encoding="utf-8")
+                return self._send_json(200, {"ok": True, "content": content})
+            if parts[3] != "report":
+                return self._send_json(404, {"ok": False, "error": "Research route not found."})
+            body = research.report_file(DATA_ROOT, run_id).read_bytes()
+        except research.ResearchError as error:
+            status = 404 if error.code in {"not_found", "report_not_found"} else 400
+            return self._send_json(status, {"ok": False, "error": str(error), "code": error.code})
+        except (OSError, UnicodeError):
+            return self._send_json(404, {"ok": False, "error": "Research report unavailable."})
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self._send_cors(self._cors_origin())
+        self.end_headers()
+        self.wfile.write(body)
 
     # ---- /settings ----
     def _handle_search_notice(self, name):

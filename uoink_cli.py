@@ -16,6 +16,7 @@ import shutil
 import stat
 import sys
 import threading
+import time
 
 APP_DIR = Path(__file__).resolve().parent
 if str(APP_DIR) not in sys.path:
@@ -77,6 +78,17 @@ def parser():
     saves.add_argument("--limit", type=int, default=50, help="items per batch, 1-50 (default 50)")
     saves.add_argument("--offset", type=int, default=0, help="start position in the staged list")
     saves.add_argument("--preview", action="store_true", help="count without queueing")
+    research = command("research", help="discover sources, capture evidence and publish a research report")
+    research.add_argument("words", nargs="+", metavar="QUESTION|status|publish|open|list")
+    research.add_argument("--sources", help="comma-separated source kinds (library,youtube,podcast,hn,hackertube)")
+    research.add_argument("--max", dest="max_sources", type=int, help="maximum sources (default 12)")
+    research.add_argument("--asr-minutes", type=int, help="ASR budget in minutes (default 120)")
+    research.add_argument("--since", help="only sources published since YYYY-MM-DD")
+    research.add_argument("--yes", action="store_true", help="capture the top candidates without prompting")
+    research.add_argument("--no-wait", action="store_true", help="return after queueing captures")
+    research.add_argument("--wait-minutes", type=float, help="maximum capture wait (default 30)")
+    research.add_argument("--claims", type=Path, help="publish payload JSON, without run_id")
+    research.add_argument("--json", action="store_true", help="one JSON result on stdout (the default)")
     note = command("note")
     note.add_argument("text")
     note.add_argument("--title")
@@ -209,7 +221,174 @@ def error_text(payload):
     return str(error)
 
 
+def research_action(ns):
+    """Reserve command tokens; a quoted multiword question remains a question."""
+    import re
+    import research
+    words = ns.words
+    action, value = "question", " ".join(words)
+    if words[0] == "list":
+        if len(words) != 1:
+            raise UsageError("research list takes no run_id or question; quote a multiword question")
+        action, value = "list", None
+    elif words[0] in {"status", "publish", "open"}:
+        if len(words) != 2 or not re.fullmatch(research.RUN_ID_PATTERN, words[1]):
+            raise UsageError(f"research {words[0]}: invalid or missing run_id; quote a multiword question")
+        action, value = words
+    if action != "question":
+        for flag, attr in (("--sources", "sources"), ("--max", "max_sources"),
+                           ("--asr-minutes", "asr_minutes"), ("--since", "since"),
+                           ("--yes", "yes"), ("--no-wait", "no_wait"), ("--wait-minutes", "wait_minutes")):
+            if getattr(ns, attr) is not None and getattr(ns, attr) is not False:
+                raise UsageError(f"{flag} requires a research question")
+    if ns.claims is not None and action != "publish":
+        raise UsageError("--claims requires research publish and a valid run_id")
+    if action == "publish" and ns.claims is None:
+        raise UsageError("research publish requires --claims claims.json")
+    return action, value
+
+
+def terminal_label(value):
+    # Saved titles and claims can contain terminal control sequences.
+    return json.dumps(str(value), ensure_ascii=False)[1:-1]
+
+
+def research_progress(status):
+    counts = status.get("counts", {})
+    return (f"{status.get('ready_count', 0)} ready; "
+            f"{counts.get('queued', 0)} queued; "
+            f"{counts.get('capturing', 0) + counts.get('asr_running', 0)} capturing; "
+            f"{counts.get('failed', 0)} failed. "
+            f"ASR budget left: {status.get('asr_minutes_left', 0)} min.")
+
+
+def research_command(ns, server, *, call_tool=None, sleep=None, clock=None,
+                     stdin=None, progress=None, opener=None):
+    """Orchestrate existing tools; injectable I/O keeps the workflow offline-testable."""
+    import research
+    import uoink_agent_runtime as runtime
+    call_tool = call_tool or (lambda name, args: runtime.call_tool(name, args, server))
+    sleep, clock = sleep or time.sleep, clock or time.monotonic
+    stdin = sys.stdin if stdin is None else stdin
+    progress = progress or (lambda text: print(text, file=sys.stderr, flush=True))
+    action, value = research_action(ns)
+    if action == "list":
+        return research.recent_runs(server.DATA_ROOT)
+    if action == "status":
+        return call_tool("research_status", {"run_id": value})
+    if action == "publish":
+        try:
+            draft = strict_json(ns.claims.read_text(encoding="utf-8-sig"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise UsageError(f"cannot read claims JSON: {exc}") from exc
+        if not isinstance(draft, dict) or "run_id" in draft:
+            raise UsageError("claims file must be a publish payload object without run_id")
+        payload = {**draft, "run_id": value}
+        research.normalize_publish(payload)
+        return call_tool("research_publish", payload)
+    if action == "open":
+        path = research.report_file(server.DATA_ROOT, value)
+        if opener is None:
+            import webbrowser
+            opener = webbrowser.open
+        opened = opener(path.as_uri())
+        if opened is False:
+            return {"ok": False, "error": "Could not open the report in the default browser.", "path": str(path)}
+        return {"ok": True, "run_id": value, "path": str(path)}
+
+    wait_minutes = 30 if ns.wait_minutes is None else ns.wait_minutes
+    if not math.isfinite(wait_minutes) or wait_minutes < 0:
+        raise UsageError("--wait-minutes must be a finite number of 0 or more")
+    scope = {"question": value, "max_sources": 12 if ns.max_sources is None else ns.max_sources,
+             "max_asr_minutes": 120 if ns.asr_minutes is None else ns.asr_minutes}
+    if ns.sources is not None:
+        scope["source_kinds"] = [kind.strip() for kind in ns.sources.split(",")]
+    if ns.since is not None:
+        scope["since"] = ns.since
+    scope = research.normalize_scope(scope)
+    start = call_tool("research_start", scope)
+    if start.get("ok") is not True:
+        return start
+    run_id = research.validate_run_id(start["run_id"])
+    needs_consent = start.get("needs_consent", [])
+    consent_help = ""
+    if needs_consent:
+        consent_help = ("Network sources need consent: " + ", ".join(needs_consent) + ". "
+                        'Enable them in Settings or POST /settings {"research_network_sources": '
+                        + json.dumps(needs_consent) + "} (include any sources you already enabled).")
+        progress(consent_help)
+    discovery = call_tool("research_discover", {"run_id": run_id,
+                          "queries": research.heuristic_queries(scope["question"])})
+    if discovery.get("ok") is not True:
+        return {**discovery, "run_id": run_id}
+    candidates = discovery.get("candidates", [])
+    for rank, candidate in enumerate(candidates, 1):
+        duration = candidate.get("duration_s")
+        duration = f"{duration / 60:.1f} min" if isinstance(duration, (int, float)) else "duration unknown"
+        progress(f"{rank}. {terminal_label(candidate.get('title', ''))} | "
+                 f"{terminal_label(candidate.get('channel', ''))} | {duration} | "
+                 f"{terminal_label(candidate.get('est_capture', 'unknown'))}\n"
+                 f"   {terminal_label('; '.join(candidate.get('why_ranked', [])))}")
+    for skipped in discovery.get("skipped", []):
+        progress(terminal_label(f"Skipped {skipped.get('kind', '')}: {skipped.get('reason', '')}"))
+    for error in discovery.get("errors", []):
+        progress(terminal_label(f"Discovery {error.get('kind', '')}: {error.get('code', 'failed')}"))
+    top = min(scope["max_sources"], len(candidates))
+    result = {"ok": True, "run_id": run_id, "scope": scope, "discovery": discovery,
+              "needs_consent": needs_consent, "consent_help": consent_help,
+              "captured": False, "timed_out": False,
+              "prompt": research.continuation_prompt(run_id, scope["question"])}
+    confirmed = ns.yes
+    if top and not confirmed and stdin.isatty():
+        progress(f"Capture the top {top}? [y/N]")
+        confirmed = stdin.readline().strip().casefold() in {"y", "yes"}
+    if not top or not confirmed:
+        result["next_step"] = (f"No capture started. Continue this run with: uoink call research_capture "
+                               f"run_id={run_id} top={top}. Use --yes to capture without a TTY on a new run."
+                               if top else "No candidates found. Enable sources in Settings or try more focused queries.")
+        progress(result["next_step"])
+        return result
+    capture = call_tool("research_capture", {"run_id": run_id, "top": top})
+    result["capture"] = capture
+    if capture.get("ok") is not True:
+        return {**result, "ok": False, "error": error_text(capture)}
+    result["captured"] = True
+    eta = capture.get("eta", {})
+    progress(f"Capture queued. Estimated {eta.get('min_minutes', '?')}-{eta.get('max_minutes', '?')} min.")
+    if capture.get("message"):
+        progress(terminal_label(capture["message"]))
+    for skipped in capture.get("skipped", []):
+        progress(terminal_label(f"Skipped {skipped.get('key', '')}: {skipped.get('reason', '')}"))
+    if ns.no_wait:
+        return result
+    deadline = clock() + wait_minutes * 60
+    while True:
+        status = call_tool("research_status", {"run_id": run_id})
+        result["status"] = status
+        if status.get("ok") is not True:
+            return {**result, "ok": False, "error": error_text(status)}
+        progress(research_progress(status))
+        if status.get("done") is True:
+            return result
+        remaining = deadline - clock()
+        if remaining <= 0:
+            result.update(ok=False, timed_out=True, code="wait_timeout",
+                          error=f"Capture wait timed out. Check progress with: uoink research status {run_id}")
+            return result
+        sleep(min(10, remaining))
+
+
 def human(payload):
+    if "prompt" in payload and "run_id" in payload:
+        lines = [f"Research run: {payload['run_id']}"]
+        if payload.get("status"):
+            lines.append(research_progress(payload["status"]))
+        for key in ("error", "next_step"):
+            if payload.get(key):
+                lines.append(terminal_label(payload[key]))
+        if payload.get("ok") is True or payload.get("captured"):
+            lines.extend(["Paste this prompt into your agent:", payload["prompt"]])
+        return "\n\n".join(lines)
     if payload.get("ok") is not True:
         return error_text(payload)
     if "tools" in payload:
@@ -229,6 +408,14 @@ def human(payload):
         return "\n" + "\n".join(label(line) for line in summary_lines(evidence))
     if "clients" in payload:
         return "\n".join(payload["clients"])
+    if "runs" in payload:
+        return "\n".join(f"{r['run_id']}  {label(r['question'])}" for r in payload["runs"]) or "No research runs yet."
+    if "verification" in payload and "report_html_path" in payload:
+        stats = payload["verification"]["stats"]
+        return (f"{stats['accepted']} accepted, {stats['flagged']} flagged, {stats['dropped']} dropped.\n"
+                + "\n".join(label(payload[key]) for key in ("report_md_path", "report_html_path", "verification_path")))
+    if "ready_count" in payload and "run_id" in payload:
+        return research_progress(payload)
     if isinstance(payload.get("source"), dict) and "found" in payload:
         source = payload["source"]
         lines = [f"{label(source.get('label'))}: {label(source.get('title'))}",
@@ -273,7 +460,8 @@ def human(payload):
 def emit(payload, text=False):
     print(human(payload) if text else json.dumps(payload, ensure_ascii=False, allow_nan=False))
     if payload.get("ok") is not True:
-        print(error_text(payload), file=sys.stderr)
+        if not text:
+            print(error_text(payload), file=sys.stderr)
         return 1
     return 0
 
@@ -358,7 +546,7 @@ def main(argv=None):
         if ns.command == "mcp":
             mcp_session = True
             return serve_mcp()
-        text_mode = getattr(ns, "text_output", False)
+        text_mode = getattr(ns, "text_output", False) and not (ns.command == "research" and ns.json)
         if ns.command == "serve":
             with redirect_stdout(sys.stderr):
                 return backend().run_cli([*isolation.child_argv(), *ns.server_args])
@@ -410,10 +598,14 @@ def main(argv=None):
             return emit({"ok": True, "tools": items}, text_mode)
         # Parse generic inputs before importing the backend or touching storage.
         call_args = arguments(ns) if ns.command == "call" else None
+        if ns.command == "research":
+            research_action(ns)
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
-            if ns.command == "status":
+            if ns.command == "research":
+                payload = research_command(ns, server)
+            elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,
                            "data_dir": str(server.DATA_ROOT.resolve()),
                            "helper_running": runtime.helper_running(server),
