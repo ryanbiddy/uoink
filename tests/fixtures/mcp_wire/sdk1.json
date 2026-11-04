@@ -5128,7 +5128,8 @@
             "enum": [
               "support",
               "counter"
-            ]
+            ],
+            "description": "Optional: support or counter. Use counter on at least one call for contested points."
           }
         },
         "required": [
@@ -5164,7 +5165,8 @@
           },
           "summary_md": {
             "type": "string",
-            "maxLength": 1500
+            "maxLength": 1500,
+            "description": "Report summary Markdown, at most 1500 characters, with no URLs."
           },
           "claims": {
             "type": "array",
@@ -5300,7 +5302,8 @@
                 "claim_ids"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "Optional, up to 10 contested topics, each naming 2-6 claim_ids that disagree."
           }
         },
         "required": [

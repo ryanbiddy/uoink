@@ -4318,6 +4318,13 @@ OVERRIDES = {
         "transcript_only": "Default true uses lite mode: full transcript, sparse screenshots and no comments. False uses full mode.",
     },
     "research_status": {"run_id": "Research run_id returned by research_start."},
+    "research_evidence": {
+        "stance_hint": "Optional: support or counter. Use counter on at least one call for contested points.",
+    },
+    "research_publish": {
+        "summary_md": "Report summary Markdown, at most 1500 characters, with no URLs.",
+        "disagreements": "Optional, up to 10 contested topics, each naming 2-6 claim_ids that disagree.",
+    },
     "research_start": {
         "question": "Research question, 1-500 characters; surrounding whitespace is stripped.",
         "max_sources": "Source budget, 1-30; discovery returns a pool of up to twice this number.",
