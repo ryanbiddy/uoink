@@ -379,10 +379,118 @@ function allowedTabUrl(value) {
   }
 }
 
+const SAVES_ORIGINS = {
+  watch_later: ["https://www.youtube.com"],
+  x_bookmarks: ["https://x.com", "https://twitter.com"],
+  reddit_saved: ["https://www.reddit.com", "https://old.reddit.com"],
+};
+const SAVES_URL_RE = /^uoink-saves:[0-9a-f]{16}$/;
+const SAVES_STAGE_BODY_MAX = 60000;
+const SAVES_STAGE_CHUNK_MAX = 500;
+
+function savesPageSource(url) {
+  if (SAVES_ORIGINS.watch_later.includes(url.origin) && /^\/playlist\/?$/.test(url.pathname)
+      && url.searchParams.get("list") === "WL") return "watch_later";
+  if (SAVES_ORIGINS.x_bookmarks.includes(url.origin) && /^\/i\/bookmarks\/?$/.test(url.pathname)) {
+    return "x_bookmarks";
+  }
+  if (SAVES_ORIGINS.reddit_saved.includes(url.origin) && /^\/user\/[A-Za-z0-9_-]+\/saved\/?$/i.test(url.pathname)) {
+    return "reddit_saved";
+  }
+  return null;
+}
+
+function allowedSavesSender(sender, source) {
+  if (!sender.tab || !Number.isInteger(sender.tab.id) || sender.frameId !== 0) return false;
+  if (typeof sender.url !== "string" || /[\s\\]/.test(sender.url)) return false;
+  try {
+    const url = new URL(sender.url);
+    const pageSource = savesPageSource(url);
+    const tabUrl = sender.tab.url ? new URL(sender.tab.url) : url;
+    return !!pageSource && (!source || source === pageSource) && !url.username && !url.password
+      && (!sender.origin || sender.origin === url.origin)
+      && tabUrl.origin === url.origin && !tabUrl.username && !tabUrl.password
+      && savesPageSource(tabUrl) === pageSource;
+  } catch {
+    return false;
+  }
+}
+
+async function stageSavesInChunks(source, items) {
+  let staged;
+  let url;
+  for (let offset = 0; offset < items.length;) {
+    const chunk = [];
+    while (offset < items.length && chunk.length < SAVES_STAGE_CHUNK_MAX) {
+      const candidate = [...chunk, items[offset]];
+      const body = { source, items: candidate, ...(url ? { append_to: url } : {}) };
+      if (JSON.stringify(body).length >= SAVES_STAGE_BODY_MAX) break;
+      chunk.push(items[offset++]);
+    }
+    // Each validated item is at most 300 characters, so one always fits.
+    staged = await STC.postStageSaves(source, chunk, url);
+    if (!staged || !staged.ok) return staged || { ok: false, error: "Uoink couldn't stage these saves." };
+    if (typeof staged.url !== "string" || !SAVES_URL_RE.test(staged.url) || (url && staged.url !== url)) {
+      return { ok: false, error: "Uoink returned an invalid saves list." };
+    }
+    url = staged.url;
+  }
+  return staged;
+}
+
+function savesRequestError(error) {
+  if (error && error.name === "AbortError") return "Uoink request timed out. Try again.";
+  if (error && (error.name === "TypeError" || /Failed to fetch|NetworkError|ERR_CONNECTION_REFUSED/i.test(error.message))) {
+    return "Uoink app isn't running";
+  }
+  return String(error && error.message || error || "Uoink couldn't import these saves.");
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!sender || sender.id !== chrome.runtime.id) return;
   if (!msg || typeof msg !== "object") return;
   if (msg.target === "offscreen") return;
+
+  if (msg.type === "stcStageSaves") {
+    if (typeof msg.source !== "string" || !Object.hasOwn(SAVES_ORIGINS, msg.source)
+        || !allowedSavesSender(sender, msg.source)
+        || !Array.isArray(msg.items) || msg.items.length < 1 || msg.items.length > 5000
+        || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)) {
+      sendResponse({ ok: false, error: "Invalid saves request or page." });
+      return;
+    }
+    (async () => {
+      let staged;
+      try {
+        staged = await stageSavesInChunks(msg.source, msg.items);
+        if (!staged || !staged.ok) {
+          sendResponse(staged || { ok: false, error: "Uoink couldn't stage these saves." });
+          return;
+        }
+        const result = await STC.postImportList(staged.url, 0, 50);
+        sendResponse({ ...staged, total: staged.count, next_offset: 0,
+          ...(result || { ok: false, error: "Uoink didn't return an import result." }), url: staged.url });
+      } catch (error) {
+        // Preserve a successful stage so Retry/Next does not create a new list.
+        sendResponse({ ...(staged && staged.ok ? {
+          url: staged.url, count: staged.count, total: staged.count, next_offset: 0,
+        } : {}), ok: false, error: savesRequestError(error) });
+      }
+    })();
+    return true;
+  }
+
+  if (msg.type === "stcImportNext") {
+    if (!allowedSavesSender(sender) || typeof msg.url !== "string" || !SAVES_URL_RE.test(msg.url)
+        || !Number.isSafeInteger(msg.offset) || msg.offset < 0 || msg.offset > 100000) {
+      sendResponse({ ok: false, error: "Invalid saves batch or page." });
+      return;
+    }
+    STC.postImportList(msg.url, msg.offset, 50).then(sendResponse, (error) => {
+      sendResponse({ ok: false, error: savesRequestError(error) });
+    });
+    return true;
+  }
 
   // E1: a capture handed over by the popup (see enqueuePopupCapture). Only
   // extension pages can start one; content scripts keep their own routes.

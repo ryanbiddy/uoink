@@ -24,6 +24,7 @@ brand/fonts/jetbrains-mono-OFL.txt
 brand/fonts/jetbrains-mono.woff
 brand/tokens.css
 content-reddit.js
+content-saves.js
 content-x-article.js
 content.js
 icons/icon-128-dark.png

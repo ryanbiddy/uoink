@@ -299,6 +299,34 @@
     }
   }
 
+  // Saves collectors only hand the worker IDs/permalinks, never site auth.
+  async function postSavesRequest(path, payload) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60 * 1000);
+    try {
+      const res = await _authedFetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      return withHttpStatus(await res.json().catch(() => ({
+        ok: false, error: "Server returned a non-JSON response." })), res);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function postStageSaves(source, items, appendTo) {
+    return postSavesRequest("/import-list/stage", {
+      source, items, ...(appendTo ? { append_to: appendTo } : {}),
+    });
+  }
+
+  function postImportList(url, offset, limit) {
+    return postSavesRequest("/import-list", { url, offset, limit });
+  }
+
   // V-2c: X ARTICLE capture. POST /extract/x-article with the DOM already
   // parsed by the content script (the payload is
   // {url, title, author, markdown, images}) — the server never touches X, it
@@ -1302,6 +1330,8 @@
     postExtract,
     postExtractAny,
     postExtractX,
+    postStageSaves,
+    postImportList,
     postExtractXArticle,
     postExtractXArticleViaBg,
     postExtractReddit,
