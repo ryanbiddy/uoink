@@ -198,6 +198,10 @@ def request_dashboard(root: Path) -> bool:
 
 
 def show_running_dashboard(root: Path) -> bool:
+    if sys.platform.startswith("linux"):
+        import uoink_install_isolation as isolation
+        logging.getLogger(__name__).info("dashboard: %s", isolation.helper_url("/dashboard"))
+        return True
     if sys.platform == "darwin":
         # The helper owns the window; a duplicate launch spawns nothing itself.
         if request_dashboard(root):

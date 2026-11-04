@@ -17,6 +17,110 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  linux-install:
+    name: installed headless Linux runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install media tools
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install Uoink
+        run: sh scripts/linux/install.sh --prefix "$RUNNER_TEMP/uoink-app" --bin-dir "$RUNNER_TEMP/bin" --no-model
+      - name: Upgrade in place
+        run: |
+          mkdir -p "$RUNNER_TEMP/uoink-app/models"
+          touch "$RUNNER_TEMP/uoink-app/models/upgrade-sentinel"
+          touch "$RUNNER_TEMP/uoink-app/python/upgrade-sentinel"
+          sh scripts/linux/install.sh --prefix "$RUNNER_TEMP/uoink-app" --bin-dir "$RUNNER_TEMP/bin" --no-model
+          test -f "$RUNNER_TEMP/uoink-app/models/upgrade-sentinel"
+          test -f "$RUNNER_TEMP/uoink-app/python/upgrade-sentinel"
+      - name: Check installed CLI and MCP stdio
+        env:
+          HOME: ${{ runner.temp }}/home
+          XDG_DATA_HOME: ${{ runner.temp }}/xdg
+          UOINK_HEADLESS: "1"
+        run: |
+          mkdir -p "$HOME" "$XDG_DATA_HOME"
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/bin/uoink" status | python -c 'import json, os, sys; p = json.load(sys.stdin); assert p["ok"] is True; assert p["capabilities"]["media"]["available"] is True; assert p["data_dir"] == os.environ["XDG_DATA_HOME"] + "/Uoink"'
+          "$RUNNER_TEMP/bin/uoink" tools > "$RUNNER_TEMP/tools.json"
+          python "$GITHUB_WORKSPACE/scripts/linux/smoke_stdio.py" "$RUNNER_TEMP/bin/uoink"
+          "$RUNNER_TEMP/bin/uoink" connect cursor > "$RUNNER_TEMP/connection.json"
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"])
+          entry = json.loads((root / "connection.json").read_text())["mcpServers"]["uoink"]
+          assert entry["command"] == str(root / "uoink-app/python/bin/python3")
+          subprocess.run([entry["command"], "-c", "import mcp, faster_whisper"], check=True)
+          PY
+      - name: Check helper state and missing-ffmpeg status
+        env:
+          HOME: ${{ runner.temp }}/home
+          XDG_DATA_HOME: ${{ runner.temp }}/xdg
+          UOINK_HEADLESS: "1"
+        run: |
+          cd "$RUNNER_TEMP"
+          python - <<'PY'
+          import json, os, subprocess, time, urllib.request
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          app, profile = root / "uoink-app", root / "helper-profile"
+          profile.mkdir()
+
+          def inventory():
+              return {str(p.relative_to(app)): (p.stat().st_size, p.stat().st_mtime_ns)
+                      for p in app.rglob("*") if p.is_file() and "__pycache__" not in p.parts}
+
+          before = inventory()
+          with (root / "helper.log").open("w") as log:
+              child = subprocess.Popen([str(root / "bin/uoink"), "serve",
+                                        "--isolated-profile", str(profile),
+                                        "--isolated-port", "18191", "--show-dashboard"],
+                                       stdout=log, stderr=subprocess.STDOUT)
+              try:
+                  deadline = time.monotonic() + 60
+                  opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                  while time.monotonic() < deadline:
+                      assert child.poll() is None, (root / "helper.log").read_text()
+                      try:
+                          with opener.open("http://127.0.0.1:18191/health", timeout=1) as reply:
+                              if json.load(reply).get("ok") is True:
+                                  break
+                      except (OSError, ValueError):
+                          pass
+                      time.sleep(0.2)
+                  else:
+                      raise AssertionError((root / "helper.log").read_text())
+                  for name in ("token.txt", "server.pid", "server.log"):
+                      assert (profile / name).is_file(), name
+              finally:
+                  child.terminate()
+                  try:
+                      child.wait(timeout=10)
+                  except subprocess.TimeoutExpired:
+                      child.kill()
+                      child.wait(timeout=5)
+          assert inventory() == before, "Helper wrote into the installed app"
+          assert "dashboard: http://127.0.0.1:18191/dashboard" in (root / "helper.log").read_text()
+
+          # Exercise status through the installed CLI with no media executables.
+          code = ("import shutil, sys; sys.path.insert(0, sys.argv[1]); "
+                  "shutil.which = lambda *a, **k: None; "
+                  "from uoink_cli import main; sys.exit(main(['status']))")
+          result = subprocess.run([str(app / "python/bin/python3"), "-c", code, str(app)],
+                                  check=True, capture_output=True, text=True, timeout=30)
+          status = json.loads(result.stdout)
+          assert status["ok"] is True
+          assert status["capabilities"]["media"]["available"] is False
+          assert status["capabilities"]["media"]["code"] == "media_requires_ffmpeg"
+          PY
+
   mcp-linux-container:
     name: offline Linux MCP introspection
     runs-on: ubuntu-latest
@@ -154,6 +258,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - name: Lint Linux installer
+        run: |
+          shellcheck scripts/linux/install.sh
+          sh -n scripts/linux/install.sh
 
       - name: Lint launch readiness script
         run: |

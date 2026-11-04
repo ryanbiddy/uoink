@@ -1,7 +1,19 @@
 #!/bin/sh
 set -eu
 
-uoink_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+uoink_launcher=$0
+if [ "$(uname -s)" = Linux ]; then
+    # The Linux installer exposes this launcher through a bin-dir symlink.
+    while [ -L "$uoink_launcher" ]; do
+        uoink_link_dir=$(CDPATH= cd -- "$(dirname -- "$uoink_launcher")" && pwd)
+        uoink_launcher=$(readlink -- "$uoink_launcher")
+        case $uoink_launcher in
+            /*) ;;
+            *) uoink_launcher=$uoink_link_dir/$uoink_launcher ;;
+        esac
+    done
+fi
+uoink_root=$(CDPATH= cd -- "$(dirname -- "$uoink_launcher")" && pwd)
 if [ "$(uname -s)" = Darwin ] && [ "$(basename "$uoink_root")" = Resources ] && [ "$(basename "$(dirname "$uoink_root")")" = Contents ]; then
     exec "$uoink_root/../MacOS/Uoink" "$@"
 elif [ -x "$uoink_root/python/bin/python3" ]; then

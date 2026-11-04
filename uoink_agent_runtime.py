@@ -8,6 +8,7 @@ import os
 import sys
 from pathlib import Path
 
+import _platform
 import uoink_install_isolation as isolation
 import uoink_mcp_tools as registry
 
@@ -22,7 +23,8 @@ def helper_running(backend) -> bool:
         # the (read-only) app files; see _platform.darwin_helper_running.
         return backend._platform.darwin_helper_running(backend.HERE, backend.DATA_ROOT)
     try:
-        pid_path = backend.HERE / "server.pid"
+        pid_path = (_platform.app_state_path(backend.HERE, backend.DATA_ROOT, "server.pid")
+                    if sys.platform.startswith("linux") else backend.HERE / "server.pid")
         pid = int(pid_path.read_text(encoding="utf-8").strip())
         if pid <= 0 or pid == os.getpid():
             return False

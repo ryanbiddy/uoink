@@ -18,6 +18,7 @@ import ctypes
 import errno
 import os
 import io
+import shutil
 import subprocess
 import sys
 import wave
@@ -160,6 +161,13 @@ def _media_self_test(ffmpeg: str, ffprobe: str, identities: tuple) -> bool:
 
 def media_capability() -> dict:
     """Only a bundled runtime requires the app-owned executable self-test."""
+    if sys.platform.startswith("linux") and any(
+            shutil.which(name) is None for name in ("ffmpeg", "ffprobe")):
+        return {"available": False, "code": "media_requires_ffmpeg",
+                "reason": "ffmpeg and ffprobe are required. Install them: "
+                          "sudo apt-get install ffmpeg (Debian/Ubuntu), "
+                          "sudo dnf install ffmpeg (Fedora, RPM Fusion), "
+                          "sudo pacman -S ffmpeg (Arch), apk add ffmpeg (Alpine)."}
     if sys.platform == "darwin" and mac_bundle_contents() is not None:
         try:
             binaries = [media_binary(name) for name in ("ffmpeg", "ffprobe")]
@@ -289,19 +297,26 @@ def legacy_user_data_dir() -> Path:
 
 
 def app_state_path(app: Path, data: Path, name: str) -> Path:
-    """Darwin state belongs outside the sealed app; other layouts stay intact."""
-    return (data if sys.platform == "darwin" else app) / name
+    """Keep mutable state outside read-only Darwin and Linux app folders."""
+    return (data if sys.platform == "darwin" or sys.platform.startswith("linux") else app) / name
 
 
 def prepare_app_state(data: Path) -> None:
-    if sys.platform == "darwin":
+    if sys.platform == "darwin" or sys.platform.startswith("linux"):
         data.mkdir(mode=0o700, parents=True, exist_ok=True)
 
 
 def topics_source(app: Path, target: Path) -> Path:
-    if sys.platform == "darwin" and not target.exists():
+    if (sys.platform == "darwin" or sys.platform.startswith("linux")) and not target.exists():
         return app / "topics.json"
     return target
+
+
+def is_headless() -> bool:
+    """Linux can run without a display, including inside agent sandboxes."""
+    return sys.platform.startswith("linux") and (
+        os.environ.get("UOINK_HEADLESS") == "1"
+        or not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")))
 
 
 def write_darwin_identity(data: Path, script: Path) -> Path:

@@ -216,10 +216,11 @@ def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path):
 
 
 @pytest.mark.parametrize("platform", ["win32", "linux"])
-def test_media_other_platforms_unchanged(monkeypatch, tmp_path, platform):
+def test_media_non_darwin_does_not_probe_bundle_files(monkeypatch, tmp_path, platform):
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
     monkeypatch.setattr(_platform, "Path", forbidden)
+    monkeypatch.setattr(_platform.shutil, "which", lambda name: f"/usr/bin/{name}")
     assert _platform.media_capability()["available"] is True
     _platform.require_media()
 
