@@ -1,0 +1,5 @@
+[
+  {"vid": "evaltalk001", "title": "Agent evals: measuring useful work", "channel": "Systems Forum", "published": "2026-10-01T12:00:00Z", "duration_s": 2700, "score": 25.0, "summary": "Building useful evaluation sets.", "why_hn": "A practical account of evals for tool-using agents."},
+  {"vid": "evaltalk007", "title": "Testing long workflows", "channel": "Runtime Sessions", "published": "2026-08-10T12:00:00Z", "duration_s": 4200, "score": 18.5, "note": "The Q&A covers agent evals and replay tests."},
+  {"vid": "evaltalk008", "title": "A tour of audio synthesis", "channel": "Sound Workshop", "duration_s": 1200, "score": 14.0, "why_hn": "A clear introduction to oscillators."}
+]

@@ -1,0 +1,12 @@
+{
+  "_type": "playlist",
+  "id": "ytsearch10:agent evals",
+  "entries": [
+    {"id": "evaltalk001", "title": "Agent evals: measuring useful work", "channel": "Systems Forum", "duration": 2700, "upload_date": "20261001", "description": "A public talk about agent evals and practical test sets.", "view_count": 12000},
+    {"id": "evaltalk002", "title": "Agent evals after deployment", "uploader": "Systems Forum", "duration": 3600, "timestamp": 1767225600, "view_count": 8000},
+    {"id": "evaltalk003", "title": "Agent evals for tool use", "channel": "systems forum", "duration": 1800, "upload_date": "20260901", "view_count": 6400},
+    {"id": "evaltalk004", "title": "Agent evals and failure analysis", "channel": "Systems Forum", "duration": 2400, "upload_date": "20260801", "view_count": 5100},
+    {"id": "evaltalk005", "title": "Evals in three minutes", "channel": "Quick Notes", "duration": 180, "upload_date": "20240101", "description": "A brief introduction to evals."},
+    {"id": "evaltalk006", "title": "Building an agent evals practice", "channel": "Signals Studio", "duration": null, "upload_date": null}
+  ]
+}

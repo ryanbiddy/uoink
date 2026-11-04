@@ -10,6 +10,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added — Deep research, part 1: research runs and source discovery
+
+- `research_start` saves a question, source choices and budgets in a local run.
+  `research_discover` merges library, YouTube, HN, HackerTube and podcast results,
+  ranks them with score explanations, and limits each channel to three candidates.
+- `UOINK_MCP_TOOLSET=research` serves these two tools plus `uoink_url`.
+  The MCP server now exposes 95 tools in the full toolset; core keeps its 36-tool order.
+- Network discovery requires the user's `research_network_sources` setting,
+  which defaults to `[]`. Research tools cannot grant consent. Reddit search is
+  deferred; capture, evidence retrieval and reports follow in later parts.
+
 ### Added
 
 - Collect YouTube Watch Later, X bookmarks and Reddit saved posts from open
@@ -44,7 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   auto_captions or whisper), the `language`, and on any fallback a plain `why`.
   It is a drop-in for the popular YouTube transcript MCP servers: same tool
   name, `url` and `lang`, plus `include_timestamps` and `next_cursor` paging.
-  The MCP server now exposes 93 tools (36 in core mode, 9 in search mode).
+  That brought the registry to 93 tools (36 in core mode, 9 in search mode).
   See "Switching from a YouTube transcript MCP server" in
   docs/connect-your-agent.md.
 - `UOINK_MCP_TOOLSET=search` serves a 9-tool set for clients with a tool

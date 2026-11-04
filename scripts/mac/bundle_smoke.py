@@ -142,7 +142,7 @@ def expected_tools() -> dict:
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id in {"CORE_STDIO_TOOLS", "CANONICAL_STDIO_TOOLS"}:
                     values[target.id] = set(ast.literal_eval(node.value))
-    assert len(values["CORE_STDIO_TOOLS"]) == 36 and len(values["CANONICAL_STDIO_TOOLS"]) == 93
+    assert len(values["CORE_STDIO_TOOLS"]) == 36 and len(values["CANONICAL_STDIO_TOOLS"]) == 95
     return {"core": values["CORE_STDIO_TOOLS"], "full": values["CANONICAL_STDIO_TOOLS"]}
 
 
