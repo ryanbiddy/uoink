@@ -51,6 +51,19 @@ def test_darwin_bundle_keeps_its_media_self_test(monkeypatch, tmp_path):
     assert _platform.media_capability()["code"] == "media_requires_ffmpeg"
 
 
+@pytest.mark.parametrize("git_kind", ["dir", "file"])
+def test_linux_source_checkout_keeps_state_next_to_server(monkeypatch, tmp_path, git_kind):
+    monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform="linux"))
+    app, data = tmp_path / "app", tmp_path / "data"
+    app.mkdir()
+    # A worktree has a .git file; a clone has a .git directory.
+    if git_kind == "dir":
+        (app / ".git").mkdir()
+    else:
+        (app / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
+    assert _platform.app_state_path(app, data, "token.txt") == app / "token.txt"
+
+
 @pytest.mark.parametrize("platform,in_data", [("linux", True), ("darwin", True), ("win32", False)])
 def test_app_state_locations(monkeypatch, tmp_path, platform, in_data):
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
