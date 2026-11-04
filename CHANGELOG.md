@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added — Deep research, part 4: CLI, dashboard Research tab and docs
+
+- `uoink research` discovers candidates, asks before capture, waits for progress and prints an agent prompt. Status, list, publish and local report opening are available as subcommands.
+- The dashboard adds source consent, candidate selection, capture estimates, verified claim chips and report exports. Read-only helper routes serve saved runs and fixed report files.
+- [Research docs](docs/research.md) explain the workflow, verification limits and privacy. The portable agent skill includes the research prompt and tools.
+
 ### Added ? Deep research, part 3: evidence, verified publish and reports
 
 - `research_evidence` searches only ready sources in a saved run and returns

@@ -25,12 +25,12 @@ def test_sidebar() -> None:
         re.sub(r"<.*?>", "", item).strip().split()[0]
         for item in re.findall(r'<button class="nav-button.*?>(.*?)</button>', nav.group(1), re.S)
     ]
-    # UI re-haul (SPEC "Dashboard IA"): the five tabs are Library, Activity,
-    # Generate, Sources, Settings. For You moved to a Library link.
-    require(labels == ["Library", "Activity", "Generate", "Sources", "Settings"], f"unexpected sidebar: {labels}")
+    # Research adds a dedicated tab to the re-haul navigation. For You stays
+    # a Library link; Build and Script remain consolidated under Generate.
+    require(labels == ["Library", "Activity", "Generate", "Research", "Sources", "Settings"], f"unexpected sidebar: {labels}")
     require('data-tab-button="build"' not in DASHBOARD, "Build tab still visible")
     require('data-tab-button="script"' not in DASHBOARD, "Script tab still visible")
-    print("ok  sidebar: five locked tabs, Build and Script gone")
+    print("ok  sidebar: six tabs including Research, Build and Script gone")
 
 
 def test_picker() -> None:

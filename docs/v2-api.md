@@ -72,6 +72,45 @@ is metered; see `GET /settings/pricing` → `actual`.
 
 ## Endpoint reference
 
+### GET /research and GET /research/<run_id>
+
+Read-only dashboard routes. Both require the helper token and the dashboard
+origin checks used by confirmation routes. No new MCP tools are added.
+
+`GET /research` returns `{ok:true, runs:[...]}` for the 20 most recent runs.
+Each entry has `run_id`, `question`, `created_at` and `candidate_count`.
+`GET /research/<run_id>` returns the scope, ranked candidates, heuristic queries,
+continuation prompt, verification ledger, quote-free report display, share text
+and an `exports` object with `html` and `md` availability. It does not return
+stored evidence excerpts. Report display is absent for reports written before
+the dashboard feature; publishing the same payload again adds it.
+
+### GET /research/<run_id>/report
+
+Serves only `DATA_ROOT/research/<run_id>/report.html`. Run IDs must match
+`rr_[0-9]{14}_[0-9a-f]{8}` exactly. Paths, encoded traversal and linked report
+locations are refused. Missing reports return 404. The route requires the
+helper token and dashboard origin checks, and sends:
+
+```text
+Content-Type: text/html; charset=utf-8
+Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src 'none'
+X-Content-Type-Options: nosniff
+Cache-Control: no-store
+```
+
+The dashboard downloads this response as an HTML file. It renders claim text
+and receipt links from JSON with DOM text nodes, never report HTML in its DOM.
+
+### GET /research/<run_id>/markdown
+
+Returns `{ok:true, content:"..."}` from the fixed `report.md` file in the run.
+It uses the same token, origin, run-ID and path checks as the HTML route. The
+dashboard downloads `content` as Markdown. Other filenames are not accepted.
+Discovery and capture use the existing `/mcp/v1/tools/call` transport, with the
+existing `/tools/<name>` fallback. Consent changes use `POST /settings` with
+`research_network_sources`; CLI research never writes that setting.
+
 ### GET /health and GET /ping
 
 On macOS only, both probes also return `capabilities`, with `library_mirror`

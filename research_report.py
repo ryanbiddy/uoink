@@ -44,8 +44,8 @@ def safe_link(value, source):
             for field in ("episode_url", "enclosure_url", "source_url"):
                 stored = urlsplit(_url(source.get(field)))
                 if stored.scheme == "https" and stored.hostname and not stored.username:
-                    hosts.add(stored.hostname.lower())
-        return value if parsed.hostname.lower() in hosts else None
+                    hosts.add(stored.hostname.lower().rstrip("."))
+        return value if parsed.hostname.lower().rstrip(".") in hosts else None
     except ValueError:
         return None
 

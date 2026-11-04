@@ -138,6 +138,13 @@ page or skip the paid step. Never require an API key to read or quote the librar
 
 ## Research and writing in the user's voice
 
+For video deep research, use the `deep-research` MCP prompt with a question.
+It guides `research_start` → `research_discover` → `research_capture` →
+`research_status` → `research_evidence` → `research_publish`. Follow
+[research.md](references/research.md) for run limits, consent and receipt checks.
+The CLI equivalent is `uoink research "QUESTION"`; JSON is the default.
+The dashboard and `--text` output provide a prompt to resume the existing run.
+
 For a topic across sources, search several precise terms, resolve the useful
 hits, and separate source statements from your synthesis. Name the sources you
 actually sampled and any coverage gaps.

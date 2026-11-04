@@ -217,10 +217,17 @@ def test_injection_is_only_data_and_writes_stay_in_run(rig):
 @pytest.mark.parametrize("url,allowed", [("https://youtube.com/watch?v=x", True),
     ("http://youtube.com/watch?v=x", False), ("https://youtube.com.evil.example/", False),
     ("https://youtube.com@evil.example/", False), ("javascript:alert(1)", False),
-    ("https://evil.example/", False), ("https://episodes.example.org/episode", True)])
+    ("https://evil.example/", False), ("https://episodes.example.org/episode", True),
+    ("https://youtube.com./watch?v=x", True), ("https://episodes.example.org./episode", True)])
 def test_link_allowlist(url, allowed):
     source = {"kind": "podcast", "episode_url": "https://episodes.example.org/show"}
     assert bool(research_report.safe_link(url, source)) is allowed
+
+
+def test_podcast_stored_host_with_trailing_dots():
+    source = {"kind": "podcast", "episode_url": "https://episodes.example.org../show"}
+    assert research_report.safe_link("https://episodes.example.org/episode", source)
+    assert not research_report.safe_link("https://evil.example/episode", source)
 
 
 def test_podcast_link_priority_and_time_labels():
@@ -444,7 +451,8 @@ def test_moved_report_root_gets_current_paths(rig):
     assert second["report_md_path"] != first["report_md_path"]
 
 
-@pytest.mark.parametrize("host", ["localhost", "test.localhost", "test.local", "127.0.0.1", "10.0.0.1",
+@pytest.mark.parametrize("host", ["localhost", "localhost.", "local.", "test.localhost", "test.local",
+    "test.localhost.", "test.localhost..", "test.local.", "test.local..", "127.0.0.1", "10.0.0.1",
     "169.254.1.1", "[::1]", "[fc00::1]", "[fe80::1]", "audio.\u202eexample.org"])
 def test_private_podcast_links_render_as_text(host):
     report = golden_report()

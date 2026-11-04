@@ -104,6 +104,28 @@ def get_prompt(arguments):
     ]}
 
 
+def heuristic_queries(question: str) -> list[str]:
+    """Fit the discovery query limit while keeping the question's scope."""
+    question = " ".join(question.split())
+    queries = [question[:200], question[:195].rstrip() + " talk",
+               question[:192].rstrip() + " podcast"]
+    return list(dict.fromkeys(queries))[:3]
+
+
+def continuation_prompt(run_id: str, question: str) -> str:
+    """Reuse the MCP workflow, keeping the question in its untrusted fence."""
+    validate_run_id(run_id)
+    messages = get_prompt({"question": question})["messages"]
+    instructions = messages[0]["content"]["text"]
+    remaining = instructions[instructions.index("3. Use research_evidence"):]
+    return (f"Continue Uoink research run {run_id}. Do not start a new run.\n"
+            "1. Call research_status with this run_id. If capture is still running, poll until enough sources are ready.\n"
+            "2. Use this run_id for every research call. Respect its existing source, query and capture budgets.\n"
+            "   If no sources were selected, ask the user to capture candidates in the Research tab or CLI first.\n"
+            "   Without MCP, use the local CLI transport: uoink call RESEARCH_TOOL --args-file arguments.json.\n"
+            + remaining + "\n" + messages[1]["content"]["text"])
+
+
 class ResearchError(ValueError):
     """A safe user-facing message with a stable error code."""
 
@@ -252,6 +274,49 @@ def list_runs(data_root: Path, limit: int = 20) -> list[dict]:
             if len(runs) >= limit:
                 break
         return runs
+
+
+def recent_runs(data_root: Path) -> dict:
+    """Small read-only projection; never return excerpts or the candidate pool."""
+    return {"ok": True, "runs": [
+        {"run_id": run["run_id"], "question": run["scope"]["question"],
+         "created_at": run["created_at"], "candidate_count": len(run.get("candidates", []))}
+        for run in list_runs(data_root)]}
+
+
+def report_file(data_root: Path, run_id: str, format: str = "html") -> Path:
+    """Derive a fixed local export path, never a path or URL from a payload."""
+    if format not in {"html", "md"}:
+        raise ResearchError("Unknown research report format.")
+    path = _report_path(data_root, run_id, "report." + format)
+    if not path.is_file():
+        raise ResearchError("No report exists yet. Publish claims for this run first.", "report_not_found")
+    return path
+
+
+def run_view(data_root: Path, run_id: str) -> dict:
+    """Dashboard data only; the verification display contains no quotations."""
+    with run_lock(run_id):
+        _report_path(data_root, run_id, "run.json")
+        run = load_run(data_root, run_id)
+        ledger_path = _report_path(data_root, run_id, "verification.json")
+        try:
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            if not isinstance(ledger, dict):
+                raise ValueError
+        except FileNotFoundError:
+            ledger = {}
+        except (OSError, ValueError):
+            raise ResearchError("Could not read the research report.", "store_failed") from None
+        return {"ok": True, "run_id": run_id, "scope": run["scope"],
+                "candidates": run.get("candidates", []),
+                "queries": heuristic_queries(run["scope"]["question"]),
+                "prompt": continuation_prompt(run_id, run["scope"]["question"]),
+                "report": ledger.get("display"),
+                "verification": {key: ledger.get(key) for key in ("accepted", "flagged", "dropped", "stats")},
+                "share_text": (ledger.get("result") or {}).get("share_text", ""),
+                "exports": {fmt: _report_path(data_root, run_id, "report." + fmt).is_file()
+                            for fmt in ("html", "md")}}
 
 
 def normalize_discovery(args: dict) -> dict:
@@ -584,6 +649,7 @@ def publish(data_root: Path, args: dict, *, index, source_reader=read_source, no
             previous = json.loads(paths["verification_path"].read_text(encoding="utf-8"))
             if (isinstance(previous, dict) and isinstance(previous.get("result"), dict)
                     and previous.get("input_hash") == digest and previous["result"].get("ok") is True
+                    and isinstance(previous.get("display"), dict)
                     and all(previous["result"].get(key) == str(p) and p.is_file() for key, p in paths.items())):
                 return previous["result"]
         except (OSError, ValueError, KeyError, TypeError, RecursionError):
@@ -599,7 +665,19 @@ def publish(data_root: Path, args: dict, *, index, source_reader=read_source, no
         _write_report(paths["report_md_path"], research_report.render_markdown(report))
         _write_report(paths["report_html_path"], research_report.render_html(report))
         # Write the receipt last; an interrupted earlier write is retried.
-        _write_report(paths["verification_path"], json.dumps({"input_hash": digest, "result": result,
+        # A quote-free view lets the dashboard use textContent instead of
+        # inserting exported HTML. Only bound receipt metadata is retained.
+        display = {key: report[key] for key in (
+            "title", "question", "date", "summary", "sources", "disagreements", "sources_searched")}
+        display["claims"] = [{
+            **{key: claim[key] for key in ("id", "text", "section", "attribution", "flags")},
+            "receipts": [{key: ref.get(key) for key in (
+                             "item_id", "time_label", "deep_link", "channel", "title", "listen_at")}
+                         | {"counter": counter}
+                         for counter, refs in ((False, claim["quotes"]), (True, claim["counter_quotes"]))
+                         for ref in refs],
+        } for claim in report["claims"]]
+        _write_report(paths["verification_path"], json.dumps({"input_hash": digest, "result": result, "display": display,
                       **report["verification"]}, ensure_ascii=False, allow_nan=False, indent=2) + "\n")
         return result
 

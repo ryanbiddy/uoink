@@ -51,6 +51,7 @@ The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Cont
 
 - **stdio** defaults to all 99 registry tools. `UOINK_MCP_TOOLSET=research` serves `research_start`, `research_discover`, `research_capture`, `research_status`, `research_evidence`, `research_publish` and `uoink_url` to discover, capture, retrieve evidence and publish verified reports. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the 36 core tools (the earlier 35 plus `get_transcript`). Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
 - **HTTP JSON-RPC** at `/mcp/v1` exposes the same 99-tool registry through the token-authenticated local helper. Both MCP transports share handlers and flatten the same three top-level `oneOf` input schemas for client compatibility. The server still validates the exact frozen schemas.
+- **[Video deep research](docs/research.md):** find sources, capture transcripts and publish timestamped receipts through the CLI or dashboard Research tab.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 

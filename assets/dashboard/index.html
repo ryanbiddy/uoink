@@ -4228,7 +4228,7 @@
         width: 28px;
         height: 28px;
       }
-      /* The nav row wraps instead of squeezing five equal columns: each item
+      /* The nav row wraps instead of squeezing equal columns: each item
          keeps at least its label and badges ("12 failed" on Activity), and an
          item that no longer fits moves to the next line instead of running
          into its neighbour. */
@@ -4817,6 +4817,37 @@
       color: var(--muted);
       margin-top: 10px;
     }
+    /* Research follows the Sources form and Library reader density. */
+    .research-form, .research-section { max-width: 960px; margin-bottom: var(--space-6); }
+    .research-form { display: grid; gap: var(--space-3); }
+    .research-form textarea { min-height: 96px; resize: vertical; }
+    .research-sources { display: flex; flex-wrap: wrap; gap: var(--space-2); border: 0; padding: 0; margin: 0; }
+    .research-sources legend { margin-bottom: var(--space-2); }
+    .research-source { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px;
+      padding: 4px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
+    .research-source:has(input:checked) { background: var(--surface-sel); }
+    .research-source:has(input:disabled) { color: var(--text-2); }
+    #tab-research input[type="checkbox"] { accent-color: var(--action); width: 18px; height: 18px; }
+    #tab-research input:focus-visible, #tab-research summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+    .research-limits { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+    .research-limits label { display: grid; gap: var(--space-2); flex: 1 1 160px; }
+    .research-consent { padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-input); }
+    .research-consent summary, .research-candidate summary { cursor: pointer; }
+    .research-list { list-style: none; padding: 0; margin: var(--space-3) 0; }
+    .research-candidate, .research-claim { padding: var(--space-4) 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+    .research-candidate label { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 32px; }
+    .research-candidate input { flex: 0 0 auto; }
+    .research-candidate .soft-note, .research-candidate details { margin: 8px 0 0 30px; }
+    .research-chip { display: inline-block; font-size: 12px; padding: 4px 8px; margin: 4px 8px 4px 0;
+      border: 1px solid currentColor; border-radius: var(--radius-thumb); color: var(--text-2); }
+    .research-chip.receipt { color: var(--ok); }
+    .research-chip.flagged { color: var(--warn); }
+    .research-chip.attribution { color: var(--text-2); border-color: var(--line-strong); }
+    .research-report { max-width: var(--reader-width); }
+    .research-report h2, .research-report h3 { text-wrap: balance; }
+    .research-report p { white-space: pre-wrap; }
+    .research-receipts { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+    .research-progress { min-height: 24px; overflow-wrap: anywhere; }
   </style>
 </head>
 <body>
@@ -4830,6 +4861,7 @@
         <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library" aria-current="page">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></span></button>
         <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count hidden" id="writingNavCount" title="0 saved drafts" aria-label="0 saved drafts"></span></button>
+        <button class="nav-button" type="button" data-tab-button="research" data-nav-label="Research">Research</button>
         <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count hidden" id="sourcesNavCount" title="0 subscribed sources" aria-label="0 subscribed sources"></span></button>
         <button class="nav-button" type="button" data-tab-button="settings" data-nav-label="Settings">Settings</button>
       </nav>
@@ -5654,6 +5686,62 @@
         </section>
         </div>
 
+        <section class="tab-panel" id="tab-research" data-tab-panel="research" aria-labelledby="researchHeading">
+          <div class="page-head">
+            <div><div class="eyebrow">Video deep research</div><h1 id="researchHeading">Ask a question. Follow the receipts.</h1>
+              <p class="lede">Find talks and episodes, capture their transcripts, then give your AI the evidence.</p></div>
+          </div>
+          <form class="research-form" id="researchForm">
+            <label for="researchQuestion">Research question</label>
+            <textarea class="field" id="researchQuestion" maxlength="500" required placeholder="What do people building AI agents say about evals?"></textarea>
+            <fieldset class="research-sources"><legend>Search sources</legend>
+              <label class="research-source"><input type="checkbox" data-research-source="library" checked>Library</label>
+              <label class="research-source"><input type="checkbox" data-research-source="youtube" disabled>YouTube</label>
+              <label class="research-source"><input type="checkbox" data-research-source="podcast" disabled>Podcasts</label>
+              <label class="research-source"><input type="checkbox" data-research-source="hn" disabled>HN</label>
+              <label class="research-source"><input type="checkbox" data-research-source="hackertube" disabled>HackerTube</label>
+              <label class="research-source"><input type="checkbox" data-research-source="reddit" disabled>Reddit · coming later</label>
+            </fieldset>
+            <details class="research-consent"><summary>Network consent</summary>
+              <p class="setting-copy">Search words go to the services you enable. YouTube uses YouTube search; HN uses Algolia; podcasts use Apple search. HackerTube downloads its public list. Library search stays local.</p>
+              <div id="researchConsent" class="inline-row">
+                <label class="inline-row"><input type="checkbox" data-research-consent="youtube">Allow YouTube</label>
+                <label class="inline-row"><input type="checkbox" data-research-consent="podcast">Allow Podcasts</label>
+                <label class="inline-row"><input type="checkbox" data-research-consent="hn">Allow HN</label>
+                <label class="inline-row"><input type="checkbox" data-research-consent="hackertube">Allow HackerTube</label>
+              </div>
+              <div class="setting-feedback"><span class="setting-status" id="researchConsentSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="researchConsentSaveRetry" type="button" data-setting-retry="researchConsent">Retry save</button></div>
+            </details>
+            <div class="research-limits">
+              <label for="researchMax">Sources to capture<input class="field" id="researchMax" type="number" min="1" max="30" value="12" required></label>
+              <label for="researchAsr">ASR budget (minutes)<input class="field" id="researchAsr" type="number" min="0" max="1440" value="120" required></label>
+              <label for="researchSince">Published since (optional)<input class="field" id="researchSince" type="date"></label>
+            </div>
+            <div><button class="button primary" type="submit" id="researchDiscover">Find sources</button></div>
+          </form>
+          <section class="research-section" aria-labelledby="researchRunsHeading">
+            <div class="inline-row"><h2 id="researchRunsHeading">Recent runs</h2><button class="button ghost" id="researchReload" type="button">Reload runs</button></div>
+            <label for="researchRuns">Open a saved run</label><select class="field" id="researchRuns"><option value="">Choose a run</option></select>
+          </section>
+          <p class="research-progress" id="researchProgress" role="status" aria-live="polite" aria-atomic="true">Start with your library, or allow a network source above.</p>
+          <section class="research-section hidden" id="researchRun" aria-labelledby="researchCandidatesHeading">
+            <div class="inline-row"><h2 id="researchCandidatesHeading" tabindex="-1">Candidates</h2><button class="button ghost" id="researchCopyPrompt" type="button" disabled>Copy prompt for my AI</button></div>
+            <p class="soft-note" id="researchRunLabel"></p>
+            <p class="soft-note">Podcasts can be discovered. Direct podcast capture is coming later; saved transcripts can be reused.</p>
+            <ol class="research-list" id="researchCandidates" aria-label="Ranked research candidates"></ol>
+            <div class="inline-row"><button class="button" type="button" id="researchCapture" disabled>Capture selected</button><span class="soft-note" id="researchSelection" aria-live="polite"></span></div>
+            <p class="setting-copy">When sources are ready, copy the prompt to an AI with Uoink MCP or local CLI access. It gathers evidence and publishes the report here.</p>
+          </section>
+          <section class="research-section hidden" id="researchPublished" aria-labelledby="researchReportHeading">
+            <div class="inline-row"><h2 id="researchReportHeading">Report</h2>
+              <button class="button ghost" type="button" id="researchMarkdown" disabled>Markdown</button>
+              <button class="button ghost" type="button" id="researchHtml" disabled>HTML</button>
+              <button class="button ghost" type="button" id="researchShare" disabled>Copy share text</button>
+            </div>
+            <div class="research-report" id="researchReport"></div>
+          </section>
+        </section>
+
         <section class="tab-panel" id="tab-sources" data-tab-panel="sources">
           <div class="page-head">
             <div>
@@ -6103,6 +6191,21 @@
               <button class="button" type="button" id="addTasteAnchor">Add anchor</button>
             </div>
           </div>
+          </section>
+
+          <section class="settings-section" id="settings-research" aria-labelledby="settingsResearchTitle">
+            <h2 class="settings-section-title" id="settingsResearchTitle" tabindex="-1">Research network sources</h2>
+            <div class="setting-block">
+              <p class="setting-copy">Research sends search words to enabled services: YouTube, HN Algolia and Apple podcast search. HackerTube supplies a public list. Saved library content is not sent to these discovery services.</p>
+              <div id="researchSettingsConsent" class="inline-row">
+                <label class="inline-row"><input type="checkbox" data-research-consent="youtube">Allow YouTube</label>
+                <label class="inline-row"><input type="checkbox" data-research-consent="podcast">Allow Podcasts</label>
+                <label class="inline-row"><input type="checkbox" data-research-consent="hn">Allow HN</label>
+                <label class="inline-row"><input type="checkbox" data-research-consent="hackertube">Allow HackerTube</label>
+              </div>
+              <div class="setting-feedback"><span class="setting-status" id="researchSettingsConsentSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="researchSettingsConsentSaveRetry" type="button" data-setting-retry="researchSettingsConsent">Retry save</button></div>
+              <a href="#research">Open Research</a>
+            </div>
           </section>
 
           <section class="settings-section" id="settings-search" aria-labelledby="settingsSearchTitle">
@@ -11513,6 +11616,378 @@
     }
 
     // ---- Import a list ---------------------------------------------------
+    // BEGIN RESEARCH: run content is data, never HTML.
+    const RESEARCH_POLL_MAX_MS = 30 * 60 * 1000;
+    const researchState = { runId: "", view: null, selected: new Set(), busy: false,
+      consentBusy: false, polling: false, pollActive: false, pollDeadline: 0,
+      timer: null, seq: 0, eta: null, reportStamp: "" };
+    const researchEl = (id) => document.getElementById(id);
+
+    function researchNode(tag, text, className = "") {
+      const node = document.createElement(tag);
+      if (text != null) node.textContent = String(text);
+      node.className = className;
+      return node;
+    }
+
+    function researchRunId(value) {
+      return typeof value === "string" && /^rr_[0-9]{14}_[0-9a-f]{8}$/.test(value);
+    }
+
+    function researchSafeLink(value, source = {}) {
+      // Same fixed host list as research_report.safe_link. Podcast hosts must
+      // come from this source's stored metadata, never the requested link.
+      function parsed(raw) {
+        if (typeof raw !== "string" || raw.length > 2048 || /[\s\\\p{Cc}\p{Cf}]/u.test(raw)) return null;
+        const authority = /^https:\/\/([^/?#]*)/i.exec(raw);
+        if (!authority || /[@%]/.test(authority[1]) || authority[1].endsWith(":")) return null;
+        try {
+          const url = new URL(raw);
+          if (url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "443")) return null;
+          // Normalize before either the blocked-host check or the allowlist,
+          // as research._url does. Source links also refuse all IP literals.
+          const host = url.hostname.toLowerCase().replace(/\.+$/, "");
+          if (!host.includes(".") || !isSourceUrl(url)) return null;
+          url.hostname = host;
+          return url;
+        } catch (_) { return null; }
+      }
+      const url = parsed(value);
+      if (!url) return null;
+      const hosts = new Set(["youtube.com", "www.youtube.com", "youtu.be", "news.ycombinator.com"]);
+      if (source.kind === "podcast") {
+        for (const field of ["episode_url", "enclosure_url", "source_url"]) {
+          const stored = parsed(source[field]);
+          if (stored) hosts.add(stored.hostname);
+        }
+      }
+      return hosts.has(url.hostname) ? url.href : null;
+    }
+
+    function researchLink(text, url, source) {
+      const safe = researchSafeLink(url, source);
+      const node = researchNode(safe ? "a" : "span", text);
+      if (safe) { node.href = safe; node.target = "_blank"; node.rel = "noopener noreferrer"; node.dataset.sourceLink = ""; }
+      return node;
+    }
+
+    function renderResearchConsent() {
+      const enabled = (state.settings || {}).research_network_sources || [];
+      document.querySelectorAll("[data-research-consent]").forEach((input) => {
+        input.checked = enabled.includes(input.dataset.researchConsent);
+        input.disabled = researchState.consentBusy || !state.settings;
+      });
+      document.querySelectorAll("[data-research-source]").forEach((input) => {
+        const kind = input.dataset.researchSource;
+        input.disabled = kind === "reddit" || (kind !== "library" && !enabled.includes(kind));
+        if (input.disabled) input.checked = false;
+      });
+    }
+
+    async function saveResearchConsent(input, checked = input.checked) {
+      if (researchState.consentBusy) return;
+      const selected = new Set((state.settings || {}).research_network_sources || []);
+      if (checked) selected.add(input.dataset.researchConsent);
+      else selected.delete(input.dataset.researchConsent);
+      const enabled = ["youtube", "podcast", "hn", "hackertube", "reddit"].filter((kind) => selected.has(kind));
+      const id = input.closest("#researchSettingsConsent") ? "researchSettingsConsent" : "researchConsent";
+      researchState.consentBusy = true;
+      renderResearchConsent();
+      try {
+        const saved = await saveSettingsPatch({ research_network_sources: enabled }, id, renderResearchConsent);
+        // Retry the source change against current settings so a later edit in
+        // the other panel is preserved, and both panels share the busy state.
+        if (!saved && settingEdit(id).retry) settingEdit(id).retry = () => saveResearchConsent(input, checked);
+      }
+      finally { researchState.consentBusy = false; renderResearchConsent(); }
+    }
+
+    function researchSelection() {
+      const view = researchState.view;
+      const count = researchState.selected.size;
+      const limit = view ? view.scope.max_sources : 30;
+      researchEl("researchCapture").disabled = researchState.busy || !count || count > limit;
+      const candidates = view ? view.candidates.filter((c) => researchState.selected.has(c.key)) : [];
+      const minutes = candidates.reduce((total, c) => total + (c.in_library ? 0 : c.est_capture === "captions" ? 1
+        : Number((/asr ~(\d+)/i.exec(c.est_capture || "") || [])[1]) || 15), 0);
+      researchEl("researchSelection").textContent = `${count} selected (limit ${limit}) · estimated ${minutes} min; actual time varies`;
+    }
+
+    function renderResearchCandidates() {
+      const view = researchState.view;
+      const container = researchEl("researchCandidates");
+      container.replaceChildren();
+      view.candidates.forEach((candidate, index) => {
+        const row = researchNode("li", null, "research-candidate");
+        const label = researchNode("label");
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.disabled = !candidate.in_library && (candidate.capturable === false || candidate.kind === "podcast");
+        check.checked = researchState.selected.has(candidate.key);
+        check.addEventListener("change", () => {
+          if (check.checked) researchState.selected.add(candidate.key);
+          else researchState.selected.delete(candidate.key);
+          researchSelection();
+        });
+        label.append(check, researchNode("span", `${index + 1}. ${candidate.title || "Untitled source"}`));
+        const meta = researchNode("div", null, "soft-note");
+        meta.append(researchLink(candidate.channel || "Source", candidate.url, candidate),
+          researchNode("span", ` · ${fmtDuration(candidate.duration_s)} · `),
+          researchNode("span", candidate.in_library ? "saved transcript" : (candidate.est_capture || "unknown").replace(/^asr/i, "ASR"), "research-chip"));
+        const why = researchNode("details");
+        why.append(researchNode("summary", "Why ranked here"));
+        const reasons = researchNode("ul");
+        (candidate.why_ranked || []).forEach((reason) => reasons.append(researchNode("li", reason)));
+        why.append(reasons);
+        row.append(label, meta, why);
+        container.append(row);
+      });
+      if (!view.candidates.length) container.append(researchNode("li", "No candidates found. Allow a network source or try a more focused question."));
+      researchSelection();
+    }
+
+    function renderResearchReport(view) {
+      const stamp = JSON.stringify([view.report, view.verification, view.exports]);
+      researchEl("researchMarkdown").disabled = !view.exports.md;
+      researchEl("researchHtml").disabled = !view.exports.html;
+      researchEl("researchShare").disabled = !view.share_text;
+      researchEl("researchPublished").classList.toggle("hidden", !view.exports.html && !view.exports.md && !view.report);
+      if (stamp === researchState.reportStamp) return;
+      researchState.reportStamp = stamp;
+      const container = researchEl("researchReport");
+      container.replaceChildren();
+      const report = view.report;
+      if (!report) {
+        container.append(researchNode("p", "This report predates the dashboard view. Download an available report, or publish the same claims again to add the view."));
+        return;
+      }
+      const verification = view.verification;
+      const stats = verification.stats || {};
+      container.append(researchNode("h3", report.title), researchNode("p", report.question),
+        researchNode("p", `${report.date} · ${stats.accepted || 0} accepted, ${stats.flagged || 0} flagged, ${stats.dropped || 0} dropped`, "soft-note"),
+        researchNode("h3", "Summary (not verified)"), researchNode("p", report.summary));
+      const sources = new Map(report.sources.map((source) => [source.item_id, source]));
+      const accepted = new Set((verification.accepted || []).map((claim) => claim.id));
+      let section = null;
+      report.claims.forEach((claim) => {
+        if (claim.section !== section) { section = claim.section; container.append(researchNode("h3", section)); }
+        const article = researchNode("article", null, "research-claim");
+        article.append(researchNode("p", claim.text));
+        if (accepted.has(claim.id)) article.append(researchNode("span", "receipt", "research-chip receipt"));
+        (claim.flags || []).filter((flag) => flag !== "speaker_unconfirmed").forEach((flag) =>
+          article.append(researchNode("span", `flagged: ${flag}`, "research-chip flagged")));
+        article.append(researchNode("span", "channel-level attribution", "research-chip attribution"));
+        const receipts = researchNode("div", null, "research-receipts");
+        (claim.receipts || []).forEach((ref) => {
+          receipts.append(researchLink(`${ref.counter ? "Others disagree: " : ""}${ref.time_label} · ${ref.channel} · ${ref.title}`,
+            ref.deep_link, sources.get(ref.item_id) || {}));
+          if (ref.listen_at) receipts.append(researchNode("span", `Transcript may be wrong here; ${ref.listen_at}`, "soft-note"));
+        });
+        article.append(receipts);
+        container.append(article);
+      });
+      if (report.disagreements.length) {
+        container.append(researchNode("h3", "Where they disagree"));
+        const claims = new Map(report.claims.map((claim) => [claim.id, claim]));
+        report.disagreements.forEach((group) => {
+          const details = researchNode("details");
+          details.append(researchNode("summary", group.topic));
+          group.claim_ids.forEach((id) => { if (claims.has(id)) details.append(researchNode("p", claims.get(id).text)); });
+          container.append(details);
+        });
+      }
+      container.append(researchNode("h3", "Sources"));
+      report.sources.forEach((source) => container.append(researchNode("p",
+        `${source.title} · ${source.channel} · ${source.published || "date unknown"} · ${fmtDuration(source.duration_s)} · ${source.transcript_source || "transcript unknown"} · ${source.claim_count} claims`, "soft-note")));
+      container.append(researchNode("h3", "Method"), researchNode("p",
+        `${report.sources_searched} sources searched. Tiers run: ${(stats.tiers_run || []).join(", ")}. ${stats.distinct_channels || 0} channels; largest share ${Math.round((stats.max_channel_share || 0) * 100)}%. Receipt checks do not establish that a claim is true.`));
+      const dropped = researchNode("details");
+      dropped.append(researchNode("summary", `Didn't make the cut (${(verification.dropped || []).length})`));
+      const list = researchNode("ul");
+      (verification.dropped || []).forEach((claim) => list.append(researchNode("li", `${claim.text} — ${(claim.reasons || []).join(", ")}`)));
+      dropped.append(list);
+      container.append(dropped);
+    }
+
+    async function researchTool(name, args) {
+      const result = await callRegistryTool(name, args);
+      if (!result || result.ok !== true) throw registryToolError(name, result);
+      return result;
+    }
+
+    async function researchWork(work) {
+      if (researchState.busy) return;
+      researchState.busy = true;
+      researchEl("researchDiscover").disabled = true;
+      researchEl("researchRuns").disabled = true;
+      researchSelection();
+      try { await work(); }
+      catch (err) { researchEl("researchProgress").textContent = err.message || "Research could not complete. Retry the action."; }
+      finally {
+        researchState.busy = false;
+        researchEl("researchDiscover").disabled = false;
+        researchEl("researchRuns").disabled = false;
+        researchSelection();
+        scheduleResearchPoll();
+      }
+    }
+
+    async function loadResearchRuns() {
+      const data = await authFetch("/research");
+      const select = researchEl("researchRuns");
+      select.replaceChildren(researchNode("option", "Choose a run"));
+      select.firstChild.value = "";
+      data.runs.filter((run) => researchRunId(run.run_id)).forEach((run) => {
+        const option = researchNode("option", `${run.question} · ${run.created_at}`);
+        option.value = run.run_id;
+        select.append(option);
+      });
+      select.value = researchState.runId;
+    }
+
+    async function openResearchRun(runId) {
+      if (!researchRunId(runId)) return;
+      const seq = ++researchState.seq;
+      researchState.pollActive = false;
+      scheduleResearchPoll();
+      const view = await authFetch(`/research/${runId}`);
+      if (seq !== researchState.seq) return;
+      researchState.runId = runId;
+      researchState.eta = null;
+      researchState.view = view;
+      // One status read determines whether this run still has active capture.
+      researchState.pollActive = true;
+      researchState.pollDeadline = Date.now() + RESEARCH_POLL_MAX_MS;
+      researchState.selected = new Set(view.candidates.filter((c) => c.in_library || (c.capturable !== false && c.kind !== "podcast"))
+        .slice(0, view.scope.max_sources).map((c) => c.key));
+      researchEl("researchRun").classList.remove("hidden");
+      researchEl("researchRunLabel").textContent = `${runId} · ${view.scope.question}`;
+      researchEl("researchCopyPrompt").disabled = false;
+      renderResearchCandidates();
+      renderResearchReport(view);
+      researchEl("researchProgress").textContent = "Choose sources to capture, or copy the prompt if this run is ready.";
+    }
+
+    async function startResearch() {
+      const question = researchEl("researchQuestion").value.trim();
+      const sourceKinds = [...document.querySelectorAll("[data-research-source]")].filter((i) => i.checked && !i.disabled).map((i) => i.dataset.researchSource);
+      const scope = { question, source_kinds: sourceKinds, max_sources: Number(researchEl("researchMax").value), max_asr_minutes: Number(researchEl("researchAsr").value) };
+      if (researchEl("researchSince").value) scope.since = researchEl("researchSince").value;
+      if (!question || !sourceKinds.length) throw new Error("Enter a question and choose at least one source.");
+      researchEl("researchProgress").textContent = "Finding sources…";
+      const start = await researchTool("research_start", scope);
+      await openResearchRun(start.run_id);
+      const found = await researchTool("research_discover", { run_id: start.run_id, queries: researchState.view.queries });
+      await openResearchRun(start.run_id);
+      await loadResearchRuns();
+      const notes = [...(found.skipped || []).map((s) => `${s.kind}: ${s.reason}`), ...(found.errors || []).map((s) => `${s.kind}: ${s.code}`)];
+      if (start.needs_consent.length) notes.push(`Enable ${start.needs_consent.join(", ")} in Network consent or Settings.`);
+      researchEl("researchProgress").textContent = `${researchState.view.candidates.length} candidates. ${notes.join("; ")}`;
+      researchEl("researchCandidatesHeading").focus();
+    }
+
+    async function captureResearch() {
+      ++researchState.seq; // An older status read must not replace the new ETA.
+      const runId = researchState.runId;
+      const keys = [...researchState.selected];
+      if (!researchRunId(runId) || !keys.length) return;
+      researchState.pollActive = false;
+      scheduleResearchPoll();
+      const capture = await researchTool("research_capture", { run_id: runId, keys });
+      researchState.pollActive = true;
+      researchState.pollDeadline = Date.now() + RESEARCH_POLL_MAX_MS;
+      researchState.eta = { ...capture.eta, started: Date.now() };
+      const skipped = (capture.skipped || []).map((s) => `${s.key}: ${s.reason}`).join("; ");
+      researchEl("researchProgress").textContent = `Queued ${capture.queued.length}; already saved ${capture.already.length}. Estimated ${capture.eta.min_minutes}–${capture.eta.max_minutes} min. ${skipped}`;
+    }
+
+    function scheduleResearchPoll() {
+      if (researchState.timer !== null) window.clearTimeout(researchState.timer);
+      researchState.timer = null;
+      if (!researchState.pollActive) return;
+      const remaining = researchState.pollDeadline - Date.now();
+      if (remaining <= 0) {
+        researchState.pollActive = false;
+        researchEl("researchProgress").textContent = "Automatic updates stopped after 30 minutes. Reload this run to check progress.";
+        return;
+      }
+      if (state.activeTab === "research" && !document.hidden && researchState.runId) {
+        researchState.timer = window.setTimeout(refreshResearch, Math.min(5000, remaining));
+      }
+    }
+
+    async function refreshResearch() {
+      if (!researchState.pollActive || state.activeTab !== "research" || document.hidden
+          || Date.now() >= researchState.pollDeadline) { scheduleResearchPoll(); return; }
+      if (researchState.busy || researchState.polling) { scheduleResearchPoll(); return; }
+      const runId = researchState.runId, seq = researchState.seq;
+      if (!researchRunId(runId)) return;
+      researchState.polling = true;
+      try {
+        const status = await researchTool("research_status", { run_id: runId });
+        if (seq !== researchState.seq || researchState.busy || state.activeTab !== "research" || document.hidden
+            || Date.now() >= researchState.pollDeadline) return;
+        researchState.pollActive = Array.isArray(status.items) && status.items.length > 0 && !status.done;
+        const view = await authFetch(`/research/${runId}`);
+        if (seq !== researchState.seq || researchState.busy || state.activeTab !== "research" || document.hidden) return;
+        researchState.view = view;
+        const counts = status.counts || {};
+        let eta = "";
+        if (!status.done && researchState.eta) {
+          const left = researchState.eta.max_minutes - (Date.now() - researchState.eta.started) / 60000;
+          eta = left > 0 ? ` About ${Math.ceil(left)} min remaining (estimate).` : " Capture is taking longer than estimated.";
+        }
+        const failures = (status.items || []).filter((item) => item.state === "failed").map((item) => `${item.title}: ${item.error}`).join("; ");
+        researchEl("researchProgress").textContent = `${status.ready_count} ready · ${counts.queued || 0} queued · ${(counts.capturing || 0) + (counts.asr_running || 0)} capturing · ${counts.failed || 0} failed. ASR budget left: ${status.asr_minutes_left} min.${eta} ${failures}`
+          + (!status.done ? "" : status.ready_count > 0 ? " Capture finished. Copy the prompt to gather evidence and publish."
+            : (status.items || []).length ? " No sources are ready. Review the failures or select other candidates."
+            : " No capture has started. Select candidates and choose Capture selected.");
+        renderResearchReport(view);
+      } catch (err) {
+        if (seq === researchState.seq) {
+          const code = err.data?.code || err.data?.error?.code;
+          if ([400, 403, 404].includes(err.status) || ["not_found", "invalid_run_id", "invalid_arguments"].includes(code)) researchState.pollActive = false;
+          researchEl("researchProgress").textContent = `Progress unavailable: ${err.message}. `
+            + (researchState.pollActive ? "Retrying while this tab is visible, for up to 30 minutes." : "Reload the run to try again.");
+        }
+      } finally { researchState.polling = false; scheduleResearchPoll(); }
+    }
+
+    async function exportResearch(format) {
+      const runId = researchState.runId;
+      if (!researchRunId(runId)) return;
+      const content = format === "md" ? (await authFetch(`/research/${runId}/markdown`)).content
+        : await authFetch(`/research/${runId}/report`, { responseType: "text" });
+      // Download bytes; never insert report HTML into the dashboard document.
+      const url = URL.createObjectURL(new Blob([content], { type: format === "md" ? "text/markdown;charset=utf-8" : "text/html;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url; link.download = `report.${format}`;
+      document.body.append(link); link.click(); link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function wireResearch() {
+      researchEl("researchForm").addEventListener("submit", (event) => { event.preventDefault(); researchWork(startResearch); });
+      researchEl("researchCapture").addEventListener("click", () => researchWork(captureResearch));
+      researchEl("researchReload").addEventListener("click", () => researchWork(async () => {
+        await loadResearchRuns();
+        if (researchState.runId) await openResearchRun(researchState.runId);
+      }));
+      researchEl("researchRuns").addEventListener("change", (event) => researchWork(() => openResearchRun(event.target.value)));
+      document.querySelectorAll("[data-research-consent]").forEach((input) => input.addEventListener("change", () => saveResearchConsent(input)));
+      researchEl("researchCopyPrompt").addEventListener("click", () => researchWork(async () => {
+        await navigator.clipboard.writeText(researchState.view.prompt); showToast("Research prompt copied.");
+      }));
+      researchEl("researchShare").addEventListener("click", () => researchWork(async () => {
+        await navigator.clipboard.writeText(researchState.view.share_text); showToast("Share text copied.");
+      }));
+      researchEl("researchMarkdown").addEventListener("click", () => researchWork(() => exportResearch("md")));
+      researchEl("researchHtml").addEventListener("click", () => researchWork(() => exportResearch("html")));
+      document.addEventListener("visibilitychange", scheduleResearchPoll);
+      renderResearchConsent();
+    }
+    // END RESEARCH
+
     const listImportState = { offset: 0, preview: null, seq: 0, timer: null, opener: null, truncated: false };
 
     function listImportEl(id) { return document.getElementById(id); }
@@ -16931,7 +17406,7 @@
       return pending;
     }
 
-    function saveSettingsPatch(patch, controlId) {
+    function saveSettingsPatch(patch, controlId, afterSave = () => {}) {
       const field = Object.keys(patch)[0];
       const id = controlId || Object.keys(SETTINGS_FIELDS).find(key => SETTINGS_FIELDS[key][0] === field);
       return queueSettingSave(id, async () => {
@@ -16960,6 +17435,7 @@
         renderAICostEstimate();
         return data;
       }, () => {
+        afterSave();
         if (field.startsWith("scrapecreators_")) {
           if (field === "scrapecreators_key") discoveryElement("scrapecreatorsKey").value = "";
           discoveryState.balancePlan = null;
@@ -17081,6 +17557,10 @@
       // newer confirmed write or an edit still waiting for its change event.
       const previous = state.settings || {};
       state.settings = { ...settings };
+      if (["researchConsent", "researchSettingsConsent"].some((id) => settingEdit(id).dirty || settingEdit(id).version !== (versions[id] || 0))) {
+        state.settings.research_network_sources = previous.research_network_sources || [];
+      }
+      if (typeof renderResearchConsent === "function") renderResearchConsent();
       for (const [id, [field, fallback]] of Object.entries(SETTINGS_FIELDS)) {
         const control = document.getElementById(id);
         if (!control) continue;
@@ -17852,6 +18332,7 @@
     // #tab-activity, ...) still land on the right screen.
     const ROUTE_TABS = {
       library: "library",
+      research: "research",
       activity: "activity",
       generate: "writing",
       sources: "sources",
@@ -18023,6 +18504,17 @@
       }
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       state.activeTab = tab;
+      if (typeof scheduleResearchPoll === "function") scheduleResearchPoll();
+      if (tab === "research") researchWork(async () => {
+        const versions = ["researchConsent", "researchSettingsConsent"].map((id) => settingEdit(id).version);
+        await settingsWriteQueue;
+        const settings = await authFetch("/settings");
+        if (!researchState.consentBusy && ["researchConsent", "researchSettingsConsent"].every((id, i) => settingEdit(id).version === versions[i])) {
+          state.settings = { ...(state.settings || {}), research_network_sources: settings.settings.research_network_sources || [] };
+          renderResearchConsent();
+        }
+        await loadResearchRuns();
+      });
       // Re-haul: from 900px up the Library list stays beside the reader.
       if (els.librarySplit) els.librarySplit.classList.toggle("reading", tab === "yoink");
       markOpenLibraryRow();
@@ -18509,6 +19001,7 @@
         els.universalCaptureButton.addEventListener("click", runUniversalCapture);
       }
       wireListImport();
+      wireResearch();
       if (els.universalCaptureAllow) {
         els.universalCaptureAllow.addEventListener("click", allowUniversalCaptureSite);
       }
