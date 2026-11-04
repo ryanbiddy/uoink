@@ -778,6 +778,7 @@ def _strict_json_route(bare: str) -> bool:
         bare == LIBRARY_INTENT_ROUTE
         or bare.startswith("/discovery/")
         or bare == "/playbooks/run"
+        or bare == "/import-list/stage"
         or bare == LIBRARY_MIRROR_INTENT_ROUTE
         or bare == LIBRARY_MIRROR_ROUTE
         or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
@@ -14568,6 +14569,109 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
 # existing download queue (pending_yoinks + the retry worker, one video per
 # pass), so an import is throttled like every other queued capture.
 _LIST_IMPORT_INTERVAL_SEC = 30
+_SAVES_POLL_SEC = 15
+_SAVES_BACKOFF = (60, 300, 900)
+_saves_capture_lock = threading.Lock()
+
+
+def _persist_x_thread(result: dict):
+    return page_extractor.persist_page_yoink(
+        _get_index(), result, data_root=DESKTOP_ROOT,
+        source_type=x_extractor.SOURCE_TYPE, subfolder="X", slug_prefix="x",
+        topic_classifier=_classify_topic)
+
+
+def _persist_reddit_thread(result: dict):
+    return page_extractor.persist_page_yoink(
+        _get_index(), result, data_root=DESKTOP_ROOT,
+        source_type=reddit_extractor.SOURCE_TYPE, subfolder="Reddit", slug_prefix="reddit",
+        topic_classifier=_classify_topic)
+
+
+def _saves_capture_one(now=None) -> bool:
+    """Capture the oldest due saved post. ``now`` is a Unix timestamp for tests.
+
+    The worker lock serializes capture; the registry lock only covers local
+    reads/writes, so importing another batch never waits for a network call.
+    Queued state survives a crash and can be retried after restart.
+    """
+    if not _saves_capture_lock.acquire(blocking=False):
+        return False
+    try:
+        now = time.time() if now is None else float(now)
+        # X posts wait in the queue (not failed) while X text capture is off,
+        # so turning the setting back on resumes them.
+        x_enabled = bool((_read_settings() or {}).get("x_text_capture_enabled"))
+        with list_imports._registry_lock:
+            registry = list_imports.load_registry(DATA_ROOT)
+            due = [(key, dict(row)) for key, row in registry["items"].items()
+                   if row.get("kind") == "post" and row.get("status") == "queued"
+                   and (row.get("retry_after") or 0) <= now
+                   and (x_enabled or row.get("source") != list_imports.SOURCE_X_BOOKMARKS)]
+        if not due:
+            return False
+        key, item = min(due, key=lambda pair: pair[1].get("imported_at") or "")
+        error = None
+        video_id = None
+        try:
+            if item["source"] == list_imports.SOURCE_X_BOOKMARKS:
+                result = x_extractor.extract_x_thread(item["url"])
+                if result.get("ok"):
+                    video_id = _persist_x_thread(result)
+                    if video_id:
+                        _save_x_video_poster(video_id, result)
+                else:
+                    error = result.get("code") or "capture_failed"
+            elif item["source"] == list_imports.SOURCE_REDDIT_SAVED:
+                result = reddit_extractor.extract_reddit_thread(item["url"])
+                if result.get("ok"):
+                    video_id = _persist_reddit_thread(result)
+                else:
+                    error = result.get("code") or "capture_failed"
+            else:
+                error = "unsupported"
+            if not error and not video_id:
+                error = "persist_failed"
+            if not error:
+                _get_index().add_tags(video_id, [item["tag"]], source=list_imports.TAG_SOURCE)
+        except Exception:
+            log.exception("saves capture failed")
+            error = "capture_failed"
+        with list_imports._registry_lock:
+            data = json.loads(json.dumps(list_imports.load_registry(DATA_ROOT)))
+            row = data["items"].get(key)
+            if row is None:
+                # The registry changed under us (unreadable or rewritten);
+                # never write back a view that lost the other items.
+                log.warning("saves capture: registry row %s vanished; not saving", key)
+                return True
+            attempts = row.get("attempts", 0) + 1
+            row.update(attempts=attempts, error=error)
+            if error:
+                row["status"] = "failed" if attempts >= 3 else "queued"
+                row["retry_after"] = now + _SAVES_BACKOFF[min(attempts - 1, 2)]
+            else:
+                row.update(status="captured", captured_video_id=video_id, retry_after=0, applied=True)
+            list_imports._save_registry(DATA_ROOT, data)
+        return True
+    finally:
+        _saves_capture_lock.release()
+
+
+def _start_saves_thread() -> None:
+    """Started only by helper startup beside the video retry worker."""
+    if "pytest" in sys.modules:
+        return
+
+    def _runner():
+        while True:
+            try:
+                _saves_capture_one()
+            except Exception:
+                log.exception("saves worker pass crashed")
+            time.sleep(_SAVES_POLL_SEC)
+
+    threading.Thread(target=_runner, name="saves-capture", daemon=True).start()
 
 
 def _research_ytsearch(query: str, n: int) -> dict:
@@ -14744,18 +14848,18 @@ def _list_import_in_library(video_id: str) -> bool:
 def _list_import_preview(text, offset=0, limit=list_imports.DEFAULT_LIMIT) -> dict:
     """Read one batch of a list source and mark what the library has.
     Raises list_imports.ImportListError with a user-facing message."""
-    spec = list_imports.classify(text if isinstance(text, str) else "")
+    spec = list_imports.classify(text if isinstance(text, str) else "", data_root=DATA_ROOT)
     off = list_imports.clamp_offset(offset)
     lim = list_imports.clamp_limit(limit)
     batch = list_imports.fetch_source(
-        spec, offset=off, limit=lim, ytdlp_playlist=_list_import_ytdlp)
+        spec, offset=off, limit=lim, data_root=DATA_ROOT, ytdlp_playlist=_list_import_ytdlp)
     return list_imports.build_preview(
-        spec, batch, offset=off, limit=lim, in_library=_list_import_in_library)
+        spec, batch, offset=off, limit=lim, in_library=_list_import_in_library, data_root=DATA_ROOT)
 
 
 def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
                        interval: int = _LIST_IMPORT_INTERVAL_SEC) -> dict:
-    """Preview, then queue every video the library doesn't have yet."""
+    """Preview, then queue every item the library doesn't have yet."""
     preview = _list_import_preview(text, offset, limit)
     idx = _get_index()
     queued: list[dict] = []
@@ -14764,13 +14868,20 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
         if item.get("in_library"):
             skipped += 1
             continue
+        if item.get("kind") == "post":
+            queued.append(dict(item))  # record_import queues posts atomically
+            continue
         url = _normalize_youtube_url(item["url"]) or item["url"]
         pending_id, inserted = idx.enqueue_pending_once(url, interval, _now_iso())
         queued.append({**item, "pending_id": pending_id, "already_queued": not inserted})
     receipt = list_imports.record_import(DATA_ROOT, preview, queued) if queued else {}
+    skipped += sum(bool(q.get("in_library")) for q in queued)
+    queued = [q for q in queued if not q.get("in_library")]
     fresh = sum(1 for q in queued if not q["already_queued"])
     waiting = len(queued) - fresh
-    parts = [f"Queued {fresh} video{'s' if fresh != 1 else ''}"]
+    noun = "post" if preview["source"]["kind"] in (
+        list_imports.SOURCE_X_BOOKMARKS, list_imports.SOURCE_REDDIT_SAVED) else "video"
+    parts = [f"Queued {fresh} {noun}{'s' if fresh != 1 else ''}"]
     if waiting:
         parts.append(f"{waiting} already waiting in the queue")
     if skipped:
@@ -14786,7 +14897,7 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
         "import_id": receipt.get("import_id"),
         "message": message,
         "videos": [
-            {k: q.get(k) for k in ("video_id", "url", "title", "channel", "pending_id",
+            {k: q.get(k) for k in ("video_id", "kind", "item_key", "url", "title", "channel", "pending_id",
                                    "already_queued")}
             for q in queued
         ],
@@ -14803,7 +14914,8 @@ def _imported_for_you(idx, *, limit: int = 6) -> list[dict]:
     with no engagement events. The taste profile is built without the
     imported items themselves, so a batch import can't vote for its own
     channels. HackerTube's quality score breaks ties."""
-    registry = list_imports.load_registry(DATA_ROOT)["items"]
+    registry = {row.get("captured_video_id") or key: row
+                for key, row in list_imports.load_registry(DATA_ROOT)["items"].items()}
     if not registry:
         return []
     rows = []
@@ -15219,10 +15331,17 @@ class Handler(BaseHTTPRequestHandler):
         origin = self.headers.get("Origin")
         if not origin:
             return None
-        if origin in ALLOWED_ORIGINS:
-            return origin
-        if self._is_allowed_extension_origin(origin):
-            return origin
+        # Echo back our own copy of the allowed origin, never the request
+        # header, so nothing from the client reaches a response header.
+        for allowed in ALLOWED_ORIGINS:
+            if origin == allowed:
+                return allowed
+        match = re.fullmatch(r"(chrome|moz)-extension://([a-z0-9_-]+)", origin)
+        if match:
+            scheme = "chrome-extension" if match.group(1) == "chrome" else "moz-extension"
+            for ext_id in _allowed_extension_ids():
+                if match.group(2) == ext_id:
+                    return f"{scheme}://{ext_id}"
         return None
 
     def _send_cors(self, origin: str | None):
@@ -17429,25 +17548,53 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "changed": changed,
                                       "enabled": enabled})
 
-    def _handle_import_list(self, body, *, start: bool):
-        """POST /import-list/preview and /import-list {url, offset?, limit?}.
+    def _handle_import_list(self, body, *, start: bool = False, stage: bool = False):
+        """Stage saves, preview a batch, or queue items the library lacks.
 
-        Preview reads one batch (default and maximum 50) of a HackerTube list,
-        HN thread, Reddit thread or YouTube playlist and marks what the
-        library already has. Import queues the rest on the download queue."""
+        /import-list/stage takes text or items. The other two routes take
+        {url, offset?, limit?}; URLs include local staged saves tokens.
+        """
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False, "error": "json object required"})
         url = body.get("url")
-        if not isinstance(url, str) or not url.strip():
+        if not stage and (not isinstance(url, str) or not url.strip()):
             return self._send_json(400, {"ok": False, "code": "empty",
                                           "error": "Paste a list link first."})
         try:
-            if start:
+            if stage:
+                if ("csv_text" in body) == ("items" in body):
+                    raise list_imports.ImportListError("Provide csv_text or items.", "invalid_items")
+                filename = body.get("filename")
+                if filename is not None and not isinstance(filename, str):
+                    raise list_imports.ImportListError("filename must be a string.", "invalid_items")
+                if "csv_text" in body:
+                    done = body.get("done", True)
+                    if not isinstance(done, bool):
+                        raise list_imports.ImportListError("done must be a boolean.", "invalid_items")
+                    if not done:
+                        result = list_imports.append_upload_chunk(
+                            DATA_ROOT, body["csv_text"], upload_id=body.get("upload_id"))
+                        return self._send_json(200, result)
+                    staged = list_imports.finish_upload(
+                        DATA_ROOT, body["csv_text"], upload_id=body.get("upload_id"),
+                        source=body.get("source"), filename=filename)
+                else:
+                    if not isinstance(body["items"], list):
+                        raise list_imports.ImportListError("items must be an array.", "invalid_items")
+                    if "append_to" in body:
+                        staged = list_imports.append_stage_items(
+                            DATA_ROOT, body["append_to"], body.get("source"), body["items"])
+                    else:
+                        staged = list_imports.stage_saves(
+                            DATA_ROOT, body.get("source"), body["items"], filename=filename)
+                result = {"ok": True, **staged, "label": list_imports.SOURCE_LABELS[staged["source"]]}
+            elif start:
                 result = _list_import_start(url, body.get("offset"), body.get("limit"))
             else:
                 result = _list_import_preview(url, body.get("offset"), body.get("limit"))
         except list_imports.ImportListError as e:
-            status = 400 if e.code in ("empty", "invalid_url", "unsupported") else 502
+            status = 400 if e.code in ("empty", "invalid_url", "unsupported", "invalid_items",
+                                       "empty_file") or (stage and e.code == "too_large") else 502
             if e.code == "unavailable":
                 status = 501
             return self._send_json(status, {"ok": False, "code": e.code, "error": str(e)})
@@ -19097,11 +19244,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
         try:
-            video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT,
-                source_type=x_extractor.SOURCE_TYPE,
-                subfolder="X", slug_prefix="x",
-                topic_classifier=_classify_topic)
+            video_id = _persist_x_thread(result)
         except Exception:
             log.exception("/extract/x persist failed")
             return self._send_json(500, {
@@ -19316,11 +19459,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
         try:
-            video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT,
-                source_type=reddit_extractor.SOURCE_TYPE,
-                subfolder="Reddit", slug_prefix="reddit",
-                topic_classifier=_classify_topic)
+            video_id = _persist_reddit_thread(result)
         except Exception:
             log.exception("/extract/reddit persist failed")
             return self._send_json(500, {
@@ -20583,8 +20722,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_reddit(body)
         if bare == "/notes":
             return self._handle_create_note(body)
-        if bare in ("/import-list/preview", "/import-list"):
-            return self._handle_import_list(body, start=bare == "/import-list")
+        if bare in ("/import-list/preview", "/import-list", "/import-list/stage"):
+            return self._handle_import_list(body, start=bare == "/import-list",
+                                            stage=bare == "/import-list/stage")
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:
@@ -22329,6 +22469,7 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     except Exception as e:
         log.warning("retry worker: reset_running_pending failed: %s", e)
     _start_retry_pending_thread()
+    _start_saves_thread()
     # Podcast watch mode: registration polls metadata automatically; the
     # per-feed auto_ingest flag separately controls media work.
     _start_podcast_feed_scheduler_thread()

@@ -1,0 +1,8 @@
+id,permalink
+t3_abc123,/r/synthetic/comments/abc123/a_test_post/
+t1_def456,https://old.reddit.com/r/synthetic/comments/abc123/a_test_post/def456/?context=3#top
+t1_def456,/r/synthetic/comments/abc123/a_test_post/def456/
+t3_xyz789,https://reddit.com/r/synthetic/comments/xyz789/another_test
+invalid,https://example.com/r/synthetic/comments/abc123/a_test_post/
+invalid,/r/synthetic/comments/abc123
+invalid,

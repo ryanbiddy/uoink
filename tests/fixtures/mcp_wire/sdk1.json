@@ -4786,26 +4786,42 @@
       "title": "Capture Reddit thread"
     },
     {
-      "annotations": {
-        "readOnlyHint": false,
-        "destructiveHint": false,
-        "idempotentHint": false,
-        "openWorldHint": true
-      },
-      "description": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note.",
+      "name": "import_list",
+      "description": "Preview or import a list in batches of at most 50, skipping saved items and adding a source tag. Supply a HackerTube, HN thread, Reddit thread or YouTube playlist url; a local .csv/.txt file of YouTube Watch Later or Reddit saves; or items with source watch_later, x_bookmarks or reddit_saved. X status links also work in a text file. Use uoink_video for one video or uoink_playlist for one tracked playlist job. Set preview_only before importing. File/items input stages up to 5000 saves locally; reuse source.url (also stage_url on staging) with next_offset for later batches. YouTube uses the video queue; X/Reddit posts capture serially at least 15 seconds apart. X text capture must be enabled. Returns found, already, queued, next_offset and item rows. HackerTube imports retain ODC-By 1.0 credit.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "url": {
             "type": "string",
-            "description": "hackertube.org page (/p/<slug>, /c/<id>, /a/<id>, /watch/<id>, / or /browse), news.ycombinator.com/item?id=... thread, reddit.com/r/<sub>/comments/... thread, or youtube.com/playlist?list=... URL."
+            "description": "Public list URL or uoink-saves:<id> token returned in source.url. Required unless file or items is supplied."
+          },
+          "file": {
+            "type": "string",
+            "description": "Local .csv or .txt saves file, at most 5 MB. Staged locally before reading this batch."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "watch_later",
+              "x_bookmarks",
+              "reddit_saved"
+            ],
+            "description": "watch_later, x_bookmarks or reddit_saved. Required with items; optional with file (auto-detected)."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5000,
+            "description": "At most 5000 video IDs or source URLs; requires source. Reuse the returned stage_url for later batches."
           },
           "limit": {
             "type": "integer",
             "minimum": 1,
             "maximum": 50,
             "default": 50,
-            "description": "Videos to read in this batch, 1-50; default 50."
+            "description": "Items to read in this batch, 1-50; default 50."
           },
           "offset": {
             "type": "integer",
@@ -4819,12 +4835,15 @@
             "description": "When true, count and list the batch without queueing anything."
           }
         },
-        "required": [
-          "url"
-        ],
+        "required": [],
         "additionalProperties": false
       },
-      "name": "import_list",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
       "title": "Import a list of videos"
     },
     {

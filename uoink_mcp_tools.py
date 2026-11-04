@@ -1920,15 +1920,29 @@ def uoink_reddit_thread(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def import_list(args: dict[str, Any]) -> dict[str, Any]:
-    """Import a list: queue every video in a HackerTube list, a Hacker News
-    thread, a Reddit thread or a YouTube playlist for normal capture, 50 at a
-    time. preview_only reads the batch without queueing anything."""
+    """Preview or queue one batch from a list URL, saves file or extension items."""
     import list_imports as _li  # noqa: WPS433
     b = _b()
     url = args.get("url")
-    if not isinstance(url, str) or not url.strip():
-        return _err("url (string) is required")
+    if sum(key in args for key in ("url", "file", "items")) != 1:
+        return _err("Provide exactly one of url, file or items.")
+    staged = None
     try:
+        if "file" in args:
+            if not isinstance(args["file"], str) or not args["file"].strip():
+                return _err("file must be a local .csv or .txt path")
+            staged = _li.stage_saves_file(b.DATA_ROOT, args["file"], source=args.get("source"))
+        elif "items" in args:
+            values = args["items"]
+            if not isinstance(values, list) or len(values) > _li.SAVES_STAGE_MAX or any(
+                    not isinstance(value, str) for value in values):
+                return _err("items must be an array of at most 5000 strings")
+            items = _li.parse_save_items(args.get("source"), values)
+            staged = _li.stage_saves(b.DATA_ROOT, args["source"], items)
+        if staged:
+            url = staged["url"]
+        if not isinstance(url, str) or not url.strip():
+            return _err("url (string) is required when neither file nor items is given")
         if args.get("preview_only") is True:
             result = {**b._list_import_preview(url, args.get("offset"), args.get("limit")),
                       "queued": 0}
@@ -1936,6 +1950,9 @@ def import_list(args: dict[str, Any]) -> dict[str, Any]:
             result = b._list_import_start(url, args.get("offset"), args.get("limit"))
     except _li.ImportListError as e:
         return {"ok": False, "error": str(e), "code": e.code}
+    if staged:
+        result["stage_url"] = staged["url"]
+        result["truncated"] = staged["truncated"]
     return result
 
 
@@ -4072,7 +4089,7 @@ DESCRIPTIONS = {
     "queue_discovered": "Enqueue selected saved discovery candidates for normal capture. Use after discover_candidates returns a run and candidate keys; use that tool again to search for new candidates. Requires agent discovery consent or a dashboard intent; stdio needs agent consent because dashboard intents are process-bound. Returns queued and skipped picks, skipping unknown, unsupported, captured or queued URLs. No ScrapeCreators credits are spent; the resident retry worker performs capture later.",
     "get_library_brief_input": "Prepare a dated library-status packet for a brief that the client writes. Use for a requested daily brief; use get_library_activity for direct metrics or get_playbook_input for topical research. Returns job_key, input_hash, bound revisions, counts, coverage, up to 20 work rows and five Librarian cards within 24,576 bytes. No work lease is acquired. Pass the unchanged packet to publish_library_brief after writing.",
     "publish_library_brief": "Save a client-written daily brief as an immutable local artifact. Use only for the user's requested brief job after get_library_brief_input; use read_library_resource to read a published brief. Validates the exact packet against current data and binds quotes to supplied evidence. An identical submission_key retry returns the saved result; stale_brief requires fresh input. Writes under reach/briefs without applying labels or changing the assignment queue.",
-    "import_list": "Queue every video from a list source for normal capture: a HackerTube playlist, category, area or the whole collection best first (hackertube.org, ODC-By 1.0), a Hacker News thread, a Reddit thread, or a YouTube playlist. Use for many videos picked by someone else; use uoink_playlist to capture a playlist as one tracked job or uoink_video for one video. Reads one batch of at most 50 (offset pages through big lists), skips videos already in the library, and queues the rest on the background download queue one at a time. Set preview_only to count without queueing. Returns found, already, queued, next_offset and per-video rows; imported items keep their source tag and note.",
+    "import_list": "Preview or import a list in batches of at most 50, skipping saved items and adding a source tag. Supply a HackerTube, HN thread, Reddit thread or YouTube playlist url; a local .csv/.txt file of YouTube Watch Later or Reddit saves; or items with source watch_later, x_bookmarks or reddit_saved. X status links also work in a text file. Use uoink_video for one video or uoink_playlist for one tracked playlist job. Set preview_only before importing. File/items input stages up to 5000 saves locally; reuse source.url (also stage_url on staging) with next_offset for later batches. YouTube uses the video queue; X/Reddit posts capture serially at least 15 seconds apart. X text capture must be enabled. Returns found, already, queued, next_offset and item rows. HackerTube imports retain ODC-By 1.0 credit.",
     "export_cited_range": "Export verbatim stored transcript cues with speaker provenance, overlapping chapters, safe links and evidence references. Use after search_clips identifies a passage; use get_citation_map for all citation rows or read_library_resource for an existing resource URI. Select exact cue-aligned bounds or a current excerpt, at most 120 seconds and 200 cues. Returns source/media revisions; refusals include next_step. It does not fetch media or recompute transcription.",
     "get_transcript": GET_TRANSCRIPT_DESCRIPTION,
     "list_library_work": "List Librarian assignment counts and one cursor page of work for a run. Use to inspect readiness before claim_library_work; use get_library_activity for aggregate library metrics. Listing expires stale leases and can update work state. Returns run revision, work states, manifest dispositions and waiting-client status. The server does not perform the Librarian's model work.",
@@ -4301,8 +4318,11 @@ OVERRIDES = {
     "uoink_x": {"url": "Public x.com or twitter.com status URL for the terminal post in the desired author chain."},
     "uoink_reddit_thread": {"url": "reddit.com/r/<sub>/comments/... thread URL."},
     "import_list": {
-        "url": "hackertube.org page (/p/<slug>, /c/<id>, /a/<id>, /watch/<id>, / or /browse), news.ycombinator.com/item?id=... thread, reddit.com/r/<sub>/comments/... thread, or youtube.com/playlist?list=... URL.",
-        "limit": "Videos to read in this batch, 1-50; default 50.",
+        "url": "Public list URL or uoink-saves:<id> token returned in source.url. Required unless file or items is supplied.",
+        "file": "Local .csv or .txt saves file, at most 5 MB. Staged locally before reading this batch.",
+        "source": "watch_later, x_bookmarks or reddit_saved. Required with items; optional with file (auto-detected).",
+        "items": "At most 5000 video IDs or source URLs; requires source. Reuse the returned stage_url for later batches.",
+        "limit": "Items to read in this batch, 1-50; default 50.",
         "offset": "Zero-based position in the list to start from; use next_offset from the previous call for the next batch.",
         "preview_only": "When true, count and list the batch without queueing anything.",
     },
@@ -4370,7 +4390,7 @@ def without_descriptions(value):
     return value
 
 
-def _output(fields):
+def _output(fields, *, optional=()):
     """Document the existing JSON result envelope, including failure results."""
     return {
         "type": "object",
@@ -4382,7 +4402,7 @@ def _output(fields):
         },
         "required": ["ok"],
         "allOf": [{"if": {"properties": {"ok": {"const": True}}},
-                   "then": {"required": list(fields)},
+                   "then": {"required": [name for name in fields if name not in optional]},
                    "else": {"required": ["error"]}}],
     }
 
@@ -4446,13 +4466,15 @@ OUTPUT_SCHEMAS = {
     }),
     "uoink_playlist": _output({"job_id": _field("string", "Asynchronous capture identifier for get_job_status or cancel_job.")}),
     "import_list": _output({
-        "source": _field("object", "Source kind, label, list title, canonical URL and credit line (HackerTube is ODC-By 1.0)."),
-        "found": _field("integer", "Videos found in this batch."),
-        "already": _field("integer", "Videos in this batch already in the library; never queued again."),
-        "queued": _field("integer", "Videos newly added to the download queue; 0 on a preview."),
+        "source": _field("object", "Source kind, label, title, URL or staged saves token, and credit line."),
+        "found": _field("integer", "Items found in this batch."),
+        "already": _field("integer", "Items already saved; never queued again."),
+        "queued": _field("integer", "Items newly queued for background capture; 0 on a preview."),
         "next_offset": _field(["integer", "null"], "Offset for the next batch, or null at the end of the list."),
-        "videos": _field("array", "Per-video rows with video_id, url, title, channel and note.", items={"type": "object"}),
-    }),
+        "videos": _field("array", "Video or post rows with kind, item_key, video_id, url, title and channel.", items={"type": "object"}),
+        "stage_url": _field("string", "Present when file/items were staged; pass this token as url for later batches."),
+        "truncated": _field("boolean", "Present when staging; true if saves exceeded the 5000-item cap."),
+    }, optional=("stage_url", "truncated")),
     "get_uoink_corpus": _output({
         "corpus_md": _field("string", "Complete saved Markdown document."),
         "folder": _field("string", "Absolute local folder holding the corpus."),
@@ -6051,14 +6073,17 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         description=DESCRIPTIONS["import_list"],
         input_schema=_schema({
             "url": {"type": "string",
-                    "description": "HackerTube, Hacker News thread, Reddit thread or YouTube playlist URL."},
+                    "description": "Public list URL or uoink-saves token; omit with file/items."},
+            "file": {"type": "string", "description": "Local .csv or .txt saves file."},
+            "source": {"type": "string", "enum": ["watch_later", "x_bookmarks", "reddit_saved"]},
+            "items": {"type": "array", "items": {"type": "string"}, "maxItems": 5000},
             "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 50,
-                      "description": "Videos per batch (1-50)."},
+                      "description": "Items per batch (1-50)."},
             "offset": {"type": "integer", "minimum": 0, "default": 0,
                        "description": "Start position in the list."},
             "preview_only": {"type": "boolean", "default": False,
                              "description": "Count without queueing."},
-        }, ["url"]),
+        }, []),
         handler=import_list,
         rate_limiter=_RateLimiter(10),
     ),

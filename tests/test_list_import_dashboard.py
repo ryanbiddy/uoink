@@ -32,7 +32,9 @@ def test_sources_entry_opens_the_dialog_without_a_second_primary():
 def test_dialog_has_one_paste_field_a_preview_count_and_one_primary_import():
     modal = _between('id="listImportModal"', 'id="stopHelperConfirm"')
     assert 'role="dialog"' in modal and 'aria-modal="true"' in modal
-    assert modal.count("<input") == 1 and 'id="listImportInput"' in modal
+    assert modal.count('type="url"') == 1 and 'id="listImportInput"' in modal
+    assert 'id="listImportFile" type="file" accept=".csv,.txt"' in modal
+    assert 'for="listImportFile">Import a saves file</label>' in modal
     assert 'id="listImportStatus"' in modal and 'aria-live="polite"' in modal
     assert modal.count('class="button primary"') == 1
     assert re.search(r'<button class="button primary" type="button" id="listImportGo" disabled>Import</button>', modal)
@@ -44,9 +46,84 @@ def test_dialog_has_one_paste_field_a_preview_count_and_one_primary_import():
 def test_dialog_talks_to_the_helper_routes():
     assert 'authFetch("/import-list/preview"' in DASHBOARD
     assert 'authFetch("/import-list"' in DASHBOARD
+    assert 'authFetch("/import-list/stage"' in DASHBOARD
+    assert "savesUploadChunk(csvText, offset, file.name, uploadId)" in DASHBOARD
+    assert 'listImportEl("listImportInput").value = data.url' in DASHBOARD
     assert "limit: 50" in DASHBOARD
     assert "wireListImport();" in DASHBOARD
     assert "trapModalFocus(event, modal, closeListImport)" in DASHBOARD
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_saves_file_upload_chunks_preserve_text_and_fit_body_limit(tmp_path):
+    functions = _between("function savesUploadChunk(", "async function runListImport()")
+    script = r'''
+const assert = require("node:assert/strict");
+const window = { clearTimeout() {} };
+const listImportState = { seq: 0 };
+const fileInput = { files: [], value: "" }, urlInput = { value: "" };
+const listImportEl = (id) => id === "listImportFile" ? fileInput : urlInput;
+let message, previews = 0, authFetch;
+const resetListImportPreview = (text) => { message = text; };
+const runListPreview = async () => { ++previews; };
+''' + functions + r'''
+(async () => {
+  const token = "uoink-saves:0123456789abcdef", uploadId = "fedcba9876543210";
+  const cases = [
+    { text: "Video ID\nsave0000001\n", count: 1 },
+    { text: "a".repeat(47999), count: 1 },
+    { text: "a".repeat(48000), count: 1 },
+    { text: "row\n".repeat(30000), count: 3, lines: true },
+    { text: "a".repeat(120001), count: 3 },
+    { text: "\u00e9".repeat(47999) },
+    { text: "\u0000\"\\".repeat(20000) },
+    { text: "a".repeat(47999) + "\ud83d\ude00" + "b".repeat(48000) },
+  ];
+  for (const example of cases) {
+    const requests = [];
+    fileInput.files = [{ size: Buffer.byteLength(example.text), name: "watch-later.csv",
+                         text: async () => example.text }];
+    urlInput.value = "";
+    authFetch = async (path, options) => {
+      assert.equal(path, "/import-list/stage");
+      assert.equal(options.method, "POST");
+      assert.ok(Buffer.byteLength(options.body) <= 65536);
+      const body = JSON.parse(options.body);
+      assert.equal(body.filename, "watch-later.csv");
+      assert.ok(body.csv_text.length <= 48000);
+      assert.equal(body.upload_id, requests.length ? uploadId : undefined);
+      assert.equal(new TextDecoder().decode(new TextEncoder().encode(body.csv_text)), body.csv_text);
+      requests.push(body);
+      return body.done ? { ok: true, url: token, count: 1, truncated: true }
+                       : { ok: true, upload_id: uploadId, received_bytes: 1 };
+    };
+    const before = previews;
+    await stageSavesFile();
+    assert.equal(previews, before + 1, message);
+    assert.equal(urlInput.value, token);
+    assert.equal(fileInput.value, "");
+    assert.equal(listImportState.truncated, true);
+    assert.equal(requests.map((body) => body.csv_text).join(""), example.text);
+    assert.equal(requests.at(-1).done, true);
+    for (const body of requests.slice(0, -1)) {
+      assert.equal(body.done, false);
+      if (example.lines) assert.ok(body.csv_text.endsWith("\n"));
+    }
+    if (example.count) assert.equal(requests.length, example.count);
+  }
+  fileInput.files = [{ size: 5 * 1024 * 1024 + 1,
+                       text: async () => assert.fail("oversized file was read") }];
+  authFetch = async () => assert.fail("oversized file was uploaded");
+  const before = previews;
+  await stageSavesFile();
+  assert.equal(previews, before);
+  assert.equal(message, "Saves files must be 5 MB or smaller.");
+})().catch((error) => { console.error(error); process.exitCode = 1; });
+'''
+    path = tmp_path / "saves-upload.js"
+    path.write_text(script, encoding="utf-8")
+    result = subprocess.run(["node", str(path)], capture_output=True, text=True, timeout=20)
+    assert result.returncode == 0, result.stderr
 
 
 def test_for_you_imports_panel_and_card_images():
