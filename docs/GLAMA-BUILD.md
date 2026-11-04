@@ -2,6 +2,8 @@
 
 The root Dockerfile runs the default 99-tool stdio server on Linux. It needs no Windows helper, credentials, media downloads, or startup network access. Media capture and paid generation still require their normal runtime dependencies and consent; introspection does not exercise those features.
 
+For capture, use [docker/capture.Dockerfile](../docker/capture.Dockerfile) and the [Linux guide](linux.md).
+
 Glama accepts build settings in a form. Use these values with this repository checked out as the working directory. These are the settings to enter, not a Dockerfile upload. Field labels may differ in Glama's UI.
 
 | Field | Value |
