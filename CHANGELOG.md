@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Deep research found no excerpts in videos captured outside a research run.
 - Research Markdown reports use Markdown escapes instead of HTML entities.
   Report and share text use singular claim and source labels when the count is one.
 - Research MCP tools describe `run_id` as coming from `research_start`.
