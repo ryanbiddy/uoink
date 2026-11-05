@@ -762,6 +762,19 @@ async function groupSearchQuotes() {
   check(html.includes('A pressurized rover keeps &lt;crew&gt; &amp; equipment safe.'), "row shows the escaped verified quote");
   check(/<a[^>]*href="#item\/moon\?t=92\.5"[^>]*>1:32<\/a>/.test(html), "quote has a timestamp link to the saved item");
   check(html.includes('aria-label="Open Moon Base episode at 1:32"'), "timestamp link names the item and time");
+  for (const [passage, itemTime, expected] of [
+    [{ timestamp_seconds: 12.48, start: 10 }, 0, 12.48],
+    [{ timestamp_seconds: "", start: 92.5 }, 0, 92.5],
+    [{ timestamp_seconds: 0, start: 92.5 }, 214, 0],
+    [{ start: null }, 214, 214],
+  ]) {
+    p.state.library = [{ ...hit, timestamp_seconds: itemTime, passage: { text: hit.passage.text, ...passage } }];
+    p.run("renderLibrary()");
+    check(p.els.libraryGrid.innerHTML.includes(`href="#item/moon?t=${expected}"`), "quote prefers its own stored time, with the item time as fallback", [passage, itemTime, expected]);
+  }
+  p.state.library = [{ ...hit, video_id: "", slug: "", folder: "fixtures/moon" }];
+  p.run("renderLibrary()");
+  check(p.els.libraryGrid.innerHTML.includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "folder-only row keeps its quote without a broken timestamp link");
   p.state.library = [{ ...hit, timestamp_seconds: 0, passage: { ...hit.passage, start: 0 } }];
   p.run("renderLibrary()");
   check(p.els.libraryGrid.innerHTML.includes('?t=0"') && p.els.libraryGrid.innerHTML.includes('>0:00</a>'), "zero is a real stored timestamp");
@@ -788,7 +801,7 @@ async function groupSearchMoments() {
   }
   const hit = row("moon", "Moon Base episode");
   p.state.library = [hit];
-  const paragraphs = [0, 90, 150].map((seconds) => {
+  const paragraphs = [0, 92.5, 150].map((seconds) => {
     const el = new FakeEl("para", "DIV");
     el.dataset.readerSeconds = String(seconds);
     el.scrollIntoView = () => { p.scrolled = seconds; };
@@ -797,21 +810,47 @@ async function groupSearchMoments() {
   });
   p.document.querySelectorAll = (selector) => selector === ".reader-para[data-reader-seconds]" ? paragraphs : [];
   p.run(`
-    loadYoinkDetails = async () => ({ transcript: [{ start: 90, end: 100, text: "A pressurized rover." }] });
-    loadYoinkMarkdown = async () => "";
+    globalThis.detailReads = 0;
+    globalThis.markdownReads = 0;
+    loadYoinkDetails = async () => {
+      detailReads++;
+      return { transcript: [{ start: 92.5, end: 100, text: "A pressurized rover." }] };
+    };
+    loadYoinkMarkdown = async () => { markdownReads++; return ""; };
     loadLibraryActivity = startLibraryActivityTimer = stopLibraryActivityTimer = () => {};
     navigateTo("#item/moon?t=92.5");
   `);
   await settle();
   await p.run("new Promise(requestAnimationFrame)");
   check(p.state.selectedYoink.video_id === "moon", "timestamp link opens the saved item");
-  check(p.scrolled === 90 && p.focused === 90, "reader scrolls and focuses the paragraph containing the match");
+  check(p.scrolled === 92.5 && p.focused === 92.5, "reader scrolls and focuses the paragraph at the exact fractional match time");
   const rendered = p.run('readerTranscriptHtml(state.selectedYoink, state.selectedYoinkSidecar)');
-  check(rendered.includes('data-reader-seconds="90"'), "reader paragraphs expose their stored time for the jump");
+  check(rendered.includes('data-reader-seconds="92.5"'), "reader paragraphs expose their precise stored time for the jump");
+  const untimed = p.run('readerTranscriptHtml(state.selectedYoink, { transcript: [{ text: "No stored time." }] })');
+  check(!untimed.includes("data-reader-seconds"), "missing segment time does not become an undefined reader timestamp");
   p.run('navigateTo("#item/moon?t=0")');
   await settle();
   await p.run("new Promise(requestAnimationFrame)");
   check(p.scrolled === 0, "a second timestamp on the same item moves to the new moment");
+  check(p.run("detailReads === 1 && markdownReads === 1"), "a second timestamp on the open item reuses its loaded content");
+  p.run('navigateTo("#library"); navigateTo("#item/moon?t=150")');
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.scrolled === 150 && p.run("detailReads === 1 && markdownReads === 1"), "returning to the selected item reveals the new moment without fetching it again");
+  p.state.library.push(row("rovers", "Rovers video"));
+  p.run(`
+    loadYoinkDetails = () => {
+      detailReads++;
+      return new Promise((resolve) => { globalThis.finishDetails = resolve; });
+    };
+    navigateTo("#item/rovers?t=0");
+    navigateTo("#item/rovers?t=150");
+  `);
+  await p.run("new Promise(requestAnimationFrame)");
+  p.run('finishDetails({ transcript: [{ start: 150, text: "Another rover." }] })');
+  await settle();
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.scrolled === 150, "a timestamp changed during loading is still the moment revealed when content arrives");
+  check(p.run("detailReads === 2 && markdownReads === 2"), "changing the pending item's timestamp does not duplicate its fetches");
   p.scrolled = null;
   p.run(`
     loadYoinkDetails = () => new Promise((resolve) => { globalThis.finishDetails = resolve; });

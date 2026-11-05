@@ -28,7 +28,8 @@ const rows = [
   { video_id: "moon", title: "Moon Base episode", source_type: "episode", platform: "podcast", timestamp_seconds: 92.5 },
   { video_id: "rovers", title: "Rovers video", source_type: "video", platform: "youtube", timestamp_seconds: 214 },
   { video_id: "defenders", title: "Planetary Defenders", source_type: "video", platform: "youtube", timestamp_seconds: 18 },
-].map((row, i) => ({ ...row, author: "Space Research", yoinked_at: `2026-11-0${i + 1}T12:00:00Z`,
+].map((row, i) => ({ ...row, timestamp_seconds: i === 0 ? 0 : row.timestamp_seconds,
+  author: "Space Research", yoinked_at: `2026-11-0${i + 1}T12:00:00Z`,
   passage_verified: true, passage: { text: i === 2 ? "A rover detects an asteroid." : quote, start: row.timestamp_seconds },
   source_url: `https://www.youtube.com/watch?v=${row.video_id}`, has_transcript: true, transcript_source: "captions" }));
 const browser = await playwright.chromium.launch({ headless: true });
@@ -108,6 +109,12 @@ try {
     await page.screenshot({ path: resolve(out, `moment-${theme}-${width}.png`) });
     const crumbs = await page.locator("#tab-yoink > .reader-crumbs").boundingBox();
     assert.ok(box.y >= crumbs.y + crumbs.height && box.y < 900, `matched paragraph is visible below the sticky breadcrumb: ${JSON.stringify({ box, crumbs })}`);
+    await page.evaluate(() => { location.hash = "#item/moon?t=0"; });
+    await page.waitForFunction(() => document.activeElement.dataset.readerSeconds === "0");
+    assert.equal(detailReads, 1, "changing the open item's timestamp reuses its transcript");
+    await page.goBack();
+    await page.waitForFunction(() => document.activeElement.dataset.readerSeconds === "92.5");
+    assert.equal(detailReads, 1, "Back between moments reuses the open item");
     await page.goBack();
     await page.waitForFunction(() => state.activeTab === "library");
     await page.locator("#sortFilter").selectOption("oldest");

@@ -8958,7 +8958,8 @@
       if (tasks.length) await Promise.all(tasks);
       if (state.selectedYoinkRequest === request) {
         renderYoinkDetail();
-        revealReaderMoment(options.seconds);
+        const route = parseRoute(currentRoute);
+        revealReaderMoment(route && route.tab === "yoink" && route.id === videoId ? route.seconds : options.seconds);
       }
     }
 
@@ -12918,10 +12919,10 @@
       if (!state.filters.q.trim()) return "";
       const passage = row.passage_verified === true && row.passage;
       if (!passage || !passage.text) return '<div class="card-match">No matching quote available.</div>';
-      const seconds = storedTime(row.timestamp_seconds, passage.timestamp_seconds, passage.start);
+      const seconds = storedTime(passage.timestamp_seconds, passage.start, row.timestamp_seconds);
       const label = readerClock(seconds);
       const id = videoIdOf(row);
-      const time = seconds === null ? "" : `<a class="reader-time" href="${htmlEscape(routeHash("item", id))}?t=${seconds}" aria-label="Open ${htmlEscape(rowTitle(row))} at ${label}">${label}</a>`;
+      const time = seconds === null || !id ? "" : `<a class="reader-time" href="${htmlEscape(routeHash("item", id))}?t=${seconds}" aria-label="Open ${htmlEscape(rowTitle(row))} at ${label}">${label}</a>`;
       return `<div class="card-match">${time}<q>${htmlEscape(passage.text)}</q></div>`;
     }
 
@@ -18596,10 +18597,9 @@
     // Shows the screen a parsed route names, without pushing history.
     function applyRoute(route) {
       if (route.tab === "yoink") {
-        // Back to the item already loaded (from its Evidence, say): show
-        // it again instead of fetching it twice.
-        if (state.activeTab !== "yoink" && videoIdOf(state.selectedYoink) === route.id) {
-          switchTab("yoink", { fromRoute: true });
+        // Reuse the selected item for Back or a different timestamp.
+        if (videoIdOf(state.selectedYoink) === route.id) {
+          if (state.activeTab !== "yoink") switchTab("yoink", { fromRoute: true });
           revealReaderMoment(route.seconds);
           return;
         }
