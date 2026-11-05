@@ -283,7 +283,10 @@ def text_library_row(row, index):
                 index.get_by_slug(row["slug"]) if row.get("slug") else None)
     except (OSError, sqlite3.Error):
         return row
-    return {**item, **row} if item and not item.get("deleted_at") else row
+    if item and not item.get("deleted_at"):
+        import podcasts
+        return podcasts.repair_corpus_titles(index, [{**item, **row}])[0]
+    return row
 
 
 def text_kind(row):

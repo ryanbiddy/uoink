@@ -564,7 +564,8 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
     idx = _b()._get_index()
     page = idx.search_mode(query, limit, mode=mode, clips_only=True,
                            video_id=video_id, filters={"channel": channel}, match=match)
-    rows = page["results"]
+    import podcasts
+    rows = podcasts.repair_corpus_titles(idx, page["results"])
     availability = _search_source_availability(idx, rows)
     results = []
     for r in rows:
@@ -615,9 +616,11 @@ def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
     if n_clips is not None:
         n_clips = _limit_int(n_clips, default=10, low=1, high=20)
     try:
+        import podcasts
+        display = podcasts.repair_corpus_titles(idx, [row])[0]
         card = build_card(row, idx.get_clips(row["video_id"]),
                           corpus_text=read_corpus_head(row.get("corpus_path")),
-                          profile=profile, n_clips=n_clips)
+                          profile=profile, n_clips=n_clips, display_channel=display.get("channel"))
     except ValueError as exc:
         return _err(str(exc))
     return _ok(**card)
@@ -702,7 +705,8 @@ def query_by_facets(args: dict[str, Any]) -> dict[str, Any]:
         tag=args.get("tag"),
         limit=int(args.get("limit") or 50),
     )
-    return _ok(yoinks=rows, count=len(rows))
+    import podcasts
+    return _ok(yoinks=podcasts.repair_corpus_titles(idx, rows), count=len(rows))
 
 
 def get_facet_taxonomy(_args: dict[str, Any]) -> dict[str, Any]:

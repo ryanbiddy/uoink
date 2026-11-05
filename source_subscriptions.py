@@ -651,6 +651,7 @@ class AdapterResult:
     retry_after_ms: int | None = None
     rejected: int = 0
     conflicts: int = 0
+    feed_title: str | None = None
 
 
 @dataclass
@@ -1046,9 +1047,11 @@ class PodcastRssAdapter(HttpFeedAdapter):
         root = ET.fromstring(body)
         root_name = _localname(root.tag)
         entries: list[tuple[str | None, str, dict]] = []
+        feed_title = None
         if root_name == "rss":
             channels = [c for c in root if _localname(c.tag) == "channel"]
             channel = channels[0] if channels else None
+            feed_title = _child_text(channel, "title") if channel is not None else None
             for item in (channel if channel is not None else []):
                 if _localname(item.tag) != "item":
                     continue
@@ -1062,6 +1065,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                     "duration": _child_text(item, "duration"),
                 }))
         elif root_name == "feed":
+            feed_title = _child_text(root, "title")
             for entry in root:
                 if _localname(entry.tag) != "entry":
                     continue
@@ -1084,7 +1088,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
             raise ValueError(f"unrecognised feed root element: {root_name!r}")
         truncated = len(entries) > PODCAST_ENTRIES_PER_POLL
         result = AdapterResult("snapshot", coverage="window" if truncated else "complete",
-                               truncated=truncated)
+                               truncated=truncated, feed_title=_safe_text(feed_title, 200))
         seen: dict[str, Observation] = {}
         for raw_id, method, meta in entries[:PODCAST_ENTRIES_PER_POLL]:
             entry_id = validate_entry_id(raw_id)
@@ -1096,6 +1100,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 canonical_url=_http_link(meta["page"]) or _http_link(entry_id),
                 published_at_ms=parse_published_ms(meta["published"]),
                 metadata={"identity_method": method, "audio_url": _http_link(meta["audio"]),
+                          "feed_title": result.feed_title,
                           "published_raw": meta["published"], "duration_raw": meta["duration"]},
             )
             if entry_id in seen:
@@ -3407,6 +3412,12 @@ class SourceSubscriptionService:
                 "UPDATE source_detection_cursors SET poll_owner_token=?, poll_consent_epoch=?, "
                 "poll_lease_expires_ms=?, last_poll_attempt_ms=? WHERE source_id=?",
                 (token, int(source["consent_epoch"]), now + POLL_LEASE_MS, now, source_id))
+            if source["kind"] == "podcast_rss" and source.get("legacy_feed_id") is not None:
+                feed = conn.execute("SELECT title FROM podcast_feeds WHERE id=?",
+                                    (source["legacy_feed_id"],)).fetchone()
+                if feed and str(feed[0] or "").strip().casefold() in ("", "untitled podcast"):
+                    # Older polls discarded the title. Fetch it even if the feed is unchanged.
+                    cursor = dict(cursor, etag=None, last_modified=None)
             boundary_pending = source["consent_state"] == "on" and source["boundary"] != "none"
             return {"source_id": source_id, "owner_token": token,
                     "consent_epoch": int(source["consent_epoch"]), "source": source,
@@ -3460,10 +3471,23 @@ class SourceSubscriptionService:
                     (now, self._next_due(source, now), result.etag, result.last_modified, source_id))
                 return {"ok": True, "outcome": "not_modified", "inserted": 0, **base}
             scan_revision = int(cursor["revision"]) + 1
+            if source["kind"] == "podcast_rss" and result.feed_title:
+                # Keep the feed name available to new captures and old library rows.
+                conn.execute("UPDATE source_subscriptions SET display_name=? WHERE source_id=? "
+                             "AND (display_name IS NULL OR lower(trim(display_name)) IN ('','untitled podcast') "
+                             "OR display_name=canonical_url)", (result.feed_title, source_id))
+                if source.get("legacy_feed_id") is not None:
+                    conn.execute("UPDATE podcast_feeds SET title=? WHERE id=?",
+                                 (result.feed_title, source["legacy_feed_id"]))
             on_current = source["consent_state"] == "on" and not stale_epoch
             epoch_for_items = int(source["consent_epoch"]) if on_current else None
             stats = self._persist_observations(conn, source, result.observations, now,
                                                scan_revision, epoch_for_items)
+            if source["kind"] == "podcast_rss" and result.feed_title:
+                conn.execute("UPDATE source_items SET metadata_json=json_set(metadata_json, '$.feed_title', ?) "
+                             "WHERE source_id=? AND json_valid(metadata_json) "
+                             "AND lower(trim(coalesce(json_extract(metadata_json,'$.feed_title'),''))) "
+                             "IN ('','untitled podcast')", (result.feed_title, source_id))
             if result.coverage == "partial":
                 # Contract: incomplete batches persist metadata but advance no success
                 # cursor or enrollment and create no eligibility.

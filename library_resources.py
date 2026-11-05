@@ -1440,7 +1440,10 @@ class LibraryReader:
         if before != self._stat_signature(item.get("corpus_path")):
             raise ResourceError("revision_unavailable", details={"reason": "file_changed_during_read"})
         try:
-            card = library_cards.build_card(item, clips, corpus_text=head, profile="librarian")
+            import podcasts
+            display = podcasts.repair_corpus_titles(self.index, [item], data_root=self.data_root)[0]
+            card = library_cards.build_card(item, clips, corpus_text=head, profile="librarian",
+                                            display_channel=display.get("channel"))
         except library_cards.CardFreezeError as exc:
             raise ResourceError("resource_too_large", details={"next_step": "search_library", "reason": "card_budget"}) from exc
         except (ValueError, TypeError) as exc:
@@ -1706,6 +1709,8 @@ class LibraryReader:
         has_more = end < size
         redacted, spans = self._redact(text, item)
         next_uri = corpus_uri(item_id, digest, end, length) if has_more else None
+        import podcasts
+        display = podcasts.repair_corpus_titles(self.index, [item], data_root=self.data_root)[0]
         body = _document_body(
             "corpus_chunk",
             identity={"item_id": item_id, "slug": item.get("slug")},
@@ -1722,7 +1727,7 @@ class LibraryReader:
             has_more=has_more,
             truncated=has_more,
             continuation={"next_uri": next_uri},
-            labels={"title": label(item.get("title")), "channel": label(item.get("channel"))},
+            labels={"title": label(item.get("title")), "channel": label(display.get("channel"))},
         )
         rendered = render_document(body)
         self._check_text(rendered, LIMITS["max_resource_text_bytes"], what="corpus_chunk")
@@ -1887,6 +1892,7 @@ class LibraryReader:
                 entry["current"] = {"error": bundle.error.code}
             else:
                 card = bundle.card
+                entry["channel"] = label(card.get("channel"))
                 entry["current"] = {"source_revision": card["source_revision"], "card_hash": card["card_hash"],
                                     "card_uri": card_uri(member["video_id"], card),
                                     "source_link": safe_url(card.get("url"))}

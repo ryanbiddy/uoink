@@ -11802,6 +11802,13 @@ def _source_availability_tick() -> None:
             _source_availability_lock.release()
 
 
+def _repair_podcast_titles_at_boot() -> None:
+    try:
+        podcasts.repair_feed_titles(_get_index(), data_root=DATA_ROOT)
+    except Exception:
+        log.exception("podcast title repair could not finish")
+
+
 def _start_podcast_feed_scheduler_thread() -> threading.Thread:
     """Run the standing-source scheduler every 30 seconds on a daemon thread.
     The tick only scans due rows; outbound polls follow each source's own
@@ -12908,7 +12915,9 @@ def _agent_client_specs() -> list[dict]:
             "config_path": appdata / "Claude" / "claude_desktop_config.json",
             "markers": [appdata / "Claude",
                         local / "AnthropicClaude",
-                        local / "Programs" / "claude"],
+                        local / "Programs" / "claude"] + (
+                            [Path("/Applications/Claude.app"), home / "Applications/Claude.app"]
+                            if sys.platform == "darwin" else []),
         },
         {
             "name": "cursor",
@@ -14607,7 +14616,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "has_transcript": bool(transcript),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
-    return out
+    return podcasts.repair_corpus_titles(idx, out, data_root=DATA_ROOT)
 
 
 # ---------------------------------------------------------------------------
@@ -15094,7 +15103,7 @@ def _resurface_payload(idx) -> dict:
 
     connections = []
     for topic, group in by_topic.items():
-        if len(group) < 2:
+        if topic.casefold() == "uncategorized" or len(group) < 2:
             continue
         pair = sorted(group, key=lambda r: index.capture_sort_key(r.get("yoinked_at")),
                       reverse=True)[:2]
@@ -20536,6 +20545,12 @@ class Handler(BaseHTTPRequestHandler):
                                          "error": "sidecar JSON must be an object"})
 
         # Return only saved fields needed by the dashboard
+        if row.get("platform") == "podcast" or row.get("source_type") == "episode":
+            repaired = podcasts.repair_corpus_titles(
+                _get_index(), [dict(row)], data_root=DATA_ROOT)[0]
+            data.update({key: repaired[key] for key in ("podcast_title", "channel", "author")
+                         if key in repaired and str(data.get(key) or "").strip().casefold()
+                         in ("", "untitled podcast")})
         allowed_scalar_keys = (
             "video_id", "youtube_id", "url", "source_url", "platform",
             "source_platform", "media_type", "content_type", "kind",
@@ -22550,6 +22565,8 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # renamed/moved library heals on launch instead of failing action by
     # action while /health smiles.
     _heal_stale_corpus_paths_at_boot()
+    threading.Thread(target=_repair_podcast_titles_at_boot,
+                     name="podcast-titles", daemon=True).start()
     # Hydrate the in-memory job dict from the index (no worker starts here).
     _restore_jobs_from_disk()
     # Phase 3 (run AM): import the legacy registries once and reconcile the

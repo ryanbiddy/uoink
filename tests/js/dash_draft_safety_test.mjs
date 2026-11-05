@@ -570,7 +570,7 @@ async function groupGenerateRun() {
     const after = p.status();
     check(after.shown && after.html.includes("needs another pass") && !after.html.includes("Preparing"), "the failure is reported in the status line", after);
     check(p.actionsOn(), "Save, Copy and Revise come back for the kept draft", p.actionStates());
-    check(!p.generateOff(), "Generate can be tried again", p.actionStates());
+    check(p.generateOff(), "Generate stays off until an agent is connected", p.actionStates());
     await p.save();
     check(p.posts().length === 1 && p.posts()[0].body === HAND, "Save stores the hand edit", p.posts().map((b) => b.body));
   });
@@ -615,7 +615,7 @@ async function groupGenerateRun() {
     check(p.preview().raw.startsWith(GENERATED), "the generated draft fills the preview", p.preview().raw);
     check(composer.length === 1 && composer[0].startsWith(GENERATED) && !composer[0].includes(HAND), "the generated draft replaces the composer", composer);
     check(!p.status().shown, "the status line clears on success", p.status());
-    check(p.actionsOn() && !p.generateOff(), "Save, Copy, Revise and Generate come back on", p.actionStates());
+    check(p.actionsOn() && p.generateOff(), "Draft actions return; Generate needs a connected agent", p.actionStates());
     await p.save();
     check(p.posts().length === 1 && String(p.posts()[0].body).startsWith(GENERATED), "Save stores the generated draft", p.posts().map((b) => b.body));
   });
@@ -663,7 +663,7 @@ async function groupNoAgent() {
     check(p.preview().html.includes("Connect a writing agent") && p.preview().raw === "", "the setup notice fills the empty preview", p.preview());
     check(!p.status().shown, "the status line is clear", p.status());
     check(p.actionsOff(), "Save, Copy and Revise stay off", p.actionStates());
-    check(!p.generateOff(), "Generate is on again", p.actionStates());
+    check(p.generateOff(), "Generate stays off without an agent", p.actionStates());
     check(!hasPlaceholder(p), "no placeholder is left behind", { preview: p.preview().raw, composer: p.composer() });
   });
 }
@@ -689,7 +689,7 @@ async function groupScriptRun() {
     await settle();
     check(p.preview().raw === EARLIER_SCRIPT && JSON.stringify(p.composer()) === JSON.stringify([EARLIER_SCRIPT]), "a failed script run keeps the earlier script", { preview: p.preview().raw, composer: p.composer() });
     check(p.status().shown && p.status().html.includes("Generate needs another pass"), "the failure is reported in the status line", p.status());
-    check(p.actionsOn() && !p.generateOff(), "Save, Copy, Revise and Generate come back on", p.actionStates());
+    check(p.actionsOn() && p.generateOff(), "Draft actions return; Generate needs a connected agent", p.actionStates());
     await p.save();
     check(p.posts().length === 1 && p.posts()[0].body === EARLIER_SCRIPT && p.posts()[0].kind === "script", "Save stores the earlier script", p.posts());
   });
