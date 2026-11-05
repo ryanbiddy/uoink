@@ -12472,17 +12472,14 @@ def _image_dimensions(path: Path) -> tuple[int | None, int | None]:
 
 
 @lru_cache(maxsize=2048)
-def _screenshot_mean_luma(path: str, mtime_ns: int, size: int) -> float | None:
-    """Small grayscale sample, cached until the file changes. Runs in the
-    helper's request thread, never in the dashboard's rendering thread."""
-    try:
-        from PIL import Image, ImageStat
-        with Image.open(path) as image:
-            image.draft("L", (64, 64))
-            image.thumbnail((32, 32), Image.Resampling.BOX)
-            return ImageStat.Stat(image.convert("L")).mean[0]
-    except Exception:
-        return None
+def _screenshot_mean_luma(path: str, mtime_ns: int, size: int) -> float:
+    """Cache successful samples until the file changes; failures propagate
+    so a later request can retry. Runs in the helper's request thread."""
+    from PIL import Image, ImageStat
+    with Image.open(path) as image:
+        image.draft("L", (64, 64))
+        image.thumbnail((32, 32), Image.Resampling.BOX)
+        return ImageStat.Stat(image.convert("L")).mean[0]
 
 
 def _screenshot_is_near_black(path: Path, folder: Path) -> bool:
@@ -12490,16 +12487,18 @@ def _screenshot_is_near_black(path: Path, folder: Path) -> bool:
     try:
         if _path_has_parent_ref(str(path)):
             return False
-        path.relative_to(folder.absolute())
         resolved = path.resolve()
         resolved.relative_to(folder.resolve())
         stat = resolved.stat()
         if stat.st_size > MAX_SERVED_FILE_BYTES:
             return False
         luma = _screenshot_mean_luma(str(resolved), stat.st_mtime_ns, stat.st_size)
-    except (OSError, ValueError, RuntimeError):
+    except ImportError:
+        log.warning("Cannot skip dark screenshots: Pillow is unavailable. Install Pillow or rebuild the app.")
         return False
-    return luma is not None and luma < 8
+    except Exception:
+        return False
+    return luma < 8
 
 
 def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
@@ -20621,10 +20620,13 @@ class Handler(BaseHTTPRequestHandler):
                               "width", "height"):
                         if k in shot and isinstance(shot[k], (str, int, float, bool)):
                             clean_shot[k] = shot[k]
-                    raw_path = (clean_shot.get("absolute_path") or clean_shot.get("file_path")
-                                or clean_shot.get("path"))
-                    if not raw_path and isinstance(clean_shot.get("filename"), str):
-                        raw_path = str(Path("screenshots") / clean_shot["filename"])
+                    # Relative paths survive a moved or synced capture folder.
+                    raw_path = clean_shot.get("path")
+                    if not isinstance(raw_path, str) or not raw_path or Path(raw_path).is_absolute():
+                        filename = clean_shot.get("filename")
+                        raw_path = (str(Path("screenshots") / filename)
+                                    if isinstance(filename, str) and filename else
+                                    clean_shot.get("absolute_path") or clean_shot.get("file_path") or raw_path)
                     if isinstance(raw_path, str):
                         shot_path = Path(raw_path)
                         if not shot_path.is_absolute():
