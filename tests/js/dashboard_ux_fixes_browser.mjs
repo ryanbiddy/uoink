@@ -131,6 +131,60 @@ try {
     await page.waitForFunction(() => document.activeElement.id === "discoveryTitle");
     assert.ok(await page.locator("#tab-sources").isVisible(), "Discover deep link opens Sources from another page");
 
+    // Launch polish: permission is visible before capture, with a stable footprint.
+    await page.evaluate(() => {
+      globalThis.launchOriginalAuthFetch = authFetch;
+      globalThis.launchOriginalDetect = detectCaptureUrl;
+      globalThis.launchCaptures = [];
+      detectCaptureUrl = async (url) => ({ ok: true, source: "web_page", label: "Article / web page",
+        endpoint: "/extract/page", canonical: url, needs_allow: true });
+      authFetch = async (path, options = {}) => {
+        if (path === "/extract/page/allowlist") return { ok: true, sites: [] };
+        if (path === "/extract/page") { launchCaptures.push(JSON.parse(options.body)); return { ok: true }; }
+        if (path === "/settings") return { ok: true, settings: { research_network_sources: ["youtube"] } };
+        if (path === "/research") return { ok: true, runs: [] };
+        return launchOriginalAuthFetch(path, options);
+      };
+    });
+    const pasteBox = page.locator("#universalCapture");
+    await pasteBox.scrollIntoViewIfNeeded();
+    assert.ok((await bounds("#universalCapture")).y < (await bounds("#sources-discover")).y);
+    await page.locator("#universalCaptureInput").fill("https://www.example.com/article");
+    const allow = page.locator("#universalCaptureAllow");
+    await allow.waitFor({ state: "visible" });
+    assert.equal(await page.locator("#universalCaptureButton").isDisabled(), true);
+    assert.deepEqual(await page.evaluate(() => launchCaptures), []);
+    const beforeAllow = await pasteBox.boundingBox();
+    const beforeButton = await bounds("#universalCaptureButton");
+    await page.screenshot({ path: join(out, `capture-permission-${theme}-${width}.png`), animations: "disabled" });
+    await allow.focus();
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => !document.getElementById("universalCaptureButton").disabled);
+    await allow.waitFor({ state: "hidden" });
+    assert.equal(await page.evaluate(() => document.activeElement.id), "universalCaptureButton");
+    assert.deepEqual(await page.evaluate(() => launchCaptures), [], "Allow never captures on its own");
+    assert.deepEqual(await pasteBox.boundingBox(), beforeAllow, "allowing a page does not move the paste box");
+    assert.deepEqual(await bounds("#universalCaptureButton"), beforeButton, "Uoink it stays in place");
+    await page.locator("#universalCaptureButton").click();
+    assert.deepEqual(await page.evaluate(() => launchCaptures), [{ url: "https://www.example.com/article" }]);
+    await page.evaluate(() => navigateTo("#research"));
+    await page.waitForFunction(() => !researchState.busy);
+    await page.evaluate(() => {
+      researchState.view = { scope: { max_sources: 12 }, candidates: [
+        { key: "lib:fixture", title: "Saved talk", kind: "youtube", in_library: true, duration_s: 120 },
+        { key: "yt:fixture0001", title: "New talk", kind: "youtube", est_capture: "captions", duration_s: 120 },
+      ] };
+      researchState.selected = new Set(["lib:fixture", "yt:fixture0001"]);
+      document.getElementById("researchRun").classList.remove("hidden");
+      renderResearchCandidates();
+    });
+    assert.equal(await page.locator('#researchForm [data-research-consent="youtube"]').count(), 1);
+    assert.equal(await page.locator('[data-research-source="youtube"]').isChecked(), true);
+    assert.equal(await page.locator("#researchUseSaved").isEnabled(), true);
+    assert.equal(await page.locator("#researchCapture").textContent(), "Capture new");
+    await fit("research-sources");
+    await page.evaluate(() => { authFetch = launchOriginalAuthFetch; detectCaptureUrl = launchOriginalDetect; });
+
     await page.evaluate(() => {
       navigateTo("#activity");
       const now = new Date().toISOString();

@@ -170,6 +170,35 @@ def test_detect_route_token_gated():
     print("ok  GET /detect is token-gated")
 
 
+def test_detect_reports_page_permission_without_capturing(tmp_path, monkeypatch):
+    import index as index_mod
+    import page_extractor
+
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    def forbidden(*_args, **_kwargs):
+        raise AssertionError("detection must not capture")
+    monkeypatch.setattr(page_extractor, "extract_page", forbidden)
+    try:
+        with _server():
+            url = "https://www.example.com/post"
+            path = "/detect?url=" + urllib.parse.quote(url)
+            before = page_extractor.list_allowed(idx)
+            code, result = _get(path)
+            assert code == 200 and result["ok"]
+            assert result["needs_allow"] is True
+            assert page_extractor.list_allowed(idx) == before
+            page_extractor.add_allowed(idx, "*.example.com")
+            code, result = _get(path)
+            assert code == 200 and result["needs_allow"] is False
+            _, other = _get("/detect?url=https://example.com.evil.test/post")
+            assert other["needs_allow"] is True
+            _, video = _get("/detect?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            assert "needs_allow" not in video
+    finally:
+        idx.close()
+
+
 # ---- dashboard wiring -----------------------------------------------------
 
 def test_dashboard_has_universal_capture_box():

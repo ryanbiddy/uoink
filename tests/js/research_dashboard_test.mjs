@@ -45,11 +45,15 @@ for (const match of page.matchAll(/<([a-z][a-z0-9]*)\b[^>]*\bid="([^"]+)"/gi)) {
   const node = new Element(match[1]); node.id = match[2]; nodes.set(node.id, node);
 }
 const sourceKinds = ["library", "youtube", "podcast", "hn", "hackertube", "reddit"];
-const chips = sourceKinds.map((kind) => { const n = new Element("input"); n.dataset.researchSource = kind; n.checked = kind === "library"; return n; });
+const chips = sourceKinds.map((kind) => {
+  const n = new Element("input"); n.dataset.researchSource = kind; n.checked = kind === "library";
+  if (kind !== "library" && kind !== "reddit") n.dataset.researchConsent = kind;
+  return n;
+});
 const panelConsent = (id) => sourceKinds.slice(1, -1).map((kind) => {
   const n = new Element("input"); n.dataset.researchConsent = kind; nodes.get(id).append(n); return n;
 });
-const consent = panelConsent("researchConsent"), settingsConsent = panelConsent("researchSettingsConsent");
+const consent = chips.slice(1, -1), settingsConsent = panelConsent("researchSettingsConsent");
 const timers = new Map(), calls = [], requests = [], copies = [], opened = [], toasts = [], listeners = new Map();
 let timerId = 0, now = 1000;
 class Clock extends Date { static now() { return now; } }
@@ -108,6 +112,55 @@ const poll = async () => {
 };
 const selectRun = () => context.researchWork(() => context.openResearchRun(runId));
 
+if (process.argv[2] === "source_actions") {
+  const saved = { ...candidate, key: "lib:saved", title: "Saved talk", in_library: true };
+  const episode = { ...saved, key: "pod:saved", kind: "podcast", capturable: false };
+  const unavailable = { ...candidate, key: "pod:new", kind: "podcast", capturable: false };
+  view.candidates = [saved, episode];
+  await selectRun();
+  assert.ok(nodes.get("researchCapture").disabled, "saved transcripts cannot be captured again");
+  assert.ok(nodes.get("researchCapture").classList.contains("hidden"));
+  assert.equal(nodes.get("researchUseSaved").disabled, false);
+  assert.match(nodes.get("researchCandidates").textContent, /Use saved/);
+  const before = calls.length;
+  await context.researchWork(context.captureResearch);
+  assert.equal(calls.length, before, "Capture new never submits saved-only selections");
+  context.callRegistryTool = async (name, args) => {
+    calls.push([name, args]);
+    if (name === "research_capture") return { ok: true,
+      queued: args.keys.includes(candidate.key) ? [candidate] : [],
+      already: [saved, episode].filter((c) => args.keys.includes(c.key)),
+      skipped: [], eta: { min_minutes: 0, max_minutes: 0 } };
+    if (name === "research_status") return structuredClone(status);
+    assert.fail(name);
+  };
+  context.wireResearch();
+  await nodes.get("researchUseSaved").listeners.click();
+  assert.deepEqual([...calls.at(-1)[1].keys], [saved.key, episode.key]);
+  assert.match(nodes.get("researchProgress").textContent, /Using 2 saved transcripts/);
+  assert.doesNotMatch(nodes.get("researchProgress").textContent, /Queued|Estimated/);
+
+  view.candidates = [saved, candidate, unavailable];
+  await selectRun();
+  assert.equal(nodes.get("researchCapture").disabled, false);
+  assert.equal(nodes.get("researchCapture").classList.contains("hidden"), false);
+  assert.match(nodes.get("researchCandidates").textContent, /Capture new/);
+  assert.equal(nodes.get("researchCandidates").children[2].children[0].children[0].disabled, true);
+  await nodes.get("researchUseSaved").listeners.click();
+  assert.deepEqual([...calls.at(-1)[1].keys], [saved.key], "Use saved excludes new sources");
+  await context.researchWork(context.captureResearch);
+  assert.deepEqual([...calls.at(-1)[1].keys], [candidate.key], "new capture excludes saved and unsupported sources");
+
+  // Status makes a newly saved transcript reusable without reopening the run.
+  status = { ...status, items: [{ key: candidate.key, state: "captioned" }] };
+  await context.refreshResearch();
+  assert.ok(nodes.get("researchCapture").disabled);
+  assert.ok(nodes.get("researchCapture").classList.contains("hidden"));
+  assert.match(nodes.get("researchCandidates").textContent, /Use saved/);
+  console.log("Research source actions passed.");
+  process.exit(0);
+}
+
 // Same-origin input cannot invent a trusted link host; podcast hosts are per item.
 const safe = (url, source = {}) => context.researchSafeLink(url, source);
 for (const host of ["youtube.com", "www.youtube.com", "youtu.be", "news.ycombinator.com"]) {
@@ -134,19 +187,19 @@ assert.ok(safe("https://audio.example./episode.mp3", podcast));
 assert.ok(safe("https://audio.example/episode.mp3", { kind: "podcast", source_url: "https://audio.example../show" }));
 assert.equal(context.htmlEscape('<script>"&\''), "&lt;script&gt;&quot;&amp;&#39;");
 
-// Per-source consent grants no other source and never selects a network chip.
+// Each chip both grants consent and selects that source, including Settings edits.
 context.renderResearchConsent();
 assert.equal(chips[0].disabled, false);
-assert.ok(chips.slice(1).every((n) => n.disabled));
+assert.ok(chips.slice(1, -1).every((n) => !n.disabled && !n.checked));
 consent[0].checked = true;
 await context.saveResearchConsent(consent[0]);
 assert.deepEqual([...context.state.settings.research_network_sources], ["youtube"]);
-assert.equal(chips[1].disabled, false); assert.equal(chips[1].checked, false);
+assert.equal(chips[1].disabled, false); assert.equal(chips[1].checked, true);
 assert.equal(chips[5].disabled, true);
 settingsFailure = true;
 consent[1].checked = true;
 await context.saveResearchConsent(consent[1]);
-assert.equal(consent[1].checked, false); assert.equal(chips[2].disabled, true);
+assert.equal(consent[1].checked, false); assert.equal(chips[2].disabled, false);
 assert.equal(settingsConsent[1].checked, false);
 assert.equal(nodes.get("researchConsentSaveRetry").classList.contains("hidden"), false);
 settingsFailure = false;
@@ -156,11 +209,15 @@ let finishSettings;
 settingsGate = new Promise((resolve) => { finishSettings = resolve; });
 const retry = context.settingEdit("researchConsent").retry();
 assert.ok([...consent, ...settingsConsent].every((input) => input.disabled));
+assert.equal(nodes.get("researchDiscover").disabled, true, "discovery waits for consent to save");
 finishSettings(); await retry; settingsGate = null;
 assert.deepEqual([...context.state.settings.research_network_sources], ["youtube", "podcast", "hn"]);
 assert.ok([...consent.slice(0, 3), ...settingsConsent.slice(0, 3)].every((input) => input.checked && !input.disabled));
 assert.equal(nodes.get("researchConsentSaveRetry").classList.contains("hidden"), true);
 assert.equal(context.settingEdit("researchConsent").retry, null);
+settingsConsent[2].checked = false;
+await context.saveResearchConsent(settingsConsent[2]);
+assert.equal(chips[3].checked, false, "revoking consent in Settings clears the chip");
 
 // Exercise start -> discover -> select -> capture -> poll with the real UI code.
 context.wireResearch();
@@ -168,7 +225,7 @@ nodes.get("researchQuestion").value = "Synthetic evals";
 nodes.get("researchMax").value = "12"; nodes.get("researchAsr").value = "120";
 await context.researchWork(context.startResearch);
 assert.deepEqual(calls.map(([name]) => name), ["research_start", "research_discover"]);
-assert.equal(calls[0][1].source_kinds.join(","), "library");
+assert.equal(calls[0][1].source_kinds.join(","), "library,youtube,podcast");
 assert.equal(calls[1][1].queries.length, 3);
 assert.ok(nodes.get("researchCandidates").textContent.includes(attack));
 assert.equal(nodes.get("researchCandidatesHeading").focused, true);
