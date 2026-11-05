@@ -901,6 +901,29 @@ def get_episode_with_feed(idx, episode_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def repair_corpus_titles(idx, rows: list[dict]) -> list[dict]:
+    """Fill missing show names from saved feed metadata without moving files."""
+    candidates = [row for row in rows if row.get("platform") == "podcast"
+                  or row.get("source_type") == "episode"]
+    ids = [row["video_id"] for row in candidates if row.get("video_id")]
+    if not ids:
+        return rows
+    with idx._lock:
+        titles = dict(idx._conn.execute(
+            "SELECT e.yoink_video_id, f.title FROM podcast_episodes e "
+            "JOIN podcast_feeds f ON f.id=e.feed_id "
+            f"WHERE e.yoink_video_id IN ({','.join('?' for _ in ids)})",
+            ids).fetchall())
+    for row in candidates:
+        title = (titles.get(row.get("video_id")) or "").strip()
+        if not title or title.casefold() == "untitled podcast":
+            continue
+        for key in ("channel", "author", "podcast_title"):
+            if str(row.get(key) or "").strip().casefold() in ("", "untitled podcast"):
+                row[key] = title
+    return rows
+
+
 def set_episode_status(idx, episode_id: int, status: str) -> bool:
     if status not in _EPISODE_STATUSES:
         raise ValueError(

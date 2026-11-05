@@ -64,6 +64,8 @@ class UoinkCorpusProvider:
         return str(value or "").replace("_", " ").replace("-", " ").title()
 
     def _item_ref(self, row: dict, *, search_details=False) -> dict:
+        import podcasts
+        row = podcasts.repair_corpus_titles(self.idx, [row])[0]
         metadata = _json_object(row.get("metadata_json"))
         author = (
             row.get("author")

@@ -12863,7 +12863,9 @@ def _agent_client_specs() -> list[dict]:
             "config_path": appdata / "Claude" / "claude_desktop_config.json",
             "markers": [appdata / "Claude",
                         local / "AnthropicClaude",
-                        local / "Programs" / "claude"],
+                        local / "Programs" / "claude"] + (
+                            [Path("/Applications/Claude.app"), home / "Applications/Claude.app"]
+                            if sys.platform == "darwin" else []),
         },
         {
             "name": "cursor",
@@ -14562,7 +14564,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "has_transcript": bool(transcript),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
-    return out
+    return podcasts.repair_corpus_titles(idx, out)
 
 
 # ---------------------------------------------------------------------------
@@ -15049,7 +15051,7 @@ def _resurface_payload(idx) -> dict:
 
     connections = []
     for topic, group in by_topic.items():
-        if len(group) < 2:
+        if topic.casefold() == "uncategorized" or len(group) < 2:
             continue
         pair = sorted(group, key=lambda r: index.capture_sort_key(r.get("yoinked_at")),
                       reverse=True)[:2]
@@ -20488,6 +20490,11 @@ class Handler(BaseHTTPRequestHandler):
                                          "error": "sidecar JSON must be an object"})
 
         # Return only saved fields needed by the dashboard
+        if row.get("platform") == "podcast" or row.get("source_type") == "episode":
+            repaired = podcasts.repair_corpus_titles(
+                _get_index(), [dict(data, video_id=video_id, platform="podcast")])[0]
+            data.update({key: repaired[key] for key in ("podcast_title", "channel", "author")
+                         if key in repaired})
         allowed_scalar_keys = (
             "video_id", "youtube_id", "url", "source_url", "platform",
             "source_platform", "media_type", "content_type", "kind",
