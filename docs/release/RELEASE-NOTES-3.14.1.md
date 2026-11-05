@@ -2,6 +2,7 @@
 
 ## What's new
 
+- **Deep research finds your saved videos again.** In 3.14.0, videos captured outside a research run gave no excerpts. Research now repairs those items the first time it reads them, after checking their transcript and saved files. No migration runs.
 - **Cleaner CLI output.** `--text` output for `search`, `recent` and `research` is easier to read. Timestamps use `m:ss` ranges and titles show normal quotes. Search results include the source and a verified quote; recent saves show the date, kind and source. Research shows a short "why" line; add `--explain` to see the full candidate score breakdown. JSON output is unchanged.
 - **Research report fixes.** `report.md` uses Markdown escapes instead of HTML entities. Reports and share text say "1 claim" and "1 source" when the count is one.
 - Research MCP tools now explain that `run_id` comes from `research_start`.
