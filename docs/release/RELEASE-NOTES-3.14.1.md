@@ -53,4 +53,11 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.14.1/docs/linux.m
 
 ## Checksums
 
-TODO: Add release artifact sizes and SHA-256 checksums after building.
+| File | Size | SHA-256 |
+| --- | --- | --- |
+| `Uoink-Setup-3.14.1.exe` | 519,406,324 B | `cd80b892581a0dfa8586260f67cfa367280af7a6f689c569ca4b95a6bd4f822a` |
+| `uoink-3.14.1.mcpb` | 117,591 B | `5e1918a4472677ae9eebd06e60feb70773bf16da90ab4d8ed71356b68fe4d6a9` |
+| `Uoink-3.14.1-macos-arm64.dmg` | 696,894,936 B | `df79cbe77d2a12ca430015459bbaa6c6014f659a0a4421258955cb6c3cd4287d` |
+| `uoink-3.14.1-macos.mcpb` | 114,124 B | `f09ae36ff9c2ede51bb37afc0b76c8b0b4a73658d225ddd9cccd0c30fd2024a0` |
+
+The Mac DMG is signed with Developer ID and notarized (mac-qualify run 42044198598).
