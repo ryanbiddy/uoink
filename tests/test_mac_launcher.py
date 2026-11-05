@@ -165,7 +165,9 @@ def test_startup_fixture_does_not_start_usage_sender(startup, monkeypatch):
     # Exercise the real main() call site, including the fixture's sender stub.
     test_main_thread_handler_and_subinterpreter_refusal(
         startup, monkeypatch, "win32", False, 0)
-    assert started == [], "Launcher tests must not leave a usage sender running"
+    # Other boot helpers (such as the podcast title repair) may start threads.
+    usage = [name for name in started if str(name).startswith("usage")]
+    assert usage == [], "Launcher tests must not leave a usage sender running"
 
 
 def _clang():
