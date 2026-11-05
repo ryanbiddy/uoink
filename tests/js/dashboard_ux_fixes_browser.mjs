@@ -180,7 +180,8 @@ try {
     });
     assert.equal(await page.locator('#researchForm [data-research-consent="youtube"]').count(), 1);
     assert.equal(await page.locator('[data-research-source="youtube"]').isChecked(), true);
-    assert.equal(await page.locator("#researchUseSaved").isEnabled(), true);
+    assert.equal(await page.locator("#researchUseSaved").isEnabled(), false);
+    assert.equal(await page.locator("#researchCapture").isEnabled(), true);
     assert.equal(await page.locator("#researchCapture").textContent(), "Capture new");
     await fit("research-sources");
     await page.evaluate(() => { authFetch = launchOriginalAuthFetch; detectCaptureUrl = launchOriginalDetect; });

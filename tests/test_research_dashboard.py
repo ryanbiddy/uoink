@@ -79,3 +79,12 @@ def test_research_saved_and_new_sources_have_separate_actions():
     result = subprocess.run(["node", str(ROOT / "tests/js/research_dashboard_test.mjs"), "source_actions"],
                             cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=25)
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is unavailable")
+@pytest.mark.parametrize("case", ["mixed_selection", "mixed_saved_guard", "saved_only",
+                                 "completed_selection", "action_visibility", "skipped_sources"])
+def test_research_source_action_regressions(case):
+    result = subprocess.run(["node", str(ROOT / "tests/js/research_dashboard_test.mjs"), case],
+                            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=25)
+    assert result.returncode == 0, result.stdout + result.stderr

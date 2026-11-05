@@ -403,6 +403,50 @@ def test_changing_or_clearing_a_link_cannot_use_stale_detection_or_permission():
     assert out["calls"] == []
 
 
+@pytest.mark.parametrize("host", ["www.example.com", "other.example.com"])
+def test_allow_result_follows_the_current_host_after_another_paste(host):
+    out = run_js("(async () => {" + PASTE_SETUP + """
+      walls = 0;
+      detectCaptureUrl = async (url) => ({ok: true, source: "web_page", label: "Article / web page",
+        endpoint: "/extract/page", canonical: url, needs_allow: true});
+      els.universalCaptureInput.value = "https://www.example.com/first";
+      await runCaptureDetection();
+      let finish;
+      const save = saveAllowedSite;
+      saveAllowedSite = async (host) => {
+        await new Promise((resolve) => { finish = resolve; });
+        await save(host);
+      };
+      const saving = allowUniversalCaptureSite();
+      els.universalCaptureInput.value = "https://""" + host + """/second";
+      scheduleCaptureDetection();
+      await runCaptureDetection();
+      const pending = {...shown(), captureDisabled: els.universalCaptureButton.disabled};
+      finish(); await saving;
+      const settled = {...shown(), captureDisabled: els.universalCaptureButton.disabled,
+        focused: els.universalCaptureButton.focused};
+      const beforeClick = [...calls];
+      await runUniversalCapture();
+      return {pending, settled, beforeClick, calls};
+    })()""")
+    same_host = host == "www.example.com"
+    assert out["pending"]["hidden"] is False
+    assert out["pending"]["captureDisabled"] is True
+    assert out["settled"]["hidden"] is same_host
+    assert out["settled"]["captureDisabled"] is not same_host
+    assert out["settled"]["focused"] == 0
+    assert out["beforeClick"] == [
+        ["/extract/page/allowlist", "POST", {"action": "add", "url_pattern": "www.example.com"}],
+        ["/extract/page/allowlist", "GET", None],
+    ]
+    if same_host:
+        assert out["settled"]["note"] == "Site allowed. Click Uoink it to capture this page."
+        assert out["calls"][-1] == ["/extract/page", "POST", {"url": "https://www.example.com/second"}]
+    else:
+        assert out["settled"]["note"] == out["pending"]["note"]
+        assert out["calls"] == out["beforeClick"]
+
+
 # ---- F4: Settings jumps --------------------------------------------------------------
 
 REVEAL_SETUP = """

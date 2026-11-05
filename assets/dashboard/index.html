@@ -11335,7 +11335,7 @@
       }
     }
 
-    // Permission and capture are separate clicks. A changed link cannot
+    // Permission and capture are separate clicks. A different host cannot
     // inherit an earlier page's permission result.
     async function allowUniversalCaptureSite() {
       const host = universalState.allowHost;
@@ -11345,7 +11345,7 @@
       setUniversalAllowHost(host);
       try {
         await saveAllowedSite(host);
-        if (seq !== universalDetectSeq || universalState.allowHost !== host) return;
+        if (universalState.allowHost !== host) return;
         setUniversalAllowHost("");
         if (els.universalCaptureNote) els.universalCaptureNote.textContent = "Site allowed. Click Uoink it to capture this page.";
       } catch (err) {
@@ -11722,13 +11722,15 @@
       const candidates = view ? view.candidates.filter((c) => researchState.selected.has(c.key)) : [];
       const saved = candidates.filter((c) => c.in_library).length;
       const fresh = candidates.filter((c) => !c.in_library && c.capturable !== false && c.kind !== "podcast").length;
-      researchEl("researchUseSaved").disabled = researchState.busy || !saved || count > limit;
+      researchEl("researchUseSaved").disabled = researchState.busy || !saved || !!fresh || count > limit;
       researchEl("researchCapture").disabled = researchState.busy || !fresh || count > limit;
+      researchEl("researchUseSaved").classList.toggle("hidden", !view || !view.candidates.some((c) => c.in_library));
       researchEl("researchCapture").classList.toggle("hidden", !view || !view.candidates.some((c) => !c.in_library && c.capturable !== false && c.kind !== "podcast"));
       const minutes = candidates.reduce((total, c) => total + (c.in_library ? 0 : c.est_capture === "captions" ? 1
         : Number((/asr ~(\d+)/i.exec(c.est_capture || "") || [])[1]) || 15), 0);
       researchEl("researchSelection").textContent = `${saved} saved · ${fresh} new selected (limit ${limit})`
-        + (fresh ? ` · estimated ${minutes} min; actual time varies` : "");
+        + (fresh ? ` · estimated ${minutes} min; actual time varies` : "")
+        + (saved && fresh ? ". Capture new also uses the selected saved transcripts." : "");
     }
 
     function renderResearchCandidates() {
@@ -11909,17 +11911,25 @@
       ++researchState.seq; // An older status read must not replace the new ETA.
       const runId = researchState.runId;
       const view = researchState.view;
-      const keys = (view ? view.candidates : []).filter((c) => researchState.selected.has(c.key)
-        && (useSaved ? c.in_library : !c.in_library && c.capturable !== false && c.kind !== "podcast")).map((c) => c.key);
-      if (!researchRunId(runId) || !keys.length || researchState.selected.size > view.scope.max_sources) return;
+      const candidates = (view ? view.candidates : []).filter((c) => researchState.selected.has(c.key)
+        && (c.in_library || (c.capturable !== false && c.kind !== "podcast")));
+      const fresh = candidates.some((c) => !c.in_library);
+      const keys = candidates.map((c) => c.key);
+      if (!researchRunId(runId) || !keys.length || researchState.selected.size > view.scope.max_sources
+          || (useSaved ? fresh : !fresh)) return;
       researchState.pollActive = false;
       scheduleResearchPoll();
       const capture = await researchTool("research_capture", { run_id: runId, keys });
-      researchState.pollActive = true;
-      researchState.pollDeadline = Date.now() + RESEARCH_POLL_MAX_MS;
-      researchState.eta = { ...capture.eta, started: Date.now() };
+      researchState.pollActive = capture.queued.length > 0;
+      researchState.pollDeadline = researchState.pollActive ? Date.now() + RESEARCH_POLL_MAX_MS : 0;
+      researchState.eta = researchState.pollActive ? { ...capture.eta, started: Date.now() } : null;
+      const already = new Set(capture.already.map((c) => c.key));
+      view.candidates.forEach((c) => { if (already.has(c.key)) c.in_library = true; });
+      already.forEach((key) => researchState.selected.delete(key));
+      if (already.size) renderResearchCandidates();
       const skipped = (capture.skipped || []).map((s) => `${s.key}: ${s.reason}`).join("; ");
-      researchEl("researchProgress").textContent = useSaved && !capture.queued.length
+      researchEl("researchProgress").textContent = !capture.queued.length && !capture.already.length
+        ? `No sources were added. ${skipped}` : !capture.queued.length
         ? `Using ${capture.already.length} saved transcript${capture.already.length === 1 ? "" : "s"}. Copy the prompt for your AI. ${skipped}`
         : `Queued ${capture.queued.length}; already saved ${capture.already.length}. Estimated ${capture.eta.min_minutes}–${capture.eta.max_minutes} min. ${skipped}`;
     }
@@ -11955,9 +11965,12 @@
         if (seq !== researchState.seq || researchState.busy || state.activeTab !== "research" || document.hidden) return;
         const ready = new Set((status.items || []).filter((item) => ["ready", "captioned"].includes(item.state)).map((item) => item.key));
         view.candidates.forEach((c) => { if (ready.has(c.key)) c.in_library = true; });
+        // Ready sources are already in the run; only unfinished picks need an action.
+        const selectedCount = researchState.selected.size;
+        ready.forEach((key) => researchState.selected.delete(key));
         const candidatesChanged = JSON.stringify(view.candidates) !== JSON.stringify(researchState.view.candidates);
         researchState.view = view;
-        if (candidatesChanged) renderResearchCandidates();
+        if (candidatesChanged || selectedCount !== researchState.selected.size) renderResearchCandidates();
         const counts = status.counts || {};
         let eta = "";
         if (!status.done && researchState.eta) {

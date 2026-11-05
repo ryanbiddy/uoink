@@ -112,6 +112,110 @@ const poll = async () => {
 };
 const selectRun = () => context.researchWork(() => context.openResearchRun(runId));
 
+const actionCase = process.argv[2];
+if (["mixed_selection", "mixed_saved_guard", "saved_only", "completed_selection", "action_visibility", "skipped_sources"].includes(actionCase)) {
+  const saved = { ...candidate, key: "lib:saved", title: "Saved talk", in_library: true };
+  const episode = { ...saved, key: "pod:saved", kind: "podcast", capturable: false };
+  const unavailable = { ...candidate, key: "pod:new", kind: "podcast", capturable: false };
+  view.candidates = [saved, episode, candidate, unavailable];
+  context.callRegistryTool = async (name, args) => {
+    calls.push([name, args]);
+    if (name === "research_capture") return { ok: true,
+      queued: args.keys.includes(candidate.key) ? [candidate] : [],
+      already: [saved, episode].filter((c) => args.keys.includes(c.key)),
+      skipped: [], eta: { min_minutes: 0, max_minutes: 1 } };
+    if (name === "research_status") return structuredClone(status);
+    assert.fail(name);
+  };
+  context.wireResearch();
+  if (actionCase === "mixed_selection") {
+    await selectRun();
+    await nodes.get("researchCapture").listeners.click();
+    assert.deepEqual([...calls.at(-1)[1].keys], [saved.key, episode.key, candidate.key],
+      "one capture request includes every eligible selected source");
+    assert.match(nodes.get("researchProgress").textContent, /Queued 1; already saved 2/);
+    assert.equal(timers.size, 1);
+    view.scope.max_sources = 2;
+    await selectRun();
+    evaluate(`researchState.selected.add(${JSON.stringify(candidate.key)})`);
+    const before = calls.length;
+    await nodes.get("researchCapture").listeners.click();
+    assert.equal(calls.length, before, "saved sources still count toward the selection limit");
+  } else if (actionCase === "mixed_saved_guard") {
+    await selectRun();
+    assert.ok(nodes.get("researchUseSaved").disabled, "Use saved cannot submit half of a mixed selection");
+    await nodes.get("researchUseSaved").listeners.click();
+    assert.equal(calls.length, 0, "the handler also rejects a mixed saved-only action");
+    const check = nodes.get("researchCandidates").children[2].children[0].children[0];
+    check.checked = false; check.listeners.change();
+    assert.equal(nodes.get("researchUseSaved").disabled, false);
+    await nodes.get("researchUseSaved").listeners.click();
+    assert.deepEqual([...calls.at(-1)[1].keys], [saved.key, episode.key]);
+  } else if (actionCase === "saved_only") {
+    view.candidates = [saved, episode];
+    await selectRun();
+    const normal = context.callRegistryTool;
+    let finishStatus;
+    context.callRegistryTool = (name, args) => name === "research_status"
+      ? new Promise((resolve) => { finishStatus = resolve; }) : normal(name, args);
+    const pending = poll();
+    await nodes.get("researchUseSaved").listeners.click();
+    const message = nodes.get("researchProgress").textContent;
+    assert.match(message, /Using 2 saved transcripts/);
+    assert.equal(timers.size, 0, "using saved transcripts schedules no capture poll");
+    assert.equal(evaluate("researchState.eta"), null);
+    finishStatus(status); await pending;
+    context.callRegistryTool = normal;
+    const before = calls.length;
+    await context.refreshResearch();
+    assert.equal(calls.length, before);
+    assert.equal(nodes.get("researchProgress").textContent, message, "neither stale nor later polls replace the saved-only result");
+    assert.ok(nodes.get("researchUseSaved").disabled, "saved sources already added to the run need no second action");
+  } else if (actionCase === "completed_selection") {
+    await selectRun();
+    await nodes.get("researchCapture").listeners.click();
+    status = { ...status, ready_count: 3, counts: { ready: 2, captioned: 1 },
+      items: [{ key: saved.key, state: "ready" }, { key: episode.key, state: "ready" },
+        { key: candidate.key, state: "captioned" }] };
+    await poll();
+    const finished = () => {
+      assert.ok(nodes.get("researchCapture").disabled);
+      assert.ok(nodes.get("researchCapture").classList.contains("hidden"));
+      assert.ok(nodes.get("researchUseSaved").disabled, "completion must not turn into another action on the same sources");
+      assert.equal(evaluate("researchState.selected.size"), 0);
+      assert.equal(nodes.get("researchCandidates").children[2].children[0].children[0].checked, false);
+      assert.equal(timers.size, 0);
+    };
+    finished();
+    assert.equal(view.candidates[2].in_library, undefined, "the server view still has discovery-time metadata");
+    await selectRun(); await poll();
+    finished();
+  } else if (actionCase === "skipped_sources") {
+    for (const includeSaved of [true, false]) {
+      view.candidates = includeSaved ? [saved, candidate] : [candidate];
+      context.callRegistryTool = async () => ({ ok: true, queued: [], already: includeSaved ? [saved] : [],
+        skipped: [{ key: candidate.key, reason: "asr_budget" }], eta: { min_minutes: 0, max_minutes: 0 } });
+      await selectRun();
+      await nodes.get("researchCapture").listeners.click();
+      assert.deepEqual([...evaluate("researchState.selected")], [candidate.key], "skipped sources stay selected for retry");
+      assert.equal(nodes.get("researchCapture").disabled, false);
+      assert.equal(timers.size, 0);
+      assert.match(nodes.get("researchProgress").textContent,
+        includeSaved ? /Using 1 saved transcript\./ : /No sources were added\./);
+      assert.match(nodes.get("researchProgress").textContent, /asr_budget/);
+    }
+  } else {
+    for (const candidates of [[], [unavailable], [candidate], [saved], [saved, candidate]]) {
+      view.candidates = candidates;
+      await selectRun();
+      assert.equal(nodes.get("researchUseSaved").classList.contains("hidden"), !candidates.includes(saved));
+      assert.equal(nodes.get("researchCapture").classList.contains("hidden"), !candidates.includes(candidate));
+    }
+  }
+  console.log(`Research source regression passed: ${actionCase}`);
+  process.exit(0);
+}
+
 if (process.argv[2] === "source_actions") {
   const saved = { ...candidate, key: "lib:saved", title: "Saved talk", in_library: true };
   const episode = { ...saved, key: "pod:saved", kind: "podcast", capturable: false };
@@ -146,16 +250,19 @@ if (process.argv[2] === "source_actions") {
   assert.equal(nodes.get("researchCapture").classList.contains("hidden"), false);
   assert.match(nodes.get("researchCandidates").textContent, /Capture new/);
   assert.equal(nodes.get("researchCandidates").children[2].children[0].children[0].disabled, true);
+  assert.ok(nodes.get("researchUseSaved").disabled);
+  const beforeMixed = calls.length;
   await nodes.get("researchUseSaved").listeners.click();
-  assert.deepEqual([...calls.at(-1)[1].keys], [saved.key], "Use saved excludes new sources");
+  assert.equal(calls.length, beforeMixed, "Use saved cannot submit only part of the selection");
   await context.researchWork(context.captureResearch);
-  assert.deepEqual([...calls.at(-1)[1].keys], [candidate.key], "new capture excludes saved and unsupported sources");
+  assert.deepEqual([...calls.at(-1)[1].keys], [saved.key, candidate.key], "capture includes saved and new sources");
 
-  // Status makes a newly saved transcript reusable without reopening the run.
+  // Status marks the transcript saved and removes the completed pick.
   status = { ...status, items: [{ key: candidate.key, state: "captioned" }] };
   await context.refreshResearch();
   assert.ok(nodes.get("researchCapture").disabled);
   assert.ok(nodes.get("researchCapture").classList.contains("hidden"));
+  assert.ok(nodes.get("researchUseSaved").disabled);
   assert.match(nodes.get("researchCandidates").textContent, /Use saved/);
   console.log("Research source actions passed.");
   process.exit(0);
