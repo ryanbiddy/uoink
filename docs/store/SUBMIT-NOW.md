@@ -1,4 +1,4 @@
-# Submit Uoink 3.11 to the Chrome Web Store
+# Submit Uoink 3.14 to the Chrome Web Store
 
 Allow about 15 minutes for the dashboard work once your images and helper
 release are ready. Account verification, helper packaging, screenshot capture
@@ -9,7 +9,7 @@ submission step. Nothing in this worktree publishes anything.
 
 Have these ready:
 
-- `dist/uoink-extension-3.11.0-cws.zip`, built with `python scripts/build_cws.py`.
+- `dist/uoink-extension-3.14.0-cws.zip`, built with `python scripts/build_cws.py`.
 - `listing.md`, `permissions-justification.md`, `privacy-practices.md` and
   `reviewer-test-instructions.md` from this folder.
 - The 1280x800 screenshots in `screenshots/`, listed in `SCREENSHOTS.md`. They
@@ -19,10 +19,10 @@ Have these ready:
 - The Limited Use statement from `privacy-practices.md`, published on
   https://uoink.app/privacy. The live policy already covers opt-in usage counts.
 
-The public v3.11.0 Windows installer exists. It does not yet contain the changes
-in this worktree or a store item ID. You can create the draft now, but finish the
-helper identity/release step below before submitting for review. This pass has
-not changed any release version or replaced any public download.
+The public v3.14.0 installer and DMG trust the store item ID (since 3.11.2), so
+a store install connects to the helper with no extra step. 3.14.0 adds the
+saves collector content script; its reviewer text is in
+`permissions-justification.md`.
 
 ## 1. Register and secure the account, about 3 minutes
 
@@ -43,8 +43,8 @@ also references the $5 registration fee. Extra account checks can take longer.
 ## 2. Create the draft and copy its ID, about 2 minutes
 
 5. Click **Add new item** (or **New item**).
-6. Click **Browse files**, select `dist/uoink-extension-3.11.0-cws.zip`, then
-   upload it. Confirm the detected name is **Uoink**, version **3.11.0**, MV3.
+6. Click **Browse files**, select `dist/uoink-extension-3.14.0-cws.zip`, then
+   upload it. Confirm the detected name is **Uoink**, version **3.14.0**, MV3.
 7. Open **Package**. Copy the **Item ID**, a 32-letter string. It exists now,
    before review. **View public key** on this tab is for matching development
    installs to that item; do not replace Uoink's existing developer key.
