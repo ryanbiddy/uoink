@@ -97,7 +97,7 @@ def spread_clips(rows: list[dict], n: int) -> list[dict]:
 def build_card(item: dict, clips: list[dict], *, corpus_text: str = "",
                profile: str = "full", n_clips: int | None = None,
                clip_chars: int | None = None,
-               byte_budget: int | None = None) -> dict:
+               byte_budget: int | None = None, display_channel: str | None = None) -> dict:
     """Build one public packet without reading files or changing inputs.
 
     ``full`` retains ten untruncated clips by default. ``librarian`` is at
@@ -142,6 +142,9 @@ def build_card(item: dict, clips: list[dict], *, corpus_text: str = "",
                 for i, c in enumerate(clips) if _string(c.get("text"))]
     evidence.sort(key=lambda c: (c["seq"], c["start"] or 0))
     revision = _hash({"item": card, "url": url, "evidence": evidence, "opening_prose": prose})
+    # Feed labels affect display and card_hash; source revisions keep the saved inputs.
+    if display_channel is not None:
+        card["channel"] = display_channel
 
     is_prose_eligible = (card.get("source_type") in PROSE_ELIGIBLE_SOURCES) and bool(prose)
     excerpts = []

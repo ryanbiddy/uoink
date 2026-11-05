@@ -64,8 +64,6 @@ class UoinkCorpusProvider:
         return str(value or "").replace("_", " ").replace("-", " ").title()
 
     def _item_ref(self, row: dict, *, search_details=False) -> dict:
-        import podcasts
-        row = podcasts.repair_corpus_titles(self.idx, [row])[0]
         metadata = _json_object(row.get("metadata_json"))
         author = (
             row.get("author")
@@ -121,6 +119,7 @@ class UoinkCorpusProvider:
         }
 
     def search(self, request: corpus_contract.SearchRequest) -> dict:
+        import podcasts
         try:
             result = self.idx.search_mode(
                 request.q, mode=request.mode, match=request.match,
@@ -148,7 +147,8 @@ class UoinkCorpusProvider:
         return {
             "items": [
                 self._item_ref(dict(row), search_details=request.search_details and bool(request.q))
-                for row in result.get("results") or []
+                for row in podcasts.repair_corpus_titles(
+                    self.idx, result.get("results") or [], data_root=self.data_root)
             ],
             **({key: result[key] for key in ("search_mode", "requested_mode", "fallback_reason") if key in result} if request.search_details else {}),
             "page": {
@@ -184,7 +184,8 @@ class UoinkCorpusProvider:
         if not row or row.get("deleted_at"):
             raise corpus_contract.ContractError(
                 "not_found", "corpus item not found", status=404)
-        return dict(row)
+        import podcasts
+        return podcasts.repair_corpus_titles(self.idx, [dict(row)], data_root=self.data_root)[0]
 
     @staticmethod
     def _content(row: dict) -> dict:

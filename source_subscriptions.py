@@ -1100,6 +1100,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 canonical_url=_http_link(meta["page"]) or _http_link(entry_id),
                 published_at_ms=parse_published_ms(meta["published"]),
                 metadata={"identity_method": method, "audio_url": _http_link(meta["audio"]),
+                          "feed_title": result.feed_title,
                           "published_raw": meta["published"], "duration_raw": meta["duration"]},
             )
             if entry_id in seen:
@@ -3472,6 +3473,9 @@ class SourceSubscriptionService:
             scan_revision = int(cursor["revision"]) + 1
             if source["kind"] == "podcast_rss" and result.feed_title:
                 # Keep the feed name available to new captures and old library rows.
+                conn.execute("UPDATE source_subscriptions SET display_name=? WHERE source_id=? "
+                             "AND (display_name IS NULL OR lower(trim(display_name)) IN ('','untitled podcast') "
+                             "OR display_name=canonical_url)", (result.feed_title, source_id))
                 if source.get("legacy_feed_id") is not None:
                     conn.execute("UPDATE podcast_feeds SET title=? WHERE id=?",
                                  (result.feed_title, source["legacy_feed_id"]))
@@ -3479,6 +3483,11 @@ class SourceSubscriptionService:
             epoch_for_items = int(source["consent_epoch"]) if on_current else None
             stats = self._persist_observations(conn, source, result.observations, now,
                                                scan_revision, epoch_for_items)
+            if source["kind"] == "podcast_rss" and result.feed_title:
+                conn.execute("UPDATE source_items SET metadata_json=json_set(metadata_json, '$.feed_title', ?) "
+                             "WHERE source_id=? AND json_valid(metadata_json) "
+                             "AND lower(trim(coalesce(json_extract(metadata_json,'$.feed_title'),''))) "
+                             "IN ('','untitled podcast')", (result.feed_title, source_id))
             if result.coverage == "partial":
                 # Contract: incomplete batches persist metadata but advance no success
                 # cursor or enrollment and create no eligibility.

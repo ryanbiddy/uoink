@@ -5109,7 +5109,7 @@
                   </div>
                 </details>
                 <button class="button primary" type="button" aria-describedby="writingAgentHint" id="generateWriting" disabled>Generate</button>
-                <div class="soft-note" id="writingAgentHint" role="status">Connect a writing agent to generate.</div>
+                <div class="soft-note hidden" id="writingAgentHint" role="status"></div>
                 <div class="agent-setup-card" id="agentSetupCard">
                   <strong>Checking for a writing agent...</strong>
                   <span class="soft-note">You can also generate with your Anthropic key when no agent is connected.</span>
@@ -10016,7 +10016,9 @@
       // Interval & Coverage
       const intervalEl = document.getElementById("activityUtcInterval");
       if (intervalEl && p.interval) {
-        intervalEl.textContent = `${formatActivityDate(p.interval.start)} to ${formatActivityDate(p.interval.end)}`;
+        const custom = Boolean(libraryActivityState.interval);
+        const end = custom ? new Date(new Date(p.interval.end).getTime() - 1) : p.interval.end;
+        intervalEl.textContent = `${formatActivityDate(p.interval.start, custom)} to ${formatActivityDate(end, custom)}`;
       }
       const covEl = document.getElementById("activityCoverageStatus");
       if (covEl && p.coverage) {
@@ -10206,7 +10208,7 @@
         const netId = activityMetricId(s.net, "");
         const churnId = activityMetricId(s.churn, "");
         return `<tr style="border-bottom:1px solid #282828;">
-            <td style="padding:4px 8px;">${escapeHtmlActivity(s.label || s.name || "Unnamed shelf")}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(s.label || s.name || s.shelf_id || "Unnamed shelf")}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(cSize, mId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(sStart, startId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(sEnd, endId)}</td>
@@ -10506,8 +10508,8 @@
             }
             return;
           }
-          const start = new Date(`${startVal}T00:00:00`);
-          const end = new Date(`${endVal}T00:00:00`);
+          const start = new Date(`${startVal}T00:00:00Z`);
+          const end = new Date(`${endVal}T00:00:00Z`);
           if (!/^\d{4}-\d{2}-\d{2}$/.test(startVal) || !/^\d{4}-\d{2}-\d{2}$/.test(endVal)
               || !Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end < start) {
             if (errEl) {
@@ -10520,7 +10522,7 @@
           document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
           libraryActivityState.days = null;
           // The date picker includes the end day; the API's end is exclusive.
-          end.setDate(end.getDate() + 1);
+          end.setUTCDate(end.getUTCDate() + 1);
           libraryActivityState.interval = { start: start.toISOString(), end: end.toISOString() };
           loadLibraryActivity(false);
         });
@@ -14578,6 +14580,11 @@
 
     function activityRowHtml(entry) {
       const row = entry.row;
+      const saved = entry.saved || (row.kind === "podcast_transcribe" && (state.library || [])
+        .find(item => videoIdOf(item) === row.result?.corpus?.video_id));
+      const source = saved && platformOf(saved) === "podcast"
+        && ["", "untitled podcast"].includes(String(row.channel || "").trim().toLowerCase())
+        ? { ...row, channel: saved.channel } : row;
       const model = entry.model || activitySteps(row);
       const retryCopy = activityRetrySchedule(entry);
       // The strip describes current work; the drawer keeps the last failed
@@ -14597,7 +14604,7 @@
       return `<article class="activity-row" data-activity-key="${htmlEscape(entry.key)}">
         <div class="activity-row-main">
           <h3 class="activity-row-title">${htmlEscape(title)}</h3>
-          <p class="activity-meta">${htmlEscape(activitySource(row))}</p>
+          <p class="activity-meta">${htmlEscape(activitySource(source))}</p>
           <div class="activity-state">${activityStripHtml(display, entry.key)}<span class="${display.failed ? "activity-failed-label" : "activity-step-label"}">${display.failed ? '<span aria-hidden="true">✕</span> ' : ""}${htmlEscape(display.label)}</span></div>
           <p class="activity-meta">${[htmlEscape(activityTranscript(entry)), time ? `<time datetime="${htmlEscape(when)}">${htmlEscape(time)}</time>` : "Time not reported"].filter(Boolean).join(" · ")}</p>
           ${retryCopy && (model.failed || entry.retryPending || (entry.pending && normalizedStatus(entry.pending) === "running")) ? `<p class="activity-retry-copy">${htmlEscape(retryCopy)}</p>` : ""}
@@ -15136,11 +15143,12 @@
         || state.writingGenerating || state.researchRunning || state.researchSaving;
       const hint = document.getElementById("writingAgentHint");
       if (hint) {
-        hint.textContent = canGenerate ? "" : "Connect a writing agent to generate.";
-        hint.classList.toggle("hidden", canGenerate);
+        const showHint = state.agentDetectionLoaded && !canGenerate;
+        hint.textContent = showHint ? "Connect a writing agent to generate." : "";
+        hint.classList.toggle("hidden", !showHint);
       }
-      if (!agentReady && els.generateResearchPanel.dataset.kind === "script") {
-        els.generateResearchPanel.classList.add("hidden");
+      if (els.generateResearchPanel.dataset.kind === "script") {
+        els.generateResearchPanel.classList.toggle("hidden", !agentReady || mode !== "script");
       }
     }
 
