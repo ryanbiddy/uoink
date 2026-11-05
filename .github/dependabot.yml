@@ -24,11 +24,23 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
+    ignore:
+      # Tauri 2 is an API rewrite of a prototype CI never builds; move by hand.
+      - dependency-name: "@tauri-apps/*"
+        update-types: ["version-update:semver-major"]
+      # @microsoft/eslint-plugin-sdl (via the Obsidian lint config) peers eslint ^9.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "cargo"
     directory: "/tauri-ui/src-tauri"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "tauri*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
