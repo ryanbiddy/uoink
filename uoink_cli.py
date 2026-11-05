@@ -13,6 +13,7 @@ import math
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import stat
 import sys
 import threading
@@ -89,6 +90,7 @@ def parser():
     research.add_argument("--wait-minutes", type=float, help="maximum capture wait (default 30)")
     research.add_argument("--claims", type=Path, help="publish payload JSON, without run_id")
     research.add_argument("--json", action="store_true", help="one JSON result on stdout (the default)")
+    research.add_argument("--explain", action="store_true", help="show the full candidate score breakdown")
     note = command("note")
     note.add_argument("text")
     note.add_argument("--title")
@@ -249,8 +251,104 @@ def research_action(ns):
 
 
 def terminal_label(value):
-    # Saved titles and claims can contain terminal control sequences.
-    return json.dumps(str(value), ensure_ascii=False)[1:-1]
+    # Escape controls, not ordinary quotes or backslashes in saved text.
+    return "".join(char if char.isprintable() else json.dumps(char, ensure_ascii=True)[1:-1]
+                   for char in str(value))
+
+
+def text_timestamp(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+        return ""
+    minutes, seconds = divmod(int(value), 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours}:{minutes:02d}:{seconds:02d}" if hours else f"{minutes}:{seconds:02d}"
+
+
+def text_excerpt(value, limit=140, *, truncated=False):
+    text = terminal_label(" ".join(str(value).split()))
+    if len(text) > limit:
+        text = text[:limit - 1].rsplit(" ", 1)[0].rstrip()
+        truncated = True
+    return text.rstrip("\u2026") + "\u2026" if truncated else text
+
+
+def text_library_row(row, index):
+    # The frozen recent envelope omits kind, channel and video_id. Enrich a
+    # display-only copy from the local index; never change the tool result.
+    if index is None:
+        return row
+    try:
+        identity = row.get("item_id") or row.get("video_id")
+        item = (index.get_yoink(identity) if identity else
+                index.get_by_slug(row["slug"]) if row.get("slug") else None)
+    except (OSError, sqlite3.Error):
+        return row
+    return {**item, **row} if item and not item.get("deleted_at") else row
+
+
+def text_kind(row):
+    kind = row.get("source_type") or row.get("kind") or row.get("platform")
+    if not kind:
+        identity = row.get("item_id") or row.get("video_id") or ""
+        kind = next((kind for prefix, kind in (("note_", "note"), ("page_", "article"),
+                    ("ep_", "podcast"), ("episode_", "podcast")) if identity.startswith(prefix)), "item")
+    return {"page": "article", "x_article": "article", "youtube": "video",
+            "youtube_video": "video", "short_video": "video", "x_video": "video",
+            "x_thread": "thread", "reddit_thread": "thread"}.get(kind, kind)
+
+
+def text_source(row):
+    source = row.get("channel") or row.get("author")
+    if not source:
+        from urllib.parse import urlsplit
+        try:
+            source = urlsplit(row.get("source_link") or row.get("source_url") or row.get("url") or "").hostname
+        except ValueError:
+            pass
+    return source or ("local" if text_kind(row) == "note" else "source unknown")
+
+
+def text_quote(row):
+    passage, preview = row.get("passage"), row.get("preview")
+    quote, truncated = "", False
+    if row.get("passage_verified") is True:
+        quote = passage.get("text", "") if isinstance(passage, dict) else passage or ""
+        if not quote and isinstance(preview, dict):
+            quote, truncated = preview.get("text", ""), preview.get("truncated", False)
+    if not quote and row.get("quote_verified") is True:
+        quote = row.get("quote", "")
+    return text_excerpt(quote, truncated=truncated) if isinstance(quote, str) and quote.strip() else ""
+
+
+def research_candidate_text(rank, candidate, *, explain=False):
+    duration = text_timestamp(candidate.get("duration_s")) or "duration unknown"
+    estimate = candidate.get("est_capture") or "unknown"
+    if candidate.get("in_library"):
+        status = "saved in library"
+    elif candidate.get("has_captions") is True or estimate == "captions":
+        status = "captions available"
+    else:
+        status = "no captions" if candidate.get("has_captions") is False else "captions unknown"
+        if estimate != "unknown":
+            status += "; " + estimate
+    line = (f"{rank}. {terminal_label(candidate.get('title') or 'Untitled')} | "
+            f"{terminal_label(candidate.get('channel') or 'source unknown')} | {duration} | "
+            f"{terminal_label(status)}")
+    reasons = candidate.get("why_ranked", [])
+    if explain:
+        why = "; ".join(reasons)
+    else:
+        parts = []
+        for reason in reasons:
+            name, sep, value = reason.rpartition(":")
+            try:
+                score = round(float(value), 2)
+            except ValueError:
+                continue
+            if sep and math.isfinite(score) and score:
+                parts.append(f"{name.strip()}: {score:+.2f}")
+        why = "; ".join(parts)
+    return line + (f"\n   Why: {terminal_label(why)}" if why else "")
 
 
 def research_progress(status):
@@ -323,12 +421,7 @@ def research_command(ns, server, *, call_tool=None, sleep=None, clock=None,
         return {**discovery, "run_id": run_id}
     candidates = discovery.get("candidates", [])
     for rank, candidate in enumerate(candidates, 1):
-        duration = candidate.get("duration_s")
-        duration = f"{duration / 60:.1f} min" if isinstance(duration, (int, float)) else "duration unknown"
-        progress(f"{rank}. {terminal_label(candidate.get('title', ''))} | "
-                 f"{terminal_label(candidate.get('channel', ''))} | {duration} | "
-                 f"{terminal_label(candidate.get('est_capture', 'unknown'))}\n"
-                 f"   {terminal_label('; '.join(candidate.get('why_ranked', [])))}")
+        progress(research_candidate_text(rank, candidate, explain=ns.explain))
     for skipped in discovery.get("skipped", []):
         progress(terminal_label(f"Skipped {skipped.get('kind', '')}: {skipped.get('reason', '')}"))
     for error in discovery.get("errors", []):
@@ -378,7 +471,7 @@ def research_command(ns, server, *, call_tool=None, sleep=None, clock=None,
         sleep(min(10, remaining))
 
 
-def human(payload):
+def human(payload, *, index=None):
     if "prompt" in payload and "run_id" in payload:
         lines = [f"Research run: {payload['run_id']}"]
         if payload.get("status"):
@@ -398,8 +491,7 @@ def human(payload):
                 f"Helper: {'running' if payload['helper_running'] else 'not running'}\n"
                 f"Tools: {payload['tool_counts']['full']} full, {payload['tool_counts']['core']} core")
     def label(value):
-        # Keep control characters escaped even in the human display.
-        return json.dumps(str(value), ensure_ascii=False)[1:-1][:240]
+        return terminal_label(value)[:240]
     def capture_limits(value):
         evidence = value.get("x_capture") if isinstance(value, dict) else None
         if not isinstance(evidence, dict):
@@ -434,10 +526,22 @@ def human(payload):
         rows = payload.get("hits", payload.get("yoinks", []))
         lines = [f"{len(rows)} result(s)"]
         for row in rows[:10]:
-            identity = row.get("item_id") or row.get("slug") or ""
-            timing = (f"{row['start']}s to {row.get('end')}s"
-                      if row.get("start") is not None else "untimed")
-            lines.append(f"{label(row.get('title') or identity)} [{label(identity)}] ({timing})")
+            row = text_library_row(row, index)
+            identity = row.get("item_id") or row.get("video_id") or row.get("slug") or ""
+            title, source = label(row.get("title") or identity), label(text_source(row))
+            kind = label(text_kind(row))
+            if "hits" in payload:
+                start, end = text_timestamp(row.get("start")), text_timestamp(row.get("end"))
+                timing = start + (f"\u2013{end}" if end and row["end"] >= row["start"] else "") if start else kind
+                line = f"{title} | {source} | {timing}"
+            else:
+                date = label(str(row.get("yoinked_at") or "")[:10]) or "date unknown"
+                line = f"{date} | {kind} | {title} | {source}"
+            lines.append(line + (f" [{terminal_label(identity)}]" if identity else ""))
+            if "hits" in payload:
+                quote = text_quote(row)
+                if quote:
+                    lines.append(f'  "{quote}"')
         if len(rows) > 10:
             lines.append("More results in JSON output.")
         return "\n".join(lines)
@@ -457,8 +561,8 @@ def human(payload):
     return f"OK ({fields}). Use JSON output for the full result." if fields else "OK"
 
 
-def emit(payload, text=False):
-    print(human(payload) if text else json.dumps(payload, ensure_ascii=False, allow_nan=False))
+def emit(payload, text=False, *, index=None):
+    print(human(payload, index=index) if text else json.dumps(payload, ensure_ascii=False, allow_nan=False))
     if payload.get("ok") is not True:
         if not text:
             print(error_text(payload), file=sys.stderr)
@@ -619,7 +723,8 @@ def main(argv=None):
                 existing_threads = set(threading.enumerate())
                 payload = runtime.call_tool(name, args, server)
                 finish_call_work(server, name, payload, existing_threads)
-        return emit(payload, text_mode)
+        return emit(payload, text_mode, index=(server._get_index() if text_mode
+                    and ("hits" in payload or "yoinks" in payload) else None))
     except UsageError as exc:
         print(f"uoink: {exc}", file=sys.stderr)
         return 2
