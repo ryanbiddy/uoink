@@ -53,5 +53,14 @@ short links do not need persistent host grants; they use user-selected URLs
 and the helper. No `<all_urls>`, cookies, history, downloads or tabs permission
 is requested.
 
+Since 3.14.0, a second content script, `content-saves.js`, runs on the same
+YouTube, X and Reddit hosts. It acts only on the user's own saves pages:
+YouTube Watch Later (`/playlist?list=WL`), X bookmarks (`/i/bookmarks`) and
+Reddit saved posts (`/user/<name>/saved`). There it reads the links already
+rendered on the page and shows a small Uoink panel with a count. Auto-scroll
+starts only when the user clicks it, and links go to the local helper only when
+the user clicks to send them, at most 50 at a time. It does nothing on any other page
+and reads no cookies or account data.
+
 See [POLICY-AUDIT.md](POLICY-AUDIT.md) for file and line evidence and
 [privacy-practices.md](privacy-practices.md) for the data declarations.
