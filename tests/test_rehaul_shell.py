@@ -279,8 +279,8 @@ def test_hash_routes_and_back_are_wired():
     # renders (never an id-only stand-in with no folder or topic).
     apply = _between(SCRIPT, "function applyRoute(route)", "function applyHashRoute()")
     assert "const row = knownLibraryRow(route.id);" in apply
-    assert "else openItemFromRoute(route.id);" in apply
-    lookup = _between(SCRIPT, "async function openItemFromRoute(id)", "async function openYoinkDetail(")
+    assert "else openItemFromRoute(route.id, route);" in apply
+    lookup = _between(SCRIPT, "async function openItemFromRoute(id, options = {})", "async function openYoinkDetail(")
     assert "const wanted = () => state.selectedYoinkRequest === request && currentRoute === hash;" in lookup
     assert "row = await findLibraryRow(id, wanted);" in lookup
     assert "if (!wanted()) return;" in lookup
@@ -300,7 +300,7 @@ def test_item_lookup_never_reads_a_partial_search_as_not_found():
     # found". Absence now comes only from the helper's answer for the id or
     # from reading every page; anything short of that is an error.
     assert "ITEM_LOOKUP_PAGES" not in SCRIPT
-    find = _between(SCRIPT, "async function findLibraryRow(id, wanted = () => true)", "async function openItemFromRoute(id)")
+    find = _between(SCRIPT, "async function findLibraryRow(id, wanted = () => true)", "async function openItemFromRoute(id, options = {})")
     assert "if (itemNotSaved(err)) return null;" in find
     assert "const byTitle = await scanLibraryFor(id, { q: title }, 0, wanted);" in find
     assert "return scanLibraryFor(id, {}, ITEM_LOOKUP_PAGE, wanted, first.total);" in find

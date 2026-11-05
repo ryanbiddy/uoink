@@ -1031,6 +1031,21 @@
       min-width: 0;
     }
 
+    .card-match {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .card-match .reader-time {
+      flex: 0 0 auto;
+    }
+
     .row-state {
       display: flex;
       flex-wrap: wrap;
@@ -5361,8 +5376,8 @@
               </div>
             </details>
             <select class="control" id="matchFilter" aria-label="Search matching">
-              <option value="forgiving">Any useful words</option>
-              <option value="strict">Exact words</option>
+              <option value="strict">All words</option>
+              <option value="forgiving">Any words</option>
             </select>
             <select class="control" id="sortFilter" aria-label="Sort Library">
               <option value="newest">Newest first</option>
@@ -6662,7 +6677,7 @@
         date_from: "",
         date_to: "",
         sort: "newest",
-        match: "forgiving",
+        match: "strict",
         // Re-haul type chips: "" (All), videos, posts, notes, podcasts.
         kind: "",
         availability: "",
@@ -8319,7 +8334,7 @@
         }
         const speaker = paragraph.speaker ? `<b class="reader-speaker">${htmlEscape(paragraph.speaker)}</b> ` : "";
         return `
-          <div class="reader-row reader-para">
+          <div class="reader-row reader-para"${paragraph.start === null ? "" : ` data-reader-seconds="${paragraph.start}"`}>
             <div class="reader-gutter">${readerTimeHtml(paragraph.start, url)}</div>
             <p>${speaker}${htmlEscape(paragraph.parts.join(" "))}</p>
           </div>
@@ -8867,9 +8882,9 @@
     // finds the saved row, then opens it as a Library card would, so Open
     // folder, the topic and the item's kind are right from the first
     // render. A move elsewhere while the lookup runs wins.
-    async function openItemFromRoute(id) {
+    async function openItemFromRoute(id, options = {}) {
       const request = ++state.selectedYoinkRequest;
-      const hash = routeHash("item", id);
+      const hash = options.hash || routeHash("item", id);
       state.selectedYoink = null;
       state.selectedYoinkLookup = { id, state: "loading" };
       renderYoinkDetail();
@@ -8884,7 +8899,7 @@
       }
       if (!wanted()) return;
       if (row) {
-        await openYoinkDetail(row, { fromRoute: true });
+        await openYoinkDetail(row, { fromRoute: true, seconds: options.seconds });
         return;
       }
       state.selectedYoinkLookup = { id, state: failed ? "error" : "missing" };
@@ -8943,7 +8958,24 @@
       if (tasks.length) await Promise.all(tasks);
       if (state.selectedYoinkRequest === request) {
         renderYoinkDetail();
+        revealReaderMoment(options.seconds);
       }
+    }
+
+    function revealReaderMoment(value) {
+      const seconds = storedTime(value);
+      if (seconds === null || state.activeTab !== "yoink") return;
+      const request = state.selectedYoinkRequest;
+      // Let the loaded transcript settle before placing it below the Back row.
+      requestAnimationFrame(() => {
+        if (state.activeTab !== "yoink" || state.selectedYoinkRequest !== request) return;
+        const paragraphs = Array.from(document.querySelectorAll(".reader-para[data-reader-seconds]"));
+        const target = paragraphs.filter((el) => Number(el.dataset.readerSeconds) <= seconds).at(-1) || paragraphs[0];
+        if (!target) return;
+        target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: "start", behavior: scrollBehavior() });
+      });
     }
 
     async function requestRetranscription() {
@@ -12436,7 +12468,7 @@
       if (state.filters.kind) params.set("kind", state.filters.kind);
       if (state.filters.availability) params.set("availability", state.filters.availability);
       params.set("sort", state.filters.sort || "newest");
-      params.set("match", state.filters.match || "forgiving");
+      params.set("match", state.filters.match || "strict");
       params.set("limit", String(extra.limit ?? state.limit));
       params.set("offset", String(extra.offset ?? state.offset));
       return params;
@@ -12522,6 +12554,7 @@
       const control = libraryFilterControl(key);
       if (control) control.value = "";
       state.filters[key] = "";
+      if (key === "q") state.filters.sort = els.sortFilter.value = "newest";
       setLibraryDateError("");
       updateVideoFacetVisibility();
       renderLibraryFilterChips();
@@ -12634,8 +12667,8 @@
     function resetLibraryFilters() {
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
-      els.matchFilter.value = "forgiving";
-      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "forgiving", kind: "", availability: "" };
+      els.matchFilter.value = "strict";
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "strict", kind: "", availability: "" };
       setLibraryDateError("");
       els.libraryMoreFilters.removeAttribute("open");
       resetLibraryCapture();
@@ -12732,6 +12765,8 @@
         if (request !== state.libraryRequest) return;
         const params = paramsFromFilters();
         params.set("mode", reset ? "auto" : (state.searchMode || "auto"));
+        // All words must narrow even when optional semantic search is ready.
+        if (params.get("q") && params.get("match") === "strict") params.set("mode", "keyword");
         const data = await authFetch(`/memory/search?${params.toString()}`);
         if (request !== state.libraryRequest) return;
         const actualMode = data.search_mode || "keyword";
@@ -12879,6 +12914,17 @@
       return label ? `<span class="source-availability-badge" title="${label}, still in your library">${label}</span>` : "";
     }
 
+    function libraryMatchHtml(row) {
+      if (!state.filters.q.trim()) return "";
+      const passage = row.passage_verified === true && row.passage;
+      if (!passage || !passage.text) return '<div class="card-match">No matching quote available.</div>';
+      const seconds = storedTime(row.timestamp_seconds, passage.timestamp_seconds, passage.start);
+      const label = readerClock(seconds);
+      const id = videoIdOf(row);
+      const time = seconds === null ? "" : `<a class="reader-time" href="${htmlEscape(routeHash("item", id))}?t=${seconds}" aria-label="Open ${htmlEscape(rowTitle(row))} at ${label}">${label}</a>`;
+      return `<div class="card-match">${time}<q>${htmlEscape(passage.text)}</q></div>`;
+    }
+
     // Re-haul list row: real thumbnail (or a neutral block naming the kind),
     // title, source · platform · time, then one state line. Write from this
     // and the hook stay on the row, shown on hover and keyboard focus.
@@ -12912,6 +12958,7 @@
           <div class="row-body">
             <div class="card-title">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
+            ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
           </div>
           <div class="row-actions">
@@ -18367,6 +18414,9 @@
       const cut = raw.indexOf("/");
       let head = (cut < 0 ? raw : raw.slice(0, cut)).toLowerCase();
       let rest = cut < 0 ? "" : raw.slice(cut + 1);
+      const timeCut = head === "item" ? rest.indexOf("?") : -1;
+      const seconds = timeCut < 0 ? null : storedTime(new URLSearchParams(rest.slice(timeCut + 1)).get("t"));
+      if (timeCut >= 0) rest = rest.slice(0, timeCut);
       try { rest = decodeURIComponent(rest); } catch (_) {}
       if (Object.prototype.hasOwnProperty.call(ROUTE_ALIASES, head)) {
         const alias = ROUTE_ALIASES[head];
@@ -18376,7 +18426,8 @@
       }
       if (!head) return { tab: "library", hash: "#library" };
       if (head === "item") {
-        return rest ? { tab: "yoink", id: rest, hash: routeHash("item", rest) } : { tab: "library", hash: "#library" };
+        return rest ? { tab: "yoink", id: rest, ...(seconds === null ? {} : { seconds }),
+          hash: routeHash("item", rest) + (seconds === null ? "" : `?t=${seconds}`) } : { tab: "library", hash: "#library" };
       }
       if (head === "evidence") {
         return rest ? { tab: "evidence", id: rest, hash: routeHash("evidence", rest) } : { tab: "evidence", hash: "#evidence" };
@@ -18549,14 +18600,15 @@
         // it again instead of fetching it twice.
         if (state.activeTab !== "yoink" && videoIdOf(state.selectedYoink) === route.id) {
           switchTab("yoink", { fromRoute: true });
+          revealReaderMoment(route.seconds);
           return;
         }
         // A row the page already has opens straight away; a fresh deep
         // link looks the saved row up first (never an id-only stand-in,
         // which would read as no folder and Uncategorized).
         const row = knownLibraryRow(route.id);
-        if (row) openYoinkDetail(row, { fromRoute: true });
-        else openItemFromRoute(route.id);
+        if (row) openYoinkDetail(row, { fromRoute: true, seconds: route.seconds });
+        else openItemFromRoute(route.id, route);
         return;
       }
       if (route.tab === "evidence" && route.id) {
@@ -18698,7 +18750,7 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
-        state.filters.match = els.matchFilter.value || "forgiving";
+        state.filters.match = els.matchFilter.value || "strict";
         updateVideoFacetVisibility();
         state.libraryRequest++;
         state.libraryResetPending = true;
@@ -19285,6 +19337,7 @@
         }
         const card = event.target.closest("[data-folder]");
         if (card && (card.dataset.videoId || card.dataset.folder)) {
+          if (event.target.closest("a")) return;
           openYoinkDetail(rowFromCard(card));
           focusReaderHeading();
           return;
