@@ -40,6 +40,7 @@ import urllib.request
 import uuid
 import webbrowser
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -12470,6 +12471,36 @@ def _image_dimensions(path: Path) -> tuple[int | None, int | None]:
     return None, None
 
 
+@lru_cache(maxsize=2048)
+def _screenshot_mean_luma(path: str, mtime_ns: int, size: int) -> float:
+    """Cache successful samples until the file changes; failures propagate
+    so a later request can retry. Runs in the helper's request thread."""
+    from PIL import Image, ImageStat
+    with Image.open(path) as image:
+        image.draft("L", (64, 64))
+        image.thumbnail((32, 32), Image.Resampling.BOX)
+        return ImageStat.Stat(image.convert("L")).mean[0]
+
+
+def _screenshot_is_near_black(path: Path, folder: Path) -> bool:
+    """Only inspect this capture's files; an unreadable frame stays visible."""
+    try:
+        if _path_has_parent_ref(str(path)):
+            return False
+        resolved = path.resolve()
+        resolved.relative_to(folder.resolve())
+        stat = resolved.stat()
+        if stat.st_size > MAX_SERVED_FILE_BYTES:
+            return False
+        luma = _screenshot_mean_luma(str(resolved), stat.st_mtime_ns, stat.st_size)
+    except ImportError:
+        log.warning("Cannot skip dark screenshots: Pillow is unavailable. Install Pillow or rebuild the app.")
+        return False
+    except Exception:
+        return False
+    return luma < 8
+
+
 def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
     """Build the picker payload for a yoink: every available screenshot with
     its absolute path, a /file URL the dashboard can render, the capture
@@ -12540,6 +12571,7 @@ def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
     # drift). Derive the timestamp from the shot number when we know the
     # interval so the picker still labels them.
     if shots_dir and shots_dir.is_dir():
+        next_index = max((entry["index"] for entry in entries), default=-1) + 1
         for p in sorted(shots_dir.glob("shot_*.jpg")):
             if p.name in seen:
                 continue
@@ -12547,7 +12579,13 @@ def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
             shot_no = int(match.group(1)) if match else (len(entries) + 1)
             ts_secs = ((shot_no - 1) * interval) if interval is not None else None
             ts_human = fmt_time(ts_secs) if ts_secs is not None else None
-            entries.append(_entry(p.name, len(entries), ts_human, ts_secs, p))
+            entries.append(_entry(p.name, next_index, ts_human, ts_secs, p))
+            next_index += 1
+
+    # Filter after assigning IDs so the picker, suggestions and image route
+    # still refer to the same saved frame when an earlier one is dark.
+    entries = [entry for entry in entries
+               if not _screenshot_is_near_black(Path(entry["path"]), folder)]
 
     return {
         "video_id": video_id,
@@ -20236,10 +20274,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
         shots = payload.get("screenshots") or []
-        if index < 0 or index >= len(shots):
+        shot = next((shot for shot in shots if shot["index"] == index), None)
+        if shot is None:
             return self._send_json(404, {
                 "ok": False, "error": "screenshot index out of range"})
-        path, mime, status, error = _resolve_served_file(shots[index]["path"])
+        path, mime, status, error = _resolve_served_file(shot["path"])
         if error:
             return self._send_json(status, {"ok": False, "error": error})
         return self._send_file(path, mime)
@@ -20581,6 +20620,19 @@ class Handler(BaseHTTPRequestHandler):
                               "width", "height"):
                         if k in shot and isinstance(shot[k], (str, int, float, bool)):
                             clean_shot[k] = shot[k]
+                    # Relative paths survive a moved or synced capture folder.
+                    raw_path = clean_shot.get("path")
+                    if not isinstance(raw_path, str) or not raw_path or Path(raw_path).is_absolute():
+                        filename = clean_shot.get("filename")
+                        raw_path = (str(Path("screenshots") / filename)
+                                    if isinstance(filename, str) and filename else
+                                    clean_shot.get("absolute_path") or clean_shot.get("file_path") or raw_path)
+                    if isinstance(raw_path, str):
+                        shot_path = Path(raw_path)
+                        if not shot_path.is_absolute():
+                            shot_path = resolved.parent / shot_path
+                        if _screenshot_is_near_black(shot_path, resolved.parent):
+                            continue
                     clean_shots.append(clean_shot)
             filtered["screenshots"] = clean_shots
 

@@ -8226,13 +8226,23 @@
     function readerParagraphs(sidecar = {}) {
       const out = [];
       let current = null;
-      transcriptSegments(sidecar).forEach((segment) => {
+      const shots = readerShotList(sidecar).timed;
+      let nextShot = 0;
+      const segments = transcriptSegments(sidecar).slice().sort((a, b) =>
+        (storedTime(a.start, a.start_seconds) ?? Infinity) - (storedTime(b.start, b.start_seconds) ?? Infinity));
+      segments.forEach((segment) => {
         const text = String(segment.text || segment.content || "").replace(/\s+/g, " ").trim();
         if (!text) return;
         const start = storedTime(segment.start, segment.start_seconds);
         const end = storedTime(segment.end, segment.end_seconds);
         const speaker = String(firstValue(segment.speaker, segment.speaker_label, segment.speaker_id) || "");
-        let fresh = !current || speaker !== current.speaker;
+        let crossedShot = false;
+        while (start !== null && nextShot < shots.length && shots[nextShot].seconds <= start) {
+          crossedShot = true;
+          nextShot += 1;
+        }
+        let fresh = !current || speaker !== current.speaker || crossedShot
+          || (start === null) !== (current.start === null);
         if (!fresh) {
           const count = current.parts.length;
           const lastLine = current.parts[count - 1];
@@ -8309,41 +8319,27 @@
       return html ? `<div class="reader-transcript reader-shots">${html}</div>` : "";
     }
 
-    // Paragraphs in time order with each screenshot after the paragraph
-    // its time falls in; shots with no readable time close the document.
+    // Merge paragraphs and screenshots by their stored time. Untimed rows
+    // close the document; equal times put screenshots before the paragraph.
     function readerTranscriptHtml(row, sidecar = {}) {
       const paragraphs = readerParagraphs(sidecar);
       if (!paragraphs.length) return "";
       const url = sourceUrlOf(row, sidecar);
       const { timed, loose } = readerShotList(sidecar);
-      // The start of the next paragraph that has a stored time, per index.
-      const nextStart = new Array(paragraphs.length).fill(Infinity);
-      for (let i = paragraphs.length - 2; i >= 0; i -= 1) {
-        const after = paragraphs[i + 1];
-        nextStart[i] = after.start !== null ? after.start : nextStart[i + 1];
-      }
-      let next = 0;
-      const rows = paragraphs.map((paragraph, index) => {
-        const until = nextStart[index];
-        const figures = [];
-        if (paragraph.start !== null || index === paragraphs.length - 1) {
-          while (next < timed.length && timed[next].seconds < until) {
-            figures.push(readerShotHtml(row, timed[next].shot, timed[next].seconds, url));
-            next += 1;
-          }
-        }
+      const timeline = timed.concat(paragraphs.map((paragraph) => ({ paragraph, seconds: paragraph.start })), loose)
+        .sort((a, b) => (a.seconds ?? Infinity) - (b.seconds ?? Infinity));
+      const rows = timeline.map((item) => {
+        if (item.shot) return readerShotHtml(row, item.shot, item.seconds, url);
+        const paragraph = item.paragraph;
         const speaker = paragraph.speaker ? `<b class="reader-speaker">${htmlEscape(paragraph.speaker)}</b> ` : "";
         return `
           <div class="reader-row reader-para"${paragraph.start === null ? "" : ` data-reader-seconds="${paragraph.start}"`}>
             <div class="reader-gutter">${readerTimeHtml(paragraph.start, url)}</div>
             <p>${speaker}${htmlEscape(paragraph.parts.join(" "))}</p>
           </div>
-          ${figures.join("")}
         `;
       });
-      const rest = timed.slice(next).concat(loose)
-        .map((item) => readerShotHtml(row, item.shot, item.seconds, url)).join("");
-      return `<div class="reader-transcript">${rows.join("")}${rest}</div>`;
+      return `<div class="reader-transcript">${rows.join("")}</div>`;
     }
 
     // The saved Markdown as the document (notes, pages, posts, threads, and
@@ -8493,16 +8489,67 @@
       return parts.join("");
     }
 
+    // Keep the saved file intact; the copied media document leads with its
+    // transcript and uses file URLs that survive being pasted elsewhere.
+    function readerClipboardMarkdown(markdown, row, sidecar = {}) {
+      if (isNoteContent(row, sidecar)) return markdown;
+      let sections = [""];
+      let inTranscript = false;
+      let fence = "";
+      const lines = String(markdown).replace(/\r\n/g, "\n").split("\n");
+      lines.forEach((line, index) => {
+        const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+        if (marker) {
+          if (!fence) fence = marker[1];
+          else if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = "";
+        } else if (!fence && /^## /.test(line)) {
+          // Transcript headings belong to its body until a saved footer.
+          const footer = /^## (Screenshots|Top Comments|Channel Context|Transcript Reliability|Comment Intelligence)\s*$/.test(line)
+            && /(?:^|\n)---\s*$/.test(sections[sections.length - 1]);
+          if (!inTranscript || footer) {
+            sections.push("");
+            inTranscript = /^## Transcript\s*$/.test(line);
+          }
+        }
+        sections[sections.length - 1] += line + (index < lines.length - 1 ? "\n" : "");
+      });
+      sections = sections.filter((section) => !/^## Tags\s+No tags\s*(?:---\s*)?$/.test(section));
+      const transcript = sections.findIndex((section) => /^## Transcript\s*\n/.test(section));
+      if (isTimedMedia(row, sidecar) && transcript > 0) {
+        const body = sections.splice(transcript, 1)[0].trimEnd() + "\n\n";
+        sections.splice(/^## /.test(sections[0]) ? 0 : 1, 0, body);
+      }
+      return sections.join("").replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (match, label, target) => {
+        if (/^(?:https?:|data:|file:)/i.test(target)) return match;
+        const encode = (part) => encodeURIComponent(part)
+          .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+        const raw = target.replace(/\\/g, "/");
+        const encoded = raw.split("/").map((part) => {
+          try { part = decodeURIComponent(part); } catch (_) {}
+          return encode(part);
+        }).join("/").replace(/^([A-Za-z])%3A\//, "$1:/");
+        const folder = folderPathOf(row).replace(/\\/g, "/").split("/").map(encode)
+          .join("/").replace(/^([A-Za-z])%3A\//, "$1:/");
+        const path = /^(?:[A-Za-z]:\/|\/)/.test(raw) ? encoded : joinLocalPath(folder, encoded);
+        if (!/^(?:[A-Za-z]:\/|\/)/.test(path)) return match;
+        const prefix = path.startsWith("//") ? "file:" : path.startsWith("/") ? "file://" : "file:///";
+        return `![${label}](${new URL(prefix + path).href})`;
+      });
+    }
+
     // Reader actions on the saved Markdown: copy it, or copy it and open
     // Claude to paste into (the extension's Send-to flow).
     async function copySelectedMarkdown({ openClaude = false } = {}) {
-      const videoId = videoIdOf(state.selectedYoink);
+      const row = state.selectedYoink;
+      let sidecar = state.selectedYoinkSidecar || {};
+      const videoId = videoIdOf(row);
       if (!videoId) return showToast("Select a uoink first.");
       let markdown = state.selectedYoinkMarkdown;
       try {
         if (!markdown) markdown = await loadYoinkMarkdown(videoId);
         if (!markdown) throw new Error("empty");
-        await navigator.clipboard.writeText(markdown);
+        if (videoIdOf(state.selectedYoink) === videoId) sidecar = state.selectedYoinkSidecar || sidecar;
+        await navigator.clipboard.writeText(readerClipboardMarkdown(markdown, row, sidecar));
       } catch (_) {
         return showToast("Couldn't copy the Markdown. Open the transcript file instead.");
       }
