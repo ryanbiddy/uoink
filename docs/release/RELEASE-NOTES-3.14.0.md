@@ -24,10 +24,9 @@
 **Mac (Apple Silicon, macOS 15 or later; preview)**
 
 1. Download `Uoink-3.14.0-macos-arm64.dmg` and check its SHA-256 against `SHA256SUMS.txt`.
-2. Open the DMG, drag Uoink to Applications and eject the disk.
-3. This Mac build is not signed or notarized, so macOS blocks the first open. Open Uoink from Applications once, then go to **System Settings > Privacy & Security** and click **Open Anyway** next to the Uoink message.
-4. In Chrome, open `chrome://extensions`, turn on **Developer mode** and click **Load unpacked**. The dashboard's **Get the extension** card copies the extension's folder path; in the picker, press ⌘⇧G, paste it and press Return.
-5. Claude Desktop: install `uoink-3.14.0-macos.mcpb`.
+2. Open the DMG, drag Uoink to Applications, eject the disk, then open Uoink from Applications.
+3. In Chrome, open `chrome://extensions`, turn on **Developer mode** and click **Load unpacked**. The dashboard's **Get the extension** card copies the extension's folder path; in the picker, press ⌘⇧G, paste it and press Return.
+4. Claude Desktop: install `uoink-3.14.0-macos.mcpb`.
 
 See [docs/mac/INSTALL.md](https://github.com/ryanbiddy/uoink/blob/v3.14.0/docs/mac/INSTALL.md) for login startup, logs and uninstalling.
 
@@ -51,5 +50,14 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.14.0/docs/linux.m
 - YouTube often blocks cloud IP addresses. On a Linux server or container, captions can fail, and the local Whisper fallback helps only when the audio download itself works.
 - Research doesn't capture podcast episodes yet: it lists them, then skips them with `podcast_capture_later`. Podcast transcripts already in your library still count as evidence. Reddit search is not available in research yet.
 - Linux is headless only: no tray, splash or dashboard window (the helper logs the dashboard URL instead). A host install needs ffmpeg and ffprobe on the system; without them media tools answer `media_requires_ffmpeg`. Podcast transcription on Linux uses CPU faster-whisper without speaker labels unless you install the optional WhisperX requirements.
-- The Mac build in this release is unsigned (see the install steps). Mac is Apple Silicon only, and Uoink doesn't update itself there yet.
+- Mac: Apple Silicon only. Uoink doesn't update itself there yet, so install new versions from the DMG.
 - Chrome (tested). Edge and Brave may work but are not tested.
+
+## Checksums
+
+| File | Size | SHA-256 |
+| --- | --- | --- |
+| `Uoink-Setup-3.14.0.exe` | 519,322,824 B | `b9e5acf346b252bd34cf00ee223a68b2b9fa65cf0dfd932603d14f3b8a957a52` |
+| `uoink-3.14.0.mcpb` | 117,589 B | `44c6a794de07d4d327fb149ecaa481dd5808aa4fae215082f4c0a74ec60429ef` |
+| `Uoink-3.14.0-macos-arm64.dmg` | 695,008,714 B | `2591ea57a39667c59216b1ba96f50532a7edb88716205a432594da5ba5742dd1` |
+| `uoink-3.14.0-macos.mcpb` | 114,114 B | `ed674f182195370b4c06af5829e46faeb21ee44a05f8dfdd6f5ac75007318626` |
