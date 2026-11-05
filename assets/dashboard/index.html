@@ -1970,6 +1970,9 @@
       flex-shrink: 0;
     }
 
+    #universalCaptureAllow.permission-hidden { visibility: hidden; }
+    #universalCaptureNote { min-height: 4.35em; }
+
     .note-capture-text {
       width: 100%;
       resize: vertical;
@@ -5708,24 +5711,16 @@
           <form class="research-form" id="researchForm">
             <label for="researchQuestion">Research question</label>
             <textarea class="field" id="researchQuestion" maxlength="500" required placeholder="What do people building AI agents say about evals?"></textarea>
-            <fieldset class="research-sources"><legend>Search sources</legend>
+            <p class="setting-copy" id="researchConsentNote">Selecting a source allows Uoink to search it. Search words go to YouTube, HN (Algolia) or Apple Podcasts. HackerTube provides a public list. Library search stays local.</p>
+            <fieldset class="research-sources" id="researchConsent" aria-describedby="researchConsentNote"><legend>Search sources</legend>
               <label class="research-source"><input type="checkbox" data-research-source="library" checked>Library</label>
-              <label class="research-source"><input type="checkbox" data-research-source="youtube" disabled>YouTube</label>
-              <label class="research-source"><input type="checkbox" data-research-source="podcast" disabled>Podcasts</label>
-              <label class="research-source"><input type="checkbox" data-research-source="hn" disabled>HN</label>
-              <label class="research-source"><input type="checkbox" data-research-source="hackertube" disabled>HackerTube</label>
+              <label class="research-source"><input type="checkbox" data-research-source="youtube" data-research-consent="youtube" disabled>YouTube</label>
+              <label class="research-source"><input type="checkbox" data-research-source="podcast" data-research-consent="podcast" disabled>Podcasts</label>
+              <label class="research-source"><input type="checkbox" data-research-source="hn" data-research-consent="hn" disabled>HN</label>
+              <label class="research-source"><input type="checkbox" data-research-source="hackertube" data-research-consent="hackertube" disabled>HackerTube</label>
               <label class="research-source"><input type="checkbox" data-research-source="reddit" disabled>Reddit · coming later</label>
             </fieldset>
-            <details class="research-consent"><summary>Network consent</summary>
-              <p class="setting-copy">Search words go to the services you enable. YouTube uses YouTube search; HN uses Algolia; podcasts use Apple search. HackerTube downloads its public list. Library search stays local.</p>
-              <div id="researchConsent" class="inline-row">
-                <label class="inline-row"><input type="checkbox" data-research-consent="youtube">Allow YouTube</label>
-                <label class="inline-row"><input type="checkbox" data-research-consent="podcast">Allow Podcasts</label>
-                <label class="inline-row"><input type="checkbox" data-research-consent="hn">Allow HN</label>
-                <label class="inline-row"><input type="checkbox" data-research-consent="hackertube">Allow HackerTube</label>
-              </div>
-              <div class="setting-feedback"><span class="setting-status" id="researchConsentSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="researchConsentSaveRetry" type="button" data-setting-retry="researchConsent">Retry save</button></div>
-            </details>
+            <div class="setting-feedback"><span class="setting-status" id="researchConsentSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="researchConsentSaveRetry" type="button" data-setting-retry="researchConsent">Retry save</button></div>
             <div class="research-limits">
               <label for="researchMax">Sources to capture<input class="field" id="researchMax" type="number" min="1" max="30" value="12" required></label>
               <label for="researchAsr">ASR budget (minutes)<input class="field" id="researchAsr" type="number" min="0" max="1440" value="120" required></label>
@@ -5743,7 +5738,7 @@
             <p class="soft-note" id="researchRunLabel"></p>
             <p class="soft-note">Podcasts can be discovered. Direct podcast capture is coming later; saved transcripts can be reused.</p>
             <ol class="research-list" id="researchCandidates" aria-label="Ranked research candidates"></ol>
-            <div class="inline-row"><button class="button" type="button" id="researchCapture" disabled>Capture selected</button><span class="soft-note" id="researchSelection" aria-live="polite"></span></div>
+            <div class="inline-row"><button class="button" type="button" id="researchUseSaved" disabled>Use saved</button><button class="button" type="button" id="researchCapture" disabled>Capture new</button><span class="soft-note" id="researchSelection" aria-live="polite"></span></div>
             <p class="setting-copy">When sources are ready, copy the prompt to an AI with Uoink MCP or local CLI access. It gathers evidence and publishes the report here.</p>
           </section>
           <section class="research-section hidden" id="researchPublished" aria-labelledby="researchReportHeading">
@@ -5819,6 +5814,18 @@
               <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
             </div>
           </section>
+          <div class="universal-capture" id="universalCapture">
+            <div class="eyebrow">Paste a URL</div>
+            <h2>Uoink anything</h2>
+            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
+            <div class="universal-capture-row">
+              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
+              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
+              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
+              <button class="button permission-hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote">Allow</button>
+            </div>
+            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
+          </div>
           <section class="discovery-panel" id="sources-discover" aria-labelledby="discoveryTitle">
             <h2 id="discoveryTitle" tabindex="-1">Discover</h2>
             <p class="discovery-note">Find posts with ScrapeCreators, then choose what to capture. <a href="#settings/connected-services">Set up Connected services</a>.</p>
@@ -5840,18 +5847,6 @@
             <p class="discovery-note">Select up to 10 posts. Results are sorted by lift; posts without a lift appear last. No thumbnails are loaded.</p>
             <ul class="discovery-results" id="discoveryResults" aria-label="Discovery results"></ul>
           </section>
-          <div class="universal-capture" id="universalCapture">
-            <div class="eyebrow">Paste a URL</div>
-            <h2>Uoink anything</h2>
-            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
-            <div class="universal-capture-row">
-              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
-              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
-              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
-              <button class="button hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote"></button>
-            </div>
-            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
-          </div>
           <div class="universal-capture list-import-card" id="listImportCard">
             <div class="eyebrow">Many at once</div>
             <h2>Import a list</h2>
@@ -11278,7 +11273,7 @@
     let universalDetectTimer = null;
     // Shared with the Library box, which adds feeds the same way.
     const PODCAST_FEED_SAVED_COPY = "Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.";
-    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null, allowHost: "" };
+    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null, allowHost: "", allowBusy: false };
 
     // A page the site allowlist turned away, said the same way here and on
     // a Library capture row: with its host, "Allow <host>" sits beside it.
@@ -11292,9 +11287,13 @@
       universalState.allowHost = host || "";
       const btn = els.universalCaptureAllow;
       if (!btn) return;
-      btn.disabled = false;
-      btn.textContent = host ? `Allow ${host}` : "";
-      btn.classList.toggle("hidden", !host);
+      btn.disabled = universalState.allowBusy;
+      btn.textContent = "Allow";
+      btn.setAttribute("aria-label", host ? `Allow ${host}` : "Allow");
+      btn.title = host ? `Allow pages from ${host}` : "";
+      btn.classList.toggle("permission-hidden", !host);
+      if (els.universalCaptureButton) els.universalCaptureButton.disabled = !universalState.endpoint
+        || !!host || universalState.busy || universalState.allowBusy;
     }
 
     async function detectCaptureUrl(url) {
@@ -11334,12 +11333,12 @@
       universalState.payloadKey = supported ? (result.payload_key || "url") : null;
       universalState.canonical = (result && result.canonical) || "";
       universalState.label = (result && result.label) || "";
-      setUniversalAllowHost("");
+      const allowHost = supported && result.needs_allow ? urlHostname(universalState.canonical) : "";
+      setUniversalAllowHost(allowHost);
       setCaptureChip(supported ? "supported" : "unsupported",
         result && result.label ? result.label : "Not a supported source yet");
-      if (els.universalCaptureButton) els.universalCaptureButton.disabled = !supported;
       if (els.universalCaptureNote) {
-        els.universalCaptureNote.textContent = (result && result.note)
+        els.universalCaptureNote.textContent = allowHost ? allowlistWallCopy(allowHost) : (result && result.note)
           || (supported ? "Ready. Click Uoink it to capture it." : "");
       }
     }
@@ -11347,6 +11346,7 @@
     async function runCaptureDetection() {
       const raw = els.universalCaptureInput ? els.universalCaptureInput.value.trim() : "";
       if (!raw) {
+        ++universalDetectSeq;
         resetUniversalCapture();
         return;
       }
@@ -11355,6 +11355,7 @@
       // and could swallow the very click that blurred the field.
       if (raw === universalState.lastRaw) return;
       const seq = ++universalDetectSeq;
+      resetUniversalCapture();
       setCaptureChip("checking", "Checking...");
       if (els.universalCaptureButton) els.universalCaptureButton.disabled = true;
       try {
@@ -11373,11 +11374,13 @@
 
     function scheduleCaptureDetection() {
       if (universalDetectTimer) clearTimeout(universalDetectTimer);
+      ++universalDetectSeq;
+      resetUniversalCapture();
       universalDetectTimer = setTimeout(runCaptureDetection, 220);
     }
 
     async function runUniversalCapture() {
-      if (universalState.busy || !universalState.endpoint) return;
+      if (universalState.busy || universalState.allowBusy || universalState.allowHost || !universalState.endpoint) return;
       const url = universalState.canonical
         || (els.universalCaptureInput ? els.universalCaptureInput.value.trim() : "");
       if (!url) return;
@@ -11422,26 +11425,34 @@
       } finally {
         universalState.busy = false;
         if (btn) { btn.textContent = "Uoink it"; btn.removeAttribute("aria-busy"); }
-        if (btn) btn.disabled = !universalState.endpoint;
+        if (btn) btn.disabled = !universalState.endpoint || !!universalState.allowHost || universalState.allowBusy;
       }
     }
 
-    // "Allow <host>" in the box: add the host the way Settings' Add does,
-    // then capture the same link again.
+    // Permission and capture are separate clicks. A different host cannot
+    // inherit an earlier page's permission result.
     async function allowUniversalCaptureSite() {
       const host = universalState.allowHost;
-      const btn = els.universalCaptureAllow;
-      if (!host || universalState.busy) return;
-      if (btn) { btn.disabled = true; btn.textContent = "Allowing..."; }
+      if (!host || universalState.busy || universalState.allowBusy) return;
+      const seq = universalDetectSeq;
+      universalState.allowBusy = true;
+      setUniversalAllowHost(host);
       try {
         await saveAllowedSite(host);
+        if (universalState.allowHost !== host) return;
+        setUniversalAllowHost("");
+        if (els.universalCaptureNote) els.universalCaptureNote.textContent = "Site allowed. Click Uoink it to capture this page.";
       } catch (err) {
-        if (btn) { btn.disabled = false; btn.textContent = `Allow ${host}`; }
-        if (els.universalCaptureNote) els.universalCaptureNote.textContent = `Couldn't allow ${host}: ${settingError(err)}`;
-        return;
+        if (seq === universalDetectSeq && universalState.allowHost === host && els.universalCaptureNote) {
+          els.universalCaptureNote.textContent = `Couldn't allow ${host}: ${settingError(err)}`;
+        }
+      } finally {
+        universalState.allowBusy = false;
+        setUniversalAllowHost(universalState.allowHost);
       }
-      setUniversalAllowHost("");
-      await runUniversalCapture();
+      if (seq === universalDetectSeq && !universalState.allowHost && els.universalCaptureButton) {
+        els.universalCaptureButton.focus({ preventScroll: true });
+      }
     }
 
     // Context-layer item 1: jot a note. A note is a first-class uoink, so the
@@ -11776,9 +11787,10 @@
       });
       document.querySelectorAll("[data-research-source]").forEach((input) => {
         const kind = input.dataset.researchSource;
-        input.disabled = kind === "reddit" || (kind !== "library" && !enabled.includes(kind));
-        if (input.disabled) input.checked = false;
+        input.disabled = kind === "reddit" || (kind !== "library" && (researchState.consentBusy || !state.settings));
+        if (kind !== "library") input.checked = kind !== "reddit" && enabled.includes(kind);
       });
+      researchEl("researchDiscover").disabled = researchState.busy || researchState.consentBusy;
     }
 
     async function saveResearchConsent(input, checked = input.checked) {
@@ -11803,11 +11815,18 @@
       const view = researchState.view;
       const count = researchState.selected.size;
       const limit = view ? view.scope.max_sources : 30;
-      researchEl("researchCapture").disabled = researchState.busy || !count || count > limit;
       const candidates = view ? view.candidates.filter((c) => researchState.selected.has(c.key)) : [];
+      const saved = candidates.filter((c) => c.in_library).length;
+      const fresh = candidates.filter((c) => !c.in_library && c.capturable !== false && c.kind !== "podcast").length;
+      researchEl("researchUseSaved").disabled = researchState.busy || !saved || !!fresh || count > limit;
+      researchEl("researchCapture").disabled = researchState.busy || !fresh || count > limit;
+      researchEl("researchUseSaved").classList.toggle("hidden", !view || !view.candidates.some((c) => c.in_library));
+      researchEl("researchCapture").classList.toggle("hidden", !view || !view.candidates.some((c) => !c.in_library && c.capturable !== false && c.kind !== "podcast"));
       const minutes = candidates.reduce((total, c) => total + (c.in_library ? 0 : c.est_capture === "captions" ? 1
         : Number((/asr ~(\d+)/i.exec(c.est_capture || "") || [])[1]) || 15), 0);
-      researchEl("researchSelection").textContent = `${count} selected (limit ${limit}) · estimated ${minutes} min; actual time varies`;
+      researchEl("researchSelection").textContent = `${saved} saved · ${fresh} new selected (limit ${limit})`
+        + (fresh ? ` · estimated ${minutes} min; actual time varies` : "")
+        + (saved && fresh ? ". Capture new also uses the selected saved transcripts." : "");
     }
 
     function renderResearchCandidates() {
@@ -11830,7 +11849,7 @@
         const meta = researchNode("div", null, "soft-note");
         meta.append(researchLink(candidate.channel || "Source", candidate.url, candidate),
           researchNode("span", ` · ${fmtDuration(candidate.duration_s)} · `),
-          researchNode("span", candidate.in_library ? "saved transcript" : (candidate.est_capture || "unknown").replace(/^asr/i, "ASR"), "research-chip"));
+          researchNode("span", candidate.in_library ? "Use saved" : check.disabled ? "Capture unavailable" : "Capture new", "research-chip"));
         const why = researchNode("details");
         why.append(researchNode("summary", "Why ranked here"));
         const reasons = researchNode("ul");
@@ -11922,7 +11941,7 @@
       catch (err) { researchEl("researchProgress").textContent = err.message || "Research could not complete. Retry the action."; }
       finally {
         researchState.busy = false;
-        researchEl("researchDiscover").disabled = false;
+        researchEl("researchDiscover").disabled = researchState.consentBusy;
         researchEl("researchRuns").disabled = false;
         researchSelection();
         scheduleResearchPoll();
@@ -11962,10 +11981,11 @@
       researchEl("researchCopyPrompt").disabled = false;
       renderResearchCandidates();
       renderResearchReport(view);
-      researchEl("researchProgress").textContent = "Choose sources to capture, or copy the prompt if this run is ready.";
+      researchEl("researchProgress").textContent = "Use saved transcripts or capture new sources, then copy the prompt for your AI.";
     }
 
     async function startResearch() {
+      if (researchState.consentBusy) return;
       const question = researchEl("researchQuestion").value.trim();
       const sourceKinds = [...document.querySelectorAll("[data-research-source]")].filter((i) => i.checked && !i.disabled).map((i) => i.dataset.researchSource);
       const scope = { question, source_kinds: sourceKinds, max_sources: Number(researchEl("researchMax").value), max_asr_minutes: Number(researchEl("researchAsr").value) };
@@ -11978,24 +11998,36 @@
       await openResearchRun(start.run_id);
       await loadResearchRuns();
       const notes = [...(found.skipped || []).map((s) => `${s.kind}: ${s.reason}`), ...(found.errors || []).map((s) => `${s.kind}: ${s.code}`)];
-      if (start.needs_consent.length) notes.push(`Enable ${start.needs_consent.join(", ")} in Network consent or Settings.`);
+      if (start.needs_consent.length) notes.push(`Select ${start.needs_consent.join(", ")} in Search sources or Settings.`);
       researchEl("researchProgress").textContent = `${researchState.view.candidates.length} candidates. ${notes.join("; ")}`;
       researchEl("researchCandidatesHeading").focus();
     }
 
-    async function captureResearch() {
+    async function captureResearch(useSaved = false) {
       ++researchState.seq; // An older status read must not replace the new ETA.
       const runId = researchState.runId;
-      const keys = [...researchState.selected];
-      if (!researchRunId(runId) || !keys.length) return;
+      const view = researchState.view;
+      const candidates = (view ? view.candidates : []).filter((c) => researchState.selected.has(c.key)
+        && (c.in_library || (c.capturable !== false && c.kind !== "podcast")));
+      const fresh = candidates.some((c) => !c.in_library);
+      const keys = candidates.map((c) => c.key);
+      if (!researchRunId(runId) || !keys.length || researchState.selected.size > view.scope.max_sources
+          || (useSaved ? fresh : !fresh)) return;
       researchState.pollActive = false;
       scheduleResearchPoll();
       const capture = await researchTool("research_capture", { run_id: runId, keys });
-      researchState.pollActive = true;
-      researchState.pollDeadline = Date.now() + RESEARCH_POLL_MAX_MS;
-      researchState.eta = { ...capture.eta, started: Date.now() };
+      researchState.pollActive = capture.queued.length > 0;
+      researchState.pollDeadline = researchState.pollActive ? Date.now() + RESEARCH_POLL_MAX_MS : 0;
+      researchState.eta = researchState.pollActive ? { ...capture.eta, started: Date.now() } : null;
+      const already = new Set(capture.already.map((c) => c.key));
+      view.candidates.forEach((c) => { if (already.has(c.key)) c.in_library = true; });
+      already.forEach((key) => researchState.selected.delete(key));
+      if (already.size) renderResearchCandidates();
       const skipped = (capture.skipped || []).map((s) => `${s.key}: ${s.reason}`).join("; ");
-      researchEl("researchProgress").textContent = `Queued ${capture.queued.length}; already saved ${capture.already.length}. Estimated ${capture.eta.min_minutes}–${capture.eta.max_minutes} min. ${skipped}`;
+      researchEl("researchProgress").textContent = !capture.queued.length && !capture.already.length
+        ? `No sources were added. ${skipped}` : !capture.queued.length
+        ? `Using ${capture.already.length} saved transcript${capture.already.length === 1 ? "" : "s"}. Copy the prompt for your AI. ${skipped}`
+        : `Queued ${capture.queued.length}; already saved ${capture.already.length}. Estimated ${capture.eta.min_minutes}–${capture.eta.max_minutes} min. ${skipped}`;
     }
 
     function scheduleResearchPoll() {
@@ -12027,7 +12059,14 @@
         researchState.pollActive = Array.isArray(status.items) && status.items.length > 0 && !status.done;
         const view = await authFetch(`/research/${runId}`);
         if (seq !== researchState.seq || researchState.busy || state.activeTab !== "research" || document.hidden) return;
+        const ready = new Set((status.items || []).filter((item) => ["ready", "captioned"].includes(item.state)).map((item) => item.key));
+        view.candidates.forEach((c) => { if (ready.has(c.key)) c.in_library = true; });
+        // Ready sources are already in the run; only unfinished picks need an action.
+        const selectedCount = researchState.selected.size;
+        ready.forEach((key) => researchState.selected.delete(key));
+        const candidatesChanged = JSON.stringify(view.candidates) !== JSON.stringify(researchState.view.candidates);
         researchState.view = view;
+        if (candidatesChanged || selectedCount !== researchState.selected.size) renderResearchCandidates();
         const counts = status.counts || {};
         let eta = "";
         if (!status.done && researchState.eta) {
@@ -12038,7 +12077,7 @@
         researchEl("researchProgress").textContent = `${status.ready_count} ready · ${counts.queued || 0} queued · ${(counts.capturing || 0) + (counts.asr_running || 0)} capturing · ${counts.failed || 0} failed. ASR budget left: ${status.asr_minutes_left} min.${eta} ${failures}`
           + (!status.done ? "" : status.ready_count > 0 ? " Capture finished. Copy the prompt to gather evidence and publish."
             : (status.items || []).length ? " No sources are ready. Review the failures or select other candidates."
-            : " No capture has started. Select candidates and choose Capture selected.");
+            : " No capture has started. Choose Use saved or Capture new.");
         renderResearchReport(view);
       } catch (err) {
         if (seq === researchState.seq) {
@@ -12066,6 +12105,7 @@
     function wireResearch() {
       researchEl("researchForm").addEventListener("submit", (event) => { event.preventDefault(); researchWork(startResearch); });
       researchEl("researchCapture").addEventListener("click", () => researchWork(captureResearch));
+      researchEl("researchUseSaved").addEventListener("click", () => researchWork(() => captureResearch(true)));
       researchEl("researchReload").addEventListener("click", () => researchWork(async () => {
         await loadResearchRuns();
         if (researchState.runId) await openResearchRun(researchState.runId);

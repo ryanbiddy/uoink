@@ -16216,12 +16216,14 @@ class Handler(BaseHTTPRequestHandler):
         Classifies a pasted URL into one capture source and tells the
         dashboard which route + payload key to use. Reuses
         _classify_capture_url so detection stays glued to what the capture
-        routes actually accept. No user data, but token-gated like the rest
-        of the mutating/reading surface (the dashboard already carries the
-        token). Always 200: an unsupported URL is a valid answer, not an
-        error."""
+        routes actually accept. Reads local site permissions without
+        fetching the page. Token-gated like the rest of the reading surface.
+        Always 200: an unsupported URL is a valid answer, not an error."""
         raw = (parse_qs(urlparse(self.path).query).get("url") or [""])[0]
         result = _classify_capture_url(raw)
+        if result.get("endpoint") == "/extract/page":
+            result["needs_allow"] = not page_extractor.host_is_allowed(
+                _get_index(), result["canonical"])
         self._send_json(200, result)
 
     # ---- v2.5 S2 engagement memory -----------------------------------------

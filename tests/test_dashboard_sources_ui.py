@@ -88,6 +88,11 @@ def test_sources_ui_contains_standing_subscription_panel() -> None:
     require("No standing subscriptions yet" in DASHBOARD, "Empty state copy missing")
 
 
+def test_free_paste_box_precedes_paid_discovery() -> None:
+    sources = DASHBOARD.split('id="tab-sources"', 1)[1].split('id="tab-settings"', 1)[0]
+    assert sources.index('id="universalCapture"') < sources.index('id="sources-discover"')
+
+
 def test_sources_ui_contains_consent_confirmation_modal() -> None:
     """Verifies presence of the consent confirmation modal with 25-cap and 10-start notices."""
     require('id="sourceConsentModal"' in DASHBOARD, "#sourceConsentModal dialog missing")
