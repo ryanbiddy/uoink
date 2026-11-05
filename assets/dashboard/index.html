@@ -5648,7 +5648,8 @@
                 <button class="button" type="button" id="yoinkCopyMarkdown">Copy as Markdown</button>
                 <button class="button" type="button" id="yoinkSendClaude">Send to Claude</button>
                 <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
-                <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
+                <button class="button primary" type="button" id="yoinkWriteFrom" aria-describedby="yoinkWriteHint" disabled>Write from this</button>
+                <span class="soft-note hidden" id="yoinkWriteHint">Connect Claude first</span>
                 <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
                   <summary class="button ghost">More actions</summary>
                   <div class="action-menu-popover">
@@ -6950,6 +6951,7 @@
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
       yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
+      yoinkWriteHint: document.getElementById("yoinkWriteHint"),
       yoinkBack: document.getElementById("yoinkBack"),
       runningPill: document.getElementById("runningPill"),
       extensionPathText: document.getElementById("extensionPathText"),
@@ -7552,6 +7554,7 @@
     }
 
     function renderAgentSetup() {
+      renderYoinkWriteFrom();
       const markup = agentSetupMarkup();
       [els.agentSetupCard, els.settingsAgentSetupCard].filter(Boolean).forEach((card) => {
         card.classList.toggle("success", connectedAgents().length > 0);
@@ -8577,6 +8580,15 @@
       },
     };
 
+    function renderYoinkWriteFrom() {
+      const connected = connectedAgents().length > 0;
+      els.yoinkWriteFrom.disabled = !videoIdOf(state.selectedYoink) || !connected;
+      if (connected) els.yoinkWriteFrom.removeAttribute("aria-describedby");
+      else els.yoinkWriteFrom.setAttribute("aria-describedby", "yoinkWriteHint");
+      els.yoinkWriteHint.textContent = "Connect Claude first";
+      els.yoinkWriteHint.classList.toggle("hidden", connected || !state.selectedYoink);
+    }
+
     function renderYoinkDetail() {
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
@@ -8587,7 +8599,7 @@
       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
       els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
-      els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
+      renderYoinkWriteFrom();
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
@@ -10572,8 +10584,11 @@
       window.addEventListener("library-activity-mutation", () => markLibraryActivityMutated());
     }
 
+    let standingRefreshTimer = null;
+
     async function loadStandingSubscriptions() {
       if (!els.standingSubscriptionList) return;
+      clearTimeout(standingRefreshTimer);
       state.standingSourcesLoading = true;
       try {
         const res = await callRegistryTool("list_sources", { limit: 100, include_archived: false });
@@ -10585,6 +10600,17 @@
         // The Sources badge counts subscribed sources and hides at zero.
         setSidebarBadge(els.sourcesNavCount, state.standingSources.length, "subscribed sources", { hideWhenZero: true });
         renderStandingSubscriptions();
+        if (state.activeTab === "sources" && !document.hidden && state.standingSources.some((source) => {
+          if (source.kind !== "podcast_rss" || source.archived || source.detection_enabled === false) return false;
+          const det = source.detection || {};
+          const counts = source.item_counts || {};
+          return !det.last_poll_success_ms || det.poll_in_progress || (source.enrollment || {}).pending
+            || (source.consent_state === "on" && (counts.eligible || counts.started || (source.in_flight || []).length));
+        })) {
+          standingRefreshTimer = setTimeout(() => {
+            if (state.activeTab === "sources" && !document.hidden) return loadStandingSubscriptions();
+          }, 3000);
+        }
       }
     }
 
@@ -10715,6 +10741,11 @@
 
         // Back catalog enrollment
         const enroll = source.enrollment || {};
+        const episode = kind === "podcast_rss" ? source.latest_episode : null;
+        const episodeProgress = kind !== "podcast_rss" ? "" : lastError
+          ? "Couldn't check for episodes. Uoink will try again."
+          : det.poll_in_progress || !det.last_poll_success_ms || enroll.pending
+            ? "Looking for episodes…" : !episode ? "No episodes in this feed yet." : "";
         let enrollmentCopy = "";
         if (enroll.pending) {
           enrollmentCopy = "Enrollment pending (up to 25 items)";
@@ -10809,6 +10840,20 @@
                 </div>
               </div>
             </div>
+
+            ${episodeProgress ? `<p class="soft-note" role="status">${htmlEscape(episodeProgress)}</p>` : ""}
+            ${episode ? `
+              <div class="captured-items-box">
+                <div class="in-flight-head"><span>${episode.capture_state === "committed" ? "Saved episode" : "Latest episode"}</span></div>
+                <div class="captured-item">
+                  <span>${htmlEscape(episode.title || "Podcast episode")}</span>
+                  ${episode.capture_state === "committed" && episode.video_id
+                    ? `<a href="#item/${encodeURIComponent(episode.video_id)}">Read episode</a>`
+                    : /^https?:\/\//i.test(episode.canonical_url || "")
+                      ? `<a href="${htmlEscape(episode.canonical_url)}" target="_blank" rel="noreferrer">Open episode</a>` : ""}
+                </div>
+              </div>
+            ` : ""}
 
             ${inFlight.length ? `
               <div class="in-flight-box">
@@ -11305,6 +11350,7 @@
         });
         if (universalState.source === "podcast_feed") {
           showToast(PODCAST_FEED_SAVED_COPY);
+          await loadStandingSubscriptions();
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
@@ -12772,7 +12818,7 @@
 
     function renderLibrary() {
       renderTopicOverview();
-      renderLibraryCaptures();
+      const captureCount = renderLibraryCaptures();
       // The helper orders every match by the Sort control (D26), so the
       // rows show in the order they arrive, Load more pages included.
       const rows = state.library.slice();
@@ -12799,7 +12845,7 @@
           els.loadMore.classList.add("hidden");
           els.libraryGrid.innerHTML = "";
           setLibraryEmptyState("no-matches");
-          els.libraryEmpty.classList.remove("hidden");
+          els.libraryEmpty.classList.toggle("hidden", captureCount > 0);
           return;
         }
         setLibraryHeadline("empty");
@@ -12808,7 +12854,7 @@
         els.loadMore.classList.add("hidden");
         els.libraryGrid.innerHTML = "";
         setLibraryEmptyState("empty");
-        els.libraryEmpty.classList.remove("hidden");
+        els.libraryEmpty.classList.toggle("hidden", captureCount > 0);
         return;
       }
       setLibraryHeadline("ready", filtersActive ? state.total : navTotal);
@@ -12923,9 +12969,17 @@
     }
 
     async function loadThumbnail(row) {
-      if (!row.thumbnail_path || !row.video_id) return;
+      if (!row.video_id) return;
       const img = document.querySelector(`img[data-thumb-for="${CSS.escape(row.video_id)}"]`);
       if (!img) return;
+      if (!row.thumbnail_path) {
+        if (isPodcastContent(row) && /^https?:\/\//i.test(row.artwork_url || "")) {
+          img.referrerPolicy = "no-referrer";
+          img.src = row.artwork_url;
+          img.classList.remove("hidden");
+        }
+        return;
+      }
       try {
         if (!state.blobUrls.has(row.thumbnail_path)) {
           const token = await getToken();
@@ -13104,6 +13158,7 @@
         setLibraryCaptureNote(`YouTube asked Uoink to wait, so it's queued${at ? ` and retries on its own at ${at}` : ""}.`);
       } else if (run.source === "podcast_feed") {
         setLibraryCaptureNote(PODCAST_FEED_SAVED_COPY);
+        navigateTo("#sources");
       } else if (run.endpoint === "/playlist/start") {
         setLibraryCaptureNote("Playlist started. Its videos show under the box as Uoink captures them.");
       } else {
@@ -13527,12 +13582,14 @@
         const index = stateValue === "queued" && !phase ? 1 : captureStepIndex(phase, stateValue);
         const key = `job:${job.id}`;
         const playlist = Number(job.videos_total) > 1;
+        const podcast = job.kind === "podcast_transcribe";
         const waiting = stateValue === "queued" || index === 1;
         items.push({
           key,
           title: job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.source_url || "Capture",
-          kind: playlist ? "playlist" : (job.kind === "retranscribe" ? "transcript" : "capture"),
-          source: [platformChipLabel(platformOf({ source_url: job.source_url || job.url || "" })),
+          kind: podcast ? "Podcast" : playlist ? "playlist" : (job.kind === "retranscribe" ? "transcript" : "capture"),
+          artwork: podcast ? job.artwork_url : "",
+          source: [podcast ? "Podcast" : platformChipLabel(platformOf({ source_url: job.source_url || job.url || "" })),
             playlist ? `${Number(job.videos_done) || 0} of ${job.videos_total} videos` : "",
             fmtAge(job.started_at || job.updated_at)].filter(Boolean).join(" · "),
           tone: waiting ? "wait" : "now",
@@ -13590,8 +13647,9 @@
         items.push({
           key: `job:${job.id}`,
           title: job.title || job.playlist_title || url || "Capture",
-          kind: Number(job.videos_total) > 1 ? "playlist" : "capture",
-          source: [platformChipLabel(platformOf({ source_url: url })), fmtAge(job.completed_at || job.updated_at)].filter(Boolean).join(" · "),
+          kind: job.kind === "podcast_transcribe" ? "Podcast" : Number(job.videos_total) > 1 ? "playlist" : "capture",
+          artwork: job.kind === "podcast_transcribe" ? job.artwork_url : "",
+          source: [job.kind === "podcast_transcribe" ? "Podcast" : platformChipLabel(platformOf({ source_url: url })), fmtAge(job.completed_at || job.updated_at)].filter(Boolean).join(" · "),
           tone: "fail",
           word: index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed",
           detail: failure.reason,
@@ -13606,7 +13664,7 @@
     function libraryCaptureRowHtml(item) {
       return `
         <article class="capture-row" data-capture-key="${htmlEscape(item.key)}">
-          <div class="row-thumb" aria-hidden="true"><span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
+          <div class="row-thumb" aria-hidden="true">${/^https?:\/\//i.test(item.artwork || "") ? `<img src="${htmlEscape(item.artwork)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : ""}<span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
           <div class="row-body">
             <div class="card-title">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
@@ -13620,7 +13678,7 @@
 
     function renderLibraryCaptures() {
       const wrap = els.libraryCaptures;
-      if (!wrap) return;
+      if (!wrap) return 0;
       reconcileLibraryRuns();
       const items = libraryCaptureItems();
       const shown = items.slice(0, LIBRARY_CAPTURE_ROWS);
@@ -13628,6 +13686,9 @@
       wrap.innerHTML = shown.map(libraryCaptureRowHtml).join("")
         + (more > 0 ? `<p class="capture-more"><a href="#activity">${more} more in Activity</a></p>` : "");
       wrap.classList.toggle("hidden", !items.length);
+      els.libraryEmpty.classList.toggle("hidden", items.length > 0 || state.library.length > 0
+        || !["no_matches", "empty_corpus"].includes(state.libraryState));
+      return items.length;
     }
 
     // Split view: the list row of the open item is marked, so the list

@@ -53,6 +53,7 @@
     .source { margin: 20px 0; padding-left: 16px; border-left: 2px solid var(--line-strong); }
     .source-title { margin-bottom: 4px; font-weight: 600; }
     .source p { margin: 0; }
+    input[type="url"] { min-width: 0; width: 100%; min-height: 44px; border: 1px solid var(--line-strong); border-radius: var(--radius-input); padding: 8px 12px; color: var(--text); background: var(--surface); font: inherit; }
     .capture-result { margin-top: 16px; }
     .capture-result p { margin-bottom: 8px; }
     footer { padding-top: 24px; }
@@ -119,11 +120,9 @@
       <div class="step-heading"><span class="step-number" aria-hidden="true">03</span><h2 id="capture-heading">Make your first capture</h2></div>
       <div class="step-body">
         <p>Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.</p>
-        <p>Try this video, or open a source you want to save and use the Uoink extension.</p>
-        <div class="source">
-          <p class="source-title">Andrej Karpathy on AGI, hiring, and the future of programming</p>
-          <p class="secondary">Lenny’s Podcast · YouTube</p>
-        </div>
+        <p>Try a public-domain NASA video on YouTube, or open a source you want to save and use the Uoink extension.</p>
+        <label for="first-capture-url">YouTube video link</label>
+        <input id="first-capture-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a video link" aria-describedby="capture-hint capture-error">
         <p id="capture-hint" class="secondary">Connect the helper to start a capture.</p>
         <button id="uoink-suggested-btn" class="button" type="button" aria-describedby="capture-hint" disabled>Uoink this video</button>
         <div id="capture-result" class="capture-result" hidden>
@@ -133,7 +132,7 @@
         </div>
       </div>
     </section>
-    <footer class="secondary">Connect Claude Desktop, Claude Code or Cursor to all 91 Uoink tools. Capture options, AI features, library and agent connections are in <a href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">dashboard Settings</a>.</footer>
+    <footer class="secondary">Connect Claude Desktop, Claude Code or Cursor to all 99 Uoink tools. Capture options, AI features, library and agent connections are in <a href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">dashboard Settings</a>.</footer>
   </main>
   <script src="lib/extract.js"></script>
   <script src="lib/store-links.js"></script>

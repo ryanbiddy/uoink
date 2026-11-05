@@ -43,7 +43,7 @@ def test_setup_explains_pinning_before_first_capture():
         '<strong>Uoink</strong>, so the Uoink button stays visible.</p>'
     )
     assert pin in capture
-    assert capture.index(pin) < capture.index('Try this video') < capture.index('id="uoink-suggested-btn"')
+    assert capture.index(pin) < capture.index('Try a public-domain NASA video') < capture.index('id="uoink-suggested-btn"')
 
 
 def test_installer_doc_distinguishes_tested_browser_and_explains_pinning():
@@ -62,7 +62,8 @@ def test_setup_is_only_install_verify_and_first_capture():
     assert '/dashboard#settings/capture' in HTML and '/dashboard#settings/app' in HTML
     assert 'id="uoink-suggested-btn"' in HTML and 'aria-describedby="capture-hint" disabled' in HTML
     assert 'role="status"' in HTML and 'role="alert"' in HTML
-    assert not re.search(r'<(?:input|select|textarea)\b', HTML)
+    assert re.findall(r'<input\b[^>]*id="([^"]+)"', HTML) == ["first-capture-url"]
+    assert not re.search(r'<(?:select|textarea)\b', HTML)
     for retired in ('ci-save-btn', 'anthropic-key', 'mcp-config-claude', 'tc-save-btn'):
         assert f'id="{retired}"' not in HTML
     for settings_io in ('updateSettings', 'getSettings', '/settings/mcp-config', 'uoink_settings_pending', 'uoink_taste_pending'):
@@ -102,7 +103,7 @@ def test_removed_setup_capabilities_have_dashboard_consumers(endpoint, capabilit
     )
 
 
-@pytest.mark.parametrize("group", ["offline", "platforms", "mac_download", "navigation_motion", "heartbeat", "visibility", "diagnostics", "routes", "capture", "capture_failure", "capture_races", "worker", "notifications"])
+@pytest.mark.parametrize("group", ["offline", "platforms", "mac_download", "navigation_motion", "heartbeat", "visibility", "diagnostics", "routes", "capture", "capture_input", "capture_failure", "capture_races", "worker", "notifications"])
 def test_setup_behaviour(group):
     result = subprocess.run(
         ["node", str(ROOT / "tests/js/rehaul_setup_test.mjs"), group],

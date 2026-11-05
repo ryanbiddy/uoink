@@ -651,6 +651,7 @@ class AdapterResult:
     retry_after_ms: int | None = None
     rejected: int = 0
     conflicts: int = 0
+    feed_title: str | None = None
 
 
 @dataclass
@@ -1046,9 +1047,17 @@ class PodcastRssAdapter(HttpFeedAdapter):
         root = ET.fromstring(body)
         root_name = _localname(root.tag)
         entries: list[tuple[str | None, str, dict]] = []
+        feed_title = artwork_url = None
         if root_name == "rss":
             channels = [c for c in root if _localname(c.tag) == "channel"]
             channel = channels[0] if channels else None
+            if channel is not None:
+                feed_title = _child_text(channel, "title")
+                for child in channel:
+                    if _localname(child.tag) == "image":
+                        artwork_url = _http_link(child.attrib.get("href") or _child_text(child, "url"))
+                        if artwork_url:
+                            break
             for item in (channel if channel is not None else []):
                 if _localname(item.tag) != "item":
                     continue
@@ -1062,6 +1071,8 @@ class PodcastRssAdapter(HttpFeedAdapter):
                     "duration": _child_text(item, "duration"),
                 }))
         elif root_name == "feed":
+            feed_title = _child_text(root, "title")
+            artwork_url = _http_link(_child_text(root, "logo", "icon"))
             for entry in root:
                 if _localname(entry.tag) != "entry":
                     continue
@@ -1084,7 +1095,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
             raise ValueError(f"unrecognised feed root element: {root_name!r}")
         truncated = len(entries) > PODCAST_ENTRIES_PER_POLL
         result = AdapterResult("snapshot", coverage="window" if truncated else "complete",
-                               truncated=truncated)
+                               truncated=truncated, feed_title=feed_title)
         seen: dict[str, Observation] = {}
         for raw_id, method, meta in entries[:PODCAST_ENTRIES_PER_POLL]:
             entry_id = validate_entry_id(raw_id)
@@ -1096,6 +1107,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 canonical_url=_http_link(meta["page"]) or _http_link(entry_id),
                 published_at_ms=parse_published_ms(meta["published"]),
                 metadata={"identity_method": method, "audio_url": _http_link(meta["audio"]),
+                          "artwork_url": artwork_url,
                           "published_raw": meta["published"], "duration_raw": meta["duration"]},
             )
             if entry_id in seen:
@@ -2958,6 +2970,13 @@ class SourceSubscriptionService:
                 "UPDATE source_subscriptions SET consent_state='on', revision=?, consent_epoch=?, "
                 "boundary=?, updated_at_ms=? WHERE source_id=?",
                 (after, epoch, boundary, now, source["source_id"]))
+            if source["kind"] == "podcast_rss" and boundary == "initial":
+                # The subscribe preview must not delay the first enrollment.
+                # Keep any failure backoff and active poll lease intact.
+                conn.execute(
+                    "UPDATE source_detection_cursors SET next_poll_at_ms=MIN(next_poll_at_ms, ?) "
+                    "WHERE source_id=? AND error_count=0",
+                    (now, source["source_id"]))
         else:
             # Contract table, "Confirm on -> off": increment revision; clear the
             # pending boundary; release every unstarted reservation in this
@@ -3094,6 +3113,14 @@ class SourceSubscriptionService:
         allowance = self._allowance(conn, source, now)
         capture_outcome, current_item, recovery_reason = self._capture_outcome_and_current_item(
             conn, source, allowance, in_flight)
+        latest_episode = None
+        if source["kind"] == "podcast_rss":
+            latest = _row(conn.execute(
+                "SELECT * FROM source_items WHERE source_id=? AND state!='deleted' "
+                "ORDER BY (state='committed') DESC, published_at_ms DESC, first_seen_ms DESC, item_id LIMIT 1",
+                (source["source_id"],)).fetchone())
+            if latest:
+                latest_episode = self._item_record(conn, latest)
         return {
             "source_id": source["source_id"], "kind": source["kind"],
             "canonical_url": source["canonical_url"],
@@ -3115,6 +3142,7 @@ class SourceSubscriptionService:
             "capture_outcome": capture_outcome,
             "recovery_reason": recovery_reason,
             "current_item": current_item,
+            "latest_episode": latest_episode,
             "legacy": {"feed_id": source.get("legacy_feed_id"),
                        "playlist_id": source.get("legacy_playlist_id")},
             "created_at_ms": int(source["created_at_ms"]),
@@ -3460,6 +3488,11 @@ class SourceSubscriptionService:
                     (now, self._next_due(source, now), result.etag, result.last_modified, source_id))
                 return {"ok": True, "outcome": "not_modified", "inserted": 0, **base}
             scan_revision = int(cursor["revision"]) + 1
+            if source["kind"] == "podcast_rss" and result.feed_title:
+                conn.execute(
+                    "UPDATE source_subscriptions SET display_name=? WHERE source_id=? "
+                    "AND (display_name IS NULL OR display_name='' OR display_name=canonical_url)",
+                    (_safe_text(result.feed_title, 200), source_id))
             on_current = source["consent_state"] == "on" and not stale_epoch
             epoch_for_items = int(source["consent_epoch"]) if on_current else None
             stats = self._persist_observations(conn, source, result.observations, now,

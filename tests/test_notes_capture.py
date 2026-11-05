@@ -89,7 +89,7 @@ def test_persist_note_writes_under_output_root():
         idx = index_mod.Index.open(Path(d) / "index.db")
         try:
             note = notes.build_note(
-                text="Kubernetes autoscaling notes for the platform migration.")
+                text="Kubernetes autoscaling notes for the platform migration. Review node capacity before scaling deployments.")
             # A trivial classifier so topic isn't None (proves the hook fires).
             vid = notes.persist_note(
                 idx, note, data_root=out_root,
