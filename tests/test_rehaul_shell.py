@@ -1,6 +1,6 @@
 """UI re-haul: the dashboard shell (SPEC "Dashboard IA").
 
-Nav (6): Library, Activity (badge "N failed" when > 0), Generate, Research, Sources,
+Nav (6): Library, Activity (one count, failures named on hover), Generate, Research, Sources,
 Settings. The helper status sits at the bottom of the sidebar ("Running on
 this PC" with a dot; offline says what to do on this OS). About and Star on
 GitHub moved into Settings > App > About, Stop Uoink into Settings > App with
@@ -28,8 +28,8 @@ popstate/hashchange on Back and Forward:
              on; every action stays off; moving elsewhere meanwhile wins
   links   -- in-app hash links push once; "#", unknown hashes and
              ctrl-clicks are left to the browser
-  badge   -- "N failed" counts failed jobs plus failed queue rows (one per
-             video, cancelled excluded) and hides at zero
+  badge   -- one count includes active and failed captures (one per video,
+             cancelled excluded), with failures named in the tooltip and label
   status  -- "Running on this PC/Mac/computer"; offline copy per OS (the
              Start menu on Windows; Mac and Linux, where no build ships,
              name the source run)
@@ -114,17 +114,12 @@ def test_nav_includes_research_with_the_existing_items_in_order():
 
 def test_activity_nav_item_says_how_many_failed():
     activity = re.search(r'<button[^>]*data-tab-button="activity".*?</button>', MARKUP, re.S).group(0)
-    assert '<span class="nav-failed hidden" id="activityFailedBadge"></span>' in activity
-    assert 'id="activityNavCount"' in activity
-    badge = _between(SCRIPT, "function setActivityFailedBadge(count)", "function setLibraryEmptyState(")
-    assert "`${failed} failed`" in badge
-    assert 'el.classList.toggle("hidden", failed === 0)' in badge
-    assert 'button.setAttribute("aria-label", failed ? `${base}, ${failed} failed` : base)' in badge
+    assert re.findall(r'<span[^>]*id="([^"]+)"', activity) == ["activityNavCount"]
     render = _between(SCRIPT, "function renderQueue(data)", "function completedTodayRows()")
-    assert 'setActivityFailedBadge(failedCount)' in render
+    assert 'failedCount ? `, ${failedCount} failed` : ""' in render
+    assert 'els.activityNavCount.classList.toggle("nav-failed", failedCount > 0)' in render
     assert 'setSidebarBadge(els.activityNavCount, activeCount + failedCount,' in render
-    # The word carries the state; the badge text uses the small-text accent
-    # and its outline the --fail token (status is never colour alone).
+    # The tooltip and accessible label name failures alongside the outline.
     rule = _between(CSS, ".nav-failed {", "}")
     assert "color: var(--rust-bright);" in rule
     assert "border: 1px solid var(--fail);" in rule

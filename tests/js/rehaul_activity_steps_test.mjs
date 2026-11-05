@@ -172,7 +172,7 @@ async function caption429() {
 
   p.handleJobsStreamEvent("queue", { pending: [queued] });
   same(p.state.activityEntries.map((entry) => entry.group), ["progress"], "a pending retry stays in In progress");
-  same(p.get("activityFailedBadge").textContent, "", "a pending retry is not counted as a hard failure");
+  check(!p.get("activityNavCount").title.includes("failed"), "a pending retry is not counted as a hard failure");
   same(p.get("activityNavCount").textContent, "1", "a pending retry counts as active work");
   check(!p.get("attentionRows").innerHTML.includes('data-activity-key="pending:7"'), "pending retry is absent from Needs attention");
   const row = p.get("queueRows").innerHTML;
@@ -199,7 +199,7 @@ async function caption429() {
     const entry = p.state.activityEntries[0];
     same(entry.group, "progress", "every remaining retry stays in progress, including merged jobs");
     same(entry.model.index, 1, "merged caption retry keeps the waiting-for-YouTube failure step");
-    same(p.get("activityFailedBadge").textContent, "", "remaining retries never inflate the failed badge");
+    check(!p.get("activityNavCount").title.includes("failed"), "remaining retries never inflate the failure count");
     same(p.get("activityNavCount").textContent, "1", "merged retries count once as active work");
     p.openCaptureFailure(entry.key, p.get("trigger"));
     same(p.get("captureFailureError").textContent, message, "merged retry drawer keeps the readable 429");
@@ -209,7 +209,7 @@ async function caption429() {
   p.state.jobs = [];
   p.handleJobsStreamEvent("queue", { pending: [pending({ last_error: "youtube_rate_limit", status: "failed", attempt_count: 3, retry_exhausted: true })] });
   same(p.state.activityEntries[0].group, "attention", "exhausted caption failure moves to Needs attention");
-  same(p.get("activityFailedBadge").textContent, "1 failed", "exhausted caption failure counts in the badge");
+  check(p.get("activityNavCount").title.endsWith(", 1 failed"), "exhausted caption failure is named in the count tooltip");
   same(p.get("activityNavCount").textContent, "1", "exhausted caption failure still needs attention");
 }
 
@@ -223,7 +223,7 @@ async function exhaustion() {
     p.renderQueue({ pending: queued });
     same(p.state.activityEntries.length, 1, "exhausted job/pending merge into one row");
     same(p.state.activityEntries[0].group, "attention", "exhaustion overrides a stale pending retry");
-    same(p.get("activityFailedBadge").textContent, "1 failed", "exhausted capture keeps the hard failure badge");
+    check(p.get("activityNavCount").title.endsWith(", 1 failed"), "exhausted capture keeps the failure count");
     const copy = p.get("attentionRows").innerHTML.replaceAll("&#39;", "'");
     // When a stale pending record predates the exhausted job, its count
     // cannot hide that the helper has stopped retrying.

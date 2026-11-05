@@ -422,8 +422,7 @@
       gap: 2px 6px;
     }
 
-    /* Shell: "N failed" on Activity. The word carries the state; the rust
-       outline only repeats it. */
+    /* Activity's single count names failures in its tooltip and label. */
     .nav-failed {
       border: 1px solid var(--fail);
       border-radius: var(--radius-pill);
@@ -4859,7 +4858,7 @@
       </div>
       <nav class="nav" aria-label="Sections">
         <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library" aria-current="page">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 captures in progress or needing attention" aria-label="0 captures in progress or needing attention">0</span></span></button>
+        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-count" id="activityNavCount" title="0 captures in progress or needing attention" aria-label="0 captures in progress or needing attention">0</span></span></button>
         <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count hidden" id="writingNavCount" title="0 saved drafts" aria-label="0 saved drafts"></span></button>
         <button class="nav-button" type="button" data-tab-button="research" data-nav-label="Research">Research</button>
         <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count hidden" id="sourcesNavCount" title="0 subscribed sources" aria-label="0 subscribed sources"></span></button>
@@ -7008,7 +7007,6 @@
       queueMeta: document.getElementById("queueMeta"),
       activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
-      activityFailedBadge: document.getElementById("activityFailedBadge"),
       cancelAll: document.getElementById("cancelAll"),
       completedRows: document.getElementById("completedRows"),
       completedToday: document.getElementById("completedToday"),
@@ -7595,8 +7593,11 @@
     }
 
     function sourceNameFromUrl(value) {
+      const raw = String(value || "");
+      const named = raw.match(/(?:\[|^)(youtube|twitter|x|tiktok|instagram|vimeo)(?:[:\]\s]|$)/i);
+      if (named) return { youtube: "YouTube", twitter: "X", x: "X", tiktok: "TikTok", instagram: "Instagram", vimeo: "Vimeo" }[named[1].toLowerCase()];
       try {
-        const host = new URL(value || "").hostname.replace(/^www\./, "");
+        const host = new URL((raw.match(/https?:\/\/[^\s"'<>]+/i) || [raw])[0]).hostname.replace(/^www\./, "");
         if (host.includes("youtube") || host === "youtu.be") return "YouTube";
         if (host.includes("twitter") || host.includes("x.com")) return "X";
         if (host.includes("vimeo")) return "Vimeo";
@@ -7630,7 +7631,7 @@
         return "This video is unavailable.";
       }
       if (haystack.includes("private") || haystack.includes("region")) {
-        return `${source} wouldn't show a usable video. It may be private, region-locked, or gone.`;
+        return "This video is private or unavailable in your region.";
       }
       if (haystack.includes("is live") || haystack.includes("premiere")) {
         return `${source} is still live. Try again once the broadcast becomes a replay.`;
@@ -12605,22 +12606,6 @@
       setSidebarBadge(els.libraryNavCount, visibleCount, "saved sources", { hideWhenZero: true });
     }
 
-    // Shell: Activity's "N failed" badge, shown only while failures wait.
-    // The word says it, so the state never rests on the badge colour; the
-    // nav button's name gains ", N failed" after the unfinished capture count.
-    function setActivityFailedBadge(count) {
-      const el = els.activityFailedBadge;
-      if (!el) return;
-      const failed = Math.max(0, Number(count) || 0);
-      el.textContent = failed ? `${failed} failed` : "";
-      el.title = failed ? `${failed} failed capture${failed === 1 ? "" : "s"} in Activity` : "";
-      el.classList.toggle("hidden", failed === 0);
-      const button = typeof el.closest === "function" ? el.closest("button") : null;
-      if (!button) return;
-      const base = String(button.getAttribute("aria-label") || button.dataset.navLabel || "Activity").replace(/, \d+ failed$/, "");
-      button.setAttribute("aria-label", failed ? `${base}, ${failed} failed` : base);
-    }
-
     function setLibraryEmptyState(mode) {
       const states = {
         "no-matches": {
@@ -13132,7 +13117,7 @@
 
     function failLibraryRun(run, err) {
       const data = (err && err.data) || {};
-      const failure = libraryFailureCopy(data);
+      const failure = libraryFailureCopy(data, run.url);
       run.state = "failed";
       run.phase = data.failure_phase || data.error_phase || "";
       run.jobId = typeof data.job_id === "string" ? data.job_id : "";
@@ -13477,7 +13462,7 @@
     // Only the public error fields belong in a Library failure. Do not
     // fall back to exception objects, raw stderr or command fields. Scrub
     // legacy diagnostics too: older helpers could echo paths or secrets.
-    function libraryFailureCopy(data = {}) {
+    function libraryFailureCopy(data = {}, sourceContext = "") {
       const error = typeof data.error === "string" ? data.error : (data.error && data.error.message);
       const raw = [data.error_detail, error, data.last_error].find((value) => typeof value === "string" && value.trim()) || "";
       const clean = (value) => String(value || "")
@@ -13495,13 +13480,14 @@
         .replace(/^ERROR:\s*(?:\[[^\]]+\]\s*)?(?:[\w-]+:\s*)?/i, "")
         .replace(/\s+/g, " ");
       const plain = clean(error);
-      const translated = activityErrorMessage(cause || detail, data.failure_phase || data.phase, {
-        url: data.source_url || data.url, terminal: true });
+      // Classify scrubbed text; keep the original only for the source name.
+      const translated = translateMachineMessage(detail, {
+        url: data.source_url || data.url || sourceContext || raw, terminal: true });
       const generic = "Uoink couldn't finish this one. Details are tucked below.";
-      let reason = translated === "This video is unavailable." ? translated
+      let reason = translated && translated !== generic ? translated
+        : cause && cause !== generic && !/^(?:\w*Error:|Command:|Exit code:)|^[\w-]+$/.test(cause) ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause)
         : plain && plain !== generic && !/^(?:ERROR:|\w*Error:|Command:|Exit code:)|^[\w-]+$|\n/.test(plain) ? plain
-        : translated && translated !== generic ? translated
-        : cause ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause) : "The capture request failed. Retry now.";
+        : "The capture request failed. Retry now.";
       if (data.retry_exhausted === true) {
         reason += ` ${activityErrorMessage("", "", { retryExhausted: true, attempts: data.attempt_count })}`;
       }
@@ -14628,8 +14614,8 @@
       els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...${attention ? ` ${attention}` : ""}`
         : attention || "Nothing uoinking right now.";
       setSidebarBadge(els.activityNavCount, activeCount + failedCount,
-        `${activeCount + failedCount === 1 ? "capture" : "captures"} in progress or needing attention`);
-      setActivityFailedBadge(failedCount);
+        `${activeCount + failedCount === 1 ? "capture" : "captures"} in progress or needing attention${failedCount ? `, ${failedCount} failed` : ""}`);
+      els.activityNavCount.classList.toggle("nav-failed", failedCount > 0);
       const cancelableCount = entries.filter((entry) => entry.pending && ["pending", "running"].includes(normalizedStatus(entry.pending))
         || entry.job && ["queued", "running"].includes(normalizedStatus(entry.row))).length;
       els.cancelAll.disabled = cancelableCount === 0;
@@ -14679,7 +14665,7 @@
       };
       put("captureFailureTitle", row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.url || row.source_url || "Capture");
       put("captureFailureLabel", entry.model.label);
-      put("captureFailureReason", libraryFailureCopy({ ...row, error_detail: activityLastError(row) }).reason);
+      put("captureFailureReason", libraryFailureCopy({ ...row, error_detail: activityLastError(row) }, row.error_detail || row.last_error || row.error).reason);
       put("captureFailureMeta", [activitySource(row), activityTranscript(entry), captureClock(activityTime(row)) || "Time not reported"].filter(Boolean).join(" · "));
       const words = { done: "Done", fail: "Failed", now: "In progress", todo: "Not reached" };
       const symbols = { done: "✓", fail: "✕", now: "○", todo: "○" };

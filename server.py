@@ -8145,7 +8145,7 @@ def _plain_error_from_text(text: str) -> str:
         return "This video is unavailable."
     if ("this video is private" in lower
             or " private" in lower or "region" in lower):
-        return f"{source} did not expose a usable video for this source."
+        return "This video is private or unavailable in your region."
     if "is live" in lower or "premiere" in lower:
         return f"{source} is still live. Try again once the broadcast becomes a replay."
     if "ffmpeg" in lower:

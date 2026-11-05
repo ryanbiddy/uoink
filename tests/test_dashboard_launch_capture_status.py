@@ -5,6 +5,7 @@ Execute the shipped dashboard script with a fake DOM and helper; no user data.
 import ast
 import json
 from pathlib import Path
+import re
 import subprocess
 
 import pytest
@@ -52,6 +53,7 @@ def run_js(code):
     ("metadata", "Getting details"), ("download", "Downloading video"),
     ("transcript", "Getting transcript"), ("transcribing", "Getting transcript"),
     ("screenshots", "Saving screenshots"), ("writing", "Saving"),
+    ("waiting", "Waiting"), ("queued", "Waiting"), ("rate_limit", "Waiting"),
 ])
 def test_live_capture_and_activity_use_plain_stage(phase, label):
     result = run_js("""(() => {
@@ -64,7 +66,8 @@ def test_live_capture_and_activity_use_plain_stage(phase, label):
       return {word: item.word, html: libraryCaptureRowHtml(item),
         activity: activitySteps({state: 'running', phase}).label};
     })()""" % json.dumps(phase))
-    assert result["word"] == result["activity"] == label
+    assert result["word"] == label
+    assert result["activity"] == (f"{label} · one YouTube capture at a time" if label == "Waiting" else label)
     assert "of 5" not in result["html"] and "Capturing ·" not in result["html"]
 
 
@@ -199,19 +202,32 @@ def test_podcast_retry_joins_saved_episode_after_original_job_ages_out():
     assert result == [{"id": "retry", "saved": "podcast12", "group": "progress"}]
 
 
-@pytest.mark.parametrize("active", [0, 1])
-def test_activity_sidebar_includes_failures_and_headline_acknowledges_them(active):
+@pytest.mark.parametrize(("active", "failed"), [(0, 0), (1, 0), (0, 1), (1, 1), (2, 3)])
+def test_activity_sidebar_has_one_count_and_headline_acknowledges_failures(active, failed):
     result = run_js("""(() => {
-      state.jobs = [{id: 'failure', state: 'failed'}];
-      if (%s) state.jobs.push({id: 'running', state: 'running'});
+      const nav = document.getElementById('fixtureActivityNav');
+      nav.dataset.navLabel = 'Activity';
+      els.activityNavCount.closest = () => nav;
+      state.jobs = Array.from({length: %s}, (_, n) => ({id: 'failure' + n, state: 'failed'}))
+        .concat(Array.from({length: %s}, (_, n) => ({id: 'running' + n, state: 'running'})));
       renderQueue({pending: []});
-      return {count: els.activityNavCount.textContent, badge: els.activityFailedBadge.textContent,
+      return {count: els.activityNavCount.textContent, title: els.activityNavCount.title,
+        label: nav.getAttribute('aria-label'), failed: els.activityNavCount.classList.contains('nav-failed'),
         headline: els.activityHeadline.innerHTML};
-    })()""" % active)
-    assert result["count"] == str(active + 1)
-    assert result["badge"] == "1 failed"
-    assert "needs attention" in result["headline"]
-    assert "Nothing uoinking" not in result["headline"]
+    })()""" % (failed, active))
+    total = active + failed
+    label = f"{total} {'capture' if total == 1 else 'captures'} in progress or needing attention"
+    if failed:
+        label += f", {failed} failed"
+        assert "attention" in result["headline"]
+        assert "Nothing uoinking" not in result["headline"]
+    assert result["count"] == str(total)
+    assert result["title"] == label
+    assert result["label"] == f"Activity, {label}"
+    assert result["failed"] == bool(failed)
+    html = (ROOT / "assets/dashboard/index.html").read_text(encoding="utf-8")
+    nav = re.search(r'<button[^>]*data-tab-button="activity".*?</button>', html, re.S).group(0)
+    assert re.findall(r'<span[^>]*id="([^"]+)"', nav) == ["activityNavCount"]
 
 
 @pytest.mark.parametrize("label", ["YouTube video", "X post", "Reddit thread"])
@@ -243,22 +259,111 @@ def test_failure_drawer_leads_with_reason_and_discloses_raw_error():
     assert 'id="captureFailureError"' in disclosure
 
 
-@pytest.mark.parametrize("message", [
-    "Video unavailable", "Video is unavailable", "This video is not available",
-    "This video has been removed by the uploader", "This video isn't available",
-    "This video is no longer available",
-])
-def test_unavailable_video_is_not_misclassified_as_ffmpeg_failure(message):
+@pytest.fixture(scope="module")
+def plain_error_from_text():
     # Load just the error translators, without importing server startup state.
     names = {"_source_name_from_error", "_plain_error_from_text"}
     tree = ast.parse((ROOT / "server.py").read_text(encoding="utf-8"))
     scope = {}
     exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n, ast.FunctionDef)
                                   and n.name in names], type_ignores=[]), "server.py", "exec"), scope)
+    return scope["_plain_error_from_text"]
+
+
+@pytest.mark.parametrize("message", [
+    "Video unavailable", "Video is unavailable", "This video is not available",
+    "This video has been removed by the uploader", "This video isn't available",
+    "This video is no longer available",
+])
+def test_unavailable_video_is_not_misclassified_as_ffmpeg_failure(message, plain_error_from_text):
     diagnostic = f"Command: yt-dlp --cookies browser.txt --ffmpeg-location bundled/bin\nERROR: [youtube] abcdefghijk: {message}"
-    assert scope["_plain_error_from_text"](diagnostic) == "This video is unavailable."
+    assert plain_error_from_text(diagnostic) == "This video is unavailable."
     shown = run_js("""(() => {
       const raw = %s;
       return {translated: translateMachineMessage(raw), failure: libraryFailureCopy({error_detail: raw}).reason};
     })()""" % json.dumps(diagnostic))
     assert shown == {"translated": "This video is unavailable.", "failure": "This video is unavailable."}
+
+
+@pytest.mark.parametrize("phase", ["media", "classify", "write"])
+@pytest.mark.parametrize("summary", [
+    "The source came down, but the local media step tripped.",
+    "YouTube did not expose a usable video for this source.",
+])
+@pytest.mark.parametrize(("message", "expected"), [
+    ("HTTP Error 429: Too Many Requests", "YouTube kept refusing this one. Give it a few minutes, then retry it yourself."),
+    ("Sign in to continue", "YouTube wouldn't hand this one over without a login. Retry with cookies?"),
+    ("Members-only video", "YouTube kept this one behind members-only access."),
+    ("This video is private", "This video is private or unavailable in your region."),
+    ("Video is unavailable", "This video is unavailable."),
+    ("This video is live", "YouTube is still live. Try again once the broadcast becomes a replay."),
+    ("Requested format is not available", "Requested format is not available"),
+])
+def test_failure_cause_wins_over_phase_and_generic_summary(phase, summary, message, expected):
+    data = {"source_url": "https://youtu.be/abcdefghijk", "failure_phase": phase, "error": summary,
+            "error_detail": f"Command: yt-dlp --cookies browser.txt --ffmpeg-location bundled/bin\nERROR: [youtube] abcdefghijk: {message}"}
+    result = run_js(f"libraryFailureCopy({json.dumps(data)})")
+    assert result["reason"] == expected
+    assert "ERROR: [youtube]" in result["detail"]
+
+
+@pytest.mark.parametrize("diagnostic", [
+    "ERROR: [youtube] abcdefghijk: Sign in to continue",
+    "Command: yt-dlp https://youtu.be/abcdefghijk?token=fixture-secret\nERROR: Sign in to continue",
+])
+def test_failure_translation_keeps_extractor_or_url_context_without_exposing_it(diagnostic):
+    result = run_js("""(() => {
+      const data = {error_detail: %s};
+      state.jobs = [{...data, id: 'context', state: 'failed'}];
+      renderQueue({pending: []});
+      openCaptureFailure('job:context');
+      return {library: libraryFailureCopy(data), drawer: {
+        reason: document.getElementById('captureFailureReason').textContent,
+        detail: document.getElementById('captureFailureError').textContent}};
+    })()""" % json.dumps(diagnostic))
+    for surface in result.values():
+        assert surface["reason"] == "YouTube wouldn't hand this one over without a login. Retry with cookies?"
+        assert "fixture-secret" not in surface["detail"]
+        assert "https://" not in surface["detail"]
+
+
+@pytest.mark.parametrize("source", ["YouTube", "X", "Vimeo"])
+def test_error_only_server_summary_keeps_source_name(source):
+    summary = f"{source} wouldn't hand this one over without a login. Retry with cookies?"
+    result = run_js("""(() => {
+      const summary = %s;
+      return {activity: activityErrorMessage(summary, 'media', {terminal: true}),
+        library: libraryFailureCopy({error: summary, failure_phase: 'media'}).reason};
+    })()""" % json.dumps(summary))
+    assert result == {"activity": summary, "library": summary}
+
+
+def test_failure_translation_does_not_treat_paths_or_url_parameters_as_the_cause():
+    data = {"error": "The source came down, but the local media step tripped.", "failure_phase": "media",
+            "error_detail": r"ERROR: [youtube] abcdefghijk: Requested format is not available at C:\Users\PrivateFixture\clip.mp4 https://example.test/media?cookies=fixture-secret"}
+    result = run_js(f"libraryFailureCopy({json.dumps(data)})")
+    assert result["reason"] == "Requested format is not available at <path> <url>"
+    assert "PrivateFixture" not in result["detail"] and "fixture-secret" not in result["detail"]
+
+
+def test_local_failure_uses_run_url_when_helper_omits_source_context():
+    result = run_js("""(() => {
+      refreshActivity = async () => {};
+      const run = {id: 'local', label: 'YouTube video', url: 'https://youtu.be/abcdefghijk'};
+      failLibraryRun(run, {data: {error_detail: 'ERROR: Sign in to continue'}});
+      return run.reason;
+    })()""")
+    assert result == "YouTube wouldn't hand this one over without a login. Retry with cookies?"
+
+
+@pytest.mark.parametrize("message", ["This video is private", "This video is blocked in your region"])
+def test_private_or_region_error_survives_server_to_dashboard_translation(message, plain_error_from_text):
+    summary = plain_error_from_text(f"ERROR: [youtube] abcdefghijk: {message}")
+    expected = "This video is private or unavailable in your region."
+    assert summary == expected
+    result = run_js("""(() => {
+      const summary = %s;
+      return {activity: activityErrorMessage(summary, 'media', {terminal: true}),
+        library: libraryFailureCopy({error: summary, failure_phase: 'media'}).reason};
+    })()""" % json.dumps(summary))
+    assert result == {"activity": expected, "library": expected}
