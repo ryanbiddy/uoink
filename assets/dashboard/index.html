@@ -8211,13 +8211,23 @@
     function readerParagraphs(sidecar = {}) {
       const out = [];
       let current = null;
-      transcriptSegments(sidecar).forEach((segment) => {
+      const shots = readerShotList(sidecar).timed;
+      let nextShot = 0;
+      const segments = transcriptSegments(sidecar).slice().sort((a, b) =>
+        (storedTime(a.start, a.start_seconds) ?? Infinity) - (storedTime(b.start, b.start_seconds) ?? Infinity));
+      segments.forEach((segment) => {
         const text = String(segment.text || segment.content || "").replace(/\s+/g, " ").trim();
         if (!text) return;
         const start = storedTime(segment.start, segment.start_seconds);
         const end = storedTime(segment.end, segment.end_seconds);
         const speaker = String(firstValue(segment.speaker, segment.speaker_label, segment.speaker_id) || "");
-        let fresh = !current || speaker !== current.speaker;
+        let crossedShot = false;
+        while (start !== null && nextShot < shots.length && shots[nextShot].seconds < start) {
+          crossedShot = true;
+          nextShot += 1;
+        }
+        let fresh = !current || speaker !== current.speaker || crossedShot
+          || (start === null) !== (current.start === null);
         if (!fresh) {
           const count = current.parts.length;
           const lastLine = current.parts[count - 1];
@@ -8294,41 +8304,27 @@
       return html ? `<div class="reader-transcript reader-shots">${html}</div>` : "";
     }
 
-    // Paragraphs in time order with each screenshot after the paragraph
-    // its time falls in; shots with no readable time close the document.
+    // Merge paragraphs and screenshots by their stored time. Untimed rows
+    // close the document; equal times keep transcript before screenshots.
     function readerTranscriptHtml(row, sidecar = {}) {
       const paragraphs = readerParagraphs(sidecar);
       if (!paragraphs.length) return "";
       const url = sourceUrlOf(row, sidecar);
       const { timed, loose } = readerShotList(sidecar);
-      // The start of the next paragraph that has a stored time, per index.
-      const nextStart = new Array(paragraphs.length).fill(Infinity);
-      for (let i = paragraphs.length - 2; i >= 0; i -= 1) {
-        const after = paragraphs[i + 1];
-        nextStart[i] = after.start !== null ? after.start : nextStart[i + 1];
-      }
-      let next = 0;
-      const rows = paragraphs.map((paragraph, index) => {
-        const until = nextStart[index];
-        const figures = [];
-        if (paragraph.start !== null || index === paragraphs.length - 1) {
-          while (next < timed.length && timed[next].seconds < until) {
-            figures.push(readerShotHtml(row, timed[next].shot, timed[next].seconds, url));
-            next += 1;
-          }
-        }
+      const timeline = paragraphs.map((paragraph) => ({ paragraph, seconds: paragraph.start }))
+        .concat(timed, loose).sort((a, b) => (a.seconds ?? Infinity) - (b.seconds ?? Infinity));
+      const rows = timeline.map((item) => {
+        if (item.shot) return readerShotHtml(row, item.shot, item.seconds, url);
+        const paragraph = item.paragraph;
         const speaker = paragraph.speaker ? `<b class="reader-speaker">${htmlEscape(paragraph.speaker)}</b> ` : "";
         return `
           <div class="reader-row reader-para">
             <div class="reader-gutter">${readerTimeHtml(paragraph.start, url)}</div>
             <p>${speaker}${htmlEscape(paragraph.parts.join(" "))}</p>
           </div>
-          ${figures.join("")}
         `;
       });
-      const rest = timed.slice(next).concat(loose)
-        .map((item) => readerShotHtml(row, item.shot, item.seconds, url)).join("");
-      return `<div class="reader-transcript">${rows.join("")}${rest}</div>`;
+      return `<div class="reader-transcript">${rows.join("")}</div>`;
     }
 
     // The saved Markdown as the document (notes, pages, posts, threads, and
@@ -8478,16 +8474,42 @@
       return parts.join("");
     }
 
+    // Keep the saved file intact; the copied media document leads with its
+    // transcript and uses file URLs that survive being pasted elsewhere.
+    function readerClipboardMarkdown(markdown, row, sidecar = {}) {
+      if (!isTimedMedia(row, sidecar)) return markdown;
+      const sections = String(markdown).replace(/\r\n/g, "\n").split(/(?=^## )/m)
+        .filter((section) => !/^## Tags\s+No tags\s*(?:---\s*)?$/.test(section));
+      const transcript = sections.findIndex((section) => /^## Transcript\s*\n/.test(section));
+      if (transcript > 0) {
+        const body = sections.splice(transcript, 1)[0].trimEnd() + "\n\n";
+        sections.splice(/^## /.test(sections[0]) ? 0 : 1, 0, body);
+      }
+      return sections.join("").replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (match, label, target) => {
+        if (/^(?:https?:|data:|file:)/i.test(target)) return match;
+        const raw = target.replace(/\\/g, "/");
+        const path = /^(?:[A-Za-z]:\/|\/)/.test(raw) ? raw : joinLocalPath(folderPathOf(row), target).replace(/\\/g, "/");
+        if (!/^(?:[A-Za-z]:\/|\/)/.test(path)) return "";
+        const encoded = path.split("/").map((part) => encodeURIComponent(part)
+          .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`))
+          .join("/").replace(/^([A-Za-z])%3A\//, "$1:/");
+        const prefix = path.startsWith("//") ? "file:" : path.startsWith("/") ? "file://" : "file:///";
+        return `![${label}](${prefix}${encoded})`;
+      });
+    }
+
     // Reader actions on the saved Markdown: copy it, or copy it and open
     // Claude to paste into (the extension's Send-to flow).
     async function copySelectedMarkdown({ openClaude = false } = {}) {
-      const videoId = videoIdOf(state.selectedYoink);
+      const row = state.selectedYoink;
+      const sidecar = state.selectedYoinkSidecar || {};
+      const videoId = videoIdOf(row);
       if (!videoId) return showToast("Select a uoink first.");
       let markdown = state.selectedYoinkMarkdown;
       try {
         if (!markdown) markdown = await loadYoinkMarkdown(videoId);
         if (!markdown) throw new Error("empty");
-        await navigator.clipboard.writeText(markdown);
+        await navigator.clipboard.writeText(readerClipboardMarkdown(markdown, row, sidecar));
       } catch (_) {
         return showToast("Couldn't copy the Markdown. Open the transcript file instead.");
       }
