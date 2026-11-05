@@ -3418,6 +3418,15 @@ class Index:
         self._invalidate_after_publication(video_id)
         return result
 
+    def refresh_media_bindings(self, video_id: str, *, clock=time.monotonic, deadline=None) -> bool:
+        """Heal stale source/corpus bindings through the fenced media publisher."""
+        import library_media as _media
+        with self._lock:
+            changed = _media.refresh_source_bindings(self._conn, video_id, clock=clock, deadline=deadline)
+        if changed:
+            self._invalidate_after_publication(video_id)
+        return changed
+
     def rebuild_media_item(self, video_id: str, *, sidecar: dict | None) -> dict:
         """Reconstruction (or clip-only rebuild) as a complete operation:
         ``library_media.rebuild_item`` under the index lock, then Phase 2
