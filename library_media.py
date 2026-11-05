@@ -1258,7 +1258,7 @@ def _clip_evidence(video_id: str, clip_rows: list[dict]) -> list[tuple[str, dict
 class _Snapshot:
     __slots__ = ("item", "cues", "clip_rows", "block", "materialized", "source_revision",
                  "head", "prose", "corpus_bytes", "corpus_sha", "sidecar_signature",
-                 "artifact_signatures")
+                 "artifact_signatures", "interrupted_repair")
 
     def __init__(self):
         self.item = None
@@ -1273,14 +1273,25 @@ class _Snapshot:
         self.corpus_sha = None
         self.sidecar_signature = None
         self.artifact_signatures = {}
+        self.interrupted_repair = False
 
 
-def _read_snapshot(conn: sqlite3.Connection, video_id: str, *, allow_stale_bindings: bool = False) -> _Snapshot:
+def _rebound_block(snap: _Snapshot) -> dict:
+    updated = copy.deepcopy(snap.block)
+    updated["source_revision"] = snap.source_revision
+    updated["provenance"]["corpus_revision"] = snap.corpus_sha
+    updated["media_revision"] = media_revision(updated)
+    return updated
+
+
+def _read_snapshot(conn: sqlite3.Connection, video_id: str, *, allow_stale_bindings: bool = False,
+                   allow_interrupted_repair: bool = False) -> _Snapshot:
     """One coherent current read: item, cues, clips, corpus head and the
     validated block (materialized or virtual). Stale bindings refuse
     ``revision_unavailable``; malformed persisted data ``invalid_source_data``.
-    Only the repair writer may defer source/corpus checks with
-    ``allow_stale_bindings``; that snapshot must never be served as evidence."""
+    Repair checks may defer source/corpus checks with ``allow_stale_bindings``
+    and accept their exact target sidecar with ``allow_interrupted_repair``;
+    those snapshots must never be served as evidence."""
     snap = _Snapshot()
     item = _load_item(conn, video_id)
     snap.item = item
@@ -1306,17 +1317,22 @@ def _read_snapshot(conn: sqlite3.Connection, video_id: str, *, allow_stale_bindi
     sidecar = _parse_json_object(_read_bytes(sidecar_path, required=True), "sidecar")
     snap.sidecar_signature = _file_signature(sidecar_path)
     side_block = sidecar.get("media_depth")
-    if not isinstance(side_block, dict) or side_block.get("media_revision") != row["media_revision"]:
+    side_mismatch = not isinstance(side_block, dict) or side_block.get("media_revision") != row["media_revision"]
+    if side_mismatch and not (allow_stale_bindings and allow_interrupted_repair):
         raise _stale("sidecar_snapshot_mismatch")
     block = validate_media_block(_block_from_db(conn, item, snap.cues, row))
     if block["media_revision"] != row["media_revision"]:
         raise _invalid("media_revision_mismatch")
+    snap.block = block
+    if side_mismatch:
+        if snap.corpus_bytes is None or _json(side_block) != _json(_rebound_block(snap)):
+            raise _stale("sidecar_snapshot_mismatch")
+        snap.interrupted_repair = True
     if not allow_stale_bindings and block["provenance"]["corpus_revision"] != snap.corpus_sha:
         raise _stale("corpus_revision_changed")
     # Original artifacts are evidence only when their bytes verify (digest,
     # JSON, locator and source-record match); a hash-shaped descriptor is not.
     snap.artifact_signatures = _verify_artifacts(_item_folder(item), block, snap.cues)
-    snap.block = block
     snap.materialized = True
     return snap
 
@@ -1355,7 +1371,10 @@ def _recheck_snapshot(conn: sqlite3.Connection, snap: _Snapshot) -> None:
     # is re-read rather than compared by signature.
     sidecar = _parse_json_object(_read_bytes(Path(item["sidecar_path"]), required=True), "sidecar")
     side_block = sidecar.get("media_depth")
-    if not isinstance(side_block, dict) or side_block.get("media_revision") != snap.block["media_revision"]:
+    if snap.interrupted_repair:
+        if _json(side_block) != _json(_rebound_block(snap)):
+            raise _stale("sidecar_snapshot_mismatch")
+    elif not isinstance(side_block, dict) or side_block.get("media_revision") != snap.block["media_revision"]:
         raise _stale("sidecar_snapshot_mismatch")
     folder = _item_folder(item)
     for digest, signature in snap.artifact_signatures.items():
@@ -1363,13 +1382,26 @@ def _recheck_snapshot(conn: sqlite3.Connection, snap: _Snapshot) -> None:
             raise _stale("artifact_changed")
 
 
+def source_bindings_stale(conn, video_id: str, *, clock=time.monotonic, deadline=None) -> bool:
+    """Check for repairable source/corpus bindings without writing storage."""
+    if conn.in_transaction:
+        raise MediaError("library_unavailable", details={"reason": "transaction_active"})
+    deadline = float(clock()) + 10 if deadline is None else deadline
+    with _ReadTransaction(conn, clock, deadline):
+        if _media_row(conn, video_id) is None:
+            return False
+        snap = _read_snapshot(conn, video_id, allow_stale_bindings=True, allow_interrupted_repair=True)
+        return (snap.block["source_revision"] != snap.source_revision
+                or snap.block["provenance"]["corpus_revision"] != snap.corpus_sha)
+
+
 def refresh_source_bindings(conn, video_id: str, *, clock=time.monotonic, deadline=None) -> bool:
     """Repair a published snapshot after corpus enrichment or classification.
 
-    Only source/corpus bindings may be stale. Cues, annotations, sidecar and
-    original artifacts must still agree with the current publication. Reuse
-    the fenced publisher to preserve annotations and heal old libraries
-    without a schema change; never retry a change observed during this read.
+    Only source/corpus bindings may be stale. Cues, annotations and original
+    artifacts must still agree with the current publication. The sidecar may
+    already contain this exact repair after an interrupted publication. Reuse
+    the fenced publisher; never retry a change observed during this read.
     """
     if conn.in_transaction:
         raise MediaError("library_unavailable", details={"reason": "transaction_active"})
@@ -1378,18 +1410,20 @@ def refresh_source_bindings(conn, video_id: str, *, clock=time.monotonic, deadli
         # Legacy items have no persisted bindings to repair.
         if _media_row(conn, video_id) is None:
             return False
-        snap = _read_snapshot(conn, video_id, allow_stale_bindings=True)
+        snap = _read_snapshot(conn, video_id, allow_stale_bindings=True, allow_interrupted_repair=True)
         block = snap.block
         if (block["source_revision"] == snap.source_revision
                 and block["provenance"]["corpus_revision"] == snap.corpus_sha):
             return False
         if snap.corpus_bytes is None:
             raise MediaError("library_unavailable", details={"reason": "corpus_missing"})
+        updated = _rebound_block(snap)
         item = snap.item
         folder = _item_folder(item)
         sidecar_path = Path(item["sidecar_path"])
         sidecar = _parse_json_object(_read_bytes(sidecar_path, required=True), "sidecar")
-        if sidecar.get("video_id") != video_id or sidecar.get("media_depth") != block:
+        expected_side_block = updated if snap.interrupted_repair else block
+        if sidecar.get("video_id") != video_id or sidecar.get("media_depth") != expected_side_block:
             raise _stale("sidecar_snapshot_mismatch")
         recovered = _cues_from_sidecar(sidecar, block, item)
         if [cue_core(c) for c in recovered] != [cue_core(c) for c in snap.cues]:
@@ -1406,12 +1440,8 @@ def refresh_source_bindings(conn, video_id: str, *, clock=time.monotonic, deadli
             inputs[path] = data
         ticket = begin_publication(conn, video_id, capture_binding=capture_sidecar_inputs(sidecar),
                                    input_files=inputs)
-        if ticket.base_media_revision != block["media_revision"]:
+        if ticket.base_media_revision not in (block["media_revision"], expected_side_block["media_revision"]):
             raise _stale("publication_superseded")
-        updated = copy.deepcopy(block)
-        updated["source_revision"] = snap.source_revision
-        updated["provenance"]["corpus_revision"] = snap.corpus_sha
-        updated["media_revision"] = media_revision(updated)
         sidecar["media_depth"] = updated
 
         # Drop our deferred snapshot before acquiring the writer lock so WAL
@@ -2318,6 +2348,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         # here, and every conflict refuses before any file is touched.
         if not conn.in_transaction:
             conn.execute("BEGIN IMMEDIATE")
+        # BEGIN IMMEDIATE alone can succeed on a read-only WAL connection.
+        # A no-op write must succeed before even the ledger file is replaced.
+        conn.execute("UPDATE media_depth SET media_revision=media_revision WHERE 0")
         item = _load_item(conn, video_id)
         target = block["media_revision"]
         current_block = None
@@ -2423,6 +2456,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         with suppress(BaseException):
             conn.rollback()
         if isinstance(exc, sqlite3.Error):
+            code = getattr(exc, "sqlite_errorcode", None)
+            if code is not None and (code & 0xff) == sqlite3.SQLITE_READONLY:
+                raise MediaError("library_unavailable", details={"reason": "read_only"}) from None
             raise MediaError("library_unavailable") from None
         raise
 
