@@ -4859,7 +4859,7 @@
       </div>
       <nav class="nav" aria-label="Sections">
         <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library" aria-current="page">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></span></button>
+        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 captures in progress or needing attention" aria-label="0 captures in progress or needing attention">0</span></span></button>
         <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count hidden" id="writingNavCount" title="0 saved drafts" aria-label="0 saved drafts"></span></button>
         <button class="nav-button" type="button" data-tab-button="research" data-nav-label="Research">Research</button>
         <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count hidden" id="sourcesNavCount" title="0 subscribed sources" aria-label="0 subscribed sources"></span></button>
@@ -5936,10 +5936,13 @@
               <div><p class="activity-failed-label" id="captureFailureLabel"></p><h2 id="captureFailureTitle" tabindex="-1"></h2></div>
               <button class="button ghost" type="button" id="closeCaptureFailure">Close</button>
             </div>
+            <p id="captureFailureReason"></p>
             <p class="activity-meta" id="captureFailureMeta"></p>
             <ol class="activity-step-list" id="captureFailureSteps" aria-label="Capture steps"></ol>
-            <h3>Last error</h3>
-            <pre class="activity-error-line" id="captureFailureError"></pre>
+            <details class="error-details">
+              <summary>Details</summary>
+              <pre class="activity-error-line" id="captureFailureError"></pre>
+            </details>
             <p class="activity-retry-copy" id="captureFailureSchedule"></p>
             <div class="activity-drawer-actions">
               <button class="button primary" type="button" id="retryCaptureFailure">Retry now</button>
@@ -7604,7 +7607,8 @@
 
     function translateMachineMessage(value, context = {}) {
       const raw = rawMachineDetails(value);
-      const haystack = `${raw} ${context.code || ""}`.toLowerCase();
+      const errors = raw.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^ERROR:/i.test(line));
+      const haystack = `${errors.pop() || raw} ${context.code || ""}`.toLowerCase();
       const source = sourceNameFromUrl(context.url || raw);
       if (!raw) return "";
       if (haystack.includes("too many requests") || haystack.includes("http error 429") || haystack.includes("rate-limit") || haystack.includes("rate limit")) {
@@ -7622,7 +7626,10 @@
       if (haystack.includes("members-only") || haystack.includes("members only")) {
         return `${source} kept this one behind members-only access.`;
       }
-      if (haystack.includes("private") || haystack.includes("video unavailable") || haystack.includes("region")) {
+      if (["video unavailable", "video is unavailable", "video is not available", "video isn't available", "video has been removed", "video is no longer available"].some((text) => haystack.includes(text))) {
+        return "This video is unavailable.";
+      }
+      if (haystack.includes("private") || haystack.includes("region")) {
         return `${source} wouldn't show a usable video. It may be private, region-locked, or gone.`;
       }
       if (haystack.includes("is live") || haystack.includes("premiere")) {
@@ -7744,7 +7751,7 @@
     // The badge names the problem ("No transcript", or "2 issues") and opens
     // the health drawer, which says why and offers Re-uoink.
     function healthException(health, row = {}) {
-      const issues = healthIssues(health);
+      const issues = healthIssues(health).filter((issue) => issue.failed || ["transcript", "screenshots"].includes(issue.key));
       if (!issues.length) return "";
       const problems = issues.filter((issue) => issue.failed);
       const kind = problems.length ? "Needs attention" : "Still working";
@@ -9107,11 +9114,16 @@
       return map[String(kind || "tweet")] || "draft";
     }
 
+    let resumeRequest = 0;
+
     async function loadResume() {
+      const request = ++resumeRequest;
       try {
         const data = await authFetch("/resume");
+        if (request !== resumeRequest) return;
         state.resume = data.resume || data;
       } catch (_) {
+        if (request !== resumeRequest) return;
         state.resume = null;
       }
       renderResumeCard(state.resume);
@@ -11310,6 +11322,7 @@
         }
         if (els.universalCaptureInput) els.universalCaptureInput.value = "";
         resetUniversalCapture();
+        loadResume();
         refreshActivity();
       } catch (err) {
         if (err && err.data && err.data.code === "host_not_allowed") {
@@ -11377,6 +11390,7 @@
         els.noteTextInput.value = "";
         if (els.noteTitleInput) els.noteTitleInput.value = "";
         showToast("Saved your note. It's in your Library.");
+        loadResume();
         await loadLibrary({ reset: true });
         // Refresh the facet dropdowns so the new note is immediately
         // filterable by platform / source type = Note.
@@ -11459,6 +11473,7 @@
         if (els.imageCaptionInput) els.imageCaptionInput.value = "";
         clearImageSelection();
         showToast("Saved your image. It's in your Library.");
+        loadResume();
         await loadLibrary({ reset: true });
         // Refresh the facet dropdowns so the new image is immediately
         // filterable by platform / source type = Image.
@@ -12592,7 +12607,7 @@
 
     // Shell: Activity's "N failed" badge, shown only while failures wait.
     // The word says it, so the state never rests on the badge colour; the
-    // nav button's name gains ", N failed" after the active-jobs count.
+    // nav button's name gains ", N failed" after the unfinished capture count.
     function setActivityFailedBadge(count) {
       const el = els.activityFailedBadge;
       if (!el) return;
@@ -12833,7 +12848,7 @@
       return "other";
     }
 
-    // The words after "Done ·" on a saved row.
+    // The words after "Ready ·" on a saved row.
     function savedRowDetail(row) {
       const st = String(row && row.source_type || "").toLowerCase();
       if (isNoteContent(row) || st === "note") return "your note";
@@ -12855,14 +12870,13 @@
       return "transcript saved";
     }
 
-    // One state line per saved row: the word carries the state, the dot
-    // only repeats it. A row with a health badge says "Saved" in a neutral
-    // tone, so a green "Done" never sits beside "No transcript".
+    // Comments and analysis run in the background. Only the transcript and
+    // screenshots hold readiness; optional failures stay in the health badge.
     function savedStateLine(row) {
-      if (healthIssues(row && row.health).length) {
+      if (healthIssues(row && row.health).some((issue) => ["transcript", "screenshots"].includes(issue.key))) {
         return `<span class="state-word saved"><i class="state-dot" aria-hidden="true"></i>Saved</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
       }
-      return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Done</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
+      return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Ready</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
     }
 
     function sourceAvailabilityLabel(row) {
@@ -13108,6 +13122,7 @@
         setLibraryCaptureNote("Playlist started. Its videos show under the box as Uoink captures them.");
       } else {
         setLibraryCaptureNote(`Saved${data.title ? ` "${data.title}"` : ` that ${run.label.toLowerCase()}`}. It's at the top of the list.`);
+        loadResume();
         loadLibrary({ reset: true });
         loadLibraryFacets();
       }
@@ -13133,7 +13148,8 @@
         run.reason = failure.reason;
       }
       run.finishedAt = new Date().toISOString();
-      setLibraryCaptureNote(`That ${run.label.toLowerCase()} didn't save. The reason is in its row.`);
+      const label = run.label.toLowerCase().replace(/\byoutube\b/g, "YouTube").replace(/\bx\b/g, "X").replace(/\breddit\b/g, "Reddit");
+      setLibraryCaptureNote(`That ${label} didn't save. The reason is in its row.`);
       renderLibraryCaptures();
       refreshActivity();
     }
@@ -13352,8 +13368,9 @@
       return before !== undefined && index > before;
     }
 
-    function captureStepLine(index) {
-      return index < 0 ? "" : `${CAPTURE_STEPS[index]} (${index + 1} of 5)`;
+    function captureStepLine(index, phase = "") {
+      if (index === 4 && phase && !/screenshot|thumb/i.test(phase)) return "Saving";
+      return ["Getting details", "Waiting", "Downloading video", "Getting transcript", "Saving screenshots"][index] || "";
     }
 
     const LIBRARY_FAILURE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -13446,6 +13463,7 @@
           : status === "completed" || done > 0) saved = true;
       });
       state.captureSaveBaseline = true;
+      if (saved) loadResume();
       if (!saved || covered || librarySavesReload) return;
       librarySavesReload = true;
       Promise.resolve().then(() => {
@@ -13461,8 +13479,8 @@
     // legacy diagnostics too: older helpers could echo paths or secrets.
     function libraryFailureCopy(data = {}) {
       const error = typeof data.error === "string" ? data.error : (data.error && data.error.message);
-      const raw = [data.error_detail, error].find((value) => typeof value === "string" && value.trim()) || "";
-      const detail = raw
+      const raw = [data.error_detail, error, data.last_error].find((value) => typeof value === "string" && value.trim()) || "";
+      const clean = (value) => String(value || "")
         .replace(/https?:\/\/[^\s"'<>]+/gi, "<url>")
         .replace(/(["'])(?:[a-z]:[\\/]|\\\\|\/)[^\r\n]*?\1/gi, "<path>")
         .replace(/[a-z]:[\\/][^\s"'<>;]+|\\\\[^\s"'<>;]+/gi, "<path>")
@@ -13471,11 +13489,19 @@
         .replace(/\b(?:Bearer|Basic)\s+[a-z0-9+/_=.-]+/gi, "[redacted]")
         .replace(/\bsk-[a-z0-9_-]{12,}/gi, "[redacted]")
         .trim().slice(0, 6000);
+      const detail = clean(raw);
       const lines = detail.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
       const cause = (lines.filter((line) => /^ERROR:/i.test(line)).pop() || lines[0] || "")
         .replace(/^ERROR:\s*(?:\[[^\]]+\]\s*)?(?:[\w-]+:\s*)?/i, "")
         .replace(/\s+/g, " ");
-      let reason = cause ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause) : "The capture request failed. Retry now.";
+      const plain = clean(error);
+      const translated = activityErrorMessage(cause || detail, data.failure_phase || data.phase, {
+        url: data.source_url || data.url, terminal: true });
+      const generic = "Uoink couldn't finish this one. Details are tucked below.";
+      let reason = translated === "This video is unavailable." ? translated
+        : plain && plain !== generic && !/^(?:ERROR:|\w*Error:|Command:|Exit code:)|^[\w-]+$|\n/.test(plain) ? plain
+        : translated && translated !== generic ? translated
+        : cause ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause) : "The capture request failed. Retry now.";
       if (data.retry_exhausted === true) {
         reason += ` ${activityErrorMessage("", "", { retryExhausted: true, attempts: data.attempt_count })}`;
       }
@@ -13502,10 +13528,10 @@
           kind: run.label,
           source: [platformChipLabel(run.platform || platformOf({ source_url: run.url })), fmtAge(run.startedAt) || "just now"].join(" · "),
           tone: failed ? "fail" : waiting ? "wait" : "now",
-          word: failed ? (index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed") : waiting ? "Waiting" : "Capturing",
+          word: failed ? (index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed") : captureStepLine(index, live && live.phase) || "Capturing",
           detail: failed ? run.reason
             : waiting ? "one YouTube capture at a time"
-              : (captureStepLine(index) || "started here, this can take a few minutes"),
+              : index < 0 ? "started here, this can take a few minutes" : "",
           errorDetail: failed ? run.errorDetail : "",
           strip: failed ? captureStripHtml(index, { failed }) : captureStripHtml(index, { advanced: captureAdvanced(run.id, index) }),
           actions: failed
@@ -13536,8 +13562,8 @@
             playlist ? `${Number(job.videos_done) || 0} of ${job.videos_total} videos` : "",
             fmtAge(job.started_at || job.updated_at)].filter(Boolean).join(" · "),
           tone: waiting ? "wait" : "now",
-          word: waiting ? "Waiting" : "Capturing",
-          detail: waiting ? "one YouTube capture at a time" : (captureStepLine(index) || "working on it"),
+          word: waiting ? "Waiting" : captureStepLine(index, phase) || "Capturing",
+          detail: waiting && job.kind !== "podcast_transcribe" ? "one YouTube capture at a time" : "",
           strip: captureStripHtml(index, { advanced: captureAdvanced(key, index) }),
           actions: "",
         });
@@ -13561,7 +13587,7 @@
         };
         if (stateValue === "running") {
           const index = captureStepIndex(row.phase);
-          items.push({ ...base, tone: "now", word: "Capturing", detail: captureStepLine(index) || "trying again now",
+          items.push({ ...base, tone: "now", word: captureStepLine(index, row.phase) || "Capturing", detail: "",
             strip: captureStripHtml(index, { advanced: captureAdvanced(key, index) }), actions: "" });
           return;
         }
@@ -13610,7 +13636,7 @@
           <div class="row-body">
             <div class="card-title">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
-            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span><span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span></div>
+            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${item.detail ? `<span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span>` : ""}</div>
             ${renderErrorDetails(item.errorDetail)}
           </div>
           ${item.actions ? `<div class="row-actions capture-actions">${item.actions}</div>` : ""}
@@ -14343,16 +14369,28 @@
         || (row.last_error === "youtube_rate_limit" ? "waiting" : ""))) || row.current_video_phase || row.phase || "";
       const index = done ? 4 : captureStepIndex(phase, failed || cancelled ? "" : status);
       const waiting = !failed && !done && !cancelled && (["queued", "pending"].includes(status) || index === 1);
-      const label = done ? "Done" : cancelled ? "Cancelled" : failed
+      const label = done ? "Ready" : cancelled ? "Cancelled" : failed
         ? (index < 0 ? "Failed" : `Failed at ${CAPTURE_STEPS[index]} (${index + 1} of 5)`)
-        : waiting ? "Waiting · one YouTube capture at a time"
-        : ["Capturing", captureStepLine(index)].filter(Boolean).join(" · ");
+        : waiting ? (row.kind === "podcast_transcribe" ? "Waiting" : "Waiting · one YouTube capture at a time")
+        : captureStepLine(index, phase) || "Capturing";
       const steps = CAPTURE_STEPS.map((label, step) => ({ label, state: done ? "done" : cancelled ? "todo"
         : step < index ? "done" : step !== index ? "todo" : failed ? "fail" : "now" }));
       return { index, failed, done, cancelled, waiting, label, steps };
     }
 
     function activityIdentity(row) {
+      const corpus = row.result && row.result.corpus;
+      if (corpus && corpus.video_id) return String(corpus.video_id);
+      if (row.kind === "podcast_transcribe") {
+        const episode = row.episode_id || (row.result && row.result.episode_id);
+        const saved = episode && (state.library || []).find((item) =>
+          String(item.episode_id || metadataOf(item).episode_id) === String(episode));
+        if (saved) return videoIdOf(saved);
+        const published = episode && (state.jobs || []).find((job) => job.kind === "podcast_transcribe"
+          && String(job.episode_id || (job.result && job.result.episode_id)) === String(episode)
+          && job.result && job.result.corpus && job.result.corpus.video_id);
+        return published ? String(published.result.corpus.video_id) : `episode:${episode || row.id}`;
+      }
       return failureKey(row) || String(row.source_url || row.url || "");
     }
 
@@ -14381,8 +14419,17 @@
       const used = new Set();
       const entries = [];
       const seenFailures = new Set();
+      // Feed URLs and episode page URLs can differ. The published corpus ID
+      // joins the saved item; the latest attempt represents each episode.
+      const episodes = new Map();
+      for (const job of jobs.filter((job) => job.kind === "podcast_transcribe")) {
+        const identity = activityIdentity(job);
+        const before = episodes.get(identity);
+        if (!before || (timeOf(activityTime(job)) || 0) > (timeOf(activityTime(before)) || 0)) episodes.set(identity, job);
+      }
       for (const job of jobs) {
         const identity = activityIdentity(job);
+        if (job.kind === "podcast_transcribe" && episodes.get(identity) !== job) continue;
         const failed = normalizedStatus(job) === "failed";
         if (failed && identity && seenFailures.has(identity)) continue;
         if (failed && identity) seenFailures.add(identity);
@@ -14576,11 +14623,13 @@
       const active = entries.filter((entry) => entry.group === "progress");
       const activeCount = active.length;
       // Pending retries count as active work, even with a failed last step.
-      const failedJobs = entries.filter((entry) => entry.group === "attention" && entry.job).map((entry) => ({ ...entry.row, state: "failed" }));
-      const queueFailedDeduped = entries.filter((entry) => entry.group === "attention" && !entry.job);
-      els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...` : "Nothing uoinking right now.";
-      setSidebarBadge(els.activityNavCount, activeCount, "active jobs");
-      setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length + queueFailedDeduped.length);
+      const failedCount = entries.filter((entry) => entry.group === "attention").length;
+      const attention = failedCount ? `${failedCount} ${failedCount === 1 ? "capture needs" : "captures need"} attention.` : "";
+      els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...${attention ? ` ${attention}` : ""}`
+        : attention || "Nothing uoinking right now.";
+      setSidebarBadge(els.activityNavCount, activeCount + failedCount,
+        `${activeCount + failedCount === 1 ? "capture" : "captures"} in progress or needing attention`);
+      setActivityFailedBadge(failedCount);
       const cancelableCount = entries.filter((entry) => entry.pending && ["pending", "running"].includes(normalizedStatus(entry.pending))
         || entry.job && ["queued", "running"].includes(normalizedStatus(entry.row))).length;
       els.cancelAll.disabled = cancelableCount === 0;
@@ -14630,6 +14679,7 @@
       };
       put("captureFailureTitle", row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.url || row.source_url || "Capture");
       put("captureFailureLabel", entry.model.label);
+      put("captureFailureReason", libraryFailureCopy({ ...row, error_detail: activityLastError(row) }).reason);
       put("captureFailureMeta", [activitySource(row), activityTranscript(entry), captureClock(activityTime(row)) || "Time not reported"].filter(Boolean).join(" · "));
       const words = { done: "Done", fail: "Failed", now: "In progress", todo: "Not reached" };
       const symbols = { done: "✓", fail: "✕", now: "○", todo: "○" };

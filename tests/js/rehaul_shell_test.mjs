@@ -1070,18 +1070,18 @@ async function groupBadge() {
     });
     check(badge.textContent === "3 failed" && !badge.classList.contains("hidden"), "two failed jobs plus one other failed queue row read 3 failed", badge.textContent);
     check(badge.title === "3 failed captures in Activity", "the badge says what it counts", badge.title);
-    check(p.els.activityNavCount.textContent === "2", "the in-flight count still counts running and queued work", p.els.activityNavCount.textContent);
-    check(p.nav("activity").getAttribute("aria-label") === "Activity, 2 active jobs, 3 failed", "the nav item's name says it in words", p.nav("activity").getAttribute("aria-label"));
+    check(p.els.activityNavCount.textContent === "5", "the count includes running, queued and failed captures", p.els.activityNavCount.textContent);
+    check(p.nav("activity").getAttribute("aria-label") === "Activity, 5 captures in progress or needing attention, 3 failed", "the nav item's name says it in words", p.nav("activity").getAttribute("aria-label"));
 
     p.state.jobs = [{ id: "j3", state: "cancelled", video_id: "ccccccccccc" }];
     p.page.renderQueue({ ok: true, pending: [] });
     check(badge.textContent === "" && badge.classList.contains("hidden"), "no failures, no badge (cancelled is not a failure)", [badge.textContent, [...badge.classList._set]]);
-    check(p.nav("activity").getAttribute("aria-label") === "Activity, 0 active jobs", "the nav item's name drops the failures", p.nav("activity").getAttribute("aria-label"));
+    check(p.nav("activity").getAttribute("aria-label") === "Activity, 0 captures in progress or needing attention", "the nav item's name drops the failures", p.nav("activity").getAttribute("aria-label"));
 
     p.state.jobs = [{ id: "j5", state: "failed", url: "https://example.com/post", title: "Post" }];
     p.page.renderQueue({});
     check(badge.textContent === "1 failed" && badge.title === "1 failed capture in Activity", "one failure reads 1 failed", [badge.textContent, badge.title]);
-    check(p.nav("activity").getAttribute("aria-label") === "Activity, 0 active jobs, 1 failed", "the name is rebuilt, not appended twice", p.nav("activity").getAttribute("aria-label"));
+    check(p.nav("activity").getAttribute("aria-label") === "Activity, 1 capture in progress or needing attention, 1 failed", "the name is rebuilt, not appended twice", p.nav("activity").getAttribute("aria-label"));
   });
 }
 

@@ -70,7 +70,7 @@ async function steps() {
     const result = p.activitySteps(input);
     same(result.index, index, phase);
     same(result.steps.map((s) => s.state), Array.from({ length: 5 }, (_, i) => i < index ? "done" : i === index ? "now" : "todo"), phase);
-    check(result.label.includes(index === 1 ? "Waiting" : `${index + 1} of 5`), "label gives words and position");
+    check(result.label.startsWith(["Getting details", "Waiting", "Downloading video", "Getting transcript", "Saving"][index]), "label names the current stage");
   }
   for (const [phase, index] of [["metadata", 0], ["waiting", 1], ["download", 2], ["transcript", 3], ["screenshots", 4]]) {
     const input = Object.freeze(failed({ failure_phase: phase, current_video_phase: "done" }));
@@ -112,7 +112,7 @@ async function rows() {
   }
   p.renderQueue({ pending: [pending({ status: "running", phase: "transcript" })] });
   check(!p.get("attentionRows").innerHTML.includes("A failed capture"), "running retry moves out of attention");
-  check(p.get("queueRows").innerHTML.includes("Capturing · transcript (4 of 5)"), `running retry uses new phase: ${p.get("queueRows").innerHTML}`);
+  check(p.get("queueRows").innerHTML.includes("Getting transcript"), `running retry uses new phase: ${p.get("queueRows").innerHTML}`);
   p.state.jobs = [failed({ title: '<img src=x onerror="boom">' })];
   p.renderQueue({ pending: [] });
   check(p.get("attentionRows").innerHTML.includes("&lt;img") && !p.get("attentionRows").innerHTML.includes("<img"), "titles escaped");
@@ -122,7 +122,7 @@ async function rows() {
   p.state.library = [];
   p.state.liveCaptures = [{ capture_ref: "local1", source_url: video, phase: "transcript", started_at: today }];
   p.renderQueue({ pending: [] });
-  check(p.get("queueRows").innerHTML.includes("transcript (4 of 5)"), "live extract has no job yet but still shows its phase");
+  check(p.get("queueRows").innerHTML.includes("Getting transcript"), "live extract has no job yet but still shows its phase");
   p.state.jobs = [failed({ state: "completed", completed_at: new Date(Date.now() + 1000).toISOString() })];
   p.renderQueue({ pending: [] });
   same(p.state.activityEntries.length, 1, "finished job supersedes a stale live record");
@@ -210,7 +210,7 @@ async function caption429() {
   p.handleJobsStreamEvent("queue", { pending: [pending({ last_error: "youtube_rate_limit", status: "failed", attempt_count: 3, retry_exhausted: true })] });
   same(p.state.activityEntries[0].group, "attention", "exhausted caption failure moves to Needs attention");
   same(p.get("activityFailedBadge").textContent, "1 failed", "exhausted caption failure counts in the badge");
-  same(p.get("activityNavCount").textContent, "0", "exhausted caption failure is no longer active");
+  same(p.get("activityNavCount").textContent, "1", "exhausted caption failure still needs attention");
 }
 
 async function exhaustion() {
@@ -249,7 +249,7 @@ async function exhaustion() {
 
 async function firstAttempt(status) {
   const p = makePage();
-  const expected = status === "pending" ? "Waiting · one YouTube capture at a time" : "Capturing · video (3 of 5)";
+  const expected = status === "pending" ? "Waiting · one YouTube capture at a time" : "Downloading video";
   for (const withJob of [false, true]) for (const extra of [
     { attempt_count: 0, last_error: "" },
     { attempt_count: 1, last_error: "" },
@@ -380,7 +380,7 @@ async function actions() {
 async function stream() {
   const p = makePage();
   p.handleJobsStreamEvent("snapshot", { active: [{ id: "live", state: "running", phase: "metadata" }], recent: [failed()], queue: { pending: [pending()] } });
-  check(p.get("queueRows").innerHTML.includes("details (1 of 5)"), "snapshot renders live steps");
+  check(p.get("queueRows").innerHTML.includes("Getting details"), "snapshot renders live steps");
   p.openCaptureFailure("job:j1", p.get("trigger"));
   p.handleJobsStreamEvent("job", failed({ failure_phase: "transcript", error_detail: "ERROR: new failure" }));
   check(p.get("captureFailureLabel").textContent.includes("transcript (4 of 5)"), "open drawer follows events");
@@ -394,7 +394,7 @@ async function stream() {
   check(p.requests.some((r) => r.path === "/queue/status"), "count-only server stream fetches details");
   p.handleJobsStreamEvent("queue", { pending: [pending({ status: "running", phase: "transcript" })] });
   release(); await settle();
-  check(p.get("queueRows").innerHTML.includes("transcript (4 of 5)"), "late queue fetch cannot overwrite newer event");
+  check(p.get("queueRows").innerHTML.includes("Getting transcript"), "late queue fetch cannot overwrite newer event");
   check(!p.els.captureFailureDrawer.open, "retry starting closes stale failure drawer");
   p.handleJobsStreamEvent("job", { id: "live", state: "completed", completed_at: today });
   check(p.get("completedRows").innerHTML.includes('step done'), "completion moves into Today");

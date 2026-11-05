@@ -147,7 +147,7 @@ try {
     assert.match(progress, /Retries on its own at /);
     assert.doesNotMatch(progress, /Failed|not reported/);
     assert.equal(await page.locator("#queueRows .step.fail").count(), 0);
-    for (const [id, label] of [[8, "Waiting · one YouTube capture at a time"], [9, "Capturing · video (3 of 5)"]]) {
+    for (const [id, label] of [[8, "Waiting · one YouTube capture at a time"], [9, "Downloading video"]]) {
       const row = page.locator(`[data-activity-key="pending:${id}"]`);
       assert.ok((await row.textContent()).includes(label));
       assert.doesNotMatch(await row.textContent(), /Waiting to retry|Retries on its own|Retrying now/);

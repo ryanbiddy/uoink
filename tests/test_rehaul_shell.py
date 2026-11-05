@@ -121,8 +121,8 @@ def test_activity_nav_item_says_how_many_failed():
     assert 'el.classList.toggle("hidden", failed === 0)' in badge
     assert 'button.setAttribute("aria-label", failed ? `${base}, ${failed} failed` : base)' in badge
     render = _between(SCRIPT, "function renderQueue(data)", "function completedTodayRows()")
-    assert ('setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length'
-            " + queueFailedDeduped.length)") in render
+    assert 'setActivityFailedBadge(failedCount)' in render
+    assert 'setSidebarBadge(els.activityNavCount, activeCount + failedCount,' in render
     # The word carries the state; the badge text uses the small-text accent
     # and its outline the --fail token (status is never colour alone).
     rule = _between(CSS, ".nav-failed {", "}")
