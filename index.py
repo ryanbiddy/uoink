@@ -3422,6 +3422,14 @@ class Index:
         """Heal stale source/corpus bindings through the fenced media publisher."""
         import library_media as _media
         with self._lock:
+            if self._existing_read_only:
+                if not _media.source_bindings_stale(self._conn, video_id, clock=clock, deadline=deadline):
+                    return False
+                try:
+                    self.initialize_for_write()
+                except Exception as exc:
+                    log.warning("media binding repair unavailable for %s: %s", video_id, type(exc).__name__)
+                    return False
             changed = _media.refresh_source_bindings(self._conn, video_id, clock=clock, deadline=deadline)
         if changed:
             self._invalidate_after_publication(video_id)

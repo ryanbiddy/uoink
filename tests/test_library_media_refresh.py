@@ -1,9 +1,11 @@
 """Normal captures remain readable after their background corpus writers finish."""
+from copy import deepcopy
 import json
 from pathlib import Path
 import sqlite3
 import re
 import threading
+from unittest.mock import Mock
 
 import pytest
 
@@ -11,6 +13,7 @@ import index as index_mod
 import library_cards
 import library_resources
 import uoink_cli
+import uoink_mcp_tools as tools
 import library_media as media
 import research
 from tests.test_phase6_bc2 import _seed_index, _server_namespace, _youtube_sidecar
@@ -89,6 +92,165 @@ def media_row(rig, video_id):
 def enrich(published):
     path = Path(published.item["corpus_path"])
     path.write_bytes(path.read_bytes() + b"\nBackground enrichment completed.\n")
+
+
+def folder_state(folder):
+    return {path.relative_to(folder): (path.read_bytes(), path.stat().st_mtime_ns)
+            for path in folder.rglob("*") if path.is_file()}
+
+
+@pytest.mark.parametrize("long", [False, True], ids=["source-revision", "corpus-revision"])
+def test_readonly_research_evidence_promotes_stale_index(rig, monkeypatch, long):
+    capture = capture_video(rig, long=long)
+    run = make_run(rig, [capture.candidate])
+    capture.replace_comments()
+    with index_mod.Index.open_existing(rig.root / "index.db") as reopened:
+        assert reopened._existing_read_only
+        monkeypatch.setattr(tools._backend, "_get_existing_index", lambda: reopened)
+        result = evidence(run)
+        assert result["ready_items"] == 1, result
+        assert result["excerpts"]
+        assert not reopened._existing_read_only
+        snap = media._read_snapshot(reopened._conn, capture.video_id)
+        stored = json.loads(capture.sidecar_path.read_bytes())
+        assert stored["media_depth"] == snap.block
+        assert stored["media_depth"]["media_revision"] == media_row(rig, capture.video_id)["media_revision"]
+        assert snap.block["provenance"]["corpus_revision"] == media._sha256(capture.corpus_path.read_bytes())
+
+
+def test_readonly_fresh_index_does_not_promote(rig, published, monkeypatch):
+    folder = Path(published.item["corpus_path"]).parent
+    before = folder_state(folder)
+    with index_mod.Index.open_existing(rig.root / "index.db") as reopened:
+        promote = Mock(side_effect=AssertionError("Fresh reads must not promote"))
+        monkeypatch.setattr(reopened, "initialize_for_write", promote)
+        assert research.read_source(reopened, published.item["video_id"]) is not None
+        promote.assert_not_called()
+        assert reopened._existing_read_only
+    assert folder_state(folder) == before
+
+
+@pytest.mark.parametrize("failure", [sqlite3.OperationalError, PermissionError])
+def test_readonly_failed_promotion_preserves_files(rig, published, monkeypatch, failure):
+    video_id = published.item["video_id"]
+    enrich(published)
+    folder = Path(published.item["corpus_path"]).parent
+    before = folder_state(folder)
+    row = media_row(rig, video_id)
+    with index_mod.Index.open_existing(rig.root / "index.db") as reopened:
+        promote = Mock(side_effect=failure("Write initialization unavailable"))
+        monkeypatch.setattr(reopened, "initialize_for_write", promote)
+        assert reopened.refresh_media_bindings(video_id) is False
+        assert research.read_source(reopened, video_id) is None
+        assert promote.call_count == 2
+        assert reopened._existing_read_only
+        assert not reopened._conn.in_transaction
+    assert folder_state(folder) == before
+    assert media_row(rig, video_id) == row
+
+
+@pytest.mark.parametrize("in_transaction", [False, True])
+def test_readonly_publisher_refuses_before_any_file_write(rig, published, in_transaction):
+    video_id = published.item["video_id"]
+    folder = Path(published.item["corpus_path"]).parent
+    before = folder_state(folder)
+    row = media_row(rig, video_id)
+    with index_mod.Index.open_existing(rig.root / "index.db") as reopened:
+        replacement = _fixture(rig, key=video_id, raw=published.raw[:4], chapters=[],
+                               corpus="# Changed synthetic corpus\n", publication_conn=reopened._conn)
+        if in_transaction:
+            reopened._conn.execute("BEGIN IMMEDIATE")
+        with pytest.raises(media.MediaError) as error:
+            media.publish_transcript(reopened._conn, video_id, cues=replacement.cues,
+                                     media_block=replacement.block, artifacts=replacement.files,
+                                     ticket=replacement.publication_ticket)
+        assert folder_state(folder) == before
+        assert error.value.code == "library_unavailable"
+        assert error.value.details == {"reason": "read_only"}
+        assert not reopened._conn.in_transaction
+    assert media_row(rig, video_id) == row
+
+
+def interrupted_repair(rig, published, monkeypatch):
+    video_id = published.item["video_id"]
+    enrich(published)
+    before = media_row(rig, video_id)
+    with monkeypatch.context() as patch:
+        patch.setattr(media, "_insert_citations", Mock(
+            side_effect=sqlite3.OperationalError("attempt to write a readonly database")))
+        with pytest.raises(media.MediaError) as error:
+            rig.idx.refresh_media_bindings(video_id)
+        assert error.value.code == "library_unavailable"
+    assert media_row(rig, video_id) == before
+    assert not rig.idx._conn.in_transaction
+    sidecar = json.loads(Path(published.item["sidecar_path"]).read_bytes())
+    assert sidecar["media_depth"]["media_revision"] != before["media_revision"]
+    return sidecar
+
+
+@pytest.mark.parametrize("read_only", [False, True])
+def test_interrupted_repair_heals_database_and_research(rig, published, monkeypatch, read_only):
+    video_id = published.item["video_id"]
+    sidecar = interrupted_repair(rig, published, monkeypatch)
+    with monkeypatch.context() as patch:
+        patch.setattr(rig.idx, "refresh_media_bindings", lambda *a, **k: False)
+        assert research.read_source(rig.idx, video_id) is None
+    with pytest.raises(media.MediaError):
+        media._read_snapshot(rig.idx._conn, video_id, allow_stale_bindings=True)
+    run = make_run(rig, [{"key": "lib:" + video_id, "video_id": video_id, "in_library": True,
+                          "kind": "library", "url": published.item["url"]}])
+    opener = index_mod.Index.open_existing if read_only else index_mod.Index.open
+    with opener(rig.root / "index.db") as reopened:
+        assert reopened.refresh_media_bindings(video_id) is True
+        monkeypatch.setattr(tools._backend, "_get_existing_index", lambda: reopened)
+        result = evidence(run, query="storage")
+        assert result["ready_items"] == 1, result
+        assert result["excerpts"]
+        snap = media._read_snapshot(reopened._conn, video_id)
+        assert snap.block == sidecar["media_depth"]
+        assert snap.block["cues"] == published.block["cues"]
+        assert snap.block["chapters"] == published.block["chapters"]
+        assert snap.block["runs"] == published.block["runs"]
+        assert snap.block["source_revision"] == snap.source_revision
+        assert snap.block["provenance"]["corpus_revision"] == snap.corpus_sha
+        assert json.loads(Path(published.item["sidecar_path"]).read_bytes())["media_depth"] == snap.block
+        assert reopened.refresh_media_bindings(video_id) is False
+
+
+@pytest.mark.parametrize("mutation", ["cues", "cue_type", "source_revision", "corpus_revision", "media_revision"])
+def test_interrupted_repair_refuses_different_sidecar_block(rig, published, monkeypatch, mutation):
+    video_id = published.item["video_id"]
+    sidecar = interrupted_repair(rig, published, monkeypatch)
+    block = deepcopy(sidecar["media_depth"])
+    if mutation == "cues":
+        raw = deepcopy(published.raw)
+        start, end, _, speaker = raw[0]
+        raw[0] = (start, end, "Different stored transcript.", speaker)
+        replacement = _fixture(rig, key=video_id, raw=raw,
+                               corpus=Path(published.item["corpus_path"]).read_text(encoding="utf-8"))
+        block = replacement.block
+        sidecar["transcript"] = replacement.sidecar["transcript"]
+        media.validate_media_block(block)
+    elif mutation == "cue_type":
+        block["cues"][0]["seq"] = False
+    elif mutation == "corpus_revision":
+        block["provenance"]["corpus_revision"] = "e" * 64
+    else:
+        block[mutation] = "e" * 64
+    if mutation not in ("media_revision", "cue_type"):
+        block["media_revision"] = media.media_revision(block)
+    sidecar["media_depth"] = block
+    Path(published.item["sidecar_path"]).write_text(json.dumps(sidecar), encoding="utf-8")
+    folder = Path(published.item["corpus_path"]).parent
+    before = folder_state(folder)
+    row = media_row(rig, video_id)
+    with pytest.raises(media.MediaError) as error:
+        rig.idx.refresh_media_bindings(video_id)
+    assert error.value.code == "revision_unavailable"
+    assert error.value.details["reason"] == "sidecar_snapshot_mismatch"
+    assert research.read_source(rig.idx, video_id) is None
+    assert folder_state(folder) == before
+    assert media_row(rig, video_id) == row
 
 
 def test_existing_stale_library_heals_durably_and_preserves_attribution(rig, published):
@@ -205,10 +367,15 @@ def test_research_rejects_concurrent_change_after_snapshot(rig, published, monke
     assert changed == [True]
 
 
+@pytest.mark.parametrize("interrupted", [False, True])
 @pytest.mark.parametrize("mutation", ["corpus", "topic", "cues", "artifact", "sidecar"])
-def test_repair_refuses_concurrent_dependency_change(rig, published, monkeypatch, mutation):
+def test_repair_refuses_concurrent_dependency_change(rig, published, monkeypatch, mutation, interrupted):
     video_id = published.item["video_id"]
-    enrich(published)
+    if interrupted:
+        sidecar = interrupted_repair(rig, published, monkeypatch)
+    else:
+        enrich(published)
+        sidecar = published.sidecar
     before = media_row(rig, video_id)
     original = media.begin_publication
 
@@ -222,7 +389,7 @@ def test_repair_refuses_concurrent_dependency_change(rig, published, monkeypatch
     assert media_row(rig, video_id) == before
     assert not rig.idx._conn.in_transaction
     stored = json.loads(Path(published.item["sidecar_path"]).read_bytes())
-    assert stored["media_depth"] == published.block
+    assert stored["media_depth"] == sidecar["media_depth"]
     if mutation == "sidecar":
         assert stored["transcript"][0]["text"] == "Newer transcript must survive."
 
