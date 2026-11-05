@@ -69,7 +69,7 @@ jobs:
         run: python -B scripts/mac/check_notary.py cleanup
       - name: Upload public notary JSON
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-notary-check
           path: ${{ runner.temp }}/mac-notary-check/*.json
@@ -111,7 +111,7 @@ jobs:
         run: python -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"
       - name: Upload portable evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-portable-py${{ matrix.python }}
           path: ${{ runner.temp }}/mac-evidence/
@@ -154,7 +154,7 @@ jobs:
         run: python -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"
       - name: Upload dependency reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-dependency-evidence
           path: |
@@ -168,7 +168,7 @@ jobs:
           retention-days: 14
       - name: Upload wheels and verified inventory for import smoke
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-qualified-wheels
           path: ${{ runner.temp }}/mac-evidence/deps/wheels/
@@ -248,14 +248,14 @@ jobs:
             "$RUNNER_TEMP/mac-receipt/receipt.json"
       - name: Upload installed receipt even on failure
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-install-receipt
           path: ${{ runner.temp }}/mac-receipt/receipt.json
           if-no-files-found: error
           retention-days: 14
       - name: Upload app archive, DMG and Darwin connector
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: uoink-macos-arm64-adhoc
           path: |
@@ -268,7 +268,7 @@ jobs:
           retention-days: 7
       - name: Upload build evidence and resolved hash lock
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-build-evidence
           path: |
@@ -356,7 +356,7 @@ jobs:
             --expected-sha256 "$digest" --require-notarized --expected-team-id "$MACOS_TEAM_ID" \
             --output "$RUNNER_TEMP/mac-signed-evidence/receipt"
       - name: Upload signed DMG and Darwin connector
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: uoink-macos-arm64-signed
           path: |
@@ -368,7 +368,7 @@ jobs:
           retention-days: 7
       - name: Upload public signing and runtime evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-signed-evidence
           path: ${{ runner.temp }}/mac-signed-evidence/
@@ -420,7 +420,7 @@ jobs:
           fi
       - name: Upload import and protocol evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mac-import-smoke
           path: ${{ runner.temp }}/mac-evidence/
