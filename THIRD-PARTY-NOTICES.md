@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-10-22; regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-11-05; regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -30,7 +30,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | defusedxml | 0.7.1 | Python Software Foundation License | https://github.com/tiran/defusedxml |
 | einops | 0.8.2 | MIT License | https://github.com/arogozhnikov/einops |
 | faster-whisper | 1.2.1 | MIT License | https://github.com/SYSTRAN/faster-whisper |
-| filelock | 3.32.0 | MIT | https://github.com/tox-dev/py-filelock |
+| filelock | 4.2.1 | MIT | https://github.com/tox-dev/py-filelock |
 | flatbuffers | 25.12.19 | Apache Software License | https://google.github.io/flatbuffers/ |
 | fonttools | 4.63.0 | MIT | http://github.com/fonttools/fonttools |
 | frozenlist | 1.8.0 | Apache-2.0 | https://github.com/aio-libs/frozenlist |
