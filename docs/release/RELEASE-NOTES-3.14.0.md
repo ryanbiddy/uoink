@@ -52,3 +52,12 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.14.0/docs/linux.m
 - Linux is headless only: no tray, splash or dashboard window (the helper logs the dashboard URL instead). A host install needs ffmpeg and ffprobe on the system; without them media tools answer `media_requires_ffmpeg`. Podcast transcription on Linux uses CPU faster-whisper without speaker labels unless you install the optional WhisperX requirements.
 - Mac: Apple Silicon only. Uoink doesn't update itself there yet, so install new versions from the DMG.
 - Chrome (tested). Edge and Brave may work but are not tested.
+
+## Checksums
+
+| File | Size | SHA-256 |
+| --- | --- | --- |
+| `Uoink-Setup-3.14.0.exe` | 519,322,824 B | `b9e5acf346b252bd34cf00ee223a68b2b9fa65cf0dfd932603d14f3b8a957a52` |
+| `uoink-3.14.0.mcpb` | 117,589 B | `44c6a794de07d4d327fb149ecaa481dd5808aa4fae215082f4c0a74ec60429ef` |
+| `Uoink-3.14.0-macos-arm64.dmg` | 695,008,714 B | `2591ea57a39667c59216b1ba96f50532a7edb88716205a432594da5ba5742dd1` |
+| `uoink-3.14.0-macos.mcpb` | 114,114 B | `ed674f182195370b4c06af5829e46faeb21ee44a05f8dfdd6f5ac75007318626` |
