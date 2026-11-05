@@ -1047,11 +1047,17 @@ class PodcastRssAdapter(HttpFeedAdapter):
         root = ET.fromstring(body)
         root_name = _localname(root.tag)
         entries: list[tuple[str | None, str, dict]] = []
-        feed_title = None
+        feed_title = artwork_url = None
         if root_name == "rss":
             channels = [c for c in root if _localname(c.tag) == "channel"]
             channel = channels[0] if channels else None
-            feed_title = _child_text(channel, "title") if channel is not None else None
+            if channel is not None:
+                feed_title = _child_text(channel, "title")
+                for child in channel:
+                    if _localname(child.tag) == "image":
+                        artwork_url = _http_link(child.attrib.get("href") or _child_text(child, "url"))
+                        if artwork_url:
+                            break
             for item in (channel if channel is not None else []):
                 if _localname(item.tag) != "item":
                     continue
@@ -1066,6 +1072,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 }))
         elif root_name == "feed":
             feed_title = _child_text(root, "title")
+            artwork_url = _http_link(_child_text(root, "logo", "icon"))
             for entry in root:
                 if _localname(entry.tag) != "entry":
                     continue
@@ -1101,6 +1108,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 published_at_ms=parse_published_ms(meta["published"]),
                 metadata={"identity_method": method, "audio_url": _http_link(meta["audio"]),
                           "feed_title": result.feed_title,
+                          "artwork_url": artwork_url,
                           "published_raw": meta["published"], "duration_raw": meta["duration"]},
             )
             if entry_id in seen:
@@ -2963,6 +2971,13 @@ class SourceSubscriptionService:
                 "UPDATE source_subscriptions SET consent_state='on', revision=?, consent_epoch=?, "
                 "boundary=?, updated_at_ms=? WHERE source_id=?",
                 (after, epoch, boundary, now, source["source_id"]))
+            if source["kind"] == "podcast_rss" and boundary == "initial":
+                # Old preview data must not delay the first consented poll.
+                # Keep any failure backoff and active poll lease intact.
+                conn.execute(
+                    "UPDATE source_detection_cursors SET next_poll_at_ms=MIN(next_poll_at_ms, ?) "
+                    "WHERE source_id=? AND error_count=0",
+                    (now, source["source_id"]))
         else:
             # Contract table, "Confirm on -> off": increment revision; clear the
             # pending boundary; release every unstarted reservation in this
@@ -3099,10 +3114,20 @@ class SourceSubscriptionService:
         allowance = self._allowance(conn, source, now)
         capture_outcome, current_item, recovery_reason = self._capture_outcome_and_current_item(
             conn, source, allowance, in_flight)
+        latest_episode = None
+        if source["kind"] == "podcast_rss":
+            latest = _row(conn.execute(
+                "SELECT * FROM source_items WHERE source_id=? AND state!='deleted' "
+                "ORDER BY (state='committed') DESC, published_at_ms DESC, first_seen_ms DESC, item_id LIMIT 1",
+                (source["source_id"],)).fetchone())
+            if latest:
+                latest_episode = self._item_record(conn, latest)
         return {
             "source_id": source["source_id"], "kind": source["kind"],
             "canonical_url": source["canonical_url"],
-            "display_name": _safe_text(source.get("display_name"), 200),
+            "display_name": _safe_text(source.get("display_name"), 200) or (
+                urllib.parse.urlparse(source["canonical_url"]).hostname
+                if source["kind"] == "podcast_rss" else None),
             "adapter": source["adapter"],
             "consent_state": source["consent_state"], "revision": int(source["revision"]),
             "consent_epoch": int(source["consent_epoch"]),
@@ -3120,6 +3145,7 @@ class SourceSubscriptionService:
             "capture_outcome": capture_outcome,
             "recovery_reason": recovery_reason,
             "current_item": current_item,
+            "latest_episode": latest_episode,
             "legacy": {"feed_id": source.get("legacy_feed_id"),
                        "playlist_id": source.get("legacy_playlist_id")},
             "created_at_ms": int(source["created_at_ms"]),
@@ -3369,6 +3395,7 @@ class SourceSubscriptionService:
         sql = ("SELECT s.source_id FROM source_subscriptions s "
                "JOIN source_detection_cursors c ON c.source_id=s.source_id "
                "WHERE s.archived=0 AND s.detection_enabled=1 AND c.poll_owner_token IS NULL "
+               "AND (s.kind!='podcast_rss' OR s.consent_epoch>0) "
                "AND c.next_poll_at_ms<=? ORDER BY c.next_poll_at_ms, s.source_id")
         params: list[Any] = [now]
         if limit is not None:
@@ -3396,6 +3423,8 @@ class SourceSubscriptionService:
             source = self._source(conn, source_id)
             cursor = self._cursor(conn, source_id)
             if source["archived"] or not source["detection_enabled"]:
+                return None
+            if source["kind"] == "podcast_rss" and not source["consent_epoch"]:
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None
@@ -3475,10 +3504,10 @@ class SourceSubscriptionService:
                 # Keep the feed name available to new captures and old library rows.
                 conn.execute("UPDATE source_subscriptions SET display_name=? WHERE source_id=? "
                              "AND (display_name IS NULL OR lower(trim(display_name)) IN ('','untitled podcast') "
-                             "OR display_name=canonical_url)", (result.feed_title, source_id))
+                             "OR display_name=canonical_url)", (_safe_text(result.feed_title, 200), source_id))
                 if source.get("legacy_feed_id") is not None:
                     conn.execute("UPDATE podcast_feeds SET title=? WHERE id=?",
-                                 (result.feed_title, source["legacy_feed_id"]))
+                                 (_safe_text(result.feed_title, 200), source["legacy_feed_id"]))
             on_current = source["consent_state"] == "on" and not stale_epoch
             epoch_for_items = int(source["consent_epoch"]) if on_current else None
             stats = self._persist_observations(conn, source, result.observations, now,
@@ -3487,7 +3516,7 @@ class SourceSubscriptionService:
                 conn.execute("UPDATE source_items SET metadata_json=json_set(metadata_json, '$.feed_title', ?) "
                              "WHERE source_id=? AND json_valid(metadata_json) "
                              "AND lower(trim(coalesce(json_extract(metadata_json,'$.feed_title'),''))) "
-                             "IN ('','untitled podcast')", (result.feed_title, source_id))
+                             "IN ('','untitled podcast')", (_safe_text(result.feed_title, 200), source_id))
             if result.coverage == "partial":
                 # Contract: incomplete batches persist metadata but advance no success
                 # cursor or enrollment and create no eligibility.
@@ -3722,6 +3751,8 @@ class SourceSubscriptionService:
         if source["archived"] or not source["detection_enabled"]:
             return success(source_id=source["source_id"], outcome="detection_disabled",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]))
+        if source["kind"] == "podcast_rss" and not source["consent_epoch"]:
+            return success(source_id=source["source_id"], outcome="consent_required")
         if int(cursor["next_poll_at_ms"]) > now or (
                 cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now):
             return success(source_id=source["source_id"], outcome="not_due",

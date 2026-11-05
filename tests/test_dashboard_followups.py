@@ -375,7 +375,10 @@ def test_page_permission_is_offered_before_the_first_capture_click():
     assert out["allowed"]["captureDisabled"] is False
     assert out["allowed"]["focused"] == 1
     assert all(call[0] == "/extract/page/allowlist" for call in out["allowed"]["calls"])
-    assert out["calls"][-1] == ["/extract/page", "POST", {"url": "https://www.example.com/post"}]
+    assert out["calls"] == out["allowed"]["calls"] + [
+        ["/extract/page", "POST", {"url": "https://www.example.com/post"}],
+        ["/resume", "GET", None],
+    ]
 
 
 def test_changing_or_clearing_a_link_cannot_use_stale_detection_or_permission():
@@ -442,7 +445,10 @@ def test_allow_result_follows_the_current_host_after_another_paste(host):
     ]
     if same_host:
         assert out["settled"]["note"] == "Site allowed. Click Uoink it to capture this page."
-        assert out["calls"][-1] == ["/extract/page", "POST", {"url": "https://www.example.com/second"}]
+        assert out["calls"] == out["beforeClick"] + [
+            ["/extract/page", "POST", {"url": "https://www.example.com/second"}],
+            ["/resume", "GET", None],
+        ]
     else:
         assert out["settled"]["note"] == out["pending"]["note"]
         assert out["calls"] == out["beforeClick"]

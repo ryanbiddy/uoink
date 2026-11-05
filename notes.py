@@ -170,8 +170,9 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
     # Classify a topic over the note text so notes join the topic facet instead
     # of piling into Uncategorized. The caller injects the classifier so this
     # module stays standalone; a classify failure never blocks the save.
+    # A short jot does not provide enough context for a reliable topic.
     topic = None
-    if topic_classifier is not None:
+    if topic_classifier is not None and len(re.findall(r"\b\w+\b", md or "")) >= 12:
         try:
             topic = topic_classifier({
                 "title": title or "",

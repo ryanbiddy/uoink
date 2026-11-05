@@ -14,6 +14,7 @@ import server
 import source_subscriptions as ss
 from tests.source_subscriptions_fixtures import (
     Clock, FakeBackend, FakeFetch, FEED_URL, MINUTE_MS, http, open_index, publish, register,
+    turn_on,
 )
 from tests.test_dashboard_runthrough_fixes import DASHBOARD, run_js
 from tests.test_podcast_corpus_bridge import _seed_episode
@@ -56,7 +57,8 @@ def test_subscription_feed_title_reaches_new_episodes(tmp_path, kind):
     service = ss.SourceSubscriptionService(index=idx, clock=clock, adapters=ss.default_adapters(fetch),
                                            backend=FakeBackend(), instance_id="title-test")
     try:
-        register(service, "podcast_rss", FEED_URL)
+        sid = register(service, "podcast_rss", FEED_URL)["source_id"]
+        turn_on(service, sid)
         assert service.detection_pass()[0]["ok"]
         episode = podcasts.list_episodes(idx)[0]
         assert podcasts.get_episode_with_feed(idx, episode["id"])["podcast_title"] == "Channel title"
@@ -89,6 +91,7 @@ def test_old_feed_without_title_is_refetched_then_uses_conditional_requests(tmp_
                                            backend=FakeBackend(), instance_id="title-repair")
     try:
         sid = register(service, "podcast_rss", FEED_URL)["source_id"]
+        turn_on(service, sid)
         with idx.write_transaction() as conn:
             conn.execute("UPDATE source_detection_cursors SET etag=?, last_modified=? WHERE source_id=?",
                          ('"unchanged"', "Wed, 04 Nov 2026 12:00:00 GMT", sid))
@@ -211,6 +214,7 @@ def test_nonlegacy_podcast_observations_supply_display_titles(tmp_path, kind):
                                            backend=FakeBackend(), instance_id="nonlegacy-title")
     try:
         sid = register(service, "podcast_rss", FEED_URL)["source_id"]
+        turn_on(service, sid)
         with idx.write_transaction() as conn:
             conn.execute("UPDATE source_subscriptions SET legacy_feed_id=NULL WHERE source_id=?", (sid,))
         assert service.detection_pass()[0]["ok"]
@@ -283,14 +287,17 @@ def test_provider_search_does_not_query_feed_titles_per_item(tmp_path):
 def test_consented_poll_recovers_missing_show_without_republishing(tmp_path):
     idx = open_index(tmp_path)
     clock = Clock()
-    body = (b'<rss><channel><item><guid>one</guid><title>Episode title</title>'
+    body = (b'<rss><channel><image><url>https://cdn.example/first.jpg</url></image>'
+            b'<item><guid>one</guid><title>Episode title</title>'
             b'</item></channel></rss>')
     fetch = FakeFetch([http(200, body), http(200, body.replace(
-        b'<channel>', b'<channel><title>Recovered show</title>'))])
+        b'<channel>', b'<channel><title>Recovered show</title>').replace(b'first.jpg', b'next.jpg'))])
     service = ss.SourceSubscriptionService(index=idx, clock=clock, adapters=ss.default_adapters(fetch),
                                            backend=FakeBackend(), instance_id="consented-title")
     try:
-        register(service, "podcast_rss", FEED_URL)
+        sid = register(service, "podcast_rss", FEED_URL)["source_id"]
+        assert service.detection_pass() == [] and not fetch.requests
+        turn_on(service, sid)
         assert service.detection_pass()[0]["ok"]
         episode = podcasts.list_episodes(idx)[0]
         transcript = tmp_path / "transcript.json"
@@ -300,10 +307,16 @@ def test_consented_poll_recovers_missing_show_without_republishing(tmp_path):
                          (str(transcript), episode["id"]))
         published = podcasts.episode_to_corpus(idx, episode["id"], data_root=tmp_path)
         saved = idx.get_yoink(published["video_id"])
+        assert json.loads(saved["metadata_json"])["artwork_url"] == "https://cdn.example/first.jpg"
         before = _saved_podcast_state(idx, saved)
         clock.advance(61 * MINUTE_MS)
         assert service.detection_pass()[0]["ok"]
         assert podcasts.repair_corpus_titles(idx, [saved])[0]["channel"] == "Recovered show"
+        metadata = json.loads(idx._conn.execute(
+            "SELECT metadata_json FROM source_items WHERE source_id=?", (sid,)).fetchone()[0])
+        assert metadata["feed_title"] == "Recovered show"
+        assert metadata["artwork_url"] == "https://cdn.example/next.jpg"
+        assert podcasts.episode_artwork_url(idx, episode["id"]) == metadata["artwork_url"]
         assert _saved_podcast_state(idx, saved) == before
         assert len(fetch.requests) == 2
     finally:
@@ -323,6 +336,7 @@ def test_boot_repairs_only_placeholder_registry_labels_from_local_data(tmp_path,
     monkeypatch.setattr(ss, "default_http_fetch", fetch)
     try:
         sid = register(service, "podcast_rss", FEED_URL)["source_id"]
+        turn_on(service, sid)
         assert service.detection_pass()[0]["ok"]
         video_id = ss.podcast_corpus_id(FEED_URL, "one")
         publish(idx, video_id, root=tmp_path, platform="podcast", source_type="episode",

@@ -1019,6 +1019,20 @@ def repair_feed_titles(idx, *, data_root: Path | None = None) -> None:
                              "IN ('','untitled podcast')", (title, url))
 
 
+def episode_artwork_url(idx, episode_id: int) -> str | None:
+    """Reuse artwork from the feed snapshot; no extra feed fetch per episode."""
+    if not _subscriptions().tables_present(idx._conn):
+        return None
+    row = idx._conn.execute(
+        "SELECT metadata_json FROM source_items WHERE legacy_episode_id=? LIMIT 1",
+        (episode_id,)).fetchone()
+    try:
+        metadata = json.loads(row[0] or "{}") if row else {}
+        return _subscriptions()._http_link(metadata.get("artwork_url"))
+    except (TypeError, ValueError, AttributeError):
+        return None
+
+
 def set_episode_status(idx, episode_id: int, status: str) -> bool:
     if status not in _EPISODE_STATUSES:
         raise ValueError(
@@ -1312,6 +1326,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         })
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
+    artwork_url = episode_artwork_url(idx, episode_id)
     record = {
         "video_id": video_id, "slug": folder.name,
         "channel": podcast_title, "author": podcast_title,
@@ -1325,6 +1340,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "duration_seconds": row.get("duration_seconds"),
             "upload_date": row.get("published_at"),
             "podcast_title": podcast_title,
+            "artwork_url": artwork_url,
             "episode_id": episode_id,
             # AS-06: full identity provenance behind the shortened corpus id.
             "feed_url": feed_key,
@@ -1390,6 +1406,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "guid": guid,
         "capture_key": capture_key,
         "podcast_title": podcast_title,
+        "artwork_url": artwork_url,
         "episode_title": episode_title,
         "title": episode_title,
         "channel": podcast_title,

@@ -153,9 +153,10 @@ def test_s02_new_sources_default_off_with_due_cursor_and_no_network(tmp_path):
         assert source["poll_interval_min"] == 60
         assert source["detection"]["next_poll_at_ms"] <= T0
     assert adapter.calls == [], "registration performs no network I/O"
-    # A metadata-only poll happens while off and creates no eligibility.
+    # Podcasts wait for consent; YouTube metadata detection remains independent.
     results = service.detection_pass()
-    assert len(results) == 3 and all(r["ok"] for r in results)
+    assert len(results) == 2 and all(r["ok"] for r in results)
+    assert {r["kind"] for r in results} == {"youtube_channel", "youtube_playlist"}
     for row in rows(service, "SELECT * FROM source_items"):
         assert row["eligibility"] == "none" and row["state"] == "observed"
         assert row["first_seen_consent_epoch"] is None

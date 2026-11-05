@@ -9685,6 +9685,7 @@ def _public_job(job: dict) -> dict:
     if kind == "podcast_transcribe":
         public.update({
             "episode_id": job.get("episode_id"),
+            "artwork_url": job.get("artwork_url"),
             "model": job.get("model"),
             "language": job.get("language"),
             "diarize": job.get("diarize"),
@@ -10775,6 +10776,7 @@ def _queue_podcast_transcription(
                         "reused_existing": True}, 202
     job = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
+        "artwork_url": podcasts.episode_artwork_url(_get_index(), episode_id),
         "source_url": episode.get("episode_page_url"),
         "title": episode.get("title") or "Untitled episode",
         "playlist_title": None, "session_folder": None,
@@ -14593,6 +14595,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "entity_count": r.get("entity_count", 0),
             "top_entities": r.get("top_entities", []),
             "thumbnail_path": thumbnail_path,
+            "artwork_url": source_subscriptions._http_link(live.get("artwork_url") or metadata.get("artwork_url")),
             "original_thumbnail_path": original_thumbnail_path,
             "card_image_source": card_image_source,
             "import_origin": list_imports.public_origin(
@@ -17325,6 +17328,8 @@ class Handler(BaseHTTPRequestHandler):
             row = podcasts.add_feed(_get_index(), feed_url,
                                        poll_interval_min=int(interval),
                                        auto_ingest=auto_ingest)
+            if not row.get("title"):
+                row["title"] = urlparse(row["feed_url"]).hostname
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:

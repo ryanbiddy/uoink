@@ -36,6 +36,7 @@ async function setup(options = {}) {
     env.document.body.appendChild(el);
   }
   env.el = id => env.document.getElementById(id);
+  env.el('first-capture-url').value = 'https://www.youtube.com/watch?v=00000000001';
   env.events = {};
   env.document.addEventListener = (name,fn) => {env.events[name]=fn;};
   env.ctx.addEventListener = (name,fn) => {env.events[name]=fn;};
@@ -192,7 +193,7 @@ const groups = {
     assert.equal(env.sent.length,1);
     assert.equal(env.sent[0].type,'popupCapture');
     assert.equal(env.sent[0].job.route,'video');assert.equal(env.sent[0].job.saveOnly,true);
-    assert.equal(env.sent[0].job.url,'https://www.youtube.com/watch?v=8rABwKRsec4');
+    assert.equal(env.sent[0].job.url,'https://www.youtube.com/watch?v=00000000001');
     assert.equal(env.tabsCreated.length,0);assert.equal(env.notifications.length,0);
     assert.match(env.el('capture-status').textContent,/Capture started/);
     await result(env,{id:'other',ok:true,video_id:'wrong'});
@@ -202,6 +203,25 @@ const groups = {
     await result(env,{id:'first',ok:true,video_id:'abc/a?b'});
     assert.equal(env.el('capture-destination').href,'http://127.0.0.1:5179/dashboard#item/abc%2Fa%3Fb');
     assert.equal(env.el('capture-status').textContent,'Done · saved to your library');
+  },
+  async capture_input() {
+    const env=await setup({onSend:()=>({ok:true,id:'first'})});
+    env.el('capture-status').textContent='Capture could not start';
+    for (const value of ['', 'https://example.com', 'javascript:alert(1)']) {
+      env.el('first-capture-url').value=value;
+      env.el('uoink-suggested-btn').click();await settle();
+      assert.equal(env.sent.length,0);
+      assert.equal(env.el('first-capture-url').getAttribute('aria-invalid'),'true');
+      assert.equal(env.el('capture-error').textContent,'Paste a YouTube video link first.');
+      assert.equal(env.el('capture-status').hidden,true);
+      assert.equal(env.el('capture-destination').hidden,true);
+    }
+    env.el('first-capture-url').value='https://youtu.be/00000000002';
+    env.el('uoink-suggested-btn').click();await settle();
+    assert.equal(env.sent[0].job.url,'https://www.youtube.com/watch?v=00000000002');
+    assert.equal(env.el('first-capture-url').getAttribute('aria-invalid'),null);
+    assert.equal(env.el('capture-status').hidden,false);
+    assert.equal(env.el('capture-destination').hidden,false);
   },
   async capture_failure() {
     let captures=0;

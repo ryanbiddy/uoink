@@ -3626,7 +3626,8 @@ def sources_call(tool_name: str, args: Any, *, transport: str = "registry") -> d
     if not callable(fn):
         return _sources_unavailable()
     try:
-        result = fn(_sources_context(transport), dict(args))
+        context = _sources_context(transport)
+        result = fn(context, dict(args))
     except Exception:
         _library_log.exception("sources %s raised", tool_name)
         return mod.error_envelope("internal_error", "The source service raised; see the helper log.",
