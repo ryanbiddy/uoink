@@ -2,17 +2,17 @@
 
 How do evals catch regressions?
 
-2026\-11\-03 · 2 claims from 1 sources, 1 dropped
+2026\-11\-03 · 2 claims from 1 source, 1 dropped
 
 ## Summary (not verified; every claim below links to its source)
 
-Evals catch regressions&#46;
+Evals catch regressions\.
 
 ## Evaluations
 
 evals catch regressions before deployment
 
-[00&#58;27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=27s)
+[00\:27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=27s)
 
 > evals catch regressions before deployment
 
@@ -20,11 +20,11 @@ Channel attribution.
 
 however benchmarks miss failures in real workflows
 
-[00&#58;38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=38s)
+[00\:38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=38s)
 
 > however benchmarks miss failures in real workflows
 
-Transcript may be wrong here; listen at 00&#58;40
+Transcript may be wrong here; listen at 00\:40
 
 Channel attribution.
 
@@ -36,13 +36,13 @@ Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly
 
 | c1 | c2 |
 | --- | --- |
-| evals catch regressions before deployment [00&#58;27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=27s) Channel attribution. | however benchmarks miss failures in real workflows [00&#58;38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=38s) Transcript may be wrong here; listen at 00&#58;40 Channel attribution. Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly overstated |
+| evals catch regressions before deployment [00\:27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=27s) Channel attribution. | however benchmarks miss failures in real workflows [00\:38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=38s) Transcript may be wrong here; listen at 00\:40 Channel attribution. Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly overstated |
 
 ## Sources
 
 | Title | Channel | Date | Duration | Transcript | Claims |
 | --- | --- | --- | --- | --- | --- |
-| Evaluation practice | Fixture talks | 2026\-10\-30 | 03&#58;30 | Captions | 2 |
+| Evaluation practice | Fixture talks | 2026\-10\-30 | 03\:30 | Captions | 2 |
 
 ## Method
 
@@ -54,4 +54,4 @@ Receipt checks bind quotations to stored transcripts; they do not establish that
 
 ### Didn't make the cut (1)
 
-- An unsupported claim&#46; — Quote not found in the stored transcript
+- An unsupported claim\. — Quote not found in the stored transcript

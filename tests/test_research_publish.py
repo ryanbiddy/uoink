@@ -74,6 +74,35 @@ def test_hard_binding_failures(rig, fault, reason):
         assert submitted["excerpt_refs"][0]["quote"] not in html_report(result)
 
 
+@pytest.mark.parametrize("claim_count,source_count,expected", [
+    (0, 0, "0 claims from 0 sources"), (1, 1, "1 claim from 1 source"),
+    (2, 1, "2 claims from 1 source"), (2, 2, "2 claims from 2 sources"),
+])
+def test_report_and_share_text_pluralize_claims_and_sources(rig, claim_count, source_count, expected):
+    run = make_run(rig, [seed(rig, video_id=f"talk{i:07d}") for i in range(source_count or 1)])
+    excerpts = evidence(run)["excerpts"]
+    claims = [claim(excerpts[i % source_count]["excerpt_id"], id=f"c{i}") for i in range(claim_count)]
+    if not claims:
+        claims = [claim(excerpts[0]["excerpt_id"], judge="no")]
+    result = publish(run, claims)
+    dropped = 0 if claim_count else 1
+    assert expected + ", each linked to the second it was said." in result["share_text"]
+    for key in ("report_md_path", "report_html_path"):
+        assert expected + f", {dropped} dropped" in Path(result[key]).read_text(encoding="utf-8")
+
+
+def test_published_markdown_uses_markdown_escapes_and_html_stays_escaped(rig):
+    run, excerpt = prepared(rig)
+    result = publish(run, [claim(excerpt)],
+                     summary_md='Evals & R&D: [checks] for @reviewer <b>catch regressions</b>.')
+    markdown = Path(result["report_md_path"]).read_text(encoding="utf-8")
+    assert r'Evals \& R\&D\: \[checks\] for \@reviewer \<b\>catch regressions\</b\>\.' in markdown
+    assert "&#" not in markdown and "&amp;" not in markdown
+    rendered = html_report(result)
+    assert "Evals &amp; R&amp;D: [checks] for @reviewer &lt;b&gt;catch regressions&lt;/b&gt;." in rendered
+    assert "b" not in Links(rendered).tags
+
+
 def test_reanchors_third_cue_and_caption_folding(rig):
     run, excerpt = prepared(rig)
     result = publish(run, [claim(excerpt, "Evals catch regressions, before deployment!")])

@@ -11554,7 +11554,8 @@
     function importOriginText(row) {
       const origin = row && row.import_origin;
       if (!origin || !origin.label) return "";
-      const from = origin.list_title ? `${origin.label}: ${origin.list_title}` : origin.label;
+      const from = origin.list_title && origin.list_title !== origin.label
+        ? `${origin.label}: ${origin.list_title}` : origin.label;
       const note = origin.note ? ` ${origin.note}` : "";
       const credit = origin.credit ? ` ${origin.credit}` : "";
       return `From ${from}.${note}${credit}`;
@@ -11593,7 +11594,7 @@
       return `
         <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
           ${image}
-          <div class="insight-kicker">${htmlEscape(origin.label || "imported")}${origin.list_title ? ` &middot; ${htmlEscape(origin.list_title)}` : ""}</div>
+          <div class="insight-kicker">${htmlEscape(origin.label || "imported")}${origin.list_title && origin.list_title !== origin.label ? ` &middot; ${htmlEscape(origin.list_title)}` : ""}</div>
           <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")}${row.topic ? ` | ${htmlEscape(row.topic)}` : ""}</div>
           ${origin.note ? `<div class="insight-note">${htmlEscape(origin.note)}</div>` : ""}
