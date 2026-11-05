@@ -104,16 +104,22 @@ try {
     const captionRow = page.locator('[data-activity-key="pending:8"]');
     assert.equal(await page.locator('#queueRows [data-activity-key="pending:8"]').count(), 1, "pending retry stays in In progress");
     assert.equal(await page.locator("#attentionRows .activity-row").count(), 0, "pending retry is not a hard failure");
-    assert.equal(await page.locator("#activityFailedBadge").isVisible(), false, "pending retry has no failed badge");
+    assert.equal((await page.locator("#activityNavCount").getAttribute("title")).includes("failed"), false, "pending retry is not counted as a hard failure");
     assert.equal(await page.locator("#activityNavCount").textContent(), "1", "pending retry counts as active work");
-    assert.equal(await captionRow.locator(".step.fail").count(), 1);
-    assert.match(await captionRow.textContent(), /Failed at waiting for YouTube \(2 of 5\)/);
+    assert.equal(await captionRow.locator(".step.now").count(), 1);
+    assert.match(await captionRow.textContent(), /Waiting to retry/);
     await captionRow.getByRole("button", { name: "Details", exact: true }).click();
     assert.equal(await page.locator("#captureFailureError").textContent(), "ERROR: YouTube refused it (HTTP 429).");
     assert.match(await drawer.locator("li").nth(1).textContent(), /✕waiting for YouTubeFailed/);
     assert.equal(await drawer.evaluate((el) => el.scrollWidth > el.clientWidth), false, "caption failure drawer must fit viewport");
     await shot(page, `activity-caption429-${theme}-${width}`);
     await page.keyboard.press("Escape");
+    await page.evaluate(() => handleJobsStreamEvent("queue", { pending: [{ pending_id: 8, status: "failed",
+      url: "https://www.youtube.com/watch?v=44444444444", last_error: "youtube_rate_limit",
+      attempt_count: 3, retry_exhausted: true }] }));
+    assert.equal(await page.locator('[data-tab-button="activity"] .nav-badges > span').count(), 1, "Activity has one count");
+    assert.equal(await page.locator("#activityNavCount").textContent(), "1", "failure counts once");
+    assert.match(await page.locator("#activityNavCount").getAttribute("title"), /, 1 failed$/);
     await page.evaluate(() => { state.jobs = []; state.library = []; state.queue = { pending: [] }; renderQueue(state.queue); });
     assert.equal(await page.locator(".activity-row").count(), 0);
     assert.equal(await page.locator("#activityHeadline").textContent(), "Nothing uoinking right now.");

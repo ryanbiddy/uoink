@@ -311,12 +311,13 @@ def test_paste_box_offers_allow_host_then_captures_again():
     assert wall["text"] == "Allow www.example.com" and wall["hidden"] is False
     assert wall["note"] == "That site isn't on your allowed pages list yet. Allow it to capture this page."
     assert wall["toasts"] == []
-    # The same call Settings' Add makes, then the same link again.
+    # The same call Settings' Add makes, then capture and refresh the last save.
     assert out["calls"] == [
         ["/extract/page", "POST", {"url": "https://www.example.com/post"}],
         ["/extract/page/allowlist", "POST", {"action": "add", "url_pattern": "www.example.com"}],
         ["/extract/page/allowlist", "GET", None],
         ["/extract/page", "POST", {"url": "https://www.example.com/post"}],
+        ["/resume", "GET", None],
     ]
     assert out["toasts"] == ["Uoinking that article / web page. Track it in Activity."]
     assert out["after"]["hidden"] is True

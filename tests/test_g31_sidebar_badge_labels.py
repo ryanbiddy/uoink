@@ -27,7 +27,7 @@ def main() -> int:
         'title="0 source types"',
         'title="0 suggestions"',
         'title="0 Generate items"',
-        'title="0 active jobs"',
+        'title="0 captures in progress or needing attention"',
         "function setSidebarBadge(el, count, label, options = {})",
         'button.setAttribute("aria-label", `${navLabel}, ${countLabel}`)',
     ):
@@ -46,7 +46,7 @@ def main() -> int:
         'setSidebarBadge(els.libraryNavCount, visibleCount, "saved sources", { hideWhenZero: true })',
         'setSidebarBadge(els.sourcesNavCount, SOURCE_CAPABILITIES.length, "source types")',
         'setSidebarBadge(els.forYouNavCount, worth.length + connections.length + gaps.length + anchors.length, "suggestions")',
-        'setSidebarBadge(els.activityNavCount, activeCount, "active jobs")',
+        'setSidebarBadge(els.activityNavCount, activeCount + failedCount,',
         "setSidebarBadge(els.writingNavCount, generateBadgeCount, generateBadgeLabel)",
     ):
         require(call in DASHBOARD, f"sidebar badge setter missing: {call}")

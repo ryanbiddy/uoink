@@ -145,7 +145,7 @@ def test_music_only_video_reads_done_with_no_speech():
       ({line: savedStateLine(row), badge: healthException(row.health, row),
         note: transcriptNoteText(row, {asr_fallback: {status: "no_speech", model: "base"}})})
     """)
-    assert ">Done</span>" in shown["line"] and "no speech found" in shown["line"]
+    assert ">Ready</span>" in shown["line"] and "no speech found" in shown["line"]
     assert shown["badge"] == ""
     assert "found no speech, so there is no transcript." in shown["note"]
 
@@ -208,7 +208,7 @@ def test_saved_article_row_reads_done_without_a_badge(tmp_path):
     assert set(row["health"].values()) == {"skipped"}
     card = run_js(f"cardHtml({json.dumps(row)})")
     assert "data-health-open" not in card
-    assert '<i class="state-dot" aria-hidden="true"></i>Done</span>' in card
+    assert '<i class="state-dot" aria-hidden="true"></i>Ready</span>' in card
     assert "Needs attention" not in card
 
 
@@ -231,8 +231,8 @@ def test_badge_names_the_problem():
     assert ">No transcript</button>" in one
     assert 'aria-label="Needs attention: No transcript. Show why"' in one
     assert ">3 issues</button>" in badges["many"]
-    assert 'class="health-exception warn"' in badges["working"] and ">Comments pending</button>" in badges["working"]
-    assert ">2 steps pending</button>" in badges["workingMany"]
+    assert badges["working"] == ""
+    assert badges["workingMany"] == ""
     # A failure outranks a step still running; the drawer lists both.
     assert ">No transcript</button>" in badges["mixed"] and "health-exception fail" in badges["mixed"]
     assert ">No text</button>" in badges["note"]
@@ -245,9 +245,9 @@ def test_done_never_sits_beside_a_problem():
       working: savedStateLine({source_type: "video", transcript_source: "captions", health: {comments: "pending"}}),
       healthy: savedStateLine({source_type: "page", health: {transcript: "skipped"}}),
     })""")
-    for key in ("problem", "working"):
-        assert ">Saved</span>" in lines[key] and "state-word done" not in lines[key]
-    assert '<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Done</span>' in lines["healthy"]
+    assert ">Saved</span>" in lines["problem"] and "state-word done" not in lines["problem"]
+    for key in ("working", "healthy"):
+        assert '<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Ready</span>' in lines[key]
 
 
 def test_health_drawer_says_why_and_reuoinks_the_same_link():

@@ -8124,7 +8124,10 @@ def _source_name_from_error(text: str) -> str:
 
 
 def _plain_error_from_text(text: str) -> str:
-    lower = text.lower()
+    # Command flags describe the request, not why the source refused it.
+    errors = [line.strip() for line in text.splitlines()
+              if line.strip().upper().startswith("ERROR:")]
+    lower = (errors[-1] if errors else text).lower()
     source = _source_name_from_error(text)
     if ("too many requests" in lower or "http error 429" in lower
             or "rate-limit" in lower or "rate limit" in lower):
@@ -8137,9 +8140,13 @@ def _plain_error_from_text(text: str) -> str:
         return f"{source} wouldn't hand this one over without a login. Retry with cookies?"
     if "members-only" in lower or "members only" in lower:
         return f"{source} kept this one behind members-only access."
-    if ("video unavailable" in lower or "this video is private" in lower
+    if any(text in lower for text in (
+            "video unavailable", "video is unavailable", "video is not available",
+            "video isn't available", "video has been removed", "video is no longer available")):
+        return "This video is unavailable."
+    if ("this video is private" in lower
             or " private" in lower or "region" in lower):
-        return f"{source} did not expose a usable video for this source."
+        return "This video is private or unavailable in your region."
     if "is live" in lower or "premiere" in lower:
         return f"{source} is still live. Try again once the broadcast becomes a replay."
     if "ffmpeg" in lower:
