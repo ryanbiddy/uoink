@@ -7615,7 +7615,7 @@
       try {
         const host = new URL((raw.match(/https?:\/\/[^\s"'<>]+/i) || [raw])[0]).hostname.replace(/^www\./, "");
         if (host.includes("youtube") || host === "youtu.be") return "YouTube";
-        if (host.includes("twitter") || host.includes("x.com")) return "X";
+        if (hostMatches(host, "twitter.com") || hostMatches(host, "x.com")) return "X";
         if (host.includes("vimeo")) return "Vimeo";
         if (host) return host;
       } catch (_) {}
@@ -7918,6 +7918,12 @@
       return firstValue(row && row.source_url, row && row.url, sidecar.url, meta.url);
     }
 
+    // True for the domain itself or any of its subdomains.
+    function hostMatches(host, domain) {
+      const name = String(host || "").toLowerCase();
+      return name === domain || name.endsWith("." + domain);
+    }
+
     function platformOf(row, sidecar = {}) {
       const meta = metadataOf(row);
       const raw = String(firstValue(
@@ -7929,9 +7935,11 @@
       ) || "").toLowerCase();
       const url = String(sourceUrlOf(row, sidecar)).toLowerCase();
       if (raw) return raw;
+      let host = "";
+      try { host = new URL(url).hostname; } catch (_) {}
       if (url.includes("spotify.")) return "spotify";
-      if (url.includes("podcasts.apple.") || url.includes("apple.com")) return "apple podcasts";
-      if (url.includes("x.com") || url.includes("twitter.com")) return "x";
+      if (hostMatches(host, "apple.com")) return "apple podcasts";
+      if (hostMatches(host, "x.com") || hostMatches(host, "twitter.com")) return "x";
       if (url.includes("youtube.") || url.includes("youtu.be")) return "youtube";
       if (url.includes(".xml") || url.includes("rss")) return "rss";
       return "web";
@@ -8357,7 +8365,7 @@
     function readerMarkdownHtml(markdown) {
       const text = String(markdown || "").replace(/\r\n/g, "\n")
         .replace(/^---\n[\s\S]*?\n---\n/, "")
-        .replace(/<!--[\s\S]*?-->/g, "")
+        .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
         .replace(/^\s*#\s+[^\n]*\n/, "")
         .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
       const html = renderMarkdown(text)
