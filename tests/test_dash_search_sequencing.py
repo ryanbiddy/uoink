@@ -44,6 +44,8 @@ HARNESS = REPO_ROOT / "tests" / "js" / "dash_search_sequencing_test.mjs"
 
 GROUPS = [
     "search_modes",
+    "search_quotes",
+    "search_moments",
     "typing",
     "stale_error",
     "load_more",
