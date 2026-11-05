@@ -10,52 +10,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added — Deep research, part 4: CLI, dashboard Research tab and docs
-
-- `uoink research` discovers candidates, asks before capture, waits for progress and prints an agent prompt. Status, list, publish and local report opening are available as subcommands.
-- The dashboard adds source consent, candidate selection, capture estimates, verified claim chips and report exports. Read-only helper routes serve saved runs and fixed report files.
-- [Research docs](docs/research.md) explain the workflow, verification limits and privacy. The portable agent skill includes the research prompt and tools.
-
-### Added ? Deep research, part 3: evidence, verified publish and reports
-
-- `research_evidence` searches only ready sources in a saved run and returns
-  fenced, cue-aligned excerpts with revision bindings and ASR doubt spans.
-- `research_publish` checks quotes and timestamps, records judge and counter-evidence
-  results, enforces quotation caps, and saves Markdown, HTML and a verification ledger.
-- The `deep-research` prompt guides discovery through a separate judge pass and
-  local publishing. The research toolset has six research tools plus `uoink_url`.
-- The MCP server now exposes 99 tools; stdio also has ten prompts. Core remains at 36.
-
-### Added — Deep research, part 2: capture and status
-
-- `research_capture` queues selected sources through the existing capture worker,
-  reserves the run's ASR budget and reuses saved or already queued sources.
-  `transcript_only` defaults to lite mode: full transcript, sparse screenshots,
-  no comments. Unknown durations reserve an assumed 15 ASR minutes.
-- `research_status` reports queue progress, saved transcript provenance, ready
-  counts and estimated ASR usage. Direct podcast audio capture is deferred.
-- Active research runs can drain captioned sources serially with a 2-second
-  pause, up to 10 captures before normal pacing resumes. Failures and rate limits
-  always retain normal pacing and backoff.
-- The `research` toolset now serves four research tools plus `uoink_url`.
-
-### Added — Deep research, part 1: research runs and source discovery
-
-- `research_start` saves a question, source choices and budgets in a local run.
-  `research_discover` merges library, YouTube, HN, HackerTube and podcast results,
-  ranks them with score explanations, and limits each channel to three candidates.
-- Introduced `UOINK_MCP_TOOLSET=research` with these two tools plus `uoink_url`.
-  The full registry gained the first two research tools; core kept its 36-tool order.
-- Network discovery requires the user's `research_network_sources` setting,
-  which defaults to `[]`. Research tools cannot grant consent. Reddit search is
-  deferred. Evidence retrieval and reports arrived in part 3.
+## [3.14.0] - 2026-11-04
 
 ### Added
 
-- Collect YouTube Watch Later, X bookmarks and Reddit saved posts from open
-  browser pages with the extension's Uoink panel. Auto-scroll starts on click;
-  send up to 5,000 saves in batches of 50 with visible progress. Adds
-  content-script matches only, with no new permissions.
+- **Deep research.** Ask a question and Uoink finds relevant talks, videos and
+  podcast episodes, captures the transcripts you pick, and gives your agent
+  bounded evidence. The agent writes the claims; Uoink checks their quotes and
+  timestamps before it saves a report. See [docs/research.md](docs/research.md).
+  - `research_start` saves a question, source choices and budgets in a local
+    run. `research_discover` merges library, YouTube, Hacker News, HackerTube
+    and podcast results, ranks them with score explanations, and limits each
+    channel to three candidates. Network discovery needs the user's
+    `research_network_sources` setting, which defaults to `[]`; research tools
+    cannot grant that consent themselves.
+  - `research_capture` queues selected sources through the existing capture
+    worker, reserves the run's ASR budget and reuses saved or already queued
+    sources. `transcript_only` defaults to lite mode: full transcript, sparse
+    screenshots, no comments. Unknown durations reserve an assumed 15 ASR
+    minutes. `research_status` reports queue progress, transcript provenance,
+    ready counts and estimated ASR use. Active runs can drain captioned
+    sources serially with a 2-second pause, up to 10 captures before normal
+    pacing resumes; failures and rate limits always keep normal backoff.
+  - `research_evidence` searches only ready sources in a saved run and returns
+    fenced, cue-aligned excerpts with revision bindings and ASR doubt spans.
+    `research_publish` checks quotes and timestamps, records judge and
+    counter-evidence results, enforces quotation caps, and saves Markdown,
+    HTML and a verification ledger.
+  - The `deep-research` prompt guides discovery through a separate judge
+    pass and local publishing. `UOINK_MCP_TOOLSET=research` serves the six
+    research tools plus `uoink_url`.
+  - `uoink research` discovers candidates, asks before capture, waits for
+    progress and prints an agent prompt; status, list, publish and local
+    report opening are subcommands. The dashboard's Research tab adds source
+    consent, candidate selection, capture estimates, verified claim chips and
+    report exports. The portable agent skill includes the research prompt
+    and tools.
+- **Import your saves.** Collect YouTube Watch Later, X bookmarks and Reddit
+  saved posts from open browser pages with the extension's Uoink panel.
+  Auto-scroll starts on click; up to 5,000 saves go to Uoink in batches of 50
+  with visible progress. The extension adds content-script matches only, with
+  no new permissions.
 - Import YouTube Watch Later from a Google Takeout playlist CSV, Reddit saved
   posts and comments from Reddit export CSVs, and X bookmarks from status links.
   Captures get the tags `watch later`, `reddit saved`, and `x bookmarks`.
@@ -65,17 +60,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   with `next_offset`. Already-saved items are skipped. X and Reddit posts
   capture one at a time, at least 15 seconds apart; X posts wait in the
   queue while X text capture is off.
-- Saved sources get polite weekly availability checks from your own machine:
-  YouTube, X, Reddit, podcasts and web pages. Two matching checks confirm a
-  source is gone. Runs make at most 25 requests, no more than once an hour,
-  with a 7-day recheck and 2 seconds between requests to the same host.
-  HTTP 429/503 responses trigger backoff honoring `Retry-After`. Checks are
-  on by default; turn them off in **Check if saved sources go offline**.
-  Library badges, a **Gone from the web** filter and a dismissible monthly
-  notice show which sources are still saved after going offline.
-  MCP `search_uoinks` and `search_clips` return `source_status` and
-  `source_last_checked` per result. Migration `0033_source_availability.sql`
-  stores availability separately from saved content.
+- **Know when a saved source goes offline.** Saved sources get polite weekly
+  availability checks from your own machine: YouTube, X, Reddit, podcasts and
+  web pages. Two matching checks confirm a source is gone. Runs make at most 25
+  requests, no more than once an hour, with a 7-day recheck and 2 seconds
+  between requests to the same host. HTTP 429/503 responses trigger backoff
+  honoring `Retry-After`. Checks are on by default; turn them off in **Check if
+  saved sources go offline**. Library badges, a **Gone from the web** filter
+  and a dismissible monthly notice show which sources are still saved after
+  going offline. MCP `search_uoinks` and `search_clips` return `source_status`
+  and `source_last_checked` per result. Migration
+  `0033_source_availability.sql` stores availability separately from saved
+  content.
 - `get_transcript`: a YouTube transcript that doesn't fail silently. It reads
   the saved library copy first (no network), then fetches captions on your own
   connection, then transcribes the audio with the bundled local Whisper model
@@ -84,12 +80,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   auto_captions or whisper), the `language`, and on any fallback a plain `why`.
   It is a drop-in for the popular YouTube transcript MCP servers: same tool
   name, `url` and `lang`, plus `include_timestamps` and `next_cursor` paging.
-  That brought the registry to 93 tools (36 in core mode, 9 in search mode).
   See "Switching from a YouTube transcript MCP server" in
   docs/connect-your-agent.md.
 - `UOINK_MCP_TOOLSET=search` serves a 9-tool set for clients with a tool
   limit, and `uoink connect <client> --toolset {full,core,search}` writes it
   into the client's config. Defaults are unchanged.
+- **Linux (headless).** `scripts/linux/install.sh` installs Uoink with no tray
+  or GUI into a venv, stages and verifies the pinned Whisper base model, and
+  links `uoink`; re-running it upgrades in place. An agent in Docker,
+  Codespaces or a cloud sandbox can run `uoink mcp` and the helper. Linux
+  keeps the token, logs, pid and topics in the XDG data dir so the app folder
+  can be read-only (a git checkout keeps them next to `server.py`), and
+  reports `media_requires_ffmpeg` when ffmpeg is missing. Podcast
+  transcription falls back to faster-whisper on Linux when WhisperX is not
+  installed (no diarization). `docker/capture.Dockerfile` builds a non-root
+  capture image with ffmpeg, yt-dlp and CPU faster-whisper. See
+  [docs/linux.md](docs/linux.md).
+
+### Known limits
+
+- The extension's Watch Later, X bookmarks and Reddit saved collectors are
+  covered by automated tests but have not yet been tested in a real browser.
+  The file imports (`uoink import`, **Import a saves file**) are the tested
+  path.
+- YouTube often blocks cloud IP addresses, so captures from a Linux server or
+  container can fail on captions, and the Whisper fallback helps only when the
+  audio download itself works.
+- Podcast episodes that research discovers are not captured yet:
+  `research_capture` skips them with `podcast_capture_later`. Podcast
+  transcripts already in your library still count as evidence. Reddit search,
+  local MiniCheck judging and Podcast Index are also deferred.
+- Linux is headless only: no tray, splash or dashboard window.
 
 ### Security
 
@@ -111,6 +132,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   refuses a task owned by another user or another install. The legacy
   `Uoink Helper` task cleanup uses the same check. The next upgrade fixes an
   affected install with no extra steps; login startup kept working throughout.
+
+### Compatibility and testing
+
+- The MCP server exposes 99 tools by default (92 in 3.13.0), 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`. stdio also
+  has ten prompts.
+- The winget and Homebrew manifests in `packaging/` still point at the
+  published 3.13.0 files until 3.14.0 is published.
 
 ## [3.13.0] - 2026-11-01
 

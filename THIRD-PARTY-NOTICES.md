@@ -82,7 +82,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | optuna | 4.9.0 | MIT License | https://optuna.org/ |
 | packaging | 26.2 | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging |
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
-| pillow | 13.0.0 | MIT-CMU | https://python-pillow.github.io |
+| pillow | 13.0.0 | MIT-CMU | https://python-pillow.org |
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
 | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
 | protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |

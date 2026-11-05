@@ -31,6 +31,13 @@ Both signatures used FFmpeg release key
 “Good signature.” The upstream sources are built without source patches.
 Extraction rejects traversal, escaping links and special files.
 
+The build tries ffmpeg.org three times. If ffmpeg.org still refuses the runner,
+it downloads the same file from the `ffmpeg-sources` prerelease of this
+repository: https://github.com/ryanbiddy/uoink/releases/tag/ffmpeg-sources.
+Those are unmodified copies, and their upstream `.asc` signatures were verified
+against the key above when they were uploaded. The size and SHA-256 pins apply
+to whichever copy is used, so the mirror cannot change what gets built.
+
 ## Configure policy and component inventory
 
 Both builds start with:

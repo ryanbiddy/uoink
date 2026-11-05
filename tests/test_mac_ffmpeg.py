@@ -132,6 +132,35 @@ def test_build_cannot_download_on_windows(monkeypatch, tmp_path):
     assert not (tmp_path / "output").exists()
 
 
+def test_fetch_source_retries_then_uses_mirror(monkeypatch, tmp_path):
+    pin = {"version": "8.1.2", "url": "https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz"}
+    calls = []
+
+    def urlopen(url, timeout):
+        calls.append(url)
+        if url == pin["url"]:
+            raise ConnectionResetError(54, "Connection reset by peer")
+        return io.BytesIO(b"tarball")
+
+    monkeypatch.setattr(ff.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(ff.time, "sleep", lambda seconds: None)
+    archive = tmp_path / "ffmpeg-8.1.2.tar.xz"
+    ff.fetch_source(pin, archive)
+    assert calls == [pin["url"]] * ff.PRIMARY_ATTEMPTS + [ff.SOURCE_MIRROR + "ffmpeg-8.1.2.tar.xz"]
+    assert archive.read_bytes() == b"tarball"
+
+
+def test_fetch_source_raises_when_every_source_fails(monkeypatch, tmp_path):
+    def urlopen(url, timeout):
+        raise ConnectionResetError(54, "Connection reset by peer")
+
+    monkeypatch.setattr(ff.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(ff.time, "sleep", lambda seconds: None)
+    with pytest.raises(ConnectionResetError):
+        ff.fetch_source({"version": "7.1.5", "url": "https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz"},
+                        tmp_path / "ffmpeg-7.1.5.tar.xz")
+
+
 @pytest.mark.parametrize("role", ["cli", "shared"])
 def test_every_requested_component_is_checked_against_pinned_source(monkeypatch, tmp_path, role):
     config = ff.load_config()
