@@ -146,6 +146,38 @@ def test_reader_and_library_show_the_import_origin():
     assert "row.import_origin && row.import_origin.label" in DASHBOARD
 
 
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_import_headers_and_origins_show_each_label_once(tmp_path):
+    functions = (_between("function importOriginText(", "// Card images on For You")
+                 + _between("function importCard(", "function renderImports("))
+    script = r'''
+const assert = require("node:assert/strict");
+const htmlEscape = String;
+const videoIdOf = () => "";
+const rowTitle = (row) => row.title;
+''' + functions + r'''
+const cases = [
+  ["YouTube Watch Later", "YouTube Watch Later", "YouTube Watch Later", "YouTube Watch Later"],
+  ["X bookmarks", "X bookmarks", "X bookmarks", "X bookmarks"],
+  ["Reddit saved", "Reddit saved", "Reddit saved", "Reddit saved"],
+  ["YouTube playlist", "A saved course", "YouTube playlist: A saved course", "YouTube playlist &middot; A saved course"],
+  ["YouTube Watch Later", "", "YouTube Watch Later", "YouTube Watch Later"],
+];
+for (const [label, title, originText, header] of cases) {
+  const row = { title: "Saved item", import_origin: {
+    label, list_title: title, note: "Keep this note.", credit: "Source credit."
+  } };
+  assert.equal(importOriginText(row), `From ${originText}. Keep this note. Source credit.`);
+  const kicker = /<div class="insight-kicker">(.*?)<\/div>/.exec(importCard(row));
+  assert.equal(kicker[1], header);
+}
+'''
+    path = tmp_path / "import-headers.js"
+    path.write_text(script, encoding="utf-8")
+    result = subprocess.run(["node", str(path)], capture_output=True, text=True, timeout=20)
+    assert result.returncode == 0, result.stderr
+
+
 def test_card_image_setting_defaults_to_middle():
     block = _between('id="settings-card-image"', 'Creator defaults')
     assert '<option value="middle">Middle of the video</option>' in block

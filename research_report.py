@@ -60,13 +60,9 @@ def _md(value):
     value = "".join(" " if c.isspace() or unicodedata.category(c) in {"Cc", "Cf", "Zl", "Zp"} else c
                     for c in str(value if value is not None else "")).strip()
     out = []
+    # Backslash escapes keep Markdown syntax, entities and bare autolinks inert.
     for char in value:
-        if char == "&":
-            out.append("&amp;")
-        elif char in ":.@":
-            # Prevent GFM bare URL/email autolinks in any untrusted text.
-            out.append(f"&#{ord(char)};")
-        elif char in "[]()*_`<>#|\\-+!~":
+        if char in "&:.@[]()*_`<>#|\\-+!~":
             out.append("\\" + char)
         else:
             out.append(char)
@@ -93,9 +89,15 @@ def _duration(source):
     return time_label(duration) if isinstance(duration, (int, float)) else "Unknown"
 
 
+def claim_source_counts(stats):
+    claim_noun = "claim" if stats["claims"] == 1 else "claims"
+    source_noun = "source" if stats["distinct_sources"] == 1 else "sources"
+    return f'{stats["claims"]} {claim_noun} from {stats["distinct_sources"]} {source_noun}'
+
+
 def _count_line(report):
     stats = report["verification"]["stats"]
-    return f'{stats["claims"]} claims from {stats["distinct_sources"]} sources, {stats["dropped"]} dropped'
+    return f'{claim_source_counts(stats)}, {stats["dropped"]} dropped'
 
 
 def render_markdown(report, *, footer=False):

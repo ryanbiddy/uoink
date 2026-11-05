@@ -14,6 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Cleaner `--text` output for search, recent and research.
 
+### Fixed
+
+- Research Markdown reports use Markdown escapes instead of HTML entities.
+  Report and share text use singular claim and source labels when the count is one.
+- Research MCP tools describe `run_id` as coming from `research_start`.
+- Saves import headers show matching source labels and list titles only once
+  in the CLI and dashboard.
+
 ## [3.14.0] - 2026-11-04
 
 ### Added

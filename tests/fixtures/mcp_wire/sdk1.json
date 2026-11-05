@@ -5108,7 +5108,7 @@
           "run_id": {
             "type": "string",
             "pattern": "^rr_[0-9]{14}_[0-9a-f]{8}$",
-            "description": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed."
+            "description": "Research run_id returned by research_start."
           },
           "query": {
             "type": "string",
@@ -5155,7 +5155,7 @@
           "run_id": {
             "type": "string",
             "pattern": "^rr_[0-9]{14}_[0-9a-f]{8}$",
-            "description": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed."
+            "description": "Research run_id returned by research_start."
           },
           "title": {
             "type": "string",

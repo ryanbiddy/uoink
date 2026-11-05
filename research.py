@@ -642,7 +642,7 @@ def publish(data_root: Path, args: dict, *, index, source_reader=read_source, no
             if source:
                 sources[item_id] = {**source, **{k: v for k, v in run.get("source_metadata", {}).get(item_id, {}).items()
                                                 if v is not None}}
-        cache_input = {"version": 2, "payload": payload, "excerpts": excerpts,
+        cache_input = {"version": 3, "payload": payload, "excerpts": excerpts,
                        "evidence_calls": run.get("evidence_calls", []), "scope": run["scope"],
                        "sources_searched": sorted(research_verify.searched_keys(run)),
                        "paths": {key: str(path) for key, path in paths.items()},
@@ -668,7 +668,7 @@ def publish(data_root: Path, args: dict, *, index, source_reader=read_source, no
         question = research_verify._URL.sub("[link omitted]", question)
         result = {"ok": True, **{key: str(path) for key, path in paths.items()},
                   "verification": report["verification"], "share_text": f'{question} '
-                  f'{stats["claims"]} claims from {stats["distinct_sources"]} sources, each linked to the second it was said.'}
+                  f'{research_report.claim_source_counts(stats)}, each linked to the second it was said.'}
         _write_report(paths["report_md_path"], research_report.render_markdown(report))
         _write_report(paths["report_html_path"], research_report.render_html(report))
         # Write the receipt last; an interrupted earlier write is retried.

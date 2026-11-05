@@ -4321,9 +4321,11 @@ OVERRIDES = {
     },
     "research_status": {"run_id": "Research run_id returned by research_start."},
     "research_evidence": {
+        "run_id": "Research run_id returned by research_start.",
         "stance_hint": "Optional: support or counter. Use counter on at least one call for contested points.",
     },
     "research_publish": {
+        "run_id": "Research run_id returned by research_start.",
         "summary_md": "Report summary Markdown, at most 1500 characters, with no URLs.",
         "disagreements": "Optional, up to 10 contested topics, each naming 2-6 claim_ids that disagree.",
     },

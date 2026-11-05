@@ -22,6 +22,20 @@ def test_import_rejects_invalid_paging(flags):
         cli.friendly_call(cli.parser().parse_args(["import", "saves.csv", *flags]), None)
 
 
+@pytest.mark.parametrize("source_label,title,expected", [
+    ("YouTube Watch Later", "YouTube Watch Later", "YouTube Watch Later"),
+    ("X bookmarks", "X bookmarks", "X bookmarks"),
+    ("Reddit saved", "Reddit saved", "Reddit saved"),
+    ("YouTube playlist", "A saved course", "YouTube playlist: A saved course"),
+    ("YouTube Watch Later", "", "YouTube Watch Later"),
+    ("", "A saved course", "A saved course"),
+])
+def test_import_header_shows_each_label_once(source_label, title, expected):
+    rendered = cli.human({"ok": True, "source": {"label": source_label, "title": title},
+                          "found": 1, "message": "Found 1 video."})
+    assert rendered.splitlines() == [expected, "Found 1 video."]
+
+
 def test_staged_token_next_batch_mapping_and_printing():
     token = "uoink-saves:0123456789abcdef"
     name, args = cli.friendly_call(cli.parser().parse_args(["import-list", token, "--offset", "50"]), None)

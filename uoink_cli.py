@@ -510,8 +510,11 @@ def human(payload, *, index=None):
         return research_progress(payload)
     if isinstance(payload.get("source"), dict) and "found" in payload:
         source = payload["source"]
-        lines = [f"{label(source.get('label'))}: {label(source.get('title'))}",
-                 label(payload.get("message") or "")]
+        heading = label(source.get("label") or source.get("title") or "")
+        title = label(source.get("title") or "")
+        if title and title != heading:
+            heading += f": {title}"
+        lines = [heading, label(payload.get("message") or "")]
         if source.get("url"):
             lines.append(f"List: {label(source['url'])}")
         if payload.get("truncated"):

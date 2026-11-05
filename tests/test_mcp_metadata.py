@@ -23,6 +23,21 @@ def test_client_metadata_preserves_every_input_contract():
     assert tools.list_tools() == original
 
 
+@pytest.mark.parametrize("name", ["research_discover", "research_capture", "research_status",
+                                 "research_evidence", "research_publish"])
+def test_research_run_id_describes_its_own_start_tool(name):
+    spec = tools.TOOL_REGISTRY[name]
+    schema = tools.client_input_schema(spec.input_schema, name)
+    assert schema["properties"]["run_id"]["description"] == "Research run_id returned by research_start."
+
+
+def test_librarian_run_id_keeps_its_work_description():
+    spec = tools.TOOL_REGISTRY["list_library_work"]
+    schema = tools.client_input_schema(spec.input_schema, spec.name)
+    assert schema["properties"]["run_id"]["description"] == (
+        "Librarian run identifier from list_library_work; omission selects the service's default run where allowed.")
+
+
 @pytest.mark.parametrize("change", ["required", "type", "enum", "minimum", "name", "count"])
 def test_metadata_refresh_refuses_contract_changes(change):
     baseline = json.loads((Path(__file__).parent / "fixtures/mcp_wire/sdk1.json").read_text(encoding="utf-8"))
