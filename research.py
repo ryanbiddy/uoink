@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import sqlite3
 import tempfile
 import threading
 import time
@@ -384,8 +385,8 @@ def normalize_publish(args: dict) -> dict:
 def read_source(index, video_id: str) -> dict | None:
     """Read the same stored cue/revision snapshot as export_cited_range.
 
-    This uses existing storage only. Reliability is read from the saved sidecar;
-    no tool handler, transcription, model download or write is involved.
+    This uses existing storage only. Stale media bindings are repaired from
+    the saved cues/artifacts before the read; no capture or model is needed.
     """
     import library_media as media
 
@@ -393,7 +394,9 @@ def read_source(index, video_id: str) -> dict | None:
         return None
     try:
         with index._lock:
-            with media._ReadTransaction(index._conn, time.monotonic, time.monotonic() + 10) as tx:
+            deadline = time.monotonic() + 10
+            index.refresh_media_bindings(video_id, deadline=deadline)
+            with media._ReadTransaction(index._conn, time.monotonic, deadline) as tx:
                 snap = media._read_snapshot(index._conn, video_id)
                 item = media._merge_item(snap.item)
                 sidecar = {}
@@ -439,7 +442,7 @@ def read_source(index, video_id: str) -> dict | None:
                         else "youtube" if _YT_ID.fullmatch(video_id) and (
                             item.get("platform") == "youtube" or _youtube_id(media._item_url(snap.item) or "") == video_id)
                         else "library"}
-    except (media.MediaError, OSError, ValueError):
+    except (media.MediaError, sqlite3.Error, OSError, ValueError):
         return None
 
 

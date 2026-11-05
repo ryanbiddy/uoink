@@ -3,7 +3,8 @@
 Shared by the stdio resource/prompt handlers, the three read tools and the
 prompt module: URI grammar, the five readers, the curated resource list, the
 refusal envelope, the trust fence and the deadline/rate guard. No model, no
-helper, no network, no writes. Run AV-1 (2026-09-08), claude worker.
+helper or network. Item resolution can repair derived media bindings through
+the fenced publisher; resource reads do not write. Run AV-1 (2026-09-08).
 
 Contract rules this module does not implement exactly, and why
 --------------------------------------------------------------
@@ -2283,6 +2284,18 @@ class LibraryReader:
                 raise ResourceError("resource_not_found")
             item, clips = self._snapshot_item(op, dict(row)["video_id"])
         item_id = item["video_id"]
+        # Resolving the item is the documented recovery path for stale media.
+        refresh = getattr(self.index, "refresh_media_bindings", None)
+        if refresh is not None:
+            import library_media
+            try:
+                changed = self._index_call(op, lambda: refresh(item_id, clock=self._clock, deadline=op.deadline_at))
+                if changed:
+                    # Publication replaces clip rows; freeze the repaired rows
+                    # before building the card and its final concurrent check.
+                    item, clips = self._snapshot_item(op, item_id)
+            except library_media.MediaError as exc:
+                raise ResourceError(exc.code, details=exc.details) from None
         cached = op.cache.get(("bundle", item_id))
         if cached is not None and (cached.item, cached.clips) != (item, clips):
             op.cache.pop(("bundle", item_id), None)
