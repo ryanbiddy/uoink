@@ -1,0 +1,142 @@
+{
+  "search": {
+    "ok": true,
+    "hits": [
+      {
+        "item_id": "stack000001",
+        "slug": "a-walkthrough-of-the-call-stack",
+        "title": "Call stack walkthrough",
+        "channel": "Example channel",
+        "source_link": "https://example.com/stack",
+        "evidence_kind": "timed_clip",
+        "start": 295.86,
+        "end": 365.09,
+        "timing": "precise",
+        "passage_verified": true,
+        "passage": {
+          "text": "A function call adds a frame to the stack."
+        },
+        "preview": {
+          "text": "A function call adds a frame to the stack.",
+          "truncated": false
+        }
+      },
+      {
+        "item_id": "math0000001",
+        "title": "Fourier series",
+        "channel": "Math channel",
+        "start": 1107.54,
+        "end": 1171.845,
+        "evidence_kind": "timed_clip"
+      },
+      {
+        "item_id": "note_123456789ab",
+        "title": "Stack notes",
+        "channel": "Example author",
+        "start": null,
+        "end": null,
+        "evidence_kind": "text_only",
+        "passage_verified": true,
+        "passage": {
+          "text": "The stack keeps track of active function calls."
+        }
+      }
+    ],
+    "search_mode": "keyword"
+  },
+  "quoted_title": {
+    "ok": true,
+    "hits": [
+      {
+        "item_id": "quotes00001",
+        "title": "\"Simple Made Easy\"",
+        "channel": "Example channel",
+        "start": 1.6400000000000001,
+        "end": 65.1,
+        "passage_verified": false,
+        "preview": {
+          "text": "An unverified snippet must not become a quote.",
+          "truncated": false
+        }
+      }
+    ]
+  },
+  "recent": {
+    "ok": true,
+    "yoinks": [
+      {
+        "slug": "2026-11-04-an-article-about-the-call-stack",
+        "title": "Understanding the call stack",
+        "folder": null,
+        "yoinked_at": "2026-11-04T10:15:30Z"
+      },
+      {
+        "slug": "2026-11-03-a-note-about-active-function-calls",
+        "title": "Stack notes",
+        "folder": null,
+        "yoinked_at": "2026-11-03T09:00:00Z"
+      }
+    ]
+  },
+  "library": [
+    {
+      "video_id": "stack000001",
+      "source_type": "video",
+      "channel": "Example channel"
+    },
+    {
+      "video_id": "math0000001",
+      "source_type": "video",
+      "channel": "Math channel"
+    },
+    {
+      "video_id": "page_a1b2c3d4e5f",
+      "slug": "2026-11-04-an-article-about-the-call-stack",
+      "source_type": "page",
+      "channel": "example.com"
+    },
+    {
+      "video_id": "note_123456789ab",
+      "slug": "2026-11-03-a-note-about-active-function-calls",
+      "source_type": "note",
+      "author": "Example author"
+    }
+  ],
+  "research_candidates": [
+    {
+      "key": "yt:quotes00001",
+      "kind": "youtube",
+      "title": "\"Simple Made Easy\"",
+      "channel": "Example channel",
+      "duration_s": 3650.2,
+      "in_library": true,
+      "has_captions": null,
+      "est_capture": "captions",
+      "score": 3.55424,
+      "why_ranked": [
+        "BM25 relevance: +2.754240",
+        "HN points: +0.000000",
+        "Length: +0.500000",
+        "Library or captions: +0.300000",
+        "HackerTube quality: +0.000000"
+      ]
+    },
+    {
+      "key": "yt:short000001",
+      "kind": "youtube",
+      "title": "Short guide",
+      "channel": "Another channel",
+      "duration_s": 200.3,
+      "in_library": false,
+      "has_captions": false,
+      "est_capture": "asr ~4 min",
+      "score": 0.507,
+      "why_ranked": [
+        "BM25 relevance: +1.007000",
+        "HN points: -0.000000",
+        "Length: -0.500000",
+        "Library or captions: +0.000000"
+      ]
+    }
+  ]
+}

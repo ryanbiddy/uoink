@@ -72,7 +72,7 @@ def test_question_runs_start_discover_capture_status(tmp_path):
     assert RUN_ID in result["prompt"] and "SEPARATE fresh-context judge" in result["prompt"]
     assert "1. Call research_start" not in result["prompt"]
     preview = "\n".join(messages)
-    for expected in ("1. Agent evals", "Example channel", "15.0 min", "captions", "BM25 relevance", "ready"):
+    for expected in ("1. Agent evals", "Example channel", "15:00", "captions", "BM25 relevance", "ready"):
         assert expected in preview
 
 
