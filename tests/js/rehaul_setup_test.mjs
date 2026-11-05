@@ -206,17 +206,22 @@ const groups = {
   },
   async capture_input() {
     const env=await setup({onSend:()=>({ok:true,id:'first'})});
+    env.el('capture-status').textContent='Capture could not start';
     for (const value of ['', 'https://example.com', 'javascript:alert(1)']) {
       env.el('first-capture-url').value=value;
       env.el('uoink-suggested-btn').click();await settle();
       assert.equal(env.sent.length,0);
       assert.equal(env.el('first-capture-url').getAttribute('aria-invalid'),'true');
       assert.equal(env.el('capture-error').textContent,'Paste a YouTube video link first.');
+      assert.equal(env.el('capture-status').hidden,true);
+      assert.equal(env.el('capture-destination').hidden,true);
     }
     env.el('first-capture-url').value='https://youtu.be/00000000002';
     env.el('uoink-suggested-btn').click();await settle();
     assert.equal(env.sent[0].job.url,'https://www.youtube.com/watch?v=00000000002');
     assert.equal(env.el('first-capture-url').getAttribute('aria-invalid'),null);
+    assert.equal(env.el('capture-status').hidden,false);
+    assert.equal(env.el('capture-destination').hidden,false);
   },
   async capture_failure() {
     let captures=0;

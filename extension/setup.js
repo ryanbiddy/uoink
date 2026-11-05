@@ -225,6 +225,8 @@ async function startFirstCapture() {
   const url = STC.normalizeYouTubeUrl($("first-capture-url").value.trim());
   if (!url) {
     $("capture-result").hidden = false;
+    $("capture-status").hidden = true;
+    $("capture-destination").hidden = true;
     $("capture-error").textContent = "Paste a YouTube video link first.";
     $("capture-error").hidden = false;
     $("first-capture-url").setAttribute("aria-invalid", "true");
@@ -236,6 +238,8 @@ async function startFirstCapture() {
   captureFinished = false;
   $("capture-result").hidden = false;
   $("capture-error").hidden = true;
+  $("capture-status").hidden = false;
+  $("capture-destination").hidden = false;
   $("capture-status").textContent = "Starting capture…";
   $("capture-destination").href = `${SERVER}/dashboard#activity`;
   $("capture-destination").textContent = "View in Activity";

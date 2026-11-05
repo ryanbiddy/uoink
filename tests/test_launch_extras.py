@@ -47,37 +47,38 @@ def feed_env(tmp_path, monkeypatch):
     idx.close()
 
 
-def test_subscribe_fetches_title_and_first_episode_with_capture_off(feed_env):
+def test_subscribe_waits_for_consent_before_fetching(feed_env):
     idx, service, calls, handler = feed_env
     code, result = handler._handle_sources_tool(
         "register_source", {"kind": "podcast_rss", "url": FEED_URL})
     assert code == 200
     source = result["source"]
-    assert source["display_name"] == "Space stories"
+    assert source["display_name"] == "show.example"
     assert source["consent_state"] == "off"
-    assert source["latest_episode"]["title"] == "First flight"
-    assert source["latest_episode"]["video_id"] is None
-    assert calls == [FEED_URL]
+    assert source["latest_episode"] is None
+    assert calls == []
+    assert idx._conn.execute("SELECT COUNT(*) FROM source_items").fetchone()[0] == 0
     assert idx._conn.execute("SELECT COUNT(*) FROM source_capture_starts").fetchone()[0] == 0
     handler._handle_sources_tool("register_source", {"kind": "podcast_rss", "url": FEED_URL})
-    assert calls == [FEED_URL], "duplicate registration must not fetch again"
+    assert calls == [], "duplicate registration must not fetch either"
 
 
-def test_registry_tool_subscribe_fetches_title_on_the_dashboard_transport(feed_env):
+def test_registry_tool_subscribe_does_not_fetch(feed_env):
     _, _, calls, _ = feed_env
     result = mcp_tools.register_source({"kind": "podcast_rss", "url": FEED_URL})
-    assert result["source"]["display_name"] == "Space stories"
-    assert result["source"]["latest_episode"]["title"] == "First flight"
-    assert calls == [FEED_URL]
+    assert result["source"]["display_name"] == "show.example"
+    assert result["source"]["latest_episode"] is None
+    assert calls == []
 
 
-def test_subscribe_preserves_custom_name_and_falls_back_on_fetch_failure(feed_env):
+def test_subscribe_preserves_custom_name_and_never_tries_an_offline_feed(feed_env):
     _, service, calls, handler = feed_env
     _, result = handler._handle_sources_tool("register_source", {
         "kind": "podcast_rss", "url": FEED_URL, "display_name": "My space feed"})
     assert result["source"]["display_name"] == "My space feed"
 
     def fail(*_):
+        calls.append("offline")
         raise OSError("offline")
 
     service.adapters[ss.ADAPTERS["podcast_rss"]] = ss.PodcastRssAdapter(fail)
@@ -85,16 +86,78 @@ def test_subscribe_preserves_custom_name_and_falls_back_on_fetch_failure(feed_en
         "kind": "podcast_rss", "url": "https://offline.example/feed.xml"})
     assert code == 200 and result["created"] is True
     source = result["source"]
-    assert (source["display_name"] or source["canonical_url"]) == "https://offline.example/feed.xml"
-    assert source["detection"]["consecutive_failures"] == 1
+    assert source["display_name"] == "offline.example"
+    assert source["detection"]["consecutive_failures"] == 0
     assert source["latest_episode"] is None
+    assert calls == []
 
 
-def test_legacy_subscribe_fetches_feed_title(feed_env):
+def test_legacy_subscribe_does_not_fetch_feed_title(feed_env):
     _, _, calls, handler = feed_env
     code, result = handler._handle_podcasts_feed_add({"feed_url": FEED_URL})
-    assert code == 200 and result["feed"]["title"] == "Space stories"
+    assert code == 200 and result["feed"]["title"] == "show.example"
+    assert calls == []
+
+
+def test_podcast_poll_gates_wait_for_first_consent(feed_env):
+    idx, service, calls, _ = feed_env
+    source = service.register_source(REGISTRY, {"kind": "podcast_rss", "url": FEED_URL})["source"]
+    sid = source["source_id"]
+    assert service.due_poll_ids() == []
+    assert service.claim_poll(sid) is None
+    assert service.detection_pass() == []
+    refreshed = service.refresh_source(REGISTRY, {"source_id": sid})
+    assert refreshed["outcome"] == "consent_required"
+    assert calls == []
+    assert idx._conn.execute("SELECT COUNT(*) FROM source_items").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize("name", [None, "My space feed"])
+def test_consented_poll_persists_feed_title_and_preserves_custom_name(feed_env, name):
+    idx, service, calls, handler = feed_env
+    args = {"kind": "podcast_rss", "url": FEED_URL}
+    if name:
+        args["display_name"] = name
+    _, registered = handler._handle_sources_tool("register_source", args)
+    sid = registered["source"]["source_id"]
+    turn_on(service, sid)
+    assert service.detection_pass()[0]["enrollment"]["enrolled"] == 1
+    source = service.source_status(REGISTRY, {"source_id": sid})["source"]
+    assert source["display_name"] == (name or "Space stories")
+    assert source["latest_episode"]["title"] == "First flight"
+    assert podcasts.get_feed(idx, source["legacy"]["feed_id"])["title"] == "Space stories"
+    episode = podcasts.list_episodes(idx)[0]
+    assert podcasts.get_episode_with_feed(idx, episode["id"])["podcast_title"] == "Space stories"
     assert calls == [FEED_URL]
+
+
+def test_first_consent_ignores_old_preview_validators_and_enrolls_observed_items(feed_env):
+    idx, service, _, _ = feed_env
+    sid = service.register_source(REGISTRY, {"kind": "podcast_rss", "url": FEED_URL})["source"]["source_id"]
+    validators = {"ETag": '"preview"', "Last-Modified": "Thu, 05 Nov 2026 00:00:00 GMT"}
+    # Model data left by the old preview, without making an unconsented request.
+    with idx.write_transaction() as conn:
+        source = dict(conn.execute("SELECT * FROM source_subscriptions WHERE source_id=?", (sid,)).fetchone())
+        service._persist_observations(conn, source, ss.PodcastRssAdapter().parse(FEED, {}).observations,
+                                      service._now(), 1, None)
+        conn.execute("UPDATE source_detection_cursors SET etag=?, last_modified=?, next_poll_at_ms=? "
+                     "WHERE source_id=?", (validators["ETag"], validators["Last-Modified"], service._now() + 3600000, sid))
+    headers_seen = []
+
+    def fetch(url, headers):
+        headers_seen.append(headers)
+        conditional = "If-None-Match" in headers or "If-Modified-Since" in headers
+        return ss.FetchResponse(304 if conditional else 200, validators, b"" if conditional else FEED)
+
+    service.adapters[ss.ADAPTERS["podcast_rss"]] = ss.PodcastRssAdapter(fetch)
+    turn_on(service, sid)
+    polled = service.detection_pass()[0]
+    assert polled["outcome"] == "snapshot" and polled["enrollment"]["enrolled"] == 1
+    assert len(headers_seen) == 1
+    assert not {"If-None-Match", "If-Modified-Since"}.intersection(headers_seen[0])
+    item = idx._conn.execute("SELECT * FROM source_items WHERE source_id=?", (sid,)).fetchone()
+    assert item["first_seen_consent_epoch"] is None
+    assert item["state"] == "eligible" and item["enrolled_epoch"] == 1
 
 
 def test_first_consent_does_not_wait_an_hour_after_subscribe(feed_env):
@@ -108,15 +171,17 @@ def test_first_consent_does_not_wait_an_hour_after_subscribe(feed_env):
 
 
 def test_first_consent_preserves_feed_failure_backoff(feed_env):
-    _, service, _, handler = feed_env
-    service.adapters[ss.ADAPTERS["podcast_rss"]] = ss.PodcastRssAdapter(
-        lambda *_: ss.FetchResponse(429, {"Retry-After": "7200"}, b""))
-    _, result = handler._handle_sources_tool("register_source", {"kind": "podcast_rss", "url": FEED_URL})
-    source = result["source"]
+    idx, service, calls, _ = feed_env
+    source = service.register_source(REGISTRY, {"kind": "podcast_rss", "url": FEED_URL})["source"]
+    retry_at = service._now() + 7200000
+    with idx.write_transaction() as conn:
+        conn.execute("UPDATE source_detection_cursors SET error_count=1, next_poll_at_ms=? WHERE source_id=?",
+                     (retry_at, source["source_id"]))
     turn_on(service, source["source_id"])
     assert service.detection_pass() == []
     updated = service.source_status(REGISTRY, {"source_id": source["source_id"]})["source"]
-    assert updated["detection"]["next_poll_at_ms"] == source["detection"]["next_poll_at_ms"]
+    assert updated["detection"]["next_poll_at_ms"] == retry_at
+    assert calls == []
 
 
 @pytest.mark.parametrize("body", [
@@ -133,7 +198,9 @@ def test_podcast_parser_retains_feed_artwork(body):
 
 def test_podcast_artwork_reaches_job_and_published_library_row(feed_env, tmp_path, monkeypatch):
     idx, service, _, handler = feed_env
-    handler._handle_sources_tool("register_source", {"kind": "podcast_rss", "url": FEED_URL})
+    _, registered = handler._handle_sources_tool("register_source", {"kind": "podcast_rss", "url": FEED_URL})
+    turn_on(service, registered["source"]["source_id"])
+    service.detection_pass()
     episode = podcasts.list_episodes(idx)[0]
     audio = tmp_path / "audio.mp3"
     audio.write_bytes(b"fixture")
@@ -187,17 +254,70 @@ def test_library_empty_state_tracks_in_progress_rows():
     assert result == {"empty": False, "running": True, "reload": True, "cleared": False}
 
 
+@pytest.mark.parametrize("run_state", ["running", "failed"])
+def test_library_no_matches_remains_visible_beside_capture_rows(run_state):
+    result = run_js('''(() => {
+      state.libraryState = "no_matches"; state.library = [];
+      state.libraryRuns = [{id: "one", state: %s, url: "https://show.example/one", label: "Podcast"}];
+      renderLibrary();
+      const rendered = els.libraryEmpty.classList.contains("hidden");
+      renderLibraryCaptures();
+      return {rendered, refreshed: els.libraryEmpty.classList.contains("hidden"), copy: els.libraryEmpty.innerHTML};
+    })()''' % json.dumps(run_state))
+    assert result["rendered"] is False and result["refreshed"] is False
+    assert "No Library matches" in result["copy"]
+
+
+def test_library_capture_dismissal_uses_empty_fallback_when_state_is_unset():
+    result = run_js('''(() => {
+      state.libraryState = null; state.library = [];
+      state.libraryRuns = [{id: "one", state: "failed", url: "https://show.example/one"}];
+      renderLibrary();
+      state.libraryRuns = []; renderLibraryCaptures();
+      return {hidden: els.libraryEmpty.classList.contains("hidden"), copy: els.libraryEmpty.innerHTML};
+    })()''')
+    assert result["hidden"] is False and "No saved uoinks yet" in result["copy"]
+
+
+@pytest.mark.parametrize("artwork", ["https://cdn.example/show.jpg", "http://cdn.example/show.jpg", ""])
+def test_saved_podcast_never_loads_remote_artwork(artwork):
+    result = run_js('''(async () => {
+      const img = getEl("thumb"); img.classList.add("hidden");
+      document.querySelector = () => img;
+      globalThis.CSS = {escape: value => value};
+      const fetched = []; fetch = async url => { fetched.push(url); throw Error("offline"); };
+      const row = {video_id: "episode", platform: "podcast", source_type: "episode", title: "First flight",
+        artwork_url: %s};
+      await loadThumbnail(row);
+      return {src: img.src || "", hidden: img.classList.contains("hidden"), fetched, html: cardHtml(row)};
+    })()''' % json.dumps(artwork))
+    assert result["src"] == "" and result["hidden"] is True and result["fetched"] == []
+    assert '<span class="source-type-chip">Podcast</span>' in result["html"]
+    assert "cdn.example" not in result["html"]
+
+
 @pytest.mark.parametrize("job_state", ["running", "failed"])
-def test_podcast_background_row_uses_kind_and_artwork(job_state):
+def test_podcast_background_row_uses_local_placeholder(job_state):
     result = run_js('''(() => {
       state.jobs = [{id: "episode", kind: "podcast_transcribe", state: %s,
         title: "First flight", source_url: "https://show.example/first",
         artwork_url: "https://cdn.example/show.jpg", updated_at: new Date().toISOString()}];
       return libraryCaptureItems().map(libraryCaptureRowHtml).join("");
     })()''' % json.dumps(job_state))
-    assert 'src="https://cdn.example/show.jpg"' in result
+    assert "<img" not in result and "cdn.example" not in result
     assert "Podcast" in result and "Web" not in result
     assert '>capture<' not in result
+
+
+@pytest.mark.parametrize("job_state", ["running", "failed"])
+def test_activity_labels_podcast_jobs_without_remote_artwork(job_state):
+    result = run_js('''(() => {
+      const row = {id: "episode", kind: "podcast_transcribe", state: %s, title: "First flight",
+        source_url: "https://show.example/first", artwork_url: "https://cdn.example/show.jpg"};
+      return activityRowHtml({key: "job:episode", row, job: row});
+    })()''' % json.dumps(job_state))
+    assert "Podcast" in result and "Web" not in result
+    assert "<img" not in result and "cdn.example" not in result
 
 
 def test_item_toolbar_requires_connected_agent_and_updates_after_setup():
@@ -232,6 +352,79 @@ def test_sources_show_poll_progress_then_episode_and_keep_refreshing():
     assert result["count"] == 1
     assert "First &lt;flight&gt;" in result["arrived"]
     assert '#item/saved-one' in result["arrived"]
+
+
+@pytest.mark.parametrize("extra", [
+    {"consent_state": "off", "consent_epoch": 0},
+    {"detection": {"consecutive_failures": 1, "error": {"code": "offline"}, "next_poll_at_ms": 9999999999999}},
+    {"capture_status": "allowance_exhausted", "item_counts": {"eligible": 4}, "detection": {"last_poll_success_ms": 1}},
+    {"capture_outcome": "settled_failed", "capture_status": "ready", "item_counts": {"eligible": 1, "started": 1}, "detection": {"last_poll_success_ms": 1}},
+    {"capture_outcome": "uncertain", "in_flight": [{"item_id": "one", "state": "uncertain"}], "detection": {"last_poll_success_ms": 1}},
+])
+def test_sources_do_not_fast_poll_without_progress(extra):
+    result = run_js('''(async () => {
+      state.activeTab = "sources";
+      const timers = []; setTimeout = (fn, delay) => { timers.push(delay); return timers.length; };
+      const source = Object.assign({source_id: "one", kind: "podcast_rss", consent_state: "on"}, %s);
+      callRegistryTool = async () => ({sources: [source]});
+      await loadStandingSubscriptions();
+      return {timers, html: els.standingSubscriptionList.innerHTML};
+    })()''' % json.dumps(extra))
+    assert result["timers"] == []
+    if extra.get("consent_state") == "off":
+        assert "Looking for episodes" not in result["html"]
+        assert "Turn on automatic capture to check for episodes." in result["html"]
+
+
+def test_sources_fast_refresh_stops_even_if_progress_is_stuck():
+    result = run_js('''(async () => {
+      state.activeTab = "sources";
+      const timers = new Map(); let next = 0; let calls = 0;
+      setTimeout = fn => { timers.set(++next, fn); return next; };
+      clearTimeout = id => timers.delete(id);
+      callRegistryTool = async () => { calls++; return {sources: [{source_id: "one", kind: "podcast_rss",
+        consent_state: "on", detection: {poll_in_progress: true}}]}; };
+      await loadStandingSubscriptions();
+      for (let n = 0; timers.size && n < 100; n++) {
+        const [id, fn] = timers.entries().next().value; timers.delete(id); await fn();
+      }
+      const stopped = timers.size === 0;
+      const automaticCalls = calls;
+      await loadStandingSubscriptions();
+      return {stopped, automaticCalls, manualRestart: timers.size};
+    })()''')
+    assert result["stopped"] is True and 1 < result["automaticCalls"] <= 21
+    assert result["manualRestart"] == 1
+
+
+def test_overlapping_source_refreshes_keep_only_the_latest_response_and_timer():
+    result = run_js('''(async () => {
+      state.activeTab = "sources";
+      const timers = new Map(); let next = 0; const replies = [];
+      setTimeout = fn => { timers.set(++next, fn); return next; };
+      clearTimeout = id => timers.delete(id);
+      callRegistryTool = () => new Promise(resolve => replies.push(resolve));
+      const first = loadStandingSubscriptions(); const second = loadStandingSubscriptions();
+      const source = id => ({source_id: id, kind: "podcast_rss", consent_state: "on", detection: {poll_in_progress: true}});
+      replies[1]({sources: [source("new")]}); await second;
+      replies[0]({sources: [source("old")]}); await first;
+      return {source: state.standingSources[0].source_id, timers: timers.size};
+    })()''')
+    assert result == {"source": "new", "timers": 1}
+
+
+@pytest.mark.parametrize("in_flight", [False, True])
+def test_known_episode_does_not_show_discovery_progress_or_duplicate(in_flight):
+    result = run_js('''(() => {
+      state.standingSources = [{source_id: "one", kind: "podcast_rss", consent_state: "on",
+        enrollment: {pending: true}, detection: {poll_in_progress: true},
+        latest_episode: {item_id: "episode-1", title: "First flight", capture_state: "started"},
+        in_flight: %s}];
+      renderStandingSubscriptions(); return els.standingSubscriptionList.innerHTML;
+    })()''' % json.dumps([{"item_id": "episode-1", "title": "First flight", "state": "started"}] if in_flight else []))
+    assert "Looking for episodes" not in result
+    assert result.count("First flight") == 1
+    assert ("Latest episode" in result) is not in_flight
 
 
 def test_sources_paste_refreshes_subscriptions_after_adding_podcast():

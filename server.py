@@ -11524,14 +11524,6 @@ def _source_startup_reconciliation() -> dict:
     return {"imported": imported, "reconciled": reconciled}
 
 
-def _prime_podcast_subscription(source_id: str) -> dict:
-    """Fetch the first metadata snapshot before returning a new subscription."""
-    service = _source_service()
-    context = _source_operator_context()
-    service.refresh_source(context, {"source_id": source_id})
-    return service.source_status(context, {"source_id": source_id})["source"]
-
-
 def _standing_due_polls() -> list[dict]:
     """Seam for the tick and its tests: the due candidates this pass will run.
 
@@ -17280,9 +17272,8 @@ class Handler(BaseHTTPRequestHandler):
             row = podcasts.add_feed(_get_index(), feed_url,
                                        poll_interval_min=int(interval),
                                        auto_ingest=auto_ingest)
-            if row.get("source_id") and not row.get("title"):
-                source = _prime_podcast_subscription(row["source_id"])
-                row["title"] = source.get("display_name")
+            if not row.get("title"):
+                row["title"] = urlparse(row["feed_url"]).hostname
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:

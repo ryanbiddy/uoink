@@ -3624,11 +3624,6 @@ def sources_call(tool_name: str, args: Any, *, transport: str = "registry") -> d
     try:
         context = _sources_context(transport)
         result = fn(context, dict(args))
-        if (tool_name == "register_source" and result.get("ok") and result.get("created")
-                and result["source"]["kind"] == "podcast_rss"):
-            source_args = {"source_id": result["source"]["source_id"]}
-            service.refresh_source(context, source_args)
-            result["source"] = service.source_status(context, source_args)["source"]
     except Exception:
         _library_log.exception("sources %s raised", tool_name)
         return mod.error_envelope("internal_error", "The source service raised; see the helper log.",

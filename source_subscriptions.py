@@ -2971,7 +2971,7 @@ class SourceSubscriptionService:
                 "boundary=?, updated_at_ms=? WHERE source_id=?",
                 (after, epoch, boundary, now, source["source_id"]))
             if source["kind"] == "podcast_rss" and boundary == "initial":
-                # The subscribe preview must not delay the first enrollment.
+                # Old preview data must not delay the first consented poll.
                 # Keep any failure backoff and active poll lease intact.
                 conn.execute(
                     "UPDATE source_detection_cursors SET next_poll_at_ms=MIN(next_poll_at_ms, ?) "
@@ -3124,7 +3124,9 @@ class SourceSubscriptionService:
         return {
             "source_id": source["source_id"], "kind": source["kind"],
             "canonical_url": source["canonical_url"],
-            "display_name": _safe_text(source.get("display_name"), 200),
+            "display_name": _safe_text(source.get("display_name"), 200) or (
+                urllib.parse.urlparse(source["canonical_url"]).hostname
+                if source["kind"] == "podcast_rss" else None),
             "adapter": source["adapter"],
             "consent_state": source["consent_state"], "revision": int(source["revision"]),
             "consent_epoch": int(source["consent_epoch"]),
@@ -3392,6 +3394,7 @@ class SourceSubscriptionService:
         sql = ("SELECT s.source_id FROM source_subscriptions s "
                "JOIN source_detection_cursors c ON c.source_id=s.source_id "
                "WHERE s.archived=0 AND s.detection_enabled=1 AND c.poll_owner_token IS NULL "
+               "AND (s.kind!='podcast_rss' OR s.consent_epoch>0) "
                "AND c.next_poll_at_ms<=? ORDER BY c.next_poll_at_ms, s.source_id")
         params: list[Any] = [now]
         if limit is not None:
@@ -3419,6 +3422,8 @@ class SourceSubscriptionService:
             source = self._source(conn, source_id)
             cursor = self._cursor(conn, source_id)
             if source["archived"] or not source["detection_enabled"]:
+                return None
+            if source["kind"] == "podcast_rss" and not source["consent_epoch"]:
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None
@@ -3493,6 +3498,9 @@ class SourceSubscriptionService:
                     "UPDATE source_subscriptions SET display_name=? WHERE source_id=? "
                     "AND (display_name IS NULL OR display_name='' OR display_name=canonical_url)",
                     (_safe_text(result.feed_title, 200), source_id))
+                if source.get("legacy_feed_id") is not None:
+                    conn.execute("UPDATE podcast_feeds SET title=? WHERE id=?",
+                                 (_safe_text(result.feed_title, 200), source["legacy_feed_id"]))
             on_current = source["consent_state"] == "on" and not stale_epoch
             epoch_for_items = int(source["consent_epoch"]) if on_current else None
             stats = self._persist_observations(conn, source, result.observations, now,
@@ -3731,6 +3739,8 @@ class SourceSubscriptionService:
         if source["archived"] or not source["detection_enabled"]:
             return success(source_id=source["source_id"], outcome="detection_disabled",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]))
+        if source["kind"] == "podcast_rss" and not source["consent_epoch"]:
+            return success(source_id=source["source_id"], outcome="consent_required")
         if int(cursor["next_poll_at_ms"]) > now or (
                 cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now):
             return success(source_id=source["source_id"], outcome="not_due",

@@ -10585,31 +10585,46 @@
     }
 
     let standingRefreshTimer = null;
+    let standingRefreshRequest = 0;
+    const STANDING_REFRESH_LIMIT = 20;
+    let standingRefreshRemaining = STANDING_REFRESH_LIMIT;
 
     async function loadStandingSubscriptions() {
       if (!els.standingSubscriptionList) return;
+      const request = ++standingRefreshRequest;
       clearTimeout(standingRefreshTimer);
       state.standingSourcesLoading = true;
       try {
         const res = await callRegistryTool("list_sources", { limit: 100, include_archived: false });
-        state.standingSources = (res && res.sources) ? res.sources : [];
+        if (request === standingRefreshRequest) state.standingSources = (res && res.sources) ? res.sources : [];
       } catch (err) {
-        state.standingSources = [];
+        if (request === standingRefreshRequest) state.standingSources = [];
       } finally {
+        if (request !== standingRefreshRequest) return;
         state.standingSourcesLoading = false;
         // The Sources badge counts subscribed sources and hides at zero.
         setSidebarBadge(els.sourcesNavCount, state.standingSources.length, "subscribed sources", { hideWhenZero: true });
         renderStandingSubscriptions();
-        if (state.activeTab === "sources" && !document.hidden && state.standingSources.some((source) => {
+        if (standingRefreshRemaining > 0 && state.activeTab === "sources" && !document.hidden && state.standingSources.some((source) => {
           if (source.kind !== "podcast_rss" || source.archived || source.detection_enabled === false) return false;
+          if (source.consent_state !== "on" && !source.consent_epoch) return false;
           const det = source.detection || {};
           const counts = source.item_counts || {};
-          return !det.last_poll_success_ms || det.poll_in_progress || (source.enrollment || {}).pending
-            || (source.consent_state === "on" && (counts.eligible || counts.started || (source.in_flight || []).length));
+          const due = !det.next_poll_at_ms || det.next_poll_at_ms <= Date.now();
+          const checking = det.poll_in_progress || (due && !det.error && !det.last_error
+            && !Number(det.consecutive_failures || det.error_count || 0)
+            && (!det.last_poll_success_ms || (source.enrollment || {}).pending));
+          const capturing = (source.in_flight || []).some((item) => ["reserved", "started"].includes(item.state))
+            || (source.consent_state === "on" && source.capture_status === "ready" && counts.eligible > 0
+              && !["settled_failed", "blocked", "uncertain"].includes(source.capture_outcome));
+          return checking || capturing;
         })) {
           standingRefreshTimer = setTimeout(() => {
+            standingRefreshRemaining -= 1;
             if (state.activeTab === "sources" && !document.hidden) return loadStandingSubscriptions();
           }, 3000);
+        } else {
+          standingRefreshRemaining = STANDING_REFRESH_LIMIT;
         }
       }
     }
@@ -10742,10 +10757,15 @@
         // Back catalog enrollment
         const enroll = source.enrollment || {};
         const episode = kind === "podcast_rss" ? source.latest_episode : null;
-        const episodeProgress = kind !== "podcast_rss" ? "" : lastError
+        const episodeInFlight = episode && episode.item_id && inFlight.some((item) => item.item_id === episode.item_id);
+        const episodeProgress = kind !== "podcast_rss" ? ""
+          : source.consent_state !== "on" && !source.consent_epoch
+            ? "Turn on automatic capture to check for episodes."
+          : lastError
           ? "Couldn't check for episodes. Uoink will try again."
+          : episode || inFlight.length ? ""
           : det.poll_in_progress || !det.last_poll_success_ms || enroll.pending
-            ? "Looking for episodes…" : !episode ? "No episodes in this feed yet." : "";
+            ? "Looking for episodes…" : "No episodes in this feed yet.";
         let enrollmentCopy = "";
         if (enroll.pending) {
           enrollmentCopy = "Enrollment pending (up to 25 items)";
@@ -10842,7 +10862,7 @@
             </div>
 
             ${episodeProgress ? `<p class="soft-note" role="status">${htmlEscape(episodeProgress)}</p>` : ""}
-            ${episode ? `
+            ${episode && !episodeInFlight ? `
               <div class="captured-items-box">
                 <div class="in-flight-head"><span>${episode.capture_state === "committed" ? "Saved episode" : "Latest episode"}</span></div>
                 <div class="captured-item">
@@ -10863,7 +10883,7 @@
                 </div>
                 ${inFlight.map((item) => `
                   <div class="in-flight-item">
-                    <span style="font-weight:500;">${htmlEscape(item.title || item.entry_id || "Active item")}</span>
+                    <span style="font-weight:500;">${htmlEscape(item.title || (episode && item.item_id === episode.item_id && episode.title) || item.entry_id || "Active item")}</span>
                     <span class="in-flight-phase">
                       ${htmlEscape(item.state || "started")} (attempt ${Number(item.actual_starts || 1)}/3)
                     </span>
@@ -12845,7 +12865,7 @@
           els.loadMore.classList.add("hidden");
           els.libraryGrid.innerHTML = "";
           setLibraryEmptyState("no-matches");
-          els.libraryEmpty.classList.toggle("hidden", captureCount > 0);
+          els.libraryEmpty.classList.remove("hidden");
           return;
         }
         setLibraryHeadline("empty");
@@ -12940,7 +12960,7 @@
       // channel), never the bare host.
       const author = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
       const platformLabel = htmlEscape(live ? `${platformChipLabel(platform)} live` : platformChipLabel(platform));
-      const sourceType = htmlEscape(sourceTypeLabel(row));
+      const sourceType = htmlEscape(podcast ? "Podcast" : sourceTypeLabel(row));
       const hook = htmlEscape(prettyHook(row.hook_type));
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
       const hookChip = row.hook_type && !podcast
@@ -12972,14 +12992,7 @@
       if (!row.video_id) return;
       const img = document.querySelector(`img[data-thumb-for="${CSS.escape(row.video_id)}"]`);
       if (!img) return;
-      if (!row.thumbnail_path) {
-        if (isPodcastContent(row) && /^https?:\/\//i.test(row.artwork_url || "")) {
-          img.referrerPolicy = "no-referrer";
-          img.src = row.artwork_url;
-          img.classList.remove("hidden");
-        }
-        return;
-      }
+      if (!row.thumbnail_path) return;
       try {
         if (!state.blobUrls.has(row.thumbnail_path)) {
           const token = await getToken();
@@ -13588,7 +13601,6 @@
           key,
           title: job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.source_url || "Capture",
           kind: podcast ? "Podcast" : playlist ? "playlist" : (job.kind === "retranscribe" ? "transcript" : "capture"),
-          artwork: podcast ? job.artwork_url : "",
           source: [podcast ? "Podcast" : platformChipLabel(platformOf({ source_url: job.source_url || job.url || "" })),
             playlist ? `${Number(job.videos_done) || 0} of ${job.videos_total} videos` : "",
             fmtAge(job.started_at || job.updated_at)].filter(Boolean).join(" · "),
@@ -13648,7 +13660,6 @@
           key: `job:${job.id}`,
           title: job.title || job.playlist_title || url || "Capture",
           kind: job.kind === "podcast_transcribe" ? "Podcast" : Number(job.videos_total) > 1 ? "playlist" : "capture",
-          artwork: job.kind === "podcast_transcribe" ? job.artwork_url : "",
           source: [job.kind === "podcast_transcribe" ? "Podcast" : platformChipLabel(platformOf({ source_url: url })), fmtAge(job.completed_at || job.updated_at)].filter(Boolean).join(" · "),
           tone: "fail",
           word: index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed",
@@ -13664,7 +13675,7 @@
     function libraryCaptureRowHtml(item) {
       return `
         <article class="capture-row" data-capture-key="${htmlEscape(item.key)}">
-          <div class="row-thumb" aria-hidden="true">${/^https?:\/\//i.test(item.artwork || "") ? `<img src="${htmlEscape(item.artwork)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : ""}<span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
+          <div class="row-thumb" aria-hidden="true"><span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
           <div class="row-body">
             <div class="card-title">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
@@ -13686,8 +13697,12 @@
       wrap.innerHTML = shown.map(libraryCaptureRowHtml).join("")
         + (more > 0 ? `<p class="capture-more"><a href="#activity">${more} more in Activity</a></p>` : "");
       wrap.classList.toggle("hidden", !items.length);
-      els.libraryEmpty.classList.toggle("hidden", items.length > 0 || state.library.length > 0
-        || !["no_matches", "empty_corpus"].includes(state.libraryState));
+      const libraryState = state.libraryState || (state.library.length ? "matches" : "empty_corpus");
+      if (["no_matches", "empty_corpus"].includes(libraryState)) {
+        setLibraryEmptyState(libraryState === "no_matches" ? "no-matches" : "empty");
+      }
+      els.libraryEmpty.classList.toggle("hidden", libraryState !== "no_matches"
+        && (items.length > 0 || state.library.length > 0 || libraryState !== "empty_corpus"));
       return items.length;
     }
 
@@ -14527,6 +14542,9 @@
 
     function activitySource(row) {
       const url = row.source_url || row.url || "";
+      if (row.kind === "podcast_transcribe" || isPodcastContent(row)) {
+        return [row.channel || row.uploader || sourceNameFromUrl(url), "Podcast"].filter(Boolean).join(" · ");
+      }
       return [row.channel || row.uploader || sourceNameFromUrl(url) || humanLabel(row.kind) || "Capture",
         isMobileQueued(row) ? "from mobile playlist" : "",
         row.videos_total ? `${row.videos_done || 0} of ${row.videos_total} videos` : ""].filter(Boolean).join(" · ");
