@@ -1,6 +1,6 @@
 cask "uoink" do
-  version "3.13.0"
-  sha256 "4f9799c7c4c585585613e03e48e230ada198cbb10b70b4f80c3df61fa8e41cbd"
+  version "3.14.0"
+  sha256 "2591ea57a39667c59216b1ba96f50532a7edb88716205a432594da5ba5742dd1"
 
   url "https://github.com/ryanbiddy/uoink/releases/download/v#{version}/Uoink-#{version}-macos-arm64.dmg"
   name "Uoink"
