@@ -444,6 +444,8 @@ def test_dashboard_init_does_not_request_remote_features():
         "loadResume", "loadForYou", "loadWriting", "renderSources",
         "refreshActivity", "connectJobsStream",
         "showUsagePrompt", "syncDashboardTheme", "loadLibraryAvailability",
+        # Contacts GitHub only when the user turned the daily check on.
+        "autoCheckUpdatesOnLoad",
     ]
     _run_js(f"""
 const calls = [], requests = [];
