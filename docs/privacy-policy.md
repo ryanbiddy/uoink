@@ -126,8 +126,13 @@ Uoink makes these outbound requests:
 - **GitHub release check — only when you click `Check now` or turn on the
   daily check.** The daily check is off by default. When on, the dashboard
   asks at most once a day. Either way it requests the latest Uoink release
-  record from `api.github.com` and never downloads an update. It sends no
-  corpus content or usage event. GitHub receives the normal request metadata.
+  record from `api.github.com`. It sends no corpus content or usage event.
+  GitHub receives the normal request metadata.
+- **Update download — only when you press `Update now` (`Download update` on
+  a Mac).** Uoink then downloads that release's installer and
+  `SHA256SUMS.txt` from `github.com` (and GitHub's release file hosts), checks
+  the installer against the published checksum, and runs it only if it
+  matches. Nothing downloads an update on its own.
 
 The dashboard and extension use bundled Inter, Bungee and JetBrains Mono
 fonts. They make no Google Fonts requests to `fonts.googleapis.com` or
