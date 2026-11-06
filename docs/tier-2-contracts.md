@@ -111,7 +111,10 @@ Key → Credential Manager (never echoed unmasked); `output_dir` validated writa
   "url":"https://github.com/ryanbiddy/uoink/releases/tag/v2.2.1",
   "published_at":"2026-06-01T00:00:00Z", "checked_at":"2026-06-02T09:00:00Z", "cached":true }
 ```
-Polls GitHub `releases/latest`, cached ≥24 h. **Never downloads / self-updates.** Offline → `{ "update_available": false, "error": "offline" }` (silent in UI).
+Polls GitHub `releases/latest`, cached ≥24 h. **The check never downloads.** Offline → `{ "update_available": false, "error": "offline" }` (silent in UI). The reply also carries `install_action` (`"Update now"` on Windows, `"Download update"` on a Mac, `null` on source runs, isolated installs and other systems), which tells the dashboard whether to show the install button.
+
+### `POST /update/install` / `GET /update/install` — user-started update
+Token-gated, never called automatically. POST acts only when the saved check reported an update: it downloads `Uoink-Setup-<ver>.exe` (Windows) or `Uoink-<ver>-macos-arm64.dmg` (Mac) and `SHA256SUMS.txt` from `github.com/ryanbiddy/uoink/releases/download/v<ver>/` (redirects only to GitHub hosts, 1.5 GB cap), checks the SHA-256, then starts the installer (`/SILENT /SUPPRESSMSGBOXES /NORESTART`) or opens the DMG. A mismatch or missing checksum line deletes the download and installs nothing. Refused (409) on isolated installs and source runs; other systems get `{ "unsupported": true, "url": … }` with 400. GET returns `{ "state": "idle"|"downloading"|"verifying"|"ready"|"launching"|"error", "bytes_done", "bytes_total", "version", "name", "error", "url" }`.
 
 ### `POST /helper/quit` — graceful stop (dashboard "Stop helper" + tray Quit)
 Token-gated. Responds `{ "ok": true }`, then shuts the server down (worker-thread `server.shutdown()`; PID cleared via atexit). Expect the connection to drop right after the 200.
