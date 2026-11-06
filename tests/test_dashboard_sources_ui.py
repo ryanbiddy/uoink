@@ -61,15 +61,15 @@ def require(condition: bool, message: str) -> None:
 
 def test_sources_ui_contains_standing_subscription_panel() -> None:
     """Verifies presence of #standingSubscriptions and summary counters in #tab-sources."""
-    # Ensure standingSubscriptions is inside tab-sources before universalCapture
+    # Ensure standingSubscriptions is inside tab-sources inside the Sources tab
     tab_sources_idx = DASHBOARD.find('id="tab-sources"')
     require(tab_sources_idx != -1, "#tab-sources missing from dashboard")
     
     standing_idx = DASHBOARD.find('id="standingSubscriptions"', tab_sources_idx)
     require(standing_idx != -1, "#standingSubscriptions missing from #tab-sources")
     
-    universal_idx = DASHBOARD.find('id="universalCapture"', standing_idx)
-    require(universal_idx != -1, "#universalCapture must follow #standingSubscriptions")
+    universal_idx = DASHBOARD.find('id="universalCapture"', tab_sources_idx)
+    require(universal_idx != -1, "#universalCapture missing from #tab-sources")
     
     # Check summary stats
     for element_id in (
@@ -358,3 +358,13 @@ def test_unavailable_reorganized_tile_is_hidden_not_led_with() -> None:
     require('id="activityChurnCard"' in DASHBOARD, "churn tile needs a hook to hide")
     require('churnCard.classList.add("hidden")' in DASHBOARD, "churn tile must hide when unavailable")
     require('churnCard.classList.remove("hidden")' in DASHBOARD, "churn tile must return when it has a value")
+
+
+# ---------------------------------------------------------------------------
+# Sources starts with the paste box (mac batch 3, item 5)
+# ---------------------------------------------------------------------------
+def test_uoink_anything_box_comes_before_standing_subscriptions() -> None:
+    paste = DASHBOARD.index('id="universalCapture"')
+    standing = DASHBOARD.index('id="standingSubscriptions"')
+    sources_tab = DASHBOARD.index('id="tab-sources"')
+    require(sources_tab < paste < standing, "paste box must lead the Sources tab")

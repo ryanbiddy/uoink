@@ -5787,6 +5787,18 @@
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
           </div>
+          <div class="universal-capture" id="universalCapture">
+            <div class="eyebrow">Paste a URL</div>
+            <h2>Uoink anything</h2>
+            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
+            <div class="universal-capture-row">
+              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
+              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
+              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
+              <button class="button permission-hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote">Allow</button>
+            </div>
+            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
+          </div>
           <!-- Phase 3: Standing subscriptions panel -->
           <section class="standing-subscriptions" id="standingSubscriptions" aria-label="Standing subscriptions">
             <div class="standing-header">
@@ -5833,18 +5845,6 @@
               <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
             </div>
           </section>
-          <div class="universal-capture" id="universalCapture">
-            <div class="eyebrow">Paste a URL</div>
-            <h2>Uoink anything</h2>
-            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
-            <div class="universal-capture-row">
-              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
-              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
-              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
-              <button class="button permission-hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote">Allow</button>
-            </div>
-            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
-          </div>
           <section class="discovery-panel" id="sources-discover" aria-labelledby="discoveryTitle">
             <h2 id="discoveryTitle" tabindex="-1">Discover</h2>
             <p class="discovery-note">Find posts with ScrapeCreators, then choose what to capture. <a href="#settings/connected-services">Set up Connected services</a>.</p>
