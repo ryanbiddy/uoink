@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Sources puts the paste box first and asks for web site permission inline.
 - Copy as Markdown leads with the transcript and drops empty sections.
 - The sidebar footer reads "Running on this PC" or "Running on this Mac".
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
 
 ### Fixed
 
