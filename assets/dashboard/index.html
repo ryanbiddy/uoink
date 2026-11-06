@@ -13232,9 +13232,12 @@
       const flat = String(text || "").replace(/\s+/g, " ").trim();
       const words = String(query || "").toLowerCase().split(/\s+/)
         .map((word) => word.replace(/[^\p{L}\p{N}']/gu, "")).filter((word) => word.length > 1);
-      const lower = flat.toLowerCase();
-      const hits = words.map((word) => lower.indexOf(word)).filter((at) => at >= 0);
-      const first = hits.length ? Math.min(...hits) : 0;
+      // Whole words only: "up" marks "up", not the start of "upset". The
+      // words are letters, digits and apostrophes by now, so none needs escaping.
+      const pattern = words.length
+        ? new RegExp(`(?<![\\p{L}\\p{N}'])(${words.join("|")})(?![\\p{L}\\p{N}'])`, "giu") : null;
+      const at = pattern ? flat.search(pattern) : -1;
+      const first = at >= 0 ? at : 0;
       let start = flat.length <= max ? 0 : Math.max(0, first - Math.floor(max / 3));
       if (start > 0) {
         const space = flat.indexOf(" ", start);
@@ -13247,7 +13250,6 @@
       }
       const excerpt = `${start > 0 ? "\u2026" : ""}${flat.slice(start, end)}${end < flat.length ? "\u2026" : ""}`;
       if (!words.length) return htmlEscape(excerpt);
-      const pattern = new RegExp(`(${words.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
       return excerpt.split(pattern).map((part, index) => index % 2 ? `<mark>${htmlEscape(part)}</mark>` : htmlEscape(part)).join("");
     }
 
