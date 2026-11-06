@@ -33,3 +33,10 @@ def test_no_channel_and_unknown_recent_video_facts_leave_no_dash():
     assert "**About this channel:**" in markdown
     assert "- Older\n" in markdown
     assert "—" not in markdown
+
+
+def test_likes_line_only_when_the_count_is_known():
+    assert "Likes" not in _build({"title": "T", "view_count": 5})
+    assert "not exposed" not in _build({"title": "T"})
+    assert "**Likes:** 7" in _build({"title": "T", "like_count": 7})
+    assert "**Likes:** 0" in _build({"title": "T", "like_count": 0})

@@ -4462,13 +4462,6 @@ def _fmt_int(n) -> str:
         return "—"
 
 
-def _fmt_likes(n) -> str:
-    """Like counts are often hidden by YouTube and exposed as null by yt-dlp."""
-    if n is None:
-        return "not exposed by YouTube for this video"
-    return _fmt_int(n)
-
-
 def _fmt_iso_date(s) -> str:
     """yt-dlp returns upload_date as 'YYYYMMDD'. Convert to 'YYYY-MM-DD'."""
     if not s:
@@ -6396,7 +6389,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     upload_date = _fmt_iso_date(metadata.get("upload_date"))
     duration = format_duration(metadata.get("duration"))
     views = _fmt_int(metadata.get("view_count"))
-    likes = _fmt_likes(metadata.get("like_count"))
+    likes = _fmt_int(metadata.get("like_count")) if metadata.get("like_count") is not None else ""
     known = lambda value: bool(value) and value != "—"  # noqa: E731
     description = (metadata.get("description") or "").strip()
     tags = metadata.get("tags") or []
