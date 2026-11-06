@@ -5142,6 +5142,15 @@ def _save_x_video_poster(video_id: str, extract_result: dict) -> Path | None:
             (folder / "thumbnail.raw").unlink(missing_ok=True)
 
 
+def _is_x_channel_url(channel_url: str) -> bool:
+    """True for an X/Twitter profile URL, which has no channel to read."""
+    try:
+        host = (urlparse(channel_url).hostname or "").lower()
+    except ValueError:
+        return False
+    return host in {"x.com", "twitter.com"} or host.endswith((".x.com", ".twitter.com"))
+
+
 def _fetch_channel_context(channel_url: str, *,
                            cancel_event: threading.Event | None = None) -> dict:
     """Best-effort fetch of channel description + last 5 video stubs.
@@ -5150,6 +5159,9 @@ def _fetch_channel_context(channel_url: str, *,
     """
     empty = {"description": "", "recent_videos": []}
     if not channel_url:
+        return empty
+    # X profiles have no /videos tab for yt-dlp; the fetch always exits 1.
+    if _is_x_channel_url(channel_url):
         return empty
 
     # Prefer the /videos tab so we get videos (not playlists/shorts/featured).
@@ -5170,7 +5182,7 @@ def _fetch_channel_context(channel_url: str, *,
     except (PlaylistJobCancelled, source_subscriptions.CaptureOwnershipUnavailable):
         raise
     except Exception as e:
-        log.warning("channel context fetch failed: %s", e)
+        log.debug("channel context fetch failed: %s", e)
         return empty
 
     try:
@@ -7458,6 +7470,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         channel_url = (metadata.get("channel_url")
                        or metadata.get("uploader_url")
                        or "")
+        if str(metadata.get("extractor") or "").lower().startswith("twitter"):
+            channel_url = ""
         channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
         # Phase 6 (BC-2): the transcript rows persist their actual link values,
