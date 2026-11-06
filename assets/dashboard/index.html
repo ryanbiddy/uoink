@@ -5350,6 +5350,7 @@
                 <button class="button primary hidden" type="button" id="libraryCaptureButton" disabled>Uoink it</button>
               </div>
               <p class="library-capture-note" id="libraryCaptureNote" role="status" aria-live="polite"></p>
+              <p class="library-capture-note" id="librarySearchMode" role="status"></p>
             </div>
             <div class="library-kinds" id="libraryKinds" role="group" aria-label="Show">
               <button class="kind-chip" type="button" data-library-kind="" aria-pressed="true">All</button>
@@ -12955,6 +12956,7 @@
       // new search from its first page instead of appending to the old rows.
       if (state.libraryResetPending) reset = true;
       state.loading = true;
+      if (reset && !semanticState) loadLibrarySearchMode();
       if (reset) {
         state.libraryResetPending = false;
         state.offset = 0;
@@ -18258,6 +18260,7 @@
         error: data.message || "Semantic search is unavailable. Retry setup. Keyword search still works."
       };
       document.getElementById("semanticStatus").textContent = data.paused ? "Paused. Select Resume to continue. Keyword search is available." : (messages[data.state] || messages.not_installed);
+      renderLibrarySearchMode();
       const progress = document.getElementById("semanticProgress");
       progress.classList.toggle("hidden", !active);
       if (data.state === "verifying") progress.removeAttribute("value");
@@ -18271,6 +18274,36 @@
       document.getElementById("semanticPause").disabled = semanticBusy || !data.enabled || data.paused;
       document.getElementById("semanticResume").disabled = semanticBusy || !accepted || (!data.paused && data.state !== "error");
       document.getElementById("semanticRemove").disabled = semanticBusy || !(accepted || data.model_bytes || data.vector_bytes);
+    }
+
+    // The Library search box says which search it runs. Off: a plain
+    // keyword search, with a way to the Settings section that turns it on.
+    function renderLibrarySearchMode() {
+      const hint = document.getElementById("librarySearchMode");
+      if (!hint || !semanticState) return;
+      const data = semanticState;
+      if (data.enabled && data.state === "ready" && !data.paused) {
+        hint.textContent = "Meaning search";
+      } else if (data.enabled && !data.paused && ["downloading", "verifying", "indexing", "retrying"].includes(data.state)) {
+        hint.textContent = "Keyword search · Meaning search is getting ready";
+      } else {
+        hint.textContent = "Keyword search · ";
+        const link = document.createElement("a");
+        link.href = "#settings/search";
+        link.textContent = "Turn on meaning search";
+        hint.appendChild(link);
+      }
+    }
+
+    // Reads the status once for the Library hint; Settings does its own polling.
+    async function loadLibrarySearchMode() {
+      if (semanticState) return;
+      try {
+        semanticState = await readSettingsResource("/search/status");
+        renderLibrarySearchMode();
+      } catch (_) {
+        // No hint is better than a wrong one.
+      }
     }
 
     async function loadSemanticStatus() {
