@@ -38,7 +38,7 @@ def test_bulky_lists_are_dropped_first_and_json_stays_valid():
     post = out["metadata"]["x_capture"]["posts"][0]
     assert post["text"] == "hello"
     assert "variants" not in post["media"][0]
-    assert "sidecar" in out["truncated"]
+    assert "sidecar" in out["reply_trimmed"]
     # The caller's object is not mutated.
     assert "variants" in reply["metadata"]["x_capture"]["posts"][0]["media"][0]
 
@@ -51,7 +51,7 @@ def test_long_text_and_lists_shrink_without_cutting_structure():
     assert out["video_id"] == "p_1"
     assert out["ok"] is True
     assert isinstance(out["rows"], list)
-    assert "truncated" in out
+    assert "reply_trimmed" in out
 
 
 def test_error_envelopes_pass_through():
@@ -63,3 +63,14 @@ def test_server_cap_constant_and_hook():
     source = (Path(__file__).resolve().parent.parent / "uoink_mcp.py").read_text(encoding="utf-8")
     assert "MCP_RESULT_TEXT_CAP = 60 * 1024" in source
     assert "cap_tool_result(envelope, MCP_RESULT_TEXT_CAP)" in source
+
+
+def test_largest_string_is_trimmed_to_fill_the_budget_and_others_stay_whole():
+    reply = {"ok": True, "video_id": "p_1", "summary": "s" * 3000, "transcript": "word " * 40000}
+    out = tools.cap_tool_result(reply, CAP)
+    assert _size(out) <= CAP
+    assert out["summary"] == "s" * 3000
+    assert len(out["transcript"]) > 40000  # fills the room, not a flat 8000
+    note = out["reply_trimmed"]
+    assert "read_library_resource" in note and "get_uoink_corpus" not in note
+    assert "truncated" not in out

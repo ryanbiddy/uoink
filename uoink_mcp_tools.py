@@ -6576,27 +6576,53 @@ def _drop_bulky(value: Any, dropped: set) -> Any:
     return value
 
 
-def _shrink(value: Any, max_items: int, max_chars: int, touched: list) -> Any:
+def _shrink_lists(value: Any, max_items: int, touched: list) -> Any:
     if isinstance(value, dict):
-        return {k: _shrink(v, max_items, max_chars, touched) for k, v in value.items()}
+        return {k: _shrink_lists(v, max_items, touched) for k, v in value.items()}
     if isinstance(value, list):
         if len(value) > max_items:
             touched.append("lists")
             value = value[:max_items]
-        return [_shrink(v, max_items, max_chars, touched) for v in value]
-    if isinstance(value, str) and len(value) > max_chars:
-        touched.append("text")
-        return value[:max_chars].rstrip() + " [...]"
+        return [_shrink_lists(v, max_items, touched) for v in value]
     return value
+
+
+def _largest_string(value: Any, best: list) -> None:
+    """Track [container, key, length] of the longest string in the tree."""
+    items = value.items() if isinstance(value, dict) else enumerate(value) if isinstance(value, list) else ()
+    for key, child in items:
+        if isinstance(child, str):
+            if len(child) > best[2]:
+                best[:] = [value, key, len(child)]
+        else:
+            _largest_string(child, best)
+
+
+def _trim_largest_strings(value: Any, budget: int, touched: list) -> bool:
+    """Cut the single largest string to fill what is left of the budget."""
+    for _ in range(200):
+        size = _json_len(value)
+        if size <= budget:
+            return True
+        best: list = [None, None, 0]
+        _largest_string(value, best)
+        container, key, length = best
+        if container is None or length <= 200:
+            return False
+        keep = max(200, length - (size - budget) - 64)
+        container[key] = container[key][:keep].rstrip() + " [...]"
+        touched.append("text")
+    return _json_len(value) <= budget
 
 
 def cap_tool_result(envelope: Any, cap: int) -> Any:
     """Keep one tool reply under ``cap`` bytes of JSON text.
 
     Trims the bulky duplicated detail first (format and variant lists), then
-    long lists, then long strings. Works on the parsed object so the JSON is
-    never cut mid-structure. Adds a short note naming where the full record
-    lives. Replies already under the cap come back untouched."""
+    long lists, then the largest strings. Works on a copy of the parsed
+    object so the JSON is never cut mid-structure. Adds a short note, under
+    ``reply_trimmed``, naming where the full record lives. Replies already
+    under the cap come back untouched."""
     if not isinstance(envelope, dict):
         return envelope
     try:
@@ -6609,22 +6635,25 @@ def cap_tool_result(envelope: Any, cap: int) -> Any:
     trimmed = _drop_bulky(envelope, dropped)
     touched: list = []
     if _json_len(trimmed) > budget:
-        for max_items, max_chars in ((50, 8000), (20, 4000), (10, 2000), (5, 1000), (3, 400)):
-            candidate = _shrink(trimmed, max_items, max_chars, touched)
+        fitted = False
+        for max_items in (50, 20, 10, 5, 3):
+            candidate = _shrink_lists(trimmed, max_items, touched)
             if _json_len(candidate) <= budget:
-                trimmed = candidate
+                trimmed, fitted = candidate, True
                 break
-        else:
+        if not fitted:
+            trimmed = candidate
+        if not fitted and not _trim_largest_strings(trimmed, budget, touched):
             # Last resort: keep only the short top-level fields.
-            trimmed = {k: v for k, v in candidate.items()
+            trimmed = {k: v for k, v in trimmed.items()
                        if not isinstance(v, (dict, list))
                        and (not isinstance(v, str) or len(v) <= 300)}
             touched.append("fields")
     note = ("Reply trimmed to stay under the MCP size limit "
             f"(removed or shortened: {', '.join(sorted(dropped | set(touched))) or 'long values'}). "
             "The full record is in the item's saved sidecar JSON; "
-            "use get_uoink_corpus or read_library_resource to read it.")
-    trimmed["truncated"] = note
+            "use read_library_resource to read it.")
+    trimmed["reply_trimmed"] = note
     return trimmed
 
 
