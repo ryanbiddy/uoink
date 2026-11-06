@@ -6390,12 +6390,14 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     metadata; when supplied it replaces the legacy transcript rendering.
     """
     title = metadata.get("title") or "Untitled"
-    channel = metadata.get("channel") or metadata.get("uploader") or "—"
+    # Unknown fields are left out of the header, never shown as a dash.
+    channel = metadata.get("channel") or metadata.get("uploader") or ""
     sub_count = format_subscribers(metadata.get("channel_follower_count"))
     upload_date = _fmt_iso_date(metadata.get("upload_date"))
     duration = format_duration(metadata.get("duration"))
     views = _fmt_int(metadata.get("view_count"))
     likes = _fmt_likes(metadata.get("like_count"))
+    known = lambda value: bool(value) and value != "—"  # noqa: E731
     description = (metadata.get("description") or "").strip()
     tags = metadata.get("tags") or []
     chapters = metadata.get("chapters") or []
@@ -6403,11 +6405,14 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts: list[str] = []
     parts.append(f"# {title}")
     parts.append("")
-    parts.append(f"**Channel:** {channel} ({sub_count} subscribers)")
-    parts.append(
-        f"**Uploaded:** {upload_date} | **Duration:** {duration} | "
-        f"**Views:** {views} | **Likes:** {likes}"
-    )
+    if channel:
+        parts.append(f"**Channel:** {channel}" + (
+            f" ({sub_count} subscribers)" if known(sub_count) else ""))
+    facts = [f"**{label}:** {value}" for label, value in (
+        ("Uploaded", upload_date), ("Duration", duration),
+        ("Views", views), ("Likes", likes)) if known(value)]
+    if facts:
+        parts.append(" | ".join(facts))
     parts.append(f"**URL:** {url}")
     parts.append(f"**Uoinked:** {yoinked_at}")
     parts.append(f"**Topic:** {topic}")
@@ -6502,7 +6507,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     # Channel Context
     parts.append("## Channel Context")
     parts.append("")
-    parts.append(f"**About {channel}:**")
+    parts.append(f"**About {channel}:**" if channel else "**About this channel:**")
     ch_desc = (channel_ctx.get("description") or "").strip()
     parts.append(ch_desc if ch_desc else "*No channel description available.*")
     parts.append("")
@@ -6515,7 +6520,9 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
             v_title = v.get("title") or "(untitled)"
             v_views = format_count(v.get("view_count"))
             v_date = _fmt_iso_date(v.get("upload_date"))
-            parts.append(f"- {v_title} ({v_views} views, {v_date})")
+            v_facts = ", ".join(f for f in (
+                f"{v_views} views" if known(v_views) else "", v_date if known(v_date) else "") if f)
+            parts.append(f"- {v_title}" + (f" ({v_facts})" if v_facts else ""))
     parts.append("")
     parts.append("---")
     parts.append("")
