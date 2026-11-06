@@ -67,6 +67,8 @@ BACK_CATALOG_CAP = 25            # lifetime initial cohort ceiling per source
 DAILY_START_CAP = 10             # actual starts per source per UTC day
 MAX_ACTUAL_STARTS = 3            # automatic attempts per source item
 RESERVATION_TTL_MS = 120_000     # reserved -> released if not dispatched
+# A manual refresh may run ahead of the due time, but not twice in this window.
+MANUAL_REFRESH_MIN_GAP_MS = 2 * 60 * 1000
 POLL_LEASE_MS = 120_000          # poll ownership lease; adapter budgets fit it
 POLL_LEASE_RECONCILE_LIMIT = 100  # expired leases reconciled per tick (AS-04, bounded)
 STANDING_POLLS_PER_TICK = 25      # due polls one scheduler tick claims (AS-05, bounded)
@@ -1333,6 +1335,21 @@ def clip_derivation_defect(conn, video_id: str, citations: list[dict], clips: li
     return None
 
 
+def _manual_gap_wait_ms(cursor: dict, now: int) -> int:
+    """Milliseconds a manual refresh must still wait after the last poll attempt;
+    0 when none was made or the gap has passed."""
+    last = cursor.get("last_poll_attempt_ms")
+    if last is None:
+        return 0
+    return max(0, int(last) + MANUAL_REFRESH_MIN_GAP_MS - now) if now >= int(last) else MANUAL_REFRESH_MIN_GAP_MS
+
+
+def _manual_may_run_early(cursor: dict, now: int) -> bool:
+    """A manual refresh may skip the due time only on a healthy feed: after a
+    failure ``next_poll_at_ms`` is an error backoff or the server's Retry-After."""
+    return int(cursor.get("error_count") or 0) == 0 and _manual_gap_wait_ms(cursor, now) == 0
+
+
 def _backend_call(backend, name: str, *args):
     """Call ``backend.<name>`` or, for a duck-typed backend that predates the run AT
     additions (acquire/release/verify_proof/inspect_publication/recover_publication), the
@@ -1457,6 +1474,10 @@ class CaptureBackend:
     kind = "inline"
 
     def preflight(self, item: dict, source: dict) -> CaptureOutcome | None:
+        return None
+
+    def cache_feed_artwork(self, source: dict, artwork_url: str) -> None:
+        """Keep one local copy of a feed's artwork; the default keeps none."""
         return None
 
     def acquire(self, start: dict, item: dict, source: dict) -> CaptureOutcome | None:
@@ -3430,7 +3451,8 @@ class SourceSubscriptionService:
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None
-            if int(cursor["next_poll_at_ms"]) > now:
+            if int(cursor["next_poll_at_ms"]) > now and not (
+                    manual and _manual_may_run_early(cursor, now)):
                 return None
             if self._clock_regressed(source, now):
                 conn.execute(
@@ -3469,7 +3491,26 @@ class SourceSubscriptionService:
                 log.exception("adapter %s raised", claim["source"]["adapter"])
                 result = AdapterResult("error", error_code="adapter_error",
                                        error_message=type(exc).__name__)
-        return self.commit_poll(claim["source_id"], claim["owner_token"], result)
+        outcome = self.commit_poll(claim["source_id"], claim["owner_token"], result)
+        if outcome.get("ok") and claim["source"]["kind"] == "podcast_rss":
+            self._cache_feed_artwork(claim["source"])
+        return outcome
+
+    def _cache_feed_artwork(self, source: dict) -> None:
+        """Hand the feed's artwork link to the backend, after the poll is
+        committed and outside any transaction. Artwork never fails a poll."""
+        try:
+            with self.store.read() as conn:
+                row = conn.execute(
+                    "SELECT json_extract(metadata_json,'$.artwork_url') FROM source_items "
+                    "WHERE source_id=? AND json_valid(metadata_json) "
+                    "AND json_extract(metadata_json,'$.artwork_url') IS NOT NULL LIMIT 1",
+                    (source["source_id"],)).fetchone()
+            url = _http_link(row[0]) if row else None
+            if url:
+                _backend_call(self.backend, "cache_feed_artwork", source, url)
+        except Exception as exc:
+            log.warning("feed artwork for %s not cached: %s", source.get("source_id"), type(exc).__name__)
 
     def commit_poll(self, source_id: str, owner_token: str, result: AdapterResult,
                     now: int | None = None) -> dict:
@@ -3741,8 +3782,10 @@ class SourceSubscriptionService:
 
     @endpoint
     def refresh_source(self, context, args):
-        """Manual refresh through the same due-time/lease gate. Not due returns
-        ``not_due`` with the persisted due time (contract, scheduler section)."""
+        """Manual refresh through the lease gate. It may run ahead of the due
+        time, but not within ``MANUAL_REFRESH_MIN_GAP_MS`` of the last attempt:
+        that returns ``not_due`` with ``retry_after_ms``. A held lease returns
+        ``not_due`` with ``poll_in_progress``. The scheduled poll keeps its cadence."""
         if set(args) - {"source_id"} or type(args.get("source_id")) is not str \
                 or not _SOURCE_ID_RE.match(args["source_id"]):
             fail("validation_error", "source_id is required")
@@ -3753,11 +3796,15 @@ class SourceSubscriptionService:
         if source["archived"] or not source["detection_enabled"]:
             return success(source_id=source["source_id"], outcome="detection_disabled",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]))
-        if int(cursor["next_poll_at_ms"]) > now or (
-                cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now):
+        if cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now:
+            return success(source_id=source["source_id"], outcome="not_due",
+                           next_poll_at_ms=int(cursor["next_poll_at_ms"]), poll_in_progress=True)
+        if int(cursor["next_poll_at_ms"]) > now and not _manual_may_run_early(cursor, now):
+            backoff = int(cursor.get("error_count") or 0) > 0
+            extra = {} if backoff else {"retry_after_ms": _manual_gap_wait_ms(cursor, now)}
             return success(source_id=source["source_id"], outcome="not_due",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]),
-                           poll_in_progress=bool(cursor["poll_owner_token"]))
+                           poll_in_progress=False, backoff=backoff, **extra)
         claim = self.claim_poll(source["source_id"], now, manual=True)
         if claim is None:
             with self.store.read() as conn:

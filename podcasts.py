@@ -1065,6 +1065,68 @@ def _slugify(text: str | None, *, fallback: str = "untitled") -> str:
     return slug[:80] or fallback
 
 
+# Feed artwork is cached once per feed beside its episodes, so the dashboard
+# only ever shows a local file (never a remote image). Names and suffixes
+# match server._local_podcast_artwork.
+_ARTWORK_MAX_BYTES = 5 * 1024 * 1024
+_ARTWORK_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
+_ARTWORK_MAGIC = {".jpg": (b"\xff\xd8\xff",), ".png": (b"\x89PNG\r\n\x1a\n",),
+                  ".webp": (b"RIFF",)}
+
+
+def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
+                       *, opener=None) -> Path | None:
+    """Save the feed's artwork as artwork.<ext> in its folder, once.
+
+    Returns the cached path, or None when there is nothing to cache or the
+    image is refused (not jpeg/png/webp, or over 5 MB). ``opener`` is the
+    public-network fetch, injectable for tests."""
+    title = (feed.get("title") or "").strip()
+    link = _subscriptions()._http_link(artwork_url)
+    if not link or not title or title.casefold() == "untitled podcast":
+        return None
+    folder = _podcast_root(Path(data_root)) / _slugify(title, fallback=f"feed-{feed.get('id') or 0}")
+    for suffix in _ARTWORK_TYPES.values():
+        if (folder / f"artwork{suffix}").is_file():
+            return folder / f"artwork{suffix}"
+    # A refused URL is remembered so the next poll does not download it again;
+    # a changed URL is tried afresh.
+    refused = folder / "artwork.refused"
+    try:
+        if refused.read_text(encoding="utf-8").strip() == link:
+            return None
+    except OSError:
+        pass
+
+    def refuse() -> None:
+        folder.mkdir(parents=True, exist_ok=True)
+        refused.write_text(link, encoding="utf-8")
+
+    opener = opener or _subscriptions().public_http_open
+    with opener(link, headers={"User-Agent": _subscriptions().FEED_USER_AGENT,
+                               "Accept": "image/jpeg,image/png,image/webp"}) as resp:
+        kind = (resp.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        suffix = _ARTWORK_TYPES.get(kind)
+        if suffix is None:
+            log.info("feed artwork skipped: content type %r", kind)
+            refuse()
+            return None
+        declared = resp.headers.get("Content-Length")
+        if declared and declared.isdigit() and int(declared) > _ARTWORK_MAX_BYTES:
+            refuse()
+            return None
+        body = resp.read(_ARTWORK_MAX_BYTES + 1)
+    if len(body) > _ARTWORK_MAX_BYTES or not body.startswith(_ARTWORK_MAGIC[suffix]):
+        refuse()
+        return None
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / f"artwork{suffix}"
+    partial = folder / f"artwork{suffix}.part"
+    partial.write_bytes(body)
+    os.replace(partial, target)
+    return target
+
+
 def _podcast_root(data_root: Path) -> Path:
     root = Path(data_root) / "Podcasts"
     root.mkdir(parents=True, exist_ok=True)

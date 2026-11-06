@@ -323,6 +323,23 @@ def test_library_podcast_dedupes_with_itunes(tmp_path, backend, monkeypatch, fie
     assert len(research.load_run(tmp_path, run_id)["candidates_pool"]) == 2
 
 
+def test_saved_podcast_episode_is_marked_saved_without_a_library_hit(tmp_path, backend, monkeypatch):
+    episode = fixture("itunes_episodes.json")["results"][0]
+    saved_row = {"video_id": "ep_saved_episode", "deleted_at": None}
+    index = SimpleNamespace(
+        search_mode=lambda *a, **k: {"results": []},
+        get_yoink=lambda video_id: None,
+        podcast_capture_for_audio_url=lambda url: saved_row if url == episode["episodeUrl"] else None,
+        list_capture_sources=lambda: [])
+    monkeypatch.setattr(backend, "_get_index", lambda: index)
+    backend._write_settings({"research_network_sources": ["podcast"]})
+    run_id = backend._research_start({"question": "evals", "source_kinds": ["library", "podcast"]})["run_id"]
+    result = backend._research_discover({"run_id": run_id, "queries": ["evals"]})
+    marks = {c["url"]: c["in_library"] for c in result["candidates"]}
+    assert marks[episode["episodeUrl"]] is True
+    assert False in [v for url, v in marks.items() if url != episode["episodeUrl"]] or len(marks) == 1
+
+
 def test_fetch_releases_store_and_run_locks_and_allows_another_run(tmp_path, backend, monkeypatch):
     backend._write_settings({"research_network_sources": ["youtube"]})
     run_id = backend._research_start({"question": "evals", "source_kinds": ["youtube"]})["run_id"]

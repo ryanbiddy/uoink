@@ -61,15 +61,15 @@ def require(condition: bool, message: str) -> None:
 
 def test_sources_ui_contains_standing_subscription_panel() -> None:
     """Verifies presence of #standingSubscriptions and summary counters in #tab-sources."""
-    # Ensure standingSubscriptions is inside tab-sources before universalCapture
+    # Ensure standingSubscriptions is inside tab-sources inside the Sources tab
     tab_sources_idx = DASHBOARD.find('id="tab-sources"')
     require(tab_sources_idx != -1, "#tab-sources missing from dashboard")
     
     standing_idx = DASHBOARD.find('id="standingSubscriptions"', tab_sources_idx)
     require(standing_idx != -1, "#standingSubscriptions missing from #tab-sources")
     
-    universal_idx = DASHBOARD.find('id="universalCapture"', standing_idx)
-    require(universal_idx != -1, "#universalCapture must follow #standingSubscriptions")
+    universal_idx = DASHBOARD.find('id="universalCapture"', tab_sources_idx)
+    require(universal_idx != -1, "#universalCapture missing from #tab-sources")
     
     # Check summary stats
     for element_id in (
@@ -322,3 +322,54 @@ def main() -> int:
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# Check now on a podcast feed card (mac batch 3, item 1)
+# ---------------------------------------------------------------------------
+def test_podcast_card_has_check_now_wired_to_the_refresh_route() -> None:
+    require('kind === "podcast_rss" ? `\n              <div class="subscription-check-row">' in DASHBOARD,
+            "Check now row must render only for podcast feeds")
+    require('class="button ghost check-now-btn"' in DASHBOARD, "Check now button missing")
+    body = DASHBOARD.split("async function checkSourceNow(btn)", 1)[1].split("// V-2a", 1)[0]
+    require('"/sources/refresh"' in body, "Check now must use the existing refresh route")
+    require('"rate_limited"' in body, "Check now must explain the rate limit")
+
+
+def test_check_now_message_explains_not_due_and_in_progress() -> None:
+    fn = DASHBOARD.split("function checkNowMessage(res)", 1)[1].split("async function checkSourceNow", 1)[0]
+    require('"not_due"' in fn and "Checked a moment ago" in fn and "retry_after_ms" in fn, "not_due must be explained")
+    require("poll_in_progress" in fn and "already running" in fn, "in-progress poll must be explained")
+    require("No new episodes" in fn, "empty result must be said plainly")
+
+
+# ---------------------------------------------------------------------------
+# Insights leads with the numbers (mac batch 3, item 3)
+# ---------------------------------------------------------------------------
+def test_insights_lead_with_numbers_then_range_controls_and_caveats() -> None:
+    grid = DASHBOARD.index('id="activityMetricsGrid"')
+    controls = DASHBOARD.index('id="activityControls"')
+    coverage = DASHBOARD.index('id="activityCoverageBlock"')
+    sections = DASHBOARD.index('id="activitySections"')
+    require(grid < controls < coverage < sections, "numbers first, then date inputs, then caveats")
+
+
+def test_unavailable_reorganized_tile_is_hidden_not_led_with() -> None:
+    require('id="activityChurnCard"' in DASHBOARD, "churn tile needs a hook to hide")
+    require('churnCard.classList.add("hidden")' in DASHBOARD, "churn tile must hide when unavailable")
+    require('churnCard.classList.remove("hidden")' in DASHBOARD, "churn tile must return when it has a value")
+
+
+# ---------------------------------------------------------------------------
+# Sources starts with the paste box (mac batch 3, item 5)
+# ---------------------------------------------------------------------------
+def test_uoink_anything_box_comes_before_standing_subscriptions() -> None:
+    paste = DASHBOARD.index('id="universalCapture"')
+    standing = DASHBOARD.index('id="standingSubscriptions"')
+    sources_tab = DASHBOARD.index('id="tab-sources"')
+    require(sources_tab < paste < standing, "paste box must lead the Sources tab")
+
+
+def test_check_now_explains_a_feed_backoff() -> None:
+    fn = DASHBOARD.split("function checkNowMessage(res)", 1)[1].split("async function checkSourceNow", 1)[0]
+    require("res.backoff" in fn and "asked us to wait" in fn, "backoff must be explained")

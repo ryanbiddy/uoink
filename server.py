@@ -5150,7 +5150,8 @@ _PODCAST_ARTWORK_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp")
 
 def _local_podcast_artwork(episode_folder: Path) -> str | None:
     """A feed image already cached beside the episode or its feed folder."""
-    # Nothing caches feed art yet, so the podcast placeholder is what shows.
+    # podcasts.cache_feed_artwork saves artwork.<ext> here at poll time; until
+    # then the podcast placeholder is what shows.
     for folder in (episode_folder, episode_folder.parent):
         for name in _PODCAST_ARTWORK_NAMES:
             for suffix in _PODCAST_ARTWORK_SUFFIXES:
@@ -10891,6 +10892,13 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     reservation itself is the durable dispatch intent and the start id is the
     job identity (contract, "Atomic starts", queue paragraph)."""
     kind = "server_capture"
+
+    def cache_feed_artwork(self, source, artwork_url):
+        feed_id = source.get("legacy_feed_id")
+        feed = podcasts.get_feed(_get_index(), feed_id) if feed_id is not None else None
+        if feed:
+            podcasts.cache_feed_artwork(DATA_ROOT, feed, artwork_url)
+
     from threading import local as _thread_local
     from threading import Condition as _Condition
     _pacing = _thread_local()
@@ -14842,8 +14850,12 @@ def _research_discover(args: dict) -> dict:
             *run.get("candidates_pool", run.get("candidates", [])), *collected["candidates"]])
         library_ids = {c["key"][3:] for c in merged
                        if c["key"].startswith("yt:") and _list_import_in_library(c["key"][3:])}
+        # A saved episode the library search did not surface is still saved:
+        # match podcasts by the same enclosure join capture uses.
+        library_keys = {c["key"] for c in merged if c["key"].startswith("pod:")
+                        and not c.get("in_library") and _research_saved_podcast(c)}
         result = research.merge_and_rank(
-            run, collected, args["queries"], library_ids=library_ids,
+            run, collected, args["queries"], library_ids=library_ids, library_keys=library_keys,
             now=datetime.fromisoformat(now.replace("Z", "+00:00")))
         run["candidates"] = result["candidates"]
         run["candidates_pool"] = result.pop("candidates_pool")
@@ -14879,6 +14891,15 @@ def _research_library_lookup(candidate: dict) -> dict | None:
                 if row and not row.get("deleted_at"):
                     return row
     return None
+
+
+def _research_saved_podcast(candidate: dict) -> bool:
+    """Best effort: a lookup error leaves the candidate as new, never fails discovery."""
+    try:
+        return bool(_research_library_lookup(candidate))
+    except Exception:
+        log.exception("research: saved-podcast lookup failed")
+        return False
 
 
 def _research_capture(args: dict) -> dict:
@@ -15078,13 +15099,17 @@ def _imported_for_you(idx, *, limit: int = 6) -> list[dict]:
 #   worth_revisiting  engagement-scored uoinks idle >= 14 days (or, with no
 #                     engagement data yet, the oldest saved uoinks)
 #   connections       topic pairs: the 2 most recent uoinks per shared topic
-#   corpus_gaps       topics with <= 2 saved uoinks
+#   corpus_gaps       topics with <= 2 saved uoinks, once the library holds
+#                     enough uoinks (_GAP_MIN_LIBRARY) to call anything a gap
 #   anchors           top engagement-scored uoinks
 #
 # Everything is computed from local data (index + engagement events). No
 # network, no AI calls.
 _RESURFACE_IDLE_DAYS = 14
 _RESURFACE_POOL_LIMIT = 200
+# One short note makes every other topic look thin. Below this many saved
+# uoinks there is not enough evidence to call a topic a gap.
+_GAP_MIN_LIBRARY = 10
 
 
 def _resurface_days_since(value) -> float:
@@ -15162,9 +15187,10 @@ def _resurface_payload(idx) -> dict:
 
     gaps = sorted(
         ({"topic": topic, "count": len(group)}
-         for topic, group in by_topic.items() if len(group) <= 2),
+         for topic, group in by_topic.items()
+         if len(group) <= 2 and topic.casefold() != "uncategorized"),
         key=lambda g: (g["count"], g["topic"]),
-    )
+    ) if len(rows) >= _GAP_MIN_LIBRARY else []
 
     return {
         "worth_revisiting": worth[:3],

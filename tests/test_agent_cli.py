@@ -472,3 +472,14 @@ def test_receipt_uses_installed_launcher_and_isolated_profile():
     assert "& $taskAgentCli --isolated-from-install-dir $taskApp status" in source
     assert "$taskCliStatus.data_dir -ine $taskProfile" in source
     assert "'cli\\uoink.cmd'" in (ROOT / "installer/verify_install.ps1").read_text()
+
+
+def test_text_output_survives_a_cp1252_console(monkeypatch):
+    import io
+    raw = io.BytesIO()
+    console = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+    monkeypatch.setattr(sys, "stdout", console)
+    code = cli.emit({"ok": True, "video_id": "abc", "title": "♪ Song"}, text=True)
+    console.flush()
+    assert code == 0
+    assert b"Saved: ? Song" in raw.getvalue()

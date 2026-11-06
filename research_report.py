@@ -89,6 +89,11 @@ def _duration(source):
     return time_label(duration) if isinstance(duration, (int, float)) else "Unknown"
 
 
+def _channels_cited(stats):
+    count = stats["distinct_channels"]
+    return f'{count} {"channel" if count == 1 else "channels"} cited'
+
+
 def claim_source_counts(stats):
     claim_noun = "claim" if stats["claims"] == 1 else "claims"
     source_noun = "source" if stats["distinct_sources"] == 1 else "sources"
@@ -153,7 +158,7 @@ def render_markdown(report, *, footer=False):
     lines.extend(["", "## Method", "", f'Sources searched: {report["sources_searched"]}. '
                   f'Tiers run: {", ".join(stats["tiers_run"])}.', "",
                   f'{stats["accepted"]} accepted, {stats["flagged"]} flagged, {stats["dropped"]} dropped. '
-                  f'{stats["distinct_channels"]} channels cited; largest channel share: {stats["max_channel_share"]:.0%}.', "",
+                  f'{_channels_cited(stats)}; largest channel share: {stats["max_channel_share"]:.0%}.', "",
                   "Receipt checks bind quotations to stored transcripts; they do not establish that a claim is true.", "",
                   f'### Didn\'t make the cut ({stats["dropped"]})', ""])
     for claim in report["verification"]["dropped"]:
@@ -241,7 +246,7 @@ def render_html(report, *, footer=True):
     parts.extend(["</tbody></table></div></section>", '<section class="method"><h2>Method</h2>',
                   "<p>" + _html(f'Sources searched: {report["sources_searched"]}. Tiers run: {", ".join(stats["tiers_run"])}.') + "</p>",
                   "<p>" + _html(f'{stats["accepted"]} accepted, {stats["flagged"]} flagged, {stats["dropped"]} dropped. '
-                    f'{stats["distinct_channels"]} channels cited; largest channel share: {stats["max_channel_share"]:.0%}.') + "</p>",
+                    f'{_channels_cited(stats)}; largest channel share: {stats["max_channel_share"]:.0%}.') + "</p>",
                   "<p>Receipt checks bind quotations to stored transcripts; they do not establish that a claim is true.</p>",
                   "<details><summary>" + _html(f'Didn\'t make the cut ({stats["dropped"]})') + "</summary><ul>"])
     for claim in report["verification"]["dropped"]:

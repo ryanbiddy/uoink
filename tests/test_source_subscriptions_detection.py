@@ -519,3 +519,68 @@ def test_s09_exhausted_capture_allowance_never_suppresses_polling(tmp_path):
     assert result["ok"] and result["inserted"] == 5 and result["enrollment"]["enrolled"] == 5
     assert len(items(service, sid)) == 20
     idx.close()
+
+
+# ---- manual refresh runs ahead of the due time, with a 2 minute floor -------
+def _manual_setup(tmp_path):
+    idx = open_index(tmp_path)
+    clock = Clock()
+    adapter = FakeAdapter([snapshot([vid(1)], coverage="window"), snapshot([vid(2)], coverage="window")])
+    service = make_service(idx, clock=clock, adapter=adapter)
+    sid = register(service)["source_id"]
+    assert service.detection_pass()[0]["ok"]
+    return idx, clock, adapter, service, sid
+
+
+def test_manual_refresh_polls_ahead_of_due_time_after_the_gap(tmp_path):
+    idx, clock, adapter, service, sid = _manual_setup(tmp_path)
+    clock.advance(ss.MANUAL_REFRESH_MIN_GAP_MS + 1)
+    assert _cursor(service, sid)["next_poll_at_ms"] > clock()
+    refresh = service.refresh_source(REGISTRY, {"source_id": sid})
+    assert refresh["ok"] and refresh["outcome"] != "not_due" and len(adapter.calls) == 2
+    # The manual poll resets the due time, as a scheduled one does.
+    assert _cursor(service, sid)["next_poll_at_ms"] > clock()
+    idx.close()
+
+
+def test_manual_refresh_within_the_floor_says_when_to_retry(tmp_path):
+    idx, clock, adapter, service, sid = _manual_setup(tmp_path)
+    clock.advance(30_000)
+    refresh = service.refresh_source(REGISTRY, {"source_id": sid})
+    assert refresh["outcome"] == "not_due" and refresh["retry_after_ms"] == ss.MANUAL_REFRESH_MIN_GAP_MS - 30_000
+    assert len(adapter.calls) == 1
+    idx.close()
+
+
+def test_manual_refresh_never_bypasses_a_held_lease(tmp_path):
+    idx, clock, adapter, service, sid = _manual_setup(tmp_path)
+    clock.advance(ss.MANUAL_REFRESH_MIN_GAP_MS + 1)
+    assert service.claim_poll(sid, manual=True) is not None
+    refresh = service.refresh_source(REGISTRY, {"source_id": sid})
+    assert refresh["outcome"] == "not_due" and refresh["poll_in_progress"] is True
+    assert len(adapter.calls) == 1
+    idx.close()
+
+
+def test_manual_refresh_respects_a_server_backoff(tmp_path):
+    idx = open_index(tmp_path)
+    clock = Clock()
+    adapter = FakeAdapter([snapshot([vid(1)], coverage="window"),
+                           error("rate_limited", retry_after_ms=10 * MINUTE_MS)])
+    service = make_service(idx, clock=clock, adapter=adapter)
+    sid = register(service)["source_id"]
+    assert service.detection_pass()[0]["ok"]
+    clock.advance(ss.MANUAL_REFRESH_MIN_GAP_MS + 1)
+    first = service.refresh_source(REGISTRY, {"source_id": sid})
+    assert first["poll"]["ok"] is False and len(adapter.calls) == 2
+    cursor = _cursor(service, sid)
+    errors, due = cursor["error_count"], cursor["next_poll_at_ms"]
+    assert errors == 1 and due >= clock() + 10 * MINUTE_MS
+    for _ in range(3):
+        clock.advance(ss.MANUAL_REFRESH_MIN_GAP_MS + 1)
+        again = service.refresh_source(REGISTRY, {"source_id": sid})
+        assert again["outcome"] == "not_due" and again["backoff"] is True
+        assert again["next_poll_at_ms"] == due and "retry_after_ms" not in again
+    assert len(adapter.calls) == 2
+    assert _cursor(service, sid)["error_count"] == errors
+    idx.close()

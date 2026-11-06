@@ -4615,6 +4615,12 @@
       border-radius: var(--control-radius);
       flex-wrap: wrap;
     }
+    .subscription-check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
     .consent-status-wrap {
       display: flex;
       align-items: center;
@@ -5451,37 +5457,6 @@
                 </div>
               </div>
               <p class="activity-empty-state hidden" id="libraryActivityEmpty" role="status" style="margin:8px 0 0;font-size:0.9rem;color:var(--text-muted, #888);">Library activity appears here after your first few captures.</p>
-              <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
-                <div class="activity-presets inline-row" role="group" aria-label="Date range" style="gap:4px;">
-                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">Last 24 hours</button>
-                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">Last 7 days</button>
-                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">Last 30 days</button>
-                </div>
-                <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
-                  <label for="activityStartInput">From</label>
-                  <input class="control small" id="activityStartInput" type="date" aria-label="Start date" style="width:145px;font-size:0.8rem;">
-                  <label for="activityEndInput">Through</label>
-                  <input class="control small" id="activityEndInput" type="date" aria-label="End date" style="width:145px;font-size:0.8rem;">
-                  <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
-                </div>
-                <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
-                  <label for="activityDateBasis" style="font-size:0.85rem;">Show by</label>
-                  <select class="control small" id="activityDateBasis" aria-label="Show by date" style="font-size:0.85rem;">
-                    <option value="capture_time">Date saved</option>
-                    <option value="publication_time">Date published</option>
-                  </select>
-                </div>
-              </div>
-              <div id="activityCustomError" class="field-error hidden" role="status" aria-live="polite" style="margin-top:6px;font-size:0.85rem;color:var(--error, #e55);"></div>
-            </div>
-
-            <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
-              <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <div><strong>Date range:</strong> <span id="activityUtcInterval">-</span></div>
-                <div><strong>History:</strong> <span id="activityCoverageStatus">-</span></div>
-                <div><strong>Not counted:</strong> <span id="activityExclusions">0</span></div>
-              </div>
-              <div id="activityWarnings" class="activity-warnings hidden" style="color:var(--warn);margin-top:4px;font-size:0.8rem;"></div>
             </div>
 
             <div class="activity-metrics-grid" id="activityMetricsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
@@ -5506,13 +5481,46 @@
                 </div>
                 <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In this date range</div>
               </div>
-              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+              <div class="activity-stat-card" id="activityChurnCard" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
                 <div style="font-size:0.8rem;color:var(--text-muted, #888);">Items reorganized</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
                   <button class="link-button activity-evidence-trigger" type="button" id="activityChurn" data-metric-id="shelf_activity.churn" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">Unavailable</button>
                 </div>
                 <div id="activityChurnSub" style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Compared with the start</div>
               </div>
+            </div>
+
+            <div class="activity-range-block" style="margin-top:14px;">
+              <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
+                <div class="activity-presets inline-row" role="group" aria-label="Date range" style="gap:4px;">
+                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">Last 24 hours</button>
+                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">Last 7 days</button>
+                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">Last 30 days</button>
+                </div>
+                <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
+                  <label for="activityStartInput">From</label>
+                  <input class="control small" id="activityStartInput" type="date" aria-label="Start date" style="width:145px;font-size:0.8rem;">
+                  <label for="activityEndInput">Through</label>
+                  <input class="control small" id="activityEndInput" type="date" aria-label="End date" style="width:145px;font-size:0.8rem;">
+                  <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
+                </div>
+                <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
+                  <label for="activityDateBasis" style="font-size:0.85rem;">Show by</label>
+                  <select class="control small" id="activityDateBasis" aria-label="Show by date" style="font-size:0.85rem;">
+                    <option value="capture_time">Date saved</option>
+                    <option value="publication_time">Date published</option>
+                  </select>
+                </div>
+              </div>
+              <div id="activityCustomError" class="field-error hidden" role="status" aria-live="polite" style="margin-top:6px;font-size:0.85rem;color:var(--error, #e55);"></div>
+            <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
+              <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div><strong>Date range:</strong> <span id="activityUtcInterval">-</span></div>
+                <div><strong>History:</strong> <span id="activityCoverageStatus">-</span></div>
+                <div><strong>Not counted:</strong> <span id="activityExclusions">0</span></div>
+              </div>
+              <div id="activityWarnings" class="activity-warnings hidden" style="color:var(--warn);margin-top:4px;font-size:0.8rem;"></div>
+            </div>
             </div>
 
             <div class="activity-sections" id="activitySections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
@@ -5779,6 +5787,18 @@
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
           </div>
+          <div class="universal-capture" id="universalCapture">
+            <div class="eyebrow">Paste a URL</div>
+            <h2>Uoink anything</h2>
+            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
+            <div class="universal-capture-row">
+              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
+              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
+              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
+              <button class="button permission-hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote">Allow</button>
+            </div>
+            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
+          </div>
           <!-- Phase 3: Standing subscriptions panel -->
           <section class="standing-subscriptions" id="standingSubscriptions" aria-label="Standing subscriptions">
             <div class="standing-header">
@@ -5825,18 +5845,6 @@
               <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
             </div>
           </section>
-          <div class="universal-capture" id="universalCapture">
-            <div class="eyebrow">Paste a URL</div>
-            <h2>Uoink anything</h2>
-            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
-            <div class="universal-capture-row">
-              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
-              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
-              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
-              <button class="button permission-hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote">Allow</button>
-            </div>
-            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
-          </div>
           <section class="discovery-panel" id="sources-discover" aria-labelledby="discoveryTitle">
             <h2 id="discoveryTitle" tabindex="-1">Discover</h2>
             <p class="discovery-note">Find posts with ScrapeCreators, then choose what to capture. <a href="#settings/connected-services">Set up Connected services</a>.</p>
@@ -9192,14 +9200,17 @@
       return out.slice(0, 5);
     }
 
+    // Matches the helper: a few notes are not enough evidence to call a gap.
+    const GAP_MIN_LIBRARY = 10;
     function buildGaps(rows) {
+      if (!Array.isArray(rows) || rows.length < GAP_MIN_LIBRARY) return [];
       const counts = new Map();
       (Array.isArray(rows) ? rows : []).forEach((row) => {
         const topic = (row.topic || "Uncategorized").trim() || "Uncategorized";
         counts.set(topic, (counts.get(topic) || 0) + 1);
       });
       return [...counts.entries()]
-        .filter(([, count]) => count <= 2)
+        .filter(([topic, count]) => count <= 2 && topic.toLowerCase() !== "uncategorized")
         .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
         .slice(0, 8)
         .map(([topic, count]) => ({ topic, count }));
@@ -10197,13 +10208,17 @@
 
       const churnEl = document.getElementById("activityChurn");
       const churnSub = document.getElementById("activityChurnSub");
+      const churnCard = document.getElementById("activityChurnCard");
       if (churnEl) {
         const ch = p.shelf_activity?.churn;
         if (ch && ch.value != null && ch.percent != null) {
           churnEl.textContent = `${ch.percent}% (${ch.numerator}/${ch.denominator})`;
+          if (churnCard) churnCard.classList.remove("hidden");
           if (churnSub) churnSub.textContent = ch.initial_filing ? "First items filed" : "Of items already on shelves";
         } else {
           churnEl.textContent = "Unavailable";
+          // With no history to compare, the tile steps aside rather than lead with "Unavailable".
+          if (churnCard) churnCard.classList.add("hidden");
           if (churnSub) churnSub.textContent = ch && ch.initial_filing ? "No items were on shelves at the start" : "Not enough history to compare";
         }
       }
@@ -10992,6 +11007,13 @@
               </button>
             </div>
 
+            ${kind === "podcast_rss" ? `
+              <div class="subscription-check-row">
+                <button class="button ghost check-now-btn" type="button" data-source-id="${htmlEscape(id)}">Check now</button>
+                <span class="soft-note check-now-note" role="status" aria-live="polite"></span>
+              </div>
+            ` : ""}
+
             ${isDraining ? `
               <div class="draining-banner">
                 <span>&#9888;</span>
@@ -11108,6 +11130,9 @@
           const sourceId = btn.dataset.sourceId;
           retrySourcePoll(sourceId);
         });
+      });
+      els.standingSubscriptionList.querySelectorAll(".check-now-btn").forEach((btn) => {
+        btn.addEventListener("click", () => checkSourceNow(btn));
       });
       els.standingSubscriptionList.querySelectorAll(".captured-items-btn").forEach((btn) => {
         btn.addEventListener("click", () => toggleCapturedItems(btn.dataset.sourceId));
@@ -11400,6 +11425,60 @@
         await loadStandingSubscriptions();
       } catch (err) {
         showToast(`Status check: ${err.message}`);
+      }
+    }
+
+    // What "Check now" tells the user for each answer the refresh route gives.
+    function checkNowMessage(res) {
+      const outcome = res && res.outcome;
+      if (outcome === "not_due") {
+        if (res.poll_in_progress) return "A check is already running. Give it a minute.";
+        if (res.backoff) {
+          const at = Number(res.next_poll_at_ms || 0);
+          return at > 0
+            ? `The feed asked us to wait; next check around ${new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`
+            : "The feed asked us to wait; try again later.";
+        }
+        const wait = Number(res.retry_after_ms || 0);
+        const minutes = Math.max(1, Math.ceil(wait / 60000));
+        return wait > 0
+          ? `Checked a moment ago, try again in about ${minutes} min.`
+          : "Checked a moment ago, try again shortly.";
+      }
+      if (outcome === "detection_disabled") return "Checking is off for this feed.";
+      const poll = (res && res.poll) || {};
+      if (poll.ok === false) return "The feed did not answer. Try again in a bit.";
+      const added = Number(poll.inserted || 0);
+      return added ? `Found ${added} new episode${added === 1 ? "" : "s"}.` : "Checked. No new episodes.";
+    }
+
+    async function checkSourceNow(btn) {
+      const note = btn.parentElement && btn.parentElement.querySelector(".check-now-note");
+      const say = (text) => { if (note) note.textContent = text; };
+      btn.disabled = true;
+      say("Checking the feed...");
+      try {
+        const res = await authFetch("/sources/refresh", {
+          method: "POST",
+          body: JSON.stringify({ source_id: btn.dataset.sourceId }),
+        });
+        const message = checkNowMessage(res);
+        say(message);
+        if (!res || res.outcome !== "not_due") {
+          await loadStandingSubscriptions();
+          // The reload redraws the card; put the answer back on the new one.
+          const fresh = els.standingSubscriptionList.querySelector(
+            `.check-now-btn[data-source-id="${CSS.escape(btn.dataset.sourceId)}"]`);
+          const freshNote = fresh && fresh.parentElement.querySelector(".check-now-note");
+          if (freshNote) freshNote.textContent = message;
+        }
+      } catch (err) {
+        const code = err && err.data && err.data.error && err.data.error.code;
+        say(code === "rate_limited"
+          ? "Checking too often. Wait a moment, then try again."
+          : `Could not check: ${err.message}`);
+      } finally {
+        btn.disabled = false;
       }
     }
 
@@ -13160,9 +13239,12 @@
       const flat = String(text || "").replace(/\s+/g, " ").trim();
       const words = String(query || "").toLowerCase().split(/\s+/)
         .map((word) => word.replace(/[^\p{L}\p{N}']/gu, "")).filter((word) => word.length > 1);
-      const lower = flat.toLowerCase();
-      const hits = words.map((word) => lower.indexOf(word)).filter((at) => at >= 0);
-      const first = hits.length ? Math.min(...hits) : 0;
+      // Whole words only: "up" marks "up", not the start of "upset". The
+      // words are letters, digits and apostrophes by now, so none needs escaping.
+      const pattern = words.length
+        ? new RegExp(`(?<![\\p{L}\\p{N}'])(${words.join("|")})(?![\\p{L}\\p{N}'])`, "giu") : null;
+      const at = pattern ? flat.search(pattern) : -1;
+      const first = at >= 0 ? at : 0;
       let start = flat.length <= max ? 0 : Math.max(0, first - Math.floor(max / 3));
       if (start > 0) {
         const space = flat.indexOf(" ", start);
@@ -13175,7 +13257,6 @@
       }
       const excerpt = `${start > 0 ? "\u2026" : ""}${flat.slice(start, end)}${end < flat.length ? "\u2026" : ""}`;
       if (!words.length) return htmlEscape(excerpt);
-      const pattern = new RegExp(`(${words.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
       return excerpt.split(pattern).map((part, index) => index % 2 ? `<mark>${htmlEscape(part)}</mark>` : htmlEscape(part)).join("");
     }
 
@@ -13800,6 +13881,18 @@
       return { detail, reason };
     }
 
+    // A failed capture is not a library hit, so a search keeps it only when
+    // it matches every word typed. Running and waiting captures stay.
+    function captureRowsForQuery(items, query) {
+      const words = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) return items;
+      return items.filter((item) => {
+        if (item.tone !== "fail") return true;
+        const text = [item.title, item.source, item.detail].join(" ").toLowerCase();
+        return words.every((word) => text.includes(word));
+      });
+    }
+
     function libraryCaptureItems() {
       const items = [];
       const now = Date.now();
@@ -13919,7 +14012,7 @@
           actions: `${url ? `<button class="button" type="button" data-library-retry="${htmlEscape(url)}" data-library-run="${htmlEscape(`job:${job.id}`)}">Retry now</button>` : ""}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(`job:${job.id}`)}">Dismiss</button>`,
         });
       });
-      return items;
+      return captureRowsForQuery(items, state.filters && state.filters.q);
     }
 
     function libraryCaptureRowHtml(item) {
