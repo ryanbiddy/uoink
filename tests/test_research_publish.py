@@ -637,3 +637,8 @@ def test_partial_judge_coverage_is_disclosed(rig):
     assert result["verification"]["flagged"][0]["id"] == "unjudged"
     assert result["verification"]["flagged"][0]["reasons"] == ["needs_judge"]
     assert "3" not in result["verification"]["stats"]["tiers_run"]
+
+
+@pytest.mark.parametrize("count,expected", [(0, "0 channels cited"), (1, "1 channel cited"), (2, "2 channels cited")])
+def test_report_method_line_pluralizes_channels(count, expected):
+    assert research_report._channels_cited({"distinct_channels": count}) == expected

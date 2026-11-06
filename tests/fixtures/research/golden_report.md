@@ -48,7 +48,7 @@ Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly
 
 Sources searched: 1. Tiers run: 0, 1, 2, 2b, 2c, 3b, 4, 5.
 
-1 accepted, 1 flagged, 1 dropped. 1 channels cited; largest channel share: 100%.
+1 accepted, 1 flagged, 1 dropped. 1 channel cited; largest channel share: 100%.
 
 Receipt checks bind quotations to stored transcripts; they do not establish that a claim is true.
 
