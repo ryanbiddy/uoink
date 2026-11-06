@@ -1711,7 +1711,9 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
     except Exception as exc:
         return _err(f"uoink_url failed: {exc}")
     if isinstance(probe.payload, dict):
-        return probe.payload
+        # The clipboard copy repeats yoink_md with screenshots inlined as
+        # base64; an agent reply never needs it.
+        return {k: v for k, v in probe.payload.items() if k != "corpus_md_paste"}
     return _err("uoink_url returned no result")
 
 
@@ -1801,6 +1803,7 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
     server = _b()
     import page_extractor as _pages  # noqa: WPS433
     import x_extractor as _x  # noqa: WPS433
+    from uoink_core import x_evidence as _x_evidence  # noqa: WPS433
 
     if not (server._read_settings() or {}).get("x_text_capture_enabled"):
         return {
@@ -1832,11 +1835,15 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
     if not video_id:
         return _err("couldn't save the X post")
     server._save_x_video_poster(video_id, result)
+    # The sidecar keeps the full evidence; the reply carries the slim view.
+    metadata = dict(result.get("metadata", {}))
+    if isinstance(metadata.get("x_capture"), dict):
+        metadata["x_capture"] = _x_evidence.slim_capture(metadata["x_capture"])
     return _ok(
         video_id=video_id,
         title=result["title"],
         tweets_captured=result.get("tweets_captured", 0),
-        metadata=result.get("metadata", {}),
+        metadata=metadata,
     )
 
 
