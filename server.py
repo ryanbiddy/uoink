@@ -5150,7 +5150,8 @@ _PODCAST_ARTWORK_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp")
 
 def _local_podcast_artwork(episode_folder: Path) -> str | None:
     """A feed image already cached beside the episode or its feed folder."""
-    # Nothing caches feed art yet, so the podcast placeholder is what shows.
+    # podcasts.cache_feed_artwork saves artwork.<ext> here at poll time; until
+    # then the podcast placeholder is what shows.
     for folder in (episode_folder, episode_folder.parent):
         for name in _PODCAST_ARTWORK_NAMES:
             for suffix in _PODCAST_ARTWORK_SUFFIXES:
@@ -10891,6 +10892,13 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     reservation itself is the durable dispatch intent and the start id is the
     job identity (contract, "Atomic starts", queue paragraph)."""
     kind = "server_capture"
+
+    def cache_feed_artwork(self, source, artwork_url):
+        feed_id = source.get("legacy_feed_id")
+        feed = podcasts.get_feed(_get_index(), feed_id) if feed_id is not None else None
+        if feed:
+            podcasts.cache_feed_artwork(DATA_ROOT, feed, artwork_url)
+
     from threading import local as _thread_local
     from threading import Condition as _Condition
     _pacing = _thread_local()

@@ -1459,6 +1459,10 @@ class CaptureBackend:
     def preflight(self, item: dict, source: dict) -> CaptureOutcome | None:
         return None
 
+    def cache_feed_artwork(self, source: dict, artwork_url: str) -> None:
+        """Keep one local copy of a feed's artwork; the default keeps none."""
+        return None
+
     def acquire(self, start: dict, item: dict, source: dict) -> CaptureOutcome | None:
         """Take execution ownership of ``start['capture_key']`` before the
         started transition. Return ``None`` when acquired (the backend holds it
@@ -3469,7 +3473,26 @@ class SourceSubscriptionService:
                 log.exception("adapter %s raised", claim["source"]["adapter"])
                 result = AdapterResult("error", error_code="adapter_error",
                                        error_message=type(exc).__name__)
-        return self.commit_poll(claim["source_id"], claim["owner_token"], result)
+        outcome = self.commit_poll(claim["source_id"], claim["owner_token"], result)
+        if outcome.get("ok") and claim["source"]["kind"] == "podcast_rss":
+            self._cache_feed_artwork(claim["source"])
+        return outcome
+
+    def _cache_feed_artwork(self, source: dict) -> None:
+        """Hand the feed's artwork link to the backend, after the poll is
+        committed and outside any transaction. Artwork never fails a poll."""
+        try:
+            with self.store.read() as conn:
+                row = conn.execute(
+                    "SELECT json_extract(metadata_json,'$.artwork_url') FROM source_items "
+                    "WHERE source_id=? AND json_valid(metadata_json) "
+                    "AND json_extract(metadata_json,'$.artwork_url') IS NOT NULL LIMIT 1",
+                    (source["source_id"],)).fetchone()
+            url = _http_link(row[0]) if row else None
+            if url:
+                _backend_call(self.backend, "cache_feed_artwork", source, url)
+        except Exception as exc:
+            log.warning("feed artwork for %s not cached: %s", source.get("source_id"), type(exc).__name__)
 
     def commit_poll(self, source_id: str, owner_token: str, result: AdapterResult,
                     now: int | None = None) -> dict:
