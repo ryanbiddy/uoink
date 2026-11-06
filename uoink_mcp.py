@@ -159,9 +159,10 @@ def _selected_toolset() -> str:
     return value
 
 
-# Claude Code's MCP client drops the session after a very large tool reply
-# (a ~35 KB uoink_x record did it), so replies are trimmed to this many bytes.
-MCP_RESULT_TEXT_CAP = 24 * 1024
+# A reply frame over 64 KiB is refused with a protocol error, which left a
+# Claude Code session unusable after one big capture. Trim tool replies to
+# this many bytes of escaped JSON first, leaving room for the frame around it.
+MCP_RESULT_TEXT_CAP = 60 * 1024
 
 
 class RegistryMCP(Server):
@@ -1132,6 +1133,7 @@ def _stdio_budget_refusal_message(scope, request_id, code: str, *, state=None):
 
 _STDIO_PROTOCOL_REJECTION_CODE = -32600
 _STDIO_PROTOCOL_REJECTION_MESSAGE = "Inbound request exceeds protocol limits"
+_STDIO_REPLY_REJECTION_MESSAGE = "Reply exceeds protocol limits"
 
 
 def _stdio_completed_frame_cap() -> int:
@@ -1202,7 +1204,7 @@ def _stdio_enforce_completed_frame(text: str, request_id, scope, *, tool_invento
                 scope, request_id, "resource_too_large", state=state
             ).model_dump_json(by_alias=True, exclude_none=True)
         else:
-            repl = _stdio_protocol_rejection_frame(request_id)
+            repl = _stdio_protocol_rejection_frame(request_id, message=_STDIO_REPLY_REJECTION_MESSAGE)
         if len(repl.encode("utf-8")) <= cap:
             return repl
     return _stdio_protocol_rejection_frame(None)

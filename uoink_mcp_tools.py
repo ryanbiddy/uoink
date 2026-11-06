@@ -6557,7 +6557,9 @@ _CAP_NOTE_RESERVE = 700
 
 
 def _json_len(value: Any) -> int:
-    return len(json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8"))
+    # The reply travels as a JSON string inside the frame, so measure it escaped.
+    text = json.dumps(value, ensure_ascii=False, allow_nan=False)
+    return len(json.dumps(text, ensure_ascii=False).encode("utf-8"))
 
 
 def _drop_bulky(value: Any, dropped: set) -> Any:

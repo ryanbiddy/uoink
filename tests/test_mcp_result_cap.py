@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import uoink_mcp_tools as tools
 
-CAP = 24 * 1024
+CAP = 60 * 1024
 
 
 def _size(value):
@@ -15,7 +15,7 @@ def _size(value):
 
 
 def _bulky_record():
-    variants = [{"url": f"https://video.example/v{i}.mp4", "bitrate": i} for i in range(300)]
+    variants = [{"url": f"https://video.example/v{i}.mp4", "bitrate": i} for i in range(600)]
     return {
         "ok": True, "video_id": "x_1", "title": "A post",
         "metadata": {"author_handle": "someone", "x_capture": {"posts": [
@@ -61,5 +61,5 @@ def test_error_envelopes_pass_through():
 
 def test_server_cap_constant_and_hook():
     source = (Path(__file__).resolve().parent.parent / "uoink_mcp.py").read_text(encoding="utf-8")
-    assert "MCP_RESULT_TEXT_CAP = 24 * 1024" in source
+    assert "MCP_RESULT_TEXT_CAP = 60 * 1024" in source
     assert "cap_tool_result(envelope, MCP_RESULT_TEXT_CAP)" in source
