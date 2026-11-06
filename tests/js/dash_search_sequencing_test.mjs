@@ -759,7 +759,15 @@ async function groupSearchQuotes() {
   p.searches[0].answer([hit]);
   await settle();
   const html = p.els.libraryGrid.innerHTML;
-  check(html.includes('A pressurized rover keeps &lt;crew&gt; &amp; equipment safe.'), "row shows the escaped verified quote");
+  // Query words are wrapped in <mark>; the quote text itself stays escaped.
+  const unmarked = (text) => text.replace(/<\/?mark>/g, "");
+  check(unmarked(html).includes('A pressurized rover keeps &lt;crew&gt; &amp; equipment safe.'), "row shows the escaped verified quote");
+  check(html.includes("A <mark>pressurized</mark> <mark>rover</mark> keeps"), "query words are highlighted in the quote");
+  p.state.filters.q = "crew";
+  p.run("renderLibrary()");
+  check(p.els.libraryGrid.innerHTML.includes("&lt;<mark>crew</mark>&gt;") && !p.els.libraryGrid.innerHTML.includes("<crew>"),
+    "a highlight inside escaped text cannot inject markup");
+  p.state.filters.q = "pressurized rover";
   check(/<a[^>]*href="#item\/moon\?t=92\.5"[^>]*>1:32<\/a>/.test(html), "quote has a timestamp link to the saved item");
   check(html.includes('aria-label="Open Moon Base episode at 1:32"'), "timestamp link names the item and time");
   for (const [passage, itemTime, expected] of [
@@ -774,21 +782,21 @@ async function groupSearchQuotes() {
   }
   p.state.library = [{ ...hit, video_id: "", slug: "", folder: "fixtures/moon" }];
   p.run("renderLibrary()");
-  check(p.els.libraryGrid.innerHTML.includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "folder-only row keeps its quote without a broken timestamp link");
+  check(unmarked(p.els.libraryGrid.innerHTML).includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "folder-only row keeps its quote without a broken timestamp link");
   p.state.library = [{ ...hit, timestamp_seconds: 0, passage: { ...hit.passage, start: 0 } }];
   p.run("renderLibrary()");
   check(p.els.libraryGrid.innerHTML.includes('?t=0"') && p.els.libraryGrid.innerHTML.includes('>0:00</a>'), "zero is a real stored timestamp");
   p.state.library = [{ ...hit, timestamp_seconds: null, passage: { text: hit.passage.text, timing: "not_timed" } }];
   p.run("renderLibrary()");
-  check(p.els.libraryGrid.innerHTML.includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "untimed text shows a quote without an invented time");
+  check(unmarked(p.els.libraryGrid.innerHTML).includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "untimed text shows a quote without an invented time");
   p.state.library = [{ ...hit, passage_verified: false, _snippet: "Unrelated opening text" }];
   p.run("renderLibrary()");
-  check(!p.els.libraryGrid.innerHTML.includes("?t=") && !p.els.libraryGrid.innerHTML.includes("A pressurized rover"), "unverified passage cannot become a quote or link");
+  check(!p.els.libraryGrid.innerHTML.includes("?t=") && !unmarked(p.els.libraryGrid.innerHTML).includes("A pressurized rover"), "unverified passage cannot become a quote or link");
   check(!p.els.libraryGrid.innerHTML.includes("Unrelated opening text"), "metadata matches do not quote unrelated discovery text");
   p.state.library = [hit];
   p.state.filters.q = "";
   p.run("renderLibrary()");
-  check(!p.els.libraryGrid.innerHTML.includes("A pressurized rover"), "browse rows do not retain search quotes");
+  check(!unmarked(p.els.libraryGrid.innerHTML).includes("A pressurized rover"), "browse rows do not retain search quotes");
 }
 
 async function groupSearchMoments() {
