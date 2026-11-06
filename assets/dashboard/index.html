@@ -4945,6 +4945,8 @@
       <div class="update-banner hidden" id="updateBanner" role="status" aria-live="polite">
         <span class="update-banner-text" id="updateBannerText"></span>
         <a class="update-banner-link" id="updateBannerLink" href="https://github.com/ryanbiddy/uoink/releases" data-product-link target="_blank" rel="noopener noreferrer">What's new</a>
+        <button class="button hidden" type="button" id="updateBannerInstall">Update now</button>
+        <span class="update-banner-text hidden" id="updateBannerProgress" role="status" aria-live="polite"></span>
         <button class="button ghost" type="button" id="updateBannerDismiss">Not now</button>
       </div>
       <form class="setting-block hidden" id="usageOptInCard" aria-labelledby="usageOptInTitle">
@@ -6533,7 +6535,9 @@
               <label class="inline-row"><input id="autoUpdateCheck" type="checkbox" aria-describedby="autoUpdateCheckCopy autoUpdateCheckSaveStatus"> Check for new versions once a day</label>
               <div class="setting-feedback"><span class="setting-status" id="autoUpdateCheckSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="autoUpdateCheckSaveRetry" type="button" data-setting-retry="autoUpdateCheck">Retry save</button></div>
               <button class="button ghost" type="button" id="checkUpdates">Check now</button>
-              <p class="setting-copy-dim" id="autoUpdateCheckCopy" style="font-size:12px;color:var(--dim);margin-top:8px">The daily check is off unless you turn it on. When it is on, Uoink asks <code>api.github.com</code> for the latest release tag once a day. Nothing else is sent: no usage counts, library data or account details. Check now does the same, once, when you press it. Uoink never downloads an update for you.</p>
+              <button class="button hidden" type="button" id="updateInstallNow">Update now</button>
+              <p class="setting-copy hidden" id="updateInstallStatus" role="status" aria-live="polite"><span id="updateInstallText"></span> <a id="updateInstallRelease" class="hidden" href="https://github.com/ryanbiddy/uoink/releases" data-product-link target="_blank" rel="noopener noreferrer">Open the release page</a></p>
+              <p class="setting-copy-dim" id="autoUpdateCheckCopy" style="font-size:12px;color:var(--dim);margin-top:8px">The daily check is off unless you turn it on. When it is on, Uoink asks <code>api.github.com</code> for the latest release tag once a day. Nothing else is sent: no usage counts, library data or account details. Check now does the same, once, when you press it. Uoink never downloads an update on its own. Update now (Download update on a Mac) is the only thing that does: when you press it, Uoink downloads the installer from GitHub and checks it against the published checksums before running it.</p>
             </div>
 
             <div class="setting-block" id="settings-about">
@@ -19476,6 +19480,8 @@
           els.updateLine.textContent = "Update check needs another moment.";
         }
       });
+      document.getElementById("updateBannerInstall").addEventListener("click", startUpdateInstall);
+      document.getElementById("updateInstallNow").addEventListener("click", startUpdateInstall);
       document.getElementById("updateBannerDismiss").addEventListener("click", () => {
         const banner = document.getElementById("updateBanner");
         dismissUpdateVersion(banner.dataset.version || "");
@@ -20067,9 +20073,90 @@
       try { window.localStorage.setItem(UPDATE_DISMISSED_KEY, version); } catch (_) {}
     }
 
+    // Only a release page of this project is ever linked.
+    function safeReleaseUrl(url) {
+      return /^https:\/\/github\.com\/ryanbiddy\/uoink\/releases\/tag\/[A-Za-z0-9._-]+$/.test(String(url || ""))
+        ? String(url) : "https://github.com/ryanbiddy/uoink/releases";
+    }
+
+    // "Update now" / "Download update" come from the helper's install_action,
+    // which is empty on source runs, isolated installs and unsupported systems.
+    function setHidden(el, hidden) {
+      el.classList[hidden ? "add" : "remove"]("hidden");
+    }
+
+    let updateInstallLabel = null;
+    let updateInstallBusy = false;
+
+    function renderUpdateInstall(data) {
+      updateInstallLabel = data && data.update_available && data.install_action ? String(data.install_action) : null;
+      for (const id of ["updateBannerInstall", "updateInstallNow"]) {
+        const button = document.getElementById(id);
+        if (!button) continue;
+        button.textContent = updateInstallLabel || "";
+        button.disabled = updateInstallBusy;
+        setHidden(button, !updateInstallLabel);
+      }
+    }
+
+    function updateInstallProgressText(job) {
+      const mb = (n) => Math.max(0, Math.round(Number(n || 0) / 1048576));
+      if (!job) return "";
+      if (job.state === "downloading") {
+        return job.bytes_total > 0
+          ? `Downloading ${mb(job.bytes_done)} of ${mb(job.bytes_total)} MB`
+          : `Downloading ${mb(job.bytes_done)} MB`;
+      }
+      if (job.state === "verifying" || job.state === "ready") return "Checking the download";
+      if (job.state === "launching") {
+        return updateInstallLabel === "Download update"
+          ? "Opening the download. Drag Uoink into Applications to finish."
+          : "Starting the installer, Uoink will restart";
+      }
+      if (job.state === "error") return job.error || "The update could not be downloaded.";
+      return "";
+    }
+
+    function showUpdateInstallText(text, releaseUrl) {
+      const banner = document.getElementById("updateBannerProgress");
+      banner.textContent = text;
+      setHidden(banner, !text);
+      document.getElementById("updateInstallText").textContent = text;
+      setHidden(document.getElementById("updateInstallStatus"), !text);
+      const link = document.getElementById("updateInstallRelease");
+      setHidden(link, !releaseUrl);
+      if (releaseUrl) link.href = safeReleaseUrl(releaseUrl);
+    }
+
+    // One status read. Returns true while the job is still running.
+    async function pollUpdateInstallOnce() {
+      const job = await authFetch("/update/install");
+      const failed = job.state === "error";
+      showUpdateInstallText(updateInstallProgressText(job), failed ? job.url || "" : "");
+      return job.state === "downloading" || job.state === "verifying" || job.state === "ready";
+    }
+
+    async function startUpdateInstall() {
+      if (updateInstallBusy || !updateInstallLabel) return;
+      updateInstallBusy = true;
+      renderUpdateInstall({ update_available: true, install_action: updateInstallLabel });
+      showUpdateInstallText("Starting the download", "");
+      try {
+        await authFetch("/update/install", { method: "POST", body: "{}" });
+        while (await pollUpdateInstallOnce()) await new Promise((r) => setTimeout(r, 1000));
+      } catch (err) {
+        // A launched installer stops the helper, so a dropped poll after that is expected.
+        const text = String((err && err.message) || "");
+        showUpdateInstallText(text || "The update could not be started.", "https://github.com/ryanbiddy/uoink/releases");
+      }
+      updateInstallBusy = false;
+      renderUpdateInstall({ update_available: true, install_action: updateInstallLabel });
+    }
+
     function renderUpdateBanner(data) {
       const banner = document.getElementById("updateBanner");
       if (!banner) return;
+      renderUpdateInstall(data);
       const latest = data && data.update_available ? String(data.latest || "") : "";
       if (!latest || dismissedUpdateVersion() === latest) {
         banner.classList.add("hidden");
@@ -20079,9 +20166,7 @@
         `Uoink ${latest} is out. You have ${data.current || "this version"}.`;
       const link = document.getElementById("updateBannerLink");
       const url = String(data.url || "");
-      // Only a release page of this project is ever linked.
-      link.href = /^https:\/\/github\.com\/ryanbiddy\/uoink\/releases\/tag\/[A-Za-z0-9._-]+$/.test(url)
-        ? url : "https://github.com/ryanbiddy/uoink/releases";
+      link.href = safeReleaseUrl(url);
       banner.dataset.version = latest;
       banner.classList.remove("hidden");
     }
