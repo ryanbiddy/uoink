@@ -3413,7 +3413,8 @@ class SourceSubscriptionService:
                 claims.append(claim)
         return claims
 
-    def claim_poll(self, source_id: str, now: int | None = None) -> dict | None:
+    def claim_poll(self, source_id: str, now: int | None = None, *,
+                   manual: bool = False) -> dict | None:
         """Claim poll ownership and its 120-second lease atomically, before any
         network I/O (contract, scheduler section). Returns None when not due,
         owned elsewhere, disabled, or when the clock regressed."""
@@ -3424,7 +3425,8 @@ class SourceSubscriptionService:
             cursor = self._cursor(conn, source_id)
             if source["archived"] or not source["detection_enabled"]:
                 return None
-            if source["kind"] == "podcast_rss" and not source["consent_epoch"]:
+            # Only a user's own refresh may read a podcast feed before consent.
+            if source["kind"] == "podcast_rss" and not source["consent_epoch"] and not manual:
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None
@@ -3751,14 +3753,12 @@ class SourceSubscriptionService:
         if source["archived"] or not source["detection_enabled"]:
             return success(source_id=source["source_id"], outcome="detection_disabled",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]))
-        if source["kind"] == "podcast_rss" and not source["consent_epoch"]:
-            return success(source_id=source["source_id"], outcome="consent_required")
         if int(cursor["next_poll_at_ms"]) > now or (
                 cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now):
             return success(source_id=source["source_id"], outcome="not_due",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]),
                            poll_in_progress=bool(cursor["poll_owner_token"]))
-        claim = self.claim_poll(source["source_id"], now)
+        claim = self.claim_poll(source["source_id"], now, manual=True)
         if claim is None:
             with self.store.read() as conn:
                 fresh = self._cursor(conn, source["source_id"])

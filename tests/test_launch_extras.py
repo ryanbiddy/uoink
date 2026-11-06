@@ -106,10 +106,12 @@ def test_podcast_poll_gates_wait_for_first_consent(feed_env):
     assert service.due_poll_ids() == []
     assert service.claim_poll(sid) is None
     assert service.detection_pass() == []
-    refreshed = service.refresh_source(REGISTRY, {"source_id": sid})
-    assert refreshed["outcome"] == "consent_required"
     assert calls == []
-    assert idx._conn.execute("SELECT COUNT(*) FROM source_items").fetchone()[0] == 0
+    # The user's own refresh may read the feed, but nothing enrolls for capture.
+    service.refresh_source(REGISTRY, {"source_id": sid})
+    assert len(calls) == 1
+    assert idx._conn.execute(
+        "SELECT COUNT(*) FROM source_items WHERE eligibility!='none'").fetchone()[0] == 0
 
 
 @pytest.mark.parametrize("name, expected_name", [
