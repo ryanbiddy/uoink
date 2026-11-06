@@ -5150,6 +5150,7 @@ _PODCAST_ARTWORK_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp")
 
 def _local_podcast_artwork(episode_folder: Path) -> str | None:
     """A feed image already cached beside the episode or its feed folder."""
+    # Nothing caches feed art yet, so the podcast placeholder is what shows.
     for folder in (episode_folder, episode_folder.parent):
         for name in _PODCAST_ARTWORK_NAMES:
             for suffix in _PODCAST_ARTWORK_SUFFIXES:
