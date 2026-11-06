@@ -10937,6 +10937,17 @@
           resetCopy = `Resets at 00:00 UTC (in ${hrs}h ${mins}m)`;
         }
 
+        // Right after consent the first poll is still running. Say so instead
+        // of "idle · 0 enrolled" until an episode is found or captured.
+        const firstPoll = kind === "podcast_rss" && source.consent_state === "on" && !lastError
+          && !episode && !inFlight.length && ["idle", "unknown"].includes(capOutcome)
+          && Boolean(det.poll_in_progress || enroll.pending);
+        if (firstPoll) {
+          capturePillClass = "in-flight";
+          capturePillLabel = "checking the feed";
+          enrollmentCopy = "Back catalog: checking the feed for episodes…";
+        }
+
         const isHeld = Boolean(allow.hold_reason || (allow.hold_until_ms && allow.hold_until_ms > Date.now()));
 
         return `
