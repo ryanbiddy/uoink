@@ -13863,6 +13863,18 @@
       return { detail, reason };
     }
 
+    // A failed capture is not a library hit, so a search keeps it only when
+    // it matches every word typed. Running and waiting captures stay.
+    function captureRowsForQuery(items, query) {
+      const words = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) return items;
+      return items.filter((item) => {
+        if (item.tone !== "fail") return true;
+        const text = [item.title, item.source, item.detail].join(" ").toLowerCase();
+        return words.every((word) => text.includes(word));
+      });
+    }
+
     function libraryCaptureItems() {
       const items = [];
       const now = Date.now();
@@ -13982,7 +13994,7 @@
           actions: `${url ? `<button class="button" type="button" data-library-retry="${htmlEscape(url)}" data-library-run="${htmlEscape(`job:${job.id}`)}">Retry now</button>` : ""}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(`job:${job.id}`)}">Dismiss</button>`,
         });
       });
-      return items;
+      return captureRowsForQuery(items, state.filters && state.filters.q);
     }
 
     function libraryCaptureRowHtml(item) {
