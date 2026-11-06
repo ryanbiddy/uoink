@@ -368,3 +368,8 @@ def test_uoink_anything_box_comes_before_standing_subscriptions() -> None:
     standing = DASHBOARD.index('id="standingSubscriptions"')
     sources_tab = DASHBOARD.index('id="tab-sources"')
     require(sources_tab < paste < standing, "paste box must lead the Sources tab")
+
+
+def test_check_now_explains_a_feed_backoff() -> None:
+    fn = DASHBOARD.split("function checkNowMessage(res)", 1)[1].split("async function checkSourceNow", 1)[0]
+    require("res.backoff" in fn and "asked us to wait" in fn, "backoff must be explained")

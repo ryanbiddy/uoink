@@ -560,3 +560,27 @@ def test_manual_refresh_never_bypasses_a_held_lease(tmp_path):
     assert refresh["outcome"] == "not_due" and refresh["poll_in_progress"] is True
     assert len(adapter.calls) == 1
     idx.close()
+
+
+def test_manual_refresh_respects_a_server_backoff(tmp_path):
+    idx = open_index(tmp_path)
+    clock = Clock()
+    adapter = FakeAdapter([snapshot([vid(1)], coverage="window"),
+                           error("rate_limited", retry_after_ms=10 * MINUTE_MS)])
+    service = make_service(idx, clock=clock, adapter=adapter)
+    sid = register(service)["source_id"]
+    assert service.detection_pass()[0]["ok"]
+    clock.advance(ss.MANUAL_REFRESH_MIN_GAP_MS + 1)
+    first = service.refresh_source(REGISTRY, {"source_id": sid})
+    assert first["poll"]["ok"] is False and len(adapter.calls) == 2
+    cursor = _cursor(service, sid)
+    errors, due = cursor["error_count"], cursor["next_poll_at_ms"]
+    assert errors == 1 and due >= clock() + 10 * MINUTE_MS
+    for _ in range(3):
+        clock.advance(ss.MANUAL_REFRESH_MIN_GAP_MS + 1)
+        again = service.refresh_source(REGISTRY, {"source_id": sid})
+        assert again["outcome"] == "not_due" and again["backoff"] is True
+        assert again["next_poll_at_ms"] == due and "retry_after_ms" not in again
+    assert len(adapter.calls) == 2
+    assert _cursor(service, sid)["error_count"] == errors
+    idx.close()

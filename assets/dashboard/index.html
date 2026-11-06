@@ -11433,6 +11433,12 @@
       const outcome = res && res.outcome;
       if (outcome === "not_due") {
         if (res.poll_in_progress) return "A check is already running. Give it a minute.";
+        if (res.backoff) {
+          const at = Number(res.next_poll_at_ms || 0);
+          return at > 0
+            ? `The feed asked us to wait; next check around ${new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`
+            : "The feed asked us to wait; try again later.";
+        }
         const wait = Number(res.retry_after_ms || 0);
         const minutes = Math.max(1, Math.ceil(wait / 60000));
         return wait > 0

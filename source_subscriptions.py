@@ -1344,6 +1344,12 @@ def _manual_gap_wait_ms(cursor: dict, now: int) -> int:
     return max(0, int(last) + MANUAL_REFRESH_MIN_GAP_MS - now) if now >= int(last) else MANUAL_REFRESH_MIN_GAP_MS
 
 
+def _manual_may_run_early(cursor: dict, now: int) -> bool:
+    """A manual refresh may skip the due time only on a healthy feed: after a
+    failure ``next_poll_at_ms`` is an error backoff or the server's Retry-After."""
+    return int(cursor.get("error_count") or 0) == 0 and _manual_gap_wait_ms(cursor, now) == 0
+
+
 def _backend_call(backend, name: str, *args):
     """Call ``backend.<name>`` or, for a duck-typed backend that predates the run AT
     additions (acquire/release/verify_proof/inspect_publication/recover_publication), the
@@ -3446,7 +3452,7 @@ class SourceSubscriptionService:
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None
             if int(cursor["next_poll_at_ms"]) > now and not (
-                    manual and _manual_gap_wait_ms(cursor, now) == 0):
+                    manual and _manual_may_run_early(cursor, now)):
                 return None
             if self._clock_regressed(source, now):
                 conn.execute(
@@ -3793,11 +3799,12 @@ class SourceSubscriptionService:
         if cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now:
             return success(source_id=source["source_id"], outcome="not_due",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]), poll_in_progress=True)
-        wait = _manual_gap_wait_ms(cursor, now)
-        if int(cursor["next_poll_at_ms"]) > now and wait:
+        if int(cursor["next_poll_at_ms"]) > now and not _manual_may_run_early(cursor, now):
+            backoff = int(cursor.get("error_count") or 0) > 0
+            extra = {} if backoff else {"retry_after_ms": _manual_gap_wait_ms(cursor, now)}
             return success(source_id=source["source_id"], outcome="not_due",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]),
-                           poll_in_progress=False, retry_after_ms=wait)
+                           poll_in_progress=False, backoff=backoff, **extra)
         claim = self.claim_poll(source["source_id"], now, manual=True)
         if claim is None:
             with self.store.read() as conn:
