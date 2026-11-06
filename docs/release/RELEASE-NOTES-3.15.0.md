@@ -60,7 +60,9 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.15.0/docs/linux.m
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `Uoink-Setup-3.15.0.exe` | TBD | `TBD` |
-| `uoink-3.15.0.mcpb` | TBD | `TBD` |
-| `Uoink-3.15.0-macos-arm64.dmg` | TBD | `TBD` |
-| `uoink-3.15.0-macos.mcpb` | TBD | `TBD` |
+| `Uoink-Setup-3.15.0.exe` | 519,418,659 B | `99449c09dfef23ee91f4e936cd8f6570d5241cf0014b1a638daaeb147c0768d2` |
+| `uoink-3.15.0.mcpb` | 117,599 B | `35e25b37e4a8b7ab9c1d9f8708972ff387281aebe240b78afa849433d72d9a81` |
+| `Uoink-3.15.0-macos-arm64.dmg` | 711,834,549 B | `7ffff2f4032cc5e866b8e050c2b9857182d9449095e66195728484a4cf2e5c9c` |
+| `uoink-3.15.0-macos.mcpb` | 114,201 B | `6785df63402143aa1a785c76bbd0a6f0fa6904aea18ec9bf7bede4dfb1758af4` |
+
+The Mac DMG is signed with Developer ID and notarized (mac-qualify run 42162030008).
