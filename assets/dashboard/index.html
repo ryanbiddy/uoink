@@ -12969,7 +12969,7 @@
       // new search from its first page instead of appending to the old rows.
       if (state.libraryResetPending) reset = true;
       state.loading = true;
-      if (reset && !semanticState) loadLibrarySearchMode();
+      if (reset && (!semanticState || semanticWarming())) loadLibrarySearchMode();
       if (reset) {
         state.libraryResetPending = false;
         state.offset = 0;
@@ -13008,6 +13008,7 @@
         modeLabel.textContent = ({ keyword: "Keyword", semantic: "Semantic", hybrid: "Hybrid" })[state.searchMode];
         modeLabel.title = data.fallback_reason || "Search mode used for these results";
         modeLabel.classList.toggle("hidden", !params.get("q"));
+        renderLibrarySearchMode();
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
         state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
@@ -18297,8 +18298,10 @@
       const hint = document.getElementById("librarySearchMode");
       if (!hint || !semanticState) return;
       const data = semanticState;
+      const searched = typeof state !== "undefined" && state.filters && String(state.filters.q || "").trim();
       if (data.enabled && data.state === "ready" && !data.paused) {
-        hint.textContent = "Meaning search";
+        // Strict matching or a fallback can still force keyword search.
+        hint.textContent = searched && state.searchMode === "keyword" ? "Keyword search" : "Meaning search";
       } else if (data.enabled && !data.paused && ["downloading", "verifying", "indexing", "retrying"].includes(data.state)) {
         hint.textContent = "Keyword search · Meaning search is getting ready";
       } else {
@@ -18311,8 +18314,14 @@
     }
 
     // Reads the status once for the Library hint; Settings does its own polling.
+    function semanticWarming() {
+      return Boolean(semanticState && semanticState.enabled && !semanticState.paused
+        && ["downloading", "verifying", "indexing", "retrying"].includes(semanticState.state));
+    }
+
     async function loadLibrarySearchMode() {
-      if (semanticState) return;
+      // Once known it stays, except while the model is still getting ready.
+      if (semanticState && !semanticWarming()) return;
       try {
         semanticState = await readSettingsResource("/search/status");
         renderLibrarySearchMode();

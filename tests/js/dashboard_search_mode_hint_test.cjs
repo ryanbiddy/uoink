@@ -6,7 +6,7 @@ const page = fs.readFileSync(require('node:path').join(__dirname, '../../assets/
 const code = page.slice(page.indexOf('    let semanticState ='), page.indexOf('    function wireSettingsAutosave()'));
 assert.match(page, /id="librarySearchMode"/);
 
-function env(status) {
+function env(status, ui) {
   const hint = { textContent: '', children: [],
     appendChild(child) { this.children.push(child); } };
   const others = new Map();
@@ -17,7 +17,7 @@ function env(status) {
       querySelectorAll: () => [],
     },
     window: { clearTimeout() {}, setTimeout() { return 1; } },
-    state: { activeTab: 'library' },
+    state: Object.assign({ activeTab: 'library' }, ui || {}),
     readSettingsResource: async path => { assert.equal(path, '/search/status'); return status; },
     settingsRequest: async () => status, settingError: err => err.message, confirm: () => true,
   });
@@ -42,6 +42,23 @@ function env(status) {
   await warming.run('loadLibrarySearchMode()');
   assert.match(warming.hint.textContent, /^Keyword search/);
   assert.match(warming.hint.textContent, /getting ready/);
+
+  // Ready, but strict matching forced keyword: say keyword, no turn-on link.
+  const forced = env({ ok: true, state: 'ready', enabled: true }, { filters: { q: 'ai agents' }, searchMode: 'keyword' });
+  await forced.run('loadLibrarySearchMode()');
+  assert.equal(forced.hint.textContent, 'Keyword search');
+  assert.equal(forced.hint.children.length, 0);
+  const meaning = env({ ok: true, state: 'ready', enabled: true }, { filters: { q: 'ai agents' }, searchMode: 'hybrid' });
+  await meaning.run('loadLibrarySearchMode()');
+  assert.equal(meaning.hint.textContent, 'Meaning search');
+
+  // While warming, the status is re-read, so it does not stay stale.
+  const stale = env({ ok: true, state: 'indexing', enabled: true });
+  await stale.run('loadLibrarySearchMode()');
+  assert.match(stale.hint.textContent, /getting ready/);
+  stale.run('readSettingsResource = async () => ({ ok: true, state: "ready", enabled: true })');
+  await stale.run('loadLibrarySearchMode()');
+  assert.equal(stale.hint.textContent, 'Meaning search');
 
   // A status that fails to load leaves the hint empty rather than wrong.
   const broken = env({});
