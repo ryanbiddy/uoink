@@ -23,6 +23,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import math
 import os
+import platform
 import queue
 import random
 import re
@@ -9312,6 +9313,218 @@ def _cached_update_result() -> dict:
     }
 
 
+# ---- Update install (user pressed Update now / Download update) ----------
+# Downloads the installer for the version the last check reported, checks it
+# against the release's SHA256SUMS.txt, and only then starts it. Nothing here
+# runs unless POST /update/install is called by a button press.
+_UPDATE_DOWNLOAD_BASE = "https://github.com/ryanbiddy/uoink/releases/download"
+_UPDATE_TAG_API = "https://api.github.com/repos/ryanbiddy/uoink/releases/tags"
+_UPDATE_HOSTS = frozenset({"github.com", "objects.githubusercontent.com",
+                           "release-assets.githubusercontent.com"})
+_UPDATE_MAX_BYTES = 1_500_000_000
+_UPDATE_MAX_HOPS = 5
+_UPDATE_SUMS_MAX_BYTES = 1_000_000
+_UPDATE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
+_UPDATE_SUM_LINE_RE = re.compile(r"^([0-9a-fA-F]{64})[ \t]+\*?(.+?)\s*$")
+# /SILENT shows setup's progress window. /SUPPRESSMSGBOXES and /NORESTART keep
+# it from stopping on a prompt or rebooting. Setup closes the running helper
+# itself (CloseApplications=force) and, because it is silent, starts the helper
+# again when it was running (installer/uoink.iss, upgrade_prep.ps1 marker).
+_UPDATE_INSTALLER_ARGS = ["/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART"]
+_update_install_lock = threading.Lock()
+_update_install_job: dict = {"state": "idle"}
+
+
+class _UpdateInstallError(Exception):
+    pass
+
+
+def _update_dir() -> Path:
+    return DATA_ROOT / "updates"
+
+
+def _is_installed_build() -> bool:
+    """True for the Windows installer layout or the signed Mac app bundle, not
+    a source checkout or an .mcpb."""
+    return (HERE / "python").is_dir() or bool(_platform.mac_bundle_contents())
+
+
+def _update_platform_asset(version: str) -> tuple[str, str] | None:
+    """(asset file name, 'windows'|'mac') this machine installs, else None."""
+    if sys.platform == "win32":
+        return f"Uoink-Setup-{version}.exe", "windows"
+    if sys.platform == "darwin" and platform.machine().lower() in ("arm64", "aarch64"):
+        return f"Uoink-{version}-macos-arm64.dmg", "mac"
+    return None
+
+
+def _update_install_action() -> str | None:
+    """Button label the dashboard may show, None when this install cannot
+    update itself (isolated test install, source run, other platform)."""
+    if _install_isolation.current_binding() is not None or not _is_installed_build():
+        return None
+    asset = _update_platform_asset("0.0.0")
+    return {"windows": "Update now", "mac": "Download update"}.get(asset[1]) if asset else None
+
+
+def _update_set_job(**fields) -> None:
+    with _update_install_lock:
+        _update_install_job.update(fields)
+
+
+def _update_status() -> dict:
+    with _update_install_lock:
+        return dict(_update_install_job)
+
+
+def _update_url_ok(url: str, hosts=_UPDATE_HOSTS) -> bool:
+    parsed = urlparse(url)
+    return parsed.scheme == "https" and (parsed.hostname or "").lower() in hosts
+
+
+def _update_open(url: str):
+    """One GitHub request: public-address checked, no automatic redirects."""
+    return source_subscriptions.public_http_open(
+        url, headers={"User-Agent": "uoink-update-install"}, timeout=30,
+        follow_redirects=False)
+
+
+def _update_fetch(url: str, hosts=_UPDATE_HOSTS):
+    """Open url and follow redirects by hand, only onto GitHub hosts."""
+    if not _update_url_ok(url, hosts):
+        raise _UpdateInstallError("Uoink only downloads updates from GitHub.")
+    current = url
+    for _ in range(_UPDATE_MAX_HOPS + 1):
+        try:
+            return _update_open(current)
+        except urllib.error.HTTPError as e:
+            location = e.headers.get("Location") if e.headers else None
+            e.close()
+            if e.code not in (301, 302, 303, 307, 308) or not location:
+                raise _UpdateInstallError(f"GitHub answered {e.code} for the download.")
+            current = urllib.parse.urljoin(current, location)
+            if not _update_url_ok(current, _UPDATE_HOSTS):
+                raise _UpdateInstallError("The download tried to leave GitHub, so Uoink stopped.")
+    raise _UpdateInstallError("The download redirected too many times.")
+
+
+def _update_expected_sha(sums_text: str, name: str) -> str | None:
+    found = []
+    for line in sums_text.splitlines():
+        m = _UPDATE_SUM_LINE_RE.match(line.strip())
+        if m and m.group(2) == name:
+            found.append(m.group(1).lower())
+    return found[0] if len(found) == 1 else None
+
+
+def _update_launch_installer(path: Path, kind: str) -> None:
+    """Start the verified installer detached so it outlives this helper."""
+    if kind == "windows":
+        flags = (getattr(subprocess, "DETACHED_PROCESS", 0)
+                 | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
+        subprocess.Popen([str(path), *_UPDATE_INSTALLER_ARGS], creationflags=flags,
+                         close_fds=True, stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        subprocess.Popen(["open", str(path)], close_fds=True)
+
+
+def _update_run_install(version: str, name: str, kind: str) -> None:
+    folder = _update_dir()
+    part = folder / (name + ".part")
+    final = folder / name
+    base = f"{_UPDATE_DOWNLOAD_BASE}/v{version}/"
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        for stale in folder.glob("*.part"):
+            stale.unlink(missing_ok=True)
+        with _update_fetch(base + "SHA256SUMS.txt") as r:
+            sums = r.read(_UPDATE_SUMS_MAX_BYTES + 1)
+        if len(sums) > _UPDATE_SUMS_MAX_BYTES:
+            raise _UpdateInstallError("The checksum list was larger than expected.")
+        expected = _update_expected_sha(sums.decode("utf-8", "replace"), name)
+        if not expected:
+            raise _UpdateInstallError("The release has no checksum for this installer, so Uoink did not install it.")
+        digest = hashlib.sha256()
+        done = 0
+        with _update_fetch(base + name) as r:
+            try:
+                total = int(r.headers.get("Content-Length") or 0)
+            except (TypeError, ValueError):
+                total = 0
+            if total > _UPDATE_MAX_BYTES:
+                raise _UpdateInstallError("The installer is larger than Uoink allows.")
+            _update_set_job(state="downloading", bytes_done=0, bytes_total=total)
+            with open(part, "wb") as out:
+                while True:
+                    chunk = r.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    done += len(chunk)
+                    if done > _UPDATE_MAX_BYTES:
+                        raise _UpdateInstallError("The installer is larger than Uoink allows.")
+                    digest.update(chunk)
+                    out.write(chunk)
+                    _update_set_job(bytes_done=done)
+        _update_set_job(state="verifying")
+        if digest.hexdigest() != expected:
+            raise _UpdateInstallError("The download did not match its checksum, so Uoink did not install it.")
+        os.replace(part, final)
+        _update_set_job(state="ready")
+        _update_set_job(state="launching")
+        _update_launch_installer(final, kind)
+    except _UpdateInstallError as e:
+        part.unlink(missing_ok=True)
+        _update_set_job(state="error", error=str(e))
+    except Exception as e:  # network drop, disk full, launch failure
+        log.warning("update install failed: %s", e)
+        part.unlink(missing_ok=True)
+        _update_set_job(state="error", error="The update could not be downloaded or started.")
+
+
+def _update_release_lists(version: str, name: str) -> bool:
+    """Pin the tag: GitHub's record for v<version> must list the installer and
+    the checksum file."""
+    with _update_fetch(f"{_UPDATE_TAG_API}/v{version}", {"api.github.com"}) as r:
+        rel = json.loads(r.read(2_000_000).decode("utf-8"))
+    listed = {a.get("name") for a in rel.get("assets") or []}
+    return str(rel.get("tag_name") or "").lstrip("vV") == version \
+        and {name, "SHA256SUMS.txt"} <= listed
+
+
+def _start_update_install() -> tuple[int, dict]:
+    """Validate, then start the download thread. Returns (http status, body)."""
+    if _install_isolation.current_binding() is not None:
+        return 409, {"ok": False, "error": "This is an isolated test install, so it cannot run the normal installer."}
+    if not _is_installed_build():
+        return 409, {"ok": False, "error": "This copy runs from source. Download the update from the release page."}
+    cached = _cached_update_result()
+    version = str(cached.get("latest") or "")
+    if not cached.get("update_available") or not _UPDATE_VERSION_RE.match(version):
+        return 409, {"ok": False, "error": "Check for updates first. No newer version was reported."}
+    asset = _update_platform_asset(version)
+    if asset is None:
+        return 400, {"ok": False, "unsupported": True, "url": cached.get("url"),
+                     "error": "Uoink can't update this computer itself. Download it from the release page."}
+    name, kind = asset
+    with _update_install_lock:
+        if _update_install_job.get("state") in ("downloading", "verifying", "ready", "launching"):
+            return 409, {"ok": False, "error": "An update is already downloading.", **_update_install_job}
+        _update_install_job.clear()
+        _update_install_job.update(state="downloading", version=version, name=name,
+                           bytes_done=0, bytes_total=0, url=cached.get("url"))
+    try:
+        if not _update_release_lists(version, name):
+            raise ValueError("release record does not match")
+    except Exception as e:
+        log.info("update install: release record check failed: %s", e)
+        _update_set_job(state="error", error="GitHub's release page doesn't list this installer yet. Try again later.")
+        return 502, {"ok": False, **_update_status()}
+    threading.Thread(target=_update_run_install, args=(version, name, kind),
+                     name="uoink-update-install", daemon=True).start()
+    return 202, {"ok": True, **_update_status()}
+
+
 # ---- Settings extras (Tier 2 dashboard Settings tab) ---------------------
 def _mask_anthropic_key(key: str) -> str | None:
     """'sk-ant-…abcd' for display; None when no key is stored."""
@@ -15978,6 +16191,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_detect()
         if bare == "/update/check":
             return self._handle_update_check()
+        if bare == "/update/install":
+            return self._handle_update_install_status()
         if bare == "/engagement/scores":
             return self._handle_engagement_scores()
         if bare == "/resurface":
@@ -16320,10 +16535,18 @@ class Handler(BaseHTTPRequestHandler):
             return
         query = parse_qs(urlparse(self.path).query)
         if (query.get("cached_only") or [""])[0] == "1":
-            self._send_json(200, {"ok": True, **_cached_update_result()})
+            self._send_json(200, {"ok": True, **_cached_update_result(),
+                                  "install_action": _update_install_action()})
             return
         force = (query.get("force") or [""])[0] == "1"
-        self._send_json(200, {"ok": True, **_check_for_update(force=force)})
+        self._send_json(200, {"ok": True, **_check_for_update(force=force),
+                              "install_action": _update_install_action()})
+
+    def _handle_update_install_status(self):
+        """GET /update/install -- progress of the user-started download."""
+        if not self._require_token():
+            return
+        self._send_json(200, {"ok": True, **_update_status()})
 
     def _handle_detect(self):
         """GET /detect?url=... -- V-2a universal capture detection.
@@ -20913,6 +21136,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_sources_service_route("archive_source", body)
         if bare == "/settings":
             return self._handle_settings_post(body)
+        if bare == "/update/install":
+            return self._send_json(*_start_update_install())
         if bare == "/relay/check":
             return self._send_json(200, _relay_request_check())
         if bare == "/settings/usage-prompt":
