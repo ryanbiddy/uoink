@@ -20026,6 +20026,9 @@
       connectJobsStream();
       setInterval(refreshHealth, 10000);
       autoCheckUpdatesOnLoad();
+      // A dashboard left open still rechecks; the 24h server cache keeps this
+      // to one GitHub request a day.
+      setInterval(autoCheckUpdatesOnLoad, 6 * 3600 * 1000);
     }
 
     init().catch((err) => {
