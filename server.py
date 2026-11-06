@@ -9473,6 +9473,9 @@ def _update_run_install(version: str, name: str, kind: str) -> None:
         _update_set_job(state="ready")
         _update_set_job(state="launching")
         _update_launch_installer(final, kind)
+        # On Windows setup stops this helper; on a Mac the helper keeps running,
+        # so leave a finished state that lets the button be pressed again.
+        _update_set_job(state="launched")
     except _UpdateInstallError as e:
         part.unlink(missing_ok=True)
         _update_set_job(state="error", error=str(e))

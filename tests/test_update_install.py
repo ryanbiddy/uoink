@@ -101,7 +101,7 @@ def test_matching_checksum_keeps_file_and_launches_with_silent_flags(rig):
     assert not (rig["dir"] / (EXE + ".part")).exists()
     assert rig["launched"] == [(final, "windows")]
     done = server._update_status()
-    assert done["state"] == "launching" and done["bytes_done"] == len(PAYLOAD)
+    assert done["state"] == "launched" and done["bytes_done"] == len(PAYLOAD)
     assert all(u.startswith(("https://github.com/", server._UPDATE_TAG_API)) for u in rig["opened"])
 
 

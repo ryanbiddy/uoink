@@ -20108,7 +20108,7 @@
           : `Downloading ${mb(job.bytes_done)} MB`;
       }
       if (job.state === "verifying" || job.state === "ready") return "Checking the download";
-      if (job.state === "launching") {
+      if (job.state === "launching" || job.state === "launched") {
         return updateInstallLabel === "Download update"
           ? "Opening the download. Drag Uoink into Applications to finish."
           : "Starting the installer, Uoink will restart";
