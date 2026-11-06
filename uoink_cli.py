@@ -568,6 +568,9 @@ def human(payload, *, index=None):
 
 
 def emit(payload, text=False, *, index=None):
+    if text and hasattr(sys.stdout, "reconfigure"):
+        # A cp1252 console cannot print a title's music note; show ? instead of crashing.
+        sys.stdout.reconfigure(errors="replace")
     print(human(payload, index=index) if text else json.dumps(payload, ensure_ascii=False, allow_nan=False))
     if payload.get("ok") is not True:
         if not text:
