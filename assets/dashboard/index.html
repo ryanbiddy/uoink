@@ -4615,6 +4615,12 @@
       border-radius: var(--control-radius);
       flex-wrap: wrap;
     }
+    .subscription-check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
     .consent-status-wrap {
       display: flex;
       align-items: center;
@@ -10992,6 +10998,13 @@
               </button>
             </div>
 
+            ${kind === "podcast_rss" ? `
+              <div class="subscription-check-row">
+                <button class="button ghost check-now-btn" type="button" data-source-id="${htmlEscape(id)}">Check now</button>
+                <span class="soft-note check-now-note" role="status" aria-live="polite"></span>
+              </div>
+            ` : ""}
+
             ${isDraining ? `
               <div class="draining-banner">
                 <span>&#9888;</span>
@@ -11108,6 +11121,9 @@
           const sourceId = btn.dataset.sourceId;
           retrySourcePoll(sourceId);
         });
+      });
+      els.standingSubscriptionList.querySelectorAll(".check-now-btn").forEach((btn) => {
+        btn.addEventListener("click", () => checkSourceNow(btn));
       });
       els.standingSubscriptionList.querySelectorAll(".captured-items-btn").forEach((btn) => {
         btn.addEventListener("click", () => toggleCapturedItems(btn.dataset.sourceId));
@@ -11400,6 +11416,53 @@
         await loadStandingSubscriptions();
       } catch (err) {
         showToast(`Status check: ${err.message}`);
+      }
+    }
+
+    // What "Check now" tells the user for each answer the refresh route gives.
+    function checkNowMessage(res) {
+      const outcome = res && res.outcome;
+      if (outcome === "not_due") {
+        if (res.poll_in_progress) return "A check is already running. Give it a minute.";
+        const at = Number(res.next_poll_at_ms || 0);
+        return at > Date.now()
+          ? `Not due yet. This feed was checked recently; next check around ${new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`
+          : "Not due yet. This feed was checked recently.";
+      }
+      if (outcome === "detection_disabled") return "Checking is off for this feed.";
+      const poll = (res && res.poll) || {};
+      if (poll.ok === false) return "The feed did not answer. Try again in a bit.";
+      const added = Number(poll.inserted || 0);
+      return added ? `Found ${added} new episode${added === 1 ? "" : "s"}.` : "Checked. No new episodes.";
+    }
+
+    async function checkSourceNow(btn) {
+      const note = btn.parentElement && btn.parentElement.querySelector(".check-now-note");
+      const say = (text) => { if (note) note.textContent = text; };
+      btn.disabled = true;
+      say("Checking the feed...");
+      try {
+        const res = await authFetch("/sources/refresh", {
+          method: "POST",
+          body: JSON.stringify({ source_id: btn.dataset.sourceId }),
+        });
+        const message = checkNowMessage(res);
+        say(message);
+        if (!res || res.outcome !== "not_due") {
+          await loadStandingSubscriptions();
+          // The reload redraws the card; put the answer back on the new one.
+          const fresh = els.standingSubscriptionList.querySelector(
+            `.check-now-btn[data-source-id="${CSS.escape(btn.dataset.sourceId)}"]`);
+          const freshNote = fresh && fresh.parentElement.querySelector(".check-now-note");
+          if (freshNote) freshNote.textContent = message;
+        }
+      } catch (err) {
+        const code = err && err.data && err.data.error && err.data.error.code;
+        say(code === "rate_limited"
+          ? "Checking too often. Wait a moment, then try again."
+          : `Could not check: ${err.message}`);
+      } finally {
+        btn.disabled = false;
       }
     }
 

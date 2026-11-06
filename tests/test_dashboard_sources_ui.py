@@ -322,3 +322,22 @@ def main() -> int:
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# Check now on a podcast feed card (mac batch 3, item 1)
+# ---------------------------------------------------------------------------
+def test_podcast_card_has_check_now_wired_to_the_refresh_route() -> None:
+    require('kind === "podcast_rss" ? `\n              <div class="subscription-check-row">' in DASHBOARD,
+            "Check now row must render only for podcast feeds")
+    require('class="button ghost check-now-btn"' in DASHBOARD, "Check now button missing")
+    body = DASHBOARD.split("async function checkSourceNow(btn)", 1)[1].split("// V-2a", 1)[0]
+    require('"/sources/refresh"' in body, "Check now must use the existing refresh route")
+    require('"rate_limited"' in body, "Check now must explain the rate limit")
+
+
+def test_check_now_message_explains_not_due_and_in_progress() -> None:
+    fn = DASHBOARD.split("function checkNowMessage(res)", 1)[1].split("async function checkSourceNow", 1)[0]
+    require('"not_due"' in fn and "Not due yet" in fn, "not_due must be explained")
+    require("poll_in_progress" in fn and "already running" in fn, "in-progress poll must be explained")
+    require("No new episodes" in fn, "empty result must be said plainly")
