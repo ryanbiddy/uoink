@@ -341,3 +341,20 @@ def test_check_now_message_explains_not_due_and_in_progress() -> None:
     require('"not_due"' in fn and "Not due yet" in fn, "not_due must be explained")
     require("poll_in_progress" in fn and "already running" in fn, "in-progress poll must be explained")
     require("No new episodes" in fn, "empty result must be said plainly")
+
+
+# ---------------------------------------------------------------------------
+# Insights leads with the numbers (mac batch 3, item 3)
+# ---------------------------------------------------------------------------
+def test_insights_lead_with_numbers_then_range_controls_and_caveats() -> None:
+    grid = DASHBOARD.index('id="activityMetricsGrid"')
+    controls = DASHBOARD.index('id="activityControls"')
+    coverage = DASHBOARD.index('id="activityCoverageBlock"')
+    sections = DASHBOARD.index('id="activitySections"')
+    require(grid < controls < coverage < sections, "numbers first, then date inputs, then caveats")
+
+
+def test_unavailable_reorganized_tile_is_hidden_not_led_with() -> None:
+    require('id="activityChurnCard"' in DASHBOARD, "churn tile needs a hook to hide")
+    require('churnCard.classList.add("hidden")' in DASHBOARD, "churn tile must hide when unavailable")
+    require('churnCard.classList.remove("hidden")' in DASHBOARD, "churn tile must return when it has a value")

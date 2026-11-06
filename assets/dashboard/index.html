@@ -5457,37 +5457,6 @@
                 </div>
               </div>
               <p class="activity-empty-state hidden" id="libraryActivityEmpty" role="status" style="margin:8px 0 0;font-size:0.9rem;color:var(--text-muted, #888);">Library activity appears here after your first few captures.</p>
-              <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
-                <div class="activity-presets inline-row" role="group" aria-label="Date range" style="gap:4px;">
-                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">Last 24 hours</button>
-                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">Last 7 days</button>
-                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">Last 30 days</button>
-                </div>
-                <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
-                  <label for="activityStartInput">From</label>
-                  <input class="control small" id="activityStartInput" type="date" aria-label="Start date" style="width:145px;font-size:0.8rem;">
-                  <label for="activityEndInput">Through</label>
-                  <input class="control small" id="activityEndInput" type="date" aria-label="End date" style="width:145px;font-size:0.8rem;">
-                  <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
-                </div>
-                <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
-                  <label for="activityDateBasis" style="font-size:0.85rem;">Show by</label>
-                  <select class="control small" id="activityDateBasis" aria-label="Show by date" style="font-size:0.85rem;">
-                    <option value="capture_time">Date saved</option>
-                    <option value="publication_time">Date published</option>
-                  </select>
-                </div>
-              </div>
-              <div id="activityCustomError" class="field-error hidden" role="status" aria-live="polite" style="margin-top:6px;font-size:0.85rem;color:var(--error, #e55);"></div>
-            </div>
-
-            <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
-              <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <div><strong>Date range:</strong> <span id="activityUtcInterval">-</span></div>
-                <div><strong>History:</strong> <span id="activityCoverageStatus">-</span></div>
-                <div><strong>Not counted:</strong> <span id="activityExclusions">0</span></div>
-              </div>
-              <div id="activityWarnings" class="activity-warnings hidden" style="color:var(--warn);margin-top:4px;font-size:0.8rem;"></div>
             </div>
 
             <div class="activity-metrics-grid" id="activityMetricsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
@@ -5512,13 +5481,46 @@
                 </div>
                 <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In this date range</div>
               </div>
-              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+              <div class="activity-stat-card" id="activityChurnCard" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
                 <div style="font-size:0.8rem;color:var(--text-muted, #888);">Items reorganized</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
                   <button class="link-button activity-evidence-trigger" type="button" id="activityChurn" data-metric-id="shelf_activity.churn" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">Unavailable</button>
                 </div>
                 <div id="activityChurnSub" style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Compared with the start</div>
               </div>
+            </div>
+
+            <div class="activity-range-block" style="margin-top:14px;">
+              <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
+                <div class="activity-presets inline-row" role="group" aria-label="Date range" style="gap:4px;">
+                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">Last 24 hours</button>
+                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">Last 7 days</button>
+                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">Last 30 days</button>
+                </div>
+                <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
+                  <label for="activityStartInput">From</label>
+                  <input class="control small" id="activityStartInput" type="date" aria-label="Start date" style="width:145px;font-size:0.8rem;">
+                  <label for="activityEndInput">Through</label>
+                  <input class="control small" id="activityEndInput" type="date" aria-label="End date" style="width:145px;font-size:0.8rem;">
+                  <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
+                </div>
+                <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
+                  <label for="activityDateBasis" style="font-size:0.85rem;">Show by</label>
+                  <select class="control small" id="activityDateBasis" aria-label="Show by date" style="font-size:0.85rem;">
+                    <option value="capture_time">Date saved</option>
+                    <option value="publication_time">Date published</option>
+                  </select>
+                </div>
+              </div>
+              <div id="activityCustomError" class="field-error hidden" role="status" aria-live="polite" style="margin-top:6px;font-size:0.85rem;color:var(--error, #e55);"></div>
+            <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
+              <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div><strong>Date range:</strong> <span id="activityUtcInterval">-</span></div>
+                <div><strong>History:</strong> <span id="activityCoverageStatus">-</span></div>
+                <div><strong>Not counted:</strong> <span id="activityExclusions">0</span></div>
+              </div>
+              <div id="activityWarnings" class="activity-warnings hidden" style="color:var(--warn);margin-top:4px;font-size:0.8rem;"></div>
+            </div>
             </div>
 
             <div class="activity-sections" id="activitySections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
@@ -10203,13 +10205,17 @@
 
       const churnEl = document.getElementById("activityChurn");
       const churnSub = document.getElementById("activityChurnSub");
+      const churnCard = document.getElementById("activityChurnCard");
       if (churnEl) {
         const ch = p.shelf_activity?.churn;
         if (ch && ch.value != null && ch.percent != null) {
           churnEl.textContent = `${ch.percent}% (${ch.numerator}/${ch.denominator})`;
+          if (churnCard) churnCard.classList.remove("hidden");
           if (churnSub) churnSub.textContent = ch.initial_filing ? "First items filed" : "Of items already on shelves";
         } else {
           churnEl.textContent = "Unavailable";
+          // With no history to compare, the tile steps aside rather than lead with "Unavailable".
+          if (churnCard) churnCard.classList.add("hidden");
           if (churnSub) churnSub.textContent = ch && ch.initial_filing ? "No items were on shelves at the start" : "Not enough history to compare";
         }
       }
