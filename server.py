@@ -14842,8 +14842,12 @@ def _research_discover(args: dict) -> dict:
             *run.get("candidates_pool", run.get("candidates", [])), *collected["candidates"]])
         library_ids = {c["key"][3:] for c in merged
                        if c["key"].startswith("yt:") and _list_import_in_library(c["key"][3:])}
+        # A saved episode the library search did not surface is still saved:
+        # match podcasts by the same enclosure join capture uses.
+        library_keys = {c["key"] for c in merged if c["key"].startswith("pod:")
+                        and not c.get("in_library") and _research_saved_podcast(c)}
         result = research.merge_and_rank(
-            run, collected, args["queries"], library_ids=library_ids,
+            run, collected, args["queries"], library_ids=library_ids, library_keys=library_keys,
             now=datetime.fromisoformat(now.replace("Z", "+00:00")))
         run["candidates"] = result["candidates"]
         run["candidates_pool"] = result.pop("candidates_pool")
@@ -14879,6 +14883,15 @@ def _research_library_lookup(candidate: dict) -> dict | None:
                 if row and not row.get("deleted_at"):
                     return row
     return None
+
+
+def _research_saved_podcast(candidate: dict) -> bool:
+    """Best effort: a lookup error leaves the candidate as new, never fails discovery."""
+    try:
+        return bool(_research_library_lookup(candidate))
+    except Exception:
+        log.exception("research: saved-podcast lookup failed")
+        return False
 
 
 def _research_capture(args: dict) -> dict:

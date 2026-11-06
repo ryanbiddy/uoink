@@ -1233,12 +1233,13 @@ def rank_candidates(candidates: list[dict], queries: list[str], scope: dict, *, 
 
 
 def merge_and_rank(run: dict, collected: dict, queries: list[str], *, now,
-                   library_ids=()) -> dict:
+                   library_ids=(), library_keys=()) -> dict:
     """Pure merge against all prior queries; retain the pool before diversity caps."""
     candidates = merge_candidates([*run.get("candidates_pool", run.get("candidates", [])),
                                    *collected["candidates"]])
     for candidate in candidates:
-        if candidate["key"].startswith("yt:") and candidate["key"][3:] in library_ids:
+        if candidate["key"] in library_keys or (
+                candidate["key"].startswith("yt:") and candidate["key"][3:] in library_ids):
             candidate["in_library"] = True
     all_queries = list(dict.fromkeys([query for call in run.get("discover_calls", [])
                                      for query in call["queries"]] + queries))
