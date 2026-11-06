@@ -15078,13 +15078,17 @@ def _imported_for_you(idx, *, limit: int = 6) -> list[dict]:
 #   worth_revisiting  engagement-scored uoinks idle >= 14 days (or, with no
 #                     engagement data yet, the oldest saved uoinks)
 #   connections       topic pairs: the 2 most recent uoinks per shared topic
-#   corpus_gaps       topics with <= 2 saved uoinks
+#   corpus_gaps       topics with <= 2 saved uoinks, once the library holds
+#                     enough uoinks (_GAP_MIN_LIBRARY) to call anything a gap
 #   anchors           top engagement-scored uoinks
 #
 # Everything is computed from local data (index + engagement events). No
 # network, no AI calls.
 _RESURFACE_IDLE_DAYS = 14
 _RESURFACE_POOL_LIMIT = 200
+# One short note makes every other topic look thin. Below this many saved
+# uoinks there is not enough evidence to call a topic a gap.
+_GAP_MIN_LIBRARY = 10
 
 
 def _resurface_days_since(value) -> float:
@@ -15162,9 +15166,10 @@ def _resurface_payload(idx) -> dict:
 
     gaps = sorted(
         ({"topic": topic, "count": len(group)}
-         for topic, group in by_topic.items() if len(group) <= 2),
+         for topic, group in by_topic.items()
+         if len(group) <= 2 and topic.casefold() != "uncategorized"),
         key=lambda g: (g["count"], g["topic"]),
-    )
+    ) if len(rows) >= _GAP_MIN_LIBRARY else []
 
     return {
         "worth_revisiting": worth[:3],

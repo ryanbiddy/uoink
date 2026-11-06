@@ -9200,14 +9200,17 @@
       return out.slice(0, 5);
     }
 
+    // Matches the helper: a few notes are not enough evidence to call a gap.
+    const GAP_MIN_LIBRARY = 10;
     function buildGaps(rows) {
+      if (!Array.isArray(rows) || rows.length < GAP_MIN_LIBRARY) return [];
       const counts = new Map();
       (Array.isArray(rows) ? rows : []).forEach((row) => {
         const topic = (row.topic || "Uncategorized").trim() || "Uncategorized";
         counts.set(topic, (counts.get(topic) || 0) + 1);
       });
       return [...counts.entries()]
-        .filter(([, count]) => count <= 2)
+        .filter(([topic, count]) => count <= 2 && topic.toLowerCase() !== "uncategorized")
         .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))
         .slice(0, 8)
         .map(([topic, count]) => ({ topic, count }));

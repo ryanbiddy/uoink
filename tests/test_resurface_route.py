@@ -120,9 +120,15 @@ def main():
                 f"pair must be the 2 most recent same-topic rows: {pair}")
         _assert(payload["connections"][0]["reason"],
                 "connection carries a reason")
-        gap_topics = {g["topic"]: g["count"] for g in payload["corpus_gaps"]}
+        # Four uoinks are too few to call anything a gap.
+        _assert(payload["corpus_gaps"] == [],
+                f"no gaps below the evidence floor: {payload['corpus_gaps']}")
+        server._GAP_MIN_LIBRARY = 4  # type: ignore
+        status, res = _get("/resurface")
+        gap_topics = {g["topic"]: g["count"] for g in res["resurface"]["corpus_gaps"]}
         _assert(gap_topics == {"Job Hunt": 1},
                 f"gaps must be low-coverage topics only: {gap_topics}")
+        server._GAP_MIN_LIBRARY = 10  # type: ignore
         _assert(payload["anchors"] == [], "no engagement -> no anchors")
         print("ok  corpus without engagement -> local library payload")
 
@@ -165,6 +171,23 @@ def main():
         httpd.shutdown()
         idx.close()
         tmp.cleanup()
+
+
+def test_corpus_gaps_wait_for_enough_uoinks(tmp_path):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    try:
+        _seed_yoink(idx, str(tmp_path), "vidaaaaaaaa", "One short note",
+                    "AI and ML", "2026-01-05T09:00:00")
+        _assert(server._resurface_payload(idx)["corpus_gaps"] == [],
+                "one short note must not call a gap")
+        for n in range(server._GAP_MIN_LIBRARY - 1):
+            _seed_yoink(idx, str(tmp_path), f"vidbbbbbbb{n}", f"Cooking {n}",
+                        "Cooking", f"2026-02-0{n + 1}T09:00:00")
+        gaps = {g["topic"]: g["count"]
+                for g in server._resurface_payload(idx)["corpus_gaps"]}
+        _assert(gaps == {"AI and ML": 1}, f"gap appears once evidence exists: {gaps}")
+    finally:
+        idx.close()
 
 
 if __name__ == "__main__":
