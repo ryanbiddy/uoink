@@ -446,11 +446,16 @@ def slim_post(post):
     out = {"id": post.get("id"), "url": post.get("url"), "author": post.get("author"),
            "created_at": post.get("created_at"), "text": post.get("text"),
            "text_completeness": post.get("text_completeness"),
+           "text_completeness_reason": post.get("text_completeness_reason"),
+           "quote_status": post.get("quote_status"), "media_status": post.get("media_status"),
+           "unavailable_reason": post.get("unavailable_reason"),
+           "missing_parent": post.get("missing_parent"),
            "engagement": {k: v for k, v in _dict(post.get("engagement")).items() if v is not None},
            "media": [_slim_media(m) for m in _list(post.get("media")) if isinstance(m, dict)]}
     quote = post.get("quote")
     if isinstance(quote, dict):
-        out["quote"] = {k: quote.get(k) for k in ("id", "url", "author", "text") if quote.get(k)}
+        out["quote"] = {k: quote.get(k) for k in ("id", "url", "author", "text", "unavailable_reason")
+                        if quote.get(k)}
     return {k: v for k, v in out.items() if v not in (None, "", [], {})}
 
 

@@ -57,3 +57,18 @@ def test_uoink_url_reply_drops_the_base64_clipboard_copy(monkeypatch):
     monkeypatch.setattr(server.Handler, "_handle_extract_any", fake)
     reply = tools.uoink_url({"url": "https://example.com/v"})
     assert reply["yoink_md"] == "text" and "corpus_md_paste" not in reply
+
+
+def test_slim_post_keeps_disclosures_for_a_tombstone_and_unavailable_quote():
+    post = x_evidence.shape({
+        "id_str": "9", "type": "tombstone", "reason": "deleted", "text": "",
+        "quoted_status_id_str": "8", "in_reply_to_status_id_str": "7"})
+    post["missing_parent"] = {"id": "7", "reason": "ancestor limit reached"}
+    post["quote"] = dict(post["quote"] or {"id": "8"}, unavailable_reason="unavailable")
+    slim = x_evidence.slim_post(post)
+    assert slim["unavailable_reason"] == "deleted"
+    assert slim["missing_parent"]["reason"] == "ancestor limit reached"
+    assert slim["text_completeness_reason"] and slim["quote_status"] and slim["media_status"]
+    assert slim["quote"]["unavailable_reason"] == "unavailable"
+    plain = x_evidence.slim_post(x_evidence.shape({"id_str": "1", "text": "hi"}))
+    assert "unavailable_reason" not in plain and "missing_parent" not in plain
