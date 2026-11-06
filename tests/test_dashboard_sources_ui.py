@@ -338,7 +338,7 @@ def test_podcast_card_has_check_now_wired_to_the_refresh_route() -> None:
 
 def test_check_now_message_explains_not_due_and_in_progress() -> None:
     fn = DASHBOARD.split("function checkNowMessage(res)", 1)[1].split("async function checkSourceNow", 1)[0]
-    require('"not_due"' in fn and "Not due yet" in fn, "not_due must be explained")
+    require('"not_due"' in fn and "Checked a moment ago" in fn and "retry_after_ms" in fn, "not_due must be explained")
     require("poll_in_progress" in fn and "already running" in fn, "in-progress poll must be explained")
     require("No new episodes" in fn, "empty result must be said plainly")
 

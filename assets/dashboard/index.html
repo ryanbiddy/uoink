@@ -11433,10 +11433,11 @@
       const outcome = res && res.outcome;
       if (outcome === "not_due") {
         if (res.poll_in_progress) return "A check is already running. Give it a minute.";
-        const at = Number(res.next_poll_at_ms || 0);
-        return at > Date.now()
-          ? `Not due yet. This feed was checked recently; next check around ${new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`
-          : "Not due yet. This feed was checked recently.";
+        const wait = Number(res.retry_after_ms || 0);
+        const minutes = Math.max(1, Math.ceil(wait / 60000));
+        return wait > 0
+          ? `Checked a moment ago, try again in about ${minutes} min.`
+          : "Checked a moment ago, try again shortly.";
       }
       if (outcome === "detection_disabled") return "Checking is off for this feed.";
       const poll = (res && res.poll) || {};

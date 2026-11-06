@@ -67,6 +67,8 @@ BACK_CATALOG_CAP = 25            # lifetime initial cohort ceiling per source
 DAILY_START_CAP = 10             # actual starts per source per UTC day
 MAX_ACTUAL_STARTS = 3            # automatic attempts per source item
 RESERVATION_TTL_MS = 120_000     # reserved -> released if not dispatched
+# A manual refresh may run ahead of the due time, but not twice in this window.
+MANUAL_REFRESH_MIN_GAP_MS = 2 * 60 * 1000
 POLL_LEASE_MS = 120_000          # poll ownership lease; adapter budgets fit it
 POLL_LEASE_RECONCILE_LIMIT = 100  # expired leases reconciled per tick (AS-04, bounded)
 STANDING_POLLS_PER_TICK = 25      # due polls one scheduler tick claims (AS-05, bounded)
@@ -1331,6 +1333,15 @@ def clip_derivation_defect(conn, video_id: str, citations: list[dict], clips: li
         if (row.get("source_deep_link") or None) != (want.get("source_deep_link") or None):
             return "clip_not_derived"
     return None
+
+
+def _manual_gap_wait_ms(cursor: dict, now: int) -> int:
+    """Milliseconds a manual refresh must still wait after the last poll attempt;
+    0 when none was made or the gap has passed."""
+    last = cursor.get("last_poll_attempt_ms")
+    if last is None:
+        return 0
+    return max(0, int(last) + MANUAL_REFRESH_MIN_GAP_MS - now) if now >= int(last) else MANUAL_REFRESH_MIN_GAP_MS
 
 
 def _backend_call(backend, name: str, *args):
@@ -3434,7 +3445,8 @@ class SourceSubscriptionService:
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None
-            if int(cursor["next_poll_at_ms"]) > now:
+            if int(cursor["next_poll_at_ms"]) > now and not (
+                    manual and _manual_gap_wait_ms(cursor, now) == 0):
                 return None
             if self._clock_regressed(source, now):
                 conn.execute(
@@ -3764,8 +3776,10 @@ class SourceSubscriptionService:
 
     @endpoint
     def refresh_source(self, context, args):
-        """Manual refresh through the same due-time/lease gate. Not due returns
-        ``not_due`` with the persisted due time (contract, scheduler section)."""
+        """Manual refresh through the lease gate. It may run ahead of the due
+        time, but not within ``MANUAL_REFRESH_MIN_GAP_MS`` of the last attempt:
+        that returns ``not_due`` with ``retry_after_ms``. A held lease returns
+        ``not_due`` with ``poll_in_progress``. The scheduled poll keeps its cadence."""
         if set(args) - {"source_id"} or type(args.get("source_id")) is not str \
                 or not _SOURCE_ID_RE.match(args["source_id"]):
             fail("validation_error", "source_id is required")
@@ -3776,11 +3790,14 @@ class SourceSubscriptionService:
         if source["archived"] or not source["detection_enabled"]:
             return success(source_id=source["source_id"], outcome="detection_disabled",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]))
-        if int(cursor["next_poll_at_ms"]) > now or (
-                cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now):
+        if cursor["poll_owner_token"] and int(cursor["poll_lease_expires_ms"]) > now:
+            return success(source_id=source["source_id"], outcome="not_due",
+                           next_poll_at_ms=int(cursor["next_poll_at_ms"]), poll_in_progress=True)
+        wait = _manual_gap_wait_ms(cursor, now)
+        if int(cursor["next_poll_at_ms"]) > now and wait:
             return success(source_id=source["source_id"], outcome="not_due",
                            next_poll_at_ms=int(cursor["next_poll_at_ms"]),
-                           poll_in_progress=bool(cursor["poll_owner_token"]))
+                           poll_in_progress=False, retry_after_ms=wait)
         claim = self.claim_poll(source["source_id"], now, manual=True)
         if claim is None:
             with self.store.read() as conn:
