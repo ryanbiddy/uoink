@@ -507,6 +507,37 @@
       grid-template-rows: auto minmax(0, 1fr);
     }
 
+    /* Slim update notice: its own row above the content, like the usage card. */
+    .main:has(> #updateBanner:not(.hidden)) {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .main:has(> #updateBanner:not(.hidden)):has(> #usageOptInCard:not(.hidden)) {
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .update-banner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 28px 0;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--rust);
+      border-radius: var(--control-radius);
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      font-size: 13px;
+    }
+
+    .update-banner.hidden {
+      display: none;
+    }
+
+    .update-banner-text {
+      flex: 1 1 auto;
+    }
+
     .main > #usageOptInCard {
       gap: 10px;
       margin: 24px 28px 12px;
@@ -4911,6 +4942,11 @@
     </aside>
 
     <main class="main">
+      <div class="update-banner hidden" id="updateBanner" role="status" aria-live="polite">
+        <span class="update-banner-text" id="updateBannerText"></span>
+        <a class="update-banner-link" id="updateBannerLink" href="https://github.com/ryanbiddy/uoink/releases" data-product-link target="_blank" rel="noopener noreferrer">What's new</a>
+        <button class="button ghost" type="button" id="updateBannerDismiss">Not now</button>
+      </div>
       <form class="setting-block hidden" id="usageOptInCard" aria-labelledby="usageOptInTitle">
         <h2 id="usageOptInTitle">Help improve Uoink with usage counts</h2>
         <p class="setting-copy">Sharing is off by default. If you turn it on, Uoink sends daily counts of tools, known MCP clients, connections, captures and searches to usage.uoink.app, along with a random ID and app and system versions. It never sends content, URLs, titles, paths, search text or account details.</p>
@@ -6494,8 +6530,10 @@
               <h2>Updates</h2>
               <p class="setting-copy" id="versionLine">Loading version...</p>
               <p class="setting-copy" id="updateLine">Last checked: not yet</p>
+              <label class="inline-row"><input id="autoUpdateCheck" type="checkbox" aria-describedby="autoUpdateCheckCopy autoUpdateCheckSaveStatus"> Check for new versions once a day</label>
+              <div class="setting-feedback"><span class="setting-status" id="autoUpdateCheckSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="autoUpdateCheckSaveRetry" type="button" data-setting-retry="autoUpdateCheck">Retry save</button></div>
               <button class="button ghost" type="button" id="checkUpdates">Check now</button>
-              <p class="setting-copy-dim" style="font-size:12px;color:var(--dim);margin-top:8px">Checking for updates queries <code>api.github.com</code> to fetch the latest release tag. This check sends no usage counts or library data.</p>
+              <p class="setting-copy-dim" id="autoUpdateCheckCopy" style="font-size:12px;color:var(--dim);margin-top:8px">The daily check is off unless you turn it on. When it is on, Uoink asks <code>api.github.com</code> for the latest release tag once a day. Nothing else is sent: no usage counts, library data or account details. Check now does the same, once, when you press it. Uoink never downloads an update for you.</p>
             </div>
 
             <div class="setting-block" id="settings-about">
@@ -7174,6 +7212,10 @@
         const keys = [...target.searchParams.keys()];
         return keys.every((key) => key === "text" || key === "url")
           && new Set(keys).size === keys.length;
+      }
+      // One release page of this project, as the update banner links it.
+      if (/^https:\/\/github\.com\/ryanbiddy\/uoink\/releases\/tag\/[A-Za-z0-9._-]+$/.test(base)) {
+        return !target.href.includes("?");
       }
       return !target.href.includes("?") && fixed.includes(base);
     }
@@ -17643,6 +17685,7 @@
       autostartToggle: ["autostart", false],
       notificationsEnabled: ["notifications_enabled", true],
       usageSharing: ["usage_sharing", false],
+      autoUpdateCheck: ["auto_update_check", false],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -19427,10 +19470,16 @@
           els.updateLine.textContent = data.update_available
             ? `Update available: ${data.latest}. Checked ${checked}.`
             : `No update available. Checked ${checked}.`;
+          renderUpdateBanner(data);
           if (data.url) showToast("Update check complete. Release links are under About in Settings, App.");
         } catch (err) {
           els.updateLine.textContent = "Update check needs another moment.";
         }
+      });
+      document.getElementById("updateBannerDismiss").addEventListener("click", () => {
+        const banner = document.getElementById("updateBanner");
+        dismissUpdateVersion(banner.dataset.version || "");
+        banner.classList.add("hidden");
       });
       document.getElementById("stopHelperSettings").addEventListener("click", stopHelperWithConfirm);
       els.cancelStopHelper.addEventListener("click", closeStopHelperConfirm);
@@ -20005,6 +20054,46 @@
       }
     }
 
+    // ---- Update notice ----------------------------------------------------
+    // The banner follows /update/check. The check runs on load only when the
+    // user turned on auto_update_check; Check now always works.
+    const UPDATE_DISMISSED_KEY = "uoink.dashboard.updateDismissed";
+
+    function dismissedUpdateVersion() {
+      try { return window.localStorage.getItem(UPDATE_DISMISSED_KEY) || ""; } catch (_) { return ""; }
+    }
+
+    function dismissUpdateVersion(version) {
+      try { window.localStorage.setItem(UPDATE_DISMISSED_KEY, version); } catch (_) {}
+    }
+
+    function renderUpdateBanner(data) {
+      const banner = document.getElementById("updateBanner");
+      if (!banner) return;
+      const latest = data && data.update_available ? String(data.latest || "") : "";
+      if (!latest || dismissedUpdateVersion() === latest) {
+        banner.classList.add("hidden");
+        return;
+      }
+      document.getElementById("updateBannerText").textContent =
+        `Uoink ${latest} is out. You have ${data.current || "this version"}.`;
+      const link = document.getElementById("updateBannerLink");
+      const url = String(data.url || "");
+      // Only a release page of this project is ever linked.
+      link.href = /^https:\/\/github\.com\/ryanbiddy\/uoink\/releases\/tag\/[A-Za-z0-9._-]+$/.test(url)
+        ? url : "https://github.com/ryanbiddy/uoink/releases";
+      banner.dataset.version = latest;
+      banner.classList.remove("hidden");
+    }
+
+    async function autoCheckUpdatesOnLoad() {
+      try {
+        const settings = await settingsRequest("/settings");
+        if (!settings || !settings.settings || settings.settings.auto_update_check !== true) return;
+        renderUpdateBanner(await authFetch("/update/check"));
+      } catch (_) {}
+    }
+
     async function init() {
       hydrateMarks();
       wireEvents();
@@ -20029,6 +20118,10 @@
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
+      autoCheckUpdatesOnLoad();
+      // A dashboard left open still rechecks; the 24h server cache keeps this
+      // to one GitHub request a day.
+      setInterval(autoCheckUpdatesOnLoad, 6 * 3600 * 1000);
     }
 
     init().catch((err) => {

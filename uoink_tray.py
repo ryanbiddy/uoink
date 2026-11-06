@@ -63,6 +63,14 @@ _U_OUTLINE = [
 _U_TIPS = [(0, 0, 32, 16), (68, 0, 100, 16)]  # cream tips (x0,y0,x1,y1)
 
 
+def update_item_latest(data) -> str | None:
+    """The version to offer from a /update/check?cached_only=1 reply, else None."""
+    if not isinstance(data, dict) or data.get("update_available") is not True:
+        return None
+    latest = str(data.get("latest") or "").strip()
+    return latest[:32] or None
+
+
 class UoinkTray:
     def __init__(self, *, host: str, port: int, version: str,
                  token_path: Path, output_dir: Path, dashboard_url: str,
@@ -78,6 +86,7 @@ class UoinkTray:
         self._icon = None
         self._state = "offline"          # offline | running | yoinking | degraded
         self._recent: list[dict] = []
+        self._update_latest: str | None = None   # from the helper's saved check
         self._last_interaction = time.monotonic()
         self._stopping = threading.Event()
         # cache one rendered image per state so update is cheap
@@ -131,6 +140,16 @@ class UoinkTray:
         data, _ = self._get("/recent", auth=True)
         if isinstance(data, dict) and isinstance(data.get("recent"), list):
             self._recent = data["recent"][:5]
+
+    def _refresh_update(self) -> None:
+        """Ask the local helper for its saved update check. cached_only means
+        the helper makes no GitHub request for this; neither do we."""
+        data, _ = self._get("/update/check?cached_only=1", auth=True)
+        self._update_latest = update_item_latest(data)
+
+    def update_title(self) -> str | None:
+        """Menu text for the update item, or None when there is nothing to show."""
+        return f"Update available: {self._update_latest}" if self._update_latest else None
 
     # ---- presentation ------------------------------------------------------
     def _status_text(self) -> str:
@@ -238,6 +257,11 @@ class UoinkTray:
         self._touch()
         webbrowser.open(self.dashboard_url)
 
+    def _open_update(self, *_):
+        # The update notice and the Check now button live in Settings, App.
+        self._touch()
+        webbrowser.open(self.dashboard_url + "#settings/app")
+
     @staticmethod
     def _open_path(path: Path) -> None:
         try:
@@ -278,6 +302,8 @@ class UoinkTray:
             MenuItem("Open folder", self._open_folder),
             MenuItem("Recent items", Menu(lambda: self._recent_items())),
             MenuItem("Settings", self._open_settings),
+            MenuItem(lambda _i: self.update_title() or "", self._open_update,
+                     visible=lambda _i: self.update_title() is not None),
             Menu.SEPARATOR,
             MenuItem("Quit Uoink", self._on_stop),
         )
@@ -303,6 +329,7 @@ class UoinkTray:
         # Prime once so the first menu open is populated.
         self._refresh_status()
         self._refresh_recent()
+        self._refresh_update()
         self._apply()
         while not self._stopping.is_set():
             idle = (time.monotonic() - self._last_interaction) > _IDLE_AFTER_SEC
@@ -312,12 +339,14 @@ class UoinkTray:
             if self._stopping.is_set():
                 break
             prev = self._state
+            prev_update = self._update_latest
             self._refresh_status()
             now = time.monotonic()
             if not idle and (now - last_recent) >= _POLL_RECENT_SEC:
                 self._refresh_recent()
+                self._refresh_update()
                 last_recent = now
-            if self._state != prev:
+            if self._state != prev or self._update_latest != prev_update:
                 self._apply()
 
     def _apply(self) -> None:

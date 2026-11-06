@@ -14,7 +14,8 @@ is unclear, email us (see *Contact* below).
 Uoink sends no usage data by default. If you turn on "Share anonymous usage counts", it sends daily counts to usage.uoink.app: calls by tool name, known MCP clients, stdio or HTTP calls, captures by source and result, and library searches. Reports include a random install ID, app version, operating system and major version, processor type, install type and hours counted. They never include content, URLs, titles, paths, search text, usernames, IP addresses or account details.
 
 Uoink has no account or cloud library. It runs on your own machine. It contacts a source service when you ask it to capture
-that source, the GitHub release API only when you click **Check now**, and
+that source, the GitHub release API only when you click **Check now** or turn
+on the daily update check (off by default), and
 Anthropic only with your own API key: for automatic AI analysis you turn on,
 a key test, or an AI action that you or a connected agent start on demand.
 Optional ScrapeCreators discovery sends your search terms or creator identifier
@@ -122,8 +123,10 @@ Uoink makes these outbound requests:
   host, handles those requests under its own policy. Capturing a picked-up
   link then contacts its source service as above. See
   [docs/relay.md](relay.md).
-- **GitHub release check — only when you click `Check now`.** The dashboard
-  requests the latest Uoink release record from `api.github.com`. It sends no
+- **GitHub release check — only when you click `Check now` or turn on the
+  daily check.** The daily check is off by default. When on, the dashboard
+  asks at most once a day. Either way it requests the latest Uoink release
+  record from `api.github.com` and never downloads an update. It sends no
   corpus content or usage event. GitHub receives the normal request metadata.
 
 The dashboard and extension use bundled Inter, Bungee and JetBrains Mono

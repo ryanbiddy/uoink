@@ -1033,6 +1033,9 @@ def _default_settings() -> dict:
         "notifications_enabled": True,
         "usage_sharing": False,
         "usage_sharing_prompt_seen": False,
+        # Daily update check against api.github.com. Off until the user turns
+        # it on; the Check now button works either way.
+        "auto_update_check": False,
         "anthropic_key_invalid": False,
         "scrapecreators_enabled": False,
         "scrapecreators_agent_calls_enabled": False,
@@ -1236,6 +1239,7 @@ def _normalize_settings(data: dict) -> dict:
     clean["auto_uoink_enabled"] = bool(clean.get("auto_uoink_enabled"))
     clean["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
     clean["usage_sharing_prompt_seen"] = clean.get("usage_sharing_prompt_seen") is True
+    clean["auto_update_check"] = clean.get("auto_update_check") is True
     clean["notifications_enabled"] = bool(
         clean.get("notifications_enabled", True)
     )
@@ -1762,6 +1766,7 @@ def _public_settings(data: dict | None = None) -> dict:
         "notifications_enabled": bool(
             data.get("notifications_enabled", True)
         ),
+        "auto_update_check": data.get("auto_update_check") is True,
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
@@ -9283,6 +9288,30 @@ def _check_for_update(*, force: bool = False) -> dict:
         return result
 
 
+def _cached_update_result() -> dict:
+    """Last saved update check, read from disk with no network call and no TTL.
+    The tray and menu bar use this so they never contact GitHub themselves.
+    update_available is re-judged against the running version, so a user who
+    has just updated stops seeing the notice."""
+    try:
+        cached = json.loads(_UPDATE_CACHE_PATH.read_text(encoding="utf-8"))
+        latest = str(cached.get("latest") or "").strip().lstrip("vV")
+    except (OSError, ValueError, AttributeError):
+        cached, latest = None, ""
+    if not latest:
+        return {"current": VERSION, "latest": None, "update_available": False,
+                "url": None, "checked_at": None, "cached": False}
+    return {
+        "current": VERSION,
+        "latest": latest,
+        "update_available": _semver_tuple(latest) > _semver_tuple(VERSION),
+        "url": cached.get("url"),
+        "published_at": cached.get("published_at"),
+        "checked_at": cached.get("checked_at"),
+        "cached": True,
+    }
+
+
 # ---- Settings extras (Tier 2 dashboard Settings tab) ---------------------
 def _mask_anthropic_key(key: str) -> str | None:
     """'sk-ant-…abcd' for display; None when no key is stored."""
@@ -16284,10 +16313,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_update_check(self):
         """Notify-only update check (Tier 2). Token-gated; cached >=24h on disk.
-        `?force=1` bypasses the cache. Never downloads -- reports + links only."""
+        `?force=1` bypasses the cache. `?cached_only=1` returns the last saved
+        result with no network call (tray and menu bar). Never downloads --
+        reports + links only."""
         if not self._require_token():
             return
-        force = (parse_qs(urlparse(self.path).query).get("force") or [""])[0] == "1"
+        query = parse_qs(urlparse(self.path).query)
+        if (query.get("cached_only") or [""])[0] == "1":
+            self._send_json(200, {"ok": True, **_cached_update_result()})
+            return
+        force = (query.get("force") or [""])[0] == "1"
         self._send_json(200, {"ok": True, **_check_for_update(force=force)})
 
     def _handle_detect(self):
@@ -18677,6 +18712,7 @@ class Handler(BaseHTTPRequestHandler):
             "notifications_enabled",        # Desktop balloons; default ON
             "usage_sharing",
             "usage_sharing_prompt_seen",
+            "auto_update_check",            # daily GitHub release check (default OFF)
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)

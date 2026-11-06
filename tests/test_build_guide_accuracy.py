@@ -77,6 +77,7 @@ def test_public_docs_do_not_claim_an_unshipped_macos_app() -> None:
         "cdn.syndication.twimg.com",
         "api.github.com",
         "user-supplied web page or podcast feed",
-        "only when you click **Check now**",
+        "only when you click **Check now** or turn",
+        "daily update check (off by default)",
     ):
         assert required_claim in privacy
