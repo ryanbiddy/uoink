@@ -29,7 +29,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from source_subscriptions_fixtures import (  # noqa: E402
     Clock, FakeAdapter, FakeBackend, MINUTE_MS, make_service, rows, snapshot, starts, status,
-    turn_on,
+    turn_off, turn_on,
 )
 
 import index as index_mod  # noqa: E402
@@ -131,6 +131,10 @@ def test_scheduler_tick_polls_only_due_sources_and_never_captures_from_detection
     adapter = FakeAdapter([snapshot(["new"], titles={"new": "Fresh episode"})])
     backend = FakeBackend()
     service = make_service(idx, clock=clock, adapter=adapter, backend=backend)
+    # These feeds were consented before automatic capture was turned off.
+    for feed in (due, future):
+        turn_on(service, feed["source_id"])
+        turn_off(service, feed["source_id"])
     with idx.write_transaction() as conn:
         # The subscription cursor is the only scheduling authority: the future
         # source is not due for half an hour, while the due feed's legacy
@@ -265,13 +269,13 @@ def test_scheduler_advances_capture_only_through_the_ledger_for_a_consented_sour
 
     results = server._podcast_feed_scheduler_tick()
 
-    # Detection ran for both due sources; only the consented one enrolled.
+    # An unconsented podcast is not polled, even when its cursor is due.
     by_source = {r["source_id"]: r for r in results}
-    assert set(by_source) == {on_feed["source_id"], off_feed["source_id"]}
+    assert set(by_source) == {on_feed["source_id"]}
+    assert [call["source_id"] for call in adapter.calls] == [on_feed["source_id"]]
     assert all(r["ok"] is True and r["inserted"] == 2 for r in results)
     enrollment = by_source[on_feed["source_id"]]["enrollment"]
     assert enrollment["boundary"] == "initial" and enrollment["enrolled"] == 2
-    assert by_source[off_feed["source_id"]]["enrollment"] is None
     assert toasts == [("New source items", "2 new item(s) discovered from a watched source.")]
     # The capture pass started exactly one item, for the consented source only,
     # through a charged ledger row (never from the poll itself).
@@ -283,8 +287,7 @@ def test_scheduler_advances_capture_only_through_the_ledger_for_a_consented_sour
     assert server._heartbeat_payload()["counts"]["ingests"] == ingests_before + 1
     off_items = rows(service, "SELECT state, eligibility FROM source_items WHERE source_id=?",
                      (off_feed["source_id"],))
-    assert len(off_items) == 2
-    assert all(r["state"] == "observed" and r["eligibility"] == "none" for r in off_items)
+    assert off_items == []
 
     # Within the interval nothing is due and the start clock holds: at most
     # one new start per source per configured interval.

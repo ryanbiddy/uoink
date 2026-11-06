@@ -36,14 +36,19 @@ def test_research_tab_and_accessible_controls():
     assert 'research: "research"' in PAGE and "wireResearch();" in PAGE
 
 
-def test_network_chips_are_disabled_until_consent():
+def test_network_chips_are_the_consent_controls():
     chips = {attrs["data-research-source"]: attrs for _, attrs in Markup().tags if "data-research-source" in attrs}
     assert set(chips) == {"library", "youtube", "podcast", "hn", "hackertube", "reddit"}
     assert "checked" in chips["library"] and "disabled" not in chips["library"]
     assert all("disabled" in attrs for kind, attrs in chips.items() if kind != "library")
     assert "Reddit · coming later" in PAGE
+    form = PAGE.split('id="researchForm"', 1)[1].split("</form>", 1)[0]
     for kind in ("youtube", "podcast", "hn", "hackertube"):
+        assert chips[kind]["data-research-consent"] == kind
+        assert form.count(f'data-research-consent="{kind}"') == 1
         assert PAGE.count(f'data-research-consent="{kind}"') == 2
+    assert "Allow YouTube" not in form
+    assert "Selecting a source allows" in form
     assert "saveSettingsPatch({ research_network_sources: enabled }, id, renderResearchConsent)" in SCRIPT
     assert 'id="settings-research"' in PAGE
 
@@ -65,5 +70,21 @@ def test_untrusted_run_text_never_enters_html_and_links_are_allowlisted():
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is unavailable")
 def test_research_behavior_in_node():
     result = subprocess.run(["node", str(ROOT / "tests/js/research_dashboard_test.mjs")],
+                            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=25)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is unavailable")
+def test_research_saved_and_new_sources_have_separate_actions():
+    result = subprocess.run(["node", str(ROOT / "tests/js/research_dashboard_test.mjs"), "source_actions"],
+                            cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=25)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node is unavailable")
+@pytest.mark.parametrize("case", ["mixed_selection", "mixed_saved_guard", "saved_only",
+                                 "completed_selection", "action_visibility", "skipped_sources"])
+def test_research_source_action_regressions(case):
+    result = subprocess.run(["node", str(ROOT / "tests/js/research_dashboard_test.mjs"), case],
                             cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=25)
     assert result.returncode == 0, result.stdout + result.stderr

@@ -295,28 +295,32 @@ PASTE_SETUP = """
       applyDetection({ok: true, source: "web_page", label: "Article / web page", endpoint: "/extract/page",
         payload_key: "url", canonical: "https://www.example.com/post", note: ""});
       const allow = els.universalCaptureAllow;
-      const shown = () => ({text: allow.textContent, hidden: allow.classList.contains("hidden"),
+      const shown = () => ({text: allow.textContent, hidden: allow.classList.contains("permission-hidden"),
         disabled: allow.disabled, note: els.universalCaptureNote.textContent});
 """
 
 
-def test_paste_box_offers_allow_host_then_captures_again():
+def test_paste_box_allowlist_fallback_waits_for_a_capture_click():
     out = run_js("(async () => {" + PASTE_SETUP + """
       await runUniversalCapture();
       const wall = {...shown(), toasts: [...toasts]};
       await allowUniversalCaptureSite();
-      return {wall, after: shown(), calls, toasts};
+      const afterAllow = calls.filter((c) => c[0] === "/extract/page").length;
+      await runUniversalCapture();
+      return {wall, after: shown(), afterAllow, calls, toasts};
     })()""")
     wall = out["wall"]
-    assert wall["text"] == "Allow www.example.com" and wall["hidden"] is False
+    assert wall["text"] == "Allow" and wall["hidden"] is False
     assert wall["note"] == "That site isn't on your allowed pages list yet. Allow it to capture this page."
     assert wall["toasts"] == []
-    # The same call Settings' Add makes, then the same link again.
+    assert out["afterAllow"] == 1
+    # The same call Settings' Add makes, then the same link again and refresh the last save.
     assert out["calls"] == [
         ["/extract/page", "POST", {"url": "https://www.example.com/post"}],
         ["/extract/page/allowlist", "POST", {"action": "add", "url_pattern": "www.example.com"}],
         ["/extract/page/allowlist", "GET", None],
         ["/extract/page", "POST", {"url": "https://www.example.com/post"}],
+        ["/resume", "GET", None],
     ]
     assert out["toasts"] == ["Uoinking that article / web page. Track it in Activity."]
     assert out["after"]["hidden"] is True
@@ -334,19 +338,120 @@ def test_paste_box_allow_failure_keeps_the_offer_and_says_why():
     })()""")
     failed = out["failed"]
     assert failed["note"].startswith("Couldn't allow www.example.com: allowlist write failed")
-    assert failed["text"] == "Allow www.example.com" and failed["hidden"] is False and failed["disabled"] is False
+    assert failed["text"] == "Allow" and failed["hidden"] is False and failed["disabled"] is False
     assert out["captures"] == 1
     assert out["next"]["hidden"] is True
 
 
 def test_paste_box_markup_wiring_and_shared_copy():
     row = _between(DASHBOARD, '<div class="universal-capture" id="universalCapture">', "</div>\n          <div")
-    assert ('<button class="button hidden" type="button" id="universalCaptureAllow" '
-            'aria-describedby="universalCaptureNote"></button>') in row
+    assert ('<button class="button permission-hidden" type="button" id="universalCaptureAllow" '
+            'aria-describedby="universalCaptureNote">Allow</button>') in row
+    assert "visibility: hidden" in _between(DASHBOARD, "#universalCaptureAllow.permission-hidden {", "}")
     assert 'els.universalCaptureAllow.addEventListener("click", allowUniversalCaptureSite);' in DASHBOARD
     # One wording for the wall; "Add it in Settings" is only the no-host fallback.
     assert DASHBOARD.count("Add it in Settings, then try again.") == 1
     assert "run.reason = allowlistWallCopy(run.allowHost);" in DASHBOARD
+
+
+def test_page_permission_is_offered_before_the_first_capture_click():
+    out = run_js("(async () => {" + PASTE_SETUP + """
+      walls = 0;
+      applyDetection({ok: true, source: "web_page", label: "Article / web page", endpoint: "/extract/page",
+        canonical: "https://www.example.com/post", needs_allow: true});
+      const before = {...shown(), captureDisabled: els.universalCaptureButton.disabled};
+      await runUniversalCapture();
+      const beforeAllow = [...calls];
+      await allowUniversalCaptureSite();
+      const allowed = {...shown(), captureDisabled: els.universalCaptureButton.disabled,
+        focused: els.universalCaptureButton.focused, calls: [...calls]};
+      await runUniversalCapture();
+      return {before, beforeAllow, allowed, calls};
+    })()""")
+    assert out["before"]["hidden"] is False
+    assert out["before"]["captureDisabled"] is True
+    assert out["beforeAllow"] == []
+    assert out["allowed"]["hidden"] is True
+    assert out["allowed"]["captureDisabled"] is False
+    assert out["allowed"]["focused"] == 1
+    assert all(call[0] == "/extract/page/allowlist" for call in out["allowed"]["calls"])
+    assert out["calls"] == out["allowed"]["calls"] + [
+        ["/extract/page", "POST", {"url": "https://www.example.com/post"}],
+        ["/resume", "GET", None],
+    ]
+
+
+def test_changing_or_clearing_a_link_cannot_use_stale_detection_or_permission():
+    out = run_js("(async () => {" + PASTE_SETUP + """
+      let finish;
+      detectCaptureUrl = () => new Promise((resolve) => { finish = resolve; });
+      els.universalCaptureInput.value = "https://old.example/post";
+      const pending = runCaptureDetection();
+      els.universalCaptureInput.value = "";
+      await runCaptureDetection();
+      finish({ok: true, endpoint: "/extract/page", canonical: "https://old.example/post", needs_allow: true});
+      await pending;
+      await runUniversalCapture();
+      const cleared = {...shown(), captureDisabled: els.universalCaptureButton.disabled};
+      applyDetection({ok: true, endpoint: "/extract/page", canonical: "https://old.example/post", needs_allow: true});
+      saveAllowedSite = () => new Promise((resolve) => { finish = resolve; });
+      const saving = allowUniversalCaptureSite();
+      els.universalCaptureInput.value = "https://new.example/post";
+      scheduleCaptureDetection();
+      await runUniversalCapture();
+      finish(); await saving;
+      return {cleared, changed: shown(), captureDisabled: els.universalCaptureButton.disabled, calls};
+    })()""")
+    assert out["cleared"]["hidden"] is True and out["cleared"]["captureDisabled"] is True
+    assert out["changed"]["hidden"] is True and out["captureDisabled"] is True
+    assert out["calls"] == []
+
+
+@pytest.mark.parametrize("host", ["www.example.com", "other.example.com"])
+def test_allow_result_follows_the_current_host_after_another_paste(host):
+    out = run_js("(async () => {" + PASTE_SETUP + """
+      walls = 0;
+      detectCaptureUrl = async (url) => ({ok: true, source: "web_page", label: "Article / web page",
+        endpoint: "/extract/page", canonical: url, needs_allow: true});
+      els.universalCaptureInput.value = "https://www.example.com/first";
+      await runCaptureDetection();
+      let finish;
+      const save = saveAllowedSite;
+      saveAllowedSite = async (host) => {
+        await new Promise((resolve) => { finish = resolve; });
+        await save(host);
+      };
+      const saving = allowUniversalCaptureSite();
+      els.universalCaptureInput.value = "https://""" + host + """/second";
+      scheduleCaptureDetection();
+      await runCaptureDetection();
+      const pending = {...shown(), captureDisabled: els.universalCaptureButton.disabled};
+      finish(); await saving;
+      const settled = {...shown(), captureDisabled: els.universalCaptureButton.disabled,
+        focused: els.universalCaptureButton.focused};
+      const beforeClick = [...calls];
+      await runUniversalCapture();
+      return {pending, settled, beforeClick, calls};
+    })()""")
+    same_host = host == "www.example.com"
+    assert out["pending"]["hidden"] is False
+    assert out["pending"]["captureDisabled"] is True
+    assert out["settled"]["hidden"] is same_host
+    assert out["settled"]["captureDisabled"] is not same_host
+    assert out["settled"]["focused"] == 0
+    assert out["beforeClick"] == [
+        ["/extract/page/allowlist", "POST", {"action": "add", "url_pattern": "www.example.com"}],
+        ["/extract/page/allowlist", "GET", None],
+    ]
+    if same_host:
+        assert out["settled"]["note"] == "Site allowed. Click Uoink it to capture this page."
+        assert out["calls"] == out["beforeClick"] + [
+            ["/extract/page", "POST", {"url": "https://www.example.com/second"}],
+            ["/resume", "GET", None],
+        ]
+    else:
+        assert out["settled"]["note"] == out["pending"]["note"]
+        assert out["calls"] == out["beforeClick"]
 
 
 # ---- F4: Settings jumps --------------------------------------------------------------

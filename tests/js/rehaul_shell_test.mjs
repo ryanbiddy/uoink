@@ -1,5 +1,5 @@
 // Dashboard shell harness (UI re-haul, SPEC "Dashboard IA"): hash routes
-// with a working Back, the Activity "N failed" badge, and the OS-correct
+// with a working Back, the Activity capture count, and the OS-correct
 // helper status at the bottom of the sidebar.
 //
 // Runs the REAL dashboard script (everything before init()) in a node:vm
@@ -36,9 +36,9 @@
 //   links   -- in-app hash links (#for-you, #activity, #settings/<x>) push
 //              one entry and are not also followed by the browser; a bare
 //              "#", an unknown hash and a ctrl-click are left alone
-//   badge   -- Activity's badge says "N failed" for failed jobs plus failed
-//              queue rows (one per video, cancelled work excluded), names it
-//              in the nav button's label, and hides at zero
+//   badge   -- Activity counts active and failed captures once per video,
+//              excludes cancelled work, and names failures in its tooltip
+//              and the nav button's label
 //   status  -- the sidebar says "Running on this PC" (Mac, computer), and
 //              offline says how to start Uoink: the Start menu on Windows;
 //              on macOS and Linux, where no build ships, that Uoink is
@@ -1051,8 +1051,8 @@ async function groupLinks() {
 async function groupBadge() {
   await scenario("Activity says how many captures failed", async () => {
     const p = makePage();
-    const badge = p.els.activityFailedBadge;
-    check(Boolean(badge) && badge.classList.contains("hidden"), "the badge ships hidden inside the Activity nav item", badge && [...badge.classList._set]);
+    const badge = p.els.activityNavCount;
+    check(Boolean(badge) && !badge.classList.contains("nav-failed"), "the count ships without a failure outline", badge && [...badge.classList._set]);
     check(badge.closest("button") === p.nav("activity"), "the badge sits in the Activity nav button", describe(badge.closest("button")));
     p.state.jobs = [
       { id: "j1", state: "failed", video_id: "aaaaaaaaaaa", title: "A" },
@@ -1068,20 +1068,20 @@ async function groupBadge() {
         { pending_id: "p3", status: "queued", video_id: "fffffffffff" },
       ],
     });
-    check(badge.textContent === "3 failed" && !badge.classList.contains("hidden"), "two failed jobs plus one other failed queue row read 3 failed", badge.textContent);
-    check(badge.title === "3 failed captures in Activity", "the badge says what it counts", badge.title);
-    check(p.els.activityNavCount.textContent === "2", "the in-flight count still counts running and queued work", p.els.activityNavCount.textContent);
-    check(p.nav("activity").getAttribute("aria-label") === "Activity, 2 active jobs, 3 failed", "the nav item's name says it in words", p.nav("activity").getAttribute("aria-label"));
+    check(badge.classList.contains("nav-failed"), "failures mark the single capture count", [...badge.classList._set]);
+    check(badge.title === "5 captures in progress or needing attention, 3 failed", "the tooltip explains the total and the failures", badge.title);
+    check(p.els.activityNavCount.textContent === "5", "the count includes running, queued and failed captures", p.els.activityNavCount.textContent);
+    check(p.nav("activity").getAttribute("aria-label") === "Activity, 5 captures in progress or needing attention, 3 failed", "the nav item's name says it in words", p.nav("activity").getAttribute("aria-label"));
 
     p.state.jobs = [{ id: "j3", state: "cancelled", video_id: "ccccccccccc" }];
     p.page.renderQueue({ ok: true, pending: [] });
-    check(badge.textContent === "" && badge.classList.contains("hidden"), "no failures, no badge (cancelled is not a failure)", [badge.textContent, [...badge.classList._set]]);
-    check(p.nav("activity").getAttribute("aria-label") === "Activity, 0 active jobs", "the nav item's name drops the failures", p.nav("activity").getAttribute("aria-label"));
+    check(badge.textContent === "0" && !badge.classList.contains("nav-failed"), "cancelled work clears the count and failure outline", [badge.textContent, [...badge.classList._set]]);
+    check(p.nav("activity").getAttribute("aria-label") === "Activity, 0 captures in progress or needing attention", "the nav item's name drops the failures", p.nav("activity").getAttribute("aria-label"));
 
     p.state.jobs = [{ id: "j5", state: "failed", url: "https://example.com/post", title: "Post" }];
     p.page.renderQueue({});
-    check(badge.textContent === "1 failed" && badge.title === "1 failed capture in Activity", "one failure reads 1 failed", [badge.textContent, badge.title]);
-    check(p.nav("activity").getAttribute("aria-label") === "Activity, 0 active jobs, 1 failed", "the name is rebuilt, not appended twice", p.nav("activity").getAttribute("aria-label"));
+    check(badge.textContent === "1" && badge.title === "1 capture in progress or needing attention, 1 failed", "one failure counts once and is named on hover", [badge.textContent, badge.title]);
+    check(p.nav("activity").getAttribute("aria-label") === "Activity, 1 capture in progress or needing attention, 1 failed", "the name is rebuilt, not appended twice", p.nav("activity").getAttribute("aria-label"));
   });
 }
 

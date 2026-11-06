@@ -1,6 +1,6 @@
 """UI re-haul: the dashboard shell (SPEC "Dashboard IA").
 
-Nav (6): Library, Activity (badge "N failed" when > 0), Generate, Research, Sources,
+Nav (6): Library, Activity (one count, failures named on hover), Generate, Research, Sources,
 Settings. The helper status sits at the bottom of the sidebar ("Running on
 this PC" with a dot; offline says what to do on this OS). About and Star on
 GitHub moved into Settings > App > About, Stop Uoink into Settings > App with
@@ -28,8 +28,8 @@ popstate/hashchange on Back and Forward:
              on; every action stays off; moving elsewhere meanwhile wins
   links   -- in-app hash links push once; "#", unknown hashes and
              ctrl-clicks are left to the browser
-  badge   -- "N failed" counts failed jobs plus failed queue rows (one per
-             video, cancelled excluded) and hides at zero
+  badge   -- one count includes active and failed captures (one per video,
+             cancelled excluded), with failures named in the tooltip and label
   status  -- "Running on this PC/Mac/computer"; offline copy per OS (the
              Start menu on Windows; Mac and Linux, where no build ships,
              name the source run)
@@ -114,17 +114,12 @@ def test_nav_includes_research_with_the_existing_items_in_order():
 
 def test_activity_nav_item_says_how_many_failed():
     activity = re.search(r'<button[^>]*data-tab-button="activity".*?</button>', MARKUP, re.S).group(0)
-    assert '<span class="nav-failed hidden" id="activityFailedBadge"></span>' in activity
-    assert 'id="activityNavCount"' in activity
-    badge = _between(SCRIPT, "function setActivityFailedBadge(count)", "function setLibraryEmptyState(")
-    assert "`${failed} failed`" in badge
-    assert 'el.classList.toggle("hidden", failed === 0)' in badge
-    assert 'button.setAttribute("aria-label", failed ? `${base}, ${failed} failed` : base)' in badge
+    assert re.findall(r'<span[^>]*id="([^"]+)"', activity) == ["activityNavCount"]
     render = _between(SCRIPT, "function renderQueue(data)", "function completedTodayRows()")
-    assert ('setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length'
-            " + queueFailedDeduped.length)") in render
-    # The word carries the state; the badge text uses the small-text accent
-    # and its outline the --fail token (status is never colour alone).
+    assert 'failedCount ? `, ${failedCount} failed` : ""' in render
+    assert 'els.activityNavCount.classList.toggle("nav-failed", failedCount > 0)' in render
+    assert 'setSidebarBadge(els.activityNavCount, activeCount + failedCount,' in render
+    # The tooltip and accessible label name failures alongside the outline.
     rule = _between(CSS, ".nav-failed {", "}")
     assert "color: var(--rust-bright);" in rule
     assert "border: 1px solid var(--fail);" in rule
@@ -279,8 +274,8 @@ def test_hash_routes_and_back_are_wired():
     # renders (never an id-only stand-in with no folder or topic).
     apply = _between(SCRIPT, "function applyRoute(route)", "function applyHashRoute()")
     assert "const row = knownLibraryRow(route.id);" in apply
-    assert "else openItemFromRoute(route.id);" in apply
-    lookup = _between(SCRIPT, "async function openItemFromRoute(id)", "async function openYoinkDetail(")
+    assert "else openItemFromRoute(route.id, route);" in apply
+    lookup = _between(SCRIPT, "async function openItemFromRoute(id, options = {})", "async function openYoinkDetail(")
     assert "const wanted = () => state.selectedYoinkRequest === request && currentRoute === hash;" in lookup
     assert "row = await findLibraryRow(id, wanted);" in lookup
     assert "if (!wanted()) return;" in lookup
@@ -300,7 +295,7 @@ def test_item_lookup_never_reads_a_partial_search_as_not_found():
     # found". Absence now comes only from the helper's answer for the id or
     # from reading every page; anything short of that is an error.
     assert "ITEM_LOOKUP_PAGES" not in SCRIPT
-    find = _between(SCRIPT, "async function findLibraryRow(id, wanted = () => true)", "async function openItemFromRoute(id)")
+    find = _between(SCRIPT, "async function findLibraryRow(id, wanted = () => true)", "async function openItemFromRoute(id, options = {})")
     assert "if (itemNotSaved(err)) return null;" in find
     assert "const byTitle = await scanLibraryFor(id, { q: title }, 0, wanted);" in find
     assert "return scanLibraryFor(id, {}, ITEM_LOOKUP_PAGE, wanted, first.total);" in find

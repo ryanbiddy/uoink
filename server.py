@@ -40,6 +40,7 @@ import urllib.request
 import uuid
 import webbrowser
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -8123,7 +8124,10 @@ def _source_name_from_error(text: str) -> str:
 
 
 def _plain_error_from_text(text: str) -> str:
-    lower = text.lower()
+    # Command flags describe the request, not why the source refused it.
+    errors = [line.strip() for line in text.splitlines()
+              if line.strip().upper().startswith("ERROR:")]
+    lower = (errors[-1] if errors else text).lower()
     source = _source_name_from_error(text)
     if ("too many requests" in lower or "http error 429" in lower
             or "rate-limit" in lower or "rate limit" in lower):
@@ -8136,9 +8140,13 @@ def _plain_error_from_text(text: str) -> str:
         return f"{source} wouldn't hand this one over without a login. Retry with cookies?"
     if "members-only" in lower or "members only" in lower:
         return f"{source} kept this one behind members-only access."
-    if ("video unavailable" in lower or "this video is private" in lower
+    if any(text in lower for text in (
+            "video unavailable", "video is unavailable", "video is not available",
+            "video isn't available", "video has been removed", "video is no longer available")):
+        return "This video is unavailable."
+    if ("this video is private" in lower
             or " private" in lower or "region" in lower):
-        return f"{source} did not expose a usable video for this source."
+        return "This video is private or unavailable in your region."
     if "is live" in lower or "premiere" in lower:
         return f"{source} is still live. Try again once the broadcast becomes a replay."
     if "ffmpeg" in lower:
@@ -9677,6 +9685,7 @@ def _public_job(job: dict) -> dict:
     if kind == "podcast_transcribe":
         public.update({
             "episode_id": job.get("episode_id"),
+            "artwork_url": job.get("artwork_url"),
             "model": job.get("model"),
             "language": job.get("language"),
             "diarize": job.get("diarize"),
@@ -10767,6 +10776,7 @@ def _queue_podcast_transcription(
                         "reused_existing": True}, 202
     job = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
+        "artwork_url": podcasts.episode_artwork_url(_get_index(), episode_id),
         "source_url": episode.get("episode_page_url"),
         "title": episode.get("title") or "Untitled episode",
         "playlist_title": None, "session_folder": None,
@@ -11794,6 +11804,13 @@ def _source_availability_tick() -> None:
             _source_availability_lock.release()
 
 
+def _repair_podcast_titles_at_boot() -> None:
+    try:
+        podcasts.repair_feed_titles(_get_index(), data_root=DATA_ROOT)
+    except Exception:
+        log.exception("podcast title repair could not finish")
+
+
 def _start_podcast_feed_scheduler_thread() -> threading.Thread:
     """Run the standing-source scheduler every 30 seconds on a daemon thread.
     The tick only scans due rows; outbound polls follow each source's own
@@ -12470,6 +12487,36 @@ def _image_dimensions(path: Path) -> tuple[int | None, int | None]:
     return None, None
 
 
+@lru_cache(maxsize=2048)
+def _screenshot_mean_luma(path: str, mtime_ns: int, size: int) -> float:
+    """Cache successful samples until the file changes; failures propagate
+    so a later request can retry. Runs in the helper's request thread."""
+    from PIL import Image, ImageStat
+    with Image.open(path) as image:
+        image.draft("L", (64, 64))
+        image.thumbnail((32, 32), Image.Resampling.BOX)
+        return ImageStat.Stat(image.convert("L")).mean[0]
+
+
+def _screenshot_is_near_black(path: Path, folder: Path) -> bool:
+    """Only inspect this capture's files; an unreadable frame stays visible."""
+    try:
+        if _path_has_parent_ref(str(path)):
+            return False
+        resolved = path.resolve()
+        resolved.relative_to(folder.resolve())
+        stat = resolved.stat()
+        if stat.st_size > MAX_SERVED_FILE_BYTES:
+            return False
+        luma = _screenshot_mean_luma(str(resolved), stat.st_mtime_ns, stat.st_size)
+    except ImportError:
+        log.warning("Cannot skip dark screenshots: Pillow is unavailable. Install Pillow or rebuild the app.")
+        return False
+    except Exception:
+        return False
+    return luma < 8
+
+
 def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
     """Build the picker payload for a yoink: every available screenshot with
     its absolute path, a /file URL the dashboard can render, the capture
@@ -12540,6 +12587,7 @@ def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
     # drift). Derive the timestamp from the shot number when we know the
     # interval so the picker still labels them.
     if shots_dir and shots_dir.is_dir():
+        next_index = max((entry["index"] for entry in entries), default=-1) + 1
         for p in sorted(shots_dir.glob("shot_*.jpg")):
             if p.name in seen:
                 continue
@@ -12547,7 +12595,13 @@ def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
             shot_no = int(match.group(1)) if match else (len(entries) + 1)
             ts_secs = ((shot_no - 1) * interval) if interval is not None else None
             ts_human = fmt_time(ts_secs) if ts_secs is not None else None
-            entries.append(_entry(p.name, len(entries), ts_human, ts_secs, p))
+            entries.append(_entry(p.name, next_index, ts_human, ts_secs, p))
+            next_index += 1
+
+    # Filter after assigning IDs so the picker, suggestions and image route
+    # still refer to the same saved frame when an earlier one is dark.
+    entries = [entry for entry in entries
+               if not _screenshot_is_near_black(Path(entry["path"]), folder)]
 
     return {
         "video_id": video_id,
@@ -12863,7 +12917,9 @@ def _agent_client_specs() -> list[dict]:
             "config_path": appdata / "Claude" / "claude_desktop_config.json",
             "markers": [appdata / "Claude",
                         local / "AnthropicClaude",
-                        local / "Programs" / "claude"],
+                        local / "Programs" / "claude"] + (
+                            [Path("/Applications/Claude.app"), home / "Applications/Claude.app"]
+                            if sys.platform == "darwin" else []),
         },
         {
             "name": "cursor",
@@ -14539,6 +14595,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "entity_count": r.get("entity_count", 0),
             "top_entities": r.get("top_entities", []),
             "thumbnail_path": thumbnail_path,
+            "artwork_url": source_subscriptions._http_link(live.get("artwork_url") or metadata.get("artwork_url")),
             "original_thumbnail_path": original_thumbnail_path,
             "card_image_source": card_image_source,
             "import_origin": list_imports.public_origin(
@@ -14562,7 +14619,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "has_transcript": bool(transcript),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
-    return out
+    return podcasts.repair_corpus_titles(idx, out, data_root=DATA_ROOT)
 
 
 # ---------------------------------------------------------------------------
@@ -15049,7 +15106,7 @@ def _resurface_payload(idx) -> dict:
 
     connections = []
     for topic, group in by_topic.items():
-        if len(group) < 2:
+        if topic.casefold() == "uncategorized" or len(group) < 2:
             continue
         pair = sorted(group, key=lambda r: index.capture_sort_key(r.get("yoinked_at")),
                       reverse=True)[:2]
@@ -16171,12 +16228,14 @@ class Handler(BaseHTTPRequestHandler):
         Classifies a pasted URL into one capture source and tells the
         dashboard which route + payload key to use. Reuses
         _classify_capture_url so detection stays glued to what the capture
-        routes actually accept. No user data, but token-gated like the rest
-        of the mutating/reading surface (the dashboard already carries the
-        token). Always 200: an unsupported URL is a valid answer, not an
-        error."""
+        routes actually accept. Reads local site permissions without
+        fetching the page. Token-gated like the rest of the reading surface.
+        Always 200: an unsupported URL is a valid answer, not an error."""
         raw = (parse_qs(urlparse(self.path).query).get("url") or [""])[0]
         result = _classify_capture_url(raw)
+        if result.get("endpoint") == "/extract/page":
+            result["needs_allow"] = not page_extractor.host_is_allowed(
+                _get_index(), result["canonical"])
         self._send_json(200, result)
 
     # ---- v2.5 S2 engagement memory -----------------------------------------
@@ -17269,6 +17328,8 @@ class Handler(BaseHTTPRequestHandler):
             row = podcasts.add_feed(_get_index(), feed_url,
                                        poll_interval_min=int(interval),
                                        auto_ingest=auto_ingest)
+            if not row.get("title"):
+                row["title"] = urlparse(row["feed_url"]).hostname
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:
@@ -20236,10 +20297,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
         shots = payload.get("screenshots") or []
-        if index < 0 or index >= len(shots):
+        shot = next((shot for shot in shots if shot["index"] == index), None)
+        if shot is None:
             return self._send_json(404, {
                 "ok": False, "error": "screenshot index out of range"})
-        path, mime, status, error = _resolve_served_file(shots[index]["path"])
+        path, mime, status, error = _resolve_served_file(shot["path"])
         if error:
             return self._send_json(status, {"ok": False, "error": error})
         return self._send_file(path, mime)
@@ -20488,6 +20550,12 @@ class Handler(BaseHTTPRequestHandler):
                                          "error": "sidecar JSON must be an object"})
 
         # Return only saved fields needed by the dashboard
+        if row.get("platform") == "podcast" or row.get("source_type") == "episode":
+            repaired = podcasts.repair_corpus_titles(
+                _get_index(), [dict(row)], data_root=DATA_ROOT)[0]
+            data.update({key: repaired[key] for key in ("podcast_title", "channel", "author")
+                         if key in repaired and str(data.get(key) or "").strip().casefold()
+                         in ("", "untitled podcast")})
         allowed_scalar_keys = (
             "video_id", "youtube_id", "url", "source_url", "platform",
             "source_platform", "media_type", "content_type", "kind",
@@ -20581,6 +20649,19 @@ class Handler(BaseHTTPRequestHandler):
                               "width", "height"):
                         if k in shot and isinstance(shot[k], (str, int, float, bool)):
                             clean_shot[k] = shot[k]
+                    # Relative paths survive a moved or synced capture folder.
+                    raw_path = clean_shot.get("path")
+                    if not isinstance(raw_path, str) or not raw_path or Path(raw_path).is_absolute():
+                        filename = clean_shot.get("filename")
+                        raw_path = (str(Path("screenshots") / filename)
+                                    if isinstance(filename, str) and filename else
+                                    clean_shot.get("absolute_path") or clean_shot.get("file_path") or raw_path)
+                    if isinstance(raw_path, str):
+                        shot_path = Path(raw_path)
+                        if not shot_path.is_absolute():
+                            shot_path = resolved.parent / shot_path
+                        if _screenshot_is_near_black(shot_path, resolved.parent):
+                            continue
                     clean_shots.append(clean_shot)
             filtered["screenshots"] = clean_shots
 
@@ -22489,6 +22570,8 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # renamed/moved library heals on launch instead of failing action by
     # action while /health smiles.
     _heal_stale_corpus_paths_at_boot()
+    threading.Thread(target=_repair_podcast_titles_at_boot,
+                     name="podcast-titles", daemon=True).start()
     # Hydrate the in-memory job dict from the index (no worker starts here).
     _restore_jobs_from_disk()
     # Phase 3 (run AM): import the legacy registries once and reconcile the

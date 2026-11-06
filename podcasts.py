@@ -901,6 +901,138 @@ def get_episode_with_feed(idx, episode_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def _channel_title(value) -> str:
+    title = value.strip() if isinstance(value, str) else ""
+    return "" if title.casefold() == "untitled podcast" else title
+
+
+def _title_metadata(value) -> dict:
+    try:
+        parsed = json.loads(value or "{}")
+    except (TypeError, ValueError):
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
+def _fill_channel_title(record: dict, title: str) -> bool:
+    changed = False
+    for key in ("channel", "author", "podcast_title"):
+        if not _channel_title(record.get(key)):
+            record[key] = title
+            changed = True
+    return changed
+
+
+def _local_feed_titles(idx, rows: list[dict], *, data_root: Path | None = None) -> tuple[dict, dict]:
+    ids = list(dict.fromkeys(row["video_id"] for row in rows if row.get("video_id")))
+    with idx._lock:
+        titles = {r["feed_url"]: _channel_title(r["title"])
+                  for r in idx._conn.execute("SELECT feed_url, title FROM podcast_feeds")}
+        links = dict(idx._conn.execute(
+            "SELECT e.yoink_video_id, f.feed_url FROM podcast_episodes e "
+            "JOIN podcast_feeds f ON f.id=e.feed_id "
+            f"WHERE e.yoink_video_id IN ({','.join('?' for _ in ids)})", ids).fetchall()) if ids else {}
+        observations = (idx._conn.execute(
+            "SELECT s.source_key, s.canonical_url, s.display_name, i.video_id, i.metadata_json "
+            "FROM source_subscriptions s LEFT JOIN source_items i ON i.source_id=s.source_id "
+            "WHERE s.kind='podcast_rss'").fetchall() if _subscriptions().tables_present(idx._conn) else [])
+    for obs in observations:
+        url = obs["source_key"]
+        if obs["video_id"]:
+            links.setdefault(obs["video_id"], url)
+        if not titles.get(url):
+            titles[url] = _channel_title(_title_metadata(obs["metadata_json"]).get("feed_title"))
+    for obs in observations:
+        if not titles.get(obs["source_key"]) and obs["display_name"] not in (obs["canonical_url"], obs["source_key"]):
+            titles[obs["source_key"]] = _channel_title(obs["display_name"])
+    root = Path(data_root if data_root is not None else Path(idx._path).parent).resolve()
+    for row in rows:
+        metadata = _title_metadata(row.get("metadata_json"))
+        url = links.get(row.get("video_id")) or metadata.get("feed_url") or row.get("feed_url")
+        if url:
+            links[row["video_id"]] = url
+        if titles.get(url):
+            continue
+        title = _channel_title(row.get("podcast_title")) or _channel_title(metadata.get("podcast_title"))
+        if not title and row.get("sidecar_path"):
+            try:
+                path = Path(row["sidecar_path"]).resolve()
+                if path.is_relative_to(root) and path.is_file():
+                    sidecar = _title_metadata(path.read_text(encoding="utf-8"))
+                    if sidecar.get("video_id", row.get("video_id")) == row.get("video_id"):
+                        title = _channel_title(sidecar.get("podcast_title"))
+            except (OSError, UnicodeError, ValueError):
+                pass
+        if title:
+            # A row without a feed link can still display its saved show name.
+            titles[url or row["video_id"]] = title
+    return links, titles
+
+
+def repair_corpus_titles(idx, rows: list[dict], *, data_root: Path | None = None) -> list[dict]:
+    """Fill placeholder show names in response copies using local metadata only.
+
+    Saved rows and media snapshots remain untouched, including on read-only indexes.
+    """
+    rows = [dict(row) for row in rows]
+    candidates = [row for row in rows if row.get("video_id")
+                  and (row.get("platform") == "podcast" or row.get("source_type") == "episode"
+                       or (not row.get("platform") and not row.get("source_type")
+                           and not _channel_title(row.get("channel"))))]
+    if not candidates:
+        return rows
+    links, titles = _local_feed_titles(idx, candidates, data_root=data_root)
+    for row in candidates:
+        title = titles.get(links.get(row["video_id"]) or row["video_id"])
+        if title:
+            _fill_channel_title(row, title)
+            if "metadata_json" in row:
+                metadata = _title_metadata(row["metadata_json"])
+                _fill_channel_title(metadata, title)
+                row["metadata_json"] = json.dumps(metadata, ensure_ascii=False)
+    return rows
+
+
+def repair_feed_titles(idx, *, data_root: Path | None = None) -> None:
+    """Recover placeholder feed labels from local records, never saved media."""
+    with idx._lock:
+        rows = [dict(r) for r in idx._conn.execute(
+            "SELECT * FROM yoinks WHERE deleted_at IS NULL "
+            "AND (platform='podcast' OR source_type='episode')")]
+        managed = _subscriptions().tables_present(idx._conn)
+    _, titles = _local_feed_titles(idx, rows, data_root=data_root)
+    with idx.write_transaction() as conn:
+        for url, title in titles.items():
+            if not title:
+                continue
+            conn.execute("UPDATE podcast_feeds SET title=? WHERE feed_url=? "
+                         "AND lower(trim(coalesce(title,''))) IN ('','untitled podcast')", (title, url))
+            if managed:
+                conn.execute("UPDATE source_subscriptions SET display_name=? WHERE kind='podcast_rss' "
+                             "AND source_key=? AND (display_name IS NULL "
+                             "OR lower(trim(display_name)) IN ('','untitled podcast') OR display_name=canonical_url)",
+                             (title, url))
+                conn.execute("UPDATE source_items SET metadata_json=json_set(metadata_json,'$.feed_title',?) "
+                             "WHERE source_id IN (SELECT source_id FROM source_subscriptions "
+                             "WHERE kind='podcast_rss' AND source_key=?) AND json_valid(metadata_json) "
+                             "AND lower(trim(coalesce(json_extract(metadata_json,'$.feed_title'),''))) "
+                             "IN ('','untitled podcast')", (title, url))
+
+
+def episode_artwork_url(idx, episode_id: int) -> str | None:
+    """Reuse artwork from the feed snapshot; no extra feed fetch per episode."""
+    if not _subscriptions().tables_present(idx._conn):
+        return None
+    row = idx._conn.execute(
+        "SELECT metadata_json FROM source_items WHERE legacy_episode_id=? LIMIT 1",
+        (episode_id,)).fetchone()
+    try:
+        metadata = json.loads(row[0] or "{}") if row else {}
+        return _subscriptions()._http_link(metadata.get("artwork_url"))
+    except (TypeError, ValueError, AttributeError):
+        return None
+
+
 def set_episode_status(idx, episode_id: int, status: str) -> bool:
     if status not in _EPISODE_STATUSES:
         raise ValueError(
@@ -1194,6 +1326,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         })
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
+    artwork_url = episode_artwork_url(idx, episode_id)
     record = {
         "video_id": video_id, "slug": folder.name,
         "channel": podcast_title, "author": podcast_title,
@@ -1207,6 +1340,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "duration_seconds": row.get("duration_seconds"),
             "upload_date": row.get("published_at"),
             "podcast_title": podcast_title,
+            "artwork_url": artwork_url,
             "episode_id": episode_id,
             # AS-06: full identity provenance behind the shortened corpus id.
             "feed_url": feed_key,
@@ -1272,6 +1406,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "guid": guid,
         "capture_key": capture_key,
         "podcast_title": podcast_title,
+        "artwork_url": artwork_url,
         "episode_title": episode_title,
         "title": episode_title,
         "channel": podcast_title,

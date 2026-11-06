@@ -477,7 +477,7 @@ async function groupPaste() {
     await sleep(DEBOUNCE_WAIT_MS);
     await settle();
     const last = p.searches().at(-1);
-    check(Boolean(last) && last.get("q") === "agent loops" && last.get("sort") === "relevance" && last.get("match") === "forgiving", "the search asks the helper for forgiving Best match results", last && last.toString());
+    check(Boolean(last) && last.get("q") === "agent loops" && last.get("sort") === "relevance" && last.get("match") === "strict", "the search asks the helper for all-words Best match results", last && last.toString());
     check(!p.paths().some((path) => path.startsWith("/detect")) && p.state.libraryRuns.length === 0, "text asks /detect nothing and starts no capture", p.paths());
     edit(p.els.searchInput, "youtu.be/abc123");
     check(p.state.filters.q === "", "the link drops the search it replaced", p.state.filters.q);
@@ -531,13 +531,13 @@ async function groupRows() {
     const p = makePage();
     const base = { video_id: "v1", slug: "v1", title: "Agent loops", channel: "Example", platform: "youtube", source_type: "video", yoinked_at: new Date().toISOString(), folder: "C:\\Uoink\\AI\\v1" };
     const captions = p.page.cardHtml({ ...base, transcript_source: "captions", has_transcript: true });
-    check(captions.includes(">Done<") && captions.includes("YouTube captions"), "captions: Done · YouTube captions", captions);
+    check(captions.includes(">Ready<") && captions.includes("YouTube captions"), "captions: Ready · YouTube captions", captions);
     const whisper = p.page.cardHtml({ ...base, transcript_source: "asr", has_transcript: true });
     check(whisper.includes("transcript by Whisper"), "local ASR: Done · transcript by Whisper", whisper);
     const none = p.page.cardHtml({ ...base, transcript_source: null, has_transcript: false, asr_fallback_status: "failed" });
     check(none.includes("no captions, transcription failed"), "no words: the row says so", none);
     const noAudio = p.page.cardHtml({ ...base, transcript_source: null, has_transcript: false, asr_fallback_status: "no_audio" });
-    check(noAudio.includes(">Done<") && noAudio.includes("no audio for transcription"), "no audio: the capture is Done with a distinct reason", noAudio);
+    check(noAudio.includes(">Ready<") && noAudio.includes("no audio for transcription"), "no audio: the capture is Ready with a distinct reason", noAudio);
     check(!noAudio.includes("no captions") && !noAudio.includes("transcription failed"), "no audio is distinct from missing captions and a failed transcription", noAudio);
     const noCaptions = p.page.cardHtml({ ...base, transcript_source: null, has_transcript: false });
     check(noCaptions.includes("no captions") && !noCaptions.includes("no audio"), "a caption miss keeps its existing label", noCaptions);
@@ -572,7 +572,7 @@ async function groupRows() {
     p.page.renderQueue(queue);
     const rows = p.els.libraryCaptures.innerHTML;
     check(!p.els.libraryCaptures.classList.contains("hidden"), "the captures show above the saved list");
-    check(rows.includes("Capturing") && rows.includes("video (3 of 5)"), "running: Capturing · video (3 of 5)", rows);
+    check(rows.includes("Downloading video"), "running: Downloading video", rows);
     check(rows.includes("Waiting") && rows.includes("one YouTube capture at a time"), "queued: Waiting · one YouTube capture at a time", rows);
     check(rows.includes("Failed at transcript") && rows.includes("data-library-retry=\"https://www.youtube.com/watch?v=f1\""), "failed: the step in words and Retry now", rows);
     check(rows.includes("HTTP 429") && rows.includes("Retries ") && rows.includes('data-retry="7"'), "rate-limited: the reason, when it retries, and Retry now", rows);
@@ -805,19 +805,19 @@ async function groupLive() {
     check(await nextJobsRead(p), "while it runs the page reads /jobs for its phase");
     let html = captureRows(p).html;
     check(html.includes(">Waiting<") && html.includes("one YouTube capture at a time"), "waiting its turn reads Waiting", html);
-    check(!html.includes("transcript (4 of 5)"), "another capture's phase is not this row's", html);
+    check(!html.includes("Getting transcript"), "another capture's phase is not this row's", html);
     check(!html.includes("now advanced"), "the first step it reports does not animate", html);
 
     live = [{ capture_ref: ref, source_url: url, phase: "download" }];
     await nextJobsRead(p);
     html = captureRows(p).html;
-    check(html.includes(">Capturing<") && html.includes("video (3 of 5)"), "downloading reads Capturing · video (3 of 5)", html);
+    check(html.includes(">Downloading video<"), "downloading names the stage", html);
     const strip = /<span class="step-strip" aria-hidden="true">(.*?)<\/span>/.exec(html);
     check(Boolean(strip) && strip[1] === '<i class="step done"></i><i class="step done"></i><i class="step now advanced"></i><i class="step todo"></i><i class="step todo"></i>', "the strip moves to video", strip && strip[1]);
 
     live = [{ capture_ref: ref, source_url: url, phase: "screenshots" }];
     await nextJobsRead(p);
-    check(captureRows(p).html.includes("screenshots and save (5 of 5)"), "the last step is screenshots and save", captureRows(p).html);
+    check(captureRows(p).html.includes("Saving screenshots"), "the last step names screenshots", captureRows(p).html);
 
     p.held[0].answer({ ok: true, title: "Live one", folder: "C:\\Uoink\\AI\\live-one" });
     live = [];
@@ -846,7 +846,7 @@ async function groupLive() {
     live = [{ capture_ref: ref, source_url: url, phase: "transcript" }];
     check(await nextJobsRead(p), "the running paste reads /jobs for its phase");
     const html = captureRows(p).html;
-    check(html.includes("transcript (4 of 5)"), "the pasted row moves to the phase the poll read", html);
+    check(html.includes("Getting transcript"), "the pasted row moves to the phase the poll read", html);
     const pl = p.state.jobs.find((job) => job.id === "pl9");
     check(Boolean(pl) && pl.state === "completed", "the playlist the stream finished stays finished", pl && pl.state);
     check(!html.includes('data-capture-key="job:pl9"'), "and never comes back as a running row", html);
@@ -1023,11 +1023,11 @@ async function groupRetry() {
     live = [{ capture_ref: firstRef, source_url: url, phase: "screenshots" },
       { capture_ref: ref, source_url: url, phase: "download" }];
     check(await nextJobsRead(p), "the retry keeps polling live phases");
-    check(captureRows(p).html.includes("video (3 of 5)") && !captureRows(p).html.includes("screenshots and save (5 of 5)"),
+    check(captureRows(p).html.includes("Downloading video") && !captureRows(p).html.includes("Saving screenshots"),
       "the retry shows its own video step, not the previous capture's", captureRows(p));
     live = [{ capture_ref: ref, source_url: url, phase: "transcript" }];
     check(await nextJobsRead(p), "polling continues after the first phase");
-    check(captureRows(p).html.includes("transcript (4 of 5)") && captureRows(p).html.includes("step now advanced"),
+    check(captureRows(p).html.includes("Getting transcript") && captureRows(p).html.includes("step now advanced"),
       "the retry strip advances to transcript", captureRows(p));
     jobs = [{ ...jobs[0], id: "job_retry", started_at: next ? next.startedAt : new Date().toISOString(),
       completed_at: new Date().toISOString(), current_video_phase: "transcript" }, ...jobs];
@@ -1068,7 +1068,7 @@ async function groupRetry() {
       "the late previous failure steps aside for the new row", captureRows(p));
     live = [{ capture_ref: ref, source_url: url, phase: "transcript" }];
     check(await nextJobsRead(p), "the new run keeps polling after the old job arrives");
-    check(captureRows(p).html.includes("transcript (4 of 5)"), "its live transcript step still appears", captureRows(p));
+    check(captureRows(p).html.includes("Getting transcript"), "its live transcript step still appears", captureRows(p));
     // The helper timestamps in whole seconds. An explicit id still matches
     // the new run even if its timestamp rounds down before the browser's.
     const current = { ...previous, id: "job_late_current",

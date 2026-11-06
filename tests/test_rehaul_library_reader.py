@@ -148,7 +148,7 @@ def test_saved_rows_hold_a_thumbnail_title_source_line_and_one_state_line():
     assert "captions`" in detail and '"transcript by Whisper"' in detail
     # The state is a word; the dot only repeats it.
     line = _between(SCRIPT, "function savedStateLine(row)", "function cardHtml(row)")
-    assert '<i class="state-dot" aria-hidden="true"></i>Done</span>' in line
+    assert '<i class="state-dot" aria-hidden="true"></i>Ready</span>' in line
     thumb = _between(SCRIPT, "async function loadThumbnail(row)", "function revokeThumbs()")
     assert "row.thumbnail_path" in thumb and "/file?path=" in thumb
 
@@ -163,8 +163,9 @@ def test_capture_rows_use_the_five_step_strip_with_words():
     for words in ('"Capturing"', '"Waiting"', '"one YouTube capture at a time"', "`Failed at ${CAPTURE_STEPS[index]}`",
                   "Retries ${at}", "(HTTP 429)"):
         assert words in items, words
-    line = _between(SCRIPT, "function captureStepLine(index)", "const LIBRARY_FAILURE_WINDOW_MS")
-    assert "(${index + 1} of 5)" in line
+    line = _between(SCRIPT, "function captureStepLine(index,", "const LIBRARY_FAILURE_WINDOW_MS")
+    assert '"Getting transcript"' in line and '"Saving screenshots"' in line
+    assert "of 5" not in line
 
 
 def test_a_link_in_the_box_goes_through_detect_and_the_capture_routes():
@@ -266,7 +267,7 @@ def test_live_steps_saves_and_one_row_per_failure_are_wired():
     assert "state.liveCaptures = Array.isArray(data.live_captures) ? data.live_captures : [];" in poll
     assert "state.jobs" not in poll and "await refreshLiveCaptures();" in poll
     # A render with no step known is not a step: the first reported one never animates.
-    advanced = _between(SCRIPT, "function captureAdvanced(key, index)", "function captureStepLine(index)")
+    advanced = _between(SCRIPT, "function captureAdvanced(key, index)", "function captureStepLine(index,")
     assert "if (index < 0) return false;" in advanced
     render = _between(SCRIPT, "function renderQueue(data)", "function completedTodayRows()")
     assert "trackCaptureSaves();" in render

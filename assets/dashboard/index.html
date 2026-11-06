@@ -422,8 +422,7 @@
       gap: 2px 6px;
     }
 
-    /* Shell: "N failed" on Activity. The word carries the state; the rust
-       outline only repeats it. */
+    /* Activity's single count names failures in its tooltip and label. */
     .nav-failed {
       border: 1px solid var(--fail);
       border-radius: var(--radius-pill);
@@ -1029,6 +1028,21 @@
       display: grid;
       gap: 3px;
       min-width: 0;
+    }
+
+    .card-match {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .card-match .reader-time {
+      flex: 0 0 auto;
     }
 
     .row-state {
@@ -1955,6 +1969,9 @@
     .universal-capture-row .button {
       flex-shrink: 0;
     }
+
+    #universalCaptureAllow.permission-hidden { visibility: hidden; }
+    #universalCaptureNote { min-height: 4.35em; }
 
     .note-capture-text {
       width: 100%;
@@ -4859,7 +4876,7 @@
       </div>
       <nav class="nav" aria-label="Sections">
         <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library" aria-current="page">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-failed hidden" id="activityFailedBadge"></span><span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></span></button>
+        <button class="nav-button" type="button" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-badges"><span class="nav-count" id="activityNavCount" title="0 captures in progress or needing attention" aria-label="0 captures in progress or needing attention">0</span></span></button>
         <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count hidden" id="writingNavCount" title="0 saved drafts" aria-label="0 saved drafts"></span></button>
         <button class="nav-button" type="button" data-tab-button="research" data-nav-label="Research">Research</button>
         <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count hidden" id="sourcesNavCount" title="0 subscribed sources" aria-label="0 subscribed sources"></span></button>
@@ -5108,7 +5125,8 @@
                     <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
                   </div>
                 </details>
-                <button class="button primary" type="button" id="generateWriting" disabled>Generate</button>
+                <button class="button primary" type="button" aria-describedby="writingAgentHint" id="generateWriting" disabled>Generate</button>
+                <div class="soft-note hidden" id="writingAgentHint" role="status"></div>
                 <div class="agent-setup-card" id="agentSetupCard">
                   <strong>Checking for a writing agent...</strong>
                   <span class="soft-note">You can also generate with your Anthropic key when no agent is connected.</span>
@@ -5216,7 +5234,7 @@
                     <button class="button ghost" type="button" id="clearWritingScreenshots">Clear selection</button>
                   </div>
                   <div class="picker-toolbar">
-                    <button class="button primary" type="button" id="pickBestScreenshots">Pick best for Tweet</button>
+                    <button class="button primary" type="button" id="pickBestScreenshots">Pick best for tweet</button>
                     <button class="button ghost" type="button" id="autoDistributeScreenshots">Auto-distribute to posts</button>
                     <label class="inline-row"><input id="writingDedupe" type="checkbox" checked> Hide visual duplicates</label>
                     <input class="field" id="writingShotFrom" type="text" inputmode="numeric" placeholder="from 00:00">
@@ -5361,8 +5379,8 @@
               </div>
             </details>
             <select class="control" id="matchFilter" aria-label="Search matching">
-              <option value="forgiving">Any useful words</option>
-              <option value="strict">Exact words</option>
+              <option value="strict">All words</option>
+              <option value="forgiving">Any words</option>
             </select>
             <select class="control" id="sortFilter" aria-label="Sort Library">
               <option value="newest">Newest first</option>
@@ -5426,22 +5444,23 @@
               </div>
               <p class="activity-empty-state hidden" id="libraryActivityEmpty" role="status" style="margin:8px 0 0;font-size:0.9rem;color:var(--text-muted, #888);">Library activity appears here after your first few captures.</p>
               <div class="activity-controls inline-row" id="activityControls" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
-                <div class="activity-presets inline-row" role="group" aria-label="Interval presets" style="gap:4px;">
-                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">1d</button>
-                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">7d</button>
-                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">30d</button>
+                <div class="activity-presets inline-row" role="group" aria-label="Date range" style="gap:4px;">
+                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">Last 24 hours</button>
+                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">Last 7 days</button>
+                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">Last 30 days</button>
                 </div>
                 <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
-                  <input class="control small" id="activityStartInput" type="text" placeholder="YYYY-MM-DDTHH:MM:SSZ" aria-label="Interval start (UTC)" style="width:170px;font-size:0.8rem;">
-                  <span>to</span>
-                  <input class="control small" id="activityEndInput" type="text" placeholder="YYYY-MM-DDTHH:MM:SSZ" aria-label="Interval end (UTC)" style="width:170px;font-size:0.8rem;">
+                  <label for="activityStartInput">From</label>
+                  <input class="control small" id="activityStartInput" type="date" aria-label="Start date" style="width:145px;font-size:0.8rem;">
+                  <label for="activityEndInput">Through</label>
+                  <input class="control small" id="activityEndInput" type="date" aria-label="End date" style="width:145px;font-size:0.8rem;">
                   <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
                 </div>
                 <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
-                  <label for="activityDateBasis" style="font-size:0.85rem;">Basis:</label>
-                  <select class="control small" id="activityDateBasis" aria-label="Activity date basis" style="font-size:0.85rem;">
-                    <option value="capture_time">Capture time (default)</option>
-                    <option value="publication_time">Publication time</option>
+                  <label for="activityDateBasis" style="font-size:0.85rem;">Show by</label>
+                  <select class="control small" id="activityDateBasis" aria-label="Show by date" style="font-size:0.85rem;">
+                    <option value="capture_time">Date saved</option>
+                    <option value="publication_time">Date published</option>
                   </select>
                 </div>
               </div>
@@ -5450,47 +5469,47 @@
 
             <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
               <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <div><strong>UTC Interval:</strong> <span id="activityUtcInterval">-</span></div>
-                <div><strong>Coverage:</strong> <span id="activityCoverageStatus">-</span></div>
-                <div><strong>Exclusions:</strong> <span id="activityExclusions">0</span></div>
+                <div><strong>Date range:</strong> <span id="activityUtcInterval">-</span></div>
+                <div><strong>History:</strong> <span id="activityCoverageStatus">-</span></div>
+                <div><strong>Not counted:</strong> <span id="activityExclusions">0</span></div>
               </div>
               <div id="activityWarnings" class="activity-warnings hidden" style="color:var(--warn);margin-top:4px;font-size:0.8rem;"></div>
             </div>
 
             <div class="activity-metrics-grid" id="activityMetricsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
               <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
-                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Selected Items</div>
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Saved items</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
                   <button class="link-button activity-evidence-trigger" type="button" id="activityTotalItems" data-metric-id="items.total" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
                 </div>
-                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Live in interval</div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In this date range</div>
               </div>
               <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
-                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Assigned Items</div>
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Items on shelves</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
                   <button class="link-button activity-evidence-trigger" type="button" id="activityAssignedItems" data-metric-id="shelf_activity.current_assigned_items" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
                 </div>
-                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Current direct members</div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Currently filed</div>
               </div>
               <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
-                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Applied Operations</div>
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Library changes</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
                   <button class="link-button activity-evidence-trigger" type="button" id="activityAppliedOps" data-metric-id="shelf_activity.applied_operations" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
                 </div>
-                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In interval</div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In this date range</div>
               </div>
               <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
-                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Interval Churn</div>
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Items reorganized</div>
                 <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
                   <button class="link-button activity-evidence-trigger" type="button" id="activityChurn" data-metric-id="shelf_activity.churn" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">Unavailable</button>
                 </div>
-                <div id="activityChurnSub" style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Proved baseline</div>
+                <div id="activityChurnSub" style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Compared with the start</div>
               </div>
             </div>
 
             <div class="activity-sections" id="activitySections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
               <details class="activity-sub-card" id="activityDailyCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Daily Activity (<span id="activityDailyCount">0</span> buckets)</summary>
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Daily activity (<span id="activityDailyCount">0</span> days)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
                   <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Daily activity table">
                     <thead>
@@ -5506,14 +5525,14 @@
               </details>
 
               <details class="activity-sub-card" id="activityHintsCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Creator Hint Breakdowns (<span id="activityHintsCount">0</span> hints)</summary>
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Creators (<span id="activityHintsCount">0</span>)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
-                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Creator hints table">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Creators table">
                     <thead>
                       <tr style="text-align:left;border-bottom:1px solid var(--line-strong);">
                         <th style="padding:4px 8px;">Platform</th>
-                        <th style="padding:4px 8px;">Field</th>
-                        <th style="padding:4px 8px;">Hint</th>
+                        <th style="padding:4px 8px;">Listed as</th>
+                        <th style="padding:4px 8px;">Creator</th>
                         <th style="padding:4px 8px;">Count</th>
                         <th style="padding:4px 8px;">Share</th>
                       </tr>
@@ -5529,19 +5548,19 @@
               </details>
 
               <details class="activity-sub-card" id="activityShelvesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Shelves &amp; Churn (<span id="activityShelvesCount">0</span> shelves)</summary>
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Shelf changes (<span id="activityShelvesCount">0</span> shelves)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
-                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Shelves and churn table">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Shelf changes table">
                     <thead>
                       <tr style="text-align:left;border-bottom:1px solid var(--line-strong);">
-                        <th style="padding:4px 8px;">Shelf ID</th>
+                        <th style="padding:4px 8px;">Shelf</th>
                         <th style="padding:4px 8px;">Current</th>
                         <th style="padding:4px 8px;">Start</th>
                         <th style="padding:4px 8px;">End</th>
                         <th style="padding:4px 8px;">Added</th>
                         <th style="padding:4px 8px;">Removed</th>
-                        <th style="padding:4px 8px;">Net</th>
-                        <th style="padding:4px 8px;">Churn</th>
+                        <th style="padding:4px 8px;">Change</th>
+                        <th style="padding:4px 8px;">Reorganized</th>
                       </tr>
                     </thead>
                     <tbody id="activityShelvesBody"></tbody>
@@ -5555,7 +5574,7 @@
               </details>
 
               <details class="activity-sub-card" id="activitySourcesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Active Sources (<span id="activitySourcesCount">0</span> sources)</summary>
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Sources (<span id="activitySourcesCount">0</span>)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
                   <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Active sources table">
                     <thead>
@@ -5563,8 +5582,8 @@
                         <th style="padding:4px 8px;">Source</th>
                         <th style="padding:4px 8px;">Kind</th>
                         <th style="padding:4px 8px;">Captures</th>
-                        <th style="padding:4px 8px;">New Obs</th>
-                        <th style="padding:4px 8px;">Observation Window</th>
+                        <th style="padding:4px 8px;">New items found</th>
+                        <th style="padding:4px 8px;">Dates seen</th>
                       </tr>
                     </thead>
                     <tbody id="activitySourcesBody"></tbody>
@@ -5578,14 +5597,14 @@
               </details>
 
               <details class="activity-sub-card" id="activityEventsCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
-                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Combined Events (<button class="link-button activity-evidence-trigger" type="button" id="activityEventsCount" data-metric-id="events.total" style="background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button> events)</summary>
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Recent activity (<button class="link-button activity-evidence-trigger" type="button" id="activityEventsCount" data-metric-id="events.total" style="background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>)</summary>
                 <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
                   <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Combined events table">
                     <thead>
                       <tr style="text-align:left;border-bottom:1px solid var(--line-strong);">
-                        <th style="padding:4px 8px;">Time (UTC)</th>
+                        <th style="padding:4px 8px;">Time</th>
                         <th style="padding:4px 8px;">Kind</th>
-                        <th style="padding:4px 8px;">Identifier</th>
+                        <th style="padding:4px 8px;">Item</th>
                         <th style="padding:4px 8px;">Details</th>
                       </tr>
                     </thead>
@@ -5648,7 +5667,8 @@
                 <button class="button" type="button" id="yoinkCopyMarkdown">Copy as Markdown</button>
                 <button class="button" type="button" id="yoinkSendClaude">Send to Claude</button>
                 <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
-                <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
+                <button class="button primary" type="button" id="yoinkWriteFrom" aria-describedby="yoinkWriteHint" disabled>Write from this</button>
+                <span class="soft-note hidden" id="yoinkWriteHint">Connect Claude first</span>
                 <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
                   <summary class="button ghost">More actions</summary>
                   <div class="action-menu-popover">
@@ -5694,24 +5714,16 @@
           <form class="research-form" id="researchForm">
             <label for="researchQuestion">Research question</label>
             <textarea class="field" id="researchQuestion" maxlength="500" required placeholder="What do people building AI agents say about evals?"></textarea>
-            <fieldset class="research-sources"><legend>Search sources</legend>
+            <p class="setting-copy" id="researchConsentNote">Selecting a source allows Uoink to search it. Search words go to YouTube, HN (Algolia) or Apple Podcasts. HackerTube provides a public list. Library search stays local.</p>
+            <fieldset class="research-sources" id="researchConsent" aria-describedby="researchConsentNote"><legend>Search sources</legend>
               <label class="research-source"><input type="checkbox" data-research-source="library" checked>Library</label>
-              <label class="research-source"><input type="checkbox" data-research-source="youtube" disabled>YouTube</label>
-              <label class="research-source"><input type="checkbox" data-research-source="podcast" disabled>Podcasts</label>
-              <label class="research-source"><input type="checkbox" data-research-source="hn" disabled>HN</label>
-              <label class="research-source"><input type="checkbox" data-research-source="hackertube" disabled>HackerTube</label>
+              <label class="research-source"><input type="checkbox" data-research-source="youtube" data-research-consent="youtube" disabled>YouTube</label>
+              <label class="research-source"><input type="checkbox" data-research-source="podcast" data-research-consent="podcast" disabled>Podcasts</label>
+              <label class="research-source"><input type="checkbox" data-research-source="hn" data-research-consent="hn" disabled>HN</label>
+              <label class="research-source"><input type="checkbox" data-research-source="hackertube" data-research-consent="hackertube" disabled>HackerTube</label>
               <label class="research-source"><input type="checkbox" data-research-source="reddit" disabled>Reddit · coming later</label>
             </fieldset>
-            <details class="research-consent"><summary>Network consent</summary>
-              <p class="setting-copy">Search words go to the services you enable. YouTube uses YouTube search; HN uses Algolia; podcasts use Apple search. HackerTube downloads its public list. Library search stays local.</p>
-              <div id="researchConsent" class="inline-row">
-                <label class="inline-row"><input type="checkbox" data-research-consent="youtube">Allow YouTube</label>
-                <label class="inline-row"><input type="checkbox" data-research-consent="podcast">Allow Podcasts</label>
-                <label class="inline-row"><input type="checkbox" data-research-consent="hn">Allow HN</label>
-                <label class="inline-row"><input type="checkbox" data-research-consent="hackertube">Allow HackerTube</label>
-              </div>
-              <div class="setting-feedback"><span class="setting-status" id="researchConsentSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="researchConsentSaveRetry" type="button" data-setting-retry="researchConsent">Retry save</button></div>
-            </details>
+            <div class="setting-feedback"><span class="setting-status" id="researchConsentSaveStatus" role="status" aria-live="polite"></span><button class="button ghost setting-retry hidden" id="researchConsentSaveRetry" type="button" data-setting-retry="researchConsent">Retry save</button></div>
             <div class="research-limits">
               <label for="researchMax">Sources to capture<input class="field" id="researchMax" type="number" min="1" max="30" value="12" required></label>
               <label for="researchAsr">ASR budget (minutes)<input class="field" id="researchAsr" type="number" min="0" max="1440" value="120" required></label>
@@ -5729,7 +5741,7 @@
             <p class="soft-note" id="researchRunLabel"></p>
             <p class="soft-note">Podcasts can be discovered. Direct podcast capture is coming later; saved transcripts can be reused.</p>
             <ol class="research-list" id="researchCandidates" aria-label="Ranked research candidates"></ol>
-            <div class="inline-row"><button class="button" type="button" id="researchCapture" disabled>Capture selected</button><span class="soft-note" id="researchSelection" aria-live="polite"></span></div>
+            <div class="inline-row"><button class="button" type="button" id="researchUseSaved" disabled>Use saved</button><button class="button" type="button" id="researchCapture" disabled>Capture new</button><span class="soft-note" id="researchSelection" aria-live="polite"></span></div>
             <p class="setting-copy">When sources are ready, copy the prompt to an AI with Uoink MCP or local CLI access. It gathers evidence and publishes the report here.</p>
           </section>
           <section class="research-section hidden" id="researchPublished" aria-labelledby="researchReportHeading">
@@ -5805,6 +5817,18 @@
               <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
             </div>
           </section>
+          <div class="universal-capture" id="universalCapture">
+            <div class="eyebrow">Paste a URL</div>
+            <h2>Uoink anything</h2>
+            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
+            <div class="universal-capture-row">
+              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
+              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
+              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
+              <button class="button permission-hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote">Allow</button>
+            </div>
+            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
+          </div>
           <section class="discovery-panel" id="sources-discover" aria-labelledby="discoveryTitle">
             <h2 id="discoveryTitle" tabindex="-1">Discover</h2>
             <p class="discovery-note">Find posts with ScrapeCreators, then choose what to capture. <a href="#settings/connected-services">Set up Connected services</a>.</p>
@@ -5826,18 +5850,6 @@
             <p class="discovery-note">Select up to 10 posts. Results are sorted by lift; posts without a lift appear last. No thumbnails are loaded.</p>
             <ul class="discovery-results" id="discoveryResults" aria-label="Discovery results"></ul>
           </section>
-          <div class="universal-capture" id="universalCapture">
-            <div class="eyebrow">Paste a URL</div>
-            <h2>Uoink anything</h2>
-            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
-            <div class="universal-capture-row">
-              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
-              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
-              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
-              <button class="button hidden" type="button" id="universalCaptureAllow" aria-describedby="universalCaptureNote"></button>
-            </div>
-            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
-          </div>
           <div class="universal-capture list-import-card" id="listImportCard">
             <div class="eyebrow">Many at once</div>
             <h2>Import a list</h2>
@@ -5936,10 +5948,13 @@
               <div><p class="activity-failed-label" id="captureFailureLabel"></p><h2 id="captureFailureTitle" tabindex="-1"></h2></div>
               <button class="button ghost" type="button" id="closeCaptureFailure">Close</button>
             </div>
+            <p id="captureFailureReason"></p>
             <p class="activity-meta" id="captureFailureMeta"></p>
             <ol class="activity-step-list" id="captureFailureSteps" aria-label="Capture steps"></ol>
-            <h3>Last error</h3>
-            <pre class="activity-error-line" id="captureFailureError"></pre>
+            <details class="error-details">
+              <summary>Details</summary>
+              <pre class="activity-error-line" id="captureFailureError"></pre>
+            </details>
             <p class="activity-retry-copy" id="captureFailureSchedule"></p>
             <div class="activity-drawer-actions">
               <button class="button primary" type="button" id="retryCaptureFailure">Retry now</button>
@@ -6662,7 +6677,7 @@
         date_from: "",
         date_to: "",
         sort: "newest",
-        match: "forgiving",
+        match: "strict",
         // Re-haul type chips: "" (All), videos, posts, notes, podcasts.
         kind: "",
         availability: "",
@@ -6950,6 +6965,7 @@
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
       yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
+      yoinkWriteHint: document.getElementById("yoinkWriteHint"),
       yoinkBack: document.getElementById("yoinkBack"),
       runningPill: document.getElementById("runningPill"),
       extensionPathText: document.getElementById("extensionPathText"),
@@ -7005,7 +7021,6 @@
       queueMeta: document.getElementById("queueMeta"),
       activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
-      activityFailedBadge: document.getElementById("activityFailedBadge"),
       cancelAll: document.getElementById("cancelAll"),
       completedRows: document.getElementById("completedRows"),
       completedToday: document.getElementById("completedToday"),
@@ -7552,11 +7567,13 @@
     }
 
     function renderAgentSetup() {
+      renderYoinkWriteFrom();
       const markup = agentSetupMarkup();
       [els.agentSetupCard, els.settingsAgentSetupCard].filter(Boolean).forEach((card) => {
         card.classList.toggle("success", connectedAgents().length > 0);
         card.innerHTML = markup;
       });
+      syncWritingGenerateState();
     }
 
     async function loadAgentSetup() {
@@ -7592,10 +7609,13 @@
     }
 
     function sourceNameFromUrl(value) {
+      const raw = String(value || "");
+      const named = raw.match(/(?:\[|^)(youtube|twitter|x|tiktok|instagram|vimeo)(?:[:\]\s]|$)/i);
+      if (named) return { youtube: "YouTube", twitter: "X", x: "X", tiktok: "TikTok", instagram: "Instagram", vimeo: "Vimeo" }[named[1].toLowerCase()];
       try {
-        const host = new URL(value || "").hostname.replace(/^www\./, "");
+        const host = new URL((raw.match(/https?:\/\/[^\s"'<>]+/i) || [raw])[0]).hostname.replace(/^www\./, "");
         if (host.includes("youtube") || host === "youtu.be") return "YouTube";
-        if (host.includes("twitter") || host.includes("x.com")) return "X";
+        if (hostMatches(host, "twitter.com") || hostMatches(host, "x.com")) return "X";
         if (host.includes("vimeo")) return "Vimeo";
         if (host) return host;
       } catch (_) {}
@@ -7604,7 +7624,8 @@
 
     function translateMachineMessage(value, context = {}) {
       const raw = rawMachineDetails(value);
-      const haystack = `${raw} ${context.code || ""}`.toLowerCase();
+      const errors = raw.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^ERROR:/i.test(line));
+      const haystack = `${errors.pop() || raw} ${context.code || ""}`.toLowerCase();
       const source = sourceNameFromUrl(context.url || raw);
       if (!raw) return "";
       if (haystack.includes("too many requests") || haystack.includes("http error 429") || haystack.includes("rate-limit") || haystack.includes("rate limit")) {
@@ -7622,8 +7643,11 @@
       if (haystack.includes("members-only") || haystack.includes("members only")) {
         return `${source} kept this one behind members-only access.`;
       }
-      if (haystack.includes("private") || haystack.includes("video unavailable") || haystack.includes("region")) {
-        return `${source} wouldn't show a usable video. It may be private, region-locked, or gone.`;
+      if (["video unavailable", "video is unavailable", "video is not available", "video isn't available", "video has been removed", "video is no longer available"].some((text) => haystack.includes(text))) {
+        return "This video is unavailable.";
+      }
+      if (haystack.includes("private") || haystack.includes("region")) {
+        return "This video is private or unavailable in your region.";
       }
       if (haystack.includes("is live") || haystack.includes("premiere")) {
         return `${source} is still live. Try again once the broadcast becomes a replay.`;
@@ -7744,7 +7768,7 @@
     // The badge names the problem ("No transcript", or "2 issues") and opens
     // the health drawer, which says why and offers Re-uoink.
     function healthException(health, row = {}) {
-      const issues = healthIssues(health);
+      const issues = healthIssues(health).filter((issue) => issue.failed || ["transcript", "screenshots"].includes(issue.key));
       if (!issues.length) return "";
       const problems = issues.filter((issue) => issue.failed);
       const kind = problems.length ? "Needs attention" : "Still working";
@@ -7894,6 +7918,12 @@
       return firstValue(row && row.source_url, row && row.url, sidecar.url, meta.url);
     }
 
+    // True for the domain itself or any of its subdomains.
+    function hostMatches(host, domain) {
+      const name = String(host || "").toLowerCase();
+      return name === domain || name.endsWith("." + domain);
+    }
+
     function platformOf(row, sidecar = {}) {
       const meta = metadataOf(row);
       const raw = String(firstValue(
@@ -7905,9 +7935,11 @@
       ) || "").toLowerCase();
       const url = String(sourceUrlOf(row, sidecar)).toLowerCase();
       if (raw) return raw;
+      let host = "";
+      try { host = new URL(url).hostname; } catch (_) {}
       if (url.includes("spotify.")) return "spotify";
-      if (url.includes("podcasts.apple.") || url.includes("apple.com")) return "apple podcasts";
-      if (url.includes("x.com") || url.includes("twitter.com")) return "x";
+      if (hostMatches(host, "apple.com")) return "apple podcasts";
+      if (hostMatches(host, "x.com") || hostMatches(host, "twitter.com")) return "x";
       if (url.includes("youtube.") || url.includes("youtu.be")) return "youtube";
       if (url.includes(".xml") || url.includes("rss")) return "rss";
       return "web";
@@ -8211,13 +8243,23 @@
     function readerParagraphs(sidecar = {}) {
       const out = [];
       let current = null;
-      transcriptSegments(sidecar).forEach((segment) => {
+      const shots = readerShotList(sidecar).timed;
+      let nextShot = 0;
+      const segments = transcriptSegments(sidecar).slice().sort((a, b) =>
+        (storedTime(a.start, a.start_seconds) ?? Infinity) - (storedTime(b.start, b.start_seconds) ?? Infinity));
+      segments.forEach((segment) => {
         const text = String(segment.text || segment.content || "").replace(/\s+/g, " ").trim();
         if (!text) return;
         const start = storedTime(segment.start, segment.start_seconds);
         const end = storedTime(segment.end, segment.end_seconds);
         const speaker = String(firstValue(segment.speaker, segment.speaker_label, segment.speaker_id) || "");
-        let fresh = !current || speaker !== current.speaker;
+        let crossedShot = false;
+        while (start !== null && nextShot < shots.length && shots[nextShot].seconds <= start) {
+          crossedShot = true;
+          nextShot += 1;
+        }
+        let fresh = !current || speaker !== current.speaker || crossedShot
+          || (start === null) !== (current.start === null);
         if (!fresh) {
           const count = current.parts.length;
           const lastLine = current.parts[count - 1];
@@ -8294,41 +8336,27 @@
       return html ? `<div class="reader-transcript reader-shots">${html}</div>` : "";
     }
 
-    // Paragraphs in time order with each screenshot after the paragraph
-    // its time falls in; shots with no readable time close the document.
+    // Merge paragraphs and screenshots by their stored time. Untimed rows
+    // close the document; equal times put screenshots before the paragraph.
     function readerTranscriptHtml(row, sidecar = {}) {
       const paragraphs = readerParagraphs(sidecar);
       if (!paragraphs.length) return "";
       const url = sourceUrlOf(row, sidecar);
       const { timed, loose } = readerShotList(sidecar);
-      // The start of the next paragraph that has a stored time, per index.
-      const nextStart = new Array(paragraphs.length).fill(Infinity);
-      for (let i = paragraphs.length - 2; i >= 0; i -= 1) {
-        const after = paragraphs[i + 1];
-        nextStart[i] = after.start !== null ? after.start : nextStart[i + 1];
-      }
-      let next = 0;
-      const rows = paragraphs.map((paragraph, index) => {
-        const until = nextStart[index];
-        const figures = [];
-        if (paragraph.start !== null || index === paragraphs.length - 1) {
-          while (next < timed.length && timed[next].seconds < until) {
-            figures.push(readerShotHtml(row, timed[next].shot, timed[next].seconds, url));
-            next += 1;
-          }
-        }
+      const timeline = timed.concat(paragraphs.map((paragraph) => ({ paragraph, seconds: paragraph.start })), loose)
+        .sort((a, b) => (a.seconds ?? Infinity) - (b.seconds ?? Infinity));
+      const rows = timeline.map((item) => {
+        if (item.shot) return readerShotHtml(row, item.shot, item.seconds, url);
+        const paragraph = item.paragraph;
         const speaker = paragraph.speaker ? `<b class="reader-speaker">${htmlEscape(paragraph.speaker)}</b> ` : "";
         return `
-          <div class="reader-row reader-para">
+          <div class="reader-row reader-para"${paragraph.start === null ? "" : ` data-reader-seconds="${paragraph.start}"`}>
             <div class="reader-gutter">${readerTimeHtml(paragraph.start, url)}</div>
             <p>${speaker}${htmlEscape(paragraph.parts.join(" "))}</p>
           </div>
-          ${figures.join("")}
         `;
       });
-      const rest = timed.slice(next).concat(loose)
-        .map((item) => readerShotHtml(row, item.shot, item.seconds, url)).join("");
-      return `<div class="reader-transcript">${rows.join("")}${rest}</div>`;
+      return `<div class="reader-transcript">${rows.join("")}</div>`;
     }
 
     // The saved Markdown as the document (notes, pages, posts, threads, and
@@ -8337,7 +8365,7 @@
     function readerMarkdownHtml(markdown) {
       const text = String(markdown || "").replace(/\r\n/g, "\n")
         .replace(/^---\n[\s\S]*?\n---\n/, "")
-        .replace(/<!--[\s\S]*?-->/g, "")
+        .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
         .replace(/^\s*#\s+[^\n]*\n/, "")
         .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
       const html = renderMarkdown(text)
@@ -8478,16 +8506,67 @@
       return parts.join("");
     }
 
+    // Keep the saved file intact; the copied media document leads with its
+    // transcript and uses file URLs that survive being pasted elsewhere.
+    function readerClipboardMarkdown(markdown, row, sidecar = {}) {
+      if (isNoteContent(row, sidecar)) return markdown;
+      let sections = [""];
+      let inTranscript = false;
+      let fence = "";
+      const lines = String(markdown).replace(/\r\n/g, "\n").split("\n");
+      lines.forEach((line, index) => {
+        const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+        if (marker) {
+          if (!fence) fence = marker[1];
+          else if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = "";
+        } else if (!fence && /^## /.test(line)) {
+          // Transcript headings belong to its body until a saved footer.
+          const footer = /^## (Screenshots|Top Comments|Channel Context|Transcript Reliability|Comment Intelligence)\s*$/.test(line)
+            && /(?:^|\n)---\s*$/.test(sections[sections.length - 1]);
+          if (!inTranscript || footer) {
+            sections.push("");
+            inTranscript = /^## Transcript\s*$/.test(line);
+          }
+        }
+        sections[sections.length - 1] += line + (index < lines.length - 1 ? "\n" : "");
+      });
+      sections = sections.filter((section) => !/^## Tags\s+No tags\s*(?:---\s*)?$/.test(section));
+      const transcript = sections.findIndex((section) => /^## Transcript\s*\n/.test(section));
+      if (isTimedMedia(row, sidecar) && transcript > 0) {
+        const body = sections.splice(transcript, 1)[0].trimEnd() + "\n\n";
+        sections.splice(/^## /.test(sections[0]) ? 0 : 1, 0, body);
+      }
+      return sections.join("").replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (match, label, target) => {
+        if (/^(?:https?:|data:|file:)/i.test(target)) return match;
+        const encode = (part) => encodeURIComponent(part)
+          .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+        const raw = target.replace(/\\/g, "/");
+        const encoded = raw.split("/").map((part) => {
+          try { part = decodeURIComponent(part); } catch (_) {}
+          return encode(part);
+        }).join("/").replace(/^([A-Za-z])%3A\//, "$1:/");
+        const folder = folderPathOf(row).replace(/\\/g, "/").split("/").map(encode)
+          .join("/").replace(/^([A-Za-z])%3A\//, "$1:/");
+        const path = /^(?:[A-Za-z]:\/|\/)/.test(raw) ? encoded : joinLocalPath(folder, encoded);
+        if (!/^(?:[A-Za-z]:\/|\/)/.test(path)) return match;
+        const prefix = path.startsWith("//") ? "file:" : path.startsWith("/") ? "file://" : "file:///";
+        return `![${label}](${new URL(prefix + path).href})`;
+      });
+    }
+
     // Reader actions on the saved Markdown: copy it, or copy it and open
     // Claude to paste into (the extension's Send-to flow).
     async function copySelectedMarkdown({ openClaude = false } = {}) {
-      const videoId = videoIdOf(state.selectedYoink);
+      const row = state.selectedYoink;
+      let sidecar = state.selectedYoinkSidecar || {};
+      const videoId = videoIdOf(row);
       if (!videoId) return showToast("Select a uoink first.");
       let markdown = state.selectedYoinkMarkdown;
       try {
         if (!markdown) markdown = await loadYoinkMarkdown(videoId);
         if (!markdown) throw new Error("empty");
-        await navigator.clipboard.writeText(markdown);
+        if (videoIdOf(state.selectedYoink) === videoId) sidecar = state.selectedYoinkSidecar || sidecar;
+        await navigator.clipboard.writeText(readerClipboardMarkdown(markdown, row, sidecar));
       } catch (_) {
         return showToast("Couldn't copy the Markdown. Open the transcript file instead.");
       }
@@ -8577,6 +8656,15 @@
       },
     };
 
+    function renderYoinkWriteFrom() {
+      const connected = connectedAgents().length > 0;
+      els.yoinkWriteFrom.disabled = !videoIdOf(state.selectedYoink) || !connected;
+      if (connected) els.yoinkWriteFrom.removeAttribute("aria-describedby");
+      else els.yoinkWriteFrom.setAttribute("aria-describedby", "yoinkWriteHint");
+      els.yoinkWriteHint.textContent = "Connect Claude first";
+      els.yoinkWriteHint.classList.toggle("hidden", connected || !state.selectedYoink);
+    }
+
     function renderYoinkDetail() {
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
@@ -8587,7 +8675,7 @@
       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
       els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
-      els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
+      renderYoinkWriteFrom();
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
@@ -8867,9 +8955,9 @@
     // finds the saved row, then opens it as a Library card would, so Open
     // folder, the topic and the item's kind are right from the first
     // render. A move elsewhere while the lookup runs wins.
-    async function openItemFromRoute(id) {
+    async function openItemFromRoute(id, options = {}) {
       const request = ++state.selectedYoinkRequest;
-      const hash = routeHash("item", id);
+      const hash = options.hash || routeHash("item", id);
       state.selectedYoink = null;
       state.selectedYoinkLookup = { id, state: "loading" };
       renderYoinkDetail();
@@ -8884,7 +8972,7 @@
       }
       if (!wanted()) return;
       if (row) {
-        await openYoinkDetail(row, { fromRoute: true });
+        await openYoinkDetail(row, { fromRoute: true, seconds: options.seconds });
         return;
       }
       state.selectedYoinkLookup = { id, state: failed ? "error" : "missing" };
@@ -8943,7 +9031,25 @@
       if (tasks.length) await Promise.all(tasks);
       if (state.selectedYoinkRequest === request) {
         renderYoinkDetail();
+        const route = parseRoute(currentRoute);
+        revealReaderMoment(route && route.tab === "yoink" && route.id === videoId ? route.seconds : options.seconds);
       }
+    }
+
+    function revealReaderMoment(value) {
+      const seconds = storedTime(value);
+      if (seconds === null || state.activeTab !== "yoink") return;
+      const request = state.selectedYoinkRequest;
+      // Let the loaded transcript settle before placing it below the Back row.
+      requestAnimationFrame(() => {
+        if (state.activeTab !== "yoink" || state.selectedYoinkRequest !== request) return;
+        const paragraphs = Array.from(document.querySelectorAll(".reader-para[data-reader-seconds]"));
+        const target = paragraphs.filter((el) => Number(el.dataset.readerSeconds) <= seconds).at(-1) || paragraphs[0];
+        if (!target) return;
+        target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: "start", behavior: scrollBehavior() });
+      });
     }
 
     async function requestRetranscription() {
@@ -9056,7 +9162,7 @@
       const byTopic = new Map();
       (Array.isArray(rows) ? rows : []).forEach((row) => {
         const topic = (row.topic || "Uncategorized").trim();
-        if (!topic) return;
+        if (!topic || topic.toLowerCase() === "uncategorized") return;
         const arr = byTopic.get(topic) || [];
         arr.push(row);
         byTopic.set(topic, arr);
@@ -9107,11 +9213,16 @@
       return map[String(kind || "tweet")] || "draft";
     }
 
+    let resumeRequest = 0;
+
     async function loadResume() {
+      const request = ++resumeRequest;
       try {
         const data = await authFetch("/resume");
+        if (request !== resumeRequest) return;
         state.resume = data.resume || data;
       } catch (_) {
+        if (request !== resumeRequest) return;
         state.resume = null;
       }
       renderResumeCard(state.resume);
@@ -9598,6 +9709,43 @@
       return { start, end };
     }
 
+    function formatActivityDate(value, dateOnly = false) {
+      if (!value) return "Date unavailable";
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return "Date unavailable";
+      return date.toLocaleString(undefined, dateOnly
+        ? { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }
+        : { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    }
+
+    function activityHistoryLabel(value) {
+      return { retained_records: "Saved history", journal_complete: "Complete history",
+        partial: "Some history is missing", no_history: "No history yet" }[value] || "History unavailable";
+    }
+
+    function activityNotice(value) {
+      return { capture_is_not_publication: "Some items were published before you saved them.",
+        capture_time_unavailable: "Some items have no saved date.",
+        publication_time_unavailable: "Some items have no publication date." }[value]
+        || "Some activity could not be counted.";
+    }
+
+    function activityKindLabel(value) {
+      return { capture: "Saved item", publication: "Published item", apply: "Library updated",
+        undo: "Change undone", taxonomy_version: "Shelves updated", run: "Library review",
+        podcast_rss: "Podcast", youtube_channel: "YouTube channel", youtube_playlist: "YouTube playlist",
+        youtube: "YouTube", podcast: "Podcast", page: "Web page", x: "X", reddit: "Reddit",
+        channel: "Channel", author: "Author", host: "Host", creator_handle: "Creator",
+        author_handle: "Author", channel_handle: "Channel", unknown: "Unknown" }[value] || "Other";
+    }
+
+    function activityMetricLabel(value) {
+      if (String(value).startsWith("shelf_activity")) return "Shelf changes";
+      if (String(value).startsWith("sources")) return "Source activity";
+      if (String(value).startsWith("events")) return "Library activity";
+      return "Saved items";
+    }
+
     function escapeHtmlActivity(str) {
       if (str == null) return "";
       return String(str)
@@ -9969,19 +10117,21 @@
       setLibraryActivityEmptyState(libraryActivityHasNoHistory(p));
 
       const asOfEl = document.getElementById("libraryActivityAsOf");
-      if (asOfEl) asOfEl.textContent = `As of ${p.as_of || ""}`;
+      if (asOfEl) asOfEl.textContent = `Updated ${formatActivityDate(p.as_of)}`;
 
       updateLibraryActivityBadge(libraryActivityState.stale ? "Stale - Refresh" : "Live", false, libraryActivityState.stale);
 
       // Interval & Coverage
       const intervalEl = document.getElementById("activityUtcInterval");
       if (intervalEl && p.interval) {
-        intervalEl.textContent = `[${p.interval.start} to ${p.interval.end})`;
+        const custom = Boolean(libraryActivityState.interval);
+        const end = custom ? new Date(new Date(p.interval.end).getTime() - 1) : p.interval.end;
+        intervalEl.textContent = `${formatActivityDate(p.interval.start, custom)} to ${formatActivityDate(end, custom)}`;
       }
       const covEl = document.getElementById("activityCoverageStatus");
       if (covEl && p.coverage) {
         const primaryCov = p.coverage[p.items?.coverage_ref] || {};
-        covEl.textContent = primaryCov.coverage_status || "retained_records";
+        covEl.textContent = activityHistoryLabel(primaryCov.coverage_status);
       }
       const exclEl = document.getElementById("activityExclusions");
       if (exclEl && p.items) {
@@ -9999,14 +10149,14 @@
         const excludedText = excluded == null ? "Unavailable" : String(excluded);
         const unavailId = activityMetricId(clockUnavailRaw, clockUnavailFallback);
         const excludedId = activityMetricId(excludedRaw, "items.deleted_items_excluded");
-        exclEl.innerHTML = `${activityEvidenceButton(unavailText, unavailId)} unavail, ${activityEvidenceButton(excludedText, excludedId)} tombstones excluded`;
+        exclEl.innerHTML = `${activityEvidenceButton(unavailText, unavailId)} missing a date, ${activityEvidenceButton(excludedText, excludedId)} deleted`;
       }
 
       // Warnings
       const warnEl = document.getElementById("activityWarnings");
       if (warnEl) {
         if (p.warnings && p.warnings.length > 0) {
-          warnEl.textContent = `Notice: ${p.warnings.join(", ")}`;
+          warnEl.textContent = p.warnings.map(activityNotice).join(" ");
           warnEl.classList.remove("hidden");
         } else {
           warnEl.classList.add("hidden");
@@ -10039,12 +10189,12 @@
       const churnSub = document.getElementById("activityChurnSub");
       if (churnEl) {
         const ch = p.shelf_activity?.churn;
-        if (ch && ch.value !== null && ch.percent !== null) {
+        if (ch && ch.value != null && ch.percent != null) {
           churnEl.textContent = `${ch.percent}% (${ch.numerator}/${ch.denominator})`;
-          if (churnSub) churnSub.textContent = ch.initial_filing ? "Initial filing" : "Survivor baseline";
+          if (churnSub) churnSub.textContent = ch.initial_filing ? "First items filed" : "Of items already on shelves";
         } else {
           churnEl.textContent = "Unavailable";
-          if (churnSub) churnSub.textContent = (ch && ch.reason) ? ch.reason : "No baseline";
+          if (churnSub) churnSub.textContent = ch && ch.initial_filing ? "No items were on shelves at the start" : "Not enough history to compare";
         }
       }
 
@@ -10105,7 +10255,7 @@
       const rows = buckets || [];
       if (dailyCount) dailyCount.textContent = String(rows.length);
       dailyBody.innerHTML = rows.map((b) => {
-        const s = (b.bucket_start || "").split("T")[0];
+        const s = formatActivityDate(b.bucket_start, true);
         const cnt = formatActivityCount(b.count);
         const pct = b.share && b.share.percent != null ? `${b.share.percent}%` : "-";
         const mId = activityMetricId(b.count, "");
@@ -10130,8 +10280,8 @@
         const mId = activityMetricId(h.count, "");
         const shareId = activityMetricId(h.share, "");
         return `<tr style="border-bottom:1px solid #282828;">
-            <td style="padding:4px 8px;">${escapeHtmlActivity(h.platform)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(h.field)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(activityKindLabel(h.platform))}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(activityKindLabel(h.field))}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.hint)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(pct, shareId)}</td>
@@ -10157,7 +10307,7 @@
         const cSize = formatActivityCount(s.current_size);
         const sStart = formatActivityCount(s.start_size);
         const sEnd = formatActivityCount(s.end_size);
-        const chPct = s.churn && s.churn.percent != null ? `${s.churn.percent}%` : ((s.churn && s.churn.reason) || "Unavailable");
+        const chPct = s.churn && s.churn.percent != null ? `${s.churn.percent}%` : "Not enough history";
         const mId = activityMetricId(s.current_size, "");
         const startId = activityMetricId(s.start_size, "");
         const endId = activityMetricId(s.end_size, "");
@@ -10166,7 +10316,7 @@
         const netId = activityMetricId(s.net, "");
         const churnId = activityMetricId(s.churn, "");
         return `<tr style="border-bottom:1px solid #282828;">
-            <td style="padding:4px 8px;">${escapeHtmlActivity(s.shelf_id)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(s.label || s.name || s.shelf_id || "Unnamed shelf")}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(cSize, mId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(sStart, startId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(sEnd, endId)}</td>
@@ -10194,10 +10344,10 @@
         const obsId = activityMetricId(src.new_observations, "");
         return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${nameLink}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(src.kind)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(activityKindLabel(src.kind || src.platform))}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(caps, capId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(newObs, obsId)}</td>
-            <td style="padding:4px 8px;font-size:0.75rem;">${escapeHtmlActivity(w.first_observed_at || "None")} to ${escapeHtmlActivity(w.last_item_seen_at || "None")}</td>
+            <td style="padding:4px 8px;font-size:0.75rem;">${escapeHtmlActivity(formatActivityDate(w.first_observed_at))} to ${escapeHtmlActivity(formatActivityDate(w.last_item_seen_at))}</td>
           </tr>`;
       }).join("");
     }
@@ -10216,10 +10366,10 @@
         const d = ev.details || {};
         const dText = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(", ");
         return `<tr style="border-bottom:1px solid #282828;">
-            <td style="padding:4px 8px;">${escapeHtmlActivity(ev.time)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(ev.kind)}</td>
-            <td style="padding:4px 8px;font-family:var(--font-ui);font-size:0.8rem;">${escapeHtmlActivity(ev.event_id)}</td>
-            <td style="padding:4px 8px;font-size:0.8rem;">${escapeHtmlActivity(dText)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(formatActivityDate(ev.time))}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(activityKindLabel(ev.kind))}</td>
+            <td style="padding:4px 8px;font-family:var(--font-ui);font-size:0.8rem;">${escapeHtmlActivity(d.title || "Library")}</td>
+            <td style="padding:4px 8px;font-size:0.8rem;"><details><summary>Details</summary>${escapeHtmlActivity(ev.event_id)}<br>${escapeHtmlActivity(dText)}</details></td>
           </tr>`;
       }).join("");
     }
@@ -10245,7 +10395,7 @@
       const nextBtn = document.getElementById("evidenceNextPageBtn");
 
       captureActivityEvidenceFocus();
-      if (titleLabel) titleLabel.textContent = metricId;
+      if (titleLabel) titleLabel.textContent = activityMetricLabel(metricId);
       if (container) container.innerHTML = `<div style="padding:16px;text-align:center;">Loading evidence...</div>`;
       if (prevBtn) prevBtn.disabled = true;
       if (nextBtn) nextBtn.disabled = true;
@@ -10274,8 +10424,7 @@
           libraryActivityState.evidenceOffset = offset;
           libraryActivityState.evidenceNext = res.next || null;
           if (scopeInfo) {
-            const rev = res.report_revision ? String(res.report_revision).slice(0, 16) : "";
-            scopeInfo.textContent = `Revision: ${rev}... | Total evidence rows: ${res.total_rows || 0}`;
+            scopeInfo.textContent = `${res.total_rows || 0} supporting records`;
           }
           renderEvidenceRows(container);
 
@@ -10378,12 +10527,11 @@
         const openBtn = vid ? `<button class="button ghost small" type="button" data-open-yoink="${escapeHtmlActivity(vid)}" style="margin-left:auto;">View Item</button>` : "";
         return `<div class="evidence-row" tabindex="0" role="article" aria-label="Evidence row ${idx + 1}" style="padding:8px 12px;background:var(--bg-card, #222);border-radius:6px;display:flex;flex-direction:column;gap:4px;">
           <div class="inline-row" style="justify-content:space-between;align-items:center;">
-            <strong>${escapeHtmlActivity(r.source_table)}:${escapeHtmlActivity(r.source_key)}</strong>
-            <span style="font-size:0.75rem;color:var(--text-muted, #888);">${escapeHtmlActivity(r.event_time)}</span>
+            <strong>${escapeHtmlActivity(d.title || activityMetricLabel(libraryActivityState.evidenceMetricId))}</strong>
+            <span style="font-size:0.75rem;color:var(--text-muted, #888);">${escapeHtmlActivity(formatActivityDate(r.event_time))}</span>
             ${openBtn}
           </div>
-          <div style="font-size:0.8rem;color:var(--text-muted, #aaa);font-family:var(--font-ui);">Hash: ${escapeHtmlActivity(r.observation_hash || "")}</div>
-          <div style="font-size:0.85rem;">${escapeHtmlActivity(JSON.stringify(d))}</div>
+          <details style="font-size:0.85rem;"><summary>Details</summary>${escapeHtmlActivity(r.source_table)}:${escapeHtmlActivity(r.source_key)}<br>${escapeHtmlActivity(r.observation_hash || "")}<br>${escapeHtmlActivity(JSON.stringify(d))}</details>
         </div>`;
       }).join("");
     }
@@ -10463,14 +10611,17 @@
           const endVal = (eInput?.value || "").trim();
           if (!startVal || !endVal) {
             if (errEl) {
-              errEl.textContent = "Start and end timestamps are required";
+              errEl.textContent = "Choose a start and end date.";
               errEl.classList.remove("hidden");
             }
             return;
           }
-          if (!startVal.endsWith("Z") || !endVal.endsWith("Z")) {
+          const start = new Date(`${startVal}T00:00:00Z`);
+          const end = new Date(`${endVal}T00:00:00Z`);
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(startVal) || !/^\d{4}-\d{2}-\d{2}$/.test(endVal)
+              || !Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end < start) {
             if (errEl) {
-              errEl.textContent = "Timestamps must be UTC ISO strings ending in Z";
+              errEl.textContent = "Choose an end date on or after the start date.";
               errEl.classList.remove("hidden");
             }
             return;
@@ -10478,7 +10629,9 @@
           if (errEl) errEl.classList.add("hidden");
           document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
           libraryActivityState.days = null;
-          libraryActivityState.interval = { start: startVal, end: endVal };
+          // The date picker includes the end day; the API's end is exclusive.
+          end.setUTCDate(end.getUTCDate() + 1);
+          libraryActivityState.interval = { start: start.toISOString(), end: end.toISOString() };
           loadLibraryActivity(false);
         });
       }
@@ -10572,19 +10725,48 @@
       window.addEventListener("library-activity-mutation", () => markLibraryActivityMutated());
     }
 
+    let standingRefreshTimer = null;
+    let standingRefreshRequest = 0;
+    const STANDING_REFRESH_LIMIT = 20;
+    let standingRefreshRemaining = STANDING_REFRESH_LIMIT;
+
     async function loadStandingSubscriptions() {
       if (!els.standingSubscriptionList) return;
+      const request = ++standingRefreshRequest;
+      clearTimeout(standingRefreshTimer);
       state.standingSourcesLoading = true;
       try {
         const res = await callRegistryTool("list_sources", { limit: 100, include_archived: false });
-        state.standingSources = (res && res.sources) ? res.sources : [];
+        if (request === standingRefreshRequest) state.standingSources = (res && res.sources) ? res.sources : [];
       } catch (err) {
-        state.standingSources = [];
+        if (request === standingRefreshRequest) state.standingSources = [];
       } finally {
+        if (request !== standingRefreshRequest) return;
         state.standingSourcesLoading = false;
         // The Sources badge counts subscribed sources and hides at zero.
         setSidebarBadge(els.sourcesNavCount, state.standingSources.length, "subscribed sources", { hideWhenZero: true });
         renderStandingSubscriptions();
+        if (standingRefreshRemaining > 0 && state.activeTab === "sources" && !document.hidden && state.standingSources.some((source) => {
+          if (source.kind !== "podcast_rss" || source.archived || source.detection_enabled === false) return false;
+          if (source.consent_state !== "on" && !source.consent_epoch) return false;
+          const det = source.detection || {};
+          const counts = source.item_counts || {};
+          const due = !det.next_poll_at_ms || det.next_poll_at_ms <= Date.now();
+          const checking = det.poll_in_progress || (due && !det.error && !det.last_error
+            && !Number(det.consecutive_failures || det.error_count || 0)
+            && (!det.last_poll_success_ms || (source.enrollment || {}).pending));
+          const capturing = (source.in_flight || []).some((item) => ["reserved", "started"].includes(item.state))
+            || (source.consent_state === "on" && source.capture_status === "ready" && counts.eligible > 0
+              && !["settled_failed", "blocked", "uncertain"].includes(source.capture_outcome));
+          return checking || capturing;
+        })) {
+          standingRefreshTimer = setTimeout(() => {
+            standingRefreshRemaining -= 1;
+            if (state.activeTab === "sources" && !document.hidden) return loadStandingSubscriptions();
+          }, 3000);
+        } else {
+          standingRefreshRemaining = STANDING_REFRESH_LIMIT;
+        }
       }
     }
 
@@ -10715,6 +10897,16 @@
 
         // Back catalog enrollment
         const enroll = source.enrollment || {};
+        const episode = kind === "podcast_rss" ? source.latest_episode : null;
+        const episodeInFlight = episode && episode.item_id && inFlight.some((item) => item.item_id === episode.item_id);
+        const episodeProgress = kind !== "podcast_rss" ? ""
+          : source.consent_state !== "on" && !source.consent_epoch
+            ? "Turn on automatic capture to check for episodes."
+          : lastError
+          ? "Couldn't check for episodes. Uoink will try again."
+          : episode || inFlight.length ? ""
+          : det.poll_in_progress || !det.last_poll_success_ms || enroll.pending
+            ? "Looking for episodes…" : "No episodes in this feed yet.";
         let enrollmentCopy = "";
         if (enroll.pending) {
           enrollmentCopy = "Enrollment pending (up to 25 items)";
@@ -10810,6 +11002,20 @@
               </div>
             </div>
 
+            ${episodeProgress ? `<p class="soft-note" role="status">${htmlEscape(episodeProgress)}</p>` : ""}
+            ${episode && !episodeInFlight ? `
+              <div class="captured-items-box">
+                <div class="in-flight-head"><span>${episode.capture_state === "committed" ? "Saved episode" : "Latest episode"}</span></div>
+                <div class="captured-item">
+                  <span>${htmlEscape(episode.title || "Podcast episode")}</span>
+                  ${episode.capture_state === "committed" && episode.video_id
+                    ? `<a href="#item/${encodeURIComponent(episode.video_id)}">Read episode</a>`
+                    : /^https?:\/\//i.test(episode.canonical_url || "")
+                      ? `<a href="${htmlEscape(episode.canonical_url)}" target="_blank" rel="noreferrer">Open episode</a>` : ""}
+                </div>
+              </div>
+            ` : ""}
+
             ${inFlight.length ? `
               <div class="in-flight-box">
                 <div class="in-flight-head">
@@ -10818,7 +11024,7 @@
                 </div>
                 ${inFlight.map((item) => `
                   <div class="in-flight-item">
-                    <span style="font-weight:500;">${htmlEscape(item.title || item.entry_id || "Active item")}</span>
+                    <span style="font-weight:500;">${htmlEscape(item.title || (episode && item.item_id === episode.item_id && episode.title) || item.entry_id || "Active item")}</span>
                     <span class="in-flight-phase">
                       ${htmlEscape(item.state || "started")} (attempt ${Number(item.actual_starts || 1)}/3)
                     </span>
@@ -11185,7 +11391,7 @@
     let universalDetectTimer = null;
     // Shared with the Library box, which adds feeds the same way.
     const PODCAST_FEED_SAVED_COPY = "Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.";
-    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null, allowHost: "" };
+    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null, allowHost: "", allowBusy: false };
 
     // A page the site allowlist turned away, said the same way here and on
     // a Library capture row: with its host, "Allow <host>" sits beside it.
@@ -11199,9 +11405,13 @@
       universalState.allowHost = host || "";
       const btn = els.universalCaptureAllow;
       if (!btn) return;
-      btn.disabled = false;
-      btn.textContent = host ? `Allow ${host}` : "";
-      btn.classList.toggle("hidden", !host);
+      btn.disabled = universalState.allowBusy;
+      btn.textContent = "Allow";
+      btn.setAttribute("aria-label", host ? `Allow ${host}` : "Allow");
+      btn.title = host ? `Allow pages from ${host}` : "";
+      btn.classList.toggle("permission-hidden", !host);
+      if (els.universalCaptureButton) els.universalCaptureButton.disabled = !universalState.endpoint
+        || !!host || universalState.busy || universalState.allowBusy;
     }
 
     async function detectCaptureUrl(url) {
@@ -11241,12 +11451,12 @@
       universalState.payloadKey = supported ? (result.payload_key || "url") : null;
       universalState.canonical = (result && result.canonical) || "";
       universalState.label = (result && result.label) || "";
-      setUniversalAllowHost("");
+      const allowHost = supported && result.needs_allow ? urlHostname(universalState.canonical) : "";
+      setUniversalAllowHost(allowHost);
       setCaptureChip(supported ? "supported" : "unsupported",
         result && result.label ? result.label : "Not a supported source yet");
-      if (els.universalCaptureButton) els.universalCaptureButton.disabled = !supported;
       if (els.universalCaptureNote) {
-        els.universalCaptureNote.textContent = (result && result.note)
+        els.universalCaptureNote.textContent = allowHost ? allowlistWallCopy(allowHost) : (result && result.note)
           || (supported ? "Ready. Click Uoink it to capture it." : "");
       }
     }
@@ -11254,6 +11464,7 @@
     async function runCaptureDetection() {
       const raw = els.universalCaptureInput ? els.universalCaptureInput.value.trim() : "";
       if (!raw) {
+        ++universalDetectSeq;
         resetUniversalCapture();
         return;
       }
@@ -11262,6 +11473,7 @@
       // and could swallow the very click that blurred the field.
       if (raw === universalState.lastRaw) return;
       const seq = ++universalDetectSeq;
+      resetUniversalCapture();
       setCaptureChip("checking", "Checking...");
       if (els.universalCaptureButton) els.universalCaptureButton.disabled = true;
       try {
@@ -11280,11 +11492,13 @@
 
     function scheduleCaptureDetection() {
       if (universalDetectTimer) clearTimeout(universalDetectTimer);
+      ++universalDetectSeq;
+      resetUniversalCapture();
       universalDetectTimer = setTimeout(runCaptureDetection, 220);
     }
 
     async function runUniversalCapture() {
-      if (universalState.busy || !universalState.endpoint) return;
+      if (universalState.busy || universalState.allowBusy || universalState.allowHost || !universalState.endpoint) return;
       const url = universalState.canonical
         || (els.universalCaptureInput ? els.universalCaptureInput.value.trim() : "");
       if (!url) return;
@@ -11305,11 +11519,13 @@
         });
         if (universalState.source === "podcast_feed") {
           showToast(PODCAST_FEED_SAVED_COPY);
+          await loadStandingSubscriptions();
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
         if (els.universalCaptureInput) els.universalCaptureInput.value = "";
         resetUniversalCapture();
+        loadResume();
         refreshActivity();
       } catch (err) {
         if (err && err.data && err.data.code === "host_not_allowed") {
@@ -11328,26 +11544,34 @@
       } finally {
         universalState.busy = false;
         if (btn) { btn.textContent = "Uoink it"; btn.removeAttribute("aria-busy"); }
-        if (btn) btn.disabled = !universalState.endpoint;
+        if (btn) btn.disabled = !universalState.endpoint || !!universalState.allowHost || universalState.allowBusy;
       }
     }
 
-    // "Allow <host>" in the box: add the host the way Settings' Add does,
-    // then capture the same link again.
+    // Permission and capture are separate clicks. A different host cannot
+    // inherit an earlier page's permission result.
     async function allowUniversalCaptureSite() {
       const host = universalState.allowHost;
-      const btn = els.universalCaptureAllow;
-      if (!host || universalState.busy) return;
-      if (btn) { btn.disabled = true; btn.textContent = "Allowing..."; }
+      if (!host || universalState.busy || universalState.allowBusy) return;
+      const seq = universalDetectSeq;
+      universalState.allowBusy = true;
+      setUniversalAllowHost(host);
       try {
         await saveAllowedSite(host);
+        if (universalState.allowHost !== host) return;
+        setUniversalAllowHost("");
+        if (els.universalCaptureNote) els.universalCaptureNote.textContent = "Site allowed. Click Uoink it to capture this page.";
       } catch (err) {
-        if (btn) { btn.disabled = false; btn.textContent = `Allow ${host}`; }
-        if (els.universalCaptureNote) els.universalCaptureNote.textContent = `Couldn't allow ${host}: ${settingError(err)}`;
-        return;
+        if (seq === universalDetectSeq && universalState.allowHost === host && els.universalCaptureNote) {
+          els.universalCaptureNote.textContent = `Couldn't allow ${host}: ${settingError(err)}`;
+        }
+      } finally {
+        universalState.allowBusy = false;
+        setUniversalAllowHost(universalState.allowHost);
       }
-      setUniversalAllowHost("");
-      await runUniversalCapture();
+      if (seq === universalDetectSeq && !universalState.allowHost && els.universalCaptureButton) {
+        els.universalCaptureButton.focus({ preventScroll: true });
+      }
     }
 
     // Context-layer item 1: jot a note. A note is a first-class uoink, so the
@@ -11377,6 +11601,7 @@
         els.noteTextInput.value = "";
         if (els.noteTitleInput) els.noteTitleInput.value = "";
         showToast("Saved your note. It's in your Library.");
+        loadResume();
         await loadLibrary({ reset: true });
         // Refresh the facet dropdowns so the new note is immediately
         // filterable by platform / source type = Note.
@@ -11459,6 +11684,7 @@
         if (els.imageCaptionInput) els.imageCaptionInput.value = "";
         clearImageSelection();
         showToast("Saved your image. It's in your Library.");
+        loadResume();
         await loadLibrary({ reset: true });
         // Refresh the facet dropdowns so the new image is immediately
         // filterable by platform / source type = Image.
@@ -11680,9 +11906,10 @@
       });
       document.querySelectorAll("[data-research-source]").forEach((input) => {
         const kind = input.dataset.researchSource;
-        input.disabled = kind === "reddit" || (kind !== "library" && !enabled.includes(kind));
-        if (input.disabled) input.checked = false;
+        input.disabled = kind === "reddit" || (kind !== "library" && (researchState.consentBusy || !state.settings));
+        if (kind !== "library") input.checked = kind !== "reddit" && enabled.includes(kind);
       });
+      researchEl("researchDiscover").disabled = researchState.busy || researchState.consentBusy;
     }
 
     async function saveResearchConsent(input, checked = input.checked) {
@@ -11707,11 +11934,18 @@
       const view = researchState.view;
       const count = researchState.selected.size;
       const limit = view ? view.scope.max_sources : 30;
-      researchEl("researchCapture").disabled = researchState.busy || !count || count > limit;
       const candidates = view ? view.candidates.filter((c) => researchState.selected.has(c.key)) : [];
+      const saved = candidates.filter((c) => c.in_library).length;
+      const fresh = candidates.filter((c) => !c.in_library && c.capturable !== false && c.kind !== "podcast").length;
+      researchEl("researchUseSaved").disabled = researchState.busy || !saved || !!fresh || count > limit;
+      researchEl("researchCapture").disabled = researchState.busy || !fresh || count > limit;
+      researchEl("researchUseSaved").classList.toggle("hidden", !view || !view.candidates.some((c) => c.in_library));
+      researchEl("researchCapture").classList.toggle("hidden", !view || !view.candidates.some((c) => !c.in_library && c.capturable !== false && c.kind !== "podcast"));
       const minutes = candidates.reduce((total, c) => total + (c.in_library ? 0 : c.est_capture === "captions" ? 1
         : Number((/asr ~(\d+)/i.exec(c.est_capture || "") || [])[1]) || 15), 0);
-      researchEl("researchSelection").textContent = `${count} selected (limit ${limit}) · estimated ${minutes} min; actual time varies`;
+      researchEl("researchSelection").textContent = `${saved} saved · ${fresh} new selected (limit ${limit})`
+        + (fresh ? ` · estimated ${minutes} min; actual time varies` : "")
+        + (saved && fresh ? ". Capture new also uses the selected saved transcripts." : "");
     }
 
     function renderResearchCandidates() {
@@ -11734,7 +11968,7 @@
         const meta = researchNode("div", null, "soft-note");
         meta.append(researchLink(candidate.channel || "Source", candidate.url, candidate),
           researchNode("span", ` · ${fmtDuration(candidate.duration_s)} · `),
-          researchNode("span", candidate.in_library ? "saved transcript" : (candidate.est_capture || "unknown").replace(/^asr/i, "ASR"), "research-chip"));
+          researchNode("span", candidate.in_library ? "Use saved" : check.disabled ? "Capture unavailable" : "Capture new", "research-chip"));
         const why = researchNode("details");
         why.append(researchNode("summary", "Why ranked here"));
         const reasons = researchNode("ul");
@@ -11826,7 +12060,7 @@
       catch (err) { researchEl("researchProgress").textContent = err.message || "Research could not complete. Retry the action."; }
       finally {
         researchState.busy = false;
-        researchEl("researchDiscover").disabled = false;
+        researchEl("researchDiscover").disabled = researchState.consentBusy;
         researchEl("researchRuns").disabled = false;
         researchSelection();
         scheduleResearchPoll();
@@ -11866,10 +12100,11 @@
       researchEl("researchCopyPrompt").disabled = false;
       renderResearchCandidates();
       renderResearchReport(view);
-      researchEl("researchProgress").textContent = "Choose sources to capture, or copy the prompt if this run is ready.";
+      researchEl("researchProgress").textContent = "Use saved transcripts or capture new sources, then copy the prompt for your AI.";
     }
 
     async function startResearch() {
+      if (researchState.consentBusy) return;
       const question = researchEl("researchQuestion").value.trim();
       const sourceKinds = [...document.querySelectorAll("[data-research-source]")].filter((i) => i.checked && !i.disabled).map((i) => i.dataset.researchSource);
       const scope = { question, source_kinds: sourceKinds, max_sources: Number(researchEl("researchMax").value), max_asr_minutes: Number(researchEl("researchAsr").value) };
@@ -11882,24 +12117,36 @@
       await openResearchRun(start.run_id);
       await loadResearchRuns();
       const notes = [...(found.skipped || []).map((s) => `${s.kind}: ${s.reason}`), ...(found.errors || []).map((s) => `${s.kind}: ${s.code}`)];
-      if (start.needs_consent.length) notes.push(`Enable ${start.needs_consent.join(", ")} in Network consent or Settings.`);
+      if (start.needs_consent.length) notes.push(`Select ${start.needs_consent.join(", ")} in Search sources or Settings.`);
       researchEl("researchProgress").textContent = `${researchState.view.candidates.length} candidates. ${notes.join("; ")}`;
       researchEl("researchCandidatesHeading").focus();
     }
 
-    async function captureResearch() {
+    async function captureResearch(useSaved = false) {
       ++researchState.seq; // An older status read must not replace the new ETA.
       const runId = researchState.runId;
-      const keys = [...researchState.selected];
-      if (!researchRunId(runId) || !keys.length) return;
+      const view = researchState.view;
+      const candidates = (view ? view.candidates : []).filter((c) => researchState.selected.has(c.key)
+        && (c.in_library || (c.capturable !== false && c.kind !== "podcast")));
+      const fresh = candidates.some((c) => !c.in_library);
+      const keys = candidates.map((c) => c.key);
+      if (!researchRunId(runId) || !keys.length || researchState.selected.size > view.scope.max_sources
+          || (useSaved ? fresh : !fresh)) return;
       researchState.pollActive = false;
       scheduleResearchPoll();
       const capture = await researchTool("research_capture", { run_id: runId, keys });
-      researchState.pollActive = true;
-      researchState.pollDeadline = Date.now() + RESEARCH_POLL_MAX_MS;
-      researchState.eta = { ...capture.eta, started: Date.now() };
+      researchState.pollActive = capture.queued.length > 0;
+      researchState.pollDeadline = researchState.pollActive ? Date.now() + RESEARCH_POLL_MAX_MS : 0;
+      researchState.eta = researchState.pollActive ? { ...capture.eta, started: Date.now() } : null;
+      const already = new Set(capture.already.map((c) => c.key));
+      view.candidates.forEach((c) => { if (already.has(c.key)) c.in_library = true; });
+      already.forEach((key) => researchState.selected.delete(key));
+      if (already.size) renderResearchCandidates();
       const skipped = (capture.skipped || []).map((s) => `${s.key}: ${s.reason}`).join("; ");
-      researchEl("researchProgress").textContent = `Queued ${capture.queued.length}; already saved ${capture.already.length}. Estimated ${capture.eta.min_minutes}–${capture.eta.max_minutes} min. ${skipped}`;
+      researchEl("researchProgress").textContent = !capture.queued.length && !capture.already.length
+        ? `No sources were added. ${skipped}` : !capture.queued.length
+        ? `Using ${capture.already.length} saved transcript${capture.already.length === 1 ? "" : "s"}. Copy the prompt for your AI. ${skipped}`
+        : `Queued ${capture.queued.length}; already saved ${capture.already.length}. Estimated ${capture.eta.min_minutes}–${capture.eta.max_minutes} min. ${skipped}`;
     }
 
     function scheduleResearchPoll() {
@@ -11931,7 +12178,14 @@
         researchState.pollActive = Array.isArray(status.items) && status.items.length > 0 && !status.done;
         const view = await authFetch(`/research/${runId}`);
         if (seq !== researchState.seq || researchState.busy || state.activeTab !== "research" || document.hidden) return;
+        const ready = new Set((status.items || []).filter((item) => ["ready", "captioned"].includes(item.state)).map((item) => item.key));
+        view.candidates.forEach((c) => { if (ready.has(c.key)) c.in_library = true; });
+        // Ready sources are already in the run; only unfinished picks need an action.
+        const selectedCount = researchState.selected.size;
+        ready.forEach((key) => researchState.selected.delete(key));
+        const candidatesChanged = JSON.stringify(view.candidates) !== JSON.stringify(researchState.view.candidates);
         researchState.view = view;
+        if (candidatesChanged || selectedCount !== researchState.selected.size) renderResearchCandidates();
         const counts = status.counts || {};
         let eta = "";
         if (!status.done && researchState.eta) {
@@ -11942,7 +12196,7 @@
         researchEl("researchProgress").textContent = `${status.ready_count} ready · ${counts.queued || 0} queued · ${(counts.capturing || 0) + (counts.asr_running || 0)} capturing · ${counts.failed || 0} failed. ASR budget left: ${status.asr_minutes_left} min.${eta} ${failures}`
           + (!status.done ? "" : status.ready_count > 0 ? " Capture finished. Copy the prompt to gather evidence and publish."
             : (status.items || []).length ? " No sources are ready. Review the failures or select other candidates."
-            : " No capture has started. Select candidates and choose Capture selected.");
+            : " No capture has started. Choose Use saved or Capture new.");
         renderResearchReport(view);
       } catch (err) {
         if (seq === researchState.seq) {
@@ -11970,6 +12224,7 @@
     function wireResearch() {
       researchEl("researchForm").addEventListener("submit", (event) => { event.preventDefault(); researchWork(startResearch); });
       researchEl("researchCapture").addEventListener("click", () => researchWork(captureResearch));
+      researchEl("researchUseSaved").addEventListener("click", () => researchWork(() => captureResearch(true)));
       researchEl("researchReload").addEventListener("click", () => researchWork(async () => {
         await loadResearchRuns();
         if (researchState.runId) await openResearchRun(researchState.runId);
@@ -12436,7 +12691,7 @@
       if (state.filters.kind) params.set("kind", state.filters.kind);
       if (state.filters.availability) params.set("availability", state.filters.availability);
       params.set("sort", state.filters.sort || "newest");
-      params.set("match", state.filters.match || "forgiving");
+      params.set("match", state.filters.match || "strict");
       params.set("limit", String(extra.limit ?? state.limit));
       params.set("offset", String(extra.offset ?? state.offset));
       return params;
@@ -12522,6 +12777,7 @@
       const control = libraryFilterControl(key);
       if (control) control.value = "";
       state.filters[key] = "";
+      if (key === "q") state.filters.sort = els.sortFilter.value = "newest";
       setLibraryDateError("");
       updateVideoFacetVisibility();
       renderLibraryFilterChips();
@@ -12590,22 +12846,6 @@
       setSidebarBadge(els.libraryNavCount, visibleCount, "saved sources", { hideWhenZero: true });
     }
 
-    // Shell: Activity's "N failed" badge, shown only while failures wait.
-    // The word says it, so the state never rests on the badge colour; the
-    // nav button's name gains ", N failed" after the active-jobs count.
-    function setActivityFailedBadge(count) {
-      const el = els.activityFailedBadge;
-      if (!el) return;
-      const failed = Math.max(0, Number(count) || 0);
-      el.textContent = failed ? `${failed} failed` : "";
-      el.title = failed ? `${failed} failed capture${failed === 1 ? "" : "s"} in Activity` : "";
-      el.classList.toggle("hidden", failed === 0);
-      const button = typeof el.closest === "function" ? el.closest("button") : null;
-      if (!button) return;
-      const base = String(button.getAttribute("aria-label") || button.dataset.navLabel || "Activity").replace(/, \d+ failed$/, "");
-      button.setAttribute("aria-label", failed ? `${base}, ${failed} failed` : base);
-    }
-
     function setLibraryEmptyState(mode) {
       const states = {
         "no-matches": {
@@ -12634,8 +12874,8 @@
     function resetLibraryFilters() {
       [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
-      els.matchFilter.value = "forgiving";
-      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "forgiving", kind: "", availability: "" };
+      els.matchFilter.value = "strict";
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest", match: "strict", kind: "", availability: "" };
       setLibraryDateError("");
       els.libraryMoreFilters.removeAttribute("open");
       resetLibraryCapture();
@@ -12732,6 +12972,8 @@
         if (request !== state.libraryRequest) return;
         const params = paramsFromFilters();
         params.set("mode", reset ? "auto" : (state.searchMode || "auto"));
+        // All words must narrow even when optional semantic search is ready.
+        if (params.get("q") && params.get("match") === "strict") params.set("mode", "keyword");
         const data = await authFetch(`/memory/search?${params.toString()}`);
         if (request !== state.libraryRequest) return;
         const actualMode = data.search_mode || "keyword";
@@ -12772,7 +13014,7 @@
 
     function renderLibrary() {
       renderTopicOverview();
-      renderLibraryCaptures();
+      const captureCount = renderLibraryCaptures();
       // The helper orders every match by the Sort control (D26), so the
       // rows show in the order they arrive, Load more pages included.
       const rows = state.library.slice();
@@ -12808,7 +13050,7 @@
         els.loadMore.classList.add("hidden");
         els.libraryGrid.innerHTML = "";
         setLibraryEmptyState("empty");
-        els.libraryEmpty.classList.remove("hidden");
+        els.libraryEmpty.classList.toggle("hidden", captureCount > 0);
         return;
       }
       setLibraryHeadline("ready", filtersActive ? state.total : navTotal);
@@ -12833,7 +13075,7 @@
       return "other";
     }
 
-    // The words after "Done ·" on a saved row.
+    // The words after "Ready ·" on a saved row.
     function savedRowDetail(row) {
       const st = String(row && row.source_type || "").toLowerCase();
       if (isNoteContent(row) || st === "note") return "your note";
@@ -12855,14 +13097,13 @@
       return "transcript saved";
     }
 
-    // One state line per saved row: the word carries the state, the dot
-    // only repeats it. A row with a health badge says "Saved" in a neutral
-    // tone, so a green "Done" never sits beside "No transcript".
+    // Comments and analysis run in the background. Only the transcript and
+    // screenshots hold readiness; optional failures stay in the health badge.
     function savedStateLine(row) {
-      if (healthIssues(row && row.health).length) {
+      if (healthIssues(row && row.health).some((issue) => ["transcript", "screenshots"].includes(issue.key))) {
         return `<span class="state-word saved"><i class="state-dot" aria-hidden="true"></i>Saved</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
       }
-      return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Done</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
+      return `<span class="state-word done"><i class="state-dot" aria-hidden="true"></i>Ready</span><span class="state-detail"> &middot; ${htmlEscape(savedRowDetail(row))}</span>`;
     }
 
     function sourceAvailabilityLabel(row) {
@@ -12877,6 +13118,17 @@
     function sourceAvailabilityBadge(row) {
       const label = sourceAvailabilityLabel(row);
       return label ? `<span class="source-availability-badge" title="${label}, still in your library">${label}</span>` : "";
+    }
+
+    function libraryMatchHtml(row) {
+      if (!state.filters.q.trim()) return "";
+      const passage = row.passage_verified === true && row.passage;
+      if (!passage || !passage.text) return '<div class="card-match">No matching quote available.</div>';
+      const seconds = storedTime(passage.timestamp_seconds, passage.start, row.timestamp_seconds);
+      const label = readerClock(seconds);
+      const id = videoIdOf(row);
+      const time = seconds === null || !id ? "" : `<a class="reader-time" href="${htmlEscape(routeHash("item", id))}?t=${seconds}" aria-label="Open ${htmlEscape(rowTitle(row))} at ${label}">${label}</a>`;
+      return `<div class="card-match">${time}<q>${htmlEscape(passage.text)}</q></div>`;
     }
 
     // Re-haul list row: real thumbnail (or a neutral block naming the kind),
@@ -12894,7 +13146,7 @@
       // channel), never the bare host.
       const author = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
       const platformLabel = htmlEscape(live ? `${platformChipLabel(platform)} live` : platformChipLabel(platform));
-      const sourceType = htmlEscape(sourceTypeLabel(row));
+      const sourceType = htmlEscape(podcast ? "Podcast" : sourceTypeLabel(row));
       const hook = htmlEscape(prettyHook(row.hook_type));
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
       const hookChip = row.hook_type && !podcast
@@ -12912,6 +13164,7 @@
           <div class="row-body">
             <div class="card-title">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
+            ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
           </div>
           <div class="row-actions">
@@ -12923,9 +13176,10 @@
     }
 
     async function loadThumbnail(row) {
-      if (!row.thumbnail_path || !row.video_id) return;
+      if (!row.video_id) return;
       const img = document.querySelector(`img[data-thumb-for="${CSS.escape(row.video_id)}"]`);
       if (!img) return;
+      if (!row.thumbnail_path) return;
       try {
         if (!state.blobUrls.has(row.thumbnail_path)) {
           const token = await getToken();
@@ -13104,10 +13358,12 @@
         setLibraryCaptureNote(`YouTube asked Uoink to wait, so it's queued${at ? ` and retries on its own at ${at}` : ""}.`);
       } else if (run.source === "podcast_feed") {
         setLibraryCaptureNote(PODCAST_FEED_SAVED_COPY);
+        navigateTo("#sources");
       } else if (run.endpoint === "/playlist/start") {
         setLibraryCaptureNote("Playlist started. Its videos show under the box as Uoink captures them.");
       } else {
         setLibraryCaptureNote(`Saved${data.title ? ` "${data.title}"` : ` that ${run.label.toLowerCase()}`}. It's at the top of the list.`);
+        loadResume();
         loadLibrary({ reset: true });
         loadLibraryFacets();
       }
@@ -13117,7 +13373,7 @@
 
     function failLibraryRun(run, err) {
       const data = (err && err.data) || {};
-      const failure = libraryFailureCopy(data);
+      const failure = libraryFailureCopy(data, run.url);
       run.state = "failed";
       run.phase = data.failure_phase || data.error_phase || "";
       run.jobId = typeof data.job_id === "string" ? data.job_id : "";
@@ -13133,7 +13389,8 @@
         run.reason = failure.reason;
       }
       run.finishedAt = new Date().toISOString();
-      setLibraryCaptureNote(`That ${run.label.toLowerCase()} didn't save. The reason is in its row.`);
+      const label = run.label.toLowerCase().replace(/\byoutube\b/g, "YouTube").replace(/\bx\b/g, "X").replace(/\breddit\b/g, "Reddit");
+      setLibraryCaptureNote(`That ${label} didn't save. The reason is in its row.`);
       renderLibraryCaptures();
       refreshActivity();
     }
@@ -13352,8 +13609,9 @@
       return before !== undefined && index > before;
     }
 
-    function captureStepLine(index) {
-      return index < 0 ? "" : `${CAPTURE_STEPS[index]} (${index + 1} of 5)`;
+    function captureStepLine(index, phase = "") {
+      if (index === 4 && phase && !/screenshot|thumb/i.test(phase)) return "Saving";
+      return ["Getting details", "Waiting", "Downloading video", "Getting transcript", "Saving screenshots"][index] || "";
     }
 
     const LIBRARY_FAILURE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -13446,6 +13704,7 @@
           : status === "completed" || done > 0) saved = true;
       });
       state.captureSaveBaseline = true;
+      if (saved) loadResume();
       if (!saved || covered || librarySavesReload) return;
       librarySavesReload = true;
       Promise.resolve().then(() => {
@@ -13459,10 +13718,10 @@
     // Only the public error fields belong in a Library failure. Do not
     // fall back to exception objects, raw stderr or command fields. Scrub
     // legacy diagnostics too: older helpers could echo paths or secrets.
-    function libraryFailureCopy(data = {}) {
+    function libraryFailureCopy(data = {}, sourceContext = "") {
       const error = typeof data.error === "string" ? data.error : (data.error && data.error.message);
-      const raw = [data.error_detail, error].find((value) => typeof value === "string" && value.trim()) || "";
-      const detail = raw
+      const raw = [data.error_detail, error, data.last_error].find((value) => typeof value === "string" && value.trim()) || "";
+      const clean = (value) => String(value || "")
         .replace(/https?:\/\/[^\s"'<>]+/gi, "<url>")
         .replace(/(["'])(?:[a-z]:[\\/]|\\\\|\/)[^\r\n]*?\1/gi, "<path>")
         .replace(/[a-z]:[\\/][^\s"'<>;]+|\\\\[^\s"'<>;]+/gi, "<path>")
@@ -13471,11 +13730,20 @@
         .replace(/\b(?:Bearer|Basic)\s+[a-z0-9+/_=.-]+/gi, "[redacted]")
         .replace(/\bsk-[a-z0-9_-]{12,}/gi, "[redacted]")
         .trim().slice(0, 6000);
+      const detail = clean(raw);
       const lines = detail.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
       const cause = (lines.filter((line) => /^ERROR:/i.test(line)).pop() || lines[0] || "")
         .replace(/^ERROR:\s*(?:\[[^\]]+\]\s*)?(?:[\w-]+:\s*)?/i, "")
         .replace(/\s+/g, " ");
-      let reason = cause ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause) : "The capture request failed. Retry now.";
+      const plain = clean(error);
+      // Classify scrubbed text; keep the original only for the source name.
+      const translated = translateMachineMessage(detail, {
+        url: data.source_url || data.url || sourceContext || raw, terminal: true });
+      const generic = "Uoink couldn't finish this one. Details are tucked below.";
+      let reason = translated && translated !== generic ? translated
+        : cause && cause !== generic && !/^(?:\w*Error:|Command:|Exit code:)|^[\w-]+$/.test(cause) ? (cause.length > 180 ? `${cause.slice(0, 177)}...` : cause)
+        : plain && plain !== generic && !/^(?:ERROR:|\w*Error:|Command:|Exit code:)|^[\w-]+$|\n/.test(plain) ? plain
+        : "The capture request failed. Retry now.";
       if (data.retry_exhausted === true) {
         reason += ` ${activityErrorMessage("", "", { retryExhausted: true, attempts: data.attempt_count })}`;
       }
@@ -13502,10 +13770,10 @@
           kind: run.label,
           source: [platformChipLabel(run.platform || platformOf({ source_url: run.url })), fmtAge(run.startedAt) || "just now"].join(" · "),
           tone: failed ? "fail" : waiting ? "wait" : "now",
-          word: failed ? (index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed") : waiting ? "Waiting" : "Capturing",
+          word: failed ? (index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed") : captureStepLine(index, live && live.phase) || "Capturing",
           detail: failed ? run.reason
             : waiting ? "one YouTube capture at a time"
-              : (captureStepLine(index) || "started here, this can take a few minutes"),
+              : index < 0 ? "started here, this can take a few minutes" : "",
           errorDetail: failed ? run.errorDetail : "",
           strip: failed ? captureStripHtml(index, { failed }) : captureStripHtml(index, { advanced: captureAdvanced(run.id, index) }),
           actions: failed
@@ -13527,17 +13795,18 @@
         const index = stateValue === "queued" && !phase ? 1 : captureStepIndex(phase, stateValue);
         const key = `job:${job.id}`;
         const playlist = Number(job.videos_total) > 1;
+        const podcast = job.kind === "podcast_transcribe";
         const waiting = stateValue === "queued" || index === 1;
         items.push({
           key,
           title: job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.source_url || "Capture",
-          kind: playlist ? "playlist" : (job.kind === "retranscribe" ? "transcript" : "capture"),
-          source: [platformChipLabel(platformOf({ source_url: job.source_url || job.url || "" })),
+          kind: podcast ? "Podcast" : playlist ? "playlist" : (job.kind === "retranscribe" ? "transcript" : "capture"),
+          source: [podcast ? "Podcast" : platformChipLabel(platformOf({ source_url: job.source_url || job.url || "" })),
             playlist ? `${Number(job.videos_done) || 0} of ${job.videos_total} videos` : "",
             fmtAge(job.started_at || job.updated_at)].filter(Boolean).join(" · "),
           tone: waiting ? "wait" : "now",
-          word: waiting ? "Waiting" : "Capturing",
-          detail: waiting ? "one YouTube capture at a time" : (captureStepLine(index) || "working on it"),
+          word: waiting ? "Waiting" : captureStepLine(index, phase) || "Capturing",
+          detail: waiting && job.kind !== "podcast_transcribe" ? "one YouTube capture at a time" : "",
           strip: captureStripHtml(index, { advanced: captureAdvanced(key, index) }),
           actions: "",
         });
@@ -13561,7 +13830,7 @@
         };
         if (stateValue === "running") {
           const index = captureStepIndex(row.phase);
-          items.push({ ...base, tone: "now", word: "Capturing", detail: captureStepLine(index) || "trying again now",
+          items.push({ ...base, tone: "now", word: captureStepLine(index, row.phase) || "Capturing", detail: "",
             strip: captureStripHtml(index, { advanced: captureAdvanced(key, index) }), actions: "" });
           return;
         }
@@ -13590,8 +13859,8 @@
         items.push({
           key: `job:${job.id}`,
           title: job.title || job.playlist_title || url || "Capture",
-          kind: Number(job.videos_total) > 1 ? "playlist" : "capture",
-          source: [platformChipLabel(platformOf({ source_url: url })), fmtAge(job.completed_at || job.updated_at)].filter(Boolean).join(" · "),
+          kind: job.kind === "podcast_transcribe" ? "Podcast" : Number(job.videos_total) > 1 ? "playlist" : "capture",
+          source: [job.kind === "podcast_transcribe" ? "Podcast" : platformChipLabel(platformOf({ source_url: url })), fmtAge(job.completed_at || job.updated_at)].filter(Boolean).join(" · "),
           tone: "fail",
           word: index >= 0 ? `Failed at ${CAPTURE_STEPS[index]}` : "Failed",
           detail: failure.reason,
@@ -13610,7 +13879,7 @@
           <div class="row-body">
             <div class="card-title">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
-            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span><span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span></div>
+            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${item.detail ? `<span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span>` : ""}</div>
             ${renderErrorDetails(item.errorDetail)}
           </div>
           ${item.actions ? `<div class="row-actions capture-actions">${item.actions}</div>` : ""}
@@ -13620,7 +13889,7 @@
 
     function renderLibraryCaptures() {
       const wrap = els.libraryCaptures;
-      if (!wrap) return;
+      if (!wrap) return 0;
       reconcileLibraryRuns();
       const items = libraryCaptureItems();
       const shown = items.slice(0, LIBRARY_CAPTURE_ROWS);
@@ -13628,6 +13897,13 @@
       wrap.innerHTML = shown.map(libraryCaptureRowHtml).join("")
         + (more > 0 ? `<p class="capture-more"><a href="#activity">${more} more in Activity</a></p>` : "");
       wrap.classList.toggle("hidden", !items.length);
+      const libraryState = state.libraryState || (state.library.length ? "matches" : "empty_corpus");
+      if (["no_matches", "empty_corpus"].includes(libraryState)) {
+        setLibraryEmptyState(libraryState === "no_matches" ? "no-matches" : "empty");
+      }
+      els.libraryEmpty.classList.toggle("hidden", libraryState !== "no_matches"
+        && (items.length > 0 || state.library.length > 0 || libraryState !== "empty_corpus"));
+      return items.length;
     }
 
     // Split view: the list row of the open item is marked, so the list
@@ -14281,7 +14557,8 @@
              `Last exit: ${recovery.last_exit_code == null ? "unknown" : recovery.last_exit_code}. Restarts: ${recovery.restart_count || 0}.`,
              recovery.last_start_at ? `Last start: ${recovery.last_start_at}.` : "",
              recovery.last_stop_at ? `Last stop: ${recovery.last_stop_at}.` : ""].filter(Boolean).join(" ") : "";
-        const fix = details || (ok ? "" : copy.fix);
+        pill.title = details;
+        const fix = ok && !failed ? "" : details || copy.fix;
         if (els.helperOfflineFix.textContent !== fix) els.helperOfflineFix.textContent = fix;
         els.helperOfflineFix.classList.toggle("hidden", !fix);
       }
@@ -14343,16 +14620,28 @@
         || (row.last_error === "youtube_rate_limit" ? "waiting" : ""))) || row.current_video_phase || row.phase || "";
       const index = done ? 4 : captureStepIndex(phase, failed || cancelled ? "" : status);
       const waiting = !failed && !done && !cancelled && (["queued", "pending"].includes(status) || index === 1);
-      const label = done ? "Done" : cancelled ? "Cancelled" : failed
+      const label = done ? "Ready" : cancelled ? "Cancelled" : failed
         ? (index < 0 ? "Failed" : `Failed at ${CAPTURE_STEPS[index]} (${index + 1} of 5)`)
-        : waiting ? "Waiting · one YouTube capture at a time"
-        : ["Capturing", captureStepLine(index)].filter(Boolean).join(" · ");
+        : waiting ? (row.kind === "podcast_transcribe" ? "Waiting" : "Waiting · one YouTube capture at a time")
+        : captureStepLine(index, phase) || "Capturing";
       const steps = CAPTURE_STEPS.map((label, step) => ({ label, state: done ? "done" : cancelled ? "todo"
         : step < index ? "done" : step !== index ? "todo" : failed ? "fail" : "now" }));
       return { index, failed, done, cancelled, waiting, label, steps };
     }
 
     function activityIdentity(row) {
+      const corpus = row.result && row.result.corpus;
+      if (corpus && corpus.video_id) return String(corpus.video_id);
+      if (row.kind === "podcast_transcribe") {
+        const episode = row.episode_id || (row.result && row.result.episode_id);
+        const saved = episode && (state.library || []).find((item) =>
+          String(item.episode_id || metadataOf(item).episode_id) === String(episode));
+        if (saved) return videoIdOf(saved);
+        const published = episode && (state.jobs || []).find((job) => job.kind === "podcast_transcribe"
+          && String(job.episode_id || (job.result && job.result.episode_id)) === String(episode)
+          && job.result && job.result.corpus && job.result.corpus.video_id);
+        return published ? String(published.result.corpus.video_id) : `episode:${episode || row.id}`;
+      }
       return failureKey(row) || String(row.source_url || row.url || "");
     }
 
@@ -14381,8 +14670,17 @@
       const used = new Set();
       const entries = [];
       const seenFailures = new Set();
+      // Feed URLs and episode page URLs can differ. The published corpus ID
+      // joins the saved item; the latest attempt represents each episode.
+      const episodes = new Map();
+      for (const job of jobs.filter((job) => job.kind === "podcast_transcribe")) {
+        const identity = activityIdentity(job);
+        const before = episodes.get(identity);
+        if (!before || (timeOf(activityTime(job)) || 0) > (timeOf(activityTime(before)) || 0)) episodes.set(identity, job);
+      }
       for (const job of jobs) {
         const identity = activityIdentity(job);
+        if (job.kind === "podcast_transcribe" && episodes.get(identity) !== job) continue;
         const failed = normalizedStatus(job) === "failed";
         if (failed && identity && seenFailures.has(identity)) continue;
         if (failed && identity) seenFailures.add(identity);
@@ -14466,6 +14764,9 @@
 
     function activitySource(row) {
       const url = row.source_url || row.url || "";
+      if (row.kind === "podcast_transcribe" || isPodcastContent(row)) {
+        return [row.channel || row.uploader || sourceNameFromUrl(url), "Podcast"].filter(Boolean).join(" · ");
+      }
       return [row.channel || row.uploader || sourceNameFromUrl(url) || humanLabel(row.kind) || "Capture",
         isMobileQueued(row) ? "from mobile playlist" : "",
         row.videos_total ? `${row.videos_done || 0} of ${row.videos_total} videos` : ""].filter(Boolean).join(" · ");
@@ -14534,6 +14835,11 @@
 
     function activityRowHtml(entry) {
       const row = entry.row;
+      const saved = entry.saved || (row.kind === "podcast_transcribe" && (state.library || [])
+        .find(item => videoIdOf(item) === row.result?.corpus?.video_id));
+      const source = saved && platformOf(saved) === "podcast"
+        && ["", "untitled podcast"].includes(String(row.channel || "").trim().toLowerCase())
+        ? { ...row, channel: saved.channel } : row;
       const model = entry.model || activitySteps(row);
       const retryCopy = activityRetrySchedule(entry);
       // The strip describes current work; the drawer keeps the last failed
@@ -14553,7 +14859,7 @@
       return `<article class="activity-row" data-activity-key="${htmlEscape(entry.key)}">
         <div class="activity-row-main">
           <h3 class="activity-row-title">${htmlEscape(title)}</h3>
-          <p class="activity-meta">${htmlEscape(activitySource(row))}</p>
+          <p class="activity-meta">${htmlEscape(activitySource(source))}</p>
           <div class="activity-state">${activityStripHtml(display, entry.key)}<span class="${display.failed ? "activity-failed-label" : "activity-step-label"}">${display.failed ? '<span aria-hidden="true">✕</span> ' : ""}${htmlEscape(display.label)}</span></div>
           <p class="activity-meta">${[htmlEscape(activityTranscript(entry)), time ? `<time datetime="${htmlEscape(when)}">${htmlEscape(time)}</time>` : "Time not reported"].filter(Boolean).join(" · ")}</p>
           ${retryCopy && (model.failed || entry.retryPending || (entry.pending && normalizedStatus(entry.pending) === "running")) ? `<p class="activity-retry-copy">${htmlEscape(retryCopy)}</p>` : ""}
@@ -14576,11 +14882,13 @@
       const active = entries.filter((entry) => entry.group === "progress");
       const activeCount = active.length;
       // Pending retries count as active work, even with a failed last step.
-      const failedJobs = entries.filter((entry) => entry.group === "attention" && entry.job).map((entry) => ({ ...entry.row, state: "failed" }));
-      const queueFailedDeduped = entries.filter((entry) => entry.group === "attention" && !entry.job);
-      els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...` : "Nothing uoinking right now.";
-      setSidebarBadge(els.activityNavCount, activeCount, "active jobs");
-      setActivityFailedBadge(failedJobs.filter((job) => normalizedStatus(job) === "failed").length + queueFailedDeduped.length);
+      const failedCount = entries.filter((entry) => entry.group === "attention").length;
+      const attention = failedCount ? `${failedCount} ${failedCount === 1 ? "capture needs" : "captures need"} attention.` : "";
+      els.activityHeadline.innerHTML = activeCount ? `${activeCount} in flight uoinking...${attention ? ` ${attention}` : ""}`
+        : attention || "Nothing uoinking right now.";
+      setSidebarBadge(els.activityNavCount, activeCount + failedCount,
+        `${activeCount + failedCount === 1 ? "capture" : "captures"} in progress or needing attention${failedCount ? `, ${failedCount} failed` : ""}`);
+      els.activityNavCount.classList.toggle("nav-failed", failedCount > 0);
       const cancelableCount = entries.filter((entry) => entry.pending && ["pending", "running"].includes(normalizedStatus(entry.pending))
         || entry.job && ["queued", "running"].includes(normalizedStatus(entry.row))).length;
       els.cancelAll.disabled = cancelableCount === 0;
@@ -14630,6 +14938,7 @@
       };
       put("captureFailureTitle", row.title || row.playlist_title || (row.current_video && row.current_video.title) || row.url || row.source_url || "Capture");
       put("captureFailureLabel", entry.model.label);
+      put("captureFailureReason", libraryFailureCopy({ ...row, error_detail: activityLastError(row) }, row.error_detail || row.last_error || row.error).reason);
       put("captureFailureMeta", [activitySource(row), activityTranscript(entry), captureClock(activityTime(row)) || "Time not reported"].filter(Boolean).join(" · "));
       const words = { done: "Done", fail: "Failed", now: "In progress", todo: "Not reached" };
       const symbols = { done: "✓", fail: "✕", now: "○", todo: "○" };
@@ -15082,10 +15391,23 @@
     }
 
     function syncWritingGenerateState() {
-      const hasPick = selectedWritingMode() === "research"
+      const mode = selectedWritingMode();
+      const agentReady = hasWritingAgentBridge() || connectedAgents().length > 0;
+      const canGenerate = mode === "research" || agentReady
+        || (mode !== "script" && Boolean(state.settings && state.settings.anthropic_key_set));
+      const hasPick = mode === "research"
         || Boolean(els.writingSource.value && state.writingSelectedSourceRow);
-      document.getElementById("generateWriting").disabled = !hasPick
+      document.getElementById("generateWriting").disabled = !hasPick || !canGenerate
         || state.writingGenerating || state.researchRunning || state.researchSaving;
+      const hint = document.getElementById("writingAgentHint");
+      if (hint) {
+        const showHint = state.agentDetectionLoaded && !canGenerate;
+        hint.textContent = showHint ? "Connect a writing agent to generate." : "";
+        hint.classList.toggle("hidden", !showHint);
+      }
+      if (els.generateResearchPanel.dataset.kind === "script") {
+        els.generateResearchPanel.classList.toggle("hidden", !agentReady || mode !== "script");
+      }
     }
 
     // The selected source renders as a two-line chip in place of the raw
@@ -15794,7 +16116,7 @@
       const shots = visibleWritingScreenshots();
       const selectedCount = state.writingSelectedScreenshots.size;
       const dedupeRemoved = Number(state.writingScreenshotMeta.dedupe_removed || 0);
-      document.getElementById("pickBestScreenshots").textContent = `Pick best for ${selectedWritingMode() === "blog" ? "Blog" : selectedWritingMode() === "newsletter" ? "Newsletter" : selectedWritingMode() === "thread" ? "Thread" : selectedWritingMode() === "script" ? "Blog" : "Tweet"}`;
+      document.getElementById("pickBestScreenshots").textContent = `Pick best for ${selectedWritingMode()}`;
       els.writingScreenshotSummary.textContent = state.writingScreenshots.length
         ? `${selectedCount} selected · ${shots.length} shown${dedupeRemoved ? ` · ${dedupeRemoved} visual duplicate${dedupeRemoved === 1 ? "" : "s"} hidden` : ""}`
         : state.writingScreenshotMeta.error
@@ -16447,10 +16769,15 @@
       const body = await generateAssemblyBody();
       const data = await requestCorpusAssembly(body);
       const assembled = Array.isArray(data.assembled) ? data.assembled : [];
-      showGenerateResearch(
-        "Script grounding",
-        `<span class="soft-note">${assembled.length} saved example${assembled.length === 1 ? "" : "s"} ready for the connected writing agent.</span>`
-      );
+      if (hasWritingAgentBridge() || connectedAgents().length) {
+        showGenerateResearch(
+          "Script examples",
+          `<span class="soft-note">${assembled.length} saved example${assembled.length === 1 ? "" : "s"} ready for your writing agent.</span>`
+        );
+        els.generateResearchPanel.dataset.kind = "script";
+      } else {
+        els.generateResearchPanel.classList.add("hidden");
+      }
       return {
         ...data,
         workspace: body,
@@ -16465,6 +16792,7 @@
     }
 
     function showGenerateResearch(title, content) {
+      els.generateResearchPanel.dataset.kind = "";
       els.generateResearchPanel.classList.remove("hidden");
       els.generateResearchPanel.innerHTML = `<strong>${htmlEscape(title)}</strong>${content}`;
     }
@@ -18367,6 +18695,9 @@
       const cut = raw.indexOf("/");
       let head = (cut < 0 ? raw : raw.slice(0, cut)).toLowerCase();
       let rest = cut < 0 ? "" : raw.slice(cut + 1);
+      const timeCut = head === "item" ? rest.indexOf("?") : -1;
+      const seconds = timeCut < 0 ? null : storedTime(new URLSearchParams(rest.slice(timeCut + 1)).get("t"));
+      if (timeCut >= 0) rest = rest.slice(0, timeCut);
       try { rest = decodeURIComponent(rest); } catch (_) {}
       if (Object.prototype.hasOwnProperty.call(ROUTE_ALIASES, head)) {
         const alias = ROUTE_ALIASES[head];
@@ -18376,7 +18707,8 @@
       }
       if (!head) return { tab: "library", hash: "#library" };
       if (head === "item") {
-        return rest ? { tab: "yoink", id: rest, hash: routeHash("item", rest) } : { tab: "library", hash: "#library" };
+        return rest ? { tab: "yoink", id: rest, ...(seconds === null ? {} : { seconds }),
+          hash: routeHash("item", rest) + (seconds === null ? "" : `?t=${seconds}`) } : { tab: "library", hash: "#library" };
       }
       if (head === "evidence") {
         return rest ? { tab: "evidence", id: rest, hash: routeHash("evidence", rest) } : { tab: "evidence", hash: "#evidence" };
@@ -18545,18 +18877,18 @@
     // Shows the screen a parsed route names, without pushing history.
     function applyRoute(route) {
       if (route.tab === "yoink") {
-        // Back to the item already loaded (from its Evidence, say): show
-        // it again instead of fetching it twice.
-        if (state.activeTab !== "yoink" && videoIdOf(state.selectedYoink) === route.id) {
-          switchTab("yoink", { fromRoute: true });
+        // Reuse the selected item for Back or a different timestamp.
+        if (videoIdOf(state.selectedYoink) === route.id) {
+          if (state.activeTab !== "yoink") switchTab("yoink", { fromRoute: true });
+          revealReaderMoment(route.seconds);
           return;
         }
         // A row the page already has opens straight away; a fresh deep
         // link looks the saved row up first (never an id-only stand-in,
         // which would read as no folder and Uncategorized).
         const row = knownLibraryRow(route.id);
-        if (row) openYoinkDetail(row, { fromRoute: true });
-        else openItemFromRoute(route.id);
+        if (row) openYoinkDetail(row, { fromRoute: true, seconds: route.seconds });
+        else openItemFromRoute(route.id, route);
         return;
       }
       if (route.tab === "evidence" && route.id) {
@@ -18698,7 +19030,7 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
-        state.filters.match = els.matchFilter.value || "forgiving";
+        state.filters.match = els.matchFilter.value || "strict";
         updateVideoFacetVisibility();
         state.libraryRequest++;
         state.libraryResetPending = true;
@@ -19285,6 +19617,7 @@
         }
         const card = event.target.closest("[data-folder]");
         if (card && (card.dataset.videoId || card.dataset.folder)) {
+          if (event.target.closest("a")) return;
           openYoinkDetail(rowFromCard(card));
           focusReaderHeading();
           return;

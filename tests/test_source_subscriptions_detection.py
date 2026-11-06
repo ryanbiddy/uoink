@@ -254,6 +254,7 @@ def test_s07_podcast_identity_fallback_and_control_characters(tmp_path):
     service = ss.SourceSubscriptionService(index=idx, clock=Clock(), adapters=ss.default_adapters(fetch),
                                            backend=FakeBackend(), instance_id="t")
     sid = register(service, "podcast_rss", FEED_URL)["source_id"]
+    turn_on(service, sid)
     result = service.detection_pass()[0]
     assert result["ok"] and result["rejected"] == 2 and result["conflicts"] == 1
     stored = {r["entry_id"]: r for r in items(service, sid)}

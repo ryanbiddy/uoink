@@ -203,6 +203,7 @@ function makePage() {
           q: params.get("q") || "",
           match: params.get("match"),
           sort: params.get("sort"),
+          mode: params.get("mode"),
           platform: params.get("platform") || "",
           hook_type: params.get("hook_type") || "",
           offset: Number(params.get("offset") || 0),
@@ -260,8 +261,14 @@ function makePage() {
   vm.runInContext(`${SCRIPT}
 ;globalThis.__page = { state, els, wireEvents, saveNote, saveImage, setImageSelection };`, ctx);
   const page = ctx.__page;
+  for (const id of ["sortFilter", "matchFilter"]) {
+    const select = MARKUP.match(new RegExp(`<select[^>]*id="${id}"[^>]*>([\\s\\S]*?)</select>`))[1];
+    const options = [...select.matchAll(/<option value="([^"]*)"([^>]*)>/g)];
+    page.els[id].value = (options.find((option) => /selected/.test(option[2])) || options[0])[1];
+  }
   page.wireEvents();
-  return { page, state: page.state, els: page.els, requests, searches };
+  return { page, state: page.state, els: page.els, requests, searches, document, docListeners,
+    run: (code) => vm.runInContext(code, ctx) };
 }
 
 // What a user's edit fires: wireEvents() listens for "input" on INPUTs (the
@@ -710,27 +717,156 @@ async function groupRefreshBeforeDebounce() {
 
 async function groupSearchModes() {
   const p = makePage();
-  await typeSearch(p, "lunar lander");
-  check(p.searches[0].match === "forgiving", "search defaults to forgiving");
+  await typeSearch(p, "pressurized rover");
+  check(p.searches[0].match === "strict", "search defaults to all words");
   check(p.searches[0].sort === "relevance", "query defaults to Best match");
   check(p.els.sortFilter.value === "relevance", "sort control displays Best match");
+  check(p.els.matchFilter.value === "strict", "match control displays All words");
+  check(p.searches[0].mode === "keyword", "semantic search cannot broaden All words");
+  console.log("library_search_params: " + JSON.stringify(p.searches[0]));
   edit(p.els.sortFilter, "oldest");
   await sleep(DEBOUNCE_WAIT_MS);
   check(p.searches[1].sort === "oldest", "date sort stays available");
-  edit(p.els.matchFilter, "strict");
+  edit(p.els.matchFilter, "forgiving");
   await sleep(DEBOUNCE_WAIT_MS);
-  check(p.searches[2].match === "strict", "Exact words sends strict");
+  check(p.searches[2].match === "forgiving", "Any words stays available");
+  check(p.searches[2].mode === "auto", "Any words keeps optional semantic search");
   check(p.searches[2].sort === "oldest", "matching change preserves chosen date order");
-  p.searches[0].answer([row("stale", "Old forgiving result")]);
-  p.searches[2].answer([row("strict", "Exact result")]);
+  p.searches[0].answer([row("stale", "Old strict result")]);
+  p.searches[2].answer([row("broad", "Any word result")]);
   await settle();
-  check(JSON.stringify(libraryIds(p)) === JSON.stringify(["strict"]), "late forgiving answer cannot replace strict results");
+  check(JSON.stringify(libraryIds(p)) === JSON.stringify(["broad"]), "late strict answer cannot replace chosen matching");
+  await typeSearch(p, "pressurized rover cabin");
+  check(p.searches[3].sort === "oldest" && p.searches[3].match === "forgiving", "editing a query preserves chosen options");
   await typeSearch(p, "");
-  check(p.searches[3].sort === "newest", "clearing query restores newest browse order");
+  check(p.searches[4].sort === "newest", "clearing query restores newest browse order");
+  p.els.clearFilters.dispatch("click");
+  await settle();
+  check(p.els.matchFilter.value === "strict" && p.els.sortFilter.value === "newest", "Clear filters restores defaults");
+  await typeSearch(p, "pressurized rover");
+  p.run('removeLibraryFilter("q")');
+  await settle();
+  check(p.searches.at(-1).q === "" && p.searches.at(-1).sort === "newest", "removing the Search chip restores newest browse order");
+  check(p.els.sortFilter.value === "newest", "the sort control follows the removed search");
+}
+
+async function groupSearchQuotes() {
+  const p = makePage();
+  await typeSearch(p, "pressurized rover");
+  const hit = { ...row("moon", "Moon Base episode"), source_type: "episode", platform: "podcast",
+    passage_verified: true, timestamp_seconds: 92.5,
+    passage: { text: 'A pressurized rover keeps <crew> & equipment safe.', start: 92.5, timing: "coarse" } };
+  p.searches[0].answer([hit]);
+  await settle();
+  const html = p.els.libraryGrid.innerHTML;
+  check(html.includes('A pressurized rover keeps &lt;crew&gt; &amp; equipment safe.'), "row shows the escaped verified quote");
+  check(/<a[^>]*href="#item\/moon\?t=92\.5"[^>]*>1:32<\/a>/.test(html), "quote has a timestamp link to the saved item");
+  check(html.includes('aria-label="Open Moon Base episode at 1:32"'), "timestamp link names the item and time");
+  for (const [passage, itemTime, expected] of [
+    [{ timestamp_seconds: 12.48, start: 10 }, 0, 12.48],
+    [{ timestamp_seconds: "", start: 92.5 }, 0, 92.5],
+    [{ timestamp_seconds: 0, start: 92.5 }, 214, 0],
+    [{ start: null }, 214, 214],
+  ]) {
+    p.state.library = [{ ...hit, timestamp_seconds: itemTime, passage: { text: hit.passage.text, ...passage } }];
+    p.run("renderLibrary()");
+    check(p.els.libraryGrid.innerHTML.includes(`href="#item/moon?t=${expected}"`), "quote prefers its own stored time, with the item time as fallback", [passage, itemTime, expected]);
+  }
+  p.state.library = [{ ...hit, video_id: "", slug: "", folder: "fixtures/moon" }];
+  p.run("renderLibrary()");
+  check(p.els.libraryGrid.innerHTML.includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "folder-only row keeps its quote without a broken timestamp link");
+  p.state.library = [{ ...hit, timestamp_seconds: 0, passage: { ...hit.passage, start: 0 } }];
+  p.run("renderLibrary()");
+  check(p.els.libraryGrid.innerHTML.includes('?t=0"') && p.els.libraryGrid.innerHTML.includes('>0:00</a>'), "zero is a real stored timestamp");
+  p.state.library = [{ ...hit, timestamp_seconds: null, passage: { text: hit.passage.text, timing: "not_timed" } }];
+  p.run("renderLibrary()");
+  check(p.els.libraryGrid.innerHTML.includes("A pressurized rover") && !p.els.libraryGrid.innerHTML.includes("?t="), "untimed text shows a quote without an invented time");
+  p.state.library = [{ ...hit, passage_verified: false, _snippet: "Unrelated opening text" }];
+  p.run("renderLibrary()");
+  check(!p.els.libraryGrid.innerHTML.includes("?t=") && !p.els.libraryGrid.innerHTML.includes("A pressurized rover"), "unverified passage cannot become a quote or link");
+  check(!p.els.libraryGrid.innerHTML.includes("Unrelated opening text"), "metadata matches do not quote unrelated discovery text");
+  p.state.library = [hit];
+  p.state.filters.q = "";
+  p.run("renderLibrary()");
+  check(!p.els.libraryGrid.innerHTML.includes("A pressurized rover"), "browse rows do not retain search quotes");
+}
+
+async function groupSearchMoments() {
+  const p = makePage();
+  const route = p.run('parseRoute("#item/moon%2Fbase?t=92.5")');
+  check(route.id === "moon/base" && route.seconds === 92.5, "deep link keeps item identity and precise stored seconds");
+  check(route.hash === "#item/moon%2Fbase?t=92.5", "timed item route round trips");
+  for (const value of ["", "-2", "Infinity", "nope"]) {
+    check(p.run(`parseRoute("#item/moon?t=${value}").seconds`) == null, `invalid time ${value} does not invent a moment`);
+  }
+  const hit = row("moon", "Moon Base episode");
+  p.state.library = [hit];
+  const paragraphs = [0, 92.5, 150].map((seconds) => {
+    const el = new FakeEl("para", "DIV");
+    el.dataset.readerSeconds = String(seconds);
+    el.scrollIntoView = () => { p.scrolled = seconds; };
+    el.focus = () => { p.focused = seconds; };
+    return el;
+  });
+  p.document.querySelectorAll = (selector) => selector === ".reader-para[data-reader-seconds]" ? paragraphs : [];
+  p.run(`
+    globalThis.detailReads = 0;
+    globalThis.markdownReads = 0;
+    loadYoinkDetails = async () => {
+      detailReads++;
+      return { transcript: [{ start: 92.5, end: 100, text: "A pressurized rover." }] };
+    };
+    loadYoinkMarkdown = async () => { markdownReads++; return ""; };
+    loadLibraryActivity = startLibraryActivityTimer = stopLibraryActivityTimer = () => {};
+    navigateTo("#item/moon?t=92.5");
+  `);
+  await settle();
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.state.selectedYoink.video_id === "moon", "timestamp link opens the saved item");
+  check(p.scrolled === 92.5 && p.focused === 92.5, "reader scrolls and focuses the paragraph at the exact fractional match time");
+  const rendered = p.run('readerTranscriptHtml(state.selectedYoink, state.selectedYoinkSidecar)');
+  check(rendered.includes('data-reader-seconds="92.5"'), "reader paragraphs expose their precise stored time for the jump");
+  const untimed = p.run('readerTranscriptHtml(state.selectedYoink, { transcript: [{ text: "No stored time." }] })');
+  check(!untimed.includes("data-reader-seconds"), "missing segment time does not become an undefined reader timestamp");
+  p.run('navigateTo("#item/moon?t=0")');
+  await settle();
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.scrolled === 0, "a second timestamp on the same item moves to the new moment");
+  check(p.run("detailReads === 1 && markdownReads === 1"), "a second timestamp on the open item reuses its loaded content");
+  p.run('navigateTo("#library"); navigateTo("#item/moon?t=150")');
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.scrolled === 150 && p.run("detailReads === 1 && markdownReads === 1"), "returning to the selected item reveals the new moment without fetching it again");
+  p.state.library.push(row("rovers", "Rovers video"));
+  p.run(`
+    loadYoinkDetails = () => {
+      detailReads++;
+      return new Promise((resolve) => { globalThis.finishDetails = resolve; });
+    };
+    navigateTo("#item/rovers?t=0");
+    navigateTo("#item/rovers?t=150");
+  `);
+  await p.run("new Promise(requestAnimationFrame)");
+  p.run('finishDetails({ transcript: [{ start: 150, text: "Another rover." }] })');
+  await settle();
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.scrolled === 150, "a timestamp changed during loading is still the moment revealed when content arrives");
+  check(p.run("detailReads === 2 && markdownReads === 2"), "changing the pending item's timestamp does not duplicate its fetches");
+  p.scrolled = null;
+  p.run(`
+    loadYoinkDetails = () => new Promise((resolve) => { globalThis.finishDetails = resolve; });
+    navigateTo("#item/moon?t=92.5");
+    navigateTo("#library");
+    finishDetails({ transcript: [{ start: 90, text: "A pressurized rover." }] });
+  `);
+  await settle();
+  await p.run("new Promise(requestAnimationFrame)");
+  check(p.state.activeTab === "library" && p.scrolled === null, "late item details cannot move the user after leaving the reader");
 }
 
 const GROUPS = {
   search_modes: groupSearchModes,
+  search_quotes: groupSearchQuotes,
+  search_moments: groupSearchMoments,
   typing: groupTyping,
   stale_error: groupStaleError,
   load_more: groupLoadMore,

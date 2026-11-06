@@ -24,5 +24,6 @@ assert.ok(els.helperOfflineFix.textContent.includes('Start menu'));
 context.fetch = async () => ({json: async () => ({ok: true, version: 'fixture', helper_recovery: {...recovery, status: 'running', reason: 'Helper is ready.', action: ''}})});
 await vm.runInContext('refreshHealth()', context);
 assert.equal(els.helperStatusText.textContent, 'Running on this PC');
-assert.ok(els.helperOfflineFix.textContent.includes('Restarts: 3'));
+assert.equal(els.helperOfflineFix.textContent, '');
+assert.ok(els.runningPill.title.includes('Restarts: 3'));
 console.log('Dashboard recovery states and text escaping: passed');

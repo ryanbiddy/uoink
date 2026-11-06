@@ -1,5 +1,5 @@
 ﻿// Setup owns install, verify and the first capture. Settings live in the dashboard.
-// Agent connections now expose all 91 tools; capped clients can use UOINK_MCP_TOOLSET=core.
+// Agent connections now expose all 99 tools; capped clients can use UOINK_MCP_TOOLSET=core.
 "use strict";
 const SERVER = "http://127.0.0.1:5179";
 const POLL_MS = 2000;
@@ -10,10 +10,6 @@ const PUBLISHED_INSTALLER_VERSION = "3.14.1";
 // until that release asset exists; bump it with PUBLISHED_INSTALLER_VERSION.
 const PUBLISHED_MAC_DMG = "3.14.1";
 const RUNNING_COPY = { win: "Running on this PC", mac: "Running on this Mac", linux: "Running on this computer" };
-const SUGGESTED_VIDEO = {
-  url: "https://www.youtube.com/watch?v=8rABwKRsec4",
-  title: "Andrej Karpathy on AGI, hiring, and the future of programming",
-};
 const $ = (id) => document.getElementById(id);
 let platformOs = "win";
 let helperUp = false;
@@ -53,7 +49,7 @@ function setPlatform(os) {
     $("download-btn").textContent = "Download for Mac";
   }
   $("install-instructions").textContent = windows
-    ? "Download the Windows installer, open it, and follow the installation steps. Agent connections include all 91 Uoink tools."
+    ? "Download the Windows installer, open it, and follow the installation steps. Agent connections include all 99 Uoink tools."
     : macDownload
       ? "Download Uoink for Mac (Apple silicon), open it, and drag Uoink to Applications. Then open Uoink from Applications."
       : `No ${platformOs === "mac" ? "Mac" : "Linux"} download is published yet. Use the manual install instructions.`;
@@ -226,17 +222,31 @@ async function readCaptureResult() {
 
 async function startFirstCapture() {
   if (!helperUp || captureStarting || captureId) return;
+  const url = STC.normalizeYouTubeUrl($("first-capture-url").value.trim());
+  if (!url) {
+    $("capture-result").hidden = false;
+    $("capture-status").hidden = true;
+    $("capture-destination").hidden = true;
+    $("capture-error").textContent = "Paste a YouTube video link first.";
+    $("capture-error").hidden = false;
+    $("first-capture-url").setAttribute("aria-invalid", "true");
+    $("first-capture-url").focus();
+    return;
+  }
+  $("first-capture-url").removeAttribute("aria-invalid");
   captureStarting = true;
   captureFinished = false;
   $("capture-result").hidden = false;
   $("capture-error").hidden = true;
+  $("capture-status").hidden = false;
+  $("capture-destination").hidden = false;
   $("capture-status").textContent = "Starting capture…";
   $("capture-destination").href = `${SERVER}/dashboard#activity`;
   $("capture-destination").textContent = "View in Activity";
   renderAvailability();
   try {
     const result = await chrome.runtime.sendMessage({ type: "popupCapture", job: {
-      route: "video", url: SUGGESTED_VIDEO.url, title: SUGGESTED_VIDEO.title, saveOnly: true,
+      route: "video", url, saveOnly: true,
     } });
     if (!result || !result.ok || !result.id) throw new Error(result && result.error || "The extension could not start this capture. Try again.");
     captureId = result.id;
@@ -264,6 +274,9 @@ $("skip-install").addEventListener("click", (event) => {
 });
 $("verify-btn").addEventListener("click", () => checkConnection(true));
 $("uoink-suggested-btn").addEventListener("click", startFirstCapture);
+$("first-capture-url").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.isComposing) startFirstCapture();
+});
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "session" && changes.popup_capture_results) readCaptureResult();
 });
