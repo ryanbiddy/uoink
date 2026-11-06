@@ -188,6 +188,9 @@ def run_menu(client: MenuClient) -> None:
         def folder_(self, sender):
             threading.Thread(target=client.folder, daemon=True).start()
 
+        def update_(self, sender):
+            threading.Thread(target=lambda: client.dashboard(settings=True), daemon=True).start()
+
         def recent_(self, sender):
             index = sender.tag()
             if 0 <= index < len(paths) and paths[index]:
@@ -203,6 +206,10 @@ def run_menu(client: MenuClient) -> None:
 
         def tick_(self, timer):
             running.set()  # Connection is reported only after the event loop runs.
+            title = client.update_title()  # Read from the helper's saved check.
+            update_item.setHidden_(title is None)
+            if title:
+                update_item.setTitle_(title)
             try:
                 while True:
                     title, recent = updates.get_nowait()
@@ -237,6 +244,8 @@ def run_menu(client: MenuClient) -> None:
     add(menu, "Open dashboard", "dashboard:")
     add(menu, "Open folder", "folder:")
     add(menu, "Settings", "settings:")
+    update_item = add(menu, "Update available", "update:")
+    update_item.setHidden_(True)
     recent_menu = A.NSMenu.alloc().init()
     recent_menu.setAutoenablesItems_(False)
     recent_item = add(menu, "Recent items", None)
@@ -259,6 +268,7 @@ def run_menu(client: MenuClient) -> None:
                     log.info("menu bar connected (pid %s)", os.getpid())
             client._refresh_status()
             client._refresh_recent()
+            client._refresh_update()
             updates.put((client._status_text(), list(client._recent)))
             stopping.wait(5)
 
