@@ -7971,8 +7971,10 @@
         meta.content_type,
         meta.feed_url,
       ].join(" ").toLowerCase();
+      const sourceType = String(firstValue(row && row.source_type, sidecar.source_type, meta.source_type) || "").toLowerCase();
       return Boolean(
         sidecar.is_podcast ||
+        sourceType === "episode" ||
         values.includes("podcast") ||
         values.includes("rss") ||
         values.includes("audio")
@@ -13172,7 +13174,9 @@
       const id = htmlEscape(row.video_id || row.slug || "");
       const podcast = isPodcastContent(row);
       const live = isLiveContent(row);
-      const platform = platformOf(row);
+      // An episode saved under a generic tag still reads as a podcast, not Web.
+      const rawPlatform = platformOf(row);
+      const platform = podcast && ["", "web", "generic", "rss"].includes(rawPlatform) ? "podcast" : rawPlatform;
       const variant = cardVariantClass(row);
       const title = htmlEscape(firstValue(row.episode_title, row.title, "Untitled uoink"));
       const availabilityLabel = sourceAvailabilityLabel(row);

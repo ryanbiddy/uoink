@@ -5151,6 +5151,24 @@ def _is_x_channel_url(channel_url: str) -> bool:
     return host in {"x.com", "twitter.com"} or host.endswith((".x.com", ".twitter.com"))
 
 
+_PODCAST_ARTWORK_NAMES = ("artwork", "cover", "folder")
+_PODCAST_ARTWORK_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def _local_podcast_artwork(episode_folder: Path) -> str | None:
+    """A feed image already cached beside the episode or its feed folder."""
+    for folder in (episode_folder, episode_folder.parent):
+        for name in _PODCAST_ARTWORK_NAMES:
+            for suffix in _PODCAST_ARTWORK_SUFFIXES:
+                candidate = folder / f"{name}{suffix}"
+                try:
+                    if candidate.is_file():
+                        return str(candidate)
+                except OSError:
+                    continue
+    return None
+
+
 def _fetch_channel_context(channel_url: str, *,
                            cancel_event: threading.Event | None = None) -> dict:
     """Best-effort fetch of channel description + last 5 video stubs.
@@ -14526,6 +14544,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # endpoint.
         thumb = folder / "thumbnail.jpg"
         thumbnail_path = str(thumb) if thumb.exists() else None
+        if thumbnail_path is None and r.get("source_type") == "episode":
+            # Feed artwork only from a copy already on disk; the Library never
+            # loads a remote image.
+            thumbnail_path = _local_podcast_artwork(folder)
         original_thumbnail_path = thumbnail_path
         metadata = {}
         if r.get("metadata_json"):
@@ -14543,6 +14565,11 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             or metadata.get("platform")
             or _detect_platform_from_url(live.get("url") or metadata.get("url") or "")
         )
+        # A podcast episode is a podcast whatever its URL looks like; a row
+        # that only has a generic tag would otherwise read as "Web".
+        if (r.get("source_type") == "episode"
+                and str(platform or "").lower() in ("", "web", "generic", "rss")):
+            platform = "podcast"
         author = (
             r.get("author")
             or live.get("author")
