@@ -123,12 +123,15 @@ def main():
         # Four uoinks are too few to call anything a gap.
         _assert(payload["corpus_gaps"] == [],
                 f"no gaps below the evidence floor: {payload['corpus_gaps']}")
+        floor = server._GAP_MIN_LIBRARY
         server._GAP_MIN_LIBRARY = 4  # type: ignore
-        status, res = _get("/resurface")
-        gap_topics = {g["topic"]: g["count"] for g in res["resurface"]["corpus_gaps"]}
-        _assert(gap_topics == {"Job Hunt": 1},
-                f"gaps must be low-coverage topics only: {gap_topics}")
-        server._GAP_MIN_LIBRARY = 10  # type: ignore
+        try:
+            status, res = _get("/resurface")
+            gap_topics = {g["topic"]: g["count"] for g in res["resurface"]["corpus_gaps"]}
+            _assert(gap_topics == {"Job Hunt": 1},
+                    f"gaps must be low-coverage topics only: {gap_topics}")
+        finally:
+            server._GAP_MIN_LIBRARY = floor  # type: ignore
         _assert(payload["anchors"] == [], "no engagement -> no anchors")
         print("ok  corpus without engagement -> local library payload")
 
