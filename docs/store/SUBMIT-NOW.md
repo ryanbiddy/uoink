@@ -1,4 +1,4 @@
-# Submit Uoink 3.14.1 to the Chrome Web Store
+# Submit Uoink 3.15.0 to the Chrome Web Store
 
 Allow about 15 minutes for the dashboard work once your images and helper
 release are ready. Account verification, helper packaging, screenshot capture
@@ -9,7 +9,7 @@ submission step. Nothing in this worktree publishes anything.
 
 Have these ready:
 
-- `dist/uoink-extension-3.14.1-cws.zip`, built with `python scripts/build_cws.py`.
+- `dist/uoink-extension-3.15.0-cws.zip`, built with `python scripts/build_cws.py`.
 - `listing.md`, `permissions-justification.md`, `privacy-practices.md` and
   `reviewer-test-instructions.md` from this folder.
 - The 1280x800 screenshots in `screenshots/`, listed in `SCREENSHOTS.md`. They
@@ -43,8 +43,8 @@ also references the $5 registration fee. Extra account checks can take longer.
 ## 2. Create the draft and copy its ID, about 2 minutes
 
 5. Click **Add new item** (or **New item**).
-6. Click **Browse files**, select `dist/uoink-extension-3.14.1-cws.zip`, then
-   upload it. Confirm the detected name is **Uoink**, version **3.14.1**, MV3.
+6. Click **Browse files**, select `dist/uoink-extension-3.15.0-cws.zip`, then
+   upload it. Confirm the detected name is **Uoink**, version **3.15.0**, MV3.
 7. Open **Package**. Copy the **Item ID**, a 32-letter string. It exists now,
    before review. **View public key** on this tab is for matching development
    installs to that item; do not replace Uoink's existing developer key.

@@ -10,6 +10,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.15.0] - 2026-11-06
+
+### Changed
+
+- Library search matches all words by default, sorts by relevance with a
+  query, and shows the matching line with a timestamp link into the reader.
+- Capture status uses plain stages and a stable "Ready"; comments no longer
+  hold a capture back.
+- Research has one control per source, with "Use saved" and "Capture new".
+- Sources puts the paste box first and asks for web site permission inline.
+- Copy as Markdown leads with the transcript and drops empty sections.
+- The sidebar footer reads "Running on this PC" or "Running on this Mac".
+
+### Fixed
+
+- The reader and Generate picker used black frames as screenshots, and
+  screenshots could appear out of time order with the transcript.
+- Podcast episodes showed "Untitled podcast" instead of the feed title.
+  Titles are fixed when shown; saved files are not rewritten.
+- Activity listed podcast episodes twice and the sidebar count disagreed with
+  failures.
+- Failure messages led with raw downloader output.
+- Uoink read a podcast feed before standing consent; now only consent or a
+  manual Check now reads it.
+- Mac: Claude Desktop in /Applications was not detected before first launch.
+- For You paired items through the Uncategorized bucket, and short notes were
+  sorted into topics.
+
 ## [3.14.1] - 2026-11-05
 
 ### Changed
