@@ -159,6 +159,11 @@ def _selected_toolset() -> str:
     return value
 
 
+# Claude Code's MCP client drops the session after a very large tool reply
+# (a ~35 KB uoink_x record did it), so replies are trimmed to this many bytes.
+MCP_RESULT_TEXT_CAP = 24 * 1024
+
+
 class RegistryMCP(Server):
     """Public low-level server with Uoink dispatch and transport settlement.
 
@@ -201,6 +206,8 @@ class RegistryMCP(Server):
             # outside the Index lock. Run them on the event loop, one at a
             # time, exactly as the v3.9.1 FastMCP tools ran.
             envelope = _call_stdio_registry(name, arguments)
+        # Every registry reply leaves through here, so the cap lives here.
+        envelope = uoink_mcp_tools.cap_tool_result(envelope, MCP_RESULT_TEXT_CAP)
         return mcp_types.CallToolResult(
             content=[mcp_types.TextContent(type="text", text=json.dumps(
                 envelope, ensure_ascii=False, allow_nan=False))],

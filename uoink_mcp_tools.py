@@ -6539,6 +6539,86 @@ def list_tools(*, structured_results: bool = True) -> list[dict[str, Any]]:
     return tools
 
 
+# Bulky detail that duplicates what the saved sidecar already holds. Dropped
+# first when a tool reply is over the MCP size cap.
+_BULKY_KEYS = frozenset({
+    "formats", "requested_formats", "variants", "source_descriptors",
+    "video_info", "media_extra", "entities", "automatic_captions",
+    "subtitles", "thumbnails", "descriptors",
+})
+_CAP_NOTE_RESERVE = 700
+
+
+def _json_len(value: Any) -> int:
+    return len(json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8"))
+
+
+def _drop_bulky(value: Any, dropped: set) -> Any:
+    if isinstance(value, dict):
+        out = {}
+        for key, child in value.items():
+            if key in _BULKY_KEYS:
+                dropped.add(key)
+                continue
+            out[key] = _drop_bulky(child, dropped)
+        return out
+    if isinstance(value, list):
+        return [_drop_bulky(child, dropped) for child in value]
+    return value
+
+
+def _shrink(value: Any, max_items: int, max_chars: int, touched: list) -> Any:
+    if isinstance(value, dict):
+        return {k: _shrink(v, max_items, max_chars, touched) for k, v in value.items()}
+    if isinstance(value, list):
+        if len(value) > max_items:
+            touched.append("lists")
+            value = value[:max_items]
+        return [_shrink(v, max_items, max_chars, touched) for v in value]
+    if isinstance(value, str) and len(value) > max_chars:
+        touched.append("text")
+        return value[:max_chars].rstrip() + " [...]"
+    return value
+
+
+def cap_tool_result(envelope: Any, cap: int) -> Any:
+    """Keep one tool reply under ``cap`` bytes of JSON text.
+
+    Trims the bulky duplicated detail first (format and variant lists), then
+    long lists, then long strings. Works on the parsed object so the JSON is
+    never cut mid-structure. Adds a short note naming where the full record
+    lives. Replies already under the cap come back untouched."""
+    if not isinstance(envelope, dict):
+        return envelope
+    try:
+        if _json_len(envelope) <= cap:
+            return envelope
+    except (TypeError, ValueError):
+        return envelope
+    budget = max(cap - _CAP_NOTE_RESERVE, cap // 2)
+    dropped: set = set()
+    trimmed = _drop_bulky(envelope, dropped)
+    touched: list = []
+    if _json_len(trimmed) > budget:
+        for max_items, max_chars in ((50, 8000), (20, 4000), (10, 2000), (5, 1000), (3, 400)):
+            candidate = _shrink(trimmed, max_items, max_chars, touched)
+            if _json_len(candidate) <= budget:
+                trimmed = candidate
+                break
+        else:
+            # Last resort: keep only the short top-level fields.
+            trimmed = {k: v for k, v in candidate.items()
+                       if not isinstance(v, (dict, list))
+                       and (not isinstance(v, str) or len(v) <= 300)}
+            touched.append("fields")
+    note = ("Reply trimmed to stay under the MCP size limit "
+            f"(removed or shortened: {', '.join(sorted(dropped | set(touched))) or 'long values'}). "
+            "The full record is in the item's saved sidecar JSON; "
+            "use get_uoink_corpus or read_library_resource to read it.")
+    trimmed["truncated"] = note
+    return trimmed
+
+
 def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
               origin: str = "", session_hash: str = "") -> dict[str, Any]:
     spec = TOOL_REGISTRY.get(name)
