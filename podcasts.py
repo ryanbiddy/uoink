@@ -1089,6 +1089,19 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
     for suffix in _ARTWORK_TYPES.values():
         if (folder / f"artwork{suffix}").is_file():
             return folder / f"artwork{suffix}"
+    # A refused URL is remembered so the next poll does not download it again;
+    # a changed URL is tried afresh.
+    refused = folder / "artwork.refused"
+    try:
+        if refused.read_text(encoding="utf-8").strip() == link:
+            return None
+    except OSError:
+        pass
+
+    def refuse() -> None:
+        folder.mkdir(parents=True, exist_ok=True)
+        refused.write_text(link, encoding="utf-8")
+
     opener = opener or _subscriptions().public_http_open
     with opener(link, headers={"User-Agent": _subscriptions().FEED_USER_AGENT,
                                "Accept": "image/jpeg,image/png,image/webp"}) as resp:
@@ -1096,12 +1109,15 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
         suffix = _ARTWORK_TYPES.get(kind)
         if suffix is None:
             log.info("feed artwork skipped: content type %r", kind)
+            refuse()
             return None
         declared = resp.headers.get("Content-Length")
         if declared and declared.isdigit() and int(declared) > _ARTWORK_MAX_BYTES:
+            refuse()
             return None
         body = resp.read(_ARTWORK_MAX_BYTES + 1)
     if len(body) > _ARTWORK_MAX_BYTES or not body.startswith(_ARTWORK_MAGIC[suffix]):
+        refuse()
         return None
     folder.mkdir(parents=True, exist_ok=True)
     target = folder / f"artwork{suffix}"

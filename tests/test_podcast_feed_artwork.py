@@ -68,9 +68,10 @@ def test_refuses_other_content_types_oversize_and_mismatched_bytes(tmp_path):
         _opener(JPEG, "image/jpeg", length=6 * 1024 * 1024),
         _opener(b"not really a png", "image/png"),
     ]
-    for opener in cases:
-        assert podcasts.cache_feed_artwork(tmp_path, FEED, ART_URL, opener=opener) is None
-    assert not list((tmp_path / "Podcasts").rglob("artwork*"))
+    for n, opener in enumerate(cases):
+        # A distinct URL each time: a refused URL is remembered and skipped.
+        assert podcasts.cache_feed_artwork(tmp_path, FEED, f"{ART_URL}?{n}", opener=opener) is None
+    assert not list((tmp_path / "Podcasts").rglob("artwork.[jpw]*"))
 
 
 def test_no_title_or_link_means_nothing_to_cache(tmp_path):
@@ -122,3 +123,17 @@ def test_an_artwork_failure_never_fails_the_poll(tmp_path):
     turn_on(service, sid)
     assert service.detection_pass()[0]["ok"]
     idx.close()
+
+
+def test_a_refused_image_is_not_downloaded_again_until_the_url_changes(tmp_path):
+    calls = []
+    for _ in range(3):
+        assert podcasts.cache_feed_artwork(
+            tmp_path, FEED, ART_URL, opener=_opener(b"<html>", "text/html", calls=calls)) is None
+    assert len(calls) == 1
+    marker = tmp_path / "Podcasts" / "the-show" / "artwork.refused"
+    assert marker.read_text(encoding="utf-8") == ART_URL
+    # A new URL is tried, and a good image is cached.
+    new_url = "https://show.example/new-cover.jpg"
+    path = podcasts.cache_feed_artwork(tmp_path, FEED, new_url, opener=_opener(JPEG, "image/jpeg", calls=calls))
+    assert path is not None and len(calls) == 2
