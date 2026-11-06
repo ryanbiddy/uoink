@@ -5350,6 +5350,7 @@
                 <button class="button primary hidden" type="button" id="libraryCaptureButton" disabled>Uoink it</button>
               </div>
               <p class="library-capture-note" id="libraryCaptureNote" role="status" aria-live="polite"></p>
+              <p class="library-capture-note" id="librarySearchMode" role="status"></p>
             </div>
             <div class="library-kinds" id="libraryKinds" role="group" aria-label="Show">
               <button class="kind-chip" type="button" data-library-kind="" aria-pressed="true">All</button>
@@ -7970,8 +7971,10 @@
         meta.content_type,
         meta.feed_url,
       ].join(" ").toLowerCase();
+      const sourceType = String(firstValue(row && row.source_type, sidecar.source_type, meta.source_type) || "").toLowerCase();
       return Boolean(
         sidecar.is_podcast ||
+        sourceType === "episode" ||
         values.includes("podcast") ||
         values.includes("rss") ||
         values.includes("audio")
@@ -10934,6 +10937,17 @@
           resetCopy = `Resets at 00:00 UTC (in ${hrs}h ${mins}m)`;
         }
 
+        // Right after consent the first poll is still running. Say so instead
+        // of "idle · 0 enrolled" until an episode is found or captured.
+        const firstPoll = kind === "podcast_rss" && source.consent_state === "on" && !lastError
+          && !episode && !inFlight.length && ["idle", "unknown"].includes(capOutcome)
+          && Boolean(det.poll_in_progress || enroll.pending);
+        if (firstPoll) {
+          capturePillClass = "in-flight";
+          capturePillLabel = "checking the feed";
+          enrollmentCopy = "Back catalog: checking the feed for episodes…";
+        }
+
         const isHeld = Boolean(allow.hold_reason || (allow.hold_until_ms && allow.hold_until_ms > Date.now()));
 
         return `
@@ -12955,6 +12969,7 @@
       // new search from its first page instead of appending to the old rows.
       if (state.libraryResetPending) reset = true;
       state.loading = true;
+      if (reset && (!semanticState || semanticWarming())) loadLibrarySearchMode();
       if (reset) {
         state.libraryResetPending = false;
         state.offset = 0;
@@ -12993,6 +13008,7 @@
         modeLabel.textContent = ({ keyword: "Keyword", semantic: "Semantic", hybrid: "Hybrid" })[state.searchMode];
         modeLabel.title = data.fallback_reason || "Search mode used for these results";
         modeLabel.classList.toggle("hidden", !params.get("q"));
+        renderLibrarySearchMode();
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
         state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
@@ -13170,7 +13186,9 @@
       const id = htmlEscape(row.video_id || row.slug || "");
       const podcast = isPodcastContent(row);
       const live = isLiveContent(row);
-      const platform = platformOf(row);
+      // An episode saved under a generic tag still reads as a podcast, not Web.
+      const rawPlatform = platformOf(row);
+      const platform = podcast && ["", "web", "generic", "rss"].includes(rawPlatform) ? "podcast" : rawPlatform;
       const variant = cardVariantClass(row);
       const title = htmlEscape(firstValue(row.episode_title, row.title, "Untitled uoink"));
       const availabilityLabel = sourceAvailabilityLabel(row);
@@ -18258,6 +18276,7 @@
         error: data.message || "Semantic search is unavailable. Retry setup. Keyword search still works."
       };
       document.getElementById("semanticStatus").textContent = data.paused ? "Paused. Select Resume to continue. Keyword search is available." : (messages[data.state] || messages.not_installed);
+      renderLibrarySearchMode();
       const progress = document.getElementById("semanticProgress");
       progress.classList.toggle("hidden", !active);
       if (data.state === "verifying") progress.removeAttribute("value");
@@ -18271,6 +18290,44 @@
       document.getElementById("semanticPause").disabled = semanticBusy || !data.enabled || data.paused;
       document.getElementById("semanticResume").disabled = semanticBusy || !accepted || (!data.paused && data.state !== "error");
       document.getElementById("semanticRemove").disabled = semanticBusy || !(accepted || data.model_bytes || data.vector_bytes);
+    }
+
+    // The Library search box says which search it runs. Off: a plain
+    // keyword search, with a way to the Settings section that turns it on.
+    function renderLibrarySearchMode() {
+      const hint = document.getElementById("librarySearchMode");
+      if (!hint || !semanticState) return;
+      const data = semanticState;
+      const searched = typeof state !== "undefined" && state.filters && String(state.filters.q || "").trim();
+      if (data.enabled && data.state === "ready" && !data.paused) {
+        // Strict matching or a fallback can still force keyword search.
+        hint.textContent = searched && state.searchMode === "keyword" ? "Keyword search" : "Meaning search";
+      } else if (data.enabled && !data.paused && ["downloading", "verifying", "indexing", "retrying"].includes(data.state)) {
+        hint.textContent = "Keyword search · Meaning search is getting ready";
+      } else {
+        hint.textContent = "Keyword search · ";
+        const link = document.createElement("a");
+        link.href = "#settings/search";
+        link.textContent = "Turn on meaning search";
+        hint.appendChild(link);
+      }
+    }
+
+    // Reads the status once for the Library hint; Settings does its own polling.
+    function semanticWarming() {
+      return Boolean(semanticState && semanticState.enabled && !semanticState.paused
+        && ["downloading", "verifying", "indexing", "retrying"].includes(semanticState.state));
+    }
+
+    async function loadLibrarySearchMode() {
+      // Once known it stays, except while the model is still getting ready.
+      if (semanticState && !semanticWarming()) return;
+      try {
+        semanticState = await readSettingsResource("/search/status");
+        renderLibrarySearchMode();
+      } catch (_) {
+        // No hint is better than a wrong one.
+      }
     }
 
     async function loadSemanticStatus() {

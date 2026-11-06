@@ -4462,13 +4462,6 @@ def _fmt_int(n) -> str:
         return "—"
 
 
-def _fmt_likes(n) -> str:
-    """Like counts are often hidden by YouTube and exposed as null by yt-dlp."""
-    if n is None:
-        return "not exposed by YouTube for this video"
-    return _fmt_int(n)
-
-
 def _fmt_iso_date(s) -> str:
     """yt-dlp returns upload_date as 'YYYYMMDD'. Convert to 'YYYY-MM-DD'."""
     if not s:
@@ -5142,6 +5135,34 @@ def _save_x_video_poster(video_id: str, extract_result: dict) -> Path | None:
             (folder / "thumbnail.raw").unlink(missing_ok=True)
 
 
+def _is_x_channel_url(channel_url: str) -> bool:
+    """True for an X/Twitter profile URL, which has no channel to read."""
+    try:
+        host = (urlparse(channel_url).hostname or "").lower()
+    except ValueError:
+        return False
+    return host in {"x.com", "twitter.com"} or host.endswith((".x.com", ".twitter.com"))
+
+
+_PODCAST_ARTWORK_NAMES = ("artwork", "cover", "folder")
+_PODCAST_ARTWORK_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def _local_podcast_artwork(episode_folder: Path) -> str | None:
+    """A feed image already cached beside the episode or its feed folder."""
+    # Nothing caches feed art yet, so the podcast placeholder is what shows.
+    for folder in (episode_folder, episode_folder.parent):
+        for name in _PODCAST_ARTWORK_NAMES:
+            for suffix in _PODCAST_ARTWORK_SUFFIXES:
+                candidate = folder / f"{name}{suffix}"
+                try:
+                    if candidate.is_file():
+                        return str(candidate)
+                except OSError:
+                    continue
+    return None
+
+
 def _fetch_channel_context(channel_url: str, *,
                            cancel_event: threading.Event | None = None) -> dict:
     """Best-effort fetch of channel description + last 5 video stubs.
@@ -5150,6 +5171,9 @@ def _fetch_channel_context(channel_url: str, *,
     """
     empty = {"description": "", "recent_videos": []}
     if not channel_url:
+        return empty
+    # X profiles have no /videos tab for yt-dlp; the fetch always exits 1.
+    if _is_x_channel_url(channel_url):
         return empty
 
     # Prefer the /videos tab so we get videos (not playlists/shorts/featured).
@@ -5170,7 +5194,7 @@ def _fetch_channel_context(channel_url: str, *,
     except (PlaylistJobCancelled, source_subscriptions.CaptureOwnershipUnavailable):
         raise
     except Exception as e:
-        log.warning("channel context fetch failed: %s", e)
+        log.debug("channel context fetch failed: %s", e)
         return empty
 
     try:
@@ -6360,12 +6384,14 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     metadata; when supplied it replaces the legacy transcript rendering.
     """
     title = metadata.get("title") or "Untitled"
-    channel = metadata.get("channel") or metadata.get("uploader") or "—"
+    # Unknown fields are left out of the header, never shown as a dash.
+    channel = metadata.get("channel") or metadata.get("uploader") or ""
     sub_count = format_subscribers(metadata.get("channel_follower_count"))
     upload_date = _fmt_iso_date(metadata.get("upload_date"))
     duration = format_duration(metadata.get("duration"))
     views = _fmt_int(metadata.get("view_count"))
-    likes = _fmt_likes(metadata.get("like_count"))
+    likes = _fmt_int(metadata.get("like_count")) if metadata.get("like_count") is not None else ""
+    known = lambda value: bool(value) and value != "—"  # noqa: E731
     description = (metadata.get("description") or "").strip()
     tags = metadata.get("tags") or []
     chapters = metadata.get("chapters") or []
@@ -6373,11 +6399,14 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts: list[str] = []
     parts.append(f"# {title}")
     parts.append("")
-    parts.append(f"**Channel:** {channel} ({sub_count} subscribers)")
-    parts.append(
-        f"**Uploaded:** {upload_date} | **Duration:** {duration} | "
-        f"**Views:** {views} | **Likes:** {likes}"
-    )
+    if channel:
+        parts.append(f"**Channel:** {channel}" + (
+            f" ({sub_count} subscribers)" if known(sub_count) else ""))
+    facts = [f"**{label}:** {value}" for label, value in (
+        ("Uploaded", upload_date), ("Duration", duration),
+        ("Views", views), ("Likes", likes)) if known(value)]
+    if facts:
+        parts.append(" | ".join(facts))
     parts.append(f"**URL:** {url}")
     parts.append(f"**Uoinked:** {yoinked_at}")
     parts.append(f"**Topic:** {topic}")
@@ -6472,7 +6501,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     # Channel Context
     parts.append("## Channel Context")
     parts.append("")
-    parts.append(f"**About {channel}:**")
+    parts.append(f"**About {channel}:**" if channel else "**About this channel:**")
     ch_desc = (channel_ctx.get("description") or "").strip()
     parts.append(ch_desc if ch_desc else "*No channel description available.*")
     parts.append("")
@@ -6485,7 +6514,9 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
             v_title = v.get("title") or "(untitled)"
             v_views = format_count(v.get("view_count"))
             v_date = _fmt_iso_date(v.get("upload_date"))
-            parts.append(f"- {v_title} ({v_views} views, {v_date})")
+            v_facts = ", ".join(f for f in (
+                f"{v_views} views" if known(v_views) else "", v_date if known(v_date) else "") if f)
+            parts.append(f"- {v_title}" + (f" ({v_facts})" if v_facts else ""))
     parts.append("")
     parts.append("---")
     parts.append("")
@@ -7458,6 +7489,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         channel_url = (metadata.get("channel_url")
                        or metadata.get("uploader_url")
                        or "")
+        if str(metadata.get("extractor") or "").lower().startswith("twitter"):
+            channel_url = ""
         channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
         # Phase 6 (BC-2): the transcript rows persist their actual link values,
@@ -14512,6 +14545,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # endpoint.
         thumb = folder / "thumbnail.jpg"
         thumbnail_path = str(thumb) if thumb.exists() else None
+        if thumbnail_path is None and r.get("source_type") == "episode":
+            # Feed artwork only from a copy already on disk; the Library never
+            # loads a remote image.
+            thumbnail_path = _local_podcast_artwork(folder)
         original_thumbnail_path = thumbnail_path
         metadata = {}
         if r.get("metadata_json"):
@@ -14529,6 +14566,11 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             or metadata.get("platform")
             or _detect_platform_from_url(live.get("url") or metadata.get("url") or "")
         )
+        # A podcast episode is a podcast whatever its URL looks like; a row
+        # that only has a generic tag would otherwise read as "Web".
+        if (r.get("source_type") == "episode"
+                and str(platform or "").lower() in ("", "web", "generic", "rss")):
+            platform = "podcast"
         author = (
             r.get("author")
             or live.get("author")

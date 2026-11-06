@@ -497,3 +497,20 @@ def test_extension_suggests_nasa_without_hardcoded_capture():
     assert "8rABwKRsec4" not in script + markup
     assert "Karpathy" not in script + markup
     assert 'id="first-capture-url"' in markup
+
+
+def test_first_poll_after_consent_says_checking_not_idle_zero_enrolled():
+    result = run_js('''(() => {
+      state.standingSources = [{source_id: "one", kind: "podcast_rss", consent_state: "on", consent_epoch: 1,
+        enrollment: {pending: true}, detection: {poll_in_progress: true}}];
+      renderStandingSubscriptions(); const waiting = els.standingSubscriptionList.innerHTML;
+      state.standingSources[0].enrollment = {pending: false, enrolled: 1};
+      state.standingSources[0].detection = {last_poll_success_ms: Date.now()};
+      state.standingSources[0].latest_episode = {item_id: "e1", title: "First flight", capture_state: "started"};
+      state.standingSources[0].in_flight = [{item_id: "e1", title: "First flight", state: "started"}];
+      renderStandingSubscriptions(); return {waiting, arrived: els.standingSubscriptionList.innerHTML};
+    })()''')
+    assert "Capture: checking the feed" in result["waiting"]
+    assert "checking the feed for episodes" in result["waiting"]
+    assert "Capture: idle" not in result["waiting"]
+    assert "checking the feed" not in result["arrived"] and "First flight" in result["arrived"]

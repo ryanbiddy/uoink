@@ -405,6 +405,69 @@ def capture(posts, scope=SCOPE):
                        "Replies below the shared post and other authors' replies are outside this capture."]}
 
 
+def _is_mp4(variant):
+    if not isinstance(variant, dict):
+        return False
+    kind = str(variant.get("content_type") or variant.get("container") or "").lower()
+    url = str(variant.get("url") or "").lower().split("?")[0]
+    return bool(variant.get("url")) and ("mp4" in kind or url.endswith(".mp4")) and not url.endswith(".m3u8")
+
+
+def _number(value):
+    return value if type(value) in (int, float) and math.isfinite(value) else None
+
+
+def _slim_media(media):
+    """One entry per attachment; a video keeps just its best MP4."""
+    out = {"type": media.get("type"), "url": media.get("url")}
+    if media.get("type") in {"video", "gif"}:
+        mp4s = [v for v in media.get("variants", []) if _is_mp4(v)]
+        best = max(mp4s, key=lambda v: _number(v.get("bitrate")) or 0, default=None)
+        info = _dict(media.get("video_info"))
+        original = _dict(media.get("original_info"))
+        duration = _number(media.get("duration"))
+        if duration is None and _number(info.get("duration_millis")) is not None:
+            duration = info["duration_millis"] / 1000
+        out.update(
+            url=(best or {}).get("url") or media.get("url"),
+            width=_number(media.get("width") or (best or {}).get("width") or original.get("width")),
+            height=_number(media.get("height") or (best or {}).get("height") or original.get("height")),
+            duration=duration,
+        )
+        if media.get("poster"):
+            out["poster"] = media["poster"]
+    elif media.get("alt_text") is not None:
+        out["alt_text"] = media["alt_text"]
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def slim_post(post):
+    """Post text, author, counts and media for a tool reply; the rest stays in the sidecar."""
+    out = {"id": post.get("id"), "url": post.get("url"), "author": post.get("author"),
+           "created_at": post.get("created_at"), "text": post.get("text"),
+           "text_completeness": post.get("text_completeness"),
+           "text_completeness_reason": post.get("text_completeness_reason"),
+           "quote_status": post.get("quote_status"), "media_status": post.get("media_status"),
+           "unavailable_reason": post.get("unavailable_reason"),
+           "missing_parent": post.get("missing_parent"),
+           "engagement": {k: v for k, v in _dict(post.get("engagement")).items() if v is not None},
+           "media": [_slim_media(m) for m in _list(post.get("media")) if isinstance(m, dict)]}
+    quote = post.get("quote")
+    if isinstance(quote, dict):
+        out["quote"] = {k: quote.get(k) for k in ("id", "url", "author", "text", "unavailable_reason")
+                        if quote.get(k)}
+    return {k: v for k, v in out.items() if v not in (None, "", [], {})}
+
+
+def slim_capture(capture):
+    """Compact view of capture(): drops descriptors, variant and format lists."""
+    capture = _dict(capture)
+    out = {k: capture[k] for k in ("schema_version", "scope", "limits") if k in capture}
+    out["posts"] = [slim_post(p) for p in _list(capture.get("posts")) if isinstance(p, dict)]
+    out["note"] = "Every other media detail is in the saved sidecar."
+    return out
+
+
 def has_content(post):
     return bool(post["text"] or post["media"] or post["quote"]
                 or any(post.get("attachments", {}).values()))

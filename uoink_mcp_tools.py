@@ -1711,7 +1711,9 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
     except Exception as exc:
         return _err(f"uoink_url failed: {exc}")
     if isinstance(probe.payload, dict):
-        return probe.payload
+        # The clipboard copy repeats yoink_md with screenshots inlined as
+        # base64; an agent reply never needs it.
+        return {k: v for k, v in probe.payload.items() if k != "corpus_md_paste"}
     return _err("uoink_url returned no result")
 
 
@@ -1801,6 +1803,7 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
     server = _b()
     import page_extractor as _pages  # noqa: WPS433
     import x_extractor as _x  # noqa: WPS433
+    from uoink_core import x_evidence as _x_evidence  # noqa: WPS433
 
     if not (server._read_settings() or {}).get("x_text_capture_enabled"):
         return {
@@ -1832,11 +1835,15 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
     if not video_id:
         return _err("couldn't save the X post")
     server._save_x_video_poster(video_id, result)
+    # The sidecar keeps the full evidence; the reply carries the slim view.
+    metadata = dict(result.get("metadata", {}))
+    if isinstance(metadata.get("x_capture"), dict):
+        metadata["x_capture"] = _x_evidence.slim_capture(metadata["x_capture"])
     return _ok(
         video_id=video_id,
         title=result["title"],
         tweets_captured=result.get("tweets_captured", 0),
-        metadata=result.get("metadata", {}),
+        metadata=metadata,
     )
 
 
@@ -6537,6 +6544,117 @@ def list_tools(*, structured_results: bool = True) -> list[dict[str, Any]]:
             item["outputSchema"] = OUTPUT_SCHEMAS[spec.name]
         tools.append(item)
     return tools
+
+
+# Bulky detail that duplicates what the saved sidecar already holds. Dropped
+# first when a tool reply is over the MCP size cap.
+_BULKY_KEYS = frozenset({
+    "formats", "requested_formats", "variants", "source_descriptors",
+    "video_info", "media_extra", "entities", "automatic_captions",
+    "subtitles", "thumbnails", "descriptors",
+})
+_CAP_NOTE_RESERVE = 700
+
+
+def _json_len(value: Any) -> int:
+    # The reply travels as a JSON string inside the frame, so measure it escaped.
+    text = json.dumps(value, ensure_ascii=False, allow_nan=False)
+    return len(json.dumps(text, ensure_ascii=False).encode("utf-8"))
+
+
+def _drop_bulky(value: Any, dropped: set) -> Any:
+    if isinstance(value, dict):
+        out = {}
+        for key, child in value.items():
+            if key in _BULKY_KEYS:
+                dropped.add(key)
+                continue
+            out[key] = _drop_bulky(child, dropped)
+        return out
+    if isinstance(value, list):
+        return [_drop_bulky(child, dropped) for child in value]
+    return value
+
+
+def _shrink_lists(value: Any, max_items: int, touched: list) -> Any:
+    if isinstance(value, dict):
+        return {k: _shrink_lists(v, max_items, touched) for k, v in value.items()}
+    if isinstance(value, list):
+        if len(value) > max_items:
+            touched.append("lists")
+            value = value[:max_items]
+        return [_shrink_lists(v, max_items, touched) for v in value]
+    return value
+
+
+def _largest_string(value: Any, best: list) -> None:
+    """Track [container, key, length] of the longest string in the tree."""
+    items = value.items() if isinstance(value, dict) else enumerate(value) if isinstance(value, list) else ()
+    for key, child in items:
+        if isinstance(child, str):
+            if len(child) > best[2]:
+                best[:] = [value, key, len(child)]
+        else:
+            _largest_string(child, best)
+
+
+def _trim_largest_strings(value: Any, budget: int, touched: list) -> bool:
+    """Cut the single largest string to fill what is left of the budget."""
+    for _ in range(200):
+        size = _json_len(value)
+        if size <= budget:
+            return True
+        best: list = [None, None, 0]
+        _largest_string(value, best)
+        container, key, length = best
+        if container is None or length <= 200:
+            return False
+        keep = max(200, length - (size - budget) - 64)
+        container[key] = container[key][:keep].rstrip() + " [...]"
+        touched.append("text")
+    return _json_len(value) <= budget
+
+
+def cap_tool_result(envelope: Any, cap: int) -> Any:
+    """Keep one tool reply under ``cap`` bytes of JSON text.
+
+    Trims the bulky duplicated detail first (format and variant lists), then
+    long lists, then the largest strings. Works on a copy of the parsed
+    object so the JSON is never cut mid-structure. Adds a short note, under
+    ``reply_trimmed``, naming where the full record lives. Replies already
+    under the cap come back untouched."""
+    if not isinstance(envelope, dict):
+        return envelope
+    try:
+        if _json_len(envelope) <= cap:
+            return envelope
+    except (TypeError, ValueError):
+        return envelope
+    budget = max(cap - _CAP_NOTE_RESERVE, cap // 2)
+    dropped: set = set()
+    trimmed = _drop_bulky(envelope, dropped)
+    touched: list = []
+    if _json_len(trimmed) > budget:
+        fitted = False
+        for max_items in (50, 20, 10, 5, 3):
+            candidate = _shrink_lists(trimmed, max_items, touched)
+            if _json_len(candidate) <= budget:
+                trimmed, fitted = candidate, True
+                break
+        if not fitted:
+            trimmed = candidate
+        if not fitted and not _trim_largest_strings(trimmed, budget, touched):
+            # Last resort: keep only the short top-level fields.
+            trimmed = {k: v for k, v in trimmed.items()
+                       if not isinstance(v, (dict, list))
+                       and (not isinstance(v, str) or len(v) <= 300)}
+            touched.append("fields")
+    note = ("Reply trimmed to stay under the MCP size limit "
+            f"(removed or shortened: {', '.join(sorted(dropped | set(touched))) or 'long values'}). "
+            "The full record is in the item's saved sidecar JSON; "
+            "use read_library_resource to read it.")
+    trimmed["reply_trimmed"] = note
+    return trimmed
 
 
 def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
