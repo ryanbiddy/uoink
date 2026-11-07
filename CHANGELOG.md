@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Suite capture (`uoink.capture/1`): a sibling local app can save one link into
+  your library with `POST /api/suite/v1/capture` and check a queued capture at
+  `GET /api/suite/v1/capture/<job_id>`. It uses the helper token, never
+  recaptures a link that is already saved, and still asks for the page
+  allowlist and podcast consent.
+
 ## [3.15.1] - 2026-11-07
 
 ### Added
