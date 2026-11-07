@@ -130,6 +130,7 @@ def test_uoink_suite_provider_matches_conformance_fixture(monkeypatch):
             "ryan.suite.health/1",
             "uoink.media.handoff/1",
             "uoink.engagement.ingest/1",
+            "uoink.capture/1",
         ],
         "provider": "Uoink",
         "regenerate": (
