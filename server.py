@@ -5086,10 +5086,10 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
         return None
 
     raw_path = output_folder / "thumbnail.raw"
+    headers = {"User-Agent": _THUMBNAIL_USER_AGENT}
     try:
         with (http_open or source_subscriptions.public_http_open)(
-                url, headers={"User-Agent": _THUMBNAIL_USER_AGENT},
-                timeout=30) as resp, open(raw_path, "wb") as f:
+                url, headers=headers, timeout=30) as resp, open(raw_path, "wb") as f:
             f.write(resp.read())
     except Exception as e:
         log.warning("thumbnail download failed: %s", e)
