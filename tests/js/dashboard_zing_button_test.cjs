@@ -65,8 +65,8 @@ function env({ available = true, handoff = null, selected = { video_id: 'abc1234
   e.run('state.selectedYoink = null; renderYoinkZing()');
   assert.equal(e.shown('yoinkZing'), false);
 
-  // Success: Opening Zing, then Opened in Zing with an Open again link; the
-  // returned local page opens through the zing kind only.
+  // Success: Opening Zing, then Opened in Zing with an Open again link. Zing
+  // opens the page itself; Open again uses the zing kind only.
   let release;
   const gate = new Promise(r => { release = r; });
   e = env({ handoff: async () => { await gate; return { ok: true, page: PAGE, project: '/p', reused: false }; } });
@@ -80,10 +80,10 @@ function env({ available = true, handoff = null, selected = { video_id: 'abc1234
   assert.equal(e.els.yoinkZing.disabled, false);
   assert.equal(e.shown('yoinkZingAgain'), true);
   assert.deepEqual(e.calls[1], ['/zing/handoff', 'POST', JSON.stringify({ video_id: 'abc12345' })]);
-  assert.equal(e.opened.length, 1);
-  assert.equal(e.opened[0][0], PAGE);
+  assert.equal(e.opened.length, 0, 'Zing opens its own page; the dashboard does not open a second tab');
   await e.run('openZingPage()');
-  assert.equal(e.opened.length, 2, 'Open again reopens the same page');
+  assert.equal(e.opened.length, 1, 'Open again reopens the returned page');
+  assert.equal(e.opened[0][0], PAGE);
 
   // The message and link belong to their item.
   e.run('state.selectedYoink = { video_id: "other9999" }; renderYoinkZing()');

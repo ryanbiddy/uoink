@@ -20130,8 +20130,8 @@
           body: JSON.stringify({ video_id: videoId }),
         });
         zing.page = typeof data.page === "string" ? data.page : "";
+        // Zing opens its own page in the browser; "Open again" reopens it.
         zing.message = "Opened in Zing";
-        openZingPage();
       } catch (err) {
         const detail = err && err.data && err.data.message;
         zing.message = detail || (err && err.message) || "Zing could not start. Try again.";
