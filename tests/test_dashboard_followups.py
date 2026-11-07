@@ -524,3 +524,30 @@ def test_switching_tabs_hands_the_settings_read_to_the_jump():
 def test_route_named_blocks_land_with_the_sections_margin():
     assert "scroll-margin-top: 16px;" in _between(DASHBOARD, ".settings-section {", "}")
     assert "scroll-margin-top: 16px;" in _between(DASHBOARD, "#tab-settings .setting-block[id] {", "}")
+
+
+def test_thumbnail_fetch_sends_a_browser_user_agent(tmp_path, monkeypatch):
+    """pbs.twimg.com 403s the Python default agent; the public-address opener stays in use."""
+    import io
+    import server
+
+    seen = {}
+
+    def fake_open(url, **kwargs):
+        seen.update(url=url, **kwargs)
+        return io.BytesIO(b"raw image bytes")
+
+    monkeypatch.setattr(server, "_run_subprocess", lambda *a, **k: (_ for _ in ()).throw(
+        server.subprocess.CalledProcessError(1, "ffmpeg", stderr=b"stop here")))
+    server._download_thumbnail({"thumbnail": "https://pbs.twimg.com/media/x.jpg"}, tmp_path,
+                               http_open=fake_open)
+    assert seen["url"] == "https://pbs.twimg.com/media/x.jpg"
+    assert seen["headers"]["User-Agent"].startswith("Mozilla/5.0")
+    assert "python" not in seen["headers"]["User-Agent"].lower()
+
+    # Without an injected opener the shared public-network opener is the one called.
+    called = {}
+    monkeypatch.setattr(server.source_subscriptions, "public_http_open",
+                        lambda url, **kw: called.update(kw) or io.BytesIO(b"x"))
+    server._download_thumbnail({"thumbnail": "https://pbs.twimg.com/media/y.jpg"}, tmp_path)
+    assert called["headers"]["User-Agent"].startswith("Mozilla/5.0")
