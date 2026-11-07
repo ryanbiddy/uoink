@@ -340,6 +340,55 @@ def test_saved_podcast_episode_is_marked_saved_without_a_library_hit(tmp_path, b
     assert False in [v for url, v in marks.items() if url != episode["episodeUrl"]] or len(marks) == 1
 
 
+def _saved_index(url, *, video_id="page_saved00001", deleted=False):
+    row = {"video_id": video_id, "deleted_at": "2026-10-02T00:00:00" if deleted else None}
+    return SimpleNamespace(
+        search_mode=lambda *a, **k: {"results": []},
+        get_yoink=lambda vid: row if vid == video_id else None,
+        podcast_capture_for_audio_url=lambda u: None,
+        list_capture_sources=lambda: [{"video_id": video_id, "metadata_json": json.dumps({"url": url})}])
+
+
+@pytest.mark.parametrize("kind,saved,candidate_url", [
+    ("hn", "https://example.org/blog/evals", "https://EXAMPLE.org/blog/evals/"),
+    ("web", "https://example.org/blog/evals?a=1", "https://example.org/blog/evals?a=1"),
+    ("reddit", "https://www.reddit.com/r/mlops/comments/abc123/evals/",
+     "https://old.reddit.com/r/mlops/comments/abc123/evals?utm_source=share"),
+    ("x", "https://x.com/someone/status/1850000000000000001",
+     "https://twitter.com/someone/status/1850000000000000001?s=20"),
+])
+def test_saved_page_thread_and_post_candidates_match_by_capture_url(backend, monkeypatch, kind, saved, candidate_url):
+    monkeypatch.setattr(backend, "_get_index", lambda: _saved_index(saved))
+    candidate = {"key": f"{kind}:1", "url": candidate_url}
+    assert backend._research_library_lookup(candidate)["video_id"] == "page_saved00001"
+    assert backend._research_saved_candidate(candidate) is True
+    other = {"key": f"{kind}:2", "url": candidate_url.replace("abc123", "zzz999").replace("0001", "0002").replace("/evals", "/other")}
+    assert backend._research_saved_candidate(other) is False
+
+
+def test_deleted_saved_page_is_not_reported_saved(backend, monkeypatch):
+    monkeypatch.setattr(backend, "_get_index", lambda: _saved_index("https://example.org/blog/evals", deleted=True))
+    assert backend._research_saved_candidate({"key": "hn:1", "url": "https://example.org/blog/evals"}) is False
+
+
+def test_hn_page_candidate_shows_use_saved_after_discovery(tmp_path, backend, monkeypatch):
+    payload = {"hits": [{"objectID": "90000009", "title": "Evals podcast", "points": 5, "num_comments": 1,
+                         "url": "https://open.spotify.com/episode/example-evals"}]}
+    monkeypatch.setattr(research, "fetch_hn", lambda q, n: payload)
+    monkeypatch.setattr(backend, "_get_index", lambda: _saved_index("https://open.spotify.com/episode/example-evals"))
+    backend._write_settings({"research_network_sources": ["hn"]})
+    run_id = backend._research_start({"question": "evals", "source_kinds": ["hn"]})["run_id"]
+    result = backend._research_discover({"run_id": run_id, "queries": ["evals"]})
+    assert [c["in_library"] for c in result["candidates"]] == [True]
+
+
+def test_youtube_candidate_is_saved_by_video_id_and_capture_reuses_it(backend, monkeypatch):
+    row = {"video_id": "evaltalk001", "deleted_at": None}
+    monkeypatch.setattr(backend, "_get_index", lambda: SimpleNamespace(get_yoink=lambda vid: row if vid == "evaltalk001" else None))
+    assert backend._research_library_lookup({"key": "yt:evaltalk001", "url": "https://www.youtube.com/watch?v=evaltalk001"}) is row
+    assert backend._research_library_lookup({"key": "yt:other", "url": "https://www.youtube.com/watch?v=other"}) is None
+
+
 def test_fetch_releases_store_and_run_locks_and_allows_another_run(tmp_path, backend, monkeypatch):
     backend._write_settings({"research_network_sources": ["youtube"]})
     run_id = backend._research_start({"question": "evals", "source_kinds": ["youtube"]})["run_id"]

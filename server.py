@@ -15095,10 +15095,10 @@ def _research_discover(args: dict) -> dict:
             *run.get("candidates_pool", run.get("candidates", [])), *collected["candidates"]])
         library_ids = {c["key"][3:] for c in merged
                        if c["key"].startswith("yt:") and _list_import_in_library(c["key"][3:])}
-        # A saved episode the library search did not surface is still saved:
-        # match podcasts by the same enclosure join capture uses.
-        library_keys = {c["key"] for c in merged if c["key"].startswith("pod:")
-                        and not c.get("in_library") and _research_saved_podcast(c)}
+        # A saved episode, page, thread or post the library search did not
+        # surface is still saved: match it by the same identity capture uses.
+        library_keys = {c["key"] for c in merged if not c["key"].startswith(("yt:", "lib:"))
+                        and not c.get("in_library") and _research_saved_candidate(c)}
         result = research.merge_and_rank(
             run, collected, args["queries"], library_ids=library_ids, library_keys=library_keys,
             now=datetime.fromisoformat(now.replace("Z", "+00:00")))
@@ -15135,15 +15135,53 @@ def _research_library_lookup(candidate: dict) -> dict | None:
                 row = idx.get_yoink(saved["video_id"])
                 if row and not row.get("deleted_at"):
                     return row
+        return None
+    if not key.startswith(("yt:", "lib:")):
+        return _research_saved_page(idx, candidate["url"])
     return None
 
 
-def _research_saved_podcast(candidate: dict) -> bool:
+def _research_url_key(url) -> str | None:
+    """One identity per saved page, Reddit thread or X post, from the capture URL rules."""
+    if not isinstance(url, str):
+        return None
+    status = x_extractor.tweet_id_from_url(url.strip())
+    if status:
+        return "x:" + status
+    if reddit_extractor.is_reddit_thread_url(url):
+        canonical = reddit_extractor.canonical_json_url(url)
+        return "reddit:" + canonical.lower().removesuffix("/.json").removesuffix(".json") if canonical else None
+    canonical = page_extractor.normalize_page_url(url)
+    if not canonical:
+        return None
+    parts = urlparse(canonical)
+    return "page:" + parts._replace(path=parts.path.rstrip("/"), fragment="").geturl()
+
+
+def _research_saved_page(idx, url: str) -> dict | None:
+    """A saved web page, Reddit thread or X post matched the way capture dedupes them."""
+    wanted = _research_url_key(url)
+    if not wanted:
+        return None
+    for saved in idx.list_capture_sources():
+        try:
+            metadata = json.loads(saved.get("metadata_json") or "{}")
+        except (ValueError, TypeError):
+            continue
+        if isinstance(metadata, dict) and wanted in {
+                _research_url_key(metadata.get(field)) for field in ("url", "source_url")}:
+            row = idx.get_yoink(saved["video_id"])
+            if row and not row.get("deleted_at"):
+                return row
+    return None
+
+
+def _research_saved_candidate(candidate: dict) -> bool:
     """Best effort: a lookup error leaves the candidate as new, never fails discovery."""
     try:
         return bool(_research_library_lookup(candidate))
     except Exception:
-        log.exception("research: saved-podcast lookup failed")
+        log.exception("research: saved-source lookup failed")
         return False
 
 
