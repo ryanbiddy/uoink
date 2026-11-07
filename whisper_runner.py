@@ -424,25 +424,6 @@ def _shape_segments(segments) -> list[dict]:
     return out
 
 
-INITIAL_PROMPT_MAX_CHARS = 200
-
-
-def build_initial_prompt(*titles) -> str | None:
-    """A short vocabulary hint for Whisper from titles only (feed, episode,
-    channel, video). Plain text, de-duplicated, capped at a word boundary."""
-    seen, parts = set(), []
-    for title in titles:
-        text = " ".join(str(title or "").split())
-        text = "".join(ch for ch in text if ch.isprintable()).strip()
-        if text and text.casefold() not in seen:
-            seen.add(text.casefold())
-            parts.append(text.rstrip(".!?"))
-    prompt = ". ".join(parts)
-    if len(prompt) > INITIAL_PROMPT_MAX_CHARS:
-        prompt = prompt[:INITIAL_PROMPT_MAX_CHARS].rsplit(" ", 1)[0].rstrip(" ,;:.-")
-    return prompt or None
-
-
 def transcribe_audio(audio_path: Path, *,
                       data_root: Path,
                       model_size: str = MODEL_BASE,

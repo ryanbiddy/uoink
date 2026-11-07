@@ -12,13 +12,13 @@ import whisper_runner as runner
 
 
 def test_prompt_is_titles_only_deduped_plain_and_capped():
-    assert runner.build_initial_prompt("Mars Rovers Weekly", "Why rovers die on Mars") == \
+    assert rel.build_initial_prompt("Mars Rovers Weekly", "Why rovers die on Mars") == \
         "Mars Rovers Weekly. Why rovers die on Mars"
-    assert runner.build_initial_prompt("Same", "same", None, "  ") == "Same"
-    assert runner.build_initial_prompt(None, "", "  ") is None
-    assert runner.build_initial_prompt("Bell\x07 ring\n  tone") == "Bell ring tone"
-    long = runner.build_initial_prompt("Feed", " ".join(["word"] * 100))
-    assert len(long) <= runner.INITIAL_PROMPT_MAX_CHARS and not long.endswith(" ")
+    assert rel.build_initial_prompt("Same", "same", None, "  ") == "Same"
+    assert rel.build_initial_prompt(None, "", "  ") is None
+    assert rel.build_initial_prompt("Bell\x07 ring\n  tone") == "Bell ring tone"
+    long = rel.build_initial_prompt("Feed", " ".join(["word"] * 100))
+    assert len(long) <= rel.INITIAL_PROMPT_MAX_CHARS and not long.endswith(" ")
 
 
 def test_transcribe_media_hands_the_prompt_to_the_model(tmp_path, monkeypatch):
@@ -115,5 +115,5 @@ def test_youtube_capture_fallback_passes_the_prompt(monkeypatch, tmp_path):
     media = tmp_path / "v.mp4"
     media.write_bytes(b"x")
     entries, source, _ = server._resolve_video_transcript(
-        [], media, 60, settings={"asr_fallback_enabled": True}, initial_prompt="Space Bench. Rover Teardown")
+        [], media, 60, settings={"asr_fallback_enabled": True}, asr_titles=("Space Bench", "Rover Teardown"))
     assert source == "asr" and calls[0]["initial_prompt"] == "Space Bench. Rover Teardown"

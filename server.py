@@ -3000,7 +3000,7 @@ def _resolve_video_transcript(
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
         cancel_event: threading.Event | None = None,
-        initial_prompt: str | None = None,
+        asr_titles: tuple = (),
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
@@ -3020,6 +3020,8 @@ def _resolve_video_transcript(
         return [], None, {"status": "disabled", "reason": reason}
 
     model_name = _selected_reliability_model(current_settings)
+    # Titles only; without a video title there is nothing worth hinting.
+    initial_prompt = uoink_reliability.build_initial_prompt(*asr_titles) if asr_titles and asr_titles[-1] else None
     expectation = _asr_duration_expectation(
         sum(length for _path, _start, length in media_chunks)
         if media_chunks else duration_seconds)
@@ -3554,7 +3556,7 @@ def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
         try:
             entries = uoink_reliability.transcribe_media(
                 audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info,
-                **({"initial_prompt": whisper_runner.build_initial_prompt(channel, title)} if title else {}))
+                **({"initial_prompt": uoink_reliability.build_initial_prompt(channel, title)} if title else {}))
         except Exception as e:
             raise TranscriptUnavailable(
                 "whisper_failed", "local Whisper failed: " + _sanitize_error(str(e)))
@@ -7468,9 +7470,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 for path, chunk in zip(video_files, long_video_chunks)
             ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
             cancel_event=cancel_event,
-            initial_prompt=whisper_runner.build_initial_prompt(
-                metadata.get("channel") or metadata.get("uploader"),
-                metadata.get("title")) if metadata.get("title") else None,
+            asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
         )
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
@@ -10638,7 +10638,7 @@ def _podcast_initial_prompt(episode_id: int) -> str | None:
     """Feed and episode titles as Whisper's vocabulary hint; never fails a job."""
     try:
         row = podcasts.get_episode_with_feed(_get_index(), episode_id) or {}
-        return whisper_runner.build_initial_prompt(row.get("podcast_title"), row.get("title"))
+        return uoink_reliability.build_initial_prompt(row.get("podcast_title"), row.get("title"))
     except Exception:
         log.exception("podcast job: could not build the Whisper vocabulary hint")
         return None
