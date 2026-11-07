@@ -3047,7 +3047,7 @@ def _resolve_video_transcript(
                             path,
                             model_name=model_name,
                             model_root=RELIABILITY_MODEL_ROOT,
-                            initial_prompt=initial_prompt,
+                            **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3102,7 +3102,7 @@ def _resolve_video_transcript(
                         path,
                         model_name=model_name,
                         model_root=RELIABILITY_MODEL_ROOT,
-                        initial_prompt=initial_prompt,
+                        **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                     )
                 _raise_if_cancelled(cancel_event)
                 if media_chunks:
@@ -3554,7 +3554,7 @@ def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
         try:
             entries = uoink_reliability.transcribe_media(
                 audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info,
-                initial_prompt=whisper_runner.build_initial_prompt(channel, title) if title else None)
+                **({"initial_prompt": whisper_runner.build_initial_prompt(channel, title)} if title else {}))
         except Exception as e:
             raise TranscriptUnavailable(
                 "whisper_failed", "local Whisper failed: " + _sanitize_error(str(e)))

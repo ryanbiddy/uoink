@@ -103,7 +103,7 @@ def test_youtube_whisper_fallback_passes_channel_and_title(monkeypatch, tmp_path
     server._whisper_transcript("https://youtu.be/x", settings={}, title="Rover Teardown", channel="Space Bench")
     server._whisper_transcript("https://youtu.be/x", settings={})
     assert calls[0]["initial_prompt"] == "Space Bench. Rover Teardown"
-    assert calls[1]["initial_prompt"] is None
+    assert "initial_prompt" not in calls[1]
 
 
 def test_youtube_capture_fallback_passes_the_prompt(monkeypatch, tmp_path):

@@ -174,6 +174,7 @@ def test_full_mode_caption_429_completes_without_retry(
     extraction.asr.assert_called_once()
     assert extraction.asr.call_args.kwargs == {
         "model_name": "base", "model_root": server.RELIABILITY_MODEL_ROOT,
+        "initial_prompt": "Example. Caption test",  # channel and title only
     }
     folder = Path(result["folder"])
     sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))

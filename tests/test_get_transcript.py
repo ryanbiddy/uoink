@@ -121,7 +121,7 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
         audio.write_bytes(b"offline audio")
         return audio
 
-    def fake_asr(audio, *, model_name, model_root, info):
+    def fake_asr(audio, *, model_name, model_root, info, initial_prompt=None):
         assert audio.read_bytes() == b"offline audio"
         assert model_name == state.settings["whisper_model"]
         assert model_root == tmp_path / "data" / "models" / "whisper"
