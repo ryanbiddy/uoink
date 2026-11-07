@@ -17,8 +17,9 @@ Times are estimates for the hands-on part.
 | 9 | [Edge Add-ons](#9-edge-add-ons) | 30 min | Ready; needs a helper release for the new ID |
 | 10 | [Alfred Gallery](#10-alfred-gallery) | later | Use the workflow for a while first |
 | 10b | [Obsidian community directory](#10b-obsidian-community-directory) | 20 min | Ready after a test run in a vault |
-| 11 | [Claude directory](#11-claude-directory-and-goose) | — | **Blocked** on the next release for option B (`uoink mcp` is built); option A can go first |
-| 12 | [Goose extensions directory](#11-claude-directory-and-goose) | — | **Blocked** on the next release, which ships `uoink mcp` |
+| 11 | [Claude directory](#11-claude-directory-and-goose) | 15 min | Ready (`uoink mcp` shipped in 3.12.1) |
+| 12 | [Goose extensions directory](#11-claude-directory-and-goose) | 15 min | Ready (`uoink mcp` shipped in 3.12.1) |
+| 13 | [Hermes Agent marketplace](#13-hermes-agent-marketplace) | 15 min | Ready after the plugin branch is pushed |
 
 ---
 
@@ -171,10 +172,10 @@ GitHub release.
 
 ## 11. Claude directory and Goose
 
-Both list one launch command that has to work on every user's machine. Today's
-agent-kit plugin runs `${LOCALAPPDATA}\Uoink\python\python.exe`, which the
-Claude directory blocks (its README and LICENSE blockers are fixed). Goose's
-`servers.json` takes one `command` string as well.
+Both list one launch command that has to work on every user's machine. The
+agent-kit plugin's own config runs `${LOCALAPPDATA}\Uoink\python\python.exe`,
+which the Claude directory blocks (its README and LICENSE blockers are fixed).
+Goose's `servers.json` takes one `command` string as well.
 
 | Option | What changes | Tradeoff |
 |---|---|---|
@@ -183,8 +184,41 @@ Claude directory blocks (its README and LICENSE blockers are fixed). Goose's
 
 A now, B in the next release, is the fastest route.
 
-**B is built** and lands in the next release: `uoink mcp` runs the same stdio
-server, and `cmd /c uoink mcp` works through the Windows `cli\uoink.cmd`
-launcher. Installed 3.12.0 copies don't have it, so the agent-kit plugin and
-`.mcpb` keep their current launch config until that release ships. Then the
-directory plugin and the Goose entry can use `command: "uoink", args: ["mcp"]`.
+**B has shipped** (3.12.1, and in every release since): `uoink mcp` runs the
+same stdio server. Both entries use the one launch line `command: "uoink",
+args: ["mcp"]`. On Windows, `uoink` resolves to a `.cmd` launcher, so a client
+that can't start `.cmd` files needs `cmd /c uoink mcp` (or a small `uoink.exe`);
+the Claude directory holds a PATH command for a reviewer rather than blocking
+it. Installed copies older than 3.12.1 don't have the subcommand, so say 3.12.1
+or newer in the listing. The agent-kit plugin and `.mcpb` can keep their
+current launch config; the directory entry and the Goose entry are what use
+the `uoink mcp` line. Option A stays a fine first submission if you want to
+go before the reviewer answers about the PATH command.
+
+## 13. Hermes Agent marketplace
+
+Hermes lists portable plugins by pointer, not by copy. The plugin is in
+[`ryanbiddy/uoink-agent-kit`](https://github.com/ryanbiddy/uoink-agent-kit) at
+`plugins/hermes-uoink` (the catalog entry's `subdir`).
+
+1. Push the plugin branch of `uoink-agent-kit` first, so the commit exists on
+   GitHub. Copy the full 40-character commit SHA of the commit you want listed.
+2. Add one file, `plugin-catalog/uoink.yaml`, to
+   [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) as a
+   single pull request from the repo owner's account (`ryanbiddy`). Copy the
+   field names from an existing file in `plugin-catalog/`; the entry points at
+   `ryanbiddy/uoink-agent-kit`, `subdir: plugins/hermes-uoink`, and pins that
+   full commit SHA (the `sha` field). A branch or tag name isn't enough.
+3. Before you open the pull request, run `hermes plugins validate` on the entry
+   and fix anything it reports. It has to pass.
+4. Bumping the listing later is a new pull request with a new SHA.
+
+> **Description:** Connects Hermes to the Uoink desktop app: search your local
+> library of saved videos, podcasts and articles, read transcripts with
+> timestamps, capture a video link, save a note, and run research that checks
+> each quote against the saved transcript. Configuration and Markdown only: no
+> Python, scripts or binaries. Needs Uoink 3.15.1 or later on the same computer.
+> It starts the installed `uoink mcp` command over stdio, and both servers are
+> declared untrusted, so Hermes asks before every call that isn't read-only.
+> The plugin makes no network calls and has no telemetry or credentials.
+
