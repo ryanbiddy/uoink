@@ -252,7 +252,7 @@ def test_web_page_needs_allowlist(env):
     port, _idx, tools = env
     status, body = _post(port, {"url": PAGE})
     assert status == 409 and body["error"] == "consent_required"
-    assert "example.org" in body["message"]
+    assert body["message"] == "Allow example.org in Uoink under Settings, Allowed sites, then try again."
     assert body["contract"] == "uoink.capture" and body["version"] == 1
     assert tools.calls == []
 
