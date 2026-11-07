@@ -15760,6 +15760,224 @@ def _resume_payload(idx) -> dict:
 # ---------------------------------------------------------------------------
 # HTTP handler
 # ---------------------------------------------------------------------------
+# ---- Make a Short with Zing ---------------------------------------------------
+# Zing is a separate app. Uoink only runs its documented hand-off command: an
+# argument list (never a shell) with a validated item id, in a detached child.
+_ZING_CONTRACT = "ryan.suite.handoff"
+_ZING_PROBE_TTL = 300        # a found Zing is rechecked every five minutes
+_ZING_MISS_TTL = 30          # a missing one sooner, so installing it shows up fast
+_ZING_PROBE_TIMEOUT = 5
+_ZING_FIRST_LINE_TIMEOUT = 60   # Zing may hash a large kept video first
+_ZING_ID_RE = re.compile(r"[A-Za-z0-9_-]{6,200}")
+_ZING_PAGE_RE = re.compile(r"http://127\.0\.0\.1:(\d{1,5})/\?t=[A-Za-z0-9._~%-]{1,512}")
+_ZING_SHELL_UNSAFE = set('&|<>^%"!\r\n')
+_zing_probe_cache: dict = {"at": 0.0, "ttl": 0, "value": None}
+_zing_probe_lock = threading.Lock()
+
+
+def _zing_search_dirs() -> list[str]:
+    """User bin folders a GUI-launched helper's PATH usually lacks (pipx, Homebrew)."""
+    home = Path.home()
+    dirs = [home / ".local" / "bin"]
+    if sys.platform == "win32":
+        for root_name, tail in (("APPDATA", "Python"), ("LOCALAPPDATA", "Programs/Python")):
+            root = os.environ.get(root_name)
+            if root:
+                dirs.extend(sorted((Path(root) / tail).glob("Python*/Scripts")))
+    else:
+        dirs.extend([Path("/opt/homebrew/bin"), Path("/usr/local/bin")])
+    return [str(d) for d in dirs if d.is_dir()]
+
+
+def _find_zing() -> str | None:
+    """Path to the zing launcher, or None. On Windows only .exe/.cmd/.bat count."""
+    found = shutil.which("zing")
+    for folder in _zing_search_dirs():
+        if found:
+            break
+        found = shutil.which("zing", path=folder)
+    if found and sys.platform == "win32" and Path(found).suffix.lower() not in (".exe", ".cmd", ".bat"):
+        return None
+    return found
+
+
+def _zing_argv(exe: str, *args: str) -> list[str] | None:
+    """The command line for zing. A Windows .cmd/.bat launcher runs through cmd
+    /c, so refuse a path or argument with a character cmd.exe would interpret."""
+    if sys.platform == "win32" and Path(exe).suffix.lower() in (".cmd", ".bat"):
+        if any(set(part) & _ZING_SHELL_UNSAFE for part in (exe, *args)):
+            return None
+        return [os.environ.get("COMSPEC") or "cmd.exe", "/d", "/c", exe, *args]
+    return [exe, *args]
+
+
+def _zing_probe_uncached() -> dict:
+    def no(reason):
+        return {"ok": True, "available": False, "service_version": None, "reason": reason}
+    exe = _find_zing()
+    if not exe:
+        return no("Zing is not installed.")
+    argv = _zing_argv(exe, "handoff", "--probe", "--json")
+    if argv is None:
+        return no("Zing's install path has characters Uoink will not run.")
+    try:
+        done = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True,
+                              timeout=_ZING_PROBE_TIMEOUT, **SUBPROCESS_KW)
+    except subprocess.TimeoutExpired:
+        return no("Zing did not answer in time.")
+    except (OSError, ValueError):
+        return no("Zing could not be started.")
+    if done.returncode != 0:
+        return no("This version of Zing does not support hand-off yet.")
+    try:
+        lines = done.stdout.decode("utf-8", "replace").strip().splitlines()
+        data = json.loads(lines[0])
+    except (IndexError, ValueError):
+        return no("Zing gave an answer Uoink could not read.")
+    if (not isinstance(data, dict) or data.get("ok") is not True
+            or data.get("contract") != _ZING_CONTRACT
+            or type(data.get("version")) is not int or data.get("version") != 1):
+        return no("This version of Zing does not match Uoink's hand-off.")
+    accepts = data.get("accepts")
+    if not isinstance(accepts, list) or "uoink.item/1" not in accepts:
+        return no("This version of Zing does not take items from Uoink.")
+    version = data.get("service_version")
+    return {"ok": True, "available": True,
+            "service_version": version if isinstance(version, str) else None, "reason": ""}
+
+
+def _zing_probe() -> dict:
+    """GET /zing/status body. Cached for a few minutes; never raises."""
+    now = time.monotonic()
+    with _zing_probe_lock:
+        cached = _zing_probe_cache["value"]
+        if cached is not None and now - _zing_probe_cache["at"] < _zing_probe_cache["ttl"]:
+            return cached
+        try:
+            value = _zing_probe_uncached()
+        except Exception as exc:
+            log.info("zing probe failed: %s", type(exc).__name__)
+            value = {"ok": True, "available": False, "service_version": None,
+                     "reason": "Zing could not be checked."}
+        _zing_probe_cache.update(at=now, value=value,
+                                 ttl=_ZING_PROBE_TTL if value["available"] else _ZING_MISS_TTL)
+        return value
+
+
+_ZING_ERROR_TEXT = {
+    "invalid_ref": "Zing did not accept this item.",
+    "uoink_unavailable": "Zing could not reach Uoink. Check that Uoink is running, then try again.",
+    "media_unavailable": ("Keep this item's media first. Uoink keeps the video only for short "
+                          "videos, and only when the keep_media setting is on, so turn it on "
+                          "and capture the item again."),
+    "project_exists": "Zing already has a project for this item. Open it from Zing.",
+    "failed": "Zing could not start. Try again.",
+}
+
+
+def _zing_popen_flags(argv: list[str]) -> dict:
+    """Detach the child so it outlives the request (and a helper restart)."""
+    if sys.platform != "win32":
+        return {"start_new_session": True, "close_fds": True}
+    group = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    if Path(argv[0]).stem.lower() == "cmd":
+        # A .cmd launcher needs a console; keep it hidden rather than detached.
+        return {"creationflags": CREATE_NO_WINDOW | group, "close_fds": True}
+    return {"creationflags": getattr(subprocess, "DETACHED_PROCESS", 0) | group,
+            "close_fds": True}
+
+
+def _zing_drain(proc) -> None:
+    """Read and drop the rest of Zing's output so it never blocks on a full pipe,
+    then reap it when it exits."""
+    try:
+        for _ in proc.stdout:
+            pass
+    except (OSError, ValueError):
+        pass
+    try:
+        proc.wait()
+    except OSError:
+        pass
+
+
+def _zing_first_line(proc) -> str | None:
+    box: queue.Queue = queue.Queue()
+
+    def read():
+        try:
+            box.put(proc.stdout.readline())
+        except (OSError, ValueError):
+            box.put(b"")
+    threading.Thread(target=read, daemon=True).start()
+    try:
+        raw = box.get(timeout=_ZING_FIRST_LINE_TIMEOUT)
+    except queue.Empty:
+        return None
+    return raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
+
+
+def _zing_fail(status: int, error: str, message: str) -> tuple[int, dict]:
+    return status, {"ok": False, "error": error, "message": message}
+
+
+def _zing_handoff(video_id) -> tuple[int, dict]:
+    """POST /zing/handoff. Starts `zing handoff uoink://item/<id> --json`
+    detached, reads only its first stdout line, and returns the review page."""
+    vid = video_id if isinstance(video_id, str) else ""
+    if not _ZING_ID_RE.fullmatch(vid):
+        return _zing_fail(400, "invalid_id", "That item id is not valid.")
+    try:
+        row = _get_index().get_yoink(vid)
+    except Exception:
+        row = None
+    if not row or row.get("deleted_at"):
+        return _zing_fail(404, "not_found", "That item is not in your Library.")
+    if not _zing_probe()["available"]:
+        return _zing_fail(409, "zing_unavailable", "Zing is not available on this computer.")
+    exe = _find_zing()
+    argv = _zing_argv(exe, "handoff", f"uoink://item/{vid}", "--json") if exe else None
+    if argv is None:
+        return _zing_fail(409, "zing_unavailable", "Zing is not available on this computer.")
+    env = dict(os.environ)
+    env["UOINK_TOKEN"] = TOKEN
+    env["UOINK_URL"] = suite_service._active_base_url()   # the isolated binding on isolated installs
+    try:
+        proc = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                stderr=subprocess.DEVNULL, env=env, **_zing_popen_flags(argv))
+    except (OSError, ValueError) as exc:
+        log.info("zing hand-off could not start: %s", type(exc).__name__)
+        return _zing_fail(502, "failed", _ZING_ERROR_TEXT["failed"])
+    line = _zing_first_line(proc)
+    # Hand the pipe to a drain thread whatever happened; the child is never killed.
+    threading.Thread(target=_zing_drain, args=(proc,), daemon=True).start()
+    if line is None:
+        log.info("zing hand-off: no answer within %ss", _ZING_FIRST_LINE_TIMEOUT)
+        return _zing_fail(504, "timeout", "Zing took too long to answer. It may still be starting.")
+    try:
+        data = json.loads(line)
+    except ValueError:
+        data = None
+    if not isinstance(data, dict) or data.get("contract") != _ZING_CONTRACT or data.get("version") != 1:
+        log.info("zing hand-off: unreadable first line")
+        return _zing_fail(502, "failed", "Zing closed before it answered." if not line.strip()
+                          else _ZING_ERROR_TEXT["failed"])
+    if data.get("ok") is not True:
+        code = data.get("error") if isinstance(data.get("error"), str) else "failed"
+        known = code in _ZING_ERROR_TEXT
+        log.info("zing hand-off refused: %s", code if known else "other")
+        return _zing_fail(502, code if known else "failed",
+                          _ZING_ERROR_TEXT.get(code, _ZING_ERROR_TEXT["failed"]))
+    page = data.get("page")
+    match = _ZING_PAGE_RE.fullmatch(page) if isinstance(page, str) else None
+    project = data.get("project")
+    if not match or not 1 <= int(match.group(1)) <= 65535 or not isinstance(project, str):
+        log.info("zing hand-off: page address was not a local Zing page")
+        return _zing_fail(502, "failed", _ZING_ERROR_TEXT["failed"])
+    log.info("zing hand-off opened for item %s", vid)   # never the page address: it carries a token
+    return 200, {"ok": True, "page": page, "project": project, "reused": data.get("reused") is True}
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = f"Uoink/{VERSION}"
     # Per-request socket timeout. BaseHTTPRequestHandler.setup() applies this
@@ -16268,6 +16486,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_update_check()
         if bare == "/update/install":
             return self._handle_update_install_status()
+        if bare == "/zing/status":
+            return self._handle_zing_status()
         if bare == "/engagement/scores":
             return self._handle_engagement_scores()
         if bare == "/resurface":
@@ -16622,6 +16842,12 @@ class Handler(BaseHTTPRequestHandler):
         if not self._require_token():
             return
         self._send_json(200, {"ok": True, **_update_status()})
+
+    def _handle_zing_status(self):
+        """GET /zing/status -- is Zing installed and hand-off capable? Always 200."""
+        if not self._require_token():
+            return
+        self._send_json(200, _zing_probe())
 
     def _handle_detect(self):
         """GET /detect?url=... -- V-2a universal capture detection.
@@ -21221,6 +21447,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_post(body)
         if bare == "/update/install":
             return self._send_json(*_start_update_install())
+        if bare == "/zing/handoff":
+            return self._send_json(*_zing_handoff(body.get("video_id") if isinstance(body, dict) else None))
         if bare == "/relay/check":
             return self._send_json(200, _relay_request_check())
         if bare == "/settings/usage-prompt":
