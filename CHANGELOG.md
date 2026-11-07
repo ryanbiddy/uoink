@@ -40,6 +40,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Research shows "Use saved" for any candidate already in the library.
 - Podcast feed artwork is cached locally once per feed, so episode cards show
   it without the dashboard loading remote images.
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
 
 ### Fixed
 
