@@ -3000,6 +3000,7 @@ def _resolve_video_transcript(
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
         cancel_event: threading.Event | None = None,
+        asr_titles: tuple = (),
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
@@ -3019,6 +3020,8 @@ def _resolve_video_transcript(
         return [], None, {"status": "disabled", "reason": reason}
 
     model_name = _selected_reliability_model(current_settings)
+    # Titles only; without a video title there is nothing worth hinting.
+    initial_prompt = uoink_reliability.build_initial_prompt(*asr_titles) if asr_titles and asr_titles[-1] else None
     expectation = _asr_duration_expectation(
         sum(length for _path, _start, length in media_chunks)
         if media_chunks else duration_seconds)
@@ -3046,6 +3049,7 @@ def _resolve_video_transcript(
                             path,
                             model_name=model_name,
                             model_root=RELIABILITY_MODEL_ROOT,
+                            **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3100,6 +3104,7 @@ def _resolve_video_transcript(
                         path,
                         model_name=model_name,
                         model_root=RELIABILITY_MODEL_ROOT,
+                        **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                     )
                 _raise_if_cancelled(cancel_event)
                 if media_chunks:
@@ -3521,7 +3526,8 @@ def _library_transcript(video_id: str) -> dict | None:
     }
 
 
-def _whisper_transcript(url: str, *, settings: dict) -> tuple[list, dict]:
+def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
+                        channel: str | None = None) -> tuple[list, dict]:
     """Download the audio once and transcribe it with the local model."""
     if not bool(settings.get("asr_fallback_enabled", True)):
         raise TranscriptUnavailable(
@@ -3549,7 +3555,8 @@ def _whisper_transcript(url: str, *, settings: dict) -> tuple[list, dict]:
         info: dict = {}
         try:
             entries = uoink_reliability.transcribe_media(
-                audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info)
+                audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info,
+                **({"initial_prompt": uoink_reliability.build_initial_prompt(channel, title)} if title else {}))
         except Exception as e:
             raise TranscriptUnavailable(
                 "whisper_failed", "local Whisper failed: " + _sanitize_error(str(e)))
@@ -3673,7 +3680,9 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
     if failures or not skipped_translation:
         why_parts.append(_CAPTION_FAILURE_WHY.get(caption_reason, "captions were unavailable"))
     try:
-        entries, asr = _whisper_transcript(url, settings=settings)
+        entries, asr = _whisper_transcript(
+            url, settings=settings, title=title,
+            channel=(metadata or {}).get("channel") or (metadata or {}).get("uploader"))
     except TranscriptUnavailable as e:
         raise TranscriptUnavailable(
             e.reason, "; ".join(why_parts) + f", and {e.why}.") from None
@@ -5070,9 +5079,18 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     if not url:
         return None
 
+    # pbs.twimg.com answers the Python default agent with 403, so thumbnail
+    # fetches introduce themselves like a browser. The address checks still run.
+    opener = http_open or source_subscriptions.public_http_open
+    user_agent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+
+    def browser_open(target, **kwargs):
+        return opener(target, headers={"User-Agent": user_agent}, **kwargs)
+
     raw_path = output_folder / "thumbnail.raw"
     try:
-        with (http_open or source_subscriptions.public_http_open)(
+        with browser_open(
                 url, timeout=30) as resp, open(raw_path, "wb") as f:
             f.write(resp.read())
     except Exception as e:
@@ -7454,6 +7472,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 for path, chunk in zip(video_files, long_video_chunks)
             ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
             cancel_event=cancel_event,
+            asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
         )
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
@@ -10491,6 +10510,10 @@ def _podcast_transcription_worker() -> None:
                 # AS-02 (run AT-4): children spawned for a standing start are
                 # recorded against it (see _run_subprocess).
                 standing_start = job.get("source_start_id")
+                try:
+                    vocabulary_hint = _podcast_initial_prompt(episode_id)
+                except Exception:
+                    vocabulary_hint = None  # a hint is never worth a failed job
                 with (source_subscriptions.capture_context(
                         standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
                         if standing_start else contextlib.nullcontext()):
@@ -10498,7 +10521,8 @@ def _podcast_transcription_worker() -> None:
                         audio_path, data_root=DATA_ROOT, model_size=model,
                         language=job.get("language"),
                         diarize=bool(job.get("diarize")),
-                        consent_given=bool(job.get("consent_given")))
+                        consent_given=bool(job.get("consent_given")),
+                        initial_prompt=vocabulary_hint)
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
@@ -10614,6 +10638,16 @@ def _podcast_transcription_worker() -> None:
             if manual_lock is not None:
                 manual_lock.release()
             _podcast_transcription_queue.task_done()
+
+
+def _podcast_initial_prompt(episode_id: int) -> str | None:
+    """Feed and episode titles as Whisper's vocabulary hint; never fails a job."""
+    try:
+        row = podcasts.get_episode_with_feed(_get_index(), episode_id) or {}
+        return uoink_reliability.build_initial_prompt(row.get("podcast_title"), row.get("title"))
+    except Exception:
+        log.exception("podcast job: could not build the Whisper vocabulary hint")
+        return None
 
 
 def _podcast_capture_key(episode_id: int) -> str | None:
@@ -15095,10 +15129,10 @@ def _research_discover(args: dict) -> dict:
             *run.get("candidates_pool", run.get("candidates", [])), *collected["candidates"]])
         library_ids = {c["key"][3:] for c in merged
                        if c["key"].startswith("yt:") and _list_import_in_library(c["key"][3:])}
-        # A saved episode the library search did not surface is still saved:
-        # match podcasts by the same enclosure join capture uses.
-        library_keys = {c["key"] for c in merged if c["key"].startswith("pod:")
-                        and not c.get("in_library") and _research_saved_podcast(c)}
+        # A saved episode, page, thread or post the library search did not
+        # surface is still saved: match it by the same identity capture uses.
+        library_keys = {c["key"] for c in merged if not c["key"].startswith(("yt:", "lib:"))
+                        and not c.get("in_library") and _research_saved_candidate(c)}
         result = research.merge_and_rank(
             run, collected, args["queries"], library_ids=library_ids, library_keys=library_keys,
             now=datetime.fromisoformat(now.replace("Z", "+00:00")))
@@ -15135,15 +15169,53 @@ def _research_library_lookup(candidate: dict) -> dict | None:
                 row = idx.get_yoink(saved["video_id"])
                 if row and not row.get("deleted_at"):
                     return row
+        return None
+    if not key.startswith(("yt:", "lib:")):
+        return _research_saved_page(idx, candidate["url"])
     return None
 
 
-def _research_saved_podcast(candidate: dict) -> bool:
+def _research_url_key(url) -> str | None:
+    """One identity per saved page, Reddit thread or X post, from the capture URL rules."""
+    if not isinstance(url, str):
+        return None
+    status = x_extractor.tweet_id_from_url(url.strip())
+    if status:
+        return "x:" + status
+    if reddit_extractor.is_reddit_thread_url(url):
+        canonical = reddit_extractor.canonical_json_url(url)
+        return "reddit:" + canonical.lower().removesuffix("/.json").removesuffix(".json") if canonical else None
+    canonical = page_extractor.normalize_page_url(url)
+    if not canonical:
+        return None
+    parts = urlparse(canonical)
+    return "page:" + parts._replace(path=parts.path.rstrip("/"), fragment="").geturl()
+
+
+def _research_saved_page(idx, url: str) -> dict | None:
+    """A saved web page, Reddit thread or X post matched the way capture dedupes them."""
+    wanted = _research_url_key(url)
+    if not wanted:
+        return None
+    for saved in idx.list_capture_sources():
+        try:
+            metadata = json.loads(saved.get("metadata_json") or "{}")
+        except (ValueError, TypeError):
+            continue
+        if isinstance(metadata, dict) and wanted in {
+                _research_url_key(metadata.get(field)) for field in ("url", "source_url")}:
+            row = idx.get_yoink(saved["video_id"])
+            if row and not row.get("deleted_at"):
+                return row
+    return None
+
+
+def _research_saved_candidate(candidate: dict) -> bool:
     """Best effort: a lookup error leaves the candidate as new, never fails discovery."""
     try:
         return bool(_research_library_lookup(candidate))
     except Exception:
-        log.exception("research: saved-podcast lookup failed")
+        log.exception("research: saved-source lookup failed")
         return False
 
 
@@ -17640,6 +17712,14 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.exception("/podcasts/feeds GET failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
+        for row in rows:
+            # The id Check now sends to /sources/refresh, the same one the
+            # Sources card uses for this feed.
+            try:
+                _key, _url = source_subscriptions.parse_source_url("podcast_rss", row.get("feed_url") or "")
+                row["source_id"] = source_subscriptions.source_identity("podcast_rss", _key)
+            except source_subscriptions.ServiceError:
+                row["source_id"] = None
         return self._send_json(200, {"ok": True, "feeds": rows,
                                       "count": len(rows)})
 

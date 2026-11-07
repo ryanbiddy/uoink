@@ -432,12 +432,32 @@ def _transcript_entries_from_segments(
     return entries
 
 
+INITIAL_PROMPT_MAX_CHARS = 200
+
+
+def build_initial_prompt(*titles) -> str | None:
+    """A short vocabulary hint for Whisper from titles only (feed, episode,
+    channel, video). Plain text, de-duplicated, capped at a word boundary."""
+    seen, parts = set(), []
+    for title in titles:
+        text = " ".join(str(title or "").split())
+        text = "".join(ch for ch in text if ch.isprintable()).strip()
+        if text and text.casefold() not in seen:
+            seen.add(text.casefold())
+            parts.append(text.rstrip(".!?"))
+    prompt = ". ".join(parts)
+    if len(prompt) > INITIAL_PROMPT_MAX_CHARS:
+        prompt = prompt[:INITIAL_PROMPT_MAX_CHARS].rsplit(" ", 1)[0].rstrip(" ,;:.-")
+    return prompt or None
+
+
 def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
                      _transcribe=None,
                      info: dict | None = None,
-                     language: str | None = None) -> list[tuple[float, float, str]]:
+                     language: str | None = None,
+                     initial_prompt: str | None = None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
 
     Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
@@ -449,6 +469,9 @@ def transcribe_media(media_path: str | Path, *,
     (``resolve_model``). ``local_files_only=True`` is intentional: capture
     must not become an implicit model download. ``ensure_model`` remains the
     explicit user-triggered download path.
+
+    ``initial_prompt`` is a short plain-text vocabulary hint (titles) that
+    steers Whisper toward niche spellings; it is never written to the output.
     """
     media = Path(media_path)
     if not media.is_file():
@@ -468,6 +491,7 @@ def transcribe_media(media_path: str | Path, *,
             best_of=1,
             vad_filter=True,
             **({"language": language} if language is not None else {}),
+            **({"initial_prompt": initial_prompt} if initial_prompt else {}),
         )
         if info is not None:
             info["language"] = getattr(detected, "language", None)

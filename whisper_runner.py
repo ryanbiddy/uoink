@@ -429,7 +429,8 @@ def transcribe_audio(audio_path: Path, *,
                       model_size: str = MODEL_BASE,
                       language: str | None = None,
                       diarize: bool = False,
-                      consent_given: bool = False) -> dict:
+                      consent_given: bool = False,
+                      initial_prompt: str | None = None) -> dict:
     """End-to-end transcription. Synchronous. Returns the structured
     transcript dict.
 
@@ -466,7 +467,8 @@ def transcribe_audio(audio_path: Path, *,
         # as the model source preserves podcast cache/consent precedence and
         # reuses reliability's local-only CPU/int8 loader without a cache write.
         entries = uoink_reliability.transcribe_media(
-            audio_path, model_name=str(model_path), language=language, info=info)
+            audio_path, model_name=str(model_path), language=language, info=info,
+            initial_prompt=initial_prompt)
         return {
             "model": model_size,
             "language": info.get("language") or language or "en",
@@ -511,7 +513,9 @@ def transcribe_audio(audio_path: Path, *,
         model = whisperx.load_model(str(model_path), device=device,
                                       compute_type=_compute_type(device),
                                       download_root=str(_model_cache_root(data_root, model_size)),
-                                      local_files_only=True)
+                                      local_files_only=True,
+                                      **({"asr_options": {"initial_prompt": initial_prompt}}
+                                         if initial_prompt else {}))
         audio_input = str(audio_path)
         if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
             # WhisperX's string loader invokes bare `ffmpeg`. Supply samples so
