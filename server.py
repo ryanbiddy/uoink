@@ -5058,12 +5058,6 @@ def _fetch_metadata(url: str, *,
     return json.loads(cp.stdout)
 
 
-# pbs.twimg.com answers the Python default agent with 403, so thumbnail
-# fetches introduce themselves like a browser. The address checks still run.
-_THUMBNAIL_USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                         "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
-
-
 def _download_thumbnail(metadata: dict, output_folder: Path, *,
                         cancel_event: threading.Event | None = None,
                         http_open=None) -> Path | None:
@@ -5085,11 +5079,19 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     if not url:
         return None
 
+    # pbs.twimg.com answers the Python default agent with 403, so thumbnail
+    # fetches introduce themselves like a browser. The address checks still run.
+    opener = http_open or source_subscriptions.public_http_open
+    user_agent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
+
+    def browser_open(target, **kwargs):
+        return opener(target, headers={"User-Agent": user_agent}, **kwargs)
+
     raw_path = output_folder / "thumbnail.raw"
-    headers = {"User-Agent": _THUMBNAIL_USER_AGENT}
     try:
-        with (http_open or source_subscriptions.public_http_open)(
-                url, headers=headers, timeout=30) as resp, open(raw_path, "wb") as f:
+        with browser_open(
+                url, timeout=30) as resp, open(raw_path, "wb") as f:
             f.write(resp.read())
     except Exception as e:
         log.warning("thumbnail download failed: %s", e)
