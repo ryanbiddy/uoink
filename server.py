@@ -10508,6 +10508,10 @@ def _podcast_transcription_worker() -> None:
                 # AS-02 (run AT-4): children spawned for a standing start are
                 # recorded against it (see _run_subprocess).
                 standing_start = job.get("source_start_id")
+                try:
+                    vocabulary_hint = _podcast_initial_prompt(episode_id)
+                except Exception:
+                    vocabulary_hint = None  # a hint is never worth a failed job
                 with (source_subscriptions.capture_context(
                         standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
                         if standing_start else contextlib.nullcontext()):
@@ -10516,7 +10520,7 @@ def _podcast_transcription_worker() -> None:
                         language=job.get("language"),
                         diarize=bool(job.get("diarize")),
                         consent_given=bool(job.get("consent_given")),
-                        initial_prompt=_podcast_initial_prompt(episode_id))
+                        initial_prompt=vocabulary_hint)
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")

@@ -87,7 +87,7 @@ def test_podcast_job_builds_the_prompt_from_feed_and_episode_titles(monkeypatch)
 def test_podcast_worker_passes_the_prompt_to_transcribe_audio():
     source = Path(server.__file__).read_text(encoding="utf-8")
     call = source.split("transcript = whisper_runner.transcribe_audio(", 1)[1].split(")\n", 1)[0]
-    assert "initial_prompt=_podcast_initial_prompt(episode_id)" in call
+    assert "initial_prompt=vocabulary_hint" in call and "_podcast_initial_prompt(episode_id)" in source
 
 
 def test_youtube_whisper_fallback_passes_channel_and_title(monkeypatch, tmp_path):
