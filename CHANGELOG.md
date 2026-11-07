@@ -10,6 +10,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.15.1] - 2026-11-07
+
+### Added
+
+- Update notices. A Settings switch, "Check for new versions once a day", is
+  off by default. When it is on, or when you press Check now, a banner says
+  when a newer Uoink is out, and the Windows tray and Mac menu bar show
+  "Update available". The tray and menu bar never contact GitHub themselves.
+- Update now (Windows) and Download update (Mac). Uoink downloads the new
+  installer from the GitHub release, checks it against the release's
+  SHA256SUMS.txt, and only then runs it (Windows) or opens the DMG (Mac).
+  It never downloads anything unless you press the button.
+- Check now on podcast feed cards and in the Settings feed list. A manual
+  check skips the hourly wait once the feed has gone 2 minutes unchecked, and
+  still respects backoff and a poll already in progress.
+- Whisper gets a short hint built from the feed and episode titles (or the
+  channel and video titles), so niche names transcribe more accurately.
+
+### Changed
+
+- MCP tool replies are trimmed to fit the 64 KiB reply frame, with a note
+  pointing at the full record. `uoink_x` returns post text, author, counts and
+  one best MP4 per video; full evidence stays in the sidecar.
+- The Library search box says whether it is using keyword or meaning search.
+- Insights leads with its numbers; date inputs and caveats move below.
+- For You waits for 10 library items before naming a corpus gap.
+- The "Uoink anything" paste box is first on Sources.
+- Research shows "Use saved" for any candidate already in the library.
+- Podcast feed artwork is cached locally once per feed, so episode cards show
+  it without the dashboard loading remote images.
+
+### Fixed
+
+- One large capture reply could leave a Claude Code session unusable with
+  "Inbound request exceeds protocol limits".
+- Failed capture rows appeared in every search.
+- Back-catalog podcast episodes showed as web pages with a grey placeholder.
+- After podcast consent the card stopped at "0 enrolled" instead of showing
+  the first check.
+- X video captures logged a failed channel-context fetch every time.
+- X thumbnails failed with 403.
+- Capture Markdown printed dashes for unknown fields.
+- Search highlighted matches inside words.
+- Research reports said "1 channels".
+- `--text` CLI output crashed on a cp1252 console.
+
 ## [3.15.0] - 2026-11-06
 
 ### Changed
