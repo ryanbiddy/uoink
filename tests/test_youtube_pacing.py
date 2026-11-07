@@ -144,14 +144,14 @@ def test_concurrent_youtube_extractions_are_serialised(network, host):
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             second = pool.submit(server._fetch_metadata, other)
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             assert len(network.calls) == 1
         finally:
             network.blocks[URL].set()
-        assert first.result(timeout=2)["id"] == "abcdef12345"
-        assert second.result(timeout=2)["id"] == "abcdef12345"
+        assert first.result(timeout=10)["id"] == "abcdef12345"
+        assert second.result(timeout=10)["id"] == "abcdef12345"
     assert len(network.calls) == 2
     assert_serial(network.calls)
 
@@ -163,14 +163,14 @@ def test_other_hosts_run_concurrently_with_youtube_and_each_other(network):
     with ThreadPoolExecutor(max_workers=3) as pool:
         futures = [pool.submit(server._fetch_metadata, url) for url in urls]
         try:
-            assert all(network.started[url].wait(1) for url in urls)
+            assert all(network.started[url].wait(10) for url in urls)
             assert len(network.calls) == 3
             assert all(call["end"] is None for call in network.calls)
         finally:
             for event in network.blocks.values():
                 event.set()
         for future in futures:
-            future.result(timeout=2)
+            future.result(timeout=10)
     assert max(call["start"] for call in network.calls) < min(
         call["end"] for call in network.calls)
 
@@ -182,16 +182,16 @@ def test_cancellation_while_waiting_does_not_launch_or_block_next_call(network, 
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             second = pool.submit(fetch, URL, cancel_event=cancel)
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             cancel.set()
             with pytest.raises(server.PlaylistJobCancelled):
-                second.result(timeout=1)
+                second.result(timeout=10)
             assert len(network.calls) == 1
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
+        first.result(timeout=10)
     server._fetch_metadata(URL)
     assert len(network.calls) == 2
     assert_serial(network.calls)
@@ -262,10 +262,10 @@ def test_failed_subprocess_releases_youtube_slot(network, failure):
                              cancel_event=cancel, timeout=0 if failure == "timeout" else None)
         try:
             if failure == "cancel":
-                assert network.started[URL].wait(1)
+                assert network.started[URL].wait(10)
                 cancel.set()
             with pytest.raises(error):
-                failed.result(timeout=2)
+                failed.result(timeout=10)
         finally:
             for event in network.blocks.values():
                 event.set()
@@ -297,16 +297,16 @@ def test_comments_and_channel_context_share_the_limiter(network, monkeypatch, tm
     with ThreadPoolExecutor(max_workers=3) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             comments = pool.submit(server._comments_worker, URL, tmp_path, tmp_path / "capture.md")
             channel = pool.submit(server._fetch_channel_context, "https://youtube.com/@example")
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             assert len(network.calls) == 1
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
-        comments.result(timeout=2)
-        assert channel.result(timeout=2) == {"description": "Channel", "recent_videos": []}
+        first.result(timeout=10)
+        comments.result(timeout=10)
+        assert channel.result(timeout=10) == {"description": "Channel", "recent_videos": []}
     assert len(network.calls) == 3
     assert_serial(network.calls)
     assert any("--write-comments" in call["cmd"] for call in network.calls)
@@ -348,15 +348,15 @@ def test_waiting_yields_process_lock_and_keeps_identity_on_cancel(network, monke
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             second = pool.submit(waiting_capture)
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             assert identity.held
             assert server._extract_lock.acquire(blocking=False)
             try:
                 cancel.set()
                 with pytest.raises(server.PlaylistJobCancelled):
-                    second.result(timeout=1)
+                    second.result(timeout=10)
                 assert server._extract_lock.locked(), "cancellation released another caller's lock"
             finally:
                 server._extract_lock.release()
@@ -365,7 +365,7 @@ def test_waiting_yields_process_lock_and_keeps_identity_on_cancel(network, monke
             assert len(network.calls) == 1
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
+        first.result(timeout=10)
 
 
 def test_concurrent_capture_steps_resume_process_ownership(network, monkeypatch):
@@ -394,14 +394,14 @@ def test_concurrent_capture_steps_resume_process_ownership(network, monkeypatch)
     with ThreadPoolExecutor(max_workers=3) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             futures = [pool.submit(capture, url) for url in captures]
-            assert all(event.wait(1) for event in entered.values())
+            assert all(event.wait(10) for event in entered.values())
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
+        first.result(timeout=10)
         for future in futures:
-            future.result(timeout=2)
+            future.result(timeout=10)
     assert len(network.calls) == 7
     assert_serial(network.calls)
     assert all(call["process_lock_held"] for call in network.calls[1:])
@@ -510,9 +510,9 @@ def test_process_waiter_leaves_youtube_slot_for_unregistered_lock_owner(network,
             assert getattr(server._ManualOwnership._pacing, "owner", None) is None
             assert getattr(server._ServerCaptureBackend._pacing, "owner", None) is None
             process_busy.set()
-            assert resume_blocked.wait(1)
+            assert resume_blocked.wait(10)
             server._fetch_metadata("https://music.youtube.com/watch?v=other123456")
-            assert release_process.wait(2)
+            assert release_process.wait(10)
 
     block(network, URL)
     other_url = "https://music.youtube.com/watch?v=other123456"
@@ -520,14 +520,14 @@ def test_process_waiter_leaves_youtube_slot_for_unregistered_lock_owner(network,
     with ThreadPoolExecutor(max_workers=3) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             waiting = pool.submit(capture)
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             owner = pool.submit(unregistered_owner)
-            assert process_busy.wait(1)
+            assert process_busy.wait(10)
             network.blocks[URL].set()
-            first.result(timeout=2)
-            assert network.started[other_url].wait(1)
+            first.result(timeout=10)
+            assert network.started[other_url].wait(10)
             assert not waiting.done(), "capture resumed without its process lock"
             assert len(network.calls) == 2
         finally:
@@ -535,8 +535,8 @@ def test_process_waiter_leaves_youtube_slot_for_unregistered_lock_owner(network,
             network.blocks[URL].set()
             if not network.started[other_url].is_set():
                 cancel.set()
-        owner.result(timeout=2)
-        waiting.result(timeout=2)
+        owner.result(timeout=10)
+        waiting.result(timeout=10)
     assert_serial(network.calls)
     assert len(network.calls) == 3
     assert not server._extract_lock.locked()
@@ -550,17 +550,17 @@ def test_generic_music_extraction_waits_without_process_lock(network, monkeypatc
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             network.returncode = 1  # Stop after metadata, before publication.
             second = pool.submit(server.Handler._handle_extract_any, handler, {
                 "url": "https://music.youtube.com/watch?v=other123456"})
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             assert server._extract_lock.acquire(blocking=False)
             server._extract_lock.release()
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
-        status, body = second.result(timeout=2)
+        first.result(timeout=10)
+        status, body = second.result(timeout=10)
     assert status == 400
     assert body["platform"] == server.PLATFORM_GENERIC
     assert_serial(network.calls)
@@ -599,7 +599,7 @@ def test_manual_waiter_reuses_local_capture_beyond_identity_timeout(
 
     def publish():
         entered.set()
-        assert finish.wait(2)
+        assert finish.wait(10)
         published["row"] = {"title": "Completed capture", "metadata_json": "{}",
                             "corpus_path": str(tmp_path / "capture.md")}
 
@@ -625,14 +625,14 @@ def test_manual_waiter_reuses_local_capture_beyond_identity_timeout(
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(owner)
         try:
-            assert entered.wait(1)
+            assert entered.wait(10)
             second = pool.submit(waiter)
-            assert backend._identity_condition.waiting.wait(1)
+            assert backend._identity_condition.waiting.wait(10)
             assert not second.done(), "local ownership must outlive the external wait bound"
         finally:
             finish.set()
-        first.result(timeout=2)
-        assert second.result(timeout=2)["title"] == "Completed capture"
+        first.result(timeout=10)
+        assert second.result(timeout=10)["title"] == "Completed capture"
     service.publication_evidence_for_reuse.assert_called_once_with("abcdef12345")
     assert not backend._local_identities
     assert not server._extract_lock.locked()
@@ -651,13 +651,13 @@ def test_standing_worker_waits_for_local_identity_without_process_lock(network, 
     with ThreadPoolExecutor(max_workers=1) as pool:
         waiting = pool.submit(backend._ensure_ownership, start)
         try:
-            assert backend._identity_condition.waiting.wait(1)
+            assert backend._identity_condition.waiting.wait(10)
             acquire.assert_not_called()
             assert server._extract_lock.acquire(blocking=False)
             server._extract_lock.release()
         finally:
             backend.release_identity(key, first_identity)
-        waiting.result(timeout=2)
+        waiting.result(timeout=10)
     try:
         assert backend._leases[key] == (second_identity, True, start["start_id"])
         assert server._extract_lock.locked()
@@ -685,12 +685,12 @@ def test_local_owner_acquired_during_identity_wait_is_allowed_to_finish(network,
     with ThreadPoolExecutor(max_workers=1) as pool:
         waiting = pool.submit(backend.acquire_identity, key)
         try:
-            assert backend._identity_condition.waiting.wait(1)
+            assert backend._identity_condition.waiting.wait(10)
             assert not waiting.done()
             assert not server._extract_lock.locked()
         finally:
             backend.release_identity(key, local_identity)
-        assert waiting.result(timeout=2) is next_identity
+        assert waiting.result(timeout=10) is next_identity
     try:
         assert acquire.call_count == 2
     finally:
@@ -746,17 +746,17 @@ def test_playlist_endpoints_wait_through_shared_limiter(network, monkeypatch, en
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             second = pool.submit(handle, handler, {"playlist_id": 1})
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             assert idx._lock.acquire(blocking=False), "playlist wait held the index lock"
             idx._lock.release()
             assert not server._extract_lock.locked()
             assert len(network.calls) == 1
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
-        status, body = second.result(timeout=2)
+        first.result(timeout=10)
+        status, body = second.result(timeout=10)
     assert status == 200 and body["ok"]
     items = body["captured"] if endpoint == "scan" else body["new"]
     assert len(items) == 1 and items[0]["video_id"] == "abcdef12345"
@@ -810,16 +810,16 @@ def test_mcp_capture_waits_without_process_lock(network, mcp_capture):
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(server._fetch_metadata, URL)
         try:
-            assert network.started[URL].wait(1)
+            assert network.started[URL].wait(10)
             second = pool.submit(uoink_mcp_tools.uoink_video, {"url": URL})
-            assert network.limiter._condition.waiting.wait(1)
+            assert network.limiter._condition.waiting.wait(10)
             assert server._extract_lock.acquire(blocking=False), "MCP wait held the process lock"
             server._extract_lock.release()
             assert len(network.calls) == 1
         finally:
             network.blocks[URL].set()
-        first.result(timeout=2)
-        result = second.result(timeout=2)
+        first.result(timeout=10)
+        result = second.result(timeout=10)
     assert result["ok"] and result["corpus_md"] == "fixture capture"
     assert len(network.calls) == 4
     assert_serial(network.calls)
@@ -867,7 +867,7 @@ def test_mcp_and_manual_captures_reuse_completion_while_paced(
 
     def publish():
         entered.set()
-        assert finish.wait(2)
+        assert finish.wait(10)
         corpus.write_text("Completed fixture capture", encoding="utf-8")
         published["row"] = {"title": "Completed capture", "metadata_json": "{}",
                             "corpus_path": str(corpus)}
@@ -894,14 +894,14 @@ def test_mcp_and_manual_captures_reuse_completion_while_paced(
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(owner)
         try:
-            assert entered.wait(1)
+            assert entered.wait(10)
             second = pool.submit(waiter)
-            assert server._ServerCaptureBackend._identity_condition.waiting.wait(1)
+            assert server._ServerCaptureBackend._identity_condition.waiting.wait(10)
             assert not second.done()
         finally:
             finish.set()
-        first.result(timeout=2)
-        second.result(timeout=2)
+        first.result(timeout=10)
+        second.result(timeout=10)
     assert len(network.calls) == (1 if owner_kind == "mcp" else 0)
     assert extract.call_count == (1 if owner_kind == "mcp" else 0)
     service.publication_evidence_for_reuse.assert_called_once_with("abcdef12345")

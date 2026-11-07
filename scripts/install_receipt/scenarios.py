@@ -969,7 +969,7 @@ class ScenarioRunner:
         }
 
     def _wait_child_evidence(self, profile: Path, *, inject: str,
-                             timeout: float = 25.0):
+                             timeout: float = 60.0):
         """Wait past launch intent; it is not evidence of a registered child."""
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:

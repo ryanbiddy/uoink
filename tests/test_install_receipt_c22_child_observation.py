@@ -149,7 +149,7 @@ def test_missing_registered_child_evidence_fails_visibly(tmp_path, monkeypatch):
     runner = object.__new__(scenarios.ScenarioRunner)
     monkeypatch.setattr(scenarios, "child_ownership_records", lambda path: [
         {"unresolved_launch": True, "children": []}])
-    clock = iter([0, 0, 26])
+    clock = iter([0, 0, 61])
     monkeypatch.setattr(scenarios.time, "monotonic", lambda: next(clock))
     monkeypatch.setattr(scenarios.time, "sleep", lambda seconds: None)
     with pytest.raises(C22ValidationError, match="spawn_child child evidence did not arrive"):
