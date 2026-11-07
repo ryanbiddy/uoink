@@ -424,12 +424,32 @@ def _shape_segments(segments) -> list[dict]:
     return out
 
 
+INITIAL_PROMPT_MAX_CHARS = 200
+
+
+def build_initial_prompt(*titles) -> str | None:
+    """A short vocabulary hint for Whisper from titles only (feed, episode,
+    channel, video). Plain text, de-duplicated, capped at a word boundary."""
+    seen, parts = set(), []
+    for title in titles:
+        text = " ".join(str(title or "").split())
+        text = "".join(ch for ch in text if ch.isprintable()).strip()
+        if text and text.casefold() not in seen:
+            seen.add(text.casefold())
+            parts.append(text.rstrip(".!?"))
+    prompt = ". ".join(parts)
+    if len(prompt) > INITIAL_PROMPT_MAX_CHARS:
+        prompt = prompt[:INITIAL_PROMPT_MAX_CHARS].rsplit(" ", 1)[0].rstrip(" ,;:.-")
+    return prompt or None
+
+
 def transcribe_audio(audio_path: Path, *,
                       data_root: Path,
                       model_size: str = MODEL_BASE,
                       language: str | None = None,
                       diarize: bool = False,
-                      consent_given: bool = False) -> dict:
+                      consent_given: bool = False,
+                      initial_prompt: str | None = None) -> dict:
     """End-to-end transcription. Synchronous. Returns the structured
     transcript dict.
 
@@ -466,7 +486,8 @@ def transcribe_audio(audio_path: Path, *,
         # as the model source preserves podcast cache/consent precedence and
         # reuses reliability's local-only CPU/int8 loader without a cache write.
         entries = uoink_reliability.transcribe_media(
-            audio_path, model_name=str(model_path), language=language, info=info)
+            audio_path, model_name=str(model_path), language=language, info=info,
+            initial_prompt=initial_prompt)
         return {
             "model": model_size,
             "language": info.get("language") or language or "en",
@@ -511,7 +532,9 @@ def transcribe_audio(audio_path: Path, *,
         model = whisperx.load_model(str(model_path), device=device,
                                       compute_type=_compute_type(device),
                                       download_root=str(_model_cache_root(data_root, model_size)),
-                                      local_files_only=True)
+                                      local_files_only=True,
+                                      **({"asr_options": {"initial_prompt": initial_prompt}}
+                                         if initial_prompt else {}))
         audio_input = str(audio_path)
         if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
             # WhisperX's string loader invokes bare `ffmpeg`. Supply samples so

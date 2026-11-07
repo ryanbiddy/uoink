@@ -3000,6 +3000,7 @@ def _resolve_video_transcript(
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
         cancel_event: threading.Event | None = None,
+        initial_prompt: str | None = None,
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
@@ -3046,6 +3047,7 @@ def _resolve_video_transcript(
                             path,
                             model_name=model_name,
                             model_root=RELIABILITY_MODEL_ROOT,
+                            initial_prompt=initial_prompt,
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3100,6 +3102,7 @@ def _resolve_video_transcript(
                         path,
                         model_name=model_name,
                         model_root=RELIABILITY_MODEL_ROOT,
+                        initial_prompt=initial_prompt,
                     )
                 _raise_if_cancelled(cancel_event)
                 if media_chunks:
@@ -3521,7 +3524,8 @@ def _library_transcript(video_id: str) -> dict | None:
     }
 
 
-def _whisper_transcript(url: str, *, settings: dict) -> tuple[list, dict]:
+def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
+                        channel: str | None = None) -> tuple[list, dict]:
     """Download the audio once and transcribe it with the local model."""
     if not bool(settings.get("asr_fallback_enabled", True)):
         raise TranscriptUnavailable(
@@ -3549,7 +3553,8 @@ def _whisper_transcript(url: str, *, settings: dict) -> tuple[list, dict]:
         info: dict = {}
         try:
             entries = uoink_reliability.transcribe_media(
-                audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info)
+                audio, model_name=model_name, model_root=RELIABILITY_MODEL_ROOT, info=info,
+                initial_prompt=whisper_runner.build_initial_prompt(channel, title) if title else None)
         except Exception as e:
             raise TranscriptUnavailable(
                 "whisper_failed", "local Whisper failed: " + _sanitize_error(str(e)))
@@ -3673,7 +3678,9 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
     if failures or not skipped_translation:
         why_parts.append(_CAPTION_FAILURE_WHY.get(caption_reason, "captions were unavailable"))
     try:
-        entries, asr = _whisper_transcript(url, settings=settings)
+        entries, asr = _whisper_transcript(
+            url, settings=settings, title=title,
+            channel=(metadata or {}).get("channel") or (metadata or {}).get("uploader"))
     except TranscriptUnavailable as e:
         raise TranscriptUnavailable(
             e.reason, "; ".join(why_parts) + f", and {e.why}.") from None
@@ -7454,6 +7461,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 for path, chunk in zip(video_files, long_video_chunks)
             ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
             cancel_event=cancel_event,
+            initial_prompt=whisper_runner.build_initial_prompt(
+                metadata.get("channel") or metadata.get("uploader"),
+                metadata.get("title")) if metadata.get("title") else None,
         )
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
@@ -10498,7 +10508,8 @@ def _podcast_transcription_worker() -> None:
                         audio_path, data_root=DATA_ROOT, model_size=model,
                         language=job.get("language"),
                         diarize=bool(job.get("diarize")),
-                        consent_given=bool(job.get("consent_given")))
+                        consent_given=bool(job.get("consent_given")),
+                        initial_prompt=_podcast_initial_prompt(episode_id))
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
@@ -10614,6 +10625,16 @@ def _podcast_transcription_worker() -> None:
             if manual_lock is not None:
                 manual_lock.release()
             _podcast_transcription_queue.task_done()
+
+
+def _podcast_initial_prompt(episode_id: int) -> str | None:
+    """Feed and episode titles as Whisper's vocabulary hint; never fails a job."""
+    try:
+        row = podcasts.get_episode_with_feed(_get_index(), episode_id) or {}
+        return whisper_runner.build_initial_prompt(row.get("podcast_title"), row.get("title"))
+    except Exception:
+        log.exception("podcast job: could not build the Whisper vocabulary hint")
+        return None
 
 
 def _podcast_capture_key(episode_id: int) -> str | None:
