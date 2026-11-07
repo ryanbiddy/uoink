@@ -28,6 +28,7 @@ Where Gemini's Phase 3 UI plan (PHASE3-UI-TEST-PLAN-2026-09-07.md) and Astra's n
 from __future__ import annotations
 
 import html
+import types
 import json
 import re
 from pathlib import Path
@@ -331,7 +332,7 @@ def test_podcast_card_has_check_now_wired_to_the_refresh_route() -> None:
     require('kind === "podcast_rss" ? `\n              <div class="subscription-check-row">' in DASHBOARD,
             "Check now row must render only for podcast feeds")
     require('class="button ghost check-now-btn"' in DASHBOARD, "Check now button missing")
-    body = DASHBOARD.split("async function checkSourceNow(btn)", 1)[1].split("// V-2a", 1)[0]
+    body = DASHBOARD.split("async function checkSourceNow(", 1)[1].split("// V-2a", 1)[0]
     require('"/sources/refresh"' in body, "Check now must use the existing refresh route")
     require('"rate_limited"' in body, "Check now must explain the rate limit")
 
@@ -373,3 +374,30 @@ def test_uoink_anything_box_comes_before_standing_subscriptions() -> None:
 def test_check_now_explains_a_feed_backoff() -> None:
     fn = DASHBOARD.split("function checkNowMessage(res)", 1)[1].split("async function checkSourceNow", 1)[0]
     require("res.backoff" in fn and "asked us to wait" in fn, "backoff must be explained")
+
+
+# ---------------------------------------------------------------------------
+# Check now on the Settings feed rows (batch 4, item 2)
+# ---------------------------------------------------------------------------
+def test_settings_feed_rows_reuse_the_same_check_now_function() -> None:
+    row = DASHBOARD.split("function renderPodcastFeedList(rows)", 1)[1].split("async function loadPlaylistSettings", 1)[0]
+    require("check-now-btn" in row and "row.source_id" in row, "feed row needs a Check now button keyed by source id")
+    require("#podcastFeedList .check-now-btn" in DASHBOARD and "checkSourceNow(feedCheckNow" in DASHBOARD,
+            "feed row click must call the shared checkSourceNow")
+    require(DASHBOARD.count("async function checkSourceNow(") == 1, "Check now logic must not be duplicated")
+
+
+def test_feeds_list_carries_the_source_id_the_refresh_route_uses(monkeypatch) -> None:
+    import server
+    import source_subscriptions as subs
+
+    sent = []
+    monkeypatch.setattr(server.podcasts, "list_feeds", lambda idx, enabled_only=False: [
+        {"id": 1, "feed_url": "https://Example.com:443/feed.xml"}, {"id": 2, "feed_url": "not a url"}])
+    monkeypatch.setattr(server, "_get_index", lambda: object())
+    handler = types.SimpleNamespace(
+        path="/podcasts/feeds", _require_token=lambda: True, _send_json=lambda code, body: sent.append(body))
+    server.Handler._handle_podcasts_feeds_list(handler)
+    ids = [feed["source_id"] for feed in sent[0]["feeds"]]
+    expected = subs.source_identity("podcast_rss", subs.normalize_podcast_feed_url("https://example.com/feed.xml"))
+    require(ids == [expected, None], f"unexpected source ids {ids}")

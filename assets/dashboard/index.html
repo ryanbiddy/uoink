@@ -11498,7 +11498,9 @@
       return added ? `Found ${added} new episode${added === 1 ? "" : "s"}.` : "Checked. No new episodes.";
     }
 
-    async function checkSourceNow(btn) {
+    // The Sources card and the Settings feed row share this; each passes how
+    // to reload its own list so the answer can be put back on the redrawn row.
+    async function checkSourceNow(btn, { reload = loadStandingSubscriptions, list = () => els.standingSubscriptionList } = {}) {
       const note = btn.parentElement && btn.parentElement.querySelector(".check-now-note");
       const say = (text) => { if (note) note.textContent = text; };
       btn.disabled = true;
@@ -11511,9 +11513,9 @@
         const message = checkNowMessage(res);
         say(message);
         if (!res || res.outcome !== "not_due") {
-          await loadStandingSubscriptions();
+          await reload();
           // The reload redraws the card; put the answer back on the new one.
-          const fresh = els.standingSubscriptionList.querySelector(
+          const fresh = list().querySelector(
             `.check-now-btn[data-source-id="${CSS.escape(btn.dataset.sourceId)}"]`);
           const freshNote = fresh && fresh.parentElement.querySelector(".check-now-note");
           if (freshNote) freshNote.textContent = message;
@@ -17370,8 +17372,10 @@
             <div style="min-width:0">
               <strong>${htmlEscape(title)}</strong>
               <div class="job-sub">${htmlEscape(meta)}</div>
+              <span class="soft-note check-now-note" role="status" aria-live="polite"></span>
             </div>
             <span class="phase-chip">${autoIngest ? "Auto-ingest on" : "Metadata only"}</span>
+            ${row.source_id ? `<button class="button ghost check-now-btn" type="button" data-source-id="${htmlEscape(row.source_id)}">Check now</button>` : ""}
             <button class="button ghost" type="button"
               data-toggle-podcast-auto-ingest="${htmlEscape(String(row.id))}"
               data-auto-ingest="${autoIngest ? "true" : "false"}">
@@ -19895,6 +19899,8 @@
         const removeAllowedSiteButton = event.target.closest("[data-remove-allowed-site]");
         if (removeAllowedSiteButton) removeAllowedSite(removeAllowedSiteButton.dataset.removeAllowedSite);
         const podcastAutoIngestButton = event.target.closest("[data-toggle-podcast-auto-ingest]");
+        const feedCheckNow = event.target.closest("#podcastFeedList .check-now-btn");
+        if (feedCheckNow) checkSourceNow(feedCheckNow, { reload: loadPodcastFeedSettings, list: () => els.podcastFeedList });
         if (podcastAutoIngestButton) {
           setPodcastAutoIngest(
             podcastAutoIngestButton.dataset.togglePodcastAutoIngest,

@@ -17678,6 +17678,14 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.exception("/podcasts/feeds GET failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
+        for row in rows:
+            # The id Check now sends to /sources/refresh, the same one the
+            # Sources card uses for this feed.
+            try:
+                _key, _url = source_subscriptions.parse_source_url("podcast_rss", row.get("feed_url") or "")
+                row["source_id"] = source_subscriptions.source_identity("podcast_rss", _key)
+            except source_subscriptions.ServiceError:
+                row["source_id"] = None
         return self._send_json(200, {"ok": True, "feeds": rows,
                                       "count": len(rows)})
 
