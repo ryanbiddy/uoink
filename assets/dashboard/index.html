@@ -5723,6 +5723,9 @@
                 <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
                 <button class="button primary" type="button" id="yoinkWriteFrom" aria-describedby="yoinkWriteHint" disabled>Write from this</button>
                 <span class="soft-note hidden" id="yoinkWriteHint">Connect Claude first</span>
+                <button class="button hidden" type="button" id="yoinkZing">Make a Short with Zing</button>
+                <span class="soft-note hidden" id="yoinkZingStatus" role="status"></span>
+                <button class="hook-help-link hidden" type="button" id="yoinkZingAgain">Open again</button>
                 <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
                   <summary class="button ghost">More actions</summary>
                   <div class="action-menu-popover">
@@ -7023,6 +7026,9 @@
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
       yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
+      yoinkZing: document.getElementById("yoinkZing"),
+      yoinkZingStatus: document.getElementById("yoinkZingStatus"),
+      yoinkZingAgain: document.getElementById("yoinkZingAgain"),
       yoinkWriteHint: document.getElementById("yoinkWriteHint"),
       yoinkBack: document.getElementById("yoinkBack"),
       runningPill: document.getElementById("runningPill"),
@@ -7248,6 +7254,9 @@
           const localSplash = ["127.0.0.1", "localhost", "[::1]"].includes(target.hostname)
             && window.location && target.href === new URL("/splash", window.location.href).href;
           allowed = isProductUrl(target) || localSplash;
+        } else if (kind === "zing") {
+          // Only the page the hand-off just returned, never another local URL.
+          allowed = isZingPage(target) && target.href === zing.page;
         } else if (kind === "source") {
           allowed = isSourceUrl(target);
         }
@@ -8727,6 +8736,7 @@
       else els.yoinkWriteFrom.setAttribute("aria-describedby", "yoinkWriteHint");
       els.yoinkWriteHint.textContent = "Connect Claude first";
       els.yoinkWriteHint.classList.toggle("hidden", connected || !state.selectedYoink);
+      renderYoinkZing();
     }
 
     function renderYoinkDetail() {
@@ -19404,6 +19414,8 @@
         if (!videoId) return showToast("This uoink has no saved source id yet.");
         writeFromSource(videoId);
       });
+      els.yoinkZing.addEventListener("click", startZingHandoff);
+      els.yoinkZingAgain.addEventListener("click", openZingPage);
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
         const videoId = evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
@@ -20066,6 +20078,72 @@
       }
     }
 
+    // ---- Zing hand-off ----------------------------------------------------
+    // "Make a Short with Zing" shows only when the helper's /zing/status says
+    // Zing is installed and can take items from Uoink. When it is not, nothing
+    // shows at all.
+    const zing = { available: false, busy: false, videoId: "", page: "", message: "" };
+
+    function isZingPage(target) {
+      // Only the review page Zing just returned: http://127.0.0.1:<port>/ with
+      // a token query, no credentials, no fragment.
+      return target.protocol === "http:" && target.hostname === "127.0.0.1"
+        && /^[0-9]{1,5}$/.test(target.port) && target.pathname === "/"
+        && !target.username && !target.password && !target.hash
+        && /^\?t=[A-Za-z0-9._~%-]+$/.test(target.search);
+    }
+
+    function renderYoinkZing() {
+      const current = videoIdOf(state.selectedYoink);
+      const show = zing.available && Boolean(current);
+      // The message and link belong to the item they were made for.
+      const mine = show && zing.videoId === current;
+      els.yoinkZing.classList.toggle("hidden", !show);
+      els.yoinkZing.disabled = zing.busy;
+      const text = mine ? zing.message : "";
+      els.yoinkZingStatus.textContent = text;
+      els.yoinkZingStatus.classList.toggle("hidden", !text);
+      els.yoinkZingAgain.classList.toggle("hidden", !(mine && zing.page));
+    }
+
+    async function loadZingStatus() {
+      try {
+        const data = await authFetch("/zing/status");
+        zing.available = Boolean(data && data.available);
+      } catch (_) {
+        zing.available = false;
+      }
+      renderYoinkZing();
+    }
+
+    async function startZingHandoff() {
+      const videoId = videoIdOf(state.selectedYoink);
+      if (!videoId || zing.busy) return;
+      zing.busy = true;
+      zing.videoId = videoId;
+      zing.page = "";
+      zing.message = "Opening Zing…";
+      renderYoinkZing();
+      try {
+        const data = await authFetch("/zing/handoff", {
+          method: "POST",
+          body: JSON.stringify({ video_id: videoId }),
+        });
+        zing.page = typeof data.page === "string" ? data.page : "";
+        zing.message = "Opened in Zing";
+        openZingPage();
+      } catch (err) {
+        const detail = err && err.data && err.data.message;
+        zing.message = detail || (err && err.message) || "Zing could not start. Try again.";
+      }
+      zing.busy = false;
+      renderYoinkZing();
+    }
+
+    function openZingPage() {
+      if (zing.page) openExternal(zing.page, "zing");
+    }
+
     // ---- Update notice ----------------------------------------------------
     // The banner follows /update/check. The check runs on load only when the
     // user turned on auto_update_check; Check now always works.
@@ -20197,6 +20275,7 @@
       // After the first token-gated call, so it reuses that token: the
       // helper rate-limits /token.
       loadLibraryAvailability();
+      loadZingStatus();
       syncDashboardTheme();
       await refreshJobs();
       await loadLibrary({ reset: true });
@@ -20209,6 +20288,7 @@
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
+      setInterval(loadZingStatus, 300000);
       autoCheckUpdatesOnLoad();
       // A dashboard left open still rechecks; the 24h server cache keeps this
       // to one GitHub request a day.
