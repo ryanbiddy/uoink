@@ -76,6 +76,13 @@ def helper(source_tree, tmp_path, monkeypatch):
         "_redact_command_args", "_redact_error_credentials", "_redact_error_paths",
         "_ERROR_SANITIZE_INPUT_LIMIT", "_CREDENTIAL_FLAG_PATTERN",
         "_fetch_video_subtitles", "_comments_worker", "PlaylistJobCancelled",
+        "_caption_failure_reason", "_is_youtube_bot_check",
+        "_youtube_bot_check_status", "_youtube_bot_check_cooldown_active",
+        "_youtube_bot_check_lock", "_youtube_bot_check_hits",
+        "_youtube_bot_check_until", "_youtube_bot_check_clock",
+        "YOUTUBE_BOT_CHECK_WINDOW_SEC", "YOUTUBE_BOT_CHECK_HIT_LIMIT",
+        "CAPTIONS_BOT_CHECK", "CAPTIONS_RATE_LIMITED", "CAPTIONS_FAILED",
+        "CAPTIONS_BOT_CHECK_COOLDOWN",
         "_reports_live_extract", "_live_extract_begin", "_live_extract_phase",
         "_live_extract_end", "_live_extracts", "_live_extracts_lock",
         "_live_extract_local", "_CAPTURE_REF_RE",
@@ -1215,14 +1222,19 @@ def test_optional_video_worker_errors_keep_raw_details_off_console(
         COMMENTS_TIMEOUT_SEC=30, PLATFORM_YOUTUBE="youtube",
         _detect_platform_from_url=lambda url: "youtube",
         _is_youtube_captions_refusal=Mock(return_value=True),
+        _is_youtube_rate_limit=Mock(return_value=False),
         _replace_comments_section=Mock(), _update_sidecar_comments=Mock())
     # Neither worker may launch a real tool, even if a regression changes its call.
     monkeypatch.setattr(subprocess, "run", Mock(side_effect=AssertionError("real tool")))
     monkeypatch.setattr(subprocess, "Popen", Mock(side_effect=AssertionError("real tool")))
     if worker == "subtitles":
-        assert helper["_fetch_video_subtitles"](
-            "https://example.test/video", output, long_video_mode="full") is True
-        helper["_is_youtube_captions_refusal"].assert_called_once_with(error)
+        reason = helper["_fetch_video_subtitles"](
+            "https://example.test/video", output, long_video_mode="full")
+        # A captions 429 is a rate limit; any other failure is just "failed".
+        assert reason == ("captions_rate_limited" if failure.startswith("exit")
+                          else "captions_failed")
+        if failure.startswith("exit"):
+            helper["_is_youtube_captions_refusal"].assert_called_once_with(error)
     else:
         helper["_comments_worker"]("https://example.test/video", output, output / "yoink.md")
         state = "disabled" if failure.startswith("exit") else "unavailable"

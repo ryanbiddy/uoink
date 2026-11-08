@@ -5387,6 +5387,10 @@
             <button class="button ghost" type="button" data-show-gone-sources>Show saved sources</button>
             <button class="button link" type="button" data-dismiss-availability aria-label="Dismiss source availability notice for this month">Dismiss</button>
           </div>
+          <div class="library-availability-notice hidden" id="youtubeBotCheckNotice">
+            <p id="youtubeBotCheckMessage" role="status" aria-live="polite"></p>
+            <button class="button link" type="button" data-dismiss-bot-check aria-label="Dismiss the YouTube bot check notice">Dismiss</button>
+          </div>
           <div class="control-grid">
             <div class="library-omnibox">
               <div class="omnibox-row">
@@ -8458,6 +8462,19 @@
     // Why this capture's words came from Whisper, or why it has none
     // (CM-11: transcript_source plus asr_fallback's status and reason).
     // Platform captions need no note.
+    // Why YouTube captions were skipped, when that was YouTube's doing
+    // (captions_skipped_reason, set by the helper). Empty for every other case.
+    function captionSkipLine(row, sidecar = {}) {
+      const reason = String(firstValue(sidecar && sidecar.captions_skipped_reason, row && row.captions_skipped_reason));
+      if (reason === "captions_bot_check" || reason === "captions_bot_check_cooldown") {
+        return "YouTube asked for a bot check, so Uoink transcribed this locally.";
+      }
+      if (reason === "captions_rate_limited") {
+        return "YouTube limited caption requests, so Uoink transcribed this locally.";
+      }
+      return "";
+    }
+
     function transcriptNoteText(row, sidecar = {}) {
       if (!row || !isTimedMedia(row, sidecar)) return "";
       const source = transcriptKind(firstValue(sidecar.transcript_source, row.transcript_source));
@@ -8470,6 +8487,8 @@
       // from captions the platform refused to hand over.
       const noCaptions = `${platformChipLabel(platformOf(row, sidecar))} didn't provide captions for this ${podcast ? "episode" : "video"}`;
       if (source === "asr") {
+        const skipLine = captionSkipLine(row, sidecar);
+        if (skipLine) return skipLine;
         return podcast
           ? `Uoink transcribed this episode's audio on ${thisDevice()} with Whisper${model}.`
           : `${noCaptions}, so Uoink transcribed the audio on ${thisDevice()} with Whisper${model}.`;
@@ -14774,11 +14793,52 @@
       }
     }
 
+    // ---- YouTube bot check notice ------------------------------------------
+    // /health reports youtube_bot_check {active, until, hits, seconds_left}.
+    // While the helper is on a cooldown the notice says so; Dismiss hides it
+    // for that cooldown only (a later one shows it again).
+    const BOT_CHECK_DISMISSED_KEY = "uoink.dashboard.botCheckDismissedUntil";
+    let botCheckDismissedUntil = "";
+
+    function botCheckDismissed(until) {
+      let stored = "";
+      try { stored = localStorage.getItem(BOT_CHECK_DISMISSED_KEY) || ""; } catch (_) {}
+      return Boolean(until) && (botCheckDismissedUntil === until || stored === until);
+    }
+
+    function renderYoutubeBotCheck(info) {
+      const notice = document.getElementById("youtubeBotCheckNotice");
+      if (!notice) return;
+      const until = info && info.active ? String(info.until || "") : "";
+      const visible = Boolean(info && info.active) && !botCheckDismissed(until);
+      notice.classList.toggle("hidden", !visible);
+      notice.dataset.until = until;
+      const message = document.getElementById("youtubeBotCheckMessage");
+      if (!visible) {
+        message.textContent = "";
+        return;
+      }
+      let minutes = Math.ceil(Number(info.seconds_left) / 60);
+      if (!Number.isFinite(minutes)) minutes = Math.ceil((Date.parse(until) - Date.now()) / 60000);
+      minutes = Math.max(1, Number.isFinite(minutes) ? minutes : 1);
+      message.textContent = "YouTube is asking Uoink to prove it isn't a bot. "
+        + `For the next ${minutes} ${minutes === 1 ? "minute" : "minutes"} Uoink skips YouTube captions and transcribes locally. `
+        + "Saving many videos quickly makes this more likely.";
+    }
+
+    function dismissYoutubeBotCheck() {
+      const notice = document.getElementById("youtubeBotCheckNotice");
+      botCheckDismissedUntil = (notice && notice.dataset.until) || "";
+      try { localStorage.setItem(BOT_CHECK_DISMISSED_KEY, botCheckDismissedUntil); } catch (_) {}
+      if (notice) notice.classList.add("hidden");
+    }
+
     async function refreshHealth() {
       try {
         const res = await fetch("/health");
         const data = await res.json();
         state.health = data;
+        try { renderYoutubeBotCheck(data && data.youtube_bot_check); } catch (_) {}
         const ok = data && data.ok !== false;
         renderHelperStatus(ok, data.helper_recovery);
         els.versionLine.textContent = `v${data.version || "unknown"} | current`;
@@ -14966,7 +15026,7 @@
       const source = row.transcript_source || (entry.saved && entry.saved.transcript_source) || metadataOf(row).transcript_source;
       const kind = transcriptKind(source);
       if (kind === "captions") return `${platformChipLabel(platformOf(row))} captions`;
-      if (kind === "asr") return "transcript by Whisper";
+      if (kind === "asr") return captionSkipLine(row) || "transcript by Whisper";
       if (row.has_transcript === false) return "No transcript";
       if (source) return `Transcript: ${humanLabel(source)}`;
       return "";
@@ -19725,6 +19785,10 @@
         }
         if (event.target.closest("[data-dismiss-availability]")) {
           dismissLibraryAvailability();
+          return;
+        }
+        if (event.target.closest("[data-dismiss-bot-check]")) {
+          dismissYoutubeBotCheck();
           return;
         }
         const kindChip = event.target.closest("[data-library-kind]");

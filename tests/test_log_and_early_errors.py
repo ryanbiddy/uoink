@@ -56,6 +56,7 @@ def http(tmp_path):
         "_OUTPUT_ROOT_FALLBACK": False, "_heartbeat_payload": lambda: {},
         "_path_integrity_status": lambda: {"ok": True},
         "_library_health_payload": lambda: {},
+        "_youtube_bot_check_status": lambda: {},
         "index": SimpleNamespace(latest_schema_version=lambda: 1),
         "whisper_runner": SimpleNamespace(
             normalize_model=lambda value: "test",

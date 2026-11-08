@@ -137,7 +137,7 @@ def capture(tmp_path, monkeypatch):
         "_screenshot_interval_for": lambda d, i: i,
         "_estimated_screenshot_count": lambda ds, i: 1,
         "_ytdlp_timeout_for": lambda d: 10, "_ffmpeg_timeout_for": lambda d: 10,
-        "_run_subprocess": fake_subprocess, "_fetch_video_subtitles": lambda *a, **k: False,
+        "_run_subprocess": fake_subprocess, "_fetch_video_subtitles": lambda *a, **k: None,
         "_download_thumbnail": Mock(), "_fetch_channel_context": lambda *a, **k: {},
         "_screenshot_ffmpeg_command": lambda v, i, p: ["ffmpeg", str(p)],
         "_resolve_video_transcript": lambda *a, **k: ([], None, None),
@@ -172,7 +172,8 @@ def capture(tmp_path, monkeypatch):
         "_VIDEO_ID_RE", "_TWITTER_STATUS_RE", "_TWITTER_HANDLE_RE", "_INSTAGRAM_KIND_RE",
         "_PLATFORM_HOST_HINTS", "PLATFORM_YOUTUBE", "PLATFORM_TWITTER", "PLATFORM_TIKTOK",
         "PLATFORM_INSTAGRAM", "PLATFORM_GENERIC", "SOURCE_TYPE_SHORT_VIDEO",
-        "_IMAGE_REF_LINE_RE",
+        "_IMAGE_REF_LINE_RE", "CAPTIONS_RATE_LIMITED", "CAPTIONS_BOT_CHECK",
+        "CAPTIONS_BOT_CHECK_COOLDOWN",
     })
     _load(ROOT / "server.py", {"_handle_session_add", "_handle_session_close",
                                "_handle_extract_any"}, scope, class_name="Handler")

@@ -178,6 +178,12 @@ Success response: HTTP 200
     "error_code": null,
     "apply_enabled": false,
     "contract_version": "phase2-v1-2026-09-04"
+  },
+  "youtube_bot_check": {
+    "active": false,
+    "until": null,
+    "hits": 0,
+    "seconds_left": 0
   }
 }
 ```
