@@ -446,6 +446,8 @@ def test_dashboard_init_does_not_request_remote_features():
         "showUsagePrompt", "syncDashboardTheme", "loadLibraryAvailability",
         # Contacts GitHub only when the user turned the daily check on.
         "autoCheckUpdatesOnLoad",
+        # Asks the local helper whether Zing is installed; no remote request.
+        "loadZingStatus",
     ]
     _run_js(f"""
 const calls = [], requests = [];
