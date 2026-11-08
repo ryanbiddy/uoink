@@ -5,7 +5,8 @@
       "ryan.suite.service/1",
       "ryan.suite.health/1",
       "uoink.media.handoff/1",
-      "uoink.engagement.ingest/1"
+      "uoink.engagement.ingest/1",
+      "uoink.capture/1"
     ],
     "provider": "Uoink",
     "regenerate": "python tests/regenerate_suite_integration_v1_fixture.py",
@@ -24,6 +25,7 @@
       "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
       "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
       "capabilities": [
+        "uoink.capture/1",
         "uoink.corpus.read/1",
         "uoink.engagement.ingest/1",
         "uoink.media.handoff/1"
@@ -54,6 +56,7 @@
           "href": "/api/suite/v1/health"
         },
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -276,6 +279,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -300,6 +304,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -323,6 +328,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -347,6 +353,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -371,6 +378,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -398,6 +406,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -421,6 +430,7 @@
         "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
         "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
         "capabilities": [
+          "uoink.capture/1",
           "uoink.corpus.read/1",
           "uoink.engagement.ingest/1",
           "uoink.media.handoff/1"
@@ -453,6 +463,7 @@
             "href": "/api/suite/v1/health"
           },
           "capabilities": [
+            "uoink.capture/1",
             "uoink.corpus.read/1",
             "uoink.engagement.ingest/1",
             "uoink.media.handoff/1"
@@ -486,6 +497,7 @@
             "href": "/api/suite/v1/health"
           },
           "capabilities": [
+            "uoink.capture/1",
             "uoink.corpus.read/1",
             "uoink.engagement.ingest/1",
             "uoink.media.handoff/1"
@@ -519,6 +531,7 @@
             "href": "/api/suite/v1/health"
           },
           "capabilities": [
+            "uoink.capture/1",
             "uoink.corpus.read/1",
             "uoink.engagement.ingest/1",
             "uoink.media.handoff/1"
@@ -556,6 +569,7 @@
             "href": "/api/suite/v1/health"
           },
           "capabilities": [
+            "uoink.capture/1",
             "uoink.corpus.read/1",
             "uoink.engagement.ingest/1",
             "uoink.media.handoff/1"
