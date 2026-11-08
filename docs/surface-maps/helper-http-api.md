@@ -258,3 +258,37 @@ pull token in the keyring (`relay_pull_token`, isolation-aware service).
 `relay_enabled` is true: `GET /v1/links` and `DELETE /v1/links/<id>`.
 
 **Consumers.** Dashboard Settings > Capture > Phone inbox.
+
+---
+
+## GET /zing/status and POST /zing/handoff (token-gated)
+
+**What they do.** Back the dashboard's "Make a Short with Zing" button.
+`GET /zing/status` runs Zing's no-network probe (`zing from-uoink --probe --json`,
+5 s timeout) and returns `{ok, available, service_version, reason}`. It is
+`available` only when Zing answers with contract `ryan.suite.handoff` version 1
+and lists `uoink.item/1` in `accepts`. Any failure is `available: false` with a
+plain `reason`; the route always answers 200 and never raises. The result is
+cached for five minutes (30 seconds when Zing was not found).
+`POST /zing/handoff` takes `{"video_id": "<id>"}`, checks the id format and
+that the item exists and is not deleted, refuses (409 `zing_unavailable`) if
+the probe fails, then runs `zing from-uoink uoink://item/<id> --json` detached and
+returns `{ok: true, page, project, reused}` from Zing's first output line. Errors
+are `{ok: false, error, message}` with plain-words `message`. Zing's codes map
+as `invalid_ref`, `uoink_unavailable`, `media_unavailable` (the message says to
+keep the item's media first: the `keep_media` setting, short videos only),
+`project_exists` and `failed`. An unanswered first line after 60 s is 504
+`timeout`; a bad id is 400 `invalid_id`; an unknown or deleted item is 404.
+
+**Auth posture.** Token-gated. A missing or wrong token answers `403`.
+
+**State it touches.** None of its own. The child gets `UOINK_TOKEN` and
+`UOINK_URL` (the helper's active base URL, which is the isolated binding's URL
+on isolated installs) so Zing can read the item's kept media through
+`uoink.media.handoff/1`. Nothing is written to `settings.json`.
+
+**Outbound requests.** None from the helper. Zing makes its own loopback calls
+to this helper.
+
+**Consumers.** Dashboard reader, "Make a Short with Zing". The dashboard opens
+only the `http://127.0.0.1:<port>/?t=...` page this call returned.

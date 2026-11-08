@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `GET /api/suite/v1/capture/<job_id>`. It uses the helper token, never
   recaptures a link that is already saved, and still asks for the page
   allowlist and podcast consent.
+- Make a Short with Zing. When Zing is installed, a button in the reader hands
+  the open item to it and opens Zing's review page. Nothing shows if Zing is
+  not installed. Zing reads the item's kept video through Uoink, so the item
+  needs its media kept first (the `keep_media` setting, short videos only).
 
 ## [3.15.1] - 2026-11-07
 
