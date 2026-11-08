@@ -16262,8 +16262,7 @@ _ZING_ERROR_TEXT = {
     "media_unavailable": ("Keep this item's media first. Uoink keeps the video only for short "
                           "videos, and only when the keep_media setting is on, so turn it on "
                           "and capture the item again."),
-    "project_exists": ("Zing already has a project for this item, or is still making it. "
-                       "Open it from Zing."),
+    "project_exists": "Zing already has a project for this item. Open it from Zing.",
     "failed": "Zing could not start. Try again.",
     "download_failed": "Zing could not download the video. Check your connection and the link, then try again.",
 }
