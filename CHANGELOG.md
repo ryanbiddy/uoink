@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   downloads it only after you click Download for that item, and Uoink shows
   the site it comes from. The hand-off runs in the background with download
   progress in the reader.
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
 
 ### Fixed
 
