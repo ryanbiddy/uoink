@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.0] - 2026-11-08
+
 ### Added
 
 - Suite capture (`uoink.capture/1`): a sibling local app can save one link into
