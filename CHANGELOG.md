@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.1] - 2026-11-08
+
 ### Added
 
 - YouTube capture ships its own JavaScript runtime on Windows. The installer now
@@ -29,12 +31,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   point (clip citations carry the timestamp). It is a prompt and a
   `get_playbook_input` playbook, and it is also in the Generate research list.
   No new tool: still 99 tools by default.
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
 
 ### Changed
 
 - On Windows and Linux, Uoink's yt-dlp now ignores a personal yt-dlp config
   file, as the Mac app already did. Options in that file, such as browser
   cookies or a forced player client, no longer change what Uoink sends.
+- A YouTube bot check at the details or media step now pauses the capture
+  instead of failing it. Uoink retries after 30 minutes, then 1 hour, then
+  4 hours, and never inside the caption cooldown. Library shows the row as
+  "Paused" with the retry time. After three attempts the capture fails with
+  bot-check wording instead of "HTTP 429", and the message says a bot check
+  usually clears within an hour.
+- Bundled yt-dlp is now 2026.10.21 (was 2026.08.19).
+
+### Removed
+
+- The "Retry with cookies" control and its `use_cookies` parameter. Uoink never
+  signs in or uses browser cookies, so the control had nothing to offer.
+
+### Fixed
+
+- Make a Short with Zing now works when your library is on a mapped network
+  drive. If the kept media resolved to a `\server\share` path, which Zing
+  refuses, Uoink now sends the drive-letter path, so Zing reads the kept media
+  instead of asking to download it.
+- Failed rows you dismiss in Library stay dismissed after a reload.
 
 ## [3.16.0] - 2026-11-08
 
