@@ -63,7 +63,7 @@ def test_probe_good(monkeypatch):
     calls = probe_says(monkeypatch, GOOD_PROBE)
     result = server._zing_probe()
     assert result == {"ok": True, "available": True, "service_version": "1.0.0rc1", "reason": ""}
-    assert calls[0][0] == ["/usr/bin/zing", "handoff", "--probe", "--json"]
+    assert calls[0][0] == ["/usr/bin/zing", "from-uoink", "--probe", "--json"]
     assert calls[0][1]["timeout"] == 5
     assert "shell" not in calls[0][1]
 
@@ -143,10 +143,10 @@ def test_windows_only_accepts_launchers_and_wraps_cmd(monkeypatch):
     monkeypatch.setattr(server.shutil, "which", lambda name, path=None: "C:/x/zing.ps1")
     assert server._find_zing() is None
     monkeypatch.setenv("COMSPEC", "C:/Windows/System32/cmd.exe")
-    assert server._zing_argv("C:/x/zing.cmd", "handoff", "--json") == [
-        "C:/Windows/System32/cmd.exe", "/d", "/c", "C:/x/zing.cmd", "handoff", "--json"]
-    assert server._zing_argv("C:/x/zing.exe", "handoff") == ["C:/x/zing.exe", "handoff"]
-    assert server._zing_argv("C:/x & y/zing.cmd", "handoff") is None
+    assert server._zing_argv("C:/x/zing.cmd", "from-uoink", "--json") == [
+        "C:/Windows/System32/cmd.exe", "/d", "/c", "C:/x/zing.cmd", "from-uoink", "--json"]
+    assert server._zing_argv("C:/x/zing.exe", "from-uoink") == ["C:/x/zing.exe", "from-uoink"]
+    assert server._zing_argv("C:/x & y/zing.cmd", "from-uoink") is None
 
 
 # ---- hand-off ---------------------------------------------------------------
@@ -201,7 +201,7 @@ def test_handoff_success(handoff, monkeypatch):
     status, body = server._zing_handoff("abc12345")
     assert (status, body) == (200, {"ok": True, "page": PAGE, "project": "/tmp/proj", "reused": False})
     argv, kw = spawned[0]
-    assert argv == ["/usr/bin/zing", "handoff", "uoink://item/abc12345", "--json"]
+    assert argv == ["/usr/bin/zing", "from-uoink", "uoink://item/abc12345", "--json"]
     assert kw["env"]["UOINK_TOKEN"] == "helper-token-value"
     assert kw["env"]["UOINK_URL"] == "http://127.0.0.1:5999"
     assert kw["stdin"] == subprocess.DEVNULL and kw["stdout"] == subprocess.PIPE

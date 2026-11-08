@@ -15817,7 +15817,7 @@ def _zing_probe_uncached() -> dict:
     exe = _find_zing()
     if not exe:
         return no("Zing is not installed.")
-    argv = _zing_argv(exe, "handoff", "--probe", "--json")
+    argv = _zing_argv(exe, "from-uoink", "--probe", "--json")
     if argv is None:
         return no("Zing's install path has characters Uoink will not run.")
     try:
@@ -15922,7 +15922,7 @@ def _zing_fail(status: int, error: str, message: str) -> tuple[int, dict]:
 
 
 def _zing_handoff(video_id) -> tuple[int, dict]:
-    """POST /zing/handoff. Starts `zing handoff uoink://item/<id> --json`
+    """POST /zing/handoff. Starts `zing from-uoink uoink://item/<id> --json`
     detached, reads only its first stdout line, and returns the review page."""
     vid = video_id if isinstance(video_id, str) else ""
     if not _ZING_ID_RE.fullmatch(vid):
@@ -15936,7 +15936,7 @@ def _zing_handoff(video_id) -> tuple[int, dict]:
     if not _zing_probe()["available"]:
         return _zing_fail(409, "zing_unavailable", "Zing is not available on this computer.")
     exe = _find_zing()
-    argv = _zing_argv(exe, "handoff", f"uoink://item/{vid}", "--json") if exe else None
+    argv = _zing_argv(exe, "from-uoink", f"uoink://item/{vid}", "--json") if exe else None
     if argv is None:
         return _zing_fail(409, "zing_unavailable", "Zing is not available on this computer.")
     env = dict(os.environ)

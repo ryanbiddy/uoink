@@ -187,7 +187,7 @@ pull token in the keyring (`relay_pull_token`, isolation-aware service).
 ## GET /zing/status and POST /zing/handoff (token-gated)
 
 **What they do.** Back the dashboard's "Make a Short with Zing" button.
-`GET /zing/status` runs Zing's no-network probe (`zing handoff --probe --json`,
+`GET /zing/status` runs Zing's no-network probe (`zing from-uoink --probe --json`,
 5 s timeout) and returns `{ok, available, service_version, reason}`. It is
 `available` only when Zing answers with contract `ryan.suite.handoff` version 1
 and lists `uoink.item/1` in `accepts`. Any failure is `available: false` with a
@@ -195,7 +195,7 @@ plain `reason`; the route always answers 200 and never raises. The result is
 cached for five minutes (30 seconds when Zing was not found).
 `POST /zing/handoff` takes `{"video_id": "<id>"}`, checks the id format and
 that the item exists and is not deleted, refuses (409 `zing_unavailable`) if
-the probe fails, then runs `zing handoff uoink://item/<id> --json` detached and
+the probe fails, then runs `zing from-uoink uoink://item/<id> --json` detached and
 returns `{ok: true, page, project, reused}` from Zing's first output line. Errors
 are `{ok: false, error, message}` with plain-words `message`. Zing's codes map
 as `invalid_ref`, `uoink_unavailable`, `media_unavailable` (the message says to
