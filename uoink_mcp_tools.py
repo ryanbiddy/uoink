@@ -307,6 +307,8 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
         folder=str(folder_path),
         corpus_md=result.get("yoink_md") or "",
         screenshots=screenshots,
+        transcript_source=result.get("transcript_source"),
+        captions_skipped_reason=result.get("captions_skipped_reason"),
     )
 
 
@@ -645,7 +647,8 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
         health = sidecar.get("health")
     if not isinstance(health, dict):
         return _err("no health data for this uoink")
-    return _ok(video_id=video_id or None, health=health)
+    return _ok(video_id=video_id or None, health=health,
+               youtube_bot_check=_b()._youtube_bot_check_status())
 
 
 def classify_facets(args: dict[str, Any]) -> dict[str, Any]:
@@ -4522,6 +4525,8 @@ OUTPUT_SCHEMAS = {
         "folder": _field("string", "Absolute local capture folder."),
         "corpus_md": _field("string", "Captured Markdown corpus."),
         "screenshots": _field("array", "Saved screenshot file paths.", items={"type": "string"}),
+        "transcript_source": _field(["string", "null"], "Where the transcript came from: captions, asr (local Whisper) or null when there is none."),
+        "captions_skipped_reason": _field(["string", "null"], "Why YouTube captions were not used: captions_bot_check, captions_bot_check_cooldown, captions_rate_limited, captions_failed, or null when they were fetched."),
     }),
     "uoink_playlist": _output({"job_id": _field("string", "Asynchronous capture identifier for get_job_status or cancel_job.")}),
     "import_list": _output({
@@ -4550,6 +4555,7 @@ OUTPUT_SCHEMAS = {
     "get_uoink_health": _output({
         "video_id": _field(["string", "null"], "Saved source identifier if present."),
         "health": _field("object", "Stored extraction-health snapshot, including per-section outcomes."),
+        "youtube_bot_check": _field("object", "Whether YouTube's bot check has Uoink on a cooldown: active, until (ISO time or null), hits and seconds_left. While active, Uoink skips YouTube captions and transcribes locally."),
     }),
     "get_transcript_reliability": _output({
         "video_id": _field("string", "Requested saved item identifier."),

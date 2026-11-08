@@ -3406,6 +3406,14 @@ def _caption_track_candidates(metadata: dict, lang: str | None) -> list[dict]:
     return out
 
 
+def _is_youtube_bot_check(e: BaseException) -> bool:
+    """True when yt-dlp stderr is YouTube's "confirm you're not a bot" wall."""
+    if not isinstance(e, subprocess.CalledProcessError):
+        return False
+    text = _subprocess_output(e).lower()
+    return "not a bot" in text or "confirm you" in text
+
+
 def _caption_failure_reason(e: BaseException, prefix: str = "captions") -> str:
     if isinstance(e, subprocess.TimeoutExpired):
         return f"{prefix}_timeout" if prefix == "captions" else f"{prefix}_failed"
@@ -3413,9 +3421,9 @@ def _caption_failure_reason(e: BaseException, prefix: str = "captions") -> str:
         if _is_youtube_captions_refusal(e) or _is_youtube_rate_limit(e) or (
                 re.search(r"\b429\b", _subprocess_output(e))):
             return f"{prefix}_rate_limited"
-        text = _subprocess_output(e).lower()
-        if "not a bot" in text or "confirm you" in text:
+        if _is_youtube_bot_check(e):
             return f"{prefix}_bot_check"
+        text = _subprocess_output(e).lower()
         if prefix == "captions" and ("sign in" in text or "login" in text
                                      or "members-only" in text or "private video" in text):
             return "captions_login_required"
@@ -4948,7 +4956,14 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
 
     if cmd[1:3] == ["-m", "yt_dlp"] and _is_youtube_ytdlp_call(cmd):
         with _youtube_network_slot(cancel_event):
-            return run()
+            try:
+                return run()
+            except subprocess.CalledProcessError as e:
+                # Every YouTube bot check (details, captions, audio) counts
+                # toward the cooldown, whichever step met it.
+                if _is_youtube_bot_check(e):
+                    _note_youtube_bot_check()
+                raise
     return run()
 
 
@@ -6554,10 +6569,79 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
 # ---------------------------------------------------------------------------
 # Extraction core (shared by /extract and /session/add)
 # ---------------------------------------------------------------------------
+# Reasons _fetch_video_subtitles can return (None means captions were fetched).
+CAPTIONS_BOT_CHECK = "captions_bot_check"
+CAPTIONS_RATE_LIMITED = "captions_rate_limited"
+CAPTIONS_FAILED = "captions_failed"
+CAPTIONS_BOT_CHECK_COOLDOWN = "captions_bot_check_cooldown"
+
+# YouTube bot-check cooldown. This many bot checks inside the window start a
+# cooldown; while it lasts, Uoink skips the caption request and transcribes
+# locally instead of hammering YouTube. State is per process, so isolated
+# installs and test runs never share it.
+YOUTUBE_BOT_CHECK_HIT_LIMIT = 3
+YOUTUBE_BOT_CHECK_WINDOW_SEC = 15 * 60
+YOUTUBE_BOT_CHECK_COOLDOWN_SEC = 30 * 60
+_youtube_bot_check_lock = threading.Lock()
+_youtube_bot_check_hits: list[float] = []
+_youtube_bot_check_until: float | None = None
+_youtube_bot_check_clock = time.monotonic  # replaced by a fake clock in tests
+
+
+def _note_youtube_bot_check() -> None:
+    """Count one YouTube bot-check hit; start the cooldown on the third."""
+    global _youtube_bot_check_until
+    with _youtube_bot_check_lock:
+        now = _youtube_bot_check_clock()
+        if _youtube_bot_check_until is not None and now < _youtube_bot_check_until:
+            return  # already cooling down; hits during it do not extend it
+        _youtube_bot_check_until = None
+        cutoff = now - YOUTUBE_BOT_CHECK_WINDOW_SEC
+        _youtube_bot_check_hits[:] = [t for t in _youtube_bot_check_hits if t > cutoff]
+        _youtube_bot_check_hits.append(now)
+        if len(_youtube_bot_check_hits) >= YOUTUBE_BOT_CHECK_HIT_LIMIT:
+            _youtube_bot_check_until = now + YOUTUBE_BOT_CHECK_COOLDOWN_SEC
+            log.warning("YouTube bot check hit %d times in %d minutes; skipping "
+                        "YouTube captions for %d minutes",
+                        len(_youtube_bot_check_hits), YOUTUBE_BOT_CHECK_WINDOW_SEC // 60,
+                        YOUTUBE_BOT_CHECK_COOLDOWN_SEC // 60)
+
+
+def _youtube_bot_check_status() -> dict:
+    """{active, until, hits, seconds_left} for /health and the dashboard."""
+    global _youtube_bot_check_until
+    with _youtube_bot_check_lock:
+        now = _youtube_bot_check_clock()
+        if _youtube_bot_check_until is not None and now >= _youtube_bot_check_until:
+            _youtube_bot_check_until = None
+            _youtube_bot_check_hits.clear()
+        if _youtube_bot_check_until is None:
+            cutoff = now - YOUTUBE_BOT_CHECK_WINDOW_SEC
+            hits = len([t for t in _youtube_bot_check_hits if t > cutoff])
+            return {"active": False, "until": None, "hits": hits, "seconds_left": 0}
+        left = max(0.0, _youtube_bot_check_until - now)
+        until = datetime.now(timezone.utc) + timedelta(seconds=left)
+        return {"active": True, "until": until.isoformat(timespec="seconds"),
+                "hits": len(_youtube_bot_check_hits), "seconds_left": int(left)}
+
+
+def _youtube_bot_check_cooldown_active() -> bool:
+    return bool(_youtube_bot_check_status()["active"])
+
+
 def _fetch_video_subtitles(url: str, output_folder: Path, *,
                            long_video_mode: str,
-                           cancel_event: threading.Event | None = None) -> bool:
-    """Fetch optional captions; return whether YouTube refused them with 429."""
+                           cancel_event: threading.Event | None = None) -> str | None:
+    """Fetch optional captions; return None, or why they were not fetched.
+
+    The reason is one of captions_bot_check, captions_rate_limited,
+    captions_bot_check_cooldown (skipped on purpose) or captions_failed.
+    """
+    is_youtube = _detect_platform_from_url(url) == PLATFORM_YOUTUBE
+    if is_youtube and _youtube_bot_check_cooldown_active():
+        log.info("%s subtitle fetch skipped: %s", long_video_mode,
+                 CAPTIONS_BOT_CHECK_COOLDOWN)
+        return CAPTIONS_BOT_CHECK_COOLDOWN
     try:
         _run_subprocess(
             [
@@ -6588,11 +6672,15 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
             e, (subprocess.CalledProcessError, subprocess.TimeoutExpired)) else "")
         _error_detail_log.warning("%s subtitle fetch unavailable: %s\n%s",
                                   long_video_mode, e, output)
-        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, type(e).__name__)
-        return (_detect_platform_from_url(url) == PLATFORM_YOUTUBE
-                and (_is_youtube_captions_refusal(e)
-                     or _is_youtube_rate_limit(e)))
-    return False
+        reason = CAPTIONS_FAILED
+        if is_youtube:
+            found = _caption_failure_reason(e)
+            if found in (CAPTIONS_BOT_CHECK, CAPTIONS_RATE_LIMITED):
+                reason = found
+        # The main log gets the fixed category, never yt-dlp's own words.
+        log.warning("%s subtitle fetch unavailable: %s", long_video_mode, reason)
+        return reason
+    return None
 
 
 def _video_capture_source(url: str) -> str:
@@ -7352,11 +7440,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if phase_callback:
             phase_callback("transcript")
-        captions_refused = _fetch_video_subtitles(
+        captions_skipped_reason = _fetch_video_subtitles(
             url, asset_folder,
             long_video_mode=effective_long_video_mode,
             cancel_event=cancel_event,
         )
+        # Only a captions 429 counts as "refused" for the ASR fallback and the
+        # retry pacing; a bot check or cooldown is recorded by its own reason.
+        captions_refused = captions_skipped_reason == CAPTIONS_RATE_LIMITED
 
         video_files = [f for f in sorted(asset_folder.glob(media_glob))
                        if f.suffix in (".mp4", ".webm", ".mkv")]
@@ -7489,6 +7580,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if transcript_source != "captions":
             if captions_refused:
                 caption_note = "YouTube refused captions"
+            elif captions_skipped_reason in (CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
+                caption_note = "YouTube asked for a bot check"
             elif _detect_platform_from_url(url) == PLATFORM_YOUTUBE:
                 caption_note = "YouTube captions unavailable"
             else:
@@ -7627,6 +7720,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # A null source means the capture honestly remains caption-less;
                 # asr_fallback carries the caption reason and local ASR status.
                 "transcript_source": transcript_source,
+                # Why platform captions were skipped (None when they were
+                # fetched): captions_bot_check, captions_rate_limited,
+                # captions_bot_check_cooldown or captions_failed.
+                "captions_skipped_reason": captions_skipped_reason,
                 "asr_fallback": asr_fallback,
                 "transcript_note": transcript_note,
                 # Structured shape: timestamp + relative path + bare filename so
@@ -7999,6 +8096,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         "transcript_segment_count": len(entries),
         "transcript_source": transcript_source,
         "captions_refused": captions_refused,
+        "captions_skipped_reason": captions_skipped_reason,
         "asr_fallback": asr_fallback,
         "transcript_note": transcript_note,
         "topic": topic,
@@ -10390,6 +10488,7 @@ def _record_single_extract_job(url: str, started_at: str, *,
             "long_video_chunks": result.get("long_video_chunks") or [],
             "processed_media_seconds": result.get("processed_media_seconds"),
             "source_duration_seconds": result.get("source_duration_seconds"),
+            "captions_skipped_reason": result.get("captions_skipped_reason"),
         } if ok else None,
         "warnings": [],
         "message": "Single-video uoink complete." if ok else "Single-video uoink failed.",
@@ -14903,6 +15002,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # ("captions" / "asr", CM-11) and why local ASR did or did not run,
         # for the row's one state line ("Done · YouTube captions").
         transcript_source = live.get("transcript_source")
+        captions_skipped = live.get("captions_skipped_reason")
         asr_fallback = live.get("asr_fallback") if isinstance(live.get("asr_fallback"), dict) else {}
         asr_status = asr_fallback.get("status")
 
@@ -14944,6 +15044,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "host": live.get("host") or metadata.get("host"),
             "speaker_count": len([s for s in speaker_names if s]),
             "transcript_source": transcript_source if isinstance(transcript_source, str) else None,
+            "captions_skipped_reason": captions_skipped if isinstance(captions_skipped, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
@@ -16124,6 +16225,8 @@ class Handler(BaseHTTPRequestHandler):
                 # means staged Librarian work exists and no client holds a
                 # lease; the server never runs the Librarian itself.
                 "library": _library_health_payload(),
+                # YouTube bot-check cooldown: {active, until, hits, seconds_left}.
+                "youtube_bot_check": _youtube_bot_check_status(),
                 **({"capabilities": _platform.platform_capabilities()}
                    if _platform.sys.platform == "darwin" else {}),
             })
@@ -20974,6 +21077,7 @@ class Handler(BaseHTTPRequestHandler):
             "is_podcast", "is_live", "live_status",
             # UI re-haul Reader: meta line and the transcript-source note.
             "yoinked_at", "upload_date", "transcript_source", "comments_status",
+            "captions_skipped_reason",
             # Reader > AI analysis: the hook read and the worker states.
             "hook_type", "hook_type_confidence", "hook_type_status",
             "hook_explanation", "comment_intelligence_status",
