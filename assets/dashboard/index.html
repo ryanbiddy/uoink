@@ -6767,7 +6767,8 @@
       // The phase each running /extract capture is in (/jobs live_captures).
       liveCaptures: [],
       // Failed captures dismissed from the Library list (Activity keeps them).
-      libraryDismissed: new Set(),
+      // Kept in localStorage so a reload doesn't bring them back (F37).
+      libraryDismissed: persistentDismissedSet("uoink.dashboard.libraryDismissed"),
       // What each job had saved when last seen ({ status, done } by id), so
       // a capture saving in the background reloads Library.
       captureSaveMarks: new Map(),
@@ -7721,8 +7722,12 @@
         }
         return "Uoink needs a minute. Retrying...";
       }
-      if (haystack.includes("sign in") || haystack.includes("login") || haystack.includes("cookies") || haystack.includes("captcha") || haystack.includes("guest token")) {
-        return `${source} wouldn't hand this one over without a login. Retry with cookies?`;
+      if (haystack.includes("not a bot") || haystack.includes("confirm you") || haystack.includes("bot check") || haystack.includes("captcha")) {
+        // Uoink never signs in or uses cookies; a bot check clears with time.
+        return `${source} asked this network for a bot check. That usually clears within an hour, then retry this one.`;
+      }
+      if (haystack.includes("sign in") || haystack.includes("login") || haystack.includes("cookies") || haystack.includes("guest token")) {
+        return `${source} wouldn't hand this one over without a login. Wait a few minutes, then retry it.`;
       }
       if (haystack.includes("members-only") || haystack.includes("members only")) {
         return `${source} kept this one behind members-only access.`;
@@ -11722,7 +11727,7 @@
           if (els.universalCaptureNote) els.universalCaptureNote.textContent = allowlistWallCopy(host);
         } else if (err && err.data && err.data.code === "x_login_wall") {
           // Honest copy straight from the helper: X login-walls Articles and
-          // pages. Don't run it through the "retry with cookies" mapping.
+          // pages. Don't run it through the sign-in mapping.
           showToast(err.data.error || "X login-walls this one. Paste a /status/ link to capture X posts and threads.");
         } else {
           showToast(translateMachineMessage(err.message, { url }));
@@ -13612,6 +13617,21 @@
       refreshActivity();
     }
 
+    // A Set whose keys survive a reload. Only the newest 200 are kept, and a
+    // blocked or broken localStorage just falls back to this page's memory.
+    function persistentDismissedSet(storageKey, limit = 200) {
+      let saved = [];
+      try { saved = JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch (_) {}
+      const set = new Set(Array.isArray(saved) ? saved.filter((key) => typeof key === "string").slice(-limit) : []);
+      const add = set.add.bind(set);
+      set.add = (key) => {
+        add(key);
+        try { localStorage.setItem(storageKey, JSON.stringify([...set].slice(-limit))); } catch (_) {}
+        return set;
+      };
+      return set;
+    }
+
     // A capture row leaving the list (Dismiss, or Retry replacing it). A
     // local run takes the helper job its failure named with it, so that job
     // never turns up later as a second row.
@@ -14074,6 +14094,13 @@
           items.push({ ...base, tone: "fail", word: "Failed", detail: `YouTube refused it (HTTP 429).${at ? ` Retries ${at}` : " Retries on its own"}`,
             strip: captureStripHtml(1, { failed: true }),
             actions: `<button class="button" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` });
+          return;
+        }
+        if (String(error || "").startsWith("youtube_bot_check")) {
+          // Paused, not failed: the retry queue owns it until the bot check clears.
+          items.push({ ...base, tone: "wait", word: "Paused",
+            detail: `YouTube asked for a bot check.${at ? ` Retries ${at}` : " Retries on its own"}`,
+            strip: captureStripHtml(1), actions: "" });
           return;
         }
         items.push({ ...base, tone: "wait", word: "Waiting",
@@ -15221,8 +15248,7 @@
       document.getElementById("removeCaptureFailure").disabled = state.activityActionBusy;
       const raw = row.error_detail || row.last_error || row.error || "";
       const phase = row.failure_phase || row.current_video_phase || row.phase || "";
-      const actions = (url && shouldOfferChunkedRetry(raw, phase) ? '<button class="button ghost" type="button" data-activity-retry-mode="lite">Retry, captions only</button>' : "")
-        + (url && shouldOfferCookieRetry(raw) ? '<button class="button ghost" type="button" data-activity-retry-mode="cookies">Retry with cookies</button>' : "");
+      const actions = (url && shouldOfferChunkedRetry(raw, phase) ? '<button class="button ghost" type="button" data-activity-retry-mode="lite">Retry, captions only</button>' : "");
       const alternates = document.getElementById("captureFailureAlternateActions");
       // Leave focused buttons in place when an unrelated stream event arrives.
       if (alternates.innerHTML !== actions) alternates.innerHTML = actions;
@@ -15284,7 +15310,6 @@
           if (["/extract", "/playlist/start"].includes(detected.endpoint)) {
             body.interval = mode === "lite" ? 120 : (entry.pending && entry.pending.interval_seconds) || 30;
             body.long_video_mode = mode === "lite" ? "lite" : entry.row.long_video_mode || "full";
-            if (mode === "cookies") body.use_cookies = true;
           }
           // An alternate retry replaces the scheduled attempt, so it cannot
           // start a second copy while the explicit request is in progress.
@@ -15357,11 +15382,6 @@
         .some((needle) => haystack.includes(needle));
     }
 
-    function shouldOfferCookieRetry(raw) {
-      const haystack = String(raw || "").toLowerCase();
-      return ["sign in", "login", "cookies", "captcha", "guest token", "members-only", "members only"]
-        .some((needle) => haystack.includes(needle));
-    }
 
     function jobRowHtml(job) { return activityRowHtml({ key: `job:${job.id}`, row: job, job }); }
     function queueRowHtml(row) { return activityRowHtml({ key: `pending:${row.pending_id}`, row, pending: row }); }
@@ -18887,21 +18907,6 @@
       return saveSettingControl("outputFolder");
     }
 
-    async function retryWithCookies(url) {
-      if (!url) {
-        showToast("No source URL available for retry.");
-        return;
-      }
-      try {
-        await authFetch("/extract", { method: "POST", body: JSON.stringify({ url, use_cookies: true }) });
-        showToast("Retry with cookies queued.");
-        refreshActivity();
-      } catch (err) {
-        showToast(err.message.includes("not found")
-          ? "Retry-with-cookies is not ready in this build."
-          : "Couldn't queue that retry.");
-      }
-    }
 
     async function pickOutputFolder() {
       const initialDir = els.outputFolder.value.trim();
@@ -20001,8 +20006,6 @@
         if (cancelJob) postHelper(`/jobs/${encodeURIComponent(cancelJob.dataset.cancelJob)}/cancel`);
         const retry = event.target.closest("[data-retry]");
         if (retry) postHelper("/queue/retry-now", { pending_id: retry.dataset.retry });
-        const retryCookies = event.target.closest("[data-retry-cookies]");
-        if (retryCookies) retryWithCookies(retryCookies.dataset.retryCookies);
         const retryChunked = event.target.closest("[data-retry-chunked]");
         if (retryChunked) retryWithLiteMode(retryChunked.dataset.retryChunked);
         const removeTopic = event.target.closest("[data-remove-topic]");

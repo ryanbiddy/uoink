@@ -70,6 +70,7 @@ def publication(capture, tmp_path):
         "_detect_live_state": lambda m: "none",
         "LIVE_STATE_LIVE": "live", "LIVE_STATE_UPCOMING": "upcoming",
         "LIVE_STATE_POST_LIVE": "post_live", "_is_youtube_rate_limit": lambda e: False,
+        "_is_youtube_block": lambda e: False,
         "_job_text_only_corpus": lambda text: text,
     })
     _load(ROOT / "server.py", {

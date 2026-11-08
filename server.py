@@ -8201,6 +8201,34 @@ def _youtube_rate_limit_detail(e: BaseException) -> str:
     return "youtube_rate_limit"
 
 
+# Waits before bot-check retries 1, 2 and 3. A bot check usually lasts longer
+# than a 429, so these start at the cooldown length and never run during one.
+_BOT_CHECK_BACKOFF_SEC = (30 * 60, 60 * 60, 4 * 60 * 60)
+
+
+def _is_youtube_block(e: BaseException) -> bool:
+    """A media 429 or a bot check: YouTube is refusing this network for now,
+    so the capture waits in the retry queue instead of failing."""
+    return _is_youtube_rate_limit(e) or _is_youtube_bot_check(e)
+
+
+def _youtube_block_detail(e: BaseException) -> str:
+    if not _is_youtube_bot_check(e) or _is_youtube_rate_limit(e):
+        return _youtube_rate_limit_detail(e)
+    for line in reversed(_subprocess_output(e).splitlines()):
+        if line.startswith("ERROR:"):
+            return "youtube_bot_check: " + _sanitize_error(line)
+    return "youtube_bot_check"
+
+
+def _youtube_block_delay(e: BaseException, attempts: int) -> int:
+    """Seconds to wait before the next try; never inside the bot-check cooldown."""
+    if not _is_youtube_bot_check(e) or _is_youtube_rate_limit(e):
+        return _RATE_LIMIT_BACKOFF_SEC[attempts]
+    left = _youtube_bot_check_status()["seconds_left"]
+    return max(_BOT_CHECK_BACKOFF_SEC[attempts], left)
+
+
 def _redact_command_args(cmd):
     """Redact whole credential arguments before quoting destroys boundaries."""
     if isinstance(cmd, str):
@@ -8292,9 +8320,15 @@ def _plain_error_from_text(text: str) -> str:
         # that may never run (G-43 / E2E D4). Point at the user action.
         return ("YouTube is refusing requests right now. Give it a few "
                 "minutes, then retry this one.")
+    if ("not a bot" in lower or "confirm you" in lower or "bot check" in lower
+            or "captcha" in lower):
+        # Uoink never signs in or uses cookies; a bot check clears with time.
+        return (f"{source} asked this network for a bot check. That usually "
+                "clears within an hour, then retry this one.")
     if ("sign in" in lower or "login" in lower or "cookies" in lower
-            or "captcha" in lower or "guest token" in lower):
-        return f"{source} wouldn't hand this one over without a login. Retry with cookies?"
+            or "guest token" in lower):
+        return (f"{source} wouldn't hand this one over without a login. "
+                "Wait a few minutes, then retry it.")
     if "members-only" in lower or "members only" in lower:
         return f"{source} kept this one behind members-only access."
     if any(text in lower for text in (
@@ -14542,9 +14576,10 @@ def _retry_pending_one() -> bool:
                     log.warning("retry worker: pending #%d handed off after save failure: %s",
                                 pending_id, _sanitize_error(msg))
                     return True
-                if _is_youtube_rate_limit(e):
+                if _is_youtube_block(e):
                     _retry_pending_last_outcome = (pending_id, "rate_limited")
-                    detail = _youtube_rate_limit_detail(e)
+                    bot_check = not _is_youtube_rate_limit(e)
+                    detail = _youtube_block_detail(e)
                     attempts = attempts_before + 1
                     if attempts >= index._PENDING_MAX_ATTEMPTS:
                         # Final strike (G-43 / E2E D4 + D5): the row goes
@@ -14558,9 +14593,10 @@ def _retry_pending_one() -> bool:
                             f"its own.")
                         final_detail = (
                             f"{detail}\n"
-                            f"YouTube answered HTTP 429 (too busy) on all "
-                            f"{attempts} attempts. The automatic retry budget "
-                            f"is used up, so Uoink stopped.")
+                            + ("YouTube asked for a bot check" if bot_check
+                               else "YouTube answered HTTP 429 (too busy)")
+                            + f" on all {attempts} attempts. The automatic "
+                            f"retry budget is used up, so Uoink stopped.")
                         status = None
                         try:
                             status = idx.mark_pending_failed(
@@ -14587,7 +14623,7 @@ def _retry_pending_one() -> bool:
                         return True
                     # Still under the strike cap: wait for the next media retry and
                     # re-queue (mark_pending_failed re-queues below the cap).
-                    delay = _RATE_LIMIT_BACKOFF_SEC[attempts]
+                    delay = _youtube_block_delay(e, attempts)
                     retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
                         "%Y-%m-%dT%H:%M:%S")
                     try:
@@ -23096,11 +23132,12 @@ class Handler(BaseHTTPRequestHandler):
                                           long_video_mode=long_video_mode,
                                           phase_callback=phase_cb)
             except BaseException as e:
-                # Sprint 19 / C4: YouTube 429 -> queue for retry instead of
-                # surfacing an error. The retry worker takes over from here.
-                if _is_youtube_rate_limit(e):
+                # Sprint 19 / C4: YouTube 429 or bot check -> queue for retry
+                # instead of surfacing an error. The retry worker takes over.
+                if _is_youtube_block(e):
+                    first_delay = _youtube_block_delay(e, 0)
                     retry_after = (datetime.now() + timedelta(
-                        seconds=_RATE_LIMIT_INITIAL_BACKOFF_SEC
+                        seconds=first_delay
                     )).strftime("%Y-%m-%dT%H:%M:%S")
                     try:
                         pending_id = _get_index().enqueue_pending(
@@ -23113,7 +23150,7 @@ class Handler(BaseHTTPRequestHandler):
                     else:
                         try:
                             _get_index().set_pending_error(
-                                pending_id, _youtube_rate_limit_detail(e))
+                                pending_id, _youtube_block_detail(e))
                         except Exception as detail_err:
                             log.warning("POST /extract -> could not store "
                                         "rate-limit detail: %s",
@@ -23124,14 +23161,15 @@ class Handler(BaseHTTPRequestHandler):
                             "POST /extract -> queued (rate-limit) pending_id=%d; "
                             "retry at %s (in %d minutes, retry 1 of %d)",
                             pending_id, retry_after,
-                            _RATE_LIMIT_INITIAL_BACKOFF_SEC // 60,
+                            first_delay // 60,
                             index._PENDING_MAX_ATTEMPTS)
                         return self._send_json(200, {
                             "ok": True,
                             "queued": True,
                             "pending_id": pending_id,
                             "retry_after": retry_after,
-                            "reason": "youtube_rate_limit",
+                            "reason": ("youtube_rate_limit" if _is_youtube_rate_limit(e)
+                                       else "youtube_bot_check"),
                             "long_video_mode": long_video_mode,
                         })
                 msg = friendly_error(e)

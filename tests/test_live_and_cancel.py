@@ -57,6 +57,10 @@ def retry(publication):
         "_check_queue_mutate_rate_limit": lambda: True,
         "_is_youtube_rate_limit": lambda e: isinstance(e, subprocess.CalledProcessError),
         "_youtube_rate_limit_detail": lambda e: "youtube_rate_limit: HTTP 429",
+        # The bot-check helpers follow whichever rate-limit pieces a test loads.
+        "_is_youtube_block": lambda e: scope["_is_youtube_rate_limit"](e),
+        "_youtube_block_detail": lambda e: scope["_youtube_rate_limit_detail"](e),
+        "_youtube_block_delay": lambda e, attempts: scope["_RATE_LIMIT_BACKOFF_SEC"][attempts],
     })
     _load(ROOT / "server.py", {
         "_retry_pending_one", "_detect_live_state", "_normalize_live_behavior",
