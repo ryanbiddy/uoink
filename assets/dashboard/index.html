@@ -14819,7 +14819,7 @@
         const res = await fetch("/health");
         const data = await res.json();
         state.health = data;
-        renderYoutubeBotCheck(data && data.youtube_bot_check);
+        try { renderYoutubeBotCheck(data && data.youtube_bot_check); } catch (_) {}
         const ok = data && data.ok !== false;
         renderHelperStatus(ok, data.helper_recovery);
         els.versionLine.textContent = `v${data.version || "unknown"} | current`;

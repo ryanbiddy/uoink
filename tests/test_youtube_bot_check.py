@@ -229,6 +229,8 @@ def test_capture_during_cooldown_goes_straight_to_local_transcription(extraction
 class FakeProc:
     def __init__(self, stderr, returncode):
         self.stderr_text, self.returncode, self.pid = stderr, returncode, 1
+        self.stdin = self.stdout = self.stderr = None
+        self.ownership_pid = 1
 
     def communicate(self, timeout=None):
         return b"", self.stderr_text
@@ -239,6 +241,7 @@ class FakeProc:
 
 def test_real_runner_counts_bot_checks_from_any_youtube_step(monkeypatch):
     monkeypatch.setattr(server, "_youtube_network_slot", lambda _cancel: nullcontext())
+    monkeypatch.setattr(server, "SUBPROCESS_KW", {})  # plain Popen on every platform
     monkeypatch.setattr(subprocess, "Popen", lambda cmd, **kw: FakeProc(BOT_CHECK.encode(), 1))
     for step in ("--dump-single-json", "--skip-download", "-f"):  # details, captions, audio
         with pytest.raises(subprocess.CalledProcessError):
@@ -249,6 +252,7 @@ def test_real_runner_counts_bot_checks_from_any_youtube_step(monkeypatch):
 
 def test_real_runner_ignores_other_failures_and_other_programs(monkeypatch):
     monkeypatch.setattr(server, "_youtube_network_slot", lambda _cancel: nullcontext())
+    monkeypatch.setattr(server, "SUBPROCESS_KW", {})  # plain Popen on every platform
     monkeypatch.setattr(subprocess, "Popen", lambda cmd, **kw: FakeProc(OTHER.encode(), 1))
     for _ in range(4):
         with pytest.raises(subprocess.CalledProcessError):

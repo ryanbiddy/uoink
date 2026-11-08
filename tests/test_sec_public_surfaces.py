@@ -127,6 +127,7 @@ def helper(surface_code):
             latest_schema_version=lambda: 3,
             schema_migration_status=Mock(return_value={"pending": False})),
         "_helper_health_status": Mock(return_value={"ok": True}),
+        "_youtube_bot_check_status": lambda: {"active": False, "until": None, "hits": 0, "seconds_left": 0},
         "_doctor_heartbeat": Mock(return_value={"stale": False}),
         "_mcp_stdio_selfcheck": Mock(return_value={"ok": True}),
         "_mcp_modern_stdio_selfcheck": Mock(return_value={"ok": True}),
