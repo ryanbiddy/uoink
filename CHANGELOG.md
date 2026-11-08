@@ -22,6 +22,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   not installed. Zing reads the item's kept video through Uoink, so the item
   needs its media kept first (the `keep_media` setting, short videos only).
 
+### Fixed
+
+- YouTube's "confirm you're not a bot" check no longer hides behind a quiet
+  fallback. When captions are blocked, the capture still finishes with local
+  Whisper, but the Library note and Activity row now say "YouTube asked for a
+  bot check, so Uoink transcribed this locally", the saved capture records
+  captions_skipped_reason (also returned by uoink_video), and server.log names
+  the category instead of just "CalledProcessError".
+- After three bot checks in 15 minutes, Uoink stops asking YouTube for captions
+  for 30 minutes and transcribes locally, so a burst of saves does not keep
+  hammering the block. The dashboard shows a notice you can dismiss, and
+  /health and get_uoink_health report youtube_bot_check. Uoink never adds
+  browser cookies on its own.
+
 ## [3.15.1] - 2026-11-07
 
 ### Added

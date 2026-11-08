@@ -338,7 +338,7 @@ function makePage({ files = {}, extract = null, searchRows = [], jobsAnswer = nu
   vm.runInContext(`${SCRIPT}
 ;globalThis.__page = { state, els, wireEvents, wireRoutes, switchTab, openYoinkDetail, renderYoinkDetail, renderQueue,
   renderTopicOverview, cardHtml, captureStepIndex, CAPTURE_STEPS, loadLibrary, refreshJobs, handleJobsStreamEvent,
-  renderLibraryAvailability, loadLibraryAvailability, resetLibraryFilters };`, ctx);
+  renderLibraryAvailability, loadLibraryAvailability, resetLibraryFilters, renderYoutubeBotCheck, activityTranscript };`, ctx);
   vm.runInContext(RECORDED.map((name) => `${name} = function () {};`).join("\n"), ctx);
   const page = ctx.__page;
   page.wireEvents();
@@ -1263,7 +1263,77 @@ async function groupAvailability() {
   });
 }
 
+// ---- botcheck ---------------------------------------------------------------
+async function groupBotCheck() {
+  const click = (p, selector) => {
+    const button = new FakeEl("", "BUTTON");
+    button._matches = [selector];
+    p.fireClick(button);
+  };
+  const BOT_LINE = "YouTube asked for a bot check, so Uoink transcribed this locally.";
+  const RATE_LINE = "YouTube limited caption requests, so Uoink transcribed this locally.";
+  await scenario("the reader note says plainly when YouTube's bot check sent a capture to Whisper", async () => {
+    for (const reason of ["captions_bot_check", "captions_bot_check_cooldown"]) {
+      const p = makePage({ files: readerFiles({ transcript_source: "asr", captions_skipped_reason: reason, asr_fallback: { status: "completed", model: "base" }, transcript: [{ start: 0, end: 2, text: "Words." }] }) });
+      await p.page.openYoinkDetail(READER_ROW);
+      await settle();
+      check(!p.els.yoinkTranscriptNote.classList.contains("hidden") && p.els.yoinkTranscriptNote.textContent === BOT_LINE, `${reason}: the note is the bot check line`, p.els.yoinkTranscriptNote.textContent);
+    }
+    const rate = makePage({ files: readerFiles({ transcript_source: "asr", captions_skipped_reason: "captions_rate_limited", asr_fallback: { status: "completed" }, transcript: [{ start: 0, end: 2, text: "Words." }] }) });
+    await rate.page.openYoinkDetail(READER_ROW);
+    await settle();
+    check(rate.els.yoinkTranscriptNote.textContent === RATE_LINE, "a captions 429 gets its own line", rate.els.yoinkTranscriptNote.textContent);
+    const plain = makePage({ files: readerFiles({ transcript_source: "asr", captions_skipped_reason: "captions_failed", asr_fallback: { status: "completed" }, transcript: [{ start: 0, end: 2, text: "Words." }] }) });
+    await plain.page.openYoinkDetail(READER_ROW);
+    await settle();
+    check(plain.els.yoinkTranscriptNote.textContent.startsWith("YouTube didn't provide captions"), "any other reason keeps the old sentence", plain.els.yoinkTranscriptNote.textContent);
+  });
+  await scenario("the Activity row carries the same line", async () => {
+    const p = makePage();
+    const saved = { video_id: "v1", platform: "youtube", transcript_source: "asr", captions_skipped_reason: "captions_bot_check" };
+    check(p.page.activityTranscript({ saved, row: { platform: "youtube" } }) === BOT_LINE, "a saved Whisper capture explains the bot check", p.page.activityTranscript({ saved, row: {} }));
+    check(p.page.activityTranscript({ saved: { ...saved, captions_skipped_reason: null }, row: { platform: "youtube" } }) === "transcript by Whisper", "no reason keeps the short label");
+    const fresh = { platform: "youtube", transcript_source: "asr", result: { captions_skipped_reason: "captions_rate_limited" } };
+    check(p.page.activityTranscript({ row: fresh }) === RATE_LINE, "a fresh job result carries it too");
+  });
+  await scenario("the cooldown notice shows while active, counts minutes and can be dismissed", async () => {
+    const p = makePage();
+    const notice = p.run('document.getElementById("youtubeBotCheckNotice")');
+    const message = p.run('document.getElementById("youtubeBotCheckMessage")');
+    p.page.renderYoutubeBotCheck({ active: false, until: null, hits: 1, seconds_left: 0 });
+    check(notice.classList.contains("hidden"), "hidden while there is no cooldown");
+    const until = "2026-11-07T20:00:00+00:00";
+    p.page.renderYoutubeBotCheck({ active: true, until, hits: 3, seconds_left: 29 * 60 + 5 });
+    check(!notice.classList.contains("hidden"), "shown during a cooldown");
+    const text = message.textContent;
+    check(text === "YouTube is asking Uoink to prove it isn't a bot. For the next 30 minutes Uoink skips YouTube captions and transcribes locally. Saving many videos quickly makes this more likely.", "the notice says what is happening and for how long", text);
+    check(!/cookie/i.test(text), "the notice says nothing about cookies");
+    p.page.renderYoutubeBotCheck({ active: true, until, hits: 3, seconds_left: 30 });
+    check(message.textContent.includes("next 1 minute "), "the last minute is singular", message.textContent);
+    click(p, "[data-dismiss-bot-check]");
+    check(notice.classList.contains("hidden"), "Dismiss hides it");
+    p.page.renderYoutubeBotCheck({ active: true, until, hits: 3, seconds_left: 600 });
+    check(notice.classList.contains("hidden"), "it stays hidden on the next health poll");
+    p.page.renderYoutubeBotCheck({ active: true, until: "2026-11-07T23:00:00+00:00", hits: 3, seconds_left: 1800 });
+    check(!notice.classList.contains("hidden"), "a later cooldown shows it again");
+    p.page.renderYoutubeBotCheck({ active: false, until: null, hits: 0, seconds_left: 0 });
+    check(notice.classList.contains("hidden"), "it clears when the cooldown ends");
+  });
+  await scenario("blocked storage still permits dismissal for this visit", async () => {
+    const p = makePage();
+    const notice = p.run('document.getElementById("youtubeBotCheckNotice")');
+    p.storage.getItem = p.storage.setItem = () => { throw new Error("storage blocked"); };
+    const data = { active: true, until: "2026-11-07T20:00:00+00:00", hits: 3, seconds_left: 900 };
+    p.page.renderYoutubeBotCheck(data);
+    check(!notice.classList.contains("hidden"), "blocked storage does not break the notice");
+    click(p, "[data-dismiss-bot-check]");
+    p.page.renderYoutubeBotCheck(data);
+    check(notice.classList.contains("hidden"), "the dismissal holds in memory");
+  });
+}
+
 const GROUPS = {
+  botcheck: groupBotCheck,
   availability: groupAvailability,
   paste: groupPaste,
   kinds: groupKinds,

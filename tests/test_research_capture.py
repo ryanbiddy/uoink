@@ -474,7 +474,7 @@ def test_transcriptless_library_entry_is_requeued_subject_to_budget(helper, budg
 @pytest.mark.parametrize("source", ["asr", None])
 def test_extraction_surfaces_caption_refusal_and_effective_source(extraction_fixture, source):
     fixture = extraction_fixture
-    fixture.scope["_fetch_video_subtitles"] = lambda *a, **k: True
+    fixture.scope["_fetch_video_subtitles"] = lambda *a, **k: "captions_rate_limited"
     resolve = Mock(return_value=([(0, 3, "Words")] if source else [], source,
                                  {"status": "succeeded" if source else "disabled"}))
     fixture.scope["_resolve_video_transcript"] = resolve
