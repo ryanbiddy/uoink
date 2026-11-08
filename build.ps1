@@ -3,12 +3,12 @@
 # One-command build:  .\build.ps1
 #
 # Steps:
-#   1. Download Python embeddable, ffmpeg, and get-pip into build\cache\
+#   1. Download Python embeddable, ffmpeg, Deno, and get-pip into build\cache\
 #      (skipped if already cached).
 #   2. Stage the install layout under installer\staging\:
 #        python\   embeddable Python with site-packages enabled and
-#                  yt-dlp installed via pip
-#        bin\      ffmpeg.exe (and ffprobe.exe if present)
+#                  yt-dlp and yt-dlp-ejs installed via pip
+#        bin\      ffmpeg.exe (and ffprobe.exe if present), deno.exe
 #        server.py, migrate_install.py, channels.py, workspaces.py, claims.py,
 #        scripts.py, corpus_contract.py, corpus_provider.py,
 #        corpus_intelligence.py, memory_layer.py,
@@ -143,6 +143,16 @@ $FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/au
 $FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.10.21'
+# yt-dlp-ejs holds the scripts yt-dlp runs to solve YouTube's player challenges.
+# It must equal the version in yt-dlp's pyproject.toml (the `default` extra) at
+# the tag above, or yt-dlp ignores it. Bump the two together.
+$YTDLP_EJS_VERSION = '0.8.0'
+# Deno is the JavaScript runtime yt-dlp runs those scripts in. It runs them in
+# its sandbox, with no file or network access. Official denoland/deno release,
+# MIT. The zip holds only deno.exe. The SHA-256 below is from the release's own
+# deno-x86_64-pc-windows-msvc.zip.sha256sum asset. yt-dlp needs Deno 2.3 or newer.
+$DENO_VERSION = '2.9.8'
+$DENO_URL     = "https://github.com/denoland/deno/releases/download/v$DENO_VERSION/deno-x86_64-pc-windows-msvc.zip"
 # Pillow is used for the multimodal paste-corpus generator (resize +
 # JPEG-recompress + base64-encode the embedded screenshots). Pinned to
 # a recent stable; bump at release-prep time after testing.
@@ -182,6 +192,7 @@ $WHISPERX_VERSION = '3.8.6'
 # file so a re-run pulls fresh.
 $PYTHON_SHA256 = "d1f04d990aee1253d8569e8e5104e30fa9f5fa830899f14843448872d936a2cf"
 $FFMPEG_SHA256 = "f6274bbd9c247f9e90c1bbed066b03ed4a3907cece2fb91be6dd352393936365"
+$DENO_SHA256   = "cba84b26e0df5ae7f74fc66b86a95b866872a86292ebd84fa1e959927edd93bf"
 $GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
 
 # ---- Helpers ------------------------------------------------------------
@@ -401,6 +412,7 @@ Confirm-Hash $NltkPathsecWheel $NLTK_PATHSEC_SHA256 'NLTK local path-policy whee
 $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
 $ffmpegZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
 $ffmpegSharedZip = Join-Path $CacheDir "ffmpeg-$FFMPEG_SHARED_VERSION-win64-lgpl-shared.zip"
+$denoZip   = Join-Path $CacheDir "deno-$DENO_VERSION-win-x64.zip"
 $getPipPy  = Join-Path $CacheDir 'get-pip.py'
 
 Get-CachedFile $PYTHON_URL $pythonZip
@@ -409,6 +421,8 @@ Get-CachedFile $FFMPEG_URL $ffmpegZip
 Confirm-Hash $ffmpegZip $FFMPEG_SHA256 'ffmpeg'
 Get-CachedFile $FFMPEG_SHARED_URL $ffmpegSharedZip
 Confirm-Hash $ffmpegSharedZip $FFMPEG_SHARED_SHA256 'ffmpeg shared runtime'
+Get-CachedFile $DENO_URL $denoZip
+Confirm-Hash $denoZip $DENO_SHA256 'Deno'
 Get-CachedFile $GETPIP_URL $getPipPy
 Confirm-Hash $getPipPy $GETPIP_SHA256 'get-pip.py'
 
@@ -450,13 +464,13 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     the user's Anthropic API key in Windows Credential Manager.
 & $embedPython $verifyInstallerLock $InstallerLock --write-constraints $InstallerConstraints
 if ($LASTEXITCODE -ne 0) { throw 'Installer constraint export failed' }
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + yt-dlp-ejs==$YTDLP_EJS_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
     --constraint $InstallerConstraints `
     $NltkPathsecWheel `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
+    "yt-dlp==$YTDLP_VERSION" "yt-dlp-ejs==$YTDLP_EJS_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + yt-dlp-ejs + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
 
 # C-02: regenerate THIRD-PARTY-NOTICES.md from the bundle we just built, so
 # the shipped notices match the shipped dependency tree exactly. pip-licenses
@@ -578,6 +592,20 @@ if ($ffprobeExe) {
 }
 Remove-Item -Recurse -Force $ffmpegTmp
 
+# 2f-2. Deno -- yt-dlp's JavaScript runtime for YouTube. Just deno.exe.
+Write-Host '    extracting Deno...'
+$denoTmp = Join-Path $BuildDir '_deno_tmp'
+if (Test-Path $denoTmp) { Remove-Item -Recurse -Force $denoTmp }
+Expand-Archive -Path $denoZip -DestinationPath $denoTmp -Force
+$denoExe = Join-Path $denoTmp 'deno.exe'
+if (-not (Test-Path -LiteralPath $denoExe)) { throw 'deno.exe not found inside the Deno release archive' }
+Copy-Item -LiteralPath $denoExe "$StagingDir\bin\deno.exe" -Force
+Remove-Item -Recurse -Force $denoTmp
+$denoVersionLine = (& "$StagingDir\bin\deno.exe" --version | Select-Object -First 1)
+if ($LASTEXITCODE -ne 0 -or "$denoVersionLine" -ne "deno $DENO_VERSION (stable, release, x86_64-pc-windows-msvc)") {
+    throw "Staged Deno reports an unexpected version: $denoVersionLine"
+}
+
 # Read only the seven pinned shared-runtime members; do not extract arbitrary
 # paths or replace the separately pinned CLI executables. Inno recurses bin/.
 $sharedBin = Join-Path $StagingDir 'bin\torchcodec'
@@ -608,6 +636,8 @@ $noticePins = @{
     'scrapecreators-social-media-research-skills-MIT-LICENSE.txt' = '37a2301a00eef329530cc65ddb9f1c1085a2fbfb1bb748adb9eb6fa05bde4f9b'
     'antlr4-python3-runtime-4.9.3-LICENSE.txt' = 'b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a'
     'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
+    'deno-2.9.8-MIT-LICENSE.txt' = 'f62497fffecc0852960c8d3e6934b9db86d16396e9b604072e923892cae3a588'
+    'yt-dlp-ejs-0.8.0-LICENSES.txt' = 'fa363489f159111e612b36c6e82677f8693ae8cdf7ab644160dbd0059bcf2880'
 }
 $noticeLock = @(Get-Content -LiteralPath $InstallerLock | ForEach-Object { $_.Trim() })
 foreach ($noticePin in @('antlr4-python3-runtime==4.9.3', 'proxy_tools==0.1.0')) {
@@ -624,6 +654,8 @@ New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'third-party-no
 foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\README.md',
         'third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt',
         'third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt',
+        'third-party-notices\deno-2.9.8-MIT-LICENSE.txt',
+        'third-party-notices\yt-dlp-ejs-0.8.0-LICENSES.txt',
         'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
         'third-party-notices\mozilla-readability-APACHE-2.0.txt',
         'third-party-notices\EmbeddingGemma-NOTICE.md',

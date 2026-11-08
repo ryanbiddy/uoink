@@ -150,6 +150,7 @@ def test_generated_and_committed_supplement_match():
     committed = (ROOT / "THIRD-PARTY-NOTICES.md").read_text(encoding="utf8")
     assert committed.count(notices.SUPPLEMENTAL_NOTICE_BLOCK) == 1
     assert committed.count(notices.FFMPEG_BLOCK) == 1
+    assert committed.count(notices.DENO_BLOCK) == 1
     assert committed.count(notices.ADAPTED_TEXT_BLOCK) == 1
     installer = (ROOT / "installer/uoink.iss").read_text(encoding="utf8")
     for name in ("README.md", "antlr4-python3-runtime-4.9.3-LICENSE.txt", "proxy-tools-0.1.0-UPSTREAM-LICENSE.txt",

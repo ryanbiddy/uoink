@@ -14,6 +14,9 @@ browser extension. An agent uses the CLI or MCP tools to capture and search.
   `sudo apt-get install python3-venv`.
 - Both `ffmpeg` and `ffprobe` on PATH. The installer prints these commands
   when either is missing.
+- Optional: Deno 2.3 or newer on PATH. yt-dlp runs YouTube's player code in
+  Deno, so YouTube capture works best with it. The installer only prints a
+  note when Deno is missing, and Uoink does not download Deno for you.
 
 | Distribution | Command |
 |---|---|

@@ -2414,6 +2414,19 @@ YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
               "--extractor-args", "twitter:api=syndication"]
 if sys.platform == "darwin":
     YTDLP_CMD.extend(_platform.ytdlp_media_args())
+else:
+    # Ignore any personal yt-dlp config file, as the Mac bundle already does.
+    # Otherwise options such as --cookies-from-browser or a forced player
+    # client in the user's own config would change what Uoink sends.
+    YTDLP_CMD.append("--ignore-config")
+# yt-dlp needs a JavaScript runtime to solve YouTube's player challenges. Use the
+# Deno that the installer put in bin\ (nothing is added if it is missing).
+YTDLP_CMD.extend(_platform.ytdlp_js_runtime_args(_BIN_DIR))
+# yt-dlp passes the helper's environment to Deno. Keep Deno's small analysis
+# cache inside Uoink's data folder rather than %LOCALAPPDATA%\deno, and turn
+# off Deno's own update check so it never contacts its release server.
+os.environ["DENO_DIR"] = str(DATA_ROOT / "deno-cache")
+os.environ["DENO_NO_UPDATE_CHECK"] = "1"
 
 # Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
 # pulls the whole file to disk first; on a small disk a few livestream-length
@@ -14940,6 +14953,23 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
             "ffmpeg is unavailable; details are in the Uoink log" if public else detail)
         warnings.append(
             "ffmpeg is missing or broken. Screenshot extraction will fail.")
+
+    # 7b. js_runtime. yt-dlp runs YouTube's player code in Deno. The installer
+    # ships one; without it yt-dlp falls back to a deno on PATH. Optional, so
+    # a miss is a warning, not an error.
+    js_args = _platform.ytdlp_js_runtime_args(_BIN_DIR)
+    deno_cmd = js_args[1].split(":", 1)[1] if js_args else "deno"
+    status, detail = _probe_command([deno_cmd, "--version"])
+    if status == "ok":
+        add("js_runtime", "ok", "JavaScript runtime (Deno) is available" if public else detail)
+    else:
+        log.warning("diagnose: Deno probe failed: %s", detail)
+        add("js_runtime", "warning",
+            "No JavaScript runtime for yt-dlp; details are in the Uoink log" if public else detail)
+        warnings.append(
+            "No JavaScript runtime for yt-dlp. Some YouTube videos may list "
+            "fewer formats. The Uoink installer includes Deno; on Linux or "
+            "macOS install Deno 2.3 or newer.")
 
     if _OUTPUT_ROOT_FALLBACK:
         warnings.append(

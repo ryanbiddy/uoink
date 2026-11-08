@@ -12,13 +12,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- YouTube capture ships its own JavaScript runtime on Windows. The installer now
+  includes Deno 2.9.8 (`bin\deno.exe`) and the matching yt-dlp-ejs 0.8.0, so
+  yt-dlp can solve YouTube's player challenges, which it now needs for full
+  YouTube support, without you installing anything. Deno runs that code in its
+  sandbox, with no file or network access. Uoink downloads nothing at runtime
+  for it, turns off Deno's own update check, and keeps Deno's small cache in
+  the Uoink data folder. The install check runs `deno --version`, and the
+  self-check (`js_runtime`) reports it. On Linux and macOS, yt-dlp uses a Deno
+  2.3 or newer already on PATH.
 - Thesis check, a sixth research playbook. Give it a claim and a selection of
   saved captures (or a topic or creator), and your AI gets a cited packet of
   the clips that match the claim, the opening of each source and the top
   comments. It asks for the assumptions the sources share, the evidence for and
   against, and what your library does not cover, with a citation on every
-  point (clip citations carry the timestamp). It is a prompt and a `get_playbook_input` playbook, and it is
-  also in the Generate research list. No new tool: still 99 tools by default.
+  point (clip citations carry the timestamp). It is a prompt and a
+  `get_playbook_input` playbook, and it is also in the Generate research list.
+  No new tool: still 99 tools by default.
+
+### Changed
+
+- On Windows and Linux, Uoink's yt-dlp now ignores a personal yt-dlp config
+  file, as the Mac app already did. Options in that file, such as browser
+  cookies or a forced player client, no longer change what Uoink sends.
 
 ## [3.16.0] - 2026-11-08
 
