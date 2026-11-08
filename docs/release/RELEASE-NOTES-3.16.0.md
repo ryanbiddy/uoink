@@ -50,7 +50,7 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.16.0/docs/linux.m
 - Research doesn't capture podcast episodes yet: it lists them, then skips them with `podcast_capture_later`. Podcast transcripts already in your library still count as evidence. Reddit search is not available in research yet.
 - Linux is headless only: no tray, splash or dashboard window (the helper logs the dashboard URL instead). A host install needs ffmpeg and ffprobe on the system; without them media tools answer `media_requires_ffmpeg`. Podcast transcription on Linux uses CPU faster-whisper without speaker labels unless you install the optional WhisperX requirements.
 - Update now works on Windows and Apple Silicon Macs from an installed build. Linux, source checkouts and isolated test installs link to the release page instead. The Windows installer is unsigned, so the update is checked against the release's published checksums, not a code signature.
-- Make a Short with Zing needs Zing installed. Zing reads short videos only.
+- Make a Short with Zing needs Zing installed. Uoink keeps media for short videos only, so a longer video goes through the Download step.
 - Mac: Apple Silicon only.
 - Chrome (tested). Edge and Brave may work but are not tested.
 
