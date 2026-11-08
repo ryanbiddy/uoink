@@ -5725,6 +5725,11 @@
                 <span class="soft-note hidden" id="yoinkWriteHint">Connect Claude first</span>
                 <button class="button hidden" type="button" id="yoinkZing">Make a Short with Zing</button>
                 <span class="soft-note hidden" id="yoinkZingStatus" role="status"></span>
+                <span class="soft-note hidden" id="yoinkZingAsk" role="group" aria-label="Download the video for Zing">
+                  <span id="yoinkZingAskText"></span>
+                  <button class="button primary" type="button" id="yoinkZingDownload">Download</button>
+                  <button class="button ghost" type="button" id="yoinkZingCancel">Cancel</button>
+                </span>
                 <button class="hook-help-link hidden" type="button" id="yoinkZingAgain">Open again</button>
                 <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
                   <summary class="button ghost">More actions</summary>
@@ -7029,6 +7034,10 @@
       yoinkZing: document.getElementById("yoinkZing"),
       yoinkZingStatus: document.getElementById("yoinkZingStatus"),
       yoinkZingAgain: document.getElementById("yoinkZingAgain"),
+      yoinkZingAsk: document.getElementById("yoinkZingAsk"),
+      yoinkZingAskText: document.getElementById("yoinkZingAskText"),
+      yoinkZingDownload: document.getElementById("yoinkZingDownload"),
+      yoinkZingCancel: document.getElementById("yoinkZingCancel"),
       yoinkWriteHint: document.getElementById("yoinkWriteHint"),
       yoinkBack: document.getElementById("yoinkBack"),
       runningPill: document.getElementById("runningPill"),
@@ -19414,7 +19423,9 @@
         if (!videoId) return showToast("This uoink has no saved source id yet.");
         writeFromSource(videoId);
       });
-      els.yoinkZing.addEventListener("click", startZingHandoff);
+      els.yoinkZing.addEventListener("click", () => startZingHandoff(false));
+      els.yoinkZingDownload.addEventListener("click", () => startZingHandoff(true));
+      els.yoinkZingCancel.addEventListener("click", cancelZingDownload);
       els.yoinkZingAgain.addEventListener("click", openZingPage);
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
@@ -20082,7 +20093,11 @@
     // "Make a Short with Zing" shows only when the helper's /zing/status says
     // Zing is installed and can take items from Uoink. When it is not, nothing
     // shows at all.
-    const zing = { available: false, busy: false, videoId: "", page: "", message: "" };
+    const zing = {
+      available: false, features: [], busy: false, videoId: "", page: "", message: "",
+      ask: "", downloading: false, percent: null, downloaded: false, host: "", run: 0,
+    };
+    const zingWait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     function isZingPage(target) {
       // Only the review page Zing just returned: http://127.0.0.1:<port>/ with
@@ -20096,13 +20111,20 @@
     function renderYoinkZing() {
       const current = videoIdOf(state.selectedYoink);
       const show = zing.available && Boolean(current);
-      // The message and link belong to the item they were made for.
+      // The message, prompt and link belong to the item they were made for.
       const mine = show && zing.videoId === current;
       els.yoinkZing.classList.toggle("hidden", !show);
-      els.yoinkZing.disabled = zing.busy;
-      const text = mine ? zing.message : "";
+      els.yoinkZing.disabled = zing.busy || Boolean(mine && zing.ask);
+      let text = mine ? zing.message : "";
+      if (mine && zing.busy && zing.downloading) {
+        text = zing.percent === null ? "Downloading…" : `Downloading… ${Math.floor(zing.percent)}%`;
+      }
       els.yoinkZingStatus.textContent = text;
       els.yoinkZingStatus.classList.toggle("hidden", !text);
+      const asking = Boolean(mine && zing.ask);
+      els.yoinkZingAskText.textContent = asking
+        ? `Uoink didn't keep this video. Download it from ${zing.ask} so Zing can cut a Short?` : "";
+      els.yoinkZingAsk.classList.toggle("hidden", !asking);
       els.yoinkZingAgain.classList.toggle("hidden", !(mine && zing.page));
     }
 
@@ -20110,33 +20132,95 @@
       try {
         const data = await authFetch("/zing/status");
         zing.available = Boolean(data && data.available);
+        zing.features = zing.available && Array.isArray(data.features) ? data.features : [];
       } catch (_) {
         zing.available = false;
+        zing.features = [];
       }
       renderYoinkZing();
     }
 
-    async function startZingHandoff() {
-      const videoId = videoIdOf(state.selectedYoink);
+    function zingErrorText(err) {
+      const detail = err && err.data && err.data.message;
+      return detail || (err && err.message) || "Zing could not start. Try again.";
+    }
+
+    // One hand-off per item at a time. Download is asked for only by the
+    // Download button on the prompt, and only when Zing listed the feature.
+    async function startZingHandoff(allowDownload) {
+      const allow = allowDownload === true && zing.features.includes("allow_download");
+      const videoId = allow ? zing.videoId : videoIdOf(state.selectedYoink);
       if (!videoId || zing.busy) return;
+      const run = ++zing.run;
       zing.busy = true;
       zing.videoId = videoId;
       zing.page = "";
-      zing.message = "Opening Zing…";
+      zing.ask = "";
+      zing.percent = null;
+      zing.downloaded = false;
+      zing.downloading = allow;
+      if (!allow) zing.host = "";
+      zing.message = allow ? "Downloading…" : "Opening Zing…";
       renderYoinkZing();
       try {
-        const data = await authFetch("/zing/handoff", {
+        const started = await authFetch("/zing/handoff", {
           method: "POST",
-          body: JSON.stringify({ video_id: videoId }),
+          body: JSON.stringify({ video_id: videoId, allow_download: allow }),
         });
-        zing.page = typeof data.page === "string" ? data.page : "";
-        // Zing opens its own page in the browser; "Open again" reopens it.
-        zing.message = "Opened in Zing";
+        await pollZingJob(started.job_id, run);
       } catch (err) {
-        const detail = err && err.data && err.data.message;
-        zing.message = detail || (err && err.message) || "Zing could not start. Try again.";
+        zing.message = zingErrorText(err);
       }
       zing.busy = false;
+      zing.downloading = false;
+      renderYoinkZing();
+    }
+
+    async function pollZingJob(jobId, run) {
+      let misses = 0;
+      // A download can take most of an hour; the helper stops waiting at 75 minutes.
+      for (let ticks = 0; ticks < 4800 && run === zing.run; ticks += 1) {
+        await zingWait(1000);
+        let job;
+        try {
+          job = await authFetch(`/zing/handoff/${encodeURIComponent(jobId)}`);
+          misses = 0;
+        } catch (err) {
+          misses += 1;
+          if ((err && err.status === 404) || misses >= 5) throw err;
+          continue;
+        }
+        if (job.state === "running") {
+          if (typeof job.percent === "number") zing.percent = job.percent;
+          renderYoinkZing();
+          continue;
+        }
+        if (job.state === "done") {
+          zing.page = typeof job.page === "string" ? job.page : "";
+          zing.downloaded = job.downloaded === true;
+          // Zing opens its own page in the browser; "Open again" reopens it.
+          zing.message = zing.downloaded
+            ? `Opened in Zing. Zing downloaded the video${zing.host ? ` from ${zing.host}` : ""}.`
+            : "Opened in Zing";
+          return;
+        }
+        if (job.error === "download_needed" && typeof job.host === "string" && job.host
+            && zing.features.includes("allow_download")) {
+          zing.host = job.host;
+          zing.ask = job.host;
+          zing.message = "";
+          return;
+        }
+        zing.message = job.message || "Zing could not start. Try again.";
+        return;
+      }
+      if (run === zing.run && !zing.message) zing.message = "Zing is still working. Check Zing.";
+    }
+
+    function cancelZingDownload() {
+      zing.ask = "";
+      zing.host = "";
+      zing.message = "";
       renderYoinkZing();
     }
 

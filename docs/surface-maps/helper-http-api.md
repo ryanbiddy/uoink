@@ -261,24 +261,47 @@ pull token in the keyring (`relay_pull_token`, isolation-aware service).
 
 ---
 
-## GET /zing/status and POST /zing/handoff (token-gated)
+## GET /zing/status, POST /zing/handoff and GET /zing/handoff/<job_id> (token-gated)
 
 **What they do.** Back the dashboard's "Make a Short with Zing" button.
 `GET /zing/status` runs Zing's no-network probe (`zing from-uoink --probe --json`,
-5 s timeout) and returns `{ok, available, service_version, reason}`. It is
-`available` only when Zing answers with contract `ryan.suite.handoff` version 1
-and lists `uoink.item/1` in `accepts`. Any failure is `available: false` with a
-plain `reason`; the route always answers 200 and never raises. The result is
-cached for five minutes (30 seconds when Zing was not found).
-`POST /zing/handoff` takes `{"video_id": "<id>"}`, checks the id format and
-that the item exists and is not deleted, refuses (409 `zing_unavailable`) if
-the probe fails, then runs `zing from-uoink uoink://item/<id> --json` detached and
-returns `{ok: true, page, project, reused}` from Zing's first output line. Errors
-are `{ok: false, error, message}` with plain-words `message`. Zing's codes map
-as `invalid_ref`, `uoink_unavailable`, `media_unavailable` (the message says to
-keep the item's media first: the `keep_media` setting, short videos only),
-`project_exists` and `failed`. An unanswered first line after 60 s is 504
-`timeout`; a bad id is 400 `invalid_id`; an unknown or deleted item is 404.
+5 s timeout) and returns `{ok, available, service_version, reason, features}`.
+It is `available` only when Zing answers with contract `ryan.suite.handoff`
+version 1 and lists `uoink.item/1` in `accepts`. `features` is the probe's list of
+strings (empty for an older Zing); `allow_download` in it means Zing can fetch a
+video Uoink did not keep. Any failure is `available: false` with a plain
+`reason`; the route always answers 200 and never raises. The result is cached for
+five minutes (30 seconds when Zing was not found).
+
+`POST /zing/handoff` takes `{"video_id": "<id>", "allow_download": bool}`. It
+checks the id format and that the item exists and is not deleted, refuses (409
+`zing_unavailable`) if the probe fails, then starts
+`zing from-uoink uoink://item/<id> --json` detached and answers
+`202 {ok: true, job_id}` at once. `--allow-download` is added only when
+`allow_download` is exactly `true` and the probe listed `allow_download`. A bad
+id is 400 `invalid_id`; an unknown or deleted item is 404; a second hand-off for
+an item that already has one running is 409 `busy`; a start failure is 502
+`failed`.
+
+`GET /zing/handoff/<job_id>` returns
+`{ok, job_id, state, percent, page, project, reused, downloaded, error, message, host}`.
+`state` is `running`, `done` or `error`. While running, `percent` is the newest
+download percent Zing reported (0-100, or null; it can stall or jump). When
+`done`, `page`, `project`, `reused` and `downloaded` are set. When `error`,
+`error` and a plain-words `message` are set. Zing's codes map as `invalid_ref`,
+`uoink_unavailable`, `media_unavailable` (keep the item's media first: the
+`keep_media` setting, short videos only), `project_exists`, `download_failed`
+and `failed`; no first line within the timeout is `timeout`. `download_needed`
+means Uoink did not keep the video and Zing needs the user's OK to fetch it;
+`host` is then the host of the item's own source link as Uoink stores it (never
+parsed from Zing's message). If the item has no http(s) source link it is
+reported as `media_unavailable`. An unknown job id is 404.
+
+Jobs live in memory only (cap 100; the oldest finished job is dropped first) and
+are lost on a helper restart; the Zing child itself is detached and is never
+killed. The reader waits up to 60 s for Zing's first line, or 75 minutes when
+`--allow-download` was passed (Zing's own download limit is one hour, plus time
+to merge).
 
 **Auth posture.** Token-gated. A missing or wrong token answers `403`.
 
@@ -288,7 +311,10 @@ on isolated installs) so Zing can read the item's kept media through
 `uoink.media.handoff/1`. Nothing is written to `settings.json`.
 
 **Outbound requests.** None from the helper. Zing makes its own loopback calls
-to this helper.
+to this helper; with `--allow-download` Zing, not Uoink, fetches the video.
 
-**Consumers.** Dashboard reader, "Make a Short with Zing". The dashboard opens
-only the `http://127.0.0.1:<port>/?t=...` page this call returned.
+**Consumers.** Dashboard reader, "Make a Short with Zing": click, POST, poll
+once a second. If the job ends in `download_needed` (and `features` has
+`allow_download`) it asks inline whether to download from the host; Download
+POSTs again with `allow_download: true`, Cancel does nothing. The dashboard opens
+only the `http://127.0.0.1:<port>/?t=...` page the job returned.
