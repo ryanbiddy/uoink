@@ -21,8 +21,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   allowlist and podcast consent.
 - Make a Short with Zing. When Zing is installed, a button in the reader hands
   the open item to it and opens Zing's review page. Nothing shows if Zing is
-  not installed. Zing reads the item's kept video through Uoink, so the item
-  needs its media kept first (the `keep_media` setting, short videos only).
+  not installed. Zing reads the item's kept video through Uoink (the
+  `keep_media` setting, short videos only). If Uoink did not keep it, Zing
+  downloads it only after you click Download for that item, and Uoink shows
+  the site it comes from. The hand-off runs in the background with download
+  progress in the reader.
 
 ### Fixed
 

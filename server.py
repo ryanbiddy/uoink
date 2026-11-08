@@ -44,7 +44,7 @@ from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse, urlsplit
 
 _HELPER_STARTED_MONOTONIC = time.monotonic()
 
@@ -16116,11 +16116,15 @@ _ZING_PROBE_TTL = 300        # a found Zing is rechecked every five minutes
 _ZING_MISS_TTL = 30          # a missing one sooner, so installing it shows up fast
 _ZING_PROBE_TIMEOUT = 5
 _ZING_FIRST_LINE_TIMEOUT = 60   # Zing may hash a large kept video first
+_ZING_DOWNLOAD_TIMEOUT = 75 * 60   # with --allow-download: Zing's own limit is 1 hour, plus merging
+_ZING_JOB_CAP = 100
 _ZING_ID_RE = re.compile(r"[A-Za-z0-9_-]{6,200}")
 _ZING_PAGE_RE = re.compile(r"http://127\.0\.0\.1:(\d{1,5})/\?t=[A-Za-z0-9._~%-]{1,512}")
 _ZING_SHELL_UNSAFE = set('&|<>^%"!\r\n')
 _zing_probe_cache: dict = {"at": 0.0, "ttl": 0, "value": None}
 _zing_probe_lock = threading.Lock()
+_zing_jobs: dict[str, dict] = {}
+_zing_jobs_lock = threading.Lock()
 
 
 def _zing_search_dirs() -> list[str]:
@@ -16161,7 +16165,8 @@ def _zing_argv(exe: str, *args: str) -> list[str] | None:
 
 def _zing_probe_uncached() -> dict:
     def no(reason):
-        return {"ok": True, "available": False, "service_version": None, "reason": reason}
+        return {"ok": True, "available": False, "service_version": None, "reason": reason,
+                "features": []}
     exe = _find_zing()
     if not exe:
         return no("Zing is not installed.")
@@ -16190,8 +16195,11 @@ def _zing_probe_uncached() -> dict:
     if not isinstance(accepts, list) or "uoink.item/1" not in accepts:
         return no("This version of Zing does not take items from Uoink.")
     version = data.get("service_version")
+    features = data.get("features")
+    features = [f for f in features if isinstance(f, str)] if isinstance(features, list) else []
     return {"ok": True, "available": True,
-            "service_version": version if isinstance(version, str) else None, "reason": ""}
+            "service_version": version if isinstance(version, str) else None, "reason": "",
+            "features": features}
 
 
 def _zing_probe() -> dict:
@@ -16206,7 +16214,7 @@ def _zing_probe() -> dict:
         except Exception as exc:
             log.info("zing probe failed: %s", type(exc).__name__)
             value = {"ok": True, "available": False, "service_version": None,
-                     "reason": "Zing could not be checked."}
+                     "reason": "Zing could not be checked.", "features": []}
         _zing_probe_cache.update(at=now, value=value,
                                  ttl=_ZING_PROBE_TTL if value["available"] else _ZING_MISS_TTL)
         return value
@@ -16220,6 +16228,7 @@ _ZING_ERROR_TEXT = {
                           "and capture the item again."),
     "project_exists": "Zing already has a project for this item. Open it from Zing.",
     "failed": "Zing could not start. Try again.",
+    "download_failed": "Zing could not download the video. Check your connection and the link, then try again.",
 }
 
 
@@ -16249,7 +16258,7 @@ def _zing_drain(proc) -> None:
         pass
 
 
-def _zing_first_line(proc) -> str | None:
+def _zing_first_line(proc, timeout: float | None = None) -> str | None:
     box: queue.Queue = queue.Queue()
 
     def read():
@@ -16259,7 +16268,7 @@ def _zing_first_line(proc) -> str | None:
             box.put(b"")
     threading.Thread(target=read, daemon=True).start()
     try:
-        raw = box.get(timeout=_ZING_FIRST_LINE_TIMEOUT)
+        raw = box.get(timeout=_ZING_FIRST_LINE_TIMEOUT if timeout is None else timeout)
     except queue.Empty:
         return None
     return raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
@@ -16269,9 +16278,138 @@ def _zing_fail(status: int, error: str, message: str) -> tuple[int, dict]:
     return status, {"ok": False, "error": error, "message": message}
 
 
-def _zing_handoff(video_id) -> tuple[int, dict]:
+def _zing_progress_percent(line) -> float | None:
+    """A whole-line JSON progress record from Zing's stderr, else None. Any
+    other line (plain text, bad JSON, someone else's record) is ignored and
+    never logged."""
+    if isinstance(line, bytes):
+        line = line.decode("utf-8", "replace")
+    line = line.strip()
+    if not line.startswith("{"):
+        return None
+    try:
+        data = json.loads(line)
+    except ValueError:
+        return None
+    if (not isinstance(data, dict) or data.get("contract") != _ZING_CONTRACT
+            or data.get("version") != 1 or data.get("progress") != "download"):
+        return None
+    pct = data.get("percent")
+    if isinstance(pct, bool) or not isinstance(pct, (int, float)) or pct != pct:
+        return None
+    return float(min(100.0, max(0.0, pct)))
+
+
+def _zing_read_stderr(proc, job_id: str) -> None:
+    """Keep the newest download percent on the job and drop everything else, so
+    Zing never blocks on a full stderr pipe. Percent may stall or jump."""
+    try:
+        for raw in proc.stderr:
+            pct = _zing_progress_percent(raw)
+            if pct is None:
+                continue
+            with _zing_jobs_lock:
+                job = _zing_jobs.get(job_id)
+                if job is not None and job["state"] == "running":
+                    job["percent"] = pct
+    except (OSError, ValueError, TypeError):
+        pass
+
+
+def _zing_source_host(row: dict) -> str | None:
+    """Host of the item's own http(s) source link, from Uoink's copy (never
+    from Zing's message)."""
+    try:
+        meta = json.loads(row.get("metadata_json") or "{}")
+    except (ValueError, TypeError):
+        meta = {}
+    if not isinstance(meta, dict):
+        meta = {}
+    for candidate in (row.get("source_url"), row.get("url"), meta.get("source_url"), meta.get("url")):
+        if isinstance(candidate, str) and candidate.startswith(("http://", "https://")):
+            try:
+                host = urlsplit(candidate).hostname
+            except ValueError:
+                continue
+            if host:
+                return host[:255]
+    return None
+
+
+def _zing_job_prune_locked() -> None:
+    while len(_zing_jobs) >= _ZING_JOB_CAP:
+        done = [k for k, v in _zing_jobs.items() if v["state"] != "running"]
+        if not done:
+            return
+        _zing_jobs.pop(done[0], None)
+
+
+def _zing_job_finish(job_id: str, **fields) -> None:
+    with _zing_jobs_lock:
+        job = _zing_jobs.get(job_id)
+        if job is not None:
+            job.update(fields)
+
+
+def _zing_job_error(job_id: str, error: str, message: str, host: str | None = None) -> None:
+    _zing_job_finish(job_id, state="error", error=error, message=message,
+                     host=host if error == "download_needed" else None)
+
+
+def _zing_job_run(proc, job_id: str, vid: str, host: str | None, allow: bool) -> None:
+    """Reader thread for one hand-off: turn Zing's first stdout line into the
+    job result, then drain and reap the child. The child is never killed."""
+    try:
+        threading.Thread(target=_zing_read_stderr, args=(proc, job_id), daemon=True).start()
+        timeout = _ZING_DOWNLOAD_TIMEOUT if allow else _ZING_FIRST_LINE_TIMEOUT
+        line = _zing_first_line(proc, timeout)
+        threading.Thread(target=_zing_drain, args=(proc,), daemon=True).start()
+        if line is None:
+            log.info("zing hand-off: no answer within %ss", timeout)
+            return _zing_job_error(job_id, "timeout",
+                                   "Zing took too long to answer. It may still be working.")
+        try:
+            data = json.loads(line)
+        except ValueError:
+            data = None
+        if not isinstance(data, dict) or data.get("contract") != _ZING_CONTRACT or data.get("version") != 1:
+            log.info("zing hand-off: unreadable first line")
+            return _zing_job_error(job_id, "failed", "Zing closed before it answered." if not line.strip()
+                                   else _ZING_ERROR_TEXT["failed"])
+        if data.get("ok") is not True:
+            code = data.get("error") if isinstance(data.get("error"), str) else "failed"
+            if code == "download_needed":
+                if host:
+                    log.info("zing hand-off needs a download consent")
+                    return _zing_job_error(job_id, code,
+                                           f"Uoink did not keep this video. Zing can download it from {host}.",
+                                           host)
+                code = "media_unavailable"
+            known = code in _ZING_ERROR_TEXT
+            log.info("zing hand-off refused: %s", code if known else "other")
+            return _zing_job_error(job_id, code if known else "failed",
+                                   _ZING_ERROR_TEXT.get(code, _ZING_ERROR_TEXT["failed"]))
+        page = data.get("page")
+        match = _ZING_PAGE_RE.fullmatch(page) if isinstance(page, str) else None
+        project = data.get("project")
+        if not match or not 1 <= int(match.group(1)) <= 65535 or not isinstance(project, str):
+            log.info("zing hand-off: page address was not a local Zing page")
+            return _zing_job_error(job_id, "failed", _ZING_ERROR_TEXT["failed"])
+        log.info("zing hand-off opened for item %s", vid)   # never the page address: it carries a token
+        _zing_job_finish(job_id, state="done", page=page, project=project,
+                         reused=data.get("reused") is True,
+                         downloaded=data.get("downloaded") is True,
+                         percent=100.0 if data.get("downloaded") is True else None)
+    except Exception as exc:
+        log.info("zing hand-off reader failed: %s", type(exc).__name__)
+        _zing_job_error(job_id, "failed", _ZING_ERROR_TEXT["failed"])
+
+
+def _zing_handoff(video_id, allow_download=False) -> tuple[int, dict]:
     """POST /zing/handoff. Starts `zing from-uoink uoink://item/<id> --json`
-    detached, reads only its first stdout line, and returns the review page."""
+    detached and returns 202 {ok, job_id} at once; a reader thread fills in the
+    job (GET /zing/handoff/<job_id>). `--allow-download` is added only when the
+    user's click said so AND this Zing's probe lists the feature."""
     vid = video_id if isinstance(video_id, str) else ""
     if not _ZING_ID_RE.fullmatch(vid):
         return _zing_fail(400, "invalid_id", "That item id is not valid.")
@@ -16281,49 +16419,50 @@ def _zing_handoff(video_id) -> tuple[int, dict]:
         row = None
     if not row or row.get("deleted_at"):
         return _zing_fail(404, "not_found", "That item is not in your Library.")
-    if not _zing_probe()["available"]:
+    probe = _zing_probe()
+    if not probe["available"]:
         return _zing_fail(409, "zing_unavailable", "Zing is not available on this computer.")
+    allow = allow_download is True and "allow_download" in (probe.get("features") or [])
     exe = _find_zing()
-    argv = _zing_argv(exe, "from-uoink", f"uoink://item/{vid}", "--json") if exe else None
+    args = ["from-uoink", f"uoink://item/{vid}", "--json"] + (["--allow-download"] if allow else [])
+    argv = _zing_argv(exe, *args) if exe else None
     if argv is None:
         return _zing_fail(409, "zing_unavailable", "Zing is not available on this computer.")
+    with _zing_jobs_lock:
+        _zing_job_prune_locked()
+        if len(_zing_jobs) >= _ZING_JOB_CAP:
+            return _zing_fail(429, "busy", "Too many Zing hand-offs are running. Try again soon.")
+        if any(j["state"] == "running" and j["video_id"] == vid for j in _zing_jobs.values()):
+            return _zing_fail(409, "busy", "A hand-off for this item is already running.")
     env = dict(os.environ)
     env["UOINK_TOKEN"] = TOKEN
     env["UOINK_URL"] = suite_service._active_base_url()   # the isolated binding on isolated installs
     try:
         proc = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                                stderr=subprocess.DEVNULL, env=env, **_zing_popen_flags(argv))
+                                stderr=subprocess.PIPE, env=env, **_zing_popen_flags(argv))
     except (OSError, ValueError) as exc:
         log.info("zing hand-off could not start: %s", type(exc).__name__)
         return _zing_fail(502, "failed", _ZING_ERROR_TEXT["failed"])
-    line = _zing_first_line(proc)
-    # Hand the pipe to a drain thread whatever happened; the child is never killed.
-    threading.Thread(target=_zing_drain, args=(proc,), daemon=True).start()
-    if line is None:
-        log.info("zing hand-off: no answer within %ss", _ZING_FIRST_LINE_TIMEOUT)
-        return _zing_fail(504, "timeout", "Zing took too long to answer. It may still be starting.")
-    try:
-        data = json.loads(line)
-    except ValueError:
-        data = None
-    if not isinstance(data, dict) or data.get("contract") != _ZING_CONTRACT or data.get("version") != 1:
-        log.info("zing hand-off: unreadable first line")
-        return _zing_fail(502, "failed", "Zing closed before it answered." if not line.strip()
-                          else _ZING_ERROR_TEXT["failed"])
-    if data.get("ok") is not True:
-        code = data.get("error") if isinstance(data.get("error"), str) else "failed"
-        known = code in _ZING_ERROR_TEXT
-        log.info("zing hand-off refused: %s", code if known else "other")
-        return _zing_fail(502, code if known else "failed",
-                          _ZING_ERROR_TEXT.get(code, _ZING_ERROR_TEXT["failed"]))
-    page = data.get("page")
-    match = _ZING_PAGE_RE.fullmatch(page) if isinstance(page, str) else None
-    project = data.get("project")
-    if not match or not 1 <= int(match.group(1)) <= 65535 or not isinstance(project, str):
-        log.info("zing hand-off: page address was not a local Zing page")
-        return _zing_fail(502, "failed", _ZING_ERROR_TEXT["failed"])
-    log.info("zing hand-off opened for item %s", vid)   # never the page address: it carries a token
-    return 200, {"ok": True, "page": page, "project": project, "reused": data.get("reused") is True}
+    job_id = uuid.uuid4().hex[:16]
+    with _zing_jobs_lock:
+        _zing_jobs[job_id] = {
+            "job_id": job_id, "video_id": vid, "state": "running", "percent": None,
+            "page": None, "project": None, "reused": None, "downloaded": None,
+            "error": None, "message": None, "host": None}
+    threading.Thread(target=_zing_job_run, args=(proc, job_id, vid, _zing_source_host(row), allow),
+                     daemon=True).start()
+    return 202, {"ok": True, "job_id": job_id}
+
+
+def _zing_job_status(job_id) -> tuple[int, dict]:
+    """GET /zing/handoff/<job_id>."""
+    with _zing_jobs_lock:
+        job = _zing_jobs.get(job_id) if isinstance(job_id, str) else None
+        if job is None:
+            return _zing_fail(404, "not_found", "That hand-off is not known.")
+        out = {k: job[k] for k in ("job_id", "state", "percent", "page", "project", "reused",
+                                   "downloaded", "error", "message", "host")}
+    return 200, {"ok": True, **out}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -16838,6 +16977,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_update_install_status()
         if bare == "/zing/status":
             return self._handle_zing_status()
+        if bare.startswith("/zing/handoff/"):
+            return self._handle_zing_job(bare[len("/zing/handoff/"):])
         if bare == "/engagement/scores":
             return self._handle_engagement_scores()
         if bare == "/resurface":
@@ -17200,6 +17341,12 @@ class Handler(BaseHTTPRequestHandler):
         if not self._require_token():
             return
         self._send_json(200, _zing_probe())
+
+    def _handle_zing_job(self, job_id):
+        """GET /zing/handoff/<job_id> -- progress and result of a hand-off."""
+        if not self._require_token():
+            return
+        self._send_json(*_zing_job_status(job_id))
 
     def _handle_detect(self):
         """GET /detect?url=... -- V-2a universal capture detection.
@@ -21821,7 +21968,8 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/update/install":
             return self._send_json(*_start_update_install())
         if bare == "/zing/handoff":
-            return self._send_json(*_zing_handoff(body.get("video_id") if isinstance(body, dict) else None))
+            body = body if isinstance(body, dict) else {}
+            return self._send_json(*_zing_handoff(body.get("video_id"), body.get("allow_download") is True))
         if bare == "/relay/check":
             return self._send_json(200, _relay_request_check())
         if bare == "/settings/usage-prompt":
