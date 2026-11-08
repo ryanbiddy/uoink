@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import mimetypes
+import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from urllib.parse import quote
 
@@ -150,6 +151,17 @@ def _resolve_media(folder: Path, raw_path: str) -> Path | None:
     return resolved
 
 
+def _wire_path(folder: Path, raw_path: str) -> str:
+    """The kept file's absolute path in the form Uoink stores it.
+
+    Path.resolve() turns a mapped network drive letter into a UNC path and can
+    keep the extended-length prefix on a long Windows path. Sibling apps refuse
+    both forms, so they get the stored drive-letter path instead. Containment
+    is still checked on the resolved path in _resolve_media.
+    """
+    return os.path.abspath(folder.joinpath(*_relative_media_parts(raw_path)))
+
+
 def _hash_file(path: Path) -> tuple[int, str]:
     digest = hashlib.sha256()
     size = 0
@@ -226,7 +238,7 @@ def resolve(idx, item_id: str) -> dict:
     byte_length, sha256 = _hash_file(media_path)
     data["state"] = "available"
     data["media"] = {
-        "path": str(media_path),
+        "path": _wire_path(folder, raw_media),
         "media_type": media_type,
         "byte_length": byte_length,
         "sha256": sha256,

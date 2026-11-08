@@ -306,7 +306,7 @@ def test_kept_media_resolver_available_not_kept_and_missing(tmp_path):
             "state": "available",
             "source_url": "https://example.test/short/123",
             "media": {
-                "path": str((folder / "video.mp4").resolve()),
+                "path": os.path.abspath(folder / "video.mp4"),
                 "media_type": "video/mp4",
                 "byte_length": len(media),
                 "sha256": hashlib.sha256(media).hexdigest(),
@@ -408,6 +408,35 @@ def test_kept_media_rejects_outside_folder_symlink(tmp_path):
         payload, status = media_handoff.resolve_http(idx, "symlink-media")
         assert status == 500
         assert payload["error"]["code"] == "provider_nonconformant"
+    finally:
+        idx.close()
+
+
+def test_kept_media_path_keeps_the_stored_form(tmp_path):
+    # A mapped network drive resolves to a UNC path and a long Windows path
+    # can resolve to an extended-length path; sibling apps refuse both. A
+    # library reached through a directory link stands in for that here: the
+    # handed-over path keeps the stored form, not the resolved one.
+    real_root = tmp_path / "real-library"
+    real_root.mkdir()
+    linked_root = tmp_path / "linked-library"
+    try:
+        linked_root.symlink_to(real_root, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"symlink creation unavailable: {error}")
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    try:
+        folder = _insert_item(
+            idx,
+            linked_root,
+            "linked-media",
+            sidecar={"schema_version": 2, "media_file": "video.mp4"},
+        )
+        (folder / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4-linked")
+        media = media_handoff.resolve(idx, "linked-media")["data"]["media"]
+        assert media["path"] == os.path.abspath(folder / "video.mp4")
+        assert media["path"] != str((folder / "video.mp4").resolve())
+        assert not media["path"].startswith(("\\\\", "//"))
     finally:
         idx.close()
 
