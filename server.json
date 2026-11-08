@@ -8,11 +8,11 @@
     "url": "https://github.com/ryanbiddy/uoink",
     "source": "github"
   },
-  "version": "3.15.1",
+  "version": "3.16.0",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/ryanbiddy/uoink/releases/download/v3.15.1/uoink-3.15.1.mcpb",
+      "identifier": "https://github.com/ryanbiddy/uoink/releases/download/v3.16.0/uoink-3.16.0.mcpb",
       "fileSha256": "2c7c282a438a17a10eed38f697c7b7fd3933545c0107dc8dce73f66fd3ddbadb",
       "transport": {
         "type": "stdio"
