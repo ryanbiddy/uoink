@@ -152,4 +152,5 @@ urllib3==2.7.0
 uvicorn==0.51.0
 whisperx==3.8.6
 yarl==1.24.5
+yt-dlp-ejs==0.8.0 --hash=sha256:79300e5fca7f937a1eeede11f0456862c1b41107ce1d726871e0207424f4bdb4
 yt-dlp==2026.10.21

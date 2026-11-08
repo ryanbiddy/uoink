@@ -82,7 +82,7 @@ The installer lays out `%LOCALAPPDATA%\Uoink\`:
 
 ```
 python\           Python 3.13 embeddable + the pinned runtime packages listed below
-bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
+bin\              ffmpeg.exe, ffprobe.exe, deno.exe (PATH-prepended by server.py)
 cli\              uoink.cmd, uoink (only this folder goes on User PATH)
 bin\torchcodec\   seven LGPL FFmpeg 7.1.5 shared libraries for TorchCodec 0.7
 models\whisper-bundled\base\  pinned faster-whisper base model (3.12+), read-only
@@ -114,6 +114,15 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
   `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-31-13-27/ffmpeg-n8.1.2-50-g1a748fe2cd-win64-lgpl-8.1.zip`.
   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
   the archive is discarded.
+- **Deno** — the official `denoland/deno` Windows release,
+  `https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-pc-windows-msvc.zip`
+  (`$DENO_VERSION`, `$DENO_URL`, `$DENO_SHA256` in `build.ps1`; the hash is
+  the release's own `.zip.sha256sum`). The zip holds only `deno.exe`, staged
+  to `bin\deno.exe`. It is yt-dlp's JavaScript runtime for YouTube. yt-dlp
+  needs 2.3 or newer. `server.py` passes `--js-runtimes deno:<path>` when the
+  file exists. The matching `yt-dlp-ejs` pip package (`$YTDLP_EJS_VERSION`)
+  must equal the version in yt-dlp's `pyproject.toml` at the pinned tag, so
+  bump the two together.
 - **get-pip.py** — PyPA `get-pip` commit
   `5e84c8360eaf92009551b3eec69d734137f31cec` (the upstream 26.1.2 update),
   fetched through that immutable GitHub revision rather than the mutable
@@ -140,6 +149,8 @@ Python with the exact pip versions below.
 | ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
 | FFmpeg shared runtime | n7.1.5 BtbN win64 LGPL shared | Locked in `build.ps1` | Seven DLLs in `bin/torchcodec`; required by TorchCodec 0.7's FFmpeg 7 ABI. |
 | yt-dlp | 2026.10.21 | (pip) | Pinned via `pip install yt-dlp==2026.10.21`. Bump after compatibility-testing a new release. |
+| yt-dlp-ejs | 0.8.0 | (pip, wheel hash in the lock) | Scripts yt-dlp runs in Deno. Must match yt-dlp's `pyproject.toml` at the pinned tag. |
+| Deno | 2.9.8 win-x64 | Locked in `build.ps1` | Official release zip; only `deno.exe` ships, in `bin`. yt-dlp's JavaScript runtime for YouTube. |
 | Pillow | 13.0.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==13.0.0`. |
 | MCP Python SDK | 2.3.0 | (pip) | Official Model Context Protocol Python SDK. Powers the dual-era stdio server. The SDK, mcp-types and transport dependencies are pinned in `requirements.txt` and the installer lock. |
 | keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
@@ -152,7 +163,7 @@ Python with the exact pip versions below.
 
 ### SHA256 hashes
 
-The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downloaded artifacts (Python embeddable + ffmpeg + get-pip.py). The `$..._SHA256` constants are locked in source, which means:
+The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downloaded artifacts (Python embeddable + ffmpeg + Deno + get-pip.py). The `$..._SHA256` constants are locked in source, which means:
 
 - A normal build prints `<component> hash OK`.
 - A compromised mirror or silent upstream change fails the build with `SHA256 mismatch`.
@@ -163,13 +174,13 @@ When bumping a directly-downloaded component:
 1. Run `.\build.ps1` once on a network-connected machine.
 2. If the version changed, copy the computed hash from the warning/error output after verifying the artifact source.
 3. Paste them into the matching `$PYTHON_SHA256`, `$FFMPEG_SHA256`,
-   `$GETPIP_COMMIT`, and `$GETPIP_SHA256` constants in `build.ps1`. For
+   `$DENO_SHA256`, `$GETPIP_COMMIT`, and `$GETPIP_SHA256` constants in `build.ps1`. For
    `get-pip.py`, use the reviewed upstream commit that generated the desired
    pip bootstrap rather than the mutable bootstrap alias.
 4. Re-run `.\build.ps1` -- it should now print `<component> hash OK` instead of the warnings.
 5. Commit the version bump and matching hash update together.
 
-The direct pip dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
+The direct pip dependencies (`yt-dlp`, `yt-dlp-ejs`, `Pillow`, `mcp`, `keyring`, `pystray`,
 `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and their complete
 Windows/CPython 3.13 transitive graph are exact-version constrained by
 `requirements-installer-lock.txt`. After build-only tooling is removed,

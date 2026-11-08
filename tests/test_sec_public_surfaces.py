@@ -96,12 +96,14 @@ def helper(surface_code):
         "json": json, "re": re,
         "secrets": secrets, "urlparse": urlparse, "time": time,
         "datetime": datetime, "log": Mock(),
+        "_BIN_DIR": PRIVATE_ROOT / "bin",
         "DESKTOP_ROOT": PRIVATE_ROOT, "INDEX_PATH": PRIVATE_ROOT / "index.db",
         "DATA_ROOT": PRIVATE_ROOT / "data", "_OUTPUT_ROOT_FALLBACK": True,
         "DASHBOARD_PATH": Mock(read_bytes=Mock(return_value=HTML)),
         "SPLASH_PATH": Mock(read_bytes=Mock(return_value=HTML)),
         "_platform": SimpleNamespace(platform_detail=lambda: "Windows AMD64",
                                      sys=SimpleNamespace(platform="win32"),
+                                     ytdlp_js_runtime_args=lambda bin_dir=None: [],
                                      media_capability=lambda: {"available": True, "code": None, "reason": None},
                                      keyring_display_name=lambda: "Windows Credential Manager"),
         "_is_writable_dir": Mock(return_value=True),
@@ -357,7 +359,8 @@ def test_console_doctor_keeps_paths_versions_and_key_status(
     helper["_get_saved_anthropic_key"].return_value = key
     helper["_read_settings"].return_value["anthropic_key_invalid"] = invalid
     helper["_is_writable_dir"].return_value = writable
-    helper["_probe_command"].side_effect = [("ok", "test-yt-version"), ("ok", "test-ffmpeg-version")]
+    helper["_probe_command"].side_effect = [("ok", "test-yt-version"), ("ok", "test-ffmpeg-version"),
+                                             ("ok", "deno test-deno-version")]
     payload = helper["doctor_payload"]()
     diag = payload["diagnose"]
     checks = {check["name"]: check for check in diag["checks"]}
@@ -365,6 +368,7 @@ def test_console_doctor_keeps_paths_versions_and_key_status(
     assert str(PRIVATE_ROOT) in checks["index_db_writable"]["detail"]
     assert checks["yt_dlp_available"]["detail"] == "yt-dlp test-yt-version"
     assert checks["ffmpeg_available"]["detail"] == "test-ffmpeg-version"
+    assert checks["js_runtime"]["detail"] == "deno test-deno-version"
     assert checks["anthropic_key_set"]["status"] == set_status
     assert checks["anthropic_key_valid"]["status"] == valid_status
     assert diag["anthropic_key_valid"] == expected
@@ -398,6 +402,7 @@ def test_diagnose_omits_tool_output_and_credential_store_exception_paths(helper,
     checks = {check["name"]: check for check in payload["checks"]}
     assert checks["yt_dlp_available"]["status"] == probe_status
     assert checks["ffmpeg_available"]["status"] == probe_status
+    assert checks["js_runtime"]["status"] == ("ok" if probe_status == "ok" else "warning")
     assert checks["keyring_available"]["status"] == "warning"
 
 

@@ -596,9 +596,10 @@ MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths
 
 - Python embeddable
 - ffmpeg
+- Deno (the official denoland/deno Windows release; yt-dlp's JavaScript runtime)
 - `get-pip.py` from an immutable reviewed PyPA `get-pip` commit
 
-Installer-installed Python packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`,
+Installer-installed Python packages (`yt-dlp`, `yt-dlp-ejs`, `Pillow`, `mcp`, `keyring`,
 `pystray`, `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and
 their complete transitive graph are exact-version constrained by
 `requirements-installer-lock.txt`. The build verifies the final installed
@@ -689,7 +690,14 @@ analysis, key tests, or explicit on-demand actions, including connected-agent
 requests and `POST /playbooks/run`. Playbook runs send the fixed instruction
 and bounded library packet described above. YouTube downloads still contact
 YouTube, and yt-dlp may contact YouTube-owned endpoints as part of uoink
-extraction.
+extraction. To read a YouTube video's format list, yt-dlp runs YouTube's player
+code in the bundled Deno (`bin\deno.exe`), which sandboxes it with no file or
+network access. Uoink downloads nothing at runtime for this. The helper sets
+`DENO_NO_UPDATE_CHECK=1`, so Deno never contacts its release server, and
+`DENO_DIR` to `deno-cache` in the Uoink data folder for Deno's small analysis
+cache. Every yt-dlp call gets `--ignore-config`, so a personal yt-dlp config
+file (for example one with `--cookies-from-browser`) cannot change what Uoink
+sends; Uoink never uses browser cookies.
 
 ## Engagement memory (v2.5 S2)
 

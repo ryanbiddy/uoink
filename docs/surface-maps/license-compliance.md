@@ -46,6 +46,14 @@ no DLLs, matching build.ps1's extract-just-the-exe logic.
 `...win64-lgpl-7.1` confirms the LGPL — not GPL — variant). `Confirm-Hash`
 enforces this on every build.
 
+### 2b. Deno and yt-dlp-ejs (3.16.1)
+
+Windows now bundles `deno.exe` (MIT) in `bin`, and the pip graph adds
+`yt-dlp-ejs` (Unlicense, with ISC and MIT parts inside its wheel). The license
+texts are `third-party-notices/deno-2.9.8-MIT-LICENSE.txt` and
+`third-party-notices/yt-dlp-ejs-0.8.0-LICENSES.txt`. `build.ps1` pins their
+SHA-256 and `gen_third_party_notices.py` carries the `DENO_BLOCK` entry.
+
 ### 3. THIRD-PARTY-NOTICES.md, generated
 
 `scripts/gen_third_party_notices.py` enumerates the installed dependency

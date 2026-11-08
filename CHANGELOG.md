@@ -10,6 +10,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- YouTube capture ships its own JavaScript runtime on Windows. The installer now
+  includes Deno 2.9.8 (`bin\deno.exe`) and the matching yt-dlp-ejs 0.8.0, so
+  yt-dlp can solve YouTube's player challenges, which it now needs for full
+  YouTube support, without you installing anything. Deno runs that code in its
+  sandbox, with no file or network access. Uoink downloads nothing at runtime
+  for it, turns off Deno's own update check, and keeps Deno's small cache in
+  the Uoink data folder. The install check runs `deno --version`, and the
+  self-check (`js_runtime`) reports it. On Linux and macOS, yt-dlp uses a Deno
+  2.3 or newer already on PATH.
+
+### Changed
+
+- On Windows and Linux, Uoink's yt-dlp now ignores a personal yt-dlp config
+  file, as the Mac app already did. Options in that file, such as browser
+  cookies or a forced player client, no longer change what Uoink sends.
+
 ## [3.16.0] - 2026-11-08
 
 ### Added

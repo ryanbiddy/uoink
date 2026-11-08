@@ -144,6 +144,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
 | yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
 | yt-dlp | 2026.10.21 | Unlicense | https://github.com/yt-dlp/yt-dlp |
+| yt-dlp-ejs | 0.8.0 | Unlicense AND MIT AND ISC | https://github.com/yt-dlp/ejs |
 
 NLTK 3.10.3+uoink.pathsec1 is a local path-policy backport of upstream 3.10.3. Its Apache 2.0 licence is retained. The exact patch, original source and build provenance are in vendor/nltk-pathsec in the source repository. This modification does not qualify model loading or clear unrelated dependency advisories.
 
@@ -209,6 +210,27 @@ the upstream JavaScript implementation. See the
   Shared libraries may be replaced with compatible LGPL FFmpeg 7 libraries
   in `bin/torchcodec`; Uoink does not statically link them into its own code.
 - LGPL text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+## Deno and yt-dlp-ejs (YouTube support, bundled)
+
+- **Component:** Deno 2.9.8, the official `deno-x86_64-pc-windows-msvc.zip`
+  from https://github.com/denoland/deno/releases/tag/v2.9.8 (see build.ps1
+  `$DENO_URL`). Only `deno.exe` is installed, in `bin/`. The macOS and Linux
+  builds do not bundle it.
+- **License:** MIT, Copyright 2018-2026 the Deno authors. The
+  [license text](third-party-notices/deno-2.9.8-MIT-LICENSE.txt) is the
+  repository's LICENSE.md at that tag. The Deno binary also contains other
+  open-source components, listed in the Deno repository at
+  https://github.com/denoland/deno .
+- **Use:** yt-dlp runs YouTube's player code in Deno to read the video's format
+  list. Deno runs that code in its sandbox, with no file or network access.
+  Uoink downloads nothing at runtime for this.
+- **yt-dlp-ejs 0.8.0** (https://github.com/yt-dlp/ejs) is the pip package that
+  holds the scripts yt-dlp hands to Deno. Its own code is under the Unlicense.
+  The wheel also bundles meriyah (ISC) and astring (MIT). The
+  [complete notices](third-party-notices/yt-dlp-ejs-0.8.0-LICENSES.txt) are the
+  wheel's LICENSE file plus the notice header of its `lib.min.js`, unchanged.
 
 
 ## Bundled Whisper model (not a Python package)

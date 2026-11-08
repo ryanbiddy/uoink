@@ -59,6 +59,8 @@ $requiredFiles = @(
     'uoink_store.py',
     'extension\store-config.json',
     'defaults\style_anchors.json',
+    # 3.16.1: yt-dlp's JavaScript runtime for YouTube.
+    'bin\deno.exe',
     # 3.12: the bundled transcription model (scripts\whisper_model_pin.json).
     'models\whisper-bundled\base\model.bin',
     'models\whisper-bundled\base\uoink-model.json'
@@ -71,6 +73,19 @@ foreach ($rf in $requiredFiles) {
     }
 }
 Write-VerifyLog ("bundled files present: {0}" -f ($requiredFiles -join ', '))
+
+# deno.exe must also run. yt-dlp uses it to solve YouTube's player challenges.
+try {
+    $denoOut = & (Join-Path $appDir 'bin\deno.exe') --version 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not ($denoOut -match '^deno \d')) {
+        Write-VerifyLog ("deno --version failed: exit={0}" -f $LASTEXITCODE)
+        exit 24
+    }
+    Write-VerifyLog ("deno ok: {0}" -f (@($denoOut)[0]))
+} catch {
+    Write-VerifyLog ("deno --version could not run: {0}" -f $_.Exception.Message)
+    exit 24
+}
 
 if (-not $ProbeHealth) {
     Write-VerifyLog 'files-only install verification OK; live health probe skipped'
