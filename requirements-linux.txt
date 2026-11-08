@@ -8,7 +8,7 @@ mcp-types==2.3.0
 httpx2==2.16.0
 httpcore2==2.16.0
 truststore==0.10.5
-yt-dlp==2026.10.21
+yt-dlp==2026.10.26
 yt-dlp-ejs==0.8.0
 Pillow==13.0.0
 PyYAML==6.0.3
