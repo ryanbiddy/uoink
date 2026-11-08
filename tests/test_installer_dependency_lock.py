@@ -146,6 +146,7 @@ def test_sdk2_hash_rows_and_version_constraint_export(tmp_path):
         "httpx2": "fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a",
         "httpcore2": "5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f",
         "truststore": "9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c",
+        "yt-dlp-ejs": "79300e5fca7f937a1eeede11f0456862c1b41107ce1d726871e0207424f4bdb4",
     }
     destination = tmp_path / "constraints.txt"
     assert verify.main([str(LOCK), "--write-constraints", str(destination)]) == 0

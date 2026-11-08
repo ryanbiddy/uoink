@@ -123,6 +123,25 @@ def ytdlp_media_args() -> list[str]:
     return ["--ignore-config", "--ffmpeg-location", str(helpers)]
 
 
+def ytdlp_js_runtime_args(bin_dir: Path | None = None) -> list[str]:
+    """Point yt-dlp at the bundled Deno, if the installer shipped one.
+
+    yt-dlp runs YouTube's player code in a JavaScript runtime. The Windows
+    installer puts deno.exe in the bin folder. Without that file we add nothing, and
+    yt-dlp still finds a deno on PATH by itself.
+    """
+    if bin_dir is None:
+        bin_dir = Path(__file__).resolve().parent / "bin"
+    name = "deno.exe" if sys.platform == "win32" else "deno"
+    path = bin_dir / name
+    try:
+        if path.is_symlink() or not path.is_file():
+            return []
+    except OSError:
+        return []
+    return ["--js-runtimes", f"deno:{path}"]
+
+
 def video_format(default: str) -> str:
     if sys.platform != "darwin" or mac_bundle_contents() is None:
         return default

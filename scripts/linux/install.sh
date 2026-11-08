@@ -63,6 +63,10 @@ if [ "$skip_ffmpeg" -eq 0 ]; then
     fi
 fi
 
+if ! command -v deno >/dev/null 2>&1; then
+    printf '%s\n' 'Note: Deno was not found. YouTube capture works best with Deno 2.3 or newer on PATH (https://docs.deno.com/runtime/getting_started/installation/). Without it, yt-dlp may list fewer YouTube formats.' >&2
+fi
+
 mkdir -p -- "$prefix" "$bin_dir"
 prefix=$(cd -- "$prefix" && pwd -P)
 bin_dir=$(cd -- "$bin_dir" && pwd -P)

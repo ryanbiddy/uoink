@@ -6,7 +6,7 @@
 ;
 ; Layout of the installed product (under {app} = %LOCALAPPDATA%\Uoink):
 ;   python\           Python 3.11 embeddable + Lib\site-packages\yt_dlp
-;   bin\              ffmpeg.exe + ffprobe.exe (PATH-prepended by server.py)
+;   bin\              ffmpeg.exe + ffprobe.exe + deno.exe (PATH-prepended by server.py)
 ;   server.py         The local helper server. pythonw.exe runs it (no console).
 ;   index.py          SQLite library-index module imported by server.py.
 ;   migrate_install.py  One-time Yoink->Uoink first-run install migration.
@@ -108,6 +108,8 @@ Source: "staging\third-party-notices\Gemma-Terms-of-Use.txt"; DestDir: "{app}\th
 Source: "staging\third-party-notices\Gemma-Prohibited-Use-Policy.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\antlr4-python3-runtime-4.9.3-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\proxy-tools-0.1.0-UPSTREAM-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\deno-2.9.8-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\yt-dlp-ejs-0.8.0-LICENSES.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\faster-whisper-base-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
