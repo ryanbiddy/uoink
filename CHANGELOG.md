@@ -55,7 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - Make a Short with Zing now works when your library is on a mapped network
-  drive. If the kept media resolved to a `\server\share` path, which Zing
+  drive. If the kept media resolved to a `\\server\share` path, which Zing
   refuses, Uoink now sends the drive-letter path, so Zing reads the kept media
   instead of asking to download it.
 - Failed rows you dismiss in Library stay dismissed after a reload.
