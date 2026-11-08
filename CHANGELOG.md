@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.0] - 2026-11-08
+
 ### Added
 
 - Suite capture (`uoink.capture/1`): a sibling local app can save one link into
@@ -19,11 +21,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   allowlist and podcast consent.
 - Make a Short with Zing. When Zing is installed, a button in the reader hands
   the open item to it and opens Zing's review page. Nothing shows if Zing is
-  not installed. Zing reads the item's kept video through Uoink, so the item
-  needs its media kept first (the `keep_media` setting, short videos only).
-- Make a Short with Zing can now download a video Uoink did not keep, only after
-  you click Download for that item (Uoink shows the site it comes from). The
-  hand-off runs in the background with download progress in the reader.
+  not installed. Zing reads the item's kept video through Uoink (the
+  `keep_media` setting, short videos only). If Uoink did not keep it, Zing
+  downloads it only after you click Download for that item, and Uoink shows
+  the site it comes from. The hand-off runs in the background with download
+  progress in the reader.
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
 
 ### Fixed
 
