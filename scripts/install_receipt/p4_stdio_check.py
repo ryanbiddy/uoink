@@ -464,7 +464,7 @@ def _inventory_finding(route, names, templates, prompts) -> list:
         findings.append(record_product_finding(
             operation="prompts/list",
             input_value={"expected": list(EXPECTED_PROMPTS), "actual": prompts},
-            error="installed prompt inventory differs from the ten shipped prompts",
+            error="installed prompt inventory differs from the eleven shipped prompts",
             route=route,
         ))
     return findings

@@ -59,6 +59,11 @@ PLAYBOOKS = (
     {"name": "repurpose-pack", "description": "Prepare cited content atoms and credited drafts from saved captures.",
      "arguments": [_argument("video_ids", "Comma-separated capture IDs, 1-5.", True),
                    _argument("kinds", "Comma-separated tweet, thread, linkedin, script, newsletter; default tweet,thread.")]},
+    {"name": "thesis-check", "description": "Test a thesis against your saved sources: the assumptions they share, evidence for and against, and what's missing.",
+     "arguments": [_argument("thesis", "The claim to test, 1-500 code points. Unicode Cc control characters are rejected.", True),
+                   _argument("video_ids", "Comma-separated capture IDs, at most 10."),
+                   _argument("topic", "FTS query, at most 512 characters."),
+                   _argument("author", _AUTHOR_DESCRIPTION), _SINCE]},
 )
 _SPECS = {p["name"]: p for p in PLAYBOOKS}
 
@@ -145,8 +150,27 @@ Writing Studio write_tweet/write_blog phase 2 save path owns credit and Voice
 DNA checks. Do not call it from this prompt.
 """.strip()
 
+# Uoink's own playbook; it adapts no upstream document.
+THESIS_INSTRUCTION = """Test the thesis in args.thesis against the supplied
+sources only. Write the thesis back in one line. Then list the assumptions the
+sources make about the market or audience, one per line, each with the keys
+that show it. Then give the evidence that supports the thesis and the evidence
+against it, quoting clips and comments verbatim with their keys, and name the
+strongest counterargument the sources make. Then list the gaps: what the
+library does not cover, and which kinds of source to capture next. Never fill a
+gap from general knowledge; write "not in your library". Clips marked
+relevant matched the thesis text; opening clips are context, not support.
+Comments are single voices, so count distinct comments in this packet and do
+not call them a trend. A library holds what the user chose to save, not a fair
+sample; say so when the evidence leans one way. Write Thesis, Shared
+assumptions (Assumption | Keys), Evidence for, Evidence against, Strongest
+counterargument, Gaps and next captures, and Coverage (captures, clips and
+comments read, and anything omitted).
+""".strip()
+
 _INSTRUCTIONS = dict(zip(_SPECS, (OUTLIER_INSTRUCTION, TRANSCRIPT_INSTRUCTION,
-                                COMMENT_INSTRUCTION, CREATOR_INSTRUCTION, REPURPOSE_INSTRUCTION)))
+                                COMMENT_INSTRUCTION, CREATOR_INSTRUCTION, REPURPOSE_INSTRUCTION,
+                                THESIS_INSTRUCTION)))
 
 
 def _validate(reader, name, arguments):
@@ -188,15 +212,21 @@ def _validate(reader, name, arguments):
             raise _invalid("metrics_unavailable", next_step="choose youtube, tiktok, instagram or reddit")
         if args["platform"] not in _PLATFORMS:
             raise _invalid("bad_enum", field="platform")
-    if name in ("transcript-intel", "comment-mining"):
-        selectors = ("video_ids", "topic", "author") if name == "transcript-intel" else ("video_ids", "author")
+    if "thesis" in args and not 1 <= len(args["thesis"]) <= 500:
+        raise _invalid("bad_thesis", field="thesis", maximum_codepoints=500)
+    if "thesis" in args and not args["thesis"].strip():
+        raise _invalid("bad_thesis", field="thesis")
+    if name in ("transcript-intel", "comment-mining", "thesis-check"):
+        selectors = ("video_ids", "topic", "author") if name != "comment-mining" else ("video_ids", "author")
         if sum(key in args for key in selectors) != 1:
             raise _invalid("exactly_one_selector", allowed_arguments=list(selectors))
     if "topic" in args:
         library_resources.validate_query_text(args["topic"], "topic")
+    if "thesis" in args:
+        library_resources.validate_query_text(args["thesis"], "thesis")
     if "video_ids" in args:
         ids = args["video_ids"].split(",")
-        maximum = {"transcript-intel": 8, "comment-mining": 10, "repurpose-pack": 5}[name]
+        maximum = {"transcript-intel": 8, "comment-mining": 10, "repurpose-pack": 5, "thesis-check": 10}[name]
         if not 1 <= len(ids) <= maximum or any(not i.strip() or len(i.strip()) > 200 for i in ids):
             raise _invalid("bad_video_ids", field="video_ids", maximum=maximum)
         args["video_ids"] = ",".join(dict.fromkeys(i.strip() for i in ids))
@@ -591,6 +621,60 @@ def _clips(scope, item, coverage, *, opening_only=False):
     return result
 
 
+THESIS_CLIPS_PER_CAPTURE = 4
+THESIS_CLIPS_TOTAL = 40
+THESIS_COMMENTS_PER_CAPTURE = 8
+THESIS_COMMENTS_TOTAL = 60
+
+
+def _thesis_clips(scope, items, thesis, coverage):
+    """Attach clips that match the thesis, best first, bounded per capture and in total.
+
+    The thesis goes through the index's own query sanitiser (search_clips
+    builds the FTS expression), the same path a search uses.
+    """
+    if not items or not scope.has_tables(("clips", "clips_fts")):
+        return
+    ids = [i["item_id"] for i in items]
+    reader = scope.reader
+    hits = reader._search_call(scope.op, lambda: scope.index.search_clips(
+        thesis, THESIS_CLIPS_TOTAL * 3, _video_ids=ids, match="forgiving", _snippets=False))
+    scope.check()
+    by_id = {i["item_id"]: i for i in items}
+    seen = {i["item_id"]: {c["seq"] for c in i.get("clips", [])} for i in items}
+    kept = 0
+    for hit in hits:
+        item = by_id.get(hit.get("video_id"))
+        if item is None:
+            continue
+        found = scope.sql("SELECT seq FROM clips WHERE clip_id=?", (hit["clip_id"],))
+        if not found:
+            continue
+        seq = found[0]["seq"]
+        relevant = [c for c in item["clips"] if c.get("relevant")]
+        if seq in seen[item["item_id"]] or len(relevant) >= THESIS_CLIPS_PER_CAPTURE or kept >= THESIS_CLIPS_TOTAL:
+            continue
+        start = _number(hit.get("start"))
+        text = hit.get("text") or ""
+        if start is None or start < 0:
+            continue
+        if not _valid_source_text(text):
+            _drop_invalid_text(coverage, "clips")
+            continue
+        seconds = int(start)
+        key = f"[t:{_key_part(item['item_id'])}@{seconds // 60}:{seconds % 60:02d}]"
+        if any(c["key"] == key for c in item["clips"]):
+            continue
+        seen[item["item_id"]].add(seq)
+        kept += 1
+        item["clips"].append({"key": key, "seq": seq, "start": start, "end": _number(hit.get("end")),
+                              "text": text, "source_deep_link": safe_url(hit.get("source_deep_link")),
+                              "transcript_source": item.get("transcript_source"),
+                              "opening": False, "last": False, "relevant": True})
+    for item in items:
+        item["clips"].sort(key=lambda c: c["start"])
+
+
 def _comments(item, sidecar, limit, seen, coverage):
     source = sidecar.get("comments")
     if not isinstance(source, list):
@@ -695,11 +779,18 @@ def _fits(name, body):
 
 def _trim(scope, name, body):
     _refresh(body)
-    for kind in ("comments", "clips", "metric_rows"):
+    kinds = ("comments", "cards", "clips", "metric_rows") if name == "thesis-check" else ("comments", "clips", "metric_rows")
+    for kind in kinds:
         while not _fits(name, body):
             scope.check()
             candidates = body["items"]
-            if kind in ("comments", "clips"):
+            if kind == "cards":
+                # Thesis clips matter more than the revision-bound card; omit a card as a unit.
+                item = next((i for i in reversed(candidates) if i.get("evidence_card")), None)
+                if item is None:
+                    break
+                count = len(item.pop("evidence_card").get("excerpts", [])) or 1
+            elif kind in ("comments", "clips"):
                 item = next((i for i in reversed(candidates) if i.get(kind)), None)
                 if item is None:
                     # A repurpose evidence card has its own bounded excerpts.
@@ -787,6 +878,19 @@ def _build(scope, reader, name, args):
                 days = sorted(d for i in items if (d := _date(i["upload_date"])) is not None)
                 body["cadence_median_days"] = median([(b - a).days for a, b in zip(days, days[1:])]) if len(days) > 1 else None
         items.extend(extras)
+    elif name == "thesis-check":
+        seen, remaining = {}, THESIS_COMMENTS_TOTAL
+        for row, item in zip(rows, items):
+            take = min(THESIS_COMMENTS_PER_CAPTURE, remaining)
+            _enrich(scope, row, item, sidecars, body["coverage"], comments=take, opening_only=True, seen=seen)
+            remaining -= len(item.get("comments", []))
+            card, error = scope.card(item["item_id"])
+            if error:
+                raise error
+            item["evidence_card"] = card
+        _thesis_clips(scope, items, args["thesis"], body["coverage"])
+        body["caveat"] = ("Comments are the top by likes per capture, a few per capture; "
+                          "the library is what the user chose to save, not a sample.")
     elif name == "comment-mining":
         seen, remaining = {}, 150
         for row, item in zip(rows, items):

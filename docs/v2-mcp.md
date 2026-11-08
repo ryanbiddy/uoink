@@ -1062,9 +1062,9 @@ reader).
 Refusals use the Phase 4 domain envelope (`invalid_request`,
 `resource_not_found`, `resource_deleted`, `revision_unavailable`,
 `resource_too_large`, `library_unavailable`, `deadline_exceeded`,
-`rate_limited`, ...). Stdio also advertises five resource templates and ten
+`rate_limited`, ...). Stdio also advertises five resource templates and eleven
 prompts: the four frozen library prompts (`consult-library`, `evidence-brief`,
-`whats-new`, `reshelve-review`), the five research playbooks below, and
+`whats-new`, `reshelve-review`), the six research playbooks below, and
 `deep-research` (required `question`, 1–500 characters).
 HTTP stays tools-only.
 
@@ -1096,10 +1096,12 @@ accepted by the matching stdio prompt:
 | `comment-mining` | Exactly one of `video_ids` (at most 10), `author`; `lens` is `voc` (default) or `demand`. |
 | `creator-teardown` | Required `author`; optional `platform`. Needs at least 3 saved captures. |
 | `repurpose-pack` | Required `video_ids` (1–5); optional `kinds`: `tweet`, `thread`, `linkedin`, `script`, `newsletter` (default `tweet,thread`). |
+| `thesis-check` | Required `thesis` (1–500 code points); exactly one of `video_ids` (at most 10), `topic`, `author`; optional `since`. |
 
 Pass `video_ids` and `kinds` as comma-separated strings. `author` is 1–200
 code points. Unicode Cc control characters are rejected; format characters
-such as joiners are accepted. `topic` is an FTS query of at most 512 characters.
+such as joiners are accepted. `thesis` is 1–500 code points with the same
+control-character rule. `topic` is an FTS query of at most 512 characters.
 `platform` accepts `youtube`, `tiktok`, `instagram`, `reddit`. `since` is a UTC
 capture date (`YYYY-MM-DD`), never a future date. Unknown arguments are refused
 before storage access; missing or deleted captures are refused.

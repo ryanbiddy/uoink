@@ -98,7 +98,7 @@ def test_legacy_stdio_wire_golden(tmp_path, version, toolset, inventory):
                 assert client.request(request_id, method, params) == {
                     "jsonrpc": "2.0", "id": request_id, "result": GOLDEN[label]}
             assert len(GOLDEN["templates"]["resourceTemplates"]) == 5
-            assert len(GOLDEN["prompts"]["prompts"]) == 10
+            assert len(GOLDEN["prompts"]["prompts"]) == 11
             for label, ok in (("success", True), ("invalid", False)):
                 result = GOLDEN[label]
                 assert "structuredContent" not in result

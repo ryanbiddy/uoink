@@ -3808,7 +3808,7 @@ def _research_playbooks_call(args: Any) -> dict[str, Any]:
 PLAYBOOK_INPUT_SCHEMA: dict[str, Any] = _schema({
     "playbook": {"type": "string", "enum": [
         "outlier-posts", "transcript-intel", "comment-mining",
-        "creator-teardown", "repurpose-pack",
+        "creator-teardown", "repurpose-pack", "thesis-check",
     ]},
     "arguments": {"type": "object", "description": (
         "The selected playbook's prompt arguments, with string values. "
@@ -3817,8 +3817,8 @@ PLAYBOOK_INPUT_SCHEMA: dict[str, Any] = _schema({
 
 PLAYBOOK_INPUT_DESCRIPTION = (
     "Prepare a bounded, cited research packet from the local library for "
-    "outlier-posts, transcript-intel, comment-mining, creator-teardown or "
-    "repurpose-pack. Returns instruction, packet and packet_hash; the client "
+    "outlier-posts, transcript-intel, comment-mining, creator-teardown, "
+    "repurpose-pack or thesis-check. Returns instruction, packet and packet_hash; the client "
     "writes the report. No model, network, capture or settings changes."
 )
 
@@ -4306,7 +4306,7 @@ PARAMETERS = {
     "expected_revision": "Current source revision from source_status; a changed source requires refreshing it.",
     "expected_cursor_revision": "Detection-cursor revision from source_status, required when enabling consent and forbidden when disabling it.",
     "playbook": "Research packet to prepare; its name selects the allowed arguments and required selectors.",
-    "arguments": "String-valued playbook arguments: outlier-posts/creator-teardown require author (optional platform); outlier-posts also accepts since. transcript-intel needs exactly one of video_ids/topic/author (optional since). comment-mining needs video_ids or author and optional lens=voc/demand. repurpose-pack requires video_ids and optional kinds. IDs/kinds are comma-separated strings; ID caps are 8, 10 and 5 respectively. since is a UTC YYYY-MM-DD capture date, not future.",
+    "arguments": "String-valued playbook arguments: outlier-posts/creator-teardown require author (optional platform); outlier-posts also accepts since. transcript-intel needs exactly one of video_ids/topic/author (optional since). comment-mining needs video_ids or author and optional lens=voc/demand. repurpose-pack requires video_ids and optional kinds. thesis-check requires thesis (1-500 characters) plus exactly one of video_ids/topic/author (optional since). IDs/kinds are comma-separated strings; ID caps are 8, 10 and 5 respectively, and 10 for thesis-check. since is a UTC YYYY-MM-DD capture date, not future.",
     "platform": "Remote platform for the discovery search; the mode/platform pair must be supported.",
     "channel_id": "YouTube channel ID beginning UC, as an alternative to handle in creator mode only.",
     "pages": "Maximum discovery pages to request; each planned page consumes one confirmed credit.",

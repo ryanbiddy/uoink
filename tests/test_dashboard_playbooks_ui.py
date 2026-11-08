@@ -29,7 +29,7 @@ def test_research_markup_keyboard_and_theme_contract():
     for mode in ("tweet", "thread", "blog", "script", "research", "newsletter"):
         assert f'name="writingMode" value="{mode}"' in markup
     for name in ("outlier-posts", "transcript-intel", "comment-mining",
-                 "creator-teardown", "repurpose-pack"):
+                 "creator-teardown", "repurpose-pack", "thesis-check"):
         assert f'<option value="{name}">' in markup
     for control in ("researchPlaybook", "researchScope", "researchCaptureSearch",
                     "researchTopic", "researchPrompt", "researchCitedSource", "researchPostMode"):

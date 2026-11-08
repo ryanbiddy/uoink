@@ -188,10 +188,10 @@ that pair uses `read_library_resource(uri)`
 [`docs/claude-code-mcp.md`](claude-code-mcp.md)). That CLI gap is not a
 Desktop-bundle defect.
 
-### Ten prompts
+### Eleven prompts
 
-Stdio advertises ten prompts (`prompts/list` / `prompts/get`): the four Library
-prompts below, five research playbooks and `deep-research`.
+Stdio advertises eleven prompts (`prompts/list` / `prompts/get`): the four Library
+prompts below, six research playbooks and `deep-research`.
 
 | Prompt | Arguments |
 |---|---|
@@ -201,7 +201,7 @@ prompts below, five research playbooks and `deep-research`.
 | `whats-new` | Optional `days`, canonical decimal 1–30, default `7`. |
 | `reshelve-review` | Required `preview_id` (Phase 2 ID grammar). Reads an existing preview; does not call `apply_reshelving`. |
 
-Five research playbooks also appear: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown`, `repurpose-pack`.
+Six research playbooks also appear: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown`, `repurpose-pack`, `thesis-check`.
 
 Prompts return a fixed instruction plus fenced data. They do not call a
 model on the server, start capture, or mutate the queue
@@ -246,7 +246,7 @@ CLI ([protocol-limits note](library/PHASE4-PROTOCOL-LIMITS-2026-09-08.md)
    (the script derives `<VERSION>` from the repo `VERSION` file).
 2. Double-click it in Claude Desktop → accept the install dir → restart.
 3. In Claude, confirm the 99-tool list (the complete shared registry), the five `uoink://library/v1/`
-   templates, and the ten prompts (including `consult-library`, `evidence-brief`,
+   templates, and the eleven prompts (including `consult-library`, `evidence-brief`,
    `whats-new`, `reshelve-review`). A smoke call such as
    `list_recent_uoinks` still works. Bounded library reads
    (`search_library` / `get_library_item`) do not require the resident HTTP

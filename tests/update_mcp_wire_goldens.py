@@ -233,7 +233,7 @@ def main():
     target = Path(__file__).parent / "fixtures/mcp_wire/sdk1.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(golden, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Wrote {target}: 99 tools, 5 templates, 10 prompts, stdio and HTTP baseline")
+    print(f"Wrote {target}: 99 tools, 5 templates, 11 prompts, stdio and HTTP baseline")
 
 
 if __name__ == "__main__":

@@ -211,6 +211,18 @@ class NoDataReader:
     ("repurpose-pack", {"video_ids": "a,b,c,d,e,f"}, "video_ids"),
     ("repurpose-pack", {"video_ids": "a,,b"}, "video_ids"),
     ("repurpose-pack", {"video_ids": "a", "kinds": "blog"}, "kinds"),
+    ("thesis-check", {"video_ids": "a"}, "thesis"),
+    ("thesis-check", {"thesis": "x" * 501, "video_ids": "a"}, "thesis"),
+    ("thesis-check", {"thesis": "", "video_ids": "a"}, "thesis"),
+    ("thesis-check", {"thesis": "a\ncommand", "video_ids": "a"}, "thesis"),
+    ("thesis-check", {"thesis": "claim"}, None),
+    ("thesis-check", {"thesis": "claim", "video_ids": "a", "topic": "tools"}, None),
+    ("thesis-check", {"thesis": "claim", "topic": "tools", "author": "a"}, None),
+    ("thesis-check", {"thesis": "claim", "video_ids": ",".join(str(i) for i in range(11))}, "video_ids"),
+    ("thesis-check", {"thesis": "claim", "video_ids": "a,,b"}, "video_ids"),
+    ("thesis-check", {"thesis": "claim", "topic": "a" * 513}, "topic"),
+    ("thesis-check", {"thesis": "claim", "author": "a", "since": "2026-10-16"}, "since"),
+    ("thesis-check", {"thesis": 5, "video_ids": "a"}, "thesis"),
 ])
 def test_argument_refusals_before_data_access(name, args, field):
     with pytest.raises(ResourceError) as exc:
@@ -324,7 +336,8 @@ def test_fence_fixed_instructions_and_read_only_packets(library):
     before = "\n".join(conn.iterdump())
     cases = {"outlier-posts": {"author": "fixture"}, "transcript-intel": {"video_ids": "a"},
              "comment-mining": {"video_ids": "a"}, "creator-teardown": {"author": "fixture"},
-             "repurpose-pack": {"video_ids": "a"}}
+             "repurpose-pack": {"video_ids": "a"},
+             "thesis-check": {"thesis": "Quotes are worth saving", "video_ids": "a"}}
     for name, args in cases.items():
         prompt = playbooks.get_prompt(reader, name, args)
         assert [m["role"] for m in prompt["messages"]] == ["user", "user"]
@@ -1141,3 +1154,109 @@ def test_adapted_notice_regeneration_exact_license_and_build_staging(tmp_path, m
     assert "'third-party-notices\\" + filename + "'" in build
     vendor = (ROOT / "vendor/scrapecreators-research-skills/VENDOR.md").read_text(encoding="utf8")
     assert "64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2" in vendor
+
+THESIS = "Small agencies will pay for a local transcript library"
+
+
+def thesis_library(library, count=3, clips=6, comments=True):
+    reader, seed, conn = library
+    for n in range(count):
+        vid = f"t{n}"
+        seed(vid, title=f"Agency talk {n}", clips=0, sidecar={"comments": [
+            {"text": f"I wish there was a local transcript library {n}", "like_count": 9, "id": f"c{n}"},
+            {"text": f"Too expensive for a small agency {n}?", "like_count": 3, "id": f"d{n}"}] if comments else []})
+        for seq in range(clips):
+            text = (f"Agencies pay for a transcript library when it is local, note {n}-{seq}." if seq % 2
+                    else f"Filler line {n}-{seq} about weather.")
+            conn.execute("INSERT INTO clips(video_id,seq,start,end,text,source_deep_link) VALUES (?,?,?,?,?,?)",
+                         (vid, seq, seq * 60, seq * 60 + 45, text, f"https://example.com/{vid}?t={seq * 60}"))
+    conn.commit()
+    return reader
+
+
+def test_thesis_check_packet_has_sections_keys_and_relevant_clips(library):
+    reader = thesis_library(library)
+    body = playbooks.build_packet(reader, "thesis-check", {"thesis": THESIS, "topic": "agency"})
+    assert body["prompt"] == "thesis-check" and body["args"]["thesis"] == THESIS
+    items = captures(body)
+    assert set(items) == {"t0", "t1", "t2"}
+    for vid, item in items.items():
+        assert item["key"] == f"[cap:{vid}]"
+        assert item["evidence_card"]["title"] == f"Agency talk {vid[1]}"
+        relevant = [c for c in item["clips"] if c.get("relevant")]
+        assert 1 <= len(relevant) <= playbooks.THESIS_CLIPS_PER_CAPTURE
+        assert all("transcript library" in c["text"] for c in relevant)
+        assert any(c["opening"] for c in item["clips"])  # context, not marked relevant
+        assert [c["start"] for c in item["clips"]] == sorted(c["start"] for c in item["clips"])
+        assert 1 <= len(item["comments"]) <= playbooks.THESIS_COMMENTS_PER_CAPTURE
+        for clip in item["clips"]:
+            assert body["refs"][clip["key"]]["kind"] == "clips" and clip["key"].startswith(f"[t:{vid}@")
+        for comment in item["comments"]:
+            assert comment["key"] in body["refs"] and comment["key"].startswith(f"[cm:{vid}:")
+    assert "[cap:t0]" in body["refs"]
+    assert body["coverage"]["matched"] == 3 and body["coverage"]["included"] == 3
+    assert body["packet_hash"] and body["refs"] == playbooks._refs(body["items"])
+    prompt = playbooks.get_prompt(reader, "thesis-check", {"thesis": THESIS, "video_ids": "t0,t1"})
+    instruction, data = [m["content"]["text"] for m in prompt["messages"]]
+    assert instruction.endswith(playbooks._RULES)
+    flat = " ".join(instruction.split())
+    assert '"not in your library"' in flat and "Strongest counterargument" in flat
+    assert THESIS in data
+    tool = playbooks.get_playbook_input(reader, "thesis-check", {"thesis": THESIS, "video_ids": "t0,t1"})
+    assert tool["ok"] and set(captures(tool["packet"])) == {"t0", "t1"}
+
+
+def test_thesis_check_selectors_and_since(library):
+    reader = thesis_library(library)
+    library[1]("other", author="someone else", clips=2, captured="2026-09-01T12:00:00")
+    by_author = playbooks.build_packet(reader, "thesis-check", {"thesis": THESIS, "author": "fixture"})
+    assert set(captures(by_author)) == {"t0", "t1", "t2"}
+    assert "someone else" not in json.dumps(by_author)
+    recent = playbooks.build_packet(reader, "thesis-check",
+                                    {"thesis": THESIS, "author": "someone else", "since": "2026-10-01"})
+    assert recent["items"] == [] and recent["coverage"]["matched"] == 0
+    with pytest.raises(ResourceError) as exc:
+        playbooks.build_packet(reader, "thesis-check", {"thesis": THESIS, "video_ids": "t0,nope"})
+    assert exc.value.details["reason"] == "unknown_or_deleted_video_ids"
+
+
+def test_thesis_check_bounds_hold_and_report_coverage(library):
+    reader = thesis_library(library, count=10, clips=30)
+    ids = ",".join(f"t{n}" for n in range(10))
+    body = playbooks.build_packet(reader, "thesis-check", {"thesis": THESIS, "video_ids": ids})
+    clips = [c for i in body["items"] for c in i.get("clips", []) if c.get("relevant")]
+    comments = [c for i in body["items"] for c in i.get("comments", [])]
+    assert len(clips) <= playbooks.THESIS_CLIPS_TOTAL and len(comments) <= playbooks.THESIS_COMMENTS_TOTAL
+    assert all(len(i.get("clips", [])) <= 1 + playbooks.THESIS_CLIPS_PER_CAPTURE for i in body["items"])
+    assert library_resources.wire_bytes(playbooks._result("thesis-check", body)) <= 65536 - 256
+    assert body["coverage"]["matched"] == 10 and "budget_drops" in body["coverage"]
+    assert set(body["refs"]) == set(playbooks._refs(body["items"]))
+
+
+def test_thesis_check_trims_comments_then_cards_before_clips(library, monkeypatch):
+    reader = thesis_library(library, count=10, clips=8)
+    limits = {**library_resources.LIMITS, "max_response_bytes": 30000}
+    monkeypatch.setattr(library_resources, "LIMITS", limits)
+    monkeypatch.setattr(playbooks, "LIMITS", limits)
+    ids = ",".join(f"t{n}" for n in range(10))
+    body = playbooks.build_packet(reader, "thesis-check", {"thesis": THESIS, "video_ids": ids})
+    drops = body["coverage"]["budget_drops"]
+    assert drops.get("comments", 0) > 0 and drops.get("cards", 0) > 0
+    if "clips" in drops:
+        assert not any(i.get("evidence_card") for i in body["items"])
+    assert body["coverage"]["dropped_for_budget"] == sum(drops.values())
+
+
+def test_thesis_check_is_read_only(library):
+    reader = thesis_library(library, count=1, clips=4)
+    before = "\n".join(library[2].iterdump())
+    body = playbooks.build_packet(reader, "thesis-check", {"thesis": THESIS, "video_ids": "t0"})
+    assert body["items"]
+    assert "\n".join(library[2].iterdump()) == before
+
+
+def test_thesis_with_fts_syntax_is_searched_safely(library):
+    reader = thesis_library(library, count=1)
+    body = playbooks.build_packet(reader, "thesis-check", {
+        "thesis": '"transcript" AND NEAR(library) OR * ) (', "video_ids": "t0"})
+    assert any(c.get("relevant") for c in body["items"][0]["clips"])

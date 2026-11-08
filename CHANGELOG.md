@@ -21,6 +21,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the Uoink data folder. The install check runs `deno --version`, and the
   self-check (`js_runtime`) reports it. On Linux and macOS, yt-dlp uses a Deno
   2.3 or newer already on PATH.
+- Thesis check, a sixth research playbook. Give it a claim and a selection of
+  saved captures (or a topic or creator), and your AI gets a cited packet of
+  the clips that match the claim, the opening of each source and the top
+  comments. It asks for the assumptions the sources share, the evidence for and
+  against, and what your library does not cover, with a citation on every
+  point (clip citations carry the timestamp). It is a prompt and a
+  `get_playbook_input` playbook, and it is also in the Generate research list.
+  No new tool: still 99 tools by default.
 
 ### Changed
 

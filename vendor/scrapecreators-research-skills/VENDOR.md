@@ -1,6 +1,7 @@
 # ScrapeCreators research skills — design reference
 
-Uoink's five local research playbooks adapt documentation from
+Five of Uoink's six local research playbooks (all but `thesis-check`, which is
+Uoink's own) adapt documentation from
 [ScrapeCreators/social-media-research-skills](https://github.com/ScrapeCreators/social-media-research-skills).
 
 - Pinned commit: `64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2` (2026-08-26).

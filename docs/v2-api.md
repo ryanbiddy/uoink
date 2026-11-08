@@ -1661,7 +1661,7 @@ and `discover_candidates` / `queue_discovered` add opt-in discovery; `import_lis
 `get_playbook_input` is available through `/tools/get_playbook_input` and MCP
 `tools/call`, with `{"playbook":"comment-mining","arguments":{"author":"Example creator","lens":"demand"}}`.
 It returns `{ok, playbook, instruction, packet, packet_hash}` without calling a
-model or the network. Errors use the Phase 4 structured envelope. Its five
+model or the network. Errors use the Phase 4 structured envelope. Its six
 playbooks and string arguments are documented in
 [the MCP reference](v2-mcp.md#get_playbook_input). Native playbook prompts are
 stdio-only; HTTP clients use this tool. The existing token gate still applies.
