@@ -222,6 +222,18 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
   It records usage as `playbook_<name>` and returns draft text with citation
   warnings. Saving is a separate `POST /writing/draft` action and warnings do
   not block it. Local MCP packet reads never call Anthropic.
+- Suite capture (`uoink.capture/1`): `POST /api/suite/v1/capture` and
+  `GET /api/suite/v1/capture/<job_id>`. A sibling local app uses it to save one
+  link. It uses the same helper token and header as every route here, so a
+  missing or wrong token gets the usual 403, and it answers on the loopback
+  address only, on the isolated install's own port when one is in use. It adds
+  no new token and no new way to reach the network: the link goes through the
+  same capture tools as `uoink capture`. A URL already in the library returns
+  `exists` and is never recaptured. Consent is not bypassed: a web page whose
+  site is not on the page allowlist, and any podcast feed, return
+  `consent_required` with plain words about what to allow in Uoink, and nothing
+  is fetched or registered. Only one video capture started this way runs at a
+  time (a second gets `busy`).
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
 - MCP HTTP JSON-RPC helper: `GET /mcp/v1/config`, `GET /mcp/v1/sse`, `POST /mcp/v1`, `POST /mcp/v1/initialize`, `POST /mcp/v1/tools/list`, `POST /mcp/v1/tools/call`
 - Living Library user-intent confirmation: `POST /library/intent`. Mints the five-minute `user_intent_token` that `pin_shelf` and `undo_library_apply` require. Beyond the token it enforces an origin gate (`Origin`, when present, must be a loopback `http` origin on the helper's own port; `Sec-Fetch-Site`, when present, must be `same-origin` or `none`; extension and web origins are refused), strict JSON decoding (no NaN, Infinity or duplicate keys) and a 30 requests/minute limit. No registry tool, MCP client or client-supplied actor string can mint this token; it exists so a pin or undo is a user's own confirmation of a displayed delta.

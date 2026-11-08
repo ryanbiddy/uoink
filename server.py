@@ -8893,6 +8893,253 @@ def _is_valid_job_id(s: str) -> bool:
     return bool(s) and bool(_JOB_ID_RE.match(s))
 
 
+# ---- uoink.capture/1: suite capture route --------------------------------
+# A sibling local app asks Uoink to save one source link. This reuses
+# _classify_capture_url (the /detect brain) and the same registry capture
+# tools `uoink capture` and the relay use, so capture logic lives in one place.
+_SUITE_CAPTURE_CONTRACT = "uoink.capture"
+_SUITE_CAPTURE_MEDIA_SOURCES = frozenset(
+    {"youtube_video", "youtube_playlist", "short_video", "x_video"})
+# Sources whose capture can run for minutes: started on a worker thread.
+_SUITE_CAPTURE_BACKGROUND_SOURCES = frozenset(
+    {"youtube_video", "short_video", "x_video"})
+_SUITE_CAPTURE_PAGE_SOURCES = frozenset({"web_page", "x_article"})
+_SUITE_CAPTURE_JOB_CAP = 200
+_suite_capture_lock = threading.Lock()
+_suite_capture_jobs: dict[str, dict] = {}
+
+
+def _suite_capture_error(status: int, code: str, message: str) -> tuple[int, dict]:
+    return status, {"ok": False, "contract": _SUITE_CAPTURE_CONTRACT,
+                    "version": 1, "error": code, "message": message}
+
+
+def _suite_capture_ok(status: str, source: str, canonical: str, *,
+                      item_id=None, job_id=None, message=None) -> tuple[int, dict]:
+    payload = {
+        "ok": True, "contract": _SUITE_CAPTURE_CONTRACT, "version": 1,
+        "status": status, "source": source, "item_id": item_id,
+        "job_id": job_id, "canonical": canonical,
+        "item_uri": f"uoink://item/{item_id}" if item_id else None,
+    }
+    if message:
+        payload["message"] = message
+    return (202 if status == "queued" else 200), payload
+
+
+def _suite_saved_video(idx, canonical: str) -> dict | None:
+    """A live saved video, matched by the identity single-video capture uses."""
+    parsed = urlparse(canonical)
+    video_id = (parse_qs(parsed.query).get("v") or [None])[0]
+    if video_id:
+        row = idx.get_yoink(video_id)
+        if row and not row.get("deleted_at"):
+            return row
+    try:
+        wanted = _video_capture_source(canonical)
+    except ValueError:
+        return None
+    for saved in idx.list_capture_sources():
+        try:
+            metadata = json.loads(saved.get("metadata_json") or "{}")
+        except (ValueError, TypeError):
+            continue
+        if not isinstance(metadata, dict):
+            continue
+        for key in ("url", "source_url", "webpage_url", "original_url"):
+            value = metadata.get(key)
+            if isinstance(value, str) and value.strip() \
+                    and _video_capture_source(value) == wanted:
+                row = idx.get_yoink(saved["video_id"])
+                if row and not row.get("deleted_at"):
+                    return row
+    return None
+
+
+def _suite_capture_find_saved(source: str, canonical: str) -> dict | None:
+    """The library row already holding this canonical URL, or None. Same
+    identity the library and research "Use saved" use; never fetches."""
+    if source in ("youtube_playlist", "podcast_feed"):
+        return None
+    idx = _get_index()
+    if source in ("youtube_video", "short_video"):
+        return _suite_saved_video(idx, canonical)
+    if source == "x_video":
+        return (_research_saved_page(idx, canonical)
+                or _suite_saved_video(idx, canonical))
+    return _research_saved_page(idx, canonical)
+
+
+def _suite_capture_row_id(row: dict | None):
+    return row.get("video_id") if isinstance(row, dict) else None
+
+
+def _suite_capture_tool_error(result) -> str:
+    error = result.get("error") if isinstance(result, dict) else None
+    if isinstance(error, dict):
+        error = error.get("message")
+    if isinstance(error, str) and error.strip():
+        return _sanitize_error(error.strip())
+    return "Uoink could not save this link."
+
+
+def _suite_capture_run_tool(name: str, key: str, canonical: str) -> dict:
+    try:
+        result = _mcp_tools_module().call_tool(name, {key: canonical})
+    except Exception as exc:
+        log.warning("suite capture: %s raised %s", name, type(exc).__name__)
+        return {"ok": False, "error": "Uoink could not save this link."}
+    return result if isinstance(result, dict) else {
+        "ok": False, "error": "Uoink could not save this link."}
+
+
+def _suite_capture_settle(job_id: str, source: str, canonical: str, name: str, key: str):
+    result = _suite_capture_run_tool(name, key, canonical)
+    item_id = None
+    if result.get("ok") is True:
+        try:
+            item_id = _suite_capture_row_id(_suite_capture_find_saved(source, canonical))
+        except Exception:
+            item_id = None
+    with _suite_capture_lock:
+        job = _suite_capture_jobs.get(job_id)
+        if job is None:
+            return
+        if result.get("ok") is True:
+            job.update(status="saved", item_id=item_id)
+        else:
+            job.update(status="error", message=_suite_capture_tool_error(result))
+
+
+def _suite_capture_prune_locked() -> None:
+    while len(_suite_capture_jobs) >= _SUITE_CAPTURE_JOB_CAP:
+        done = [k for k, v in _suite_capture_jobs.items() if v["status"] != "queued"]
+        if not done:
+            return
+        _suite_capture_jobs.pop(done[0], None)
+
+
+def _suite_capture_start(body) -> tuple[int, dict]:
+    """POST /api/suite/v1/capture. Returns (http status, payload)."""
+    if not isinstance(body, dict):
+        return _suite_capture_error(400, "bad_request", "Send a JSON object with a url.")
+    url = body.get("url")
+    if not isinstance(url, str) or not url.strip():
+        return _suite_capture_error(400, "bad_request", "url must be a non-empty string.")
+    hint = body.get("source_hint")
+    if hint is not None and (not isinstance(hint, str) or hint not in _CAPTURE_SOURCES):
+        return _suite_capture_error(
+            400, "bad_request", "source_hint must be one of: "
+            + ", ".join(sorted(_CAPTURE_SOURCES)) + ".")
+    route = _classify_capture_url(url)
+    source = route.get("source")
+    tools = _capture_tools()
+    if not route.get("ok") or source not in tools:
+        return _suite_capture_error(
+            400, "unsupported_url", "Uoink can't read this link. YouTube, X, "
+            "Reddit threads and most web pages work.")
+    canonical = route["canonical"]
+
+    # Already saved: never recapture.
+    try:
+        row = _suite_capture_find_saved(source, canonical)
+    except Exception:
+        log.exception("suite capture: library lookup failed")
+        row = None
+    if row:
+        return _suite_capture_ok("exists", source, canonical,
+                                 item_id=_suite_capture_row_id(row))
+
+    # Consent is never bypassed.
+    if source == "podcast_feed":
+        return _suite_capture_error(
+            409, "consent_required", "Podcast feeds are standing sources. Add "
+            "this feed in Uoink under Podcasts and allow it there.")
+    if source in _SUITE_CAPTURE_PAGE_SOURCES \
+            and not page_extractor.host_is_allowed(_get_index(), canonical):
+        host = urlparse(canonical).hostname or "this site"
+        return _suite_capture_error(
+            409, "consent_required",
+            f"Allow {host} in Uoink under Settings, Allowed sites, then try again.")
+    if source in _SUITE_CAPTURE_MEDIA_SOURCES:
+        refusal = _platform.capability_refusal(_platform.media_capability())
+        if refusal is not None:
+            return _suite_capture_error(
+                501, "media_unavailable",
+                refusal.get("reason") or "Video capture isn't available on this install.")
+
+    name, key = tools[source]
+    if source == "youtube_playlist":
+        playlist, err, status = _fetch_playlist_preview(canonical)
+        if err:
+            if status == 501:
+                return _suite_capture_error(501, "media_unavailable", err)
+            return _suite_capture_error(
+                400 if status < 500 else 502,
+                "unsupported_url" if status < 500 else "capture_failed",
+                "Uoink could not read this playlist.")
+        job_id, _public = _create_playlist_job(playlist, 30)
+        return _suite_capture_ok("queued", source, canonical, job_id=job_id)
+
+    if source in _SUITE_CAPTURE_BACKGROUND_SOURCES:
+        with _suite_capture_lock:
+            if any(j["status"] == "queued" for j in _suite_capture_jobs.values()):
+                return _suite_capture_error(
+                    429, "busy", "Uoink is already saving a link for another "
+                    "app. Try again in a minute.")
+            _suite_capture_prune_locked()
+            job_id = _make_job_id()
+            _suite_capture_jobs[job_id] = {
+                "status": "queued", "source": source, "canonical": canonical,
+                "item_id": None, "message": None}
+        threading.Thread(
+            target=_suite_capture_settle,
+            args=(job_id, source, canonical, name, key),
+            name="suite-capture", daemon=True).start()
+        return _suite_capture_ok("queued", source, canonical, job_id=job_id)
+
+    result = _suite_capture_run_tool(name, key, canonical)
+    if result.get("ok") is not True:
+        if result.get("code") == "host_not_allowed":
+            host = urlparse(canonical).hostname or "this site"
+            return _suite_capture_error(
+                409, "consent_required",
+                f"Allow {host} in Uoink under Settings, Allowed sites, then try again.")
+        return _suite_capture_error(502, "capture_failed", _suite_capture_tool_error(result))
+    item_id = result.get("video_id")
+    if not item_id:
+        try:
+            item_id = _suite_capture_row_id(_suite_capture_find_saved(source, canonical))
+        except Exception:
+            item_id = None
+    return _suite_capture_ok("saved", source, canonical, item_id=item_id)
+
+
+def _suite_capture_job_status(job_id: str) -> tuple[int, dict]:
+    """GET /api/suite/v1/capture/<job_id>. Returns (http status, payload)."""
+    if not _is_valid_job_id(job_id):
+        return _suite_capture_error(400, "bad_request", "That job id is not valid.")
+    with _suite_capture_lock:
+        job = dict(_suite_capture_jobs.get(job_id) or {})
+    if job:
+        return _suite_capture_ok(
+            job["status"], job["source"], job["canonical"],
+            item_id=job["item_id"], job_id=job_id,
+            message=job["message"] if job["status"] == "error" else None)
+    public = _get_public_job(job_id)
+    if not public:
+        return _suite_capture_error(404, "not_found", "Uoink has no capture job with that id.")
+    state = public.get("state")
+    mapped = ("saved" if state == "completed"
+              else "error" if state in ("failed", "cancelled") else "queued")
+    message = None
+    if mapped == "error":
+        message = _sanitize_error(str(public.get("error") or "The capture did not finish."))
+    return _suite_capture_ok(
+        mapped, "youtube_playlist" if public.get("kind") == "playlist" else "youtube_video",
+        public.get("source_url") or "", job_id=job_id, message=message)
+
+
 INDEX_FILENAME = "_all-uoinks-index.md"
 # Pre-rename master-index filename. Still read so the incremental updater can
 # pick up (and supersede) a Yoink-era index that hasn't been regenerated yet.
@@ -16381,6 +16628,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_auto_uoink_status()
         if bare == "/resume":
             return self._handle_resume()
+        if bare.startswith("/api/suite/v1/capture/"):
+            return self._handle_suite_capture_job(bare)
         if bare == "/api/corpus/v1/search":
             return self._handle_corpus_v1_search()
         if bare == "/api/corpus/v1/facets":
@@ -16741,6 +16990,26 @@ class Handler(BaseHTTPRequestHandler):
             result["needs_allow"] = not page_extractor.host_is_allowed(
                 _get_index(), result["canonical"])
         self._send_json(200, result)
+
+    def _handle_suite_capture(self, body):
+        """POST /api/suite/v1/capture -- uoink.capture/1. Token-gated by
+        do_POST like every route; loopback only. Saves one link through the
+        existing capture tools, never recaptures a saved URL, never skips
+        the page allowlist or source consent."""
+        try:
+            status, payload = _suite_capture_start(body)
+        except Exception:
+            log.exception("/api/suite/v1/capture failed")
+            status, payload = _suite_capture_error(
+                502, "capture_failed", "Uoink could not save this link.")
+        return self._send_json(status, payload)
+
+    def _handle_suite_capture_job(self, bare: str):
+        """GET /api/suite/v1/capture/<job_id> -- uoink.capture/1 job lookup."""
+        from urllib.parse import unquote
+        job_id = unquote(bare[len("/api/suite/v1/capture/"):]).strip("/")
+        status, payload = _suite_capture_job_status(job_id)
+        return self._send_json(status, payload)
 
     # ---- v2.5 S2 engagement memory -----------------------------------------
     # Pure local instrumentation. value_score formula + decay live on the
@@ -21423,6 +21692,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_engagement_log(body)
         if bare == "/api/engagement/v1/events":
             return self._handle_suite_engagement_ingest(body)
+        if bare == "/api/suite/v1/capture":
+            return self._handle_suite_capture(body)
         if bare == "/taste/anchors":
             return self._handle_taste_anchors_post(body)
         if bare == "/channels":

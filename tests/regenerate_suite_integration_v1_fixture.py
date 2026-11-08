@@ -199,6 +199,7 @@ def generate_fixture() -> dict:
                 "ryan.suite.health/1",
                 "uoink.media.handoff/1",
                 "uoink.engagement.ingest/1",
+                "uoink.capture/1",
             ],
             "provider": "Uoink",
             "regenerate": (
