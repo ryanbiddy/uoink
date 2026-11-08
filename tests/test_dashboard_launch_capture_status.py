@@ -292,7 +292,7 @@ def test_unavailable_video_is_not_misclassified_as_ffmpeg_failure(message, plain
 ])
 @pytest.mark.parametrize(("message", "expected"), [
     ("HTTP Error 429: Too Many Requests", "YouTube kept refusing this one. Give it a few minutes, then retry it yourself."),
-    ("Sign in to continue", "YouTube wouldn't hand this one over without a login. Retry with cookies?"),
+    ("Sign in to continue", "YouTube wouldn't hand this one over without a login. Wait a few minutes, then retry it."),
     ("Members-only video", "YouTube kept this one behind members-only access."),
     ("This video is private", "This video is private or unavailable in your region."),
     ("Video is unavailable", "This video is unavailable."),
@@ -322,14 +322,14 @@ def test_failure_translation_keeps_extractor_or_url_context_without_exposing_it(
         detail: document.getElementById('captureFailureError').textContent}};
     })()""" % json.dumps(diagnostic))
     for surface in result.values():
-        assert surface["reason"] == "YouTube wouldn't hand this one over without a login. Retry with cookies?"
+        assert surface["reason"] == "YouTube wouldn't hand this one over without a login. Wait a few minutes, then retry it."
         assert "fixture-secret" not in surface["detail"]
         assert "https://" not in surface["detail"]
 
 
 @pytest.mark.parametrize("source", ["YouTube", "X", "Vimeo"])
 def test_error_only_server_summary_keeps_source_name(source):
-    summary = f"{source} wouldn't hand this one over without a login. Retry with cookies?"
+    summary = f"{source} wouldn't hand this one over without a login. Wait a few minutes, then retry it."
     result = run_js("""(() => {
       const summary = %s;
       return {activity: activityErrorMessage(summary, 'media', {terminal: true}),
@@ -353,7 +353,7 @@ def test_local_failure_uses_run_url_when_helper_omits_source_context():
       failLibraryRun(run, {data: {error_detail: 'ERROR: Sign in to continue'}});
       return run.reason;
     })()""")
-    assert result == "YouTube wouldn't hand this one over without a login. Retry with cookies?"
+    assert result == "YouTube wouldn't hand this one over without a login. Wait a few minutes, then retry it."
 
 
 @pytest.mark.parametrize("message", ["This video is private", "This video is blocked in your region"])
@@ -367,3 +367,35 @@ def test_private_or_region_error_survives_server_to_dashboard_translation(messag
         library: libraryFailureCopy({error: summary, failure_phase: 'media'}).reason};
     })()""" % json.dumps(summary))
     assert result == {"activity": expected, "library": expected}
+
+
+def test_bot_check_copy_survives_retranslation_and_queue_row_reads_paused():
+    summary = "YouTube asked this network for a bot check. That usually clears within an hour, then retry this one."
+    result = run_js("""(() => {
+      const summary = %s;
+      state.jobs = [];
+      state.queue = {pending: [{pending_id: 7, url: 'https://youtu.be/abcdefghijk', status: 'pending',
+        attempt_count: 1, retry_after: '2026-11-07T15:40:00',
+        last_error: "youtube_bot_check: ERROR: [youtube] abcdefghijk: Sign in to confirm you're not a bot"}]};
+      const row = libraryCaptureItems().find((item) => item.key === 'pending:7');
+      return {fresh: translateMachineMessage("ERROR: [youtube] abcdefghijk: Sign in to confirm you're not a bot", {url: 'https://youtu.be/abcdefghijk'}),
+        again: activityErrorMessage(summary, 'metadata', {terminal: true}),
+        word: row.word, tone: row.tone, detail: row.detail};
+    })()""" % json.dumps(summary))
+    assert result["fresh"] == summary
+    assert result["again"] == summary
+    assert (result["word"], result["tone"]) == ("Paused", "wait")
+    assert result["detail"].startswith("YouTube asked for a bot check. Retries ")
+
+
+def test_library_dismissals_survive_a_reload():
+    result = run_js("""(() => {
+      const store = {};
+      localStorage.getItem = (key) => (key in store ? store[key] : null);
+      localStorage.setItem = (key, value) => { store[key] = String(value); };
+      const first = persistentDismissedSet('uoink.test.dismissed', 2);
+      first.add('job:a'); first.add('job:b'); first.add('job:c');
+      const reloaded = persistentDismissedSet('uoink.test.dismissed', 2);
+      return [reloaded.has('job:a'), reloaded.has('job:b'), reloaded.has('job:c')];
+    })()""")
+    assert result == [False, True, True]

@@ -282,3 +282,75 @@ def test_dashboard_notice_and_item_line():
         ["node", str(ROOT / "tests/js/rehaul_library_reader_test.mjs"), "botcheck"],
         capture_output=True, text=True, timeout=60)
     assert done.returncode == 0, done.stdout + done.stderr
+
+
+# ---- A bot check pauses the capture in the retry queue (F38) ---------------
+from datetime import datetime, timedelta  # noqa: E402
+
+import index  # noqa: E402
+from tests.test_rate_limit_backoff import retry_queue  # noqa: E402,F401
+
+BOT_CHECK_ERROR = subprocess.CalledProcessError(1, ["yt-dlp"], stderr=BOT_CHECK.encode())
+
+
+def _bot_check_row(state):
+    rows = state.index.list_pending(include_terminal=True)
+    assert len(rows) == 1
+    return rows[0]
+
+
+def test_bot_check_queues_the_capture_instead_of_failing(retry_queue):
+    state = retry_queue
+    state.extract.side_effect = BOT_CHECK_ERROR
+    state.handler._handle_extract({"url": URL, "interval": 30})
+    status, result = state.handler.response
+    assert status == 200 and result["ok"] is True and result["queued"] is True
+    assert result["reason"] == "youtube_bot_check"
+    row = _bot_check_row(state)
+    assert row["status"] == "pending"
+    assert row["last_error"].startswith("youtube_bot_check: ERROR:")
+    assert datetime.fromisoformat(row["retry_after"]) == state.now + timedelta(minutes=30)
+    state.record_job.assert_not_called()
+
+
+def test_bot_check_retry_waits_out_the_cooldown(retry_queue, clock):
+    state = retry_queue
+    state.extract.side_effect = BOT_CHECK_ERROR
+    state.handler._handle_extract({"url": URL, "interval": 30})
+    row = _bot_check_row(state)
+    # A cooldown longer than the backoff step sets the retry time.
+    server._youtube_bot_check_until = clock.now + 90 * MINUTE
+    state.now = datetime.fromisoformat(row["retry_after"])
+    assert server._retry_pending_one() is True
+    row = _bot_check_row(state)
+    assert row["status"] == "pending" and row["attempt_count"] == 1
+    assert datetime.fromisoformat(row["retry_after"]) == state.now + timedelta(minutes=90)
+    state.record_job.assert_not_called()
+
+
+def test_bot_check_goes_terminal_with_bot_check_wording(retry_queue):
+    state = retry_queue
+    state.extract.side_effect = BOT_CHECK_ERROR
+    state.handler._handle_extract({"url": URL, "interval": 30})
+    for _ in range(index._PENDING_MAX_ATTEMPTS):
+        state.now = datetime.fromisoformat(_bot_check_row(state)["retry_after"])
+        assert server._retry_pending_one() is True
+    assert _bot_check_row(state)["status"] == "failed"
+    kwargs = state.record_job.call_args.kwargs
+    assert kwargs["retry_exhausted"] is True
+    assert "bot check" in kwargs["error_detail"] and "429" not in kwargs["error_detail"]
+
+
+def test_bot_check_copy_never_offers_cookies():
+    text = server._plain_error_from_text(BOT_CHECK)
+    assert text == ("YouTube asked this network for a bot check. That usually "
+                    "clears within an hour, then retry this one.")
+    login = server._plain_error_from_text("ERROR: [youtube] x: Sign in to continue")
+    for copy in (text, login):
+        assert "cookie" not in copy.lower()
+
+
+def test_dashboard_has_no_cookie_retry_and_persists_dismissals():
+    html = (ROOT / "assets" / "dashboard" / "index.html").read_text(encoding="utf-8")
+    assert "use_cookies" not in html and "Retry with cookies" not in html
+    assert 'persistentDismissedSet("uoink.dashboard.libraryDismissed")' in html

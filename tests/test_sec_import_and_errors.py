@@ -125,6 +125,7 @@ def helper(source_tree, tmp_path, monkeypatch):
             ok=True, conflict=None, completed_while_waiting=False)),
         "_fetch_metadata": Mock(side_effect=RuntimeError(PRIVATE)),
         "_is_youtube_rate_limit": Mock(return_value=False),
+        "_is_youtube_block": Mock(return_value=False),
         "_failure_phase": lambda exc, phase: phase,
         "INSTALL_HELP_URL": "https://example.test/install",
         "_run_backfill": Mock(),

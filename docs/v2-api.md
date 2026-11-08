@@ -1934,7 +1934,7 @@ Fields:
 | `queued` | boolean | `true` if the request was enqueued due to YouTube rate limiting; omitted or `false` otherwise. |
 | `pending_id` | integer | The ID of the queued request in `pending_yoinks` if `queued` is `true`. |
 | `retry_after` | string | ISO timestamp indicating when the next retry will occur if `queued` is `true`. |
-| `reason` | string | The reason for enqueuing, e.g., `"youtube_rate_limit"`. |
+| `reason` | string | Why it was queued: `"youtube_rate_limit"` (HTTP 429) or `"youtube_bot_check"` (YouTube asked for a bot check; the first retry waits at least 30 minutes and never runs inside the cooldown). |
 
 ### GET /diagnose
 

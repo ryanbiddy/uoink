@@ -1,0 +1,61 @@
+name: yt-dlp freshness
+
+# YouTube changes often and an old yt-dlp meets more bot checks. This weekly
+# check goes red when the bundled pin is more than 30 days behind the newest
+# stable release. It never runs on pull requests, so it can't block a merge.
+
+on:
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    name: bundled yt-dlp is current
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Compare the pin with PyPI
+        shell: python
+        run: |
+          import json, os, re, sys, urllib.request
+          from datetime import datetime, timezone
+
+          pin = re.search(r"(?m)^\$YTDLP_VERSION\s*=\s*'([^']+)'$",
+                          open("build.ps1", encoding="utf-8").read()).group(1)
+          with urllib.request.urlopen("https://pypi.org/pypi/yt-dlp/json", timeout=30) as r:
+              releases = json.load(r)["releases"]
+
+          def uploaded(version):
+              files = releases.get(version) or []
+              return min(datetime.fromisoformat(f["upload_time_iso_8601"].replace("Z", "+00:00"))
+                         for f in files) if files else None
+
+          def key(version):
+              return tuple(int(part) for part in version.split("."))
+
+          stable = [v for v in releases if re.fullmatch(r"\d+\.\d+\.\d+", v) and uploaded(v)]
+          latest = max(stable, key=key)
+          pinned = next((v for v in stable if key(v) == key(pin)), None)
+          if pinned is None:
+              sys.exit(f"Pinned yt-dlp {pin} isn't a stable release on PyPI.")
+          behind = (uploaded(latest) - uploaded(pinned)).days
+          age = (datetime.now(timezone.utc) - uploaded(pinned)).days
+          line = (f"Bundled yt-dlp {pin} is {age} days old. The newest stable is {latest}, "
+                  f"{behind} days newer.")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write(line + "\n")
+          print(line)
+          if key(latest) > key(pin) and age > 30:
+              sys.exit("Bump yt-dlp: pick a stable release at least 14 days old and move "
+                       "every pin together (build.ps1, requirements-installer-lock.txt, "
+                       "requirements-linux.txt, REQUIREMENTS.md, docs/build-installer.md, "
+                       "THIRD-PARTY-NOTICES.md, tests/test_ytdlp_pin.py, "
+                       "tests/test_installer_dependency_lock.py).")

@@ -210,6 +210,7 @@ def test_capture_entry_points_refresh_the_legacy_item(legacy, entry):
         "_live_extract_begin": Mock(), "_live_extract_phase": Mock(),
         "_record_single_extract_job": recorded, "_make_job_id": lambda: "job_fixture",
         "_detect_live_state": lambda metadata: "none", "_is_youtube_rate_limit": lambda e: False,
+        "_is_youtube_block": lambda e: False,
         "LIVE_STATE_LIVE": "live", "LIVE_STATE_UPCOMING": "upcoming", "LIVE_STATE_POST_LIVE": "post_live",
         "_failure_phase": lambda error, phase: phase, "_sanitize_error": str,
         "_pending_long_video_mode": lambda *a, **k: "full",
