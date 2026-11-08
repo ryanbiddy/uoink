@@ -16,6 +16,7 @@ BASE_URL = f"http://127.0.0.1:{DEFAULT_PORT}"
 HEALTH_PATH = "/api/suite/v1/health"
 MANIFEST_PATH = "/.well-known/suite-service.json"
 CAPABILITIES = (
+    "uoink.capture/1",
     "uoink.corpus.read/1",
     "uoink.engagement.ingest/1",
     "uoink.media.handoff/1",

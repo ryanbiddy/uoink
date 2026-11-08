@@ -160,6 +160,83 @@ honest `note`; a video in the post is queued via the extension's Uoink button.
 
 ---
 
+## POST /api/suite/v1/capture and GET /api/suite/v1/capture/<job_id> (token-gated)
+
+Capability `uoink.capture/1`, listed in `/.well-known/suite-service.json` and
+the runtime lease next to `uoink.corpus.read/1`, `uoink.engagement.ingest/1`
+and `uoink.media.handoff/1`. Added for sibling suite apps that need to save one
+source link into the user's library.
+
+**Auth.** `X-Uoink-Token`, the same header and check as every other route on
+this page and as `POST /api/engagement/v1/events`. Missing or wrong token: the
+usual `403 {"ok": false, "error": "missing or invalid token"}`. Loopback only;
+on an isolated install it answers on that install's port.
+
+**Request.** `POST` JSON `{"url": "<http(s) url>", "source_hint": optional}`.
+`source_hint` is one of the `/detect` sources (`youtube_video`,
+`youtube_playlist`, `x_video`, `reddit_thread`, `podcast_feed`, `web_page`;
+`short_video` and `x_article` are accepted too). It is only a hint: the route
+classifies the URL with the same `_classify_capture_url` as `GET /detect`, and
+detection decides.
+
+**What happens.**
+
+1. An unsupported URL stops here (`unsupported_url`).
+2. If the canonical URL is already in the library, the response is `exists`
+   with that item and nothing is captured. The lookup uses the identity the
+   library and research "Use saved" use: the video ID or recorded source URL for
+   videos, and the saved-page, Reddit-thread and X-post key for everything else.
+   A deleted item does not count.
+3. A web page (or X article) whose host is not on the page allowlist, and any
+   podcast feed, stops with `consent_required`.
+4. Video sources stop with `media_unavailable` when this install has no media
+   capability.
+5. The capture then goes to the existing code for that source:
+   `uoink_reddit_thread` and `uoink_page` run inline and answer `saved`.
+   `youtube_video`, `short_video` and `x_video` (`uoink_video`, `uoink_url`) can
+   take minutes, so they run on a worker thread and answer `queued` with a
+   `job_id`. A `youtube_playlist` starts the existing playlist job and answers
+   `queued` with that job's id. While one video capture started here is still
+   running, another gets `busy`.
+
+**Success.** `200` for `saved` and `exists`, `202` for `queued`:
+
+```json
+{
+  "ok": true,
+  "contract": "uoink.capture",
+  "version": 1,
+  "status": "saved",
+  "source": "reddit_thread",
+  "item_id": "abc123",
+  "job_id": null,
+  "canonical": "https://www.reddit.com/r/test/comments/abc123/a_title/",
+  "item_uri": "uoink://item/abc123"
+}
+```
+
+`item_id` and `item_uri` are `null` while queued (and for a finished playlist,
+which is many items). `job_id` is `null` unless queued.
+
+**Job lookup.** `GET /api/suite/v1/capture/<job_id>` returns the same shape with
+`status` of `queued` (`202`), `saved` or `error` (`200`). An `error` carries a
+plain `message`. It reads both jobs started here and playlist jobs.
+
+**Errors.** `{"ok": false, "contract": "uoink.capture", "version": 1, "error":
+"<code>", "message": "<plain words>"}`:
+
+| code | HTTP | meaning |
+|---|---|---|
+| `bad_request` | 400 | missing or non-string `url`, unknown `source_hint`, malformed job id |
+| `unsupported_url` | 400 | not a link Uoink can capture |
+| `consent_required` | 409 | site not on the page allowlist, or a podcast feed |
+| `media_unavailable` | 501 | video capture is not available on this install |
+| `busy` | 429 | a video capture started here is still running |
+| `not_found` | 404 | no job with that id |
+| `capture_failed` | 502 | the capture tool ran and could not save the link |
+
+---
+
 ## GET /relay/status and POST /relay/check (token-gated)
 
 **What they do.** Report and trigger the phone inbox poller (Uoink Relay,

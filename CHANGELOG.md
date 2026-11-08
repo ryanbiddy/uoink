@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Suite capture (`uoink.capture/1`): a sibling local app can save one link into
+  your library with `POST /api/suite/v1/capture` and check a queued capture at
+  `GET /api/suite/v1/capture/<job_id>`. It uses the helper token, never
+  recaptures a link that is already saved, and still asks for the page
+  allowlist and podcast consent.
 - Make a Short with Zing. When Zing is installed, a button in the reader hands
   the open item to it and opens Zing's review page. Nothing shows if Zing is
   not installed. Zing reads the item's kept video through Uoink, so the item

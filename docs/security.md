@@ -222,6 +222,18 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
   It records usage as `playbook_<name>` and returns draft text with citation
   warnings. Saving is a separate `POST /writing/draft` action and warnings do
   not block it. Local MCP packet reads never call Anthropic.
+- Suite capture (`uoink.capture/1`): `POST /api/suite/v1/capture` and
+  `GET /api/suite/v1/capture/<job_id>`. A sibling local app uses it to save one
+  link. It uses the same helper token and header as every route here, so a
+  missing or wrong token gets the usual 403, and it answers on the loopback
+  address only, on the isolated install's own port when one is in use. It adds
+  no new token and no new way to reach the network: the link goes through the
+  same capture tools as `uoink capture`. A URL already in the library returns
+  `exists` and is never recaptured. Consent is not bypassed: a web page whose
+  site is not on the page allowlist, and any podcast feed, return
+  `consent_required` with plain words about what to allow in Uoink, and nothing
+  is fetched or registered. Only one video capture started this way runs at a
+  time (a second gets `busy`).
 - Zing hand-off: `GET /zing/status`, `POST /zing/handoff`. Uoink looks for a `zing` launcher (PATH, then `~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin` and the Windows Python Scripts folders) and runs only `zing from-uoink --probe --json` and `zing from-uoink uoink://item/<id> --json`, as argument lists with no shell. The id must match `[A-Za-z0-9_-]{6,200}` and be a live item. The child's environment is the helper's environment plus `UOINK_TOKEN` and `UOINK_URL`; the token goes to that one local process and is never written to a log, nor is the review page address, whose `t=` value is a Zing token. The child starts detached (Windows `DETACHED_PROCESS`, or a hidden console for a `.cmd` launcher; POSIX new session) so it outlives the request and a helper restart. The helper reads only the first line of its output (60 s limit), then drains the rest on a background thread so Zing never blocks on a full pipe, and never kills it. A returned page is accepted only if it is `http://127.0.0.1:<port>/?t=<token>`; the dashboard opens only that exact page.
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
 - MCP HTTP JSON-RPC helper: `GET /mcp/v1/config`, `GET /mcp/v1/sse`, `POST /mcp/v1`, `POST /mcp/v1/initialize`, `POST /mcp/v1/tools/list`, `POST /mcp/v1/tools/call`
