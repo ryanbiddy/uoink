@@ -309,6 +309,13 @@ to merge).
 `UOINK_URL` (the helper's active base URL, which is the isolated binding's URL
 on isolated installs) so Zing can read the item's kept media through
 `uoink.media.handoff/1`. Nothing is written to `settings.json`.
+That contract's `media.path` is the kept file's resolved absolute path: a plain
+local path, or `\\?\C:\...` for a long Windows path. When a library on a
+mapped drive resolves to a `\\server\share` path, Uoink sends the stored
+drive-letter path instead (with `\\?\` if it is too long), because Zing
+refuses share paths. A library stored on a share stays a share path, and Zing
+falls back to asking to download. Containment inside the item folder is always
+checked on the resolved path.
 
 **Outbound requests.** None from the helper. Zing makes its own loopback calls
 to this helper; with `--allow-download` Zing, not Uoink, fetches the video.

@@ -412,6 +412,35 @@ def test_kept_media_rejects_outside_folder_symlink(tmp_path):
         idx.close()
 
 
+@pytest.mark.parametrize(
+    ("resolved", "stored", "expected"),
+    [
+        # Plain local paths and POSIX paths pass through as resolved.
+        ("E:\\Uoink\\item\\video.mp4", "E:\\Uoink\\item\\video.mp4",
+         "E:\\Uoink\\item\\video.mp4"),
+        ("/Users/me/Uoink/item/video.mp4", "/Users/me/Uoink/item/video.mp4",
+         "/Users/me/Uoink/item/video.mp4"),
+        # A long local path keeps its extended-length form.
+        ("\\\\?\\E:\\" + "d" * 300 + "\\video.mp4",
+         "E:\\" + "d" * 300 + "\\video.mp4",
+         "\\\\?\\E:\\" + "d" * 300 + "\\video.mp4"),
+        # A mapped drive that resolved to a share goes as the drive letter.
+        ("\\\\nas\\media\\Uoink\\item\\video.mp4", "Z:\\Uoink\\item\\video.mp4",
+         "Z:\\Uoink\\item\\video.mp4"),
+        # ...with the extended-length prefix when it is too long.
+        ("\\\\nas\\media\\" + "d" * 300 + "\\video.mp4",
+         "Z:\\" + "d" * 300 + "\\video.mp4",
+         "\\\\?\\Z:\\" + "d" * 300 + "\\video.mp4"),
+        # A library stored on a share stays a share path.
+        ("\\\\nas\\media\\Uoink\\item\\video.mp4",
+         "\\\\nas\\media\\Uoink\\item\\video.mp4",
+         "\\\\nas\\media\\Uoink\\item\\video.mp4"),
+    ],
+)
+def test_kept_media_wire_path_form(resolved, stored, expected):
+    assert media_handoff._wire_path(resolved, stored) == expected
+
+
 def test_kept_media_http_is_token_gated(live_server, tmp_path):
     port, idx = live_server
     folder = _insert_item(
