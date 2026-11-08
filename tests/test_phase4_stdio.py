@@ -1,7 +1,7 @@
 """tests/test_phase4_stdio.py - Living Library Stdio MCP & Compatibility Tests (AV-1a).
 
 Gates covered:
-- P4-06 (Capabilities: advertised methods, 5 templates, 10 prompts, curated <= 41, 99 tools,
+- P4-06 (Capabilities: advertised methods, 5 templates, 11 prompts, curated <= 41, 99 tools,
   no promised notifications/subscriptions, JSON-RPC error codes -32602, -32002, -32603)
 - P4-13 stdio part (Installed compatibility: python -P embeddable rules, spaced paths, clean stdout,
   diagnostic stderr separation, restart resilience, missing storage handling)
@@ -186,7 +186,7 @@ class TestP406CapabilitiesAndDiscovery:
             client.close()
 
     def test_stdio_prompts_list(self, tmp_path: Path):
-        """prompts/list returns the 4 frozen prompts plus exactly 5 playbooks."""
+        """prompts/list returns the 4 frozen prompts plus exactly 6 playbooks."""
         client = _StdioTestClient(
             [sys.executable, "-P", str(ROOT / "uoink_mcp.py")],
             cwd=tmp_path,
@@ -204,7 +204,7 @@ class TestP406CapabilitiesAndDiscovery:
             assert "result" in resp
             prompts = resp["result"]["prompts"]
             prompt_names = {p["name"] for p in prompts}
-            assert len(prompts) == 10
+            assert len(prompts) == 11
             assert prompt_names == {p["name"] for p in (*PROMPTS, *research_playbooks.PLAYBOOKS, *research.PROMPTS)}
         finally:
             client.close()
@@ -441,6 +441,7 @@ PLAYBOOK_CASES = [
     ("comment-mining", {"author": "fixture", "lens": "demand"}),
     ("creator-teardown", {"author": "fixture"}),
     ("repurpose-pack", {"video_ids": "a", "kinds": "tweet,newsletter"}),
+    ("thesis-check", {"thesis": "Quotes are worth saving", "video_ids": "a,b"}),
 ]
 
 
@@ -560,7 +561,7 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
                                 "idempotentHint": True, "openWorldHint": False}
     assert spec.rate_limiter is None
     assert len(PROMPTS) == 4
-    assert len(prompts) == 10
+    assert len(prompts) == 11
     expected = [*PROMPTS, *research_playbooks.PLAYBOOKS, *research.PROMPTS]
     assert prompts == expected
 
@@ -577,6 +578,7 @@ def test_playbook_wire_schema_hints_and_prompt_arguments(tmp_path):
     {"playbook": "transcript-intel", "arguments": {"video_ids": "a,b", "topic": "Quote"}},
     {"playbook": "comment-mining", "arguments": {"author": "fixture", "lens": "unknown"}},
     {"playbook": "repurpose-pack", "arguments": {"video_ids": "a,b,c,d,e,f"}},
+    {"playbook": "thesis-check", "arguments": {"video_ids": "a"}},
 ])
 def test_playbook_invalid_arguments_refuse_before_data_access(playbook_adapter, monkeypatch, args):
     import uoink_mcp_tools

@@ -5096,7 +5096,12 @@
                     <option value="comment-mining">Comment mining</option>
                     <option value="creator-teardown">Creator teardown</option>
                     <option value="repurpose-pack">Repurpose pack</option>
+                    <option value="thesis-check">Thesis check</option>
                   </select>
+                  <div class="hidden" id="researchThesisScope">
+                    <label class="soft-note" for="researchThesis">Thesis to test</label>
+                    <input class="field" id="researchThesis" type="text" maxlength="500" placeholder="Small agencies will pay for a local transcript library" autocomplete="off">
+                  </div>
                   <label class="soft-note" for="researchScope">Scope</label>
                   <select class="field" id="researchScope" aria-describedby="researchScopeNote">
                     <option value="author">Creator</option>
@@ -15850,6 +15855,7 @@
       "comment-mining": { scopes: ["author", "video_ids"], max: 10, note: "Read saved comments from one creator or up to 10 captures." },
       "creator-teardown": { scopes: ["author"], note: "Choose a creator with at least 3 saved captures." },
       "repurpose-pack": { scopes: ["video_ids"], max: 5, note: "Choose 1–5 captures for cited content atoms and credited drafts." },
+      "thesis-check": { scopes: ["author", "video_ids", "topic"], max: 10, note: "Test a thesis against one creator, up to 10 captures, or a topic in your saved sources." },
     };
 
     function syncResearchScope() {
@@ -15858,6 +15864,7 @@
       for (const option of picker.options) option.disabled = !spec.scopes.includes(option.value);
       if (!spec.scopes.includes(picker.value)) picker.value = spec.scopes[0];
       document.getElementById("researchScopeNote").textContent = spec.note;
+      document.getElementById("researchThesisScope").classList.toggle("hidden", document.getElementById("researchPlaybook").value !== "thesis-check");
       document.getElementById("researchCreatorScope").classList.toggle("hidden", picker.value !== "author");
       document.getElementById("researchCaptureScope").classList.toggle("hidden", picker.value !== "video_ids");
       document.getElementById("researchTopicScope").classList.toggle("hidden", picker.value !== "topic");
@@ -15893,7 +15900,13 @@
         if (!ids.length || ids.length > spec.max) throw new Error(`Select 1–${spec.max} captures for this playbook.`);
         value = ids.join(",");
       }
-      return { playbook, arguments: { [scope]: value } };
+      const request = { playbook, arguments: { [scope]: value } };
+      if (playbook === "thesis-check") {
+        const thesis = document.getElementById("researchThesis").value.trim();
+        if (!thesis) throw new Error("Enter the thesis to test.");
+        request.arguments.thesis = thesis;
+      }
+      return request;
     }
 
     function researchStatus(message, error = false) {

@@ -43,8 +43,8 @@ SHA-256 and carries the full MIT license text.
 
 ## Adapted documentation text
 
-**ScrapeCreators social media research skills.** Uoink's five local research
-playbooks adapt workflow steps, output templates, outlier thresholds and
+**ScrapeCreators social media research skills.** Five of Uoink's six local research
+playbooks (all but `thesis-check`, which is Uoink's own) adapt workflow steps, output templates, outlier thresholds and
 pitfalls from [ScrapeCreators/social-media-research-skills](https://github.com/ScrapeCreators/social-media-research-skills)
 at commit `64ba7b4dea71e130d2712ffb6c1c1024b3b7c4b2` (`64ba7b4`).
 The [complete upstream MIT license](scrapecreators-social-media-research-skills-MIT-LICENSE.txt)

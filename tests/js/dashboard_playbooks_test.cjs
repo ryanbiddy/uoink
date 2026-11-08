@@ -131,14 +131,25 @@ const scenarios = {
     assert.equal(e.el("writingAnchorsPanel").classList.contains("hidden"), true);
     assert.deepEqual(plain(e.run("researchRequest()")), { playbook: "outlier-posts", arguments: { author: "Creator" } });
     for (const [book, scopes, max] of [["outlier-posts", ["author"]], ["transcript-intel", ["author", "video_ids", "topic"], 8],
-      ["comment-mining", ["author", "video_ids"], 10], ["creator-teardown", ["author"]], ["repurpose-pack", ["video_ids"], 5]]) {
+      ["comment-mining", ["author", "video_ids"], 10], ["creator-teardown", ["author"]], ["repurpose-pack", ["video_ids"], 5],
+      ["thesis-check", ["author", "video_ids", "topic"], 10]]) {
       e.el("researchPlaybook").value = book;
       await e.el("researchPlaybook").fire("change");
       assert.deepEqual(e.el("researchScope").options.filter(o => !o.disabled).map(o => o.value), scopes);
       for (const scope of scopes) {
         e.el("researchScope").value = scope; e.el("researchTopic").value = "design";
         e.run('state.researchCaptureIds = new Set(["a"]); syncResearchScope()');
-        assert.deepEqual(plain(e.run("researchRequest()")), { playbook: book, arguments: { [scope]: scope === "author" ? "Creator" : scope === "topic" ? "design" : "a" } });
+        const expected = { [scope]: scope === "author" ? "Creator" : scope === "topic" ? "design" : "a" };
+        if (book === "thesis-check") {
+          e.el("researchThesis").value = "";
+          assert.throws(() => e.run("researchRequest()"), /Enter the thesis/);
+          e.el("researchThesis").value = " Notes are worth saving ";
+          expected.thesis = "Notes are worth saving";
+          assert.equal(e.el("researchThesisScope").classList.contains("hidden"), false);
+        } else {
+          assert.equal(e.el("researchThesisScope").classList.contains("hidden"), true);
+        }
+        assert.deepEqual(plain(e.run("researchRequest()")), { playbook: book, arguments: expected });
       }
       if (max) {
         e.el("researchScope").value = "video_ids";

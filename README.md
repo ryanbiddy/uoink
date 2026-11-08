@@ -45,7 +45,7 @@ Published sources are indexed in one local library. Podcast audio and transcript
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)**: A local MCP server exposing 99 tools over stdio, five library resource templates and ten prompts. Claude Desktop (.mcpb), Claude Code and Cursor get the full capture, research, writing and Library tool set through the standard connection. Consent gates are unchanged.
+**2. MCP server (the agent path)**: A local MCP server exposing 99 tools over stdio, five library resource templates and eleven prompts. Claude Desktop (.mcpb), Claude Code and Cursor get the full capture, research, writing and Library tool set through the standard connection. Consent gates are unchanged.
 
 The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested.
 
@@ -149,7 +149,7 @@ Setup, the Shortcut recipe and the free-plan tradeoffs are in
 
 **Agent flow (MCP):** your agent has the Uoink tools after setup → ask *"uoink this video and decode the hook"* → the agent calls `uoink_video` → `classify_hook` → analysis, no clipboard step.
 
-Five research playbooks work over saved captures: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown` and `repurpose-pack`. Use their stdio prompts or `get_playbook_input` on either transport. Uoink computes the metrics and supplies cited evidence; your client writes the report. These reads need no API key and make no network calls. See [arguments and examples](docs/v2-mcp.md#get_playbook_input).
+Six research playbooks work over saved captures: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown`, `repurpose-pack` and `thesis-check`. `thesis-check` takes a claim you want to test and reads your saved transcripts and comments for the assumptions they share, the evidence for and against, and what your library does not cover, with a citation key and timestamp on every point. Use their stdio prompts or `get_playbook_input` on either transport. Uoink computes the metrics and supplies cited evidence; your client writes the report. These reads need no API key and make no network calls. See [arguments and examples](docs/v2-mcp.md#get_playbook_input).
 
 Optional ScrapeCreators discovery adds `discover_candidates` and
 `queue_discovered` on both transports. It is off by default and uses your own

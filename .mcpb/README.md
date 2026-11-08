@@ -22,7 +22,7 @@ does not prove Claude Code installation or any current CLI capability.
 3. When prompted for the **Uoink install directory**, accept the default
    (`%LOCALAPPDATA%\Uoink`) unless you installed Uoink somewhere else.
 4. Restart Claude Desktop. The 99 stdio tools, five library resource
-   templates, and ten prompts below appear from the launched child.
+   templates, and eleven prompts below appear from the launched child.
 
 ## What this bundle is (and isn't)
 
@@ -63,7 +63,7 @@ see https://uoink.app/developers. For **Claude Code CLI**, do not use this
 ## What stdio advertises
 
 The launched child is `uoink_mcp.py`. On stdio it advertises **99 tools**,
-**five resource templates**, and **ten prompts**. HTTP MCP stays tools-only
+**five resource templates**, and **eleven prompts**. HTTP MCP stays tools-only
 and is not what this bundle launches.
 
 The committed [manifest](manifest.json) lists all 99 names. The 36 core
@@ -136,7 +136,7 @@ client uses `read_library_resource(uri)` instead
 
 | Tool | Role |
 |---|---|
-| `get_playbook_input` | Prepare a cited local packet for one of five research playbooks. |
+| `get_playbook_input` | Prepare a cited local packet for one of six research playbooks. |
 | `discover_candidates` | Plan or run opt-in ScrapeCreators discovery with explicit credit confirmation. |
 | `queue_discovered` | Send up to ten selected discovery results through the normal capture queue. |
 
@@ -226,7 +226,7 @@ hashes.
 | `shelves/{shelf_key}/{taxonomy_revision}/{projection_revision}/{shelf_revision}/{offset}` | Shelf definition and a page of current members. |
 | `briefs/{date}/{brief_hash}` | One persisted client-produced brief. |
 
-### Ten prompts
+### Eleven prompts
 
 | Prompt | Arguments |
 |---|---|
@@ -240,6 +240,7 @@ hashes.
 | `comment-mining` | Exactly one of `video_ids` (up to 10) or `author`; optional `lens` (`voc` or `demand`). |
 | `creator-teardown` | Required `author`; optional `platform`. Needs at least three saved captures. |
 | `repurpose-pack` | Required `video_ids` (1–5); optional `kinds` (defaults to `tweet,thread`). |
+| `thesis-check` | Required `thesis` (1–500 characters) and exactly one of `video_ids` (up to 10), `topic` or `author`; optional `since`. |
 
 ## Bundle format (`manifest_version` 0.4)
 

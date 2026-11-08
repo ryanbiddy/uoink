@@ -23,7 +23,7 @@ discovery's in-memory, origin-bound intents cannot cross into this process,
 so discovery requires the explicit agent-consent setting here. Library and
 source intents use the same token-derived trusted session as HTTP.
 
-Five resource templates and ten prompts remain available in every mode.
+Five resource templates and eleven prompts remain available in every mode.
 Bounded Library admission stays alive through the concrete SDK JSON-RPC
 dump, write and flush. Other registry tools run on the
 event loop one at a time, as in v3.9.1, because they share the Index
@@ -458,7 +458,7 @@ def get_library_activity(
 # isError set from the envelope, never wrapped in the SDK's "Error executing
 # tool" string. Resources and prompts use low-level handlers on
 # the owned public Server so the curated list,
-# the five templates, the ten prompts and the JSON-RPC error codes are ours:
+# the five templates, the eleven prompts and the JSON-RPC error codes are ours:
 # -32602 invalid parameters, -32002 missing or deleted resource, -32603 any
 # other refusal, each carrying the domain envelope in error.data. The SDK
 # advertises resources {subscribe:false, listChanged:false} and prompts
@@ -486,7 +486,7 @@ def read_library_resource(uri: str):
 
 def get_playbook_input(
     playbook: Literal["outlier-posts", "transcript-intel", "comment-mining",
-                      "creator-teardown", "repurpose-pack"],
+                      "creator-teardown", "repurpose-pack", "thesis-check"],
     arguments: dict,
 ) -> dict:
     return uoink_mcp_tools.call_tool("get_playbook_input", {

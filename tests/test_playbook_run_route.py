@@ -63,6 +63,7 @@ CASES = [
     ("comment-mining", {"author": "fixture", "lens": "demand"}),
     ("creator-teardown", {"author": "fixture"}),
     ("repurpose-pack", {"video_ids": "a,b"}),
+    ("thesis-check", {"thesis": "Quotes are worth saving", "video_ids": "a,b"}),
 ]
 
 

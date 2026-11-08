@@ -981,13 +981,14 @@
               "transcript-intel",
               "comment-mining",
               "creator-teardown",
-              "repurpose-pack"
+              "repurpose-pack",
+              "thesis-check"
             ],
             "description": "Research packet to prepare; its name selects the allowed arguments and required selectors."
           },
           "arguments": {
             "type": "object",
-            "description": "String-valued playbook arguments: outlier-posts/creator-teardown require author (optional platform); outlier-posts also accepts since. transcript-intel needs exactly one of video_ids/topic/author (optional since). comment-mining needs video_ids or author and optional lens=voc/demand. repurpose-pack requires video_ids and optional kinds. IDs/kinds are comma-separated strings; ID caps are 8, 10 and 5 respectively. since is a UTC YYYY-MM-DD capture date, not future."
+            "description": "String-valued playbook arguments: outlier-posts/creator-teardown require author (optional platform); outlier-posts also accepts since. transcript-intel needs exactly one of video_ids/topic/author (optional since). comment-mining needs video_ids or author and optional lens=voc/demand. repurpose-pack requires video_ids and optional kinds. thesis-check requires thesis (1-500 characters) plus exactly one of video_ids/topic/author (optional since). IDs/kinds are comma-separated strings; ID caps are 8, 10 and 5 respectively, and 10 for thesis-check. since is a UTC YYYY-MM-DD capture date, not future."
           }
         },
         "required": [
@@ -5523,6 +5524,37 @@
         ],
         "description": "Prepare cited content atoms and credited drafts from saved captures.",
         "name": "repurpose-pack"
+      },
+      {
+        "arguments": [
+          {
+            "description": "The claim to test, 1-500 code points. Unicode Cc control characters are rejected.",
+            "name": "thesis",
+            "required": true
+          },
+          {
+            "description": "Comma-separated capture IDs, at most 10.",
+            "name": "video_ids",
+            "required": false
+          },
+          {
+            "description": "FTS query, at most 512 characters.",
+            "name": "topic",
+            "required": false
+          },
+          {
+            "description": "Creator author or channel, 1-200 code points. Unicode Cc control characters are rejected; format characters such as joiners are accepted.",
+            "name": "author",
+            "required": false
+          },
+          {
+            "description": "UTC capture date YYYY-MM-DD, not in the future.",
+            "name": "since",
+            "required": false
+          }
+        ],
+        "description": "Test a thesis against your saved sources: the assumptions they share, evidence for and against, and what's missing.",
+        "name": "thesis-check"
       },
       {
         "arguments": [

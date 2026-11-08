@@ -172,6 +172,7 @@ EXPECTED_PROMPTS = (
     "comment-mining",
     "creator-teardown",
     "repurpose-pack",
+    "thesis-check",
     "deep-research",
 )
 EXPECTED_TEMPLATE_NAMES = (
