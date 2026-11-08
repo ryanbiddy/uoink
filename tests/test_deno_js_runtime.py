@@ -40,6 +40,17 @@ def test_ytdlp_cmd_uses_the_same_rule():
     assert server.YTDLP_CMD[:4] == [sys.executable, "-m", "yt_dlp", "--extractor-args"]
 
 
+def test_ytdlp_ignores_personal_config_on_every_platform():
+    # The Mac gets it from ytdlp_media_args; Windows and Linux from the base list.
+    assert server.YTDLP_CMD.count("--ignore-config") == 1
+
+
+def test_deno_cache_and_update_check_are_contained():
+    import os
+    assert os.environ["DENO_NO_UPDATE_CHECK"] == "1"
+    assert Path(os.environ["DENO_DIR"]) == Path(server.DATA_ROOT) / "deno-cache"
+
+
 def test_youtube_call_detection_still_works_with_the_flag(monkeypatch, tmp_path):
     (tmp_path / DENO_NAME).write_bytes(b"x")
     cmd = [*server.YTDLP_CMD, "--js-runtimes", f"deno:{tmp_path / DENO_NAME}",

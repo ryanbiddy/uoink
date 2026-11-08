@@ -2414,9 +2414,19 @@ YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
               "--extractor-args", "twitter:api=syndication"]
 if sys.platform == "darwin":
     YTDLP_CMD.extend(_platform.ytdlp_media_args())
+else:
+    # Ignore any personal yt-dlp config file, as the Mac bundle already does.
+    # Otherwise options such as --cookies-from-browser or a forced player
+    # client in the user's own config would change what Uoink sends.
+    YTDLP_CMD.append("--ignore-config")
 # yt-dlp needs a JavaScript runtime to solve YouTube's player challenges. Use the
 # Deno that the installer put in bin\ (nothing is added if it is missing).
 YTDLP_CMD.extend(_platform.ytdlp_js_runtime_args(_BIN_DIR))
+# yt-dlp passes the helper's environment to Deno. Keep Deno's small analysis
+# cache inside Uoink's data folder rather than %LOCALAPPDATA%\deno, and turn
+# off Deno's own update check so it never contacts its release server.
+os.environ["DENO_DIR"] = str(DATA_ROOT / "deno-cache")
+os.environ["DENO_NO_UPDATE_CHECK"] = "1"
 
 # Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
 # pulls the whole file to disk first; on a small disk a few livestream-length

@@ -692,7 +692,12 @@ and bounded library packet described above. YouTube downloads still contact
 YouTube, and yt-dlp may contact YouTube-owned endpoints as part of uoink
 extraction. To read a YouTube video's format list, yt-dlp runs YouTube's player
 code in the bundled Deno (`bin\deno.exe`), which sandboxes it with no file or
-network access. Uoink downloads nothing at runtime for this.
+network access. Uoink downloads nothing at runtime for this. The helper sets
+`DENO_NO_UPDATE_CHECK=1`, so Deno never contacts its release server, and
+`DENO_DIR` to `deno-cache` in the Uoink data folder for Deno's small analysis
+cache. Every yt-dlp call gets `--ignore-config`, so a personal yt-dlp config
+file (for example one with `--cookies-from-browser`) cannot change what Uoink
+sends; Uoink never uses browser cookies.
 
 ## Engagement memory (v2.5 S2)
 
