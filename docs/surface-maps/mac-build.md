@@ -33,6 +33,7 @@ Deno (unreleased): `scripts/mac/deno_bundle.py` downloads the pinned `deno-aarch
 `com.apple.security.cs.allow-jit`; `sign_notarize.codesign_command()` passes it for that one path
 and nowhere else, and never uses `--deep`. The ad-hoc CI build signs without the hardened runtime,
 so it needs no entitlement. `verify_signing.verify_entitlements()` fails unless Deno holds exactly
-allow-jit and no other Mach-O holds any. `bundle_smoke.deno_smoke()` runs real JavaScript (an
+allow-jit and no other Mach-O holds any; `quarantine_smoke.smoke()` runs it, then `deno_smoke`, on the
+signed, notarized, unquarantined copy in the Developer ID job (the only place the hardened runtime is on). `bundle_smoke.deno_smoke()` runs real JavaScript (an
 offline `deno eval` plus a hot loop), because `deno --version` works even when JIT is blocked.
 `_platform.ytdlp_js_runtime_args()` returns `--js-runtimes deno:<Contents>/Helpers/deno` in bundle mode.

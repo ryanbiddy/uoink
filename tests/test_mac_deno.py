@@ -210,6 +210,28 @@ def test_verify_entitlements_requires_deno_to_be_checked_and_codesign_to_succeed
         verify_signing.verify_entitlements(app, fixture_paths(app), execute=failing)
 
 
+def test_parse_ignores_trailing_text_and_legacy_blob_prefix():
+    xml = plistlib.dumps(JIT).decode()
+    assert verify_signing.parse_entitlements(xml + "Executable=/x\n") == JIT
+    assert verify_signing.parse_entitlements("") == {}
+    assert verify_signing.parse_entitlements("Executable=/x\n") == {}
+    blob = bytes([0xfa, 0xde, 0x71, 0x71, 0, 0, 1, 0x2c, 0]).decode("utf-8", errors="replace")
+    assert verify_signing.parse_entitlements(blob + xml) == JIT
+    assert verify_signing.parse_entitlements(blob + xml + "tail") == JIT
+
+
+def test_verify_entitlements_ignores_stderr_executable_line(tmp_path):
+    app = tmp_path / "Uoink.app"
+
+    def execute(argv):
+        values = JIT if Path(argv[-1]).name == "deno" else {}
+        return {"argv": argv, "exit": 0, "stdout": plistlib.dumps(values).decode() if values else "",
+                "stderr": f"Executable={argv[-1]}\n"}
+
+    found = verify_signing.verify_entitlements(app, fixture_paths(app), execute=execute)
+    assert found["Contents/Helpers/deno"] == JIT
+
+
 # --- bundle_smoke ----------------------------------------------------------
 
 def smoke_rig(tmp_path, monkeypatch, outputs):

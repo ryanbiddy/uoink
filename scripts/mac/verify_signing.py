@@ -65,9 +65,15 @@ def verify_notarized(app: Path, dmg: Path, team: str, report: dict, *, execute=c
 
 
 def parse_entitlements(output: str) -> dict:
-    """Read the XML plist `codesign -d --entitlements - --xml` prints; no plist means none."""
+    """Read the XML plist `codesign -d --entitlements - --xml` writes to stdout (stderr only carries
+    an Executable= line, so it is ignored); no plist means none."""
     start = output.find("<?xml")
-    return plistlib.loads(output[start:].encode()) if start >= 0 else {}
+    if start < 0:
+        return {}
+    end = output.find("</plist>", start)
+    if end < 0:
+        raise ValueError("Entitlements plist is not terminated")
+    return plistlib.loads(output[start:end + len("</plist>")].encode())
 
 
 def verify_entitlements(app: Path, macho_paths, *, execute=command) -> dict:
@@ -77,7 +83,7 @@ def verify_entitlements(app: Path, macho_paths, *, execute=command) -> dict:
         relative = path.relative_to(app).as_posix()
         result = execute(["/usr/bin/codesign", "-d", "--entitlements", "-", "--xml", path])
         require(result["exit"] == 0, f"{relative}: cannot read entitlements")
-        entitlements = parse_entitlements(result["stdout"] + result["stderr"])
+        entitlements = parse_entitlements(result["stdout"])
         found[relative] = entitlements
         if relative == DENO_HELPER:
             seen_deno = True
