@@ -17,6 +17,7 @@ import tarfile
 import time
 
 from build_bundle import create_dmg, sha256, signing_order, tree_inventory
+from deno_bundle import ENTITLEMENTS as DENO_ENTITLEMENTS, HELPER as DENO_HELPER
 from qualify_deps import write_json
 from sign_archives import sign_archives
 
@@ -149,10 +150,17 @@ def cleanup(private: Path) -> None:
 
 
 def codesign_command(path: Path, identity: str, keychain: Path) -> list:
-    # No exceptions established by runtime evidence yet. In particular, do not
-    # inherit upstream entitlements, disable library validation, or allow debugging.
-    return ["codesign", "--force", "--options", "runtime", "--timestamp",
-            "--sign", identity, "--keychain", keychain, path]
+    # One exception, established by a real Mac run (2026-11-08): the bundled Deno
+    # (Contents/Helpers/deno) crashes on any JavaScript under the hardened runtime
+    # unless it holds allow-jit. It gets that single entitlement from
+    # deno.entitlements.plist. Every other path gets none. In particular, do not
+    # inherit upstream entitlements, disable library validation, allow debugging,
+    # or use --deep.
+    command = ["codesign", "--force", "--options", "runtime", "--timestamp",
+               "--sign", identity, "--keychain", keychain]
+    if Path(path).as_posix().endswith("/" + DENO_HELPER):
+        command += ["--entitlements", DENO_ENTITLEMENTS]
+    return [*command, path]
 
 
 def signing_diagnostics(keychain: Path, evidence: Path) -> None:
@@ -345,7 +353,7 @@ def sign_release(output: Path, evidence: Path, private: Path, team: str) -> None
     metadata["signing"] = "Developer ID, hardened runtime; app and DMG submitted separately for notarization"
     write_json(notice, metadata)
     ordered = signing_order(app)
-    write_json(evidence / "signing.json", {"identity": identity, "team": team, "entitlements": {},
+    write_json(evidence / "signing.json", {"identity": identity, "team": team, "entitlements": {DENO_HELPER: ["com.apple.security.cs.allow-jit"]},
                                            "order": [p.relative_to(app).as_posix() for p in ordered]})
     for path in ordered:
         signer(path)

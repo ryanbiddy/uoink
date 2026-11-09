@@ -10,7 +10,8 @@ python3 -B scripts/mac/bundle_smoke.py --app "$RUNNER_TEMP/mac-app/Uoink.app" \
   --output "$RUNNER_TEMP/mac-smoke"
 ```
 
-The CLI build installs `ffmpeg` and `ffprobe` 8.1.2 in `Contents/Helpers`.
+The CLI build installs `ffmpeg` and `ffprobe` 8.1.2 in `Contents/Helpers`, next to
+`deno` (not FFmpeg; see `deno_bundle.py`).
 FFmpeg 7.1.5 supplies the shared ABI for TorchCodec 0.7.0, subject to a real
 decode test. No Homebrew binaries, headers, libraries or pkg-config are used.
 Windows keeps its BtbN n8.1.2 static CLI and n7.1.5 DLLs; Linux is unchanged.

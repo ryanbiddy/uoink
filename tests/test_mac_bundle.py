@@ -439,6 +439,7 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     monkeypatch.setattr(bundle_smoke.subprocess, "run", run)
     monkeypatch.setattr(bundle_smoke, "stdio", lambda *args: {"ok": True})
     monkeypatch.setattr(bundle_smoke, "media_smoke", lambda *args: {"ok": True})
+    monkeypatch.setattr(bundle_smoke, "deno_smoke", lambda *args: {"eval": "42"})
     monkeypatch.setattr(bundle_smoke, "whisper_smoke", lambda *args: {"model": "base"})
     monkeypatch.setattr(bundle_smoke, "stop", lambda proc: None)
     if mutate or fail:

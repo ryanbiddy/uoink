@@ -48,7 +48,7 @@ enforces this on every build.
 
 ### 2b. Deno and yt-dlp-ejs (3.16.1)
 
-Windows now bundles `deno.exe` (MIT) in `bin`, and the pip graph adds
+Windows now bundles `deno.exe` (MIT) in `bin`, the Mac app bundles `Helpers/deno` (same licence file), and the pip graph adds
 `yt-dlp-ejs` (Unlicense, with ISC and MIT parts inside its wheel). The license
 texts are `third-party-notices/deno-2.9.8-MIT-LICENSE.txt` and
 `third-party-notices/yt-dlp-ejs-0.8.0-LICENSES.txt`. `build.ps1` pins their

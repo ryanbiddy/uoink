@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- The Mac app now bundles Deno 2.9.8 (`Contents/Helpers/deno`, Apple Silicon) so yt-dlp
+  can solve YouTube's player challenges without you installing anything. It is signed
+  with a single extra permission, allow-jit, which Deno needs to run JavaScript under
+  macOS's hardened runtime. No other file in the app gets any extra permission.
+
 ### Fixed
 
 - Diagnose now checks that Deno can run JavaScript, not only that it starts. A Deno
