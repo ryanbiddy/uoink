@@ -15,10 +15,8 @@ pythonnet==3.0.5
 # makes the direct use explicit.
 faster-whisper==1.2.1
 whisperx==3.8.6
-# v3.2 Universal Site Uoinking. Lazy-imported by page_extractor.py; the
-# helper falls back to a stdlib HTML-to-markdown path when crawl4ai
-# isn't importable (broken bundle, missing playwright runtime, etc.).
-# Bundling into the embeddable Python is gated on a clean-install test
-# of the playwright transitive dep -- not in build.ps1 yet (see the
-# v3.2 universal-site PR body).
-crawl4ai==0.4.247
+# crawl4ai is optional and is NOT installed by default (no pin here). The
+# Windows installer and the Mac app do not ship it. page_extractor.py
+# lazy-imports it and uses it only if it is importable; otherwise (or if it
+# fails) the helper uses its stdlib HTML-to-markdown path. Uoink's own SSRF
+# checks run before any render either way.

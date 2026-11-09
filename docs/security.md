@@ -2,13 +2,15 @@
 
 Status: launch-facing for the current helper and extension
 
-The Living Library candidate build selects a verified local NLTK path-policy
-backport, `3.10.3+uoink.pathsec1`. The fixed wheel, original source, patch and
-provenance are retained under vendor/nltk-pathsec. At this source checkpoint,
-replacement staging and installation are still pending; package 08 contains
-upstream 3.10.3. Keep the original advisory observation alongside any later
-installed backport disposition. This patch does not qualify model loading or
-resolve the retained Torch and Transformers findings.
+The Windows installer ships upstream NLTK 3.10.4, pinned with its wheel hash in
+`requirements-installer-lock.txt`. It replaces the locally patched
+`3.10.3+uoink.pathsec1` build: 3.10.4 fixes GHSA-8mgp-746c-j5xp (model-artifact
+APIs bypassing the path policy) and GHSA-j456-xh4h-cpf2 (the Weka classifier
+model path), and covers every function the local patch changed. Uoink does not
+import NLTK itself; WhisperX requires it. The old patch, original source and
+provenance stay under vendor/nltk-pathsec for reference only and are no longer
+used by the build. This does not qualify model loading or resolve any other
+dependency finding.
 
 > Compatibility note: the canonical auth header is `X-Uoink-Token` and the
 > `/token` gate is `X-Uoink-Client: uoink-extension`. The shipped extension

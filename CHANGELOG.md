@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Security
 
 - Refreshed the Windows installer's bundled libraries to clear open security alerts: PyJWT 2.15.1, aiohttp 3.14.5, urllib3 2.8.0, setuptools 84.2.1, Mako 1.4.3, multidict 6.9.1, yarl 1.25.1 and the OpenTelemetry packages 1.45.1.
+- crawl4ai is no longer installed by default. It was pinned to an old version with open alerts, mostly in a Docker API server Uoink never runs, and neither installer ships it. Uoink uses it only if you install it yourself, and otherwise reads pages with its built-in extractor.
+- NLTK moved from a locally patched build to upstream 3.10.4, which includes the path-policy fixes. Uoink does not use NLTK itself; WhisperX does.
 
 ## [3.16.1] - 2026-11-08
 

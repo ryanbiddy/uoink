@@ -224,11 +224,8 @@ hooks run; SHA-256 is also recorded. `pip wheel --no-deps --no-build-isolation
 are checked against `build.ps1` by an offline test. There is no
 generic source fallback for missing native wheels.
 
-For NLTK, Job B downloads upstream 3.10.3 with the existing builder's SHA-256
-requirement, then calls `build_nltk_pathsec_wheel.py`, retaining all source,
-patch, member and hash checks. The result must match the Windows build hash
-`969f623541344ade83ea267130e016d6cb8a223ecaaf28fb3d7a663c7e3c60d8`.
-It never substitutes the unpatched public package. Darwin builder scratch uses
+NLTK is no longer built from a patch: the lock pins upstream 3.10.4, which
+resolves as an ordinary public wheel. Darwin builder scratch uses
 canonical system temporary paths, resolving `/var` before the no-linked-ancestor
 checks; Windows build scratch is unchanged. Build provenance is retained in
 `source-builds.json`. No real archive was downloaded or built during local checks.

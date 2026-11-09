@@ -277,35 +277,13 @@ class QualificationTests(unittest.TestCase):
             self.assertEqual(row["blake2b_256"], address)
             self.assertEqual(len(address), 64)
 
-    def test_nltk_uses_existing_builder_and_rejects_non_windows_output_hash(self):
+    def test_nltk_is_an_ordinary_wheel_not_a_source_build(self):
         wheels = self.root / "wheels"
         wheels.mkdir()
-        commands, builds = [], []
-        class Builder:
-            EXPECTED_WHEEL_NAME = "nltk-3.10.3-py3-none-any.whl"
-            EXPECTED_WHEEL_SHA256 = "f" * 64
-            OUTPUT_WHEEL_NAME = "nltk-3.10.3+uoink.pathsec1-py3-none-any.whl"
-            @staticmethod
-            def build_nltk_wheel(source, output):
-                builds.append((source, output))
-                output.mkdir()
-                (output / Builder.OUTPUT_WHEEL_NAME).write_bytes(b"wrong output hash")
-                return {}
-        loader = SimpleNamespace(exec_module=lambda module: None)
-        def fake_run(command, log, timeout=240):
-            commands.append(command)
-            if "download" in command:
-                self.assertIn("--require-hashes", command)
-                self.assertIn(Builder.EXPECTED_WHEEL_SHA256, Path(command[-1]).read_text())
-            return 0
-        with patch.object(deps.importlib.util, "spec_from_file_location", return_value=SimpleNamespace(loader=loader)), \
-                patch.object(deps.importlib.util, "module_from_spec", return_value=Builder), \
-                patch.object(deps, "run_logged", side_effect=fake_run):
-            report = deps.build_source_wheels([("nltk", "3.10.3+uoink.pathsec1")], wheels, self.root)
-        self.assertEqual(len(builds), 1)
-        self.assertFalse(report["nltk"]["wheel_found"])
-        self.assertIn("Windows build hash", str(report))
-        self.assertEqual(list(wheels.iterdir()), [])
+        with patch.object(deps, "run_logged", side_effect=AssertionError("no build expected")):
+            report = deps.build_source_wheels([("nltk", "3.10.4")], wheels, self.root)
+        self.assertEqual(report, {})
+        self.assertNotIn("nltk", json.loads(deps.SOURCE_PINS.read_text(encoding="utf-8")))
 
     def test_combined_resolver_uses_built_wheels(self):
         lock = self.root / "lock.txt"
