@@ -26,3 +26,14 @@ No FFmpeg CLI is bundled. The reason and proposed source-build approach are in
 `scripts/mac/FFMPEG.md`. Library mirroring is unavailable on Darwin. Automatic
 Darwin tray and splash startup are deferred to the AppKit/UI pass. The existing
 LaunchAgent and entitlement templates are not installed or used for signing.
+
+Deno (unreleased): `scripts/mac/deno_bundle.py` downloads the pinned `deno-aarch64-apple-darwin.zip`
+(pin and SHA-256 in `payload.json` under `deno`), verifies it and installs
+`Contents/Helpers/deno`. `deno.entitlements.plist` (hash-pinned) holds only
+`com.apple.security.cs.allow-jit`; `sign_notarize.codesign_command()` passes it for that one path
+and nowhere else, and never uses `--deep`. The ad-hoc CI build signs without the hardened runtime,
+so it needs no entitlement. `verify_signing.verify_entitlements()` fails unless Deno holds exactly
+allow-jit and no other Mach-O holds any; `quarantine_smoke.smoke()` runs it, then `deno_smoke`, on the
+signed, notarized, unquarantined copy in the Developer ID job (the only place the hardened runtime is on). `bundle_smoke.deno_smoke()` runs real JavaScript (an
+offline `deno eval` plus a hot loop), because `deno --version` works even when JIT is blocked.
+`_platform.ytdlp_js_runtime_args()` returns `--js-runtimes deno:<Contents>/Helpers/deno` in bundle mode.

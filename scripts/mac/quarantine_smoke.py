@@ -14,11 +14,12 @@ from types import SimpleNamespace
 import urllib.request
 import uuid
 
+import build_bundle
 import bundle_smoke
 import dmg_smoke
 import receipt
 from qualify_deps import write_json
-from verify_signing import command, require, verify_notarized
+from verify_signing import command, require, verify_entitlements, verify_notarized
 
 
 def bind_menu(app: Path, bound: dict, log_files: list[Path]) -> dict:
@@ -169,6 +170,11 @@ def smoke(dmg: Path, output: Path, team: str) -> None:
                 dmg_smoke.prepare_normal_install(normal, normal_report)
                 normal_report["notarization"] = {}
                 verify_notarized(normal, download, team, normal_report["notarization"])
+                # The hardened runtime is on in this signed build, so this is the real
+                # test that Deno holds allow-jit (and nothing else does) and can run JS.
+                normal_report["entitlements"] = verify_entitlements(normal, list(build_bundle.macho_files(normal)))
+                normal_report["deno"] = bundle_smoke.deno_smoke(
+                    normal / "Contents", normal_root, {**os.environ, "HOME": str(normal_root)})
                 normal_report["launch"] = {}
                 launch(normal, normal_root, output / "normal", normal_report["launch"], translocated=False)
                 normal_report["after_launch"] = {}

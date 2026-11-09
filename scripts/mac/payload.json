@@ -93,6 +93,17 @@
     "yoink_mcp.py",
     "yt_extract.py"
   ],
+  "deno": {
+    "version": "2.9.8",
+    "url": "https://github.com/denoland/deno/releases/download/v2.9.8/deno-aarch64-apple-darwin.zip",
+    "sha256": "9f0bf660393da2eaff044cdc7444cb08c73f235849b61d224d825a194ce7c98e",
+    "size": 38770795,
+    "arch": "arm64",
+    "license": "MIT",
+    "license_url": "https://github.com/denoland/deno/blob/v2.9.8/LICENSE.md",
+    "entitlements": "deno.entitlements.plist",
+    "entitlements_sha256": "958648f799e436860b51eaf55ec8f92d2c62da17001e23d96bc05ffc748f2a2a"
+  },
   "ffmpeg": {
     "minimum_macos": "15.0",
     "common_flags": [

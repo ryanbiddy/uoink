@@ -19,6 +19,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/mac"))
 import build_bundle
+import deno_bundle
 import sign_archives as archives
 import sign_notarize as signing
 import verify_signing
@@ -34,6 +35,7 @@ MACHO = b"\xcf\xfa\xed\xfe" + b"fixture"
 def make_app(root):
     app = root / "Uoink.app"
     for name in ("Contents/MacOS/Uoink", "Contents/Helpers/ffmpeg", "Contents/Helpers/ffprobe",
+                 "Contents/Helpers/deno",
                  "Contents/Resources/Python/bin/python3", "Contents/Resources/Python/lib/native.so"):
         target = app / name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -51,9 +53,15 @@ def test_developer_signing_commands_cover_all_code_without_entitlements_or_deep(
     for path in build_bundle.signing_order(app):
         signing.sign(path, IDENTITY, tmp_path / "fixture-kc", tmp_path)
     assert calls[-1][-1] == app
-    assert len(calls) == 7
+    assert len(calls) == 8
     for call in calls:
-        assert "--deep" not in call and "--entitlements" not in call
+        assert "--deep" not in call
+        # Only the bundled Deno gets an entitlement, and only the allow-jit plist.
+        if call[-1] == app / "Contents/Helpers/deno":
+            assert call[call.index("--entitlements") + 1] == deno_bundle.ENTITLEMENTS
+            assert call.count("--entitlements") == 1
+        else:
+            assert "--entitlements" not in call
         assert call[call.index("--options") + 1] == "runtime"
         assert "--timestamp" in call and "--timestamp=none" not in call
         assert call[call.index("--sign") + 1] == IDENTITY
@@ -668,12 +676,17 @@ def test_quarantine_copy_assessment_and_launch_sequence(tmp_path, monkeypatch, q
     monkeypatch.setattr(quarantine_smoke.dmg_smoke, "run", lambda args, **kw: shutil.copytree(args[1], args[2]))
     monkeypatch.setattr(quarantine_smoke.dmg_smoke, "prepare_normal_install",
                         lambda app, report: events.append("normal_copy"))
+    monkeypatch.setattr(quarantine_smoke, "verify_entitlements",
+                        lambda app, paths: events.append("entitlements") or {"checked": len(paths)})
+    monkeypatch.setattr(quarantine_smoke.bundle_smoke, "deno_smoke",
+                        lambda contents, scratch, env: events.append("deno") or {"eval": "42"})
     monkeypatch.setattr(quarantine_smoke, "launch", lambda *a, **kw:
                         events.append("normal_launch" if kw.get("translocated") is False else "launch"))
     output = tmp_path / "output"
     if quarantine_present:
         quarantine_smoke.smoke(dmg, output, TEAM)
-        assert events == ["install", "assess", "launch", "assess", "normal_copy", "assess", "normal_launch", "assess"]
+        assert events == ["install", "assess", "launch", "assess", "normal_copy", "assess",
+                          "entitlements", "deno", "normal_launch", "assess"]
         assert any(c[:2] == ["/usr/bin/syspolicy_check", "distribution"] for c in calls)
         assert any("context:primary-signature" in c for c in calls)
         assert any("--verbose=2" in c and "--strict" in c and "--deep" in c for c in calls)

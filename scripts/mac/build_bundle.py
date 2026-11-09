@@ -21,6 +21,7 @@ import urllib.request
 
 from qualify_deps import ROOT, sha256, standalone_pins, verify_ui_wheels, write_json
 from wheel_lock import LOCK_NAME, verify
+import deno_bundle
 import ffmpeg_bundle
 
 # The Windows build shares this stager: one pin, one hash check, one layout.
@@ -30,6 +31,7 @@ import stage_whisper_model  # noqa: E402
 MAC = Path(__file__).parent
 # Rebuilds in the same checkout reuse the verified download (as on Windows).
 WHISPER_CACHE = ROOT / "build/cache/whisper-model"
+DENO_CACHE = ROOT / "build/cache/deno"
 # Read-only app data beside the Python sources; codesign seals it with the
 # other resources. uoink_reliability.bundled_model_root() finds it here.
 WHISPER_BUNDLE = Path("Contents/Resources/models/whisper-bundled")
@@ -528,6 +530,9 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None,
     write_json(notices / "resolved-wheels.json", {"wheels": rows})
     write_json(notices / "packages.json", json.loads(packages))
     ffmpeg = ffmpeg_bundle.install(ffmpeg_output, app, notices)
+    # Deno lets yt-dlp solve YouTube player challenges. It is the only signed
+    # binary with an entitlement (allow-jit); see deno_bundle.py.
+    deno = deno_bundle.install(app, notices, DENO_CACHE)
     cli = contents / "Helpers/uoink"
     shutil.copyfile(ROOT / "installer/mac/cli.sh", cli)
     cli.chmod(0o755)
@@ -536,7 +541,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None,
     shutil.copyfile(output / "development-pruned.json", notices / "development-pruned.json")
     rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
-                                       "platform": platform.platform(), "ffmpeg": ffmpeg,
+                                       "platform": platform.platform(), "ffmpeg": ffmpeg, "deno": deno,
                                        "whisper_model": whisper,
                                        "signing": "whole app ad-hoc; no Developer ID or notarization",
                                        "minimum_os": MINIMUM_MACOS,

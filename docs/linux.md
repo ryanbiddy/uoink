@@ -15,7 +15,7 @@ browser extension. An agent uses the CLI or MCP tools to capture and search.
 - Both `ffmpeg` and `ffprobe` on PATH. The installer prints these commands
   when either is missing.
 - Optional: Deno 2.3 or newer on PATH. yt-dlp runs YouTube's player code in
-  Deno, so YouTube capture works best with it. The installer only prints a
+  Deno, so YouTube capture works best with it (the Windows installer and the Mac app bundle their own). The installer only prints a
   note when Deno is missing, and Uoink does not download Deno for you.
 
 | Distribution | Command |

@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+import plistlib
 import re
 import subprocess
+
+from deno_bundle import ALLOWED_ENTITLEMENTS, HELPER as DENO_HELPER
 
 
 def command(argv) -> dict:
@@ -59,3 +62,34 @@ def verify_notarized(app: Path, dmg: Path, team: str, report: dict, *, execute=c
             require(re.search(r"(?m)^source=Notarized Developer ID\s*$", assessment),
                     "app: spctl source is not Notarized Developer ID")
     report["ok"] = True
+
+
+def parse_entitlements(output: str) -> dict:
+    """Read the XML plist `codesign -d --entitlements - --xml` writes to stdout (stderr only carries
+    an Executable= line, so it is ignored); no plist means none."""
+    start = output.find("<?xml")
+    if start < 0:
+        return {}
+    end = output.find("</plist>", start)
+    if end < 0:
+        raise ValueError("Entitlements plist is not terminated")
+    return plistlib.loads(output[start:end + len("</plist>")].encode())
+
+
+def verify_entitlements(app: Path, macho_paths, *, execute=command) -> dict:
+    """Only Helpers/deno may hold entitlements, and exactly allow-jit. Never --deep."""
+    found, seen_deno = {}, False
+    for path in sorted(Path(p) for p in macho_paths):
+        relative = path.relative_to(app).as_posix()
+        result = execute(["/usr/bin/codesign", "-d", "--entitlements", "-", "--xml", path])
+        require(result["exit"] == 0, f"{relative}: cannot read entitlements")
+        entitlements = parse_entitlements(result["stdout"])
+        found[relative] = entitlements
+        if relative == DENO_HELPER:
+            seen_deno = True
+            require(entitlements == ALLOWED_ENTITLEMENTS,
+                    f"{relative}: entitlements must be exactly allow-jit, got {sorted(entitlements)}")
+        else:
+            require(not entitlements, f"{relative}: unexpected entitlements {sorted(entitlements)}")
+    require(seen_deno, "Helpers/deno was not checked")
+    return found
