@@ -1,5 +1,10 @@
 # NLTK path-policy source backport
 
+**No longer used (as of this change).** The Windows installer now pins upstream
+NLTK 3.10.4, which includes these fixes (GHSA-8mgp-746c-j5xp and
+GHSA-j456-xh4h-cpf2). build.ps1 does not read anything in this folder. It is
+kept for reference and history only.
+
 This patch targets the six artifact APIs named by GHSA-8mgp-746c-j5xp in
 NLTK 3.10.3. The integration verdict, test counts and limits
 live in an internal review note. It is source preparation,

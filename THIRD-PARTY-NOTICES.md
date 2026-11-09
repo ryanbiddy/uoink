@@ -67,7 +67,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | multidict | 6.9.1 | Apache License 2.0 | https://github.com/aio-libs/multidict |
 | narwhals | 2.24.0 | MIT | https://github.com/narwhals-dev/narwhals |
 | networkx | 3.6.1 | BSD-3-Clause | https://networkx.org/ |
-| nltk | 3.10.3+uoink.pathsec1 | Apache Software License | https://www.nltk.org/ |
+| nltk | 3.10.4 | Apache Software License | https://www.nltk.org/ |
 | numpy | 2.4.6 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
 | onnxruntime | 1.27.0 | MIT License | https://onnxruntime.ai |
@@ -147,8 +147,6 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | yarl | 1.25.1 | Apache-2.0 | https://github.com/aio-libs/yarl |
 | yt-dlp | 2026.10.21 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 | yt-dlp-ejs | 0.8.0 | Unlicense AND MIT AND ISC | https://github.com/yt-dlp/ejs |
-
-NLTK 3.10.3+uoink.pathsec1 is a local path-policy backport of upstream 3.10.3. Its Apache 2.0 licence is retained. The exact patch, original source and build provenance are in vendor/nltk-pathsec in the source repository. This modification does not qualify model loading or clear unrelated dependency advisories.
 
 ## Supplemental upstream notices
 

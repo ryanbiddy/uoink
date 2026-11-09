@@ -2,13 +2,15 @@
 
 Status: launch-facing for the current helper and extension
 
-The Living Library candidate build selects a verified local NLTK path-policy
-backport, `3.10.3+uoink.pathsec1`. The fixed wheel, original source, patch and
-provenance are retained under vendor/nltk-pathsec. At this source checkpoint,
-replacement staging and installation are still pending; package 08 contains
-upstream 3.10.3. Keep the original advisory observation alongside any later
-installed backport disposition. This patch does not qualify model loading or
-resolve the retained Torch and Transformers findings.
+The Windows installer ships upstream NLTK 3.10.4, pinned with its wheel hash in
+`requirements-installer-lock.txt`. It replaces the locally patched
+`3.10.3+uoink.pathsec1` build: 3.10.4 fixes GHSA-8mgp-746c-j5xp (model-artifact
+APIs bypassing the path policy) and GHSA-j456-xh4h-cpf2 (the Weka classifier
+model path), and covers every function the local patch changed. Uoink does not
+import NLTK itself; WhisperX requires it. The old patch, original source and
+provenance stay under vendor/nltk-pathsec for reference only and are no longer
+used by the build. This does not qualify model loading or resolve any other
+dependency finding.
 
 > Compatibility note: the canonical auth header is `X-Uoink-Token` and the
 > `/token` gate is `X-Uoink-Client: uoink-extension`. The shipped extension
@@ -638,6 +640,28 @@ files. Migration to a safer loading path remains planned.
 Uoink 3.10.0 ships unsigned: `SigningCertificateThumbprint=none`. Signing is
 skipped for this release; the signing path remains available for a future release.
 Windows SmartScreen warnings are expected for unsigned builds.
+
+### Advisories that wait on WhisperX
+
+A few dependency advisories stay open because the fixed versions do not fit
+WhisperX 3.8.6, which the installer ships. They are left open on purpose, not
+dismissed, so they close when the pins move.
+
+- **torch 2.8.0** (fixes in 2.9.1, 2.10.0 and 2.13.0). WhisperX 3.8.6 requires
+  `torch~=2.8.0`, and so does its 3.8.7rc1 release candidate. The two remote
+  code execution advisories are about loading untrusted checkpoint files. Uoink
+  loads only checkpoints that ship with the app or come from the named model
+  repositories described above.
+- **transformers 4.57.6** (fixes in 5.x). Every transformers 5.x release needs
+  huggingface-hub 1.x, and WhisperX 3.8.6 requires huggingface-hub below 1.0.
+  Uoink never imports transformers. WhisperX uses it only during speaker
+  labeling, to load a wav2vec2 alignment model for languages other than
+  English. English alignment uses torchaudio's built-in
+  `WAV2VEC2_ASR_BASE_960H` instead. The advisories cover `Trainer`,
+  `save_pretrained`, LightGlue and custom generation code, none of which that
+  path calls.
+
+Both move in the first WhisperX release that allows them.
 
 ## macOS status
 

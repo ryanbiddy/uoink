@@ -208,7 +208,7 @@ cleanup and isolation checks. Credentials and keychains are never uploaded.
 - Qualification uses the shipping pins in `requirements-installer-lock.txt`,
   excludes only `scripts/mac/dependency-exclusions.json`, adds the five hashed
   PyObjC 12.2.2 pins in `scripts/mac/ui-wheels.json`, and retains the reviewed
-  source-wheel/NLTK patches. `payload.json` names that Darwin-only input. After a successful macOS 15 solve,
+  source-wheel pins. `payload.json` names that Darwin-only input. After a successful macOS 15 solve,
   `wheel_lock.py` writes `requirements-macos-arm64-lock.txt` and
   `resolved-wheels.json` into the wheel artifact.
 - Build verifies those files against `wheel-manifest.json` and every selected

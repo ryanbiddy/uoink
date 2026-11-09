@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -155,7 +154,7 @@ def collect_wheels(source: Path, destination: Path | None, package: str | None =
 
 
 def windows_build_pin(name: str) -> str:
-    """Use the reviewed Windows build's tooling and final NLTK hash verbatim."""
+    """Use the reviewed Windows build's tooling pins verbatim."""
     source = (ROOT / "build.ps1").read_text(encoding="utf-8-sig")
     matches = re.findall(r"^\$" + re.escape(name) + r"\s*=\s*'([^']+)'", source, re.MULTILINE)
     if len(matches) != 1:
@@ -164,7 +163,7 @@ def windows_build_pin(name: str) -> str:
 
 
 def build_source_wheels(included: list[tuple[str, str]], wheels: Path, output: Path) -> dict:
-    """Only the two reviewed pure-Python sdists and the existing NLTK patch.
+    """Only the two reviewed pure-Python sdists.
 
     The sdists are pinned to the BLAKE2-256 content addresses retained in the
     September Python qualification. Verify bytes before executing build hooks;
@@ -173,8 +172,6 @@ def build_source_wheels(included: list[tuple[str, str]], wheels: Path, output: P
     sources = json.loads(SOURCE_PINS.read_text(encoding="utf-8"))
     requested = {canonical(name): version for name, version in included}
     selected = {key: value for key, value in sources.items() if key in requested}
-    if "nltk" in requested:
-        selected["nltk"] = {"version": "3.10.3+uoink.pathsec1"}
     if not selected:
         return {}
     logs = output / "logs"
@@ -200,40 +197,19 @@ def build_source_wheels(included: list[tuple[str, str]], wheels: Path, output: P
                 # rejects linked ancestors, so pass canonical scratch paths.
                 scratch = Path(temporary).resolve()
                 built = scratch / "built"
-                if key == "nltk":
-                    spec = importlib.util.spec_from_file_location(
-                        "nltk_pathsec_builder", ROOT / "scripts/build_nltk_pathsec_wheel.py")
-                    builder = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(builder)
-                    requirement = scratch / "upstream.txt"
-                    requirement.write_text(
-                        f"nltk==3.10.3 --hash=sha256:{builder.EXPECTED_WHEEL_SHA256}\n", encoding="utf-8")
-                    command = [sys.executable, "-m", "pip", "--isolated", "download", "--no-deps",
-                               "--only-binary=:all:", "--require-hashes", "--no-cache-dir",
-                               "--index-url", "https://pypi.org/simple", "--dest", str(scratch),
-                               "-r", str(requirement)]
-                    if run_logged(command, logs / "nltk-upstream.txt"):
-                        raise ValueError("Pinned NLTK upstream download failed")
-                    provenance = builder.build_nltk_wheel(scratch / builder.EXPECTED_WHEEL_NAME, built)
-                    expected = windows_build_pin("NLTK_PATHSEC_SHA256")
-                    if sha256(built / builder.OUTPUT_WHEEL_NAME) != expected:
-                        raise ValueError("Patched NLTK wheel differs from the Windows build hash")
-                    row.update(upstream_sha256=builder.EXPECTED_WHEEL_SHA256,
-                               expected_wheel_sha256=expected, provenance=provenance)
-                else:
-                    source = scratch / pin["url"].rsplit("/", 1)[1]
-                    with request(pin["url"]) as response, source.open("wb") as stream:
-                        shutil.copyfileobj(response, stream)
-                    actual = hashlib.blake2b(source.read_bytes(), digest_size=32).hexdigest()
-                    row.update(source_url=pin["url"], source_blake2b_256=actual, source_sha256=sha256(source))
-                    if actual != pin["blake2b_256"]:
-                        raise ValueError("Pinned sdist BLAKE2-256 mismatch")
-                    built.mkdir()
-                    command = [sys.executable, "-m", "pip", "--isolated", "wheel", "--no-deps",
-                               "--no-build-isolation", "--no-index", "--no-cache-dir",
-                               "--wheel-dir", str(built), str(source)]
-                    if run_logged(command, logs / f"{key}-source-build.txt", timeout=300):
-                        raise ValueError("Pinned sdist wheel build failed")
+                source = scratch / pin["url"].rsplit("/", 1)[1]
+                with request(pin["url"]) as response, source.open("wb") as stream:
+                    shutil.copyfileobj(response, stream)
+                actual = hashlib.blake2b(source.read_bytes(), digest_size=32).hexdigest()
+                row.update(source_url=pin["url"], source_blake2b_256=actual, source_sha256=sha256(source))
+                if actual != pin["blake2b_256"]:
+                    raise ValueError("Pinned sdist BLAKE2-256 mismatch")
+                built.mkdir()
+                command = [sys.executable, "-m", "pip", "--isolated", "wheel", "--no-deps",
+                           "--no-build-isolation", "--no-index", "--no-cache-dir",
+                           "--wheel-dir", str(built), str(source)]
+                if run_logged(command, logs / f"{key}-source-build.txt", timeout=300):
+                    raise ValueError("Pinned sdist wheel build failed")
                 found, errors = collect_wheels(built, None, key)
                 if (errors or len(found) != 1 or found[0]["version"] != requested[key]
                         or found[0]["wheel_tag"] not in ("py3-none-any", "py2.py3-none-any")):
