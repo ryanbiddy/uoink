@@ -2414,10 +2414,11 @@ YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
               "--extractor-args", "twitter:api=syndication"]
 if sys.platform == "darwin":
     YTDLP_CMD.extend(_platform.ytdlp_media_args())
-else:
-    # Ignore any personal yt-dlp config file, as the Mac bundle already does.
-    # Otherwise options such as --cookies-from-browser or a forced player
-    # client in the user's own config would change what Uoink sends.
+# Ignore any personal yt-dlp config file on every platform. The Mac app bundle
+# already gets the flag from ytdlp_media_args; a Mac run from source does not.
+# Otherwise options such as --cookies-from-browser or a forced player client in
+# the user's own config would change what Uoink sends.
+if "--ignore-config" not in YTDLP_CMD:
     YTDLP_CMD.append("--ignore-config")
 # yt-dlp needs a JavaScript runtime to solve YouTube's player challenges. Use the
 # Deno that the installer put in bin\ (nothing is added if it is missing).
