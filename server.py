@@ -14791,9 +14791,10 @@ def _keyring_display_name() -> str:
     return _platform.keyring_display_name()
 
 
-def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
+def _probe_command(cmd: list[str], expect: str | None = None) -> tuple[str, str | None]:
     """Run a short version-probe subprocess. Returns (status, detail) where
-    status is 'ok' / 'error' and detail is a one-line message."""
+    status is 'ok' / 'error' and detail is a one-line message. With `expect`,
+    stdout (stripped) must equal it exactly or the probe is an error."""
     try:
         out = subprocess.run(
             cmd, capture_output=True, text=True, timeout=10, **SUBPROCESS_KW,
@@ -14805,6 +14806,9 @@ def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
     if out.returncode != 0:
         first_err = (out.stderr or "").strip().splitlines()
         return "error", first_err[0] if first_err else f"exit code {out.returncode}"
+    if expect is not None and (out.stdout or "").strip() != expect:
+        first_line = (out.stdout or "").strip().splitlines()
+        return "error", f"expected {expect!r}, got {first_line[0] if first_line else 'no output'!r}"
     first_line = (out.stdout or "").strip().splitlines()
     return "ok", first_line[0] if first_line else "ok"
 
@@ -14957,10 +14961,17 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 
     # 7b. js_runtime. yt-dlp runs YouTube's player code in Deno. The installer
     # ships one; without it yt-dlp falls back to a deno on PATH. Optional, so
-    # a miss is a warning, not an error.
+    # a miss is a warning, not an error. The probe evaluates real JavaScript, so a
+    # Deno that starts but cannot run code (e.g. blocked JIT) is caught too.
     js_args = _platform.ytdlp_js_runtime_args(_BIN_DIR)
     deno_cmd = js_args[1].split(":", 1)[1] if js_args else "deno"
-    status, detail = _probe_command([deno_cmd, "--version"])
+    # Same lockdown yt-dlp uses: no permissions granted, no prompts, no remote
+    # or npm modules, no lockfile, no config. A Deno that cannot create a V8
+    # isolate (e.g. macOS hardened runtime without JIT) crashes here.
+    status, detail = _probe_command(
+        [deno_cmd, "eval", "--no-prompt", "--no-remote", "--no-npm", "--no-lock",
+         "--no-config", "--node-modules-dir=none", "console.log(6*7)"],
+        expect="42")
     if status == "ok":
         add("js_runtime", "ok", "JavaScript runtime (Deno) is available" if public else detail)
     else:

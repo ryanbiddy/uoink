@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Diagnose now checks that Deno can run JavaScript, not only that it starts. A Deno
+  that cannot run code (for example one blocked by macOS code signing) shows as
+  a warning.
+
 ## [3.16.1] - 2026-11-08
 
 ### Added
