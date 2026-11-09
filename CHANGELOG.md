@@ -36,6 +36,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   file, as the Mac app already did. Options in that file, such as browser
   cookies or a forced player client, no longer change what Uoink sends.
 
+### Fixed
+
+- Diagnose now checks that Deno can run JavaScript, not only that it starts. A Deno
+  that cannot run code (for example one blocked by macOS code signing) shows as
+  a warning.
+
 ## [3.16.0] - 2026-11-08
 
 ### Added

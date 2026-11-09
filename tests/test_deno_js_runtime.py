@@ -89,3 +89,65 @@ def test_license_files_are_pinned_and_shipped():
         assert f"'third-party-notices\\{name}'" in BUILD
         assert f'Source: "staging\\third-party-notices\\{name}"' in ISS
     assert "MIT License" in (folder / "deno-2.9.8-MIT-LICENSE.txt").read_text(encoding="utf-8")
+
+
+# --- /diagnose js_runtime must evaluate real JavaScript ----------------------
+import subprocess  # noqa: E402
+
+
+def test_deno_probe_command_evals_with_no_permissions(monkeypatch):
+    seen = []
+    monkeypatch.setattr(server, "_probe_command",
+                        lambda cmd, expect=None: seen.append((cmd, expect)) or ("ok", "42"))
+    server._build_diagnose_payload(public=False)
+    cmd, expect = next(s for s in seen if "eval" in s[0])
+    assert cmd[1] == "eval" and expect == "42"
+    assert not [a for a in cmd if a.startswith("--allow-") or a in ("-A", "--allow-all")]
+    assert "--no-prompt" in cmd and "--no-remote" in cmd and "--no-lock" in cmd
+
+
+def _fake_run(monkeypatch, stdout="", stderr="", returncode=0, raises=None):
+    def run(cmd, **kw):
+        if raises:
+            raise raises
+        return subprocess.CompletedProcess(cmd, returncode, stdout, stderr)
+    monkeypatch.setattr(server.subprocess, "run", run)
+
+
+def _js_runtime_check():
+    checks = server._build_diagnose_payload(public=False)["checks"]
+    return next(c for c in checks if c["name"] == "js_runtime")
+
+
+def _only_deno_fake(monkeypatch, **fake):
+    real = server._probe_command
+    _fake_run(monkeypatch, **fake)
+    monkeypatch.setattr(server, "_probe_command",
+                        lambda cmd, expect=None: real(cmd, expect) if "eval" in cmd
+                        else ("ok", "stub"))
+
+
+def test_js_runtime_ok_when_deno_prints_42(monkeypatch):
+    _only_deno_fake(monkeypatch, stdout="42\n")
+    assert _js_runtime_check()["status"] == "ok"
+
+
+def test_js_runtime_warns_on_wrong_answer(monkeypatch):
+    _only_deno_fake(monkeypatch, stdout="43\n")
+    check = _js_runtime_check()
+    assert check["status"] == "warning" and "43" in check["detail"]
+
+
+def test_js_runtime_warns_on_crash_with_stderr_detail(monkeypatch):
+    _only_deno_fake(monkeypatch, returncode=-5,
+                    stderr="Failed to reserve virtual memory for CodeRange\n")
+    check = _js_runtime_check()
+    assert check["status"] == "warning"
+    assert "CodeRange" in check["detail"]
+
+
+def test_js_runtime_warns_on_nonzero_exit_and_timeout(monkeypatch):
+    _only_deno_fake(monkeypatch, returncode=1)
+    assert _js_runtime_check()["status"] == "warning"
+    _only_deno_fake(monkeypatch, raises=subprocess.TimeoutExpired("deno", 10))
+    assert _js_runtime_check()["status"] == "warning"
