@@ -10,12 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.2] - 2026-11-09
+
 ### Added
 
 - The Mac app now bundles Deno 2.9.8 (`Contents/Helpers/deno`, Apple Silicon) so yt-dlp
   can solve YouTube's player challenges without you installing anything. It is signed
   with a single extra permission, allow-jit, which Deno needs to run JavaScript under
   macOS's hardened runtime. No other file in the app gets any extra permission.
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
 
 ### Fixed
 
