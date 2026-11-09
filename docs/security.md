@@ -641,6 +641,28 @@ Uoink 3.10.0 ships unsigned: `SigningCertificateThumbprint=none`. Signing is
 skipped for this release; the signing path remains available for a future release.
 Windows SmartScreen warnings are expected for unsigned builds.
 
+### Advisories that wait on WhisperX
+
+A few dependency advisories stay open because the fixed versions do not fit
+WhisperX 3.8.6, which the installer ships. They are left open on purpose, not
+dismissed, so they close when the pins move.
+
+- **torch 2.8.0** (fixes in 2.9.1, 2.10.0 and 2.13.0). WhisperX 3.8.6 requires
+  `torch~=2.8.0`, and so does its 3.8.7rc1 release candidate. The two remote
+  code execution advisories are about loading untrusted checkpoint files. Uoink
+  loads only checkpoints that ship with the app or come from the named model
+  repositories described above.
+- **transformers 4.57.6** (fixes in 5.x). Every transformers 5.x release needs
+  huggingface-hub 1.x, and WhisperX 3.8.6 requires huggingface-hub below 1.0.
+  Uoink never imports transformers. WhisperX uses it only during speaker
+  labeling, to load a wav2vec2 alignment model for languages other than
+  English. English alignment uses torchaudio's built-in
+  `WAV2VEC2_ASR_BASE_960H` instead. The advisories cover `Trainer`,
+  `save_pretrained`, LightGlue and custom generation code, none of which that
+  path calls.
+
+Both move in the first WhisperX release that allows them.
+
 ## macOS status
 
 Uoink 3.11.2 ships a Mac preview for Apple Silicon. The app and DMG are signed
