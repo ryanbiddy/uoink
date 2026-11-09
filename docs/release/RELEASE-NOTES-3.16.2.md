@@ -4,7 +4,7 @@
 
 This release puts Deno inside the Mac app, makes the Deno check in Diagnose stricter and refreshes libraries to clear open security alerts.
 
-- **Deno ships inside the Mac app.** YouTube capture on a Mac can now solve YouTube's player challenges without you installing anything, like Windows since 3.16.1. Deno is signed with one extra permission, allow-jit, which it needs to run JavaScript under macOS's hardened runtime. No other file in the app gets any extra permission. The DMG grows by about N MB. <!-- TODO: orchestrator fills N from the signed DMG -->
+- **Deno ships inside the Mac app.** YouTube capture on a Mac can now solve YouTube's player challenges without you installing anything, like Windows since 3.16.1. Deno is signed with one extra permission, allow-jit, which it needs to run JavaScript under macOS's hardened runtime. No other file in the app gets any extra permission. The DMG grows by about 18 MB.
 - **Diagnose checks that Deno can run JavaScript.** It no longer only checks that Deno starts. A Deno that cannot run code, for example one blocked by macOS code signing, shows as a warning.
 - **Security.** The Windows installer's bundled libraries are refreshed to clear open alerts: PyJWT 2.15.1, aiohttp 3.14.5, urllib3 2.8.0, setuptools 84.2.1, Mako 1.4.3, multidict 6.9.1, yarl 1.25.1 and the OpenTelemetry packages 1.45.1. NLTK moves to upstream 3.10.4. crawl4ai is no longer installed by default in source installs. Neither installer ever shipped it. Uoink uses it only if you install it yourself.
 - **Linux** still uses a Deno 2.3 or newer on your PATH.
@@ -60,9 +60,9 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.16.2/docs/linux.m
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `Uoink-Setup-3.16.2.exe` | TBD | TBD |
-| `uoink-3.16.2.mcpb` | TBD | TBD |
-| `Uoink-3.16.2-macos-arm64.dmg` | TBD | TBD |
-| `uoink-3.16.2-macos.mcpb` | TBD | TBD |
+| `Uoink-Setup-3.16.2.exe` | 548,622,064 B | `895e0379e6c9d97d8e1eec5fa8d823b7afb8b54b5b3afc52aad6b4dd702d5a1e` |
+| `uoink-3.16.2.mcpb` | 119,763 B | `944da127e8324948bd9e8ad5d57a59c7bf54df40c3e8a900e1c3f6101c886d04` |
+| `Uoink-3.16.2-macos-arm64.dmg` | 735,192,482 B | `e89572108fdabb7e6079accc39319dad1f598169ee687e298069eae92f0a7a02` |
+| `uoink-3.16.2-macos.mcpb` | 116,301 B | `0556330205fbffad2a61839c32a0c010aa748ec01f4be758edf323e0f88c9ae0` |
 
-The Mac DMG is signed with Developer ID and notarized (mac-qualify run TBD).
+The Mac DMG is signed with Developer ID and notarized (mac-qualify run 42623218976).
