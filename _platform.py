@@ -127,9 +127,22 @@ def ytdlp_js_runtime_args(bin_dir: Path | None = None) -> list[str]:
     """Point yt-dlp at the bundled Deno, if the installer shipped one.
 
     yt-dlp runs YouTube's player code in a JavaScript runtime. The Windows
-    installer puts deno.exe in the bin folder. Without that file we add nothing, and
-    yt-dlp still finds a deno on PATH by itself.
+    installer puts deno.exe in the bin folder, and the Mac app puts deno in
+    Contents/Helpers. Without that file we add nothing, and yt-dlp still finds a
+    deno on PATH by itself.
     """
+    contents = mac_bundle_contents()
+    if contents is not None:
+        # The Mac app keeps Deno next to FFmpeg, in Contents/Helpers. In bundle
+        # mode that location wins over any bin_dir the caller passes.
+        helpers = contents / "Helpers"
+        path = helpers / "deno"
+        try:
+            if helpers.is_symlink() or path.is_symlink() or not path.is_file():
+                return []
+        except OSError:
+            return []
+        return ["--js-runtimes", f"deno:{path}"]
     if bin_dir is None:
         bin_dir = Path(__file__).resolve().parent / "bin"
     name = "deno.exe" if sys.platform == "win32" else "deno"

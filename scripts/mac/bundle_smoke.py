@@ -197,6 +197,39 @@ def stdio(python: Path, resources: Path, scratch: Path, env: dict, mode: str, ou
             stop(proc)
 
 
+# Same lockdown flags as the /diagnose probe in server.py. Offline, no permissions.
+DENO_FLAGS = ["eval", "--no-prompt", "--no-remote", "--no-npm", "--no-lock",
+              "--no-config", "--node-modules-dir=none"]
+# A hot loop makes V8 compile optimized code, so a Deno that starts but is not
+# allowed to JIT dies here. The result is a known constant (sum of 0..199999).
+DENO_JIT_LOOP = "let t = 0; for (let i = 0; i < 200000; i++) { t += i % 7 + (i & 3); } console.log(t)"
+
+
+def deno_expected_loop() -> str:
+    return str(sum(i % 7 + (i & 3) for i in range(200000)))
+
+
+def deno_smoke(contents: Path, scratch: Path, env: dict) -> dict:
+    """Run real JavaScript in the bundled Deno. `deno --version` proves nothing:
+    it works even when the hardened runtime blocks V8 from generating code."""
+    deno = contents / "Helpers/deno"
+    assert deno.is_file() and not deno.is_symlink(), f"Missing bundled Deno: {deno}"
+    deno_env = {**env, "DENO_DIR": str(scratch / "deno-cache"), "DENO_NO_UPDATE_CHECK": "1"}
+    report = {}
+    for name, source, expected in (("eval", "console.log(6*7)", "42"),
+                                   ("jit_loop", DENO_JIT_LOOP, deno_expected_loop())):
+        result = subprocess.run([str(deno), *DENO_FLAGS, source], cwd=scratch, env=deno_env,
+                                capture_output=True, text=True, timeout=60)
+        if result.returncode != 0 or result.stdout.strip() != expected:
+            print(f"deno smoke {name} failed: exit {result.returncode}"
+                  f"\n{result.stderr[-2000:]}",
+                  file=sys.stderr, flush=True)
+            raise AssertionError(f"Bundled Deno {name}: exit {result.returncode}, "
+                                 f"expected {expected!r}, got {result.stdout.strip()[:80]!r}")
+        report[name] = result.stdout.strip()
+    return report
+
+
 def media_smoke(contents: Path, scratch: Path, env: dict) -> dict:
     """Use generated local fixtures; every command names the relocated binary."""
     ffmpeg, ffprobe = [str(contents / "Helpers" / name) for name in ("ffmpeg", "ffprobe")]
@@ -347,6 +380,7 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
             verify_launchagent(config, launcher)
             report["launchagent"] = {"generated": True, "bootstrapped": False, "config": config}
             report["media"] = media_smoke(contents, scratch, env)
+            report["deno"] = deno_smoke(contents, scratch, env)
             report["whisper"] = whisper_smoke(contents, scratch, env)
             cocoa = subprocess.run([str(python), "-B", "-s", "-c", COCOA_IMPORT],
                                    cwd=scratch, env=env, capture_output=True, text=True,

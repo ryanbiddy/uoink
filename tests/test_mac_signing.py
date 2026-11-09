@@ -19,6 +19,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/mac"))
 import build_bundle
+import deno_bundle
 import sign_archives as archives
 import sign_notarize as signing
 import verify_signing
@@ -34,6 +35,7 @@ MACHO = b"\xcf\xfa\xed\xfe" + b"fixture"
 def make_app(root):
     app = root / "Uoink.app"
     for name in ("Contents/MacOS/Uoink", "Contents/Helpers/ffmpeg", "Contents/Helpers/ffprobe",
+                 "Contents/Helpers/deno",
                  "Contents/Resources/Python/bin/python3", "Contents/Resources/Python/lib/native.so"):
         target = app / name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -51,9 +53,15 @@ def test_developer_signing_commands_cover_all_code_without_entitlements_or_deep(
     for path in build_bundle.signing_order(app):
         signing.sign(path, IDENTITY, tmp_path / "fixture-kc", tmp_path)
     assert calls[-1][-1] == app
-    assert len(calls) == 7
+    assert len(calls) == 8
     for call in calls:
-        assert "--deep" not in call and "--entitlements" not in call
+        assert "--deep" not in call
+        # Only the bundled Deno gets an entitlement, and only the allow-jit plist.
+        if call[-1] == app / "Contents/Helpers/deno":
+            assert call[call.index("--entitlements") + 1] == deno_bundle.ENTITLEMENTS
+            assert call.count("--entitlements") == 1
+        else:
+            assert "--entitlements" not in call
         assert call[call.index("--options") + 1] == "runtime"
         assert "--timestamp" in call and "--timestamp=none" not in call
         assert call[call.index("--sign") + 1] == IDENTITY
