@@ -6,7 +6,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | Package | Version | License | Project |
 |---|---|---|---|
 | aiohappyeyeballs | 2.7.1 | Python Software Foundation License | https://github.com/aio-libs/aiohappyeyeballs |
-| aiohttp | 3.14.3 | Apache-2.0 AND MIT | https://github.com/aio-libs/aiohttp |
+| aiohttp | 3.14.5 | Apache-2.0 AND MIT | https://github.com/aio-libs/aiohttp |
 | aiosignal | 1.4.0 | Apache Software License | https://github.com/aio-libs/aiosignal |
 | alembic | 1.18.5 | MIT | https://alembic.sqlalchemy.org |
 | annotated-types | 0.7.0 | MIT License | https://github.com/annotated-types/annotated-types |
@@ -55,7 +55,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | kiwisolver | 1.5.0 | BSD License | https://github.com/nucleic/kiwi |
 | lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | lightning-utilities | 0.15.3 | Apache-2.0 | https://github.com/Lightning-AI/utilities |
-| Mako | 1.3.12 | MIT License | https://www.makotemplates.org/ |
+| Mako | 1.4.3 | MIT | https://www.makotemplates.org/ |
 | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
 | MarkupSafe | 3.0.3 | BSD-3-Clause | https://github.com/pallets/markupsafe/ |
 | matplotlib | 3.11.1 | Python Software Foundation License | https://matplotlib.org |
@@ -64,21 +64,23 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | mdurl | 0.1.2 | MIT License | https://github.com/executablebooks/mdurl |
 | more-itertools | 11.1.0 | MIT | https://github.com/more-itertools/more-itertools |
 | mpmath | 1.3.0 | BSD License | http://mpmath.org/ |
-| multidict | 6.7.1 | Apache License 2.0 | https://github.com/aio-libs/multidict |
+| multidict | 6.9.1 | Apache License 2.0 | https://github.com/aio-libs/multidict |
 | narwhals | 2.24.0 | MIT | https://github.com/narwhals-dev/narwhals |
 | networkx | 3.6.1 | BSD-3-Clause | https://networkx.org/ |
 | nltk | 3.10.3+uoink.pathsec1 | Apache Software License | https://www.nltk.org/ |
 | numpy | 2.4.6 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
 | onnxruntime | 1.27.0 | MIT License | https://onnxruntime.ai |
-| opentelemetry-api | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api |
-| opentelemetry-exporter-otlp | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp |
-| opentelemetry-exporter-otlp-proto-common | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common |
-| opentelemetry-exporter-otlp-proto-grpc | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-grpc |
-| opentelemetry-exporter-otlp-proto-http | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http |
-| opentelemetry-proto | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto |
-| opentelemetry-sdk | 1.44.0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk |
-| opentelemetry-semantic-conventions | 0.65b0 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions |
+| opentelemetry-api | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api |
+| opentelemetry-exporter-http-transport | 0.66b1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport |
+| opentelemetry-exporter-otlp | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp |
+| opentelemetry-exporter-otlp-common | 0.66b1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common |
+| opentelemetry-exporter-otlp-proto-common | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common |
+| opentelemetry-exporter-otlp-proto-grpc | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-grpc |
+| opentelemetry-exporter-otlp-proto-http | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http |
+| opentelemetry-proto | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto |
+| opentelemetry-sdk | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk |
+| opentelemetry-semantic-conventions | 0.66b1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions |
 | optuna | 4.9.0 | MIT License | https://optuna.org/ |
 | packaging | 26.2 | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging |
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
@@ -97,7 +99,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pydantic | 2.13.4 | MIT | https://github.com/pydantic/pydantic |
 | pydantic_core | 2.46.4 | MIT | https://github.com/pydantic/pydantic |
 | Pygments | 2.20.0 | BSD-2-Clause | https://pygments.org |
-| PyJWT | 2.13.0 | MIT | https://github.com/jpadilla/pyjwt |
+| PyJWT | 2.15.1 | MIT | https://github.com/jpadilla/pyjwt |
 | pyparsing | 3.3.2 | MIT | https://github.com/pyparsing/pyparsing/ |
 | pystray | 0.19.5 | GNU Lesser General Public License v3 (LGPLv3) | https://github.com/moses-palmer/pystray |
 | python-dateutil | 2.9.0.post0 | Apache Software License; BSD License | https://github.com/dateutil/dateutil |
@@ -117,7 +119,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | safetensors | 0.8.0 | Apache Software License | https://github.com/huggingface/safetensors |
 | scikit-learn | 1.9.0 | BSD-3-Clause | https://scikit-learn.org |
 | scipy | 1.17.1 | BSD License | https://scipy.org/ |
-| setuptools | 83.0.0 | MIT | https://github.com/pypa/setuptools |
+| setuptools | 84.2.1 | MIT | https://github.com/pypa/setuptools |
 | six | 1.17.0 | MIT License | https://github.com/benjaminp/six |
 | sortedcontainers | 2.4.0 | Apache Software License | http://www.grantjenks.com/docs/sortedcontainers/ |
 | SQLAlchemy | 2.0.51 | MIT | https://www.sqlalchemy.org |
@@ -139,10 +141,10 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | typing-inspection | 0.4.2 | MIT | https://github.com/pydantic/typing-inspection |
 | typing_extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
 | tzdata | 2026.3 | Apache-2.0 | https://github.com/python/tzdata |
-| urllib3 | 2.7.0 | MIT | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst |
+| urllib3 | 2.8.0 | MIT | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst |
 | uvicorn | 0.51.0 | BSD-3-Clause | https://uvicorn.dev/ |
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
-| yarl | 1.24.5 | Apache-2.0 | https://github.com/aio-libs/yarl |
+| yarl | 1.25.1 | Apache-2.0 | https://github.com/aio-libs/yarl |
 | yt-dlp | 2026.10.21 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 | yt-dlp-ejs | 0.8.0 | Unlicense AND MIT AND ISC | https://github.com/yt-dlp/ejs |
 

@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   that cannot run code (for example one blocked by macOS code signing) shows as
   a warning.
 
+### Security
+
+- Refreshed the Windows installer's bundled libraries to clear open security alerts: PyJWT 2.15.1, aiohttp 3.14.5, urllib3 2.8.0, setuptools 84.2.1, Mako 1.4.3, multidict 6.9.1, yarl 1.25.1 and the OpenTelemetry packages 1.45.1.
+
 ## [3.16.1] - 2026-11-08
 
 ### Added

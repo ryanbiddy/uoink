@@ -26,7 +26,7 @@ def test_runtime_notice_generation_includes_setuptools_and_excludes_build_tools(
     monkeypatch.setattr(notices.sys, 'argv', ['notices', str(output)])
     assert notices.main() == 0
     text = output.read_text(encoding='utf8')
-    assert '| setuptools | 83.0.0 |' in text
+    assert '| setuptools | 84.2.1 |' in text
     assert '| torch | 2.8.0 |' in text
     for name in ('pip', 'wheel', 'pip-licenses', 'prettytable'):
         assert f'| {name} |' not in text
@@ -47,7 +47,7 @@ def test_actual_trim_patterns_keep_setuptools_startup_support():
     patterns = re.findall(r'"\$StagingDir\\python\\Lib\\site-packages\\([^"\\]+)"', block)
     assert patterns
     from fnmatch import fnmatchcase
-    for entry in ('setuptools', 'setuptools-83.0.0.dist-info', '_distutils_hack', 'distutils-precedence.pth'):
+    for entry in ('setuptools', 'setuptools-84.2.1.dist-info', '_distutils_hack', 'distutils-precedence.pth'):
         assert not any(fnmatchcase(entry, pattern) for pattern in patterns), entry
     for entry in ('pip', 'pip-26.1.2.dist-info', 'wheel', '__pycache__'):
         assert any(fnmatchcase(entry, pattern) for pattern in patterns), entry

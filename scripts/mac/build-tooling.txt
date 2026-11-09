@@ -1,7 +1,7 @@
 # Pure-Python wheels; versions match build.ps1.
-# packaging/setuptools hashes: run 39215500494 deps/wheels.json.
+# packaging hashes: run 39215500494 deps/wheels.json. setuptools hash: PyPI wheel digest (2026-11-09).
 # pip/wheel hashes: retained PyPI simple-index metadata (uv cache).
 pip==26.1.2 --hash=sha256:382ff9f685ee3bc25864f820aa50505825f10f5458ffff07e30a6d96e5715cab
-setuptools==83.0.0 --hash=sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3
+setuptools==84.2.1 --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
 wheel==0.47.0 --hash=sha256:212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced
 packaging==26.2 --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e

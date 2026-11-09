@@ -118,7 +118,7 @@ $GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT
 # locally built wheels even though the tools themselves are stripped. Pin it
 # just as strictly as the final runtime graph.
 $PIP_VERSION        = '26.1.2'
-$SETUPTOOLS_VERSION = '83.0.0'
+$SETUPTOOLS_VERSION = '84.2.1'
 $WHEEL_VERSION      = '0.47.0'
 $PACKAGING_VERSION  = '26.2'
 # C-02 (license compliance): ffmpeg is now BtbN's win64-LGPL build, not the
