@@ -65,6 +65,6 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.16.3/docs/linux.m
 | `Uoink-Setup-3.16.3.exe` | TBD | TBD |
 | `uoink-3.16.3.mcpb` | TBD | TBD |
 | `Uoink-3.16.3-macos-arm64.dmg` | TBD | TBD |
-| `uoink-3.16.3-macos.mcpb` | MACTBD | TBD |
+| `uoink-3.16.3-macos.mcpb` | TBD | TBD |
 
 The Mac DMG is signed with Developer ID and notarized (mac-qualify run TBD).
