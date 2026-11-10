@@ -7,7 +7,7 @@ This release makes installing Uoink look like installing an official app, on Win
 - **The Windows installer's buttons read right again.** In recent Windows installers, the Next, Install and Finish buttons showed `*` instead of their names. They say Next, Install and Finish again.
 - **A one-screen Windows install.** Setup opens on one screen with the Uoink icon and an Install button, then shows its progress, then "Uoink is installed". To pick the install folder, the desktop shortcut or the PATH option for AI agents, tick **Choose the install folder and shortcuts** first. Setup follows Windows light and dark mode. Over an existing install, it says **Update Uoink**.
 - **The Mac app has its icon.** Finder, the Dock and Launchpad showed the generic app icon for Uoink. They now show the Uoink icon.
-- **A real Mac install window.** The DMG opens to a window with Uoink on the left, Applications on the right and an arrow between them. Drag Uoink across and you're done. The DMG is also about TBD MB smaller, from tighter compression. The app inside is the same size.
+- **A real Mac install window.** The DMG opens to a window with Uoink on the left, Applications on the right and an arrow between them. Drag Uoink across and you're done. The DMG is also about 222 MB smaller, from tighter compression. The app inside is the same size.
 - **One icon everywhere.** Setup, the Start menu and desktop shortcuts, the uninstaller, notifications and the dashboard window use the same icon as the uoink.app download page.
 
 The MCP server still exposes 99 tools by default, 36 with `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
@@ -62,9 +62,9 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.16.3/docs/linux.m
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `Uoink-Setup-3.16.3.exe` | TBD | TBD |
-| `uoink-3.16.3.mcpb` | TBD | TBD |
-| `Uoink-3.16.3-macos-arm64.dmg` | TBD | TBD |
-| `uoink-3.16.3-macos.mcpb` | TBD | TBD |
+| `Uoink-Setup-3.16.3.exe` | 549,031,529 B | `9ad7efabbca4d80375fe50e9c9aba04dd686e14c36f04e139b227cb28358d533` |
+| `uoink-3.16.3.mcpb` | 119,830 B | `6ab1769c192ba48e0c264bdc0764efb246a5c5f78b50df0c6afc8088da48dfa8` |
+| `Uoink-3.16.3-macos-arm64.dmg` | 513,312,753 B | `338acaece74728f680368a40caa2d12f279066d3dbdcf958e94377bf243ddfe2` |
+| `uoink-3.16.3-macos.mcpb` | 116,301 B | `cbb6cc0d991727e495bbcddc383cdacbb2bb2514c9050ff3e7afc380f5e5c025` |
 
-The Mac DMG is signed with Developer ID and notarized (mac-qualify run TBD).
+The Mac DMG is signed with Developer ID and notarized (mac-qualify run 42759954325).
