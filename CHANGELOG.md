@@ -10,6 +10,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.16.3] - 2026-11-10
+
+### Changed
+
+- The Windows installer opens on one screen with the Uoink icon and an Install button,
+  then shows progress, then "Uoink is installed". Ticking **Choose the install folder and
+  shortcuts** brings back the folder, options and ready pages. Setup follows Windows light
+  and dark mode, says **Update Uoink** over an existing install, and isolated installs keep
+  every page.
+- The Mac DMG opens to a fixed window with Uoink on the left, Applications on the right and
+  an arrow between them, built with dmgbuild. Read Me.txt is gone; its facts are on the
+  background. The DMG is smaller from tighter compression; the app inside is unchanged.
+- Setup, shortcuts, the uninstaller, notifications, the dashboard window and the Mac app all
+  use one app icon, the one on the uoink.app download page (`installer/app_icon.py`).
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
+
+### Fixed
+
+- The Windows installer's Next, Install and Finish buttons showed `*` instead of their
+  names. The wizard saved the Next caption before Inno had set it and wrote it back on
+  every page.
+- The Mac app showed the generic app icon in Finder, the Dock and Launchpad. The bundle
+  build now makes `Contents/Resources/Uoink.icns`, and the smoke checks require it.
+
 ## [3.16.2] - 2026-11-09
 
 ### Added
