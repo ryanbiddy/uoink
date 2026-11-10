@@ -106,6 +106,16 @@ def test_one_click_install_skips_pages_unless_customize_is_ticked() -> None:
     require("SetupWindowTitle={#AppName} Setup" in ISS, "window title is not 'Uoink Setup'")
 
 
+def test_isolated_welcome_button_says_next() -> None:
+    """Isolated installs keep every page, so the Welcome button must not say
+    Install there (it leads to the folder page), and the customize box is hidden."""
+    caption = pascal_routine("function ActionCaption(): String;")
+    require("if CustomizeChosen or IsolatedInstall() then" in caption,
+            "isolated Welcome button would read Install but lead to the folder page")
+    require("CustomizeBox.Visible := not IsolatedInstall();" in pascal_routine("procedure BuildWelcomePage();"),
+            "the customize box shows in isolated mode, where it does nothing")
+
+
 def test_installer_copy_avoids_old_and_banned_words() -> None:
     messages = ISS.split("[Messages]", 1)[1].split("[Languages]", 1)[0]
     for word in ("corpus", "receipts", "seamless", "robust", "leverage", "delve", "straightforward"):
@@ -152,6 +162,7 @@ def main() -> int:
     test_welcome_page_is_dpi_safe()
     test_next_button_caption_is_never_restored_from_initialize_wizard()
     test_one_click_install_skips_pages_unless_customize_is_ticked()
+    test_isolated_welcome_button_says_next()
     test_installer_copy_avoids_old_and_banned_words()
     test_verify_script_is_files_only_by_default()
     test_first_run_splash_suppresses_ready_toast()

@@ -1477,7 +1477,9 @@ end;
 
 function ActionCaption(): String;
 begin
-  if CustomizeChosen then
+  { Isolated installs never skip the folder, options and ready pages, so the
+    Welcome button leads to Next there, like a ticked customize box. }
+  if CustomizeChosen or IsolatedInstall() then
     Result := SetupMessage(msgButtonNext)
   else if IsUpdateInstall() then
     Result := 'Update'
@@ -1532,6 +1534,8 @@ begin
   CustomizeBox.Caption := 'Choose the install folder and shortcuts';
   CustomizeBox.Checked := False;
   CustomizeBox.OnClick := @CustomizeBoxClick;
+  { Isolated installs always show every page, so the box would do nothing. }
+  CustomizeBox.Visible := not IsolatedInstall();
 end;
 
 { Same layout on the stock Finished page, applied each time it is shown so the
