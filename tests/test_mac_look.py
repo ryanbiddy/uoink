@@ -228,9 +228,18 @@ def test_background_art_regenerates_identically():
     pytest.importorskip("PIL")
     sys.path.insert(0, str(ROOT / "installer/mac"))
     import dmg_background
-    from PIL import Image, ImageChops
+    from PIL import Image, ImageChops, ImageStat
+    # Pillow and FreeType versions anti-alias text and the arrow a little
+    # differently (CI's Linux Pillow vs the Windows build Pillow that drew the
+    # committed PNGs), so compare the average difference, not every pixel. A
+    # real change to the art (canvas color, text, arrow, layout) moves the mean
+    # far past this; test_background_art_matches_the_layout pins the geometry.
     for scale, relative in ((1, mac_look.BACKGROUND), (2, mac_look.BACKGROUND_2X)):
-        assert ImageChops.difference(dmg_background.render(scale), Image.open(ROOT / relative).convert("RGB")).getbbox() is None
+        rendered = dmg_background.render(scale)
+        committed = Image.open(ROOT / relative).convert("RGB")
+        assert rendered.size == committed.size
+        mean = sum(ImageStat.Stat(ImageChops.difference(rendered, committed)).mean) / 3
+        assert mean < 3.0, f"{relative}: mean channel difference {mean:.2f}; rerun installer/mac/dmg_background.py"
 
 
 def test_tooling_file_is_hash_pinned_and_pure_python():
