@@ -1,17 +1,16 @@
-r"""Regenerate installer/uoink.ico from assets/logo-mark-color.png at build time.
+r"""Regenerate installer/uoink.ico from the app icon at build time.
 
-Build-time step (mirrors installer/generate_bitmaps.py). Outputs a multi-size
-.ico Windows uses for the wizard top-left icon, the installed .exe icon, the
-uninstaller, the Start Menu shortcut, and the taskbar/Alt-Tab entry. Single
-source of truth = the rust-U PNG at assets/logo-mark-color.png, so the icon
-can never go stale during a rebrand (as it did through v2.1.x, where the
-installer kept shipping the legacy Yoink-Y until v2.2.0 visual smoke caught it).
+Build-time step (mirrors installer/generate_bitmaps.py). Outputs the multi-size
+.ico Windows uses for Setup.exe, the uninstaller, the Start menu and desktop
+shortcuts, and the taskbar/Alt-Tab entry. The source is installer/app_icon.py
+(ink plate, rust U, yellow caps), the same mark uoink.app shows on its download
+page, so Setup.exe, the shortcuts and the site match. Each size is drawn from
+the geometry rather than shrunk from one bitmap, so the small sizes stay crisp.
 
-Sizes embedded: 16, 24, 32, 48, 64, 128, 256 -- Windows picks the closest match
-per-context (16/24 for tray, 32 for shortcuts, 48 for Explorer detail view, 256
-for the modern Vista+ jumbo icons). Source PNG should ideally have an alpha
-channel for clean tray rendering on any wallpaper; if it's solid RGB the .ico
-will show the background colour (still infinitely better than the yellow Y).
+The tray glyph is a separate mark (assets/logo-mark-color.png) and is not
+touched here.
+
+Sizes embedded: 16, 20, 24, 32, 40, 48, 64, 96, 128, 256.
 """
 from __future__ import annotations
 
@@ -20,19 +19,22 @@ from pathlib import Path
 
 from PIL import Image
 
-SIZES = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
-ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "assets" / "logo-mark-color.png"
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from app_icon import render_app_icon  # noqa: E402
+
+SIZES = [(16, 16), (20, 20), (24, 24), (32, 32), (40, 40), (48, 48),
+         (64, 64), (96, 96), (128, 128), (256, 256)]
+ROOT = HERE.parent
 DST = ROOT / "installer" / "uoink.ico"
 
 
 def main() -> int:
-    if not SRC.is_file():
-        print(f"ERROR: source PNG not found: {SRC}", file=sys.stderr)
-        return 1
-    img = Image.open(SRC).convert("RGBA")
     DST.parent.mkdir(parents=True, exist_ok=True)
-    img.save(DST, format="ICO", sizes=SIZES)
+    frames = [render_app_icon(w) for w, _ in SIZES]
+    frames[-1].save(DST, format="ICO", sizes=SIZES, append_images=frames[:-1])
     # Sanity-check: reopen + confirm the embedded sizes match what we asked for.
     with Image.open(DST) as ico:
         got = sorted(ico.info.get("sizes", set()))

@@ -1,34 +1,35 @@
 # Installer And First-Run Surface Map
 
-The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard art, rewrites `#define AppVersion`, then runs Inno Setup. After install, first-run setup moves through the local helper, splash window, tray, and dashboard.
+The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard images (`generate_bitmaps.py`, PNG from `installer/app_icon.py`) and `uoink.ico` (`generate_icon.py`, same icon), rewrites `#define AppVersion`, then runs Inno Setup. After install, first-run setup moves through the local helper, splash window, tray, and dashboard.
 
 ## Installer Pages
 
 Welcome:
 
-- The stock Inno welcome page is skipped.
-- `BuildWelcomePage()` creates the branded page.
-- Labels are positioned with `ScaleY()` so 125 percent and 150 percent display scaling do not clip the headline or body copy.
-- The page uses the cream surface color from the installer palette.
-- The fake `STEP 1 OF 4` tracker was removed.
-- The first-page Next button is widened to 112 scaled pixels, right-aligned, and labeled `Let's go ->`.
-- When the wizard leaves the Welcome page, the default Next button caption, width, left edge, and Back button are restored.
+- This is the stock Inno welcome page (`DisableWelcomePage=no`), laid out by `BuildWelcomePage()`: the app icon, the title ("Install Uoink", or "Update Uoink" when `WizardForm.PrevAppDir` is set), one line of copy, a quiet meta line with the version, and an unchecked "Choose the install folder and shortcuts" box.
+- Everything is positioned with `ScaleX()` and `ScaleY()` so 125 percent and 150 percent display scaling do not clip it.
+- The wizard follows the Windows light/dark setting (`WizardStyle=modern dynamic windows11 hidebevels`). Light mode uses the download page cream `#FFF4EC`, dark mode uses the app icon ink `#15110D`. Custom labels pick their color with `IsDarkInstallMode()`.
+- The primary button reads Install (or Update). With the box unticked, `ShouldSkipPage()` skips the folder, tasks and ready pages, so the button goes straight to installing with the default tasks. Ticking the box turns the button into Next and the usual pages follow. Isolated mode keeps all of its pages.
+- Back is hidden on this page. The Next button is sized from its measured caption (`SizeNextButtonToCaption`).
+- Never restore a Next caption saved in `InitializeWizard`: Inno has not set one yet (it reads `*`), and restoring it put `*` on Next, Install and Finish. Inno sets its own caption on every other page.
 
 Directory and Ready:
 
-- These are stock Inno pages with Uoink copy from `[Messages]`.
+- These are stock Inno pages with Uoink copy from `[Messages]`, shown only when the customize box is ticked.
 - `UpdateReadyMemo()` prints the chosen install path on the Ready page.
 
 Migration:
 
-- `BuildMigratePage()` creates a legacy-install note for machines with the old local folder.
+- `BuildMigratePage()` creates a legacy-install note for machines with the old local folder. In the one-click flow its button reads Install (or Update) because the ready page is skipped.
 - The page is anchored after `wpSelectDir`, so it appears before the Ready commit click, not after Install. Order for an upgrader: Welcome, Select dir, Migrate, Ready, Install.
 - `ShouldSkipPage()` hides it on clean installs.
 - The page is expectation-setting copy only. The migration itself runs on the helper's first boot, so the page position has no functional effect.
 
 Finish:
 
+- `LayoutFinishedPage()` gives the stock finish page the same layout as Welcome: icon, "Uoink is installed", two plain sentences, then the checkbox.
 - The finish copy points users at the Uoink browser-button setup window.
+- The checkbox reads `Open Uoink and add the Chrome button`.
 - The checked finish action starts `server.py` without `--show-dashboard`.
 - The dashboard is not forced open from the installer finish page.
 
@@ -52,7 +53,7 @@ Failure state:
 
 ## First Run After Finish
 
-When the user keeps `Set up the browser button now` checked, Inno starts the helper once the wizard reaches the finish step.
+When the user keeps `Open Uoink and add the Chrome button` checked, Inno starts the helper once the wizard reaches the finish step.
 
 Runtime order:
 
@@ -134,23 +135,12 @@ The stop action appears once as `Quit Uoink`. It calls `_on_stop()`, hides the i
 
 ## Wizard Art
 
-`installer/generate_bitmaps.py` writes 24-bit BMP files at 100, 125, 150, and 200 percent scale.
+`installer/generate_bitmaps.py` draws the wizard images from `installer/app_icon.py` (the uoink.app download-page icon) as transparent RGBA PNGs at 100, 125, 150 and 200 percent scale, in a light set and a dark set:
 
-Large art:
+- `wizard-large-{100,125,150,200}.png` and `wizard-large-dark-{...}.png`: the icon on the Welcome and Finished pages.
+- `wizard-small-{100,125,150,200}.png` and `wizard-small-dark-{...}.png`: the icon in the header of the inner pages.
 
-- `wizard-large-100.bmp`
-- `wizard-large-125.bmp`
-- `wizard-large-150.bmp`
-- `wizard-large-200.bmp`
-
-Small art:
-
-- `wizard-small-100.bmp`
-- `wizard-small-125.bmp`
-- `wizard-small-150.bmp`
-- `wizard-small-200.bmp`
-
-`installer/uoink.iss` references those files as comma lists in `WizardImageFile` and `WizardSmallImageFile`. The BMPs are ignored in git because `build.ps1` regenerates them before Inno compiles.
+The dark set gives the ink plate a thin rim so it doesn't vanish on the ink canvas. `installer/uoink.iss` references the light set in `WizardImageFile` and `WizardSmallImageFile` and the dark set in their `DynamicDark` twins. The PNGs are ignored in git because `build.ps1` regenerates them before Inno compiles.
 
 ## Regression Checks
 
@@ -163,7 +153,9 @@ Small art:
 - welcome labels are DPI-safe
 - the fake step tracker stays gone
 - first-run splash suppresses the ready toast
-- multi-scale wizard art is referenced and generated
+- multi-scale wizard art (light and dark PNGs) is referenced and generated from the app icon
+- no button caption captured in `InitializeWizard` is ever restored (the shipped `*` bug)
+- the one-click flow skips folder, tasks and ready unless the customize box is ticked, and never in isolated mode
 
 `tests/test_u12_first_run_polish.py` guards:
 

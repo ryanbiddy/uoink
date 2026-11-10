@@ -24,6 +24,7 @@ from build_bundle import ROOT, PYTHON_EXECUTABLE, development_payload, tree_inve
 from qualify_deps import write_json
 from ffmpeg_bundle import probe_torchcodec
 from import_smoke import COCOA_IMPORT
+import mac_look
 
 
 def verify_launchagent(config: dict, launcher: Path) -> None:
@@ -344,6 +345,8 @@ def smoke(app: Path, output: Path, *, scratch: Path | None = None,
             report["development_payload"] = [p.relative_to(relocated).as_posix()
                                              for p in development_payload(relocated)]
             assert not report["development_payload"], report["development_payload"]
+            # Finder, the Dock and the DMG window all read this file.
+            report["app_icon"] = mac_look.check_app_icon(relocated)
             if env is None:
                 with socket.socket() as sock:
                     sock.bind(("127.0.0.1", 0))

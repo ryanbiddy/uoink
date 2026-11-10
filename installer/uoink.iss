@@ -51,12 +51,26 @@ OutputDir=..\build
 OutputBaseFilename=Uoink-Setup-{#AppVersion}
 Compression=lzma2/max
 SolidCompression=yes
-WizardStyle=modern
-; Branded wizard bitmaps (Variant A magnet-U), regenerated each build by
-; ../generate_bitmaps.py into installer/assets/. Compile-time only (baked into
-; Setup.exe, not installed to {app}). 24-bit BMP per Inno's requirement.
-WizardImageFile=staging\installer-assets\wizard-large-100.bmp,staging\installer-assets\wizard-large-125.bmp,staging\installer-assets\wizard-large-150.bmp,staging\installer-assets\wizard-large-200.bmp
-WizardSmallImageFile=staging\installer-assets\wizard-small-100.bmp,staging\installer-assets\wizard-small-125.bmp,staging\installer-assets\wizard-small-150.bmp,staging\installer-assets\wizard-small-200.bmp
+; Modern Windows 11 look that follows the system light/dark setting. The canvas
+; matches the uoink.app download page: cream #FFF4EC in light mode, the app
+; icon's warm ink #15110D in dark mode. No bevel lines, no gray button band.
+WizardStyle=modern dynamic windows11 hidebevels
+; The stock Welcome page is the one decision screen (off by default in Inno 6).
+DisableWelcomePage=no
+WizardBackColor=#FFF4EC
+WizardBackColorDynamicDark=#15110D
+WizardImageBackColor=#FFF4EC
+WizardImageBackColorDynamicDark=#15110D
+WizardSmallImageBackColor=#FFF4EC
+WizardSmallImageBackColorDynamicDark=#15110D
+; The app icon on a transparent ground, regenerated each build by
+; ../generate_bitmaps.py into installer/assets/ (PNG, four DPI scales). The
+; large image is the Welcome/Finished icon, the small one sits in the header
+; of the inner pages. Compile-time only (baked into Setup.exe).
+WizardImageFile=staging\installer-assets\wizard-large-100.png,staging\installer-assets\wizard-large-125.png,staging\installer-assets\wizard-large-150.png,staging\installer-assets\wizard-large-200.png
+WizardImageFileDynamicDark=staging\installer-assets\wizard-large-dark-100.png,staging\installer-assets\wizard-large-dark-125.png,staging\installer-assets\wizard-large-dark-150.png,staging\installer-assets\wizard-large-dark-200.png
+WizardSmallImageFile=staging\installer-assets\wizard-small-100.png,staging\installer-assets\wizard-small-125.png,staging\installer-assets\wizard-small-150.png,staging\installer-assets\wizard-small-200.png
+WizardSmallImageFileDynamicDark=staging\installer-assets\wizard-small-dark-100.png,staging\installer-assets\wizard-small-dark-125.png,staging\installer-assets\wizard-small-dark-150.png,staging\installer-assets\wizard-small-dark-200.png
 SetupIconFile=staging\uoink.ico
 UninstallDisplayIcon={app}\uoink.ico
 UninstallDisplayName={code:GetUninstallDisplayName}
@@ -78,17 +92,28 @@ SignToolRetryCount=0
 #endif
 
 [Messages]
-; Net-new copy (WIZARD-COPY-AND-BITMAPS.md s1) to land the Uoink voice on the
-; otherwise-stock Inno screens. ASCII-safe punctuation only (no em-dashes) so
-; the strings render identically regardless of the .iss code page.
-WelcomeLabel2=Uoink keeps videos, podcasts, and articles on your own disk, then hands them to your AI as a cited corpus you can write from.%n%nThis installer places the private local helper onto your machine. No accounts, no cloud dependencies. Setup completes in under a minute.
-SelectDirDesc=Choose where to place Uoink's local files
-SelectDirLabel3=Uoink runs a lightweight program on your computer to process source transcripts, screenshots, and article text locally, keeping your research private. Setup will install these tools into the folder below.
-ReadyLabel1=Uoink is ready to set up on your machine. Click Install to place the local helper and dependencies in:
-StatusExtractFiles=Placing local helper files and media dependencies...
-FinishedHeadingLabel=Uoink is Ready
-FinishedLabelNoIcons=Uoink has been successfully installed. The Uoink window will walk you through loading the browser button, then your first save opens the dashboard with the source ready to read.
-FinishedLabel=Uoink has been successfully installed. The Uoink window will walk you through loading the browser button, then your first save opens the dashboard with the source ready to read.
+; Plain copy for the stock Inno screens. ASCII-safe punctuation only (no
+; em-dashes) so the strings render identically regardless of the .iss code page.
+SetupWindowTitle={#AppName} Setup
+WelcomeLabel1=Install Uoink
+WelcomeLabel2=Save videos, podcasts and posts to a library on your computer. Your AI searches it and cites the minute.
+WizardSelectDir=Install folder
+SelectDirDesc=Choose where Uoink lives on this PC.
+SelectDirLabel3=Uoink installs for your account only, so it doesn't need admin rights.
+WizardSelectTasks=Options
+SelectTasksDesc=Shortcuts and agent access
+SelectTasksLabel2=Pick what Uoink sets up for you.
+WizardReady=Ready to install
+ReadyLabel1=Ready to install Uoink in:
+ReadyLabel2a=Click Install to continue.
+ReadyLabel2b=Click Install to continue.
+WizardInstalling=Installing Uoink
+InstallingLabel=This only takes a minute.
+StatusExtractFiles=Copying Uoink files...
+ClickFinish=
+FinishedHeadingLabel=Uoink is installed
+FinishedLabelNoIcons=Uoink opens next and walks you through adding the browser button. Your first save opens the dashboard with the source ready to read.
+FinishedLabel=Uoink opens next and walks you through adding the browser button. Your first save opens the dashboard with the source ready to read.
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -350,11 +375,11 @@ Name: "{autodesktop}\Uoink Isolated"; \
   Check: IsolatedInstall
 
 [Run]
-; "Set up the browser button now" checkbox on the finish page (default checked).
+; "Open Uoink and add the Chrome button" checkbox on the finish page (default checked).
 Filename: "{app}\python\pythonw.exe"; \
   Parameters: """{app}\uoink_supervisor.py"""; \
   WorkingDir: "{app}"; \
-  Description: "Set up the browser button now"; \
+  Description: "Open Uoink and add the Chrome button"; \
   Flags: postinstall nowait skipifsilent; \
   Check: not IsolatedInstall
 ; A silent install has no finish page, so the entry above never runs there.
@@ -405,39 +430,38 @@ Type: filesandordirs; Name: "{app}\python\Lib\site-packages"
 Type: filesandordirs; Name: "{app}\python\__pycache__"
 
 [Code]
-{ Tier 2 GUI wizard customization (DESIGN-MOCKS-tier-2.pdf, section 1.2). What's
-  in scope for v2.2 within Inno's modern-wizard ceiling:
-    * Branded WizardImageFile + WizardSmallImageFile (magnet-U Variant A)
-    * AG-voiced [Messages] copy on the standard Welcome/Ready/Installing/Finished
-    * A custom CreateCustomPage Welcome (the local-corpus hero from mock
-      1.2.1) which replaces the stock welcome (wpWelcome is skipped).
-    * A custom CreateCustomPage "Migrating Yoink Data" page (mock 1.2.5)
-      shown only when a legacy %LOCALAPPDATA%\Yoink\ is detected. The actual
-      migration runs on the helper's first boot (copy-not-move, 7-day grace),
-      so this page sets expectations rather than tracking live progress.
-  What is NOT in scope for v2.2 (flagged in PR for v2.3 Tauri shell):
-    * Custom title-bar chrome (Inno owns the OS chrome).
-    * Inline italic vermillion runs inside a headline (Inno labels don't do
-      mid-line style mixing; the hero renders as a single rust-on-cream label
-      that passes AA at large-text 18pt+).
-    * JetBrains-Mono live-log inset on the Installing page.
-    * "Close Yoink first" interstitial that detects a locked index.db during
-      install -- migration runs post-wizard, so the wizard can't observe it.
-  Pixel-target match for these requires a custom shell + a runnable helper to
-  observe. Human visual QA is the gate before tagging v2.2. }
+{ Wizard look: a modern one-click installer, built on Inno's own pages.
+    * WizardStyle=modern dynamic windows11 hidebevels, with the uoink.app
+      canvas colors (cream in light mode, warm ink in dark mode).
+    * The stock Welcome page is the only decision screen: the app icon, the
+      title ("Install Uoink" or "Update Uoink"), one line of copy, a quiet meta
+      line and a "Choose the install folder and shortcuts" box. Unchecked, the
+      folder, tasks and ready pages are skipped and the button installs.
+      Checked, the usual pages follow.
+    * The stock Finished page gets the same layout with the icon on top.
+    * A custom "Migrating your previous install" page is shown only when a
+      legacy %LOCALAPPDATA%\Yoink\ is detected. The actual migration runs on
+      the helper's first boot (copy-not-move, 7-day grace), so this page sets
+      expectations rather than tracking live progress.
+  Never restore a button caption captured in InitializeWizard: Inno has not
+  set one yet at that point (it reads "*"). Inno sets its own captions on every
+  page change, so only override them where the design needs it. }
 
 const
-  { Inno TColor uses BGR hex (low byte = blue). #C2410C => $0C 41 C2. }
-  C_RUST  = $000C41C2;
-  C_CREAM = $00ECF4FF;
-  C_INK   = $000A0A0A;
+  { Inno TColor uses BGR hex (low byte = blue). Custom labels pick their color
+    with IsDarkInstallMode; stock labels follow the wizard style on their own. }
+  C_INK_TEXT   = $000A0A0A;   { #0A0A0A on the cream canvas }
+  C_CREAM_TEXT = $00ECF4FF;   { #FFF4EC on the ink canvas }
+  C_MUTED_LIGHT = $00566073;  { #736056, 5.5:1 on #FFF4EC }
+  C_MUTED_DARK  = $00A9B6C4;  { #C4B6A9, 9:1 on #15110D }
   ISOLATED_MARKER_MAX = 8192;
 
 var
-  WelcomePage:  TWizardPage;
   MigratePage:  TWizardPage;
   MigrateText:  TNewStaticText;
-  DefaultNextCaption: String;
+  CustomizeBox: TNewCheckBox;
+  MetaLabel: TNewStaticText;
+  CustomizeChosen: Boolean;
   DefaultNextLeft: Integer;
   DefaultNextWidth: Integer;
   IsolatedErrorText: String;
@@ -1436,44 +1460,104 @@ begin
   Result := DirExists(ExpandConstant('{localappdata}\Yoink'));
 end;
 
-procedure AddLabel(P: TWizardPage; const Caption: string;
-                   Top, Height, FontSize: Integer; FontStyle: TFontStyles;
-                   Colr: TColor);
-var L: TNewStaticText;
+function MutedColor(): TColor;
 begin
-  L := TNewStaticText.Create(P);
-  L.Parent := P.Surface;
-  L.AutoSize := False;
-  L.Left := ScaleX(0);
-  L.Top := ScaleY(Top);
-  L.Width := P.SurfaceWidth;
-  L.Height := ScaleY(Height);
-  L.Caption := Caption;
-  L.Font.Size := FontSize;
-  L.Font.Style := FontStyle;
-  L.Font.Color := Colr;
-  L.WordWrap := True;
+  if IsDarkInstallMode() then Result := C_MUTED_DARK else Result := C_MUTED_LIGHT;
 end;
 
-procedure BuildWelcomePage();
+function BodyColor(): TColor;
 begin
-  WelcomePage := CreateCustomPage(wpWelcome,
-    'Welcome to Uoink',
-    'Build a local corpus your AI can write from.');
-  WelcomePage.Surface.Color := C_CREAM;
-  { Hero (mock 1.2.1). Rust on the cream wizard ground passes AA for large
-    text (>=18pt bold); body copy below stays on the default ink-on-cream the
-    wizard uses -- never rust on ink, per the contrast rules. }
-  AddLabel(WelcomePage, 'Build from receipts.',  20,  58, 28, [fsBold], C_RUST);
-  AddLabel(WelcomePage,
-    'Save videos, podcasts, articles, and threads into a cited corpus on your disk.',
-                                               96, 42, 11, [], C_INK);
-  AddLabel(WelcomePage,
-    'This installs the local helper that does the work. ' +
-    'No account, no cloud. Takes about a minute.',
-                                              146, 48, 10, [], C_INK);
-  AddLabel(WelcomePage,
-    'MIT - open source - uoink.app',          218, 24,  9, [fsItalic], C_RUST);
+  if IsDarkInstallMode() then Result := C_CREAM_TEXT else Result := C_INK_TEXT;
+end;
+
+function IsUpdateInstall(): Boolean;
+begin
+  Result := WizardForm.PrevAppDir <> '';
+end;
+
+function ActionCaption(): String;
+begin
+  if CustomizeChosen then
+    Result := SetupMessage(msgButtonNext)
+  else if IsUpdateInstall() then
+    Result := 'Update'
+  else
+    Result := SetupMessage(msgButtonInstall);
+end;
+
+procedure SizeNextButtonToCaption(const Cap: String); forward;
+
+procedure CustomizeBoxClick(Sender: TObject);
+begin
+  CustomizeChosen := CustomizeBox.Checked;
+  SizeNextButtonToCaption(ActionCaption());
+end;
+
+{ Lay out the stock Welcome page: icon, title, one line of copy, meta line and
+  the customize box, all positioned with ScaleX/ScaleY so 125 and 150 percent
+  display scaling never clip anything. }
+procedure BuildWelcomePage();
+var
+  Page: TWizardPage;
+  W, Left: Integer;
+begin
+  Left := ScaleX(48);
+  W := WizardForm.WelcomePage.ClientWidth - Left * 2;
+  WizardForm.WizardBitmapImage.Left := Left;
+  WizardForm.WizardBitmapImage.Top := ScaleY(40);
+  WizardForm.WizardBitmapImage.Width := ScaleX(80);
+  WizardForm.WizardBitmapImage.Height := ScaleY(80);
+  WizardForm.WelcomeLabel1.SetBounds(Left, ScaleY(140), W, ScaleY(44));
+  WizardForm.WelcomeLabel1.Font.Name := 'Segoe UI';
+  WizardForm.WelcomeLabel1.Font.Size := 24;
+  WizardForm.WelcomeLabel1.Font.Style := [fsBold];
+  WizardForm.WelcomeLabel2.SetBounds(Left, ScaleY(196), W, ScaleY(50));
+  WizardForm.WelcomeLabel2.Font.Name := 'Segoe UI';
+  WizardForm.WelcomeLabel2.Font.Size := 11;
+
+  MetaLabel := TNewStaticText.Create(WizardForm);
+  MetaLabel.Parent := WizardForm.WelcomePage;
+  MetaLabel.AutoSize := False;
+  MetaLabel.WordWrap := True;
+  MetaLabel.SetBounds(Left, ScaleY(254), W, ScaleY(36));
+  MetaLabel.Font.Name := 'Segoe UI';
+  MetaLabel.Font.Size := 9;
+  MetaLabel.Font.Color := MutedColor();
+  MetaLabel.Caption := 'Version {#AppVersion}. Installs for your account only. ' +
+    'No admin rights needed.';
+
+  CustomizeBox := TNewCheckBox.Create(WizardForm);
+  CustomizeBox.Parent := WizardForm.WelcomePage;
+  CustomizeBox.SetBounds(Left, ScaleY(300), W, ScaleY(20));
+  CustomizeBox.Caption := 'Choose the install folder and shortcuts';
+  CustomizeBox.Checked := False;
+  CustomizeBox.OnClick := @CustomizeBoxClick;
+end;
+
+{ Same layout on the stock Finished page, applied each time it is shown so the
+  height of the (word-wrapped) text is measured at the real width. }
+procedure LayoutFinishedPage();
+var
+  Left, W: Integer;
+begin
+  Left := ScaleX(48);
+  W := WizardForm.FinishedPage.ClientWidth - Left * 2;
+  WizardForm.WizardBitmapImage2.Left := Left;
+  WizardForm.WizardBitmapImage2.Top := ScaleY(40);
+  WizardForm.WizardBitmapImage2.Width := ScaleX(80);
+  WizardForm.WizardBitmapImage2.Height := ScaleY(80);
+  WizardForm.FinishedHeadingLabel.SetBounds(Left, ScaleY(140), W, ScaleY(44));
+  WizardForm.FinishedHeadingLabel.Font.Name := 'Segoe UI';
+  WizardForm.FinishedHeadingLabel.Font.Size := 24;
+  WizardForm.FinishedHeadingLabel.Font.Style := [fsBold];
+  WizardForm.FinishedLabel.Left := Left;
+  WizardForm.FinishedLabel.Top := ScaleY(196);
+  WizardForm.FinishedLabel.Width := W;
+  WizardForm.FinishedLabel.Font.Name := 'Segoe UI';
+  WizardForm.FinishedLabel.Font.Size := 11;
+  WizardForm.RunList.Left := Left;
+  WizardForm.RunList.Width := W;
+  WizardForm.RunList.Top := WizardForm.FinishedLabel.Top + WizardForm.FinishedLabel.Height + ScaleY(20);
 end;
 
 procedure BuildMigratePage();
@@ -1488,7 +1572,7 @@ begin
   // pure copy (migration itself runs on the helper's first boot), so its
   // position has no functional effect on the migration.
   MigratePage := CreateCustomPage(wpSelectDir, 'Migrating your previous install',
-    'Moving your saved videos, settings, and API key safely into Uoink');
+    'Your videos, settings and API key come with you.');
   MigrateText := TNewStaticText.Create(MigratePage);
   MigrateText.Parent := MigratePage.Surface;
   MigrateText.AutoSize := False;
@@ -1498,19 +1582,20 @@ begin
   MigrateText.Height := MigratePage.SurfaceHeight;
   MigrateText.WordWrap := True;
   MigrateText.Caption :=
-    'A previous install of the helper was found on this PC.' + #13#10#13#10 +
-    'The first time Uoink starts, it will automatically copy your saved videos, ' +
-    'settings, and Anthropic API key from the previous install. Nothing is moved ' +
-    'or deleted until a fully verified copy exists -- your old files stay in place ' +
-    'for 7 days as a safety net, then are removed automatically.' + #13#10#13#10 +
-    'If anything cannot be copied automatically, no data is lost: your old files ' +
-    'remain in the legacy local data folder, and you can re-enter your Anthropic API key ' +
-    'from the Uoink Settings menu at any time.';
+    'Uoink found a previous install on this PC.' + #13#10#13#10 +
+    'The first time Uoink starts, it copies your saved videos, settings and ' +
+    'Anthropic API key from the previous install. Nothing is moved or deleted ' +
+    'until a verified copy exists. Your old files stay in place for 7 days as a ' +
+    'safety net, then they are removed automatically.' + #13#10#13#10 +
+    'If something can''t be copied, nothing is lost. Your old files stay where ' +
+    'they are, and you can enter your Anthropic API key again in Uoink Settings ' +
+    'any time.';
 end;
 
 procedure InitializeWizard();
 begin
-  DefaultNextCaption := WizardForm.NextButton.Caption;
+  { Geometry only. Never capture a button caption here: Inno has not set one yet
+    (it reads "*") and restoring it later put "*" on Next, Install and Finish. }
   DefaultNextLeft := WizardForm.NextButton.Left;
   DefaultNextWidth := WizardForm.NextButton.Width;
   BuildWelcomePage();
@@ -1520,13 +1605,16 @@ end;
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False;
-  { Hide the stock Welcome page so our custom WelcomePage takes its place as
-    the wizard's first screen (mock 1.2.1). }
-  if PageID = wpWelcome then
-    Result := True;
   { Keep the page hidden while allowing an explicit /GROUP for isolation.
     DisableProgramGroupPage=yes would ignore that command-line argument. }
   if PageID = wpSelectProgramGroup then
+    Result := True;
+  { One-click install: unless "Choose the install folder and shortcuts" is
+    ticked on the Welcome page, skip folder, tasks and ready. The defaults
+    apply, the same as clicking through them. Isolated mode keeps every page
+    it had. }
+  if (not CustomizeChosen) and (not IsolatedInstall()) and
+     ((PageID = wpSelectDir) or (PageID = wpSelectTasks) or (PageID = wpReady)) then
     Result := True;
   if (PageID = MigratePage.ID) and ((not LegacyYoinkPresent()) or IsolatedInstall()) then
     Result := True;
@@ -2091,20 +2179,12 @@ begin
   end;
 end;
 
-{ Finding 2.2 (creative review v2.2, AG): override Next/Back chrome on
-  Welcome so the primary CTA reads as a landing-page call to action ("Let's
-  go ->") and the Back button is hidden (there is no Back from the first
-  page). Inno resets button state on page transitions, so the customization
-  is scoped to wpWelcome's custom-page id only; subsequent pages keep
-  Inno's stock chrome with no else branch needed.
+{ Size the Next button to a caption we set ourselves (Install, Update, Next on
+  the Welcome page).
 
   IN-04 hardening (button DPI/glyph safety):
-    * Caption uses a plain ASCII "->" arrow, matching the marketing site's
-      button voice ("Download ->", "Open release ->"). This drops the old
-      Chr($2192) Unicode right-arrow, which relied on the default wizard
-      font carrying U+2192 and on the source-encoding dance (build.ps1
-      writes the .iss BOM-less, read as cp1252). ASCII "->" renders in every
-      font at every code page with zero glyph or encoding risk.
+    * The caption is plain ASCII, so it renders in every font at every code
+      page with zero glyph or encoding risk.
     * The button auto-sizes to its caption via SizeNextButtonToCaption
       instead of a hand-computed ScaleX(112) magic width. Measuring the
       real caption in the real button font at the real DPI means the label
@@ -2139,6 +2219,7 @@ begin
   { Keep the right edge where Inno's stock Next button sits. }
   WizardForm.NextButton.Left := (DefaultNextLeft + DefaultNextWidth) - W;
 end;
+
 function UpdateReadyMemo(
   Space, NewLine, MemoUserInfoInfo, MemoDirInfo, MemoTypeInfo,
   MemoComponentsInfo, MemoGroupInfo, MemoTasksInfo: String): String;
@@ -2152,14 +2233,25 @@ end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
-  if CurPageID = WelcomePage.ID then
+  if CurPageID = wpWelcome then
   begin
-    SizeNextButtonToCaption('Let''s go ->');
+    if IsUpdateInstall() then
+      WizardForm.WelcomeLabel1.Caption := 'Update Uoink'
+    else
+      WizardForm.WelcomeLabel1.Caption := 'Install Uoink';
+    SizeNextButtonToCaption(ActionCaption());
     WizardForm.BackButton.Visible := False;
   end else
   begin
-    WizardForm.NextButton.Caption := DefaultNextCaption;
+    { Inno sets the caption for every other page itself. Only the geometry we
+      changed on the Welcome page goes back. }
     WizardForm.NextButton.Width := DefaultNextWidth;
     WizardForm.NextButton.Left := DefaultNextLeft;
+    if (CurPageID = MigratePage.ID) and (not CustomizeChosen) and (not IsolatedInstall()) then
+      SizeNextButtonToCaption(ActionCaption());
+    if CurPageID = wpInstalling then
+      WizardForm.FilenameLabel.Visible := False;
+    if CurPageID = wpFinished then
+      LayoutFinishedPage();
   end;
 end;

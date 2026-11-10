@@ -428,8 +428,17 @@ Those skips are intentional feature deferral, not Mac publication evidence.
 
 ## DMG and client acceptance
 
-After signing, `hdiutil create -format UDZO` packages Uoink.app and an
-`/Applications` symlink. `dmg.json` records SHA-256 and byte size. The Darwin
+The app carries `Contents/Resources/Uoink.icns`, built from
+`assets/brand/app-icon-macos-1024.png` with `sips` and `iconutil` before signing.
+`bundle_smoke.py` checks the file and that `CFBundleIconFile` names it.
+
+After signing, `dmgbuild` (pinned with hashes in `scripts/mac/dmg-tooling.txt`)
+packages Uoink.app and an `/Applications` symlink as UDZO. The Finder window is a
+fixed 660 x 400 icon view with the cream background from
+`installer/mac/dmg-background.png` and `@2x`, drawn by `installer/mac/dmg_background.py`.
+Layout numbers live in `scripts/mac/mac_look.py`. `dmg_smoke.py` checks the mounted
+volume for the background, `.DS_Store`, the volume icon, the link, the app icon and
+no `Read Me.txt`. `dmg.json` records SHA-256 and byte size. The Darwin
 MCPB builder shares the entry-point, command and platform checks in
 `scripts/mcpb_manifest.py` with the POSIX builder. It checks the ZIP payload
 again after writing it. The Windows PowerShell builder retains its equivalent

@@ -345,6 +345,10 @@ def test_smoke_success_requires_completed_checks_and_immutable_bundle(monkeypatc
     (app / "payload").write_text("original")
     (app / "Contents/Resources").mkdir(parents=True)
     (app / "Contents/Resources/VERSION").write_text("3.10.0")
+    # The smoke now also requires the app icon that Info.plist names.
+    import plistlib
+    (app / "Contents/Info.plist").write_bytes(plistlib.dumps({"CFBundleIconFile": "Uoink.icns"}))
+    (app / "Contents/Resources/Uoink.icns").write_bytes(b"icns" + (12).to_bytes(4, "big") + b"data")
     for relative in ("Contents/Resources/Python/lib/python3.13/site-packages/PyObjCTest/__init__.py",
                      "Contents/Frameworks/example.dSYM/Contents/Resources/DWARF/example"):
         target = app / relative

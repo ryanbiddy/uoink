@@ -63,12 +63,13 @@ docs/launch/
 /Yoink-claude-v2/
 /Yoink-codex-v2/
 
-# Wizard bitmaps are regenerated from installer/generate_bitmaps.py on each
+# Wizard images are regenerated from installer/generate_bitmaps.py on each
 # build (build.ps1) -- no committed binary churn.
 installer/assets/*.bmp
+installer/assets/*.png
 
 # v2.2.0: installer/uoink.ico is regenerated each build by
-# installer/generate_icon.py from assets/logo-mark-color.png -- never commit it.
+# installer/generate_icon.py from installer/app_icon.py -- never commit it.
 installer/uoink.ico
 
 # build.ps1 rewrites installer/uoink.generated.iss from installer/uoink.iss with
