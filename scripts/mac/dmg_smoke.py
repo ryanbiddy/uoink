@@ -11,6 +11,7 @@ import tempfile
 from build_bundle import run, sha256
 from build_mcpb import check
 from bundle_smoke import smoke
+import mac_look
 from qualify_deps import write_json
 
 
@@ -60,7 +61,8 @@ def smoke_dmg(dmg: Path, mcpb: Path, output: Path) -> None:
     with tempfile.TemporaryDirectory(prefix="uoink-dmg-install-") as temporary:
         scratch = Path(temporary)
         try:
-            with installed_dmg(dmg, scratch, report) as (_, installed):
+            with installed_dmg(dmg, scratch, report) as (mounted_app, installed):
+                report["layout"] = mac_look.check_mounted_layout(mounted_app.parent)
                 report["normal_install"] = {}
                 prepare_normal_install(installed, report["normal_install"])
                 report["mcpb"] = {"version": check(mcpb)["version"], "platform": "darwin", "ok": True}

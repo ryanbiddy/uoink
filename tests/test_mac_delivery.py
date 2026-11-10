@@ -478,24 +478,24 @@ def test_signing_rejects_wrong_main_executable(tmp_path, executable):
 
 def test_dmg_format_volume_link_and_digest(tmp_path, monkeypatch):
     app = tmp_path / "Uoink.app"
-    app.mkdir()
-    calls = []
-    links = {}
-    monkeypatch.setattr(Path, "symlink_to", lambda p, target, **kw: links.update({p: target}))
-    def run(args, **kwargs):
-        calls.append(args)
-        if args[0] == "ditto":
-            args[2].mkdir()
-        else:
-            stage = args[args.index("-srcfolder") + 1]
-            assert links[stage / "Applications"] == "/Applications"
-            args[-1].write_bytes(b"fake UDZO")
-    monkeypatch.setattr(build_bundle, "run", run)
-    dmg = build_bundle.create_dmg(app, tmp_path, "3.10.0")
-    args = calls[-1]
-    assert args[:6] == ["hdiutil", "create", "-format", "UDZO", "-volname", "Uoink 3.10.0"]
+    (app / "Contents/Resources").mkdir(parents=True)
+    (app / "Contents/Resources/Uoink.icns").write_bytes(b"icns" + bytes([0, 0, 0, 8]))
+    built = []
+
+    def builder(filename, volume, settings):
+        built.append((filename, volume, settings))
+        Path(filename).write_bytes(b"fake UDZO")
+
+    dmg = build_bundle.create_dmg(app, tmp_path, "3.10.0", builder=builder)
+    filename, volume, settings = built[-1]
+    assert Path(filename) == dmg and volume == "Uoink 3.10.0"
+    assert settings["format"] == "UDZO"
+    assert settings["symlinks"] == {"Applications": "/Applications"} and settings["files"] == [str(app)]
     receipt = json.loads((tmp_path / "dmg.json").read_text())
-    assert receipt["sha256"] == build_bundle.sha256(dmg) and receipt["size_bytes"] == len(b"fake UDZO")
+    assert receipt == {"filename": dmg.name, "size_bytes": len(b"fake UDZO"),
+                       "sha256": build_bundle.sha256(dmg), "volume": "Uoink 3.10.0"}
+    with pytest.raises(ValueError, match="already exists"):
+        build_bundle.create_dmg(app, tmp_path, "3.10.0", builder=builder)
 
 
 @pytest.mark.parametrize("foreign", ["program", "pid", "unknown", None])
@@ -645,6 +645,8 @@ def test_dmg_smoke_detaches_on_success_and_failure(tmp_path, monkeypatch, fail):
         if args[0] == "ditto":
             args[-1].mkdir(parents=True)
         return SimpleNamespace(stdout="")
+    layout = []
+    monkeypatch.setattr(dmg_smoke.mac_look, "check_mounted_layout", lambda mount: layout.append(mount) or {"ok": True})
     def smoke(*args):
         if fail:
             raise ValueError("smoke failed")
@@ -661,6 +663,8 @@ def test_dmg_smoke_detaches_on_success_and_failure(tmp_path, monkeypatch, fail):
         dmg_smoke.smoke_dmg(dmg, tmp_path / "fake.mcpb", output)
     assert calls[0][:4] == ["hdiutil", "attach", "-readonly", "-nobrowse"]
     assert calls[-1][:2] == ["hdiutil", "detach"]
+    # The window layout is checked on the read-only mount, before the app is installed.
+    assert layout == [calls[0][calls[0].index("-mountpoint") + 1]]
     installed = next(c[-1] for c in calls if c[0] == "ditto")
     assert [c for c in calls if c[0] == "codesign"] == [
         ["codesign", "--verify", "--strict", "--deep", installed]] * (2 if fail else 3)

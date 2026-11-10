@@ -15,7 +15,6 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import time
 import urllib.parse
 import urllib.request
 
@@ -23,6 +22,7 @@ from qualify_deps import ROOT, sha256, standalone_pins, verify_ui_wheels, write_
 from wheel_lock import LOCK_NAME, verify
 import deno_bundle
 import ffmpeg_bundle
+import mac_look
 
 # The Windows build shares this stager: one pin, one hash check, one layout.
 sys.path.append(str(ROOT / "scripts"))
@@ -45,6 +45,7 @@ DESKTOP_USAGE = "Uoink saves your captures in the Uoink folder on your Desktop."
 def info_plist(version: str) -> dict:
     return {"CFBundleName": "Uoink", "CFBundleDisplayName": "Uoink",
             "CFBundleIdentifier": "com.ryanbiddy.uoink", "CFBundleExecutable": "Uoink",
+            "CFBundleIconFile": mac_look.ICON_NAME,
             "CFBundlePackageType": "APPL", "CFBundleShortVersionString": version,
             "CFBundleVersion": version, "LSMinimumSystemVersion": MINIMUM_MACOS,
             "LSUIElement": True, "NSDesktopFolderUsageDescription": DESKTOP_USAGE}
@@ -395,38 +396,21 @@ def sign_app(app: Path, report: Path) -> None:
                                   "stderr": assessment.stderr, "expected": "rejection until Developer ID and notarization"}})
 
 
-def create_dmg(app: Path, output: Path, version: str, *, signed: bool = False) -> Path:
+def create_dmg(app: Path, output: Path, version: str, *, signed: bool = False, builder=None) -> Path:
+    """Package the app with dmgbuild: fixed window, background art, app and Applications link.
+
+    `signed` is kept for callers; both builds now share one window and the
+    signing state is shown by Gatekeeper, not by a note in the disk image.
+    """
     dmg = output / f"Uoink-{version}-macos-arm64.dmg"
     if dmg.exists():
         raise ValueError("DMG already exists")
-    with tempfile.TemporaryDirectory(prefix="uoink-dmg-stage-") as temporary:
-        stage = Path(temporary)
-        run(["ditto", app, stage / "Uoink.app"])
-        (stage / "Applications").symlink_to("/Applications", target_is_directory=True)
-        (stage / "Read Me.txt").write_text(
-            f"Uoink {version} for Apple Silicon requires macOS {MINIMUM_MACOS} or later.\n"
-            "Drag Uoink to Applications. Eject this disk, then open Uoink from Applications.\n"
-            + ("This build uses Developer ID signing and notarization.\n" if signed else
-               "This private test build is ad-hoc signed. Developer ID and notarization are pending.\n"),
-            encoding="utf-8")
-        command = ["hdiutil", "create", "-format", "UDZO", "-volname", f"Uoink {version}",
-                   "-srcfolder", stage, dmg]
-        # Hosted macOS runners intermittently report "hdiutil: create failed -
-        # Resource busy"; retry a bounded number of times before failing.
-        for attempt in range(1, 4):
-            try:
-                run(command, capture_output=True)
-                break
-            except subprocess.CalledProcessError as error:
-                detail = (error.stderr or "").strip()
-                print(f"hdiutil create attempt {attempt} failed: {detail}", file=sys.stderr, flush=True)
-                if dmg.exists():
-                    dmg.unlink()
-                if "Resource busy" not in detail or attempt == 3:
-                    raise
-                time.sleep(10 * attempt)
+    volume = f"Uoink {version}"
+    settings = mac_look.dmg_settings(app, ROOT)
+    mac_look.build_dmg_image(dmg, volume, settings, builder=builder,
+                             log=lambda message: print(message, file=sys.stderr, flush=True))
     write_json(output / "dmg.json", {"filename": dmg.name, "size_bytes": dmg.stat().st_size,
-                                     "sha256": sha256(dmg), "volume": f"Uoink {version}"})
+                                     "sha256": sha256(dmg), "volume": volume})
     return dmg
 
 
@@ -519,6 +503,9 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None,
         raise ValueError("Invalid product VERSION")
     with (contents / "Info.plist").open("wb") as stream:
         plistlib.dump(info_plist(version), stream)
+    # The icon is a plain resource, made before sign_app so codesign seals it.
+    with tempfile.TemporaryDirectory(prefix="uoink-iconset-") as iconset_scratch:
+        mac_look.build_icns(ROOT / mac_look.ICON_SOURCE, resources, Path(iconset_scratch), run)
     notices = resources / "notices"
     notices.mkdir()
     shutil.copyfile(output / "python-pruned.json", notices / "python-pruned.json")
