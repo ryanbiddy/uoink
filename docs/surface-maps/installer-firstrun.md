@@ -53,7 +53,7 @@ Failure state:
 
 ## First Run After Finish
 
-When the user keeps `Set up the browser button now` checked, Inno starts the helper once the wizard reaches the finish step.
+When the user keeps `Open Uoink and add the Chrome button` checked, Inno starts the helper once the wizard reaches the finish step.
 
 Runtime order:
 
@@ -135,23 +135,12 @@ The stop action appears once as `Quit Uoink`. It calls `_on_stop()`, hides the i
 
 ## Wizard Art
 
-`installer/generate_bitmaps.py` writes 24-bit BMP files at 100, 125, 150, and 200 percent scale.
+`installer/generate_bitmaps.py` draws the wizard images from `installer/app_icon.py` (the uoink.app download-page icon) as transparent RGBA PNGs at 100, 125, 150 and 200 percent scale, in a light set and a dark set:
 
-Large art:
+- `wizard-large-{100,125,150,200}.png` and `wizard-large-dark-{...}.png`: the icon on the Welcome and Finished pages.
+- `wizard-small-{100,125,150,200}.png` and `wizard-small-dark-{...}.png`: the icon in the header of the inner pages.
 
-- `wizard-large-100.bmp`
-- `wizard-large-125.bmp`
-- `wizard-large-150.bmp`
-- `wizard-large-200.bmp`
-
-Small art:
-
-- `wizard-small-100.bmp`
-- `wizard-small-125.bmp`
-- `wizard-small-150.bmp`
-- `wizard-small-200.bmp`
-
-`installer/uoink.iss` references those files as comma lists in `WizardImageFile` and `WizardSmallImageFile`. The BMPs are ignored in git because `build.ps1` regenerates them before Inno compiles.
+The dark set gives the ink plate a thin rim so it doesn't vanish on the ink canvas. `installer/uoink.iss` references the light set in `WizardImageFile` and `WizardSmallImageFile` and the dark set in their `DynamicDark` twins. The PNGs are ignored in git because `build.ps1` regenerates them before Inno compiles.
 
 ## Regression Checks
 
@@ -164,7 +153,9 @@ Small art:
 - welcome labels are DPI-safe
 - the fake step tracker stays gone
 - first-run splash suppresses the ready toast
-- multi-scale wizard art is referenced and generated
+- multi-scale wizard art (light and dark PNGs) is referenced and generated from the app icon
+- no button caption captured in `InitializeWizard` is ever restored (the shipped `*` bug)
+- the one-click flow skips folder, tasks and ready unless the customize box is ticked, and never in isolated mode
 
 `tests/test_u12_first_run_polish.py` guards:
 

@@ -48,7 +48,7 @@ verify).
 | Dashboard window | `uoink_dashboard.py` (pywebview + WebView2), Win32 HWND icon branding | WKWebView on macOS; the HWND icon branding is already `sys.platform`-guarded and no-ops. Window icon comes from the `.app` `.icns`. | S |
 | Install-layout gate | tray + splash gated on `python\pythonw.exe` existing | Now `server._is_installed_layout()`, recognises `python/bin/python3` too. Fixed on `cc/mac-prep`. | Done |
 | Interpreter for subprocess spawn | hard-coded `python\pythonw.exe` at three sites | `server._bundled_interpreter(gui=...)`, returns the right interpreter per OS. Fixed on `cc/mac-prep`. | Done |
-| Icon assets | `installer/uoink.ico` from `generate_icon.py` (the app icon); PNG wizard images | `Uoink.icns` via `iconutil` + `sips` from `assets/logo-mark-color.png`. No wizard art needed (the `.dmg` uses a background image instead). | S |
+| Icon assets | `installer/uoink.ico` from `generate_icon.py` (the app icon); PNG wizard images | `Uoink.icns` via `iconutil` + `sips` from `assets/brand/app-icon-macos-1024.png` (`scripts/mac/mac_look.py`). No wizard art needed (the `.dmg` window uses `installer/mac/dmg-background.png`). | S |
 | Output-folder picker | `_pick_output_folder_windows` (PowerShell `FolderBrowserDialog`), falls back to tkinter | tkinter fallback already covers macOS; a native NSOpenPanel via pyobjc is optional polish. | S |
 | Toast / notification | PowerShell `NotifyIcon` balloon | Already implemented: `osascript -e 'display notification'` in `_platform._macos_toast`. | Done |
 | Keychain / secret store | `keyring` -> Windows Credential Manager | `keyring` -> macOS Keychain. Already handled; label is "macOS Keychain". First Keychain access prompts the user once. | Done |
