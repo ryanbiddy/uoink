@@ -119,7 +119,7 @@ def test_build_uses_and_verifies_the_installer_lock() -> None:
     assert "LastWriteTimeUtc = $packageTimestampUtc" in build
     assert "Copy-Item (Join-Path $InstallerDir 'upgrade_prep.ps1')" in build
     assert "staging\\upgrade_prep.ps1" in installer
-    assert "staging\\installer-assets\\wizard-large-100.bmp" in installer
+    assert "staging\\installer-assets\\wizard-large-100.png" in installer
     assert "SetupIconFile=staging\\uoink.ico" in installer
     assert build.index("Final staging cleanup left") < build.index(
         "Write-Step 'Compiling installer'"

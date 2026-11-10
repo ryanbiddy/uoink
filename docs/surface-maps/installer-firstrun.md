@@ -1,34 +1,35 @@
 # Installer And First-Run Surface Map
 
-The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard art, rewrites `#define AppVersion`, then runs Inno Setup. After install, first-run setup moves through the local helper, splash window, tray, and dashboard.
+The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard images (`generate_bitmaps.py`, PNG from `installer/app_icon.py`) and `uoink.ico` (`generate_icon.py`, same icon), rewrites `#define AppVersion`, then runs Inno Setup. After install, first-run setup moves through the local helper, splash window, tray, and dashboard.
 
 ## Installer Pages
 
 Welcome:
 
-- The stock Inno welcome page is skipped.
-- `BuildWelcomePage()` creates the branded page.
-- Labels are positioned with `ScaleY()` so 125 percent and 150 percent display scaling do not clip the headline or body copy.
-- The page uses the cream surface color from the installer palette.
-- The fake `STEP 1 OF 4` tracker was removed.
-- The first-page Next button is widened to 112 scaled pixels, right-aligned, and labeled `Let's go ->`.
-- When the wizard leaves the Welcome page, the default Next button caption, width, left edge, and Back button are restored.
+- This is the stock Inno welcome page (`DisableWelcomePage=no`), laid out by `BuildWelcomePage()`: the app icon, the title ("Install Uoink", or "Update Uoink" when `WizardForm.PrevAppDir` is set), one line of copy, a quiet meta line with the version, and an unchecked "Choose the install folder and shortcuts" box.
+- Everything is positioned with `ScaleX()` and `ScaleY()` so 125 percent and 150 percent display scaling do not clip it.
+- The wizard follows the Windows light/dark setting (`WizardStyle=modern dynamic windows11 hidebevels`). Light mode uses the download page cream `#FFF4EC`, dark mode uses the app icon ink `#15110D`. Custom labels pick their color with `IsDarkInstallMode()`.
+- The primary button reads Install (or Update). With the box unticked, `ShouldSkipPage()` skips the folder, tasks and ready pages, so the button goes straight to installing with the default tasks. Ticking the box turns the button into Next and the usual pages follow. Isolated mode keeps all of its pages.
+- Back is hidden on this page. The Next button is sized from its measured caption (`SizeNextButtonToCaption`).
+- Never restore a Next caption saved in `InitializeWizard`: Inno has not set one yet (it reads `*`), and restoring it put `*` on Next, Install and Finish. Inno sets its own caption on every other page.
 
 Directory and Ready:
 
-- These are stock Inno pages with Uoink copy from `[Messages]`.
+- These are stock Inno pages with Uoink copy from `[Messages]`, shown only when the customize box is ticked.
 - `UpdateReadyMemo()` prints the chosen install path on the Ready page.
 
 Migration:
 
-- `BuildMigratePage()` creates a legacy-install note for machines with the old local folder.
+- `BuildMigratePage()` creates a legacy-install note for machines with the old local folder. In the one-click flow its button reads Install (or Update) because the ready page is skipped.
 - The page is anchored after `wpSelectDir`, so it appears before the Ready commit click, not after Install. Order for an upgrader: Welcome, Select dir, Migrate, Ready, Install.
 - `ShouldSkipPage()` hides it on clean installs.
 - The page is expectation-setting copy only. The migration itself runs on the helper's first boot, so the page position has no functional effect.
 
 Finish:
 
+- `LayoutFinishedPage()` gives the stock finish page the same layout as Welcome: icon, "Uoink is installed", two plain sentences, then the checkbox.
 - The finish copy points users at the Uoink browser-button setup window.
+- The checkbox reads `Open Uoink and add the Chrome button`.
 - The checked finish action starts `server.py` without `--show-dashboard`.
 - The dashboard is not forced open from the installer finish page.
 

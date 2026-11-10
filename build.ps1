@@ -298,12 +298,12 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 
 # ---- Sanity checks ------------------------------------------------------
 # v2.2.0 brand fix: $IconSrc (installer\uoink.ico) is now a BUILD ARTIFACT
-# regenerated from assets\logo-mark-color.png by installer\generate_icon.py
+# regenerated from the app icon (installer\app_icon.py) by installer\generate_icon.py
 # (the regen step runs after pip install, since it uses the bundled Pillow).
-# So the preflight here checks the SOURCE PNG instead of the generated .ico;
+# So the preflight here checks the SOURCE (app_icon.py) instead of the generated .ico;
 # the .ico itself is gitignored to prevent the v2.1.x staleness regression
 # (it shipped the legacy Yoink-Y all the way through the rebrand).
-$logoSrc = Join-Path $RepoRoot 'assets\logo-mark-color.png'
+$logoSrc = Join-Path $InstallerDir 'app_icon.py'
 if (-not (Test-Path $logoSrc)) {
     throw "Missing $logoSrc -- can't regenerate installer\uoink.ico"
 }
@@ -522,7 +522,7 @@ try {
     $PSNativeCommandUseErrorActionPreference = $noticePriorNativePreference
 }
 
-# 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
+# 2d-bis. Regenerate installer\uoink.ico from installer\app_icon.py. Uses
 # the embeddable Pillow (just installed). Runs BEFORE the staging copy of
 # uoink.ico and before ISCC reads SetupIconFile, so both consumers pick up the
 # fresh .ico. Single source of truth -> no more rebrand staleness.
@@ -796,8 +796,8 @@ Copy-Item (Join-Path $RepoRoot 'assets\brand')  (Join-Path $StagingDir 'assets\b
 # v3.1.3: ship the unpacked Chrome extension beside the helper so the
 # first-run hint can point Chrome's "Load unpacked" flow at a real folder.
 Copy-Item (Join-Path $RepoRoot 'extension') (Join-Path $StagingDir 'extension') -Recurse -Force
-# v2.2.0: canonical rust-U mark used by the tray glyph loader AND by
-# installer\generate_icon.py. Shipping it makes the tray's PNG source-of-truth
+# v2.2.0: canonical rust-U mark used by the tray glyph loader (the .ico now
+# comes from installer\app_icon.py). Shipping it makes the tray's PNG source-of-truth
 # pattern work post-install (uoink_tray loads {app}\assets\logo-mark-color.png).
 Copy-Item (Join-Path $RepoRoot 'assets\logo-mark-color.png') (Join-Path $StagingDir 'assets\logo-mark-color.png') -Force
 # Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
@@ -913,17 +913,17 @@ print("smoke: bundled Whisper %s @ %s loads read-only" % (info["model"], info["r
     Pop-Location
 }
 
-# ---- 2i. Wizard bitmaps -------------------------------------------------
-# Regenerate the branded WizardImage/WizardSmallImage BMPs from source each
+# ---- 2i. Wizard images --------------------------------------------------
+# Regenerate the branded WizardImage/WizardSmallImage PNGs from source each
 # build (no committed binary churn). Uses the staged embeddable Python, which
 # has Pillow installed. ISCC reads them from installer\assets\ at compile time
 # (they are baked into Setup.exe, not installed into {app}).
-Write-Step 'Generating wizard bitmaps'
+Write-Step 'Generating wizard images'
 & $embedPython (Join-Path $InstallerDir 'generate_bitmaps.py')
 if ($LASTEXITCODE -ne 0) { throw 'wizard bitmap generation failed' }
 $stagedInstallerAssets = Join-Path $StagingDir 'installer-assets'
 New-Item -ItemType Directory -Force -Path $stagedInstallerAssets | Out-Null
-Get-ChildItem -Path (Join-Path $InstallerDir 'assets') -Filter 'wizard-*.bmp' -File |
+Get-ChildItem -Path (Join-Path $InstallerDir 'assets') -Filter 'wizard-*.png' -File |
     ForEach-Object { Copy-Item $_.FullName $stagedInstallerAssets -Force }
 
 # py_compile, staged imports, and bitmap generation all recreate bytecode after
