@@ -1244,12 +1244,23 @@
 
     /* A row's "source . platform . time" line. */
     .card-source {
+      display: flex;
+      min-width: 0;
       overflow: hidden;
       color: var(--text-2);
       font-size: 13px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      white-space: pre; /* keeps the space after the author in a flex row */
     }
+
+    /* Only the author gives way: the platform and age after it are plain
+       nowrap text, so they keep their full width. */
+    .card-source .card-author {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
 
     .card-title {
       display: -webkit-box;
@@ -1370,6 +1381,30 @@
     .health-legend .fail i { background: var(--action); }
 
     .degraded-state,
+    /* Insights tables scroll inside their own box on a narrow screen and
+       never push the page wider. */
+    .library-activity-panel {
+      box-sizing: border-box;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .activity-table-wrapper {
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    @media (max-width: 480px) {
+      .activity-table th,
+      .activity-table td {
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .degraded-actions {
+      margin-top: 10px;
+    }
+
     .job-error {
       border: 1px solid color-mix(in srgb, var(--acid) 24%, transparent);
       border-radius: var(--control-radius);
@@ -2400,7 +2435,17 @@
       cursor: pointer;
     }
 
+    .topic-overview-label {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      font-weight: inherit;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .topic-overview-chip span {
+      flex: none;
       color: var(--text-2);
       font-size: 12px;
       font-variant-numeric: tabular-nums;
@@ -2415,6 +2460,26 @@
     .topic-overview-chip.active {
       border-color: var(--action);
       background: var(--surface-sel);
+    }
+
+    .topic-overview-more {
+      min-height: var(--target-chip);
+      border: 0;
+      border-radius: var(--radius-input);
+      padding: 0 10px;
+      background: transparent;
+      color: var(--text-2);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .topic-overview-more:hover,
+    .topic-overview-more:focus-visible {
+      color: var(--text);
     }
 
     .topic-overview-chip.uncategorized {
@@ -3693,10 +3758,16 @@
 
     #tab-library .control-grid {
       position: relative;
-      grid-template-columns: minmax(0, 1fr) auto minmax(150px, 190px);
+      grid-template-columns: minmax(130px, 170px) minmax(120px, 160px) minmax(150px, 190px) minmax(0, 1fr);
       align-items: center;
       gap: var(--space-3);
       margin: 0 0 var(--space-4);
+    }
+
+    /* The type chips take their own row; Filters, All words and the sort
+       sit together on the row under them. */
+    #tab-library .control-grid > .library-kinds {
+      grid-column: 1 / -1;
     }
 
     .library-omnibox {
@@ -3925,6 +3996,13 @@
       text-underline-offset: 2px;
     }
 
+    .crumb-button {
+      overflow: hidden;
+      max-width: 24ch;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .crumb-current {
       overflow: hidden;
       max-width: 40ch;
@@ -3976,7 +4054,12 @@
 
     .reader-body {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       min-width: 0;
+    }
+
+    .reader-facts .job-sub {
+      overflow-wrap: anywhere;
     }
 
     .reader-note {
@@ -3986,6 +4069,12 @@
       background: var(--surface-sel);
       color: var(--text);
       line-height: 1.5;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .reader-more {
+      margin-top: var(--space-4);
     }
 
     .reader-doc,
@@ -4210,6 +4299,10 @@
         grid-template-columns: minmax(0, 1fr) auto;
       }
 
+      .library-split.reading #tab-library #sortFilter {
+        grid-column: 1 / -1;
+      }
+
       .library-split.reading #tab-library .library-kinds {
         grid-column: 1 / -1;
       }
@@ -4372,7 +4465,8 @@
       #tab-library .control-grid {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       }
-      .library-kinds {
+      .library-kinds,
+      #tab-library #sortFilter {
         grid-column: 1 / -1;
       }
       .omnibox-row {
@@ -6739,6 +6833,9 @@
       hasMore: false,
       libraryState: "loading",
       libraryErrorDetail: "",
+      libraryAutoRetried: false,
+      libraryRetryTimer: null,
+      topicOverviewExpanded: false,
       filters: {
         q: "",
         platform: "",
@@ -7351,6 +7448,9 @@
         const err = new Error((detail && typeof detail === "object" ? detail.message : detail) || `HTTP ${res.status}`);
         err.status = res.status;
         err.data = data || {};
+        // How long the helper asks us to wait, in seconds, when it says.
+        const wait = res.headers && typeof res.headers.get === "function" ? Number(res.headers.get("Retry-After")) : NaN;
+        if (Number.isFinite(wait) && wait >= 0) err.retryAfter = wait;
         throw err;
       }
       return data;
@@ -7386,6 +7486,18 @@
       const t = new Date(value);
       if (Number.isNaN(t.getTime())) return "";
       const diff = Date.now() - t.getTime();
+      // A date in the future is never "just now". Under a minute ahead is
+      // clock skew; further out reads "in 3 days", and past two weeks the date.
+      if (diff < -60000) {
+        const ahead = Math.round(-diff / 60000);
+        let rtf = null;
+        try { rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "always" }); } catch (err) { rtf = null; }
+        if (!rtf || ahead >= 14 * 24 * 60) return t.toLocaleDateString();
+        if (ahead < 60) return rtf.format(ahead, "minute");
+        const aheadHours = Math.round(ahead / 60);
+        if (aheadHours < 36) return rtf.format(aheadHours, "hour");
+        return rtf.format(Math.round(aheadHours / 24), "day");
+      }
       const mins = Math.max(0, Math.round(diff / 60000));
       if (mins < 2) return "just now";
       if (mins < 60) return `${mins}m ago`;
@@ -7779,12 +7891,13 @@
       return `<details class="error-details"><summary>Details</summary><pre>${htmlEscape(raw)}</pre></details>`;
     }
 
-    function degradedState(title, copy, detail) {
+    function degradedState(title, copy, detail, actionHtml = "") {
       return `
         <div class="degraded-state">
           <div class="job-title">${htmlEscape(title)}</div>
           <div class="job-sub">${htmlEscape(copy || "")}</div>
           ${renderErrorDetails(detail)}
+          ${actionHtml}
         </div>
       `;
     }
@@ -8166,6 +8279,50 @@
       return colors[index % colors.length];
     }
 
+    // Fold every segment into about 200 time slots across the whole talk, so a
+    // long recording draws end to end instead of only its first minutes. Each
+    // slot keeps one bar per speaker; its tooltip names the speaker and the
+    // time span the bar covers.
+    const SPEAKER_TIMELINE_SLOTS = 200;
+    function speakerTimelineBuckets(segments, speakerIndex, maxEnd) {
+      const slotLength = maxEnd / SPEAKER_TIMELINE_SLOTS;
+      const merged = new Map();
+      for (const segment of segments) {
+        const first = Math.min(SPEAKER_TIMELINE_SLOTS - 1, Math.max(0, Math.floor(segment.start / slotLength)));
+        const last = Math.min(SPEAKER_TIMELINE_SLOTS - 1, Math.max(first, Math.floor((segment.end - 1e-9) / slotLength)));
+        for (let slot = first; slot <= last; slot += 1) {
+          const key = `${slot}:${segment.speaker}`;
+          const start = Math.max(segment.start, slot * slotLength);
+          const end = Math.min(segment.end, (slot + 1) * slotLength);
+          const hit = merged.get(key);
+          if (hit) {
+            hit.start = Math.min(hit.start, start);
+            hit.end = Math.max(hit.end, end);
+          } else {
+            merged.set(key, { speaker: segment.speaker, index: speakerIndex.get(segment.speaker) || 0, start, end });
+          }
+        }
+      }
+      // Join neighbouring slots of one speaker into a single bar.
+      const bars = [];
+      const open = new Map();
+      for (const [key, hit] of [...merged.entries()].sort((a, b) => a[1].start - b[1].start)) {
+        const slot = Number(key.split(":")[0]);
+        const prev = open.get(hit.speaker);
+        if (prev && slot === prev.slot + 1) {
+          prev.bar.end = hit.end;
+          prev.slot = slot;
+        } else {
+          const bar = { speaker: hit.speaker, index: hit.index, start: hit.start, end: hit.end };
+          bars.push(bar);
+          open.set(hit.speaker, { bar, slot });
+        }
+      }
+      // fmtTimestamp reads 0 as unknown; the start of a talk is 0:00.
+      const stamp = (seconds) => (seconds > 0 ? fmtTimestamp(seconds) : "0:00");
+      return bars.map((bar) => ({ ...bar, title: `${bar.speaker} ${stamp(bar.start)}-${stamp(bar.end)}` }));
+    }
+
     function diarizationTimelineHtml(row, sidecar = {}) {
       if (!shouldShowDiarization(row, sidecar)) return "";
       const segments = diarizationSegments(sidecar);
@@ -8195,11 +8352,10 @@
               ${speakers.map((speaker, index) => `<span><i style="--speaker-color:${speakerColor(index)}"></i>${htmlEscape(speaker)}</span>`).join("")}
             </div>
             <div class="speaker-bars" style="--timeline-height:${timelineHeight}px">
-              ${segments.slice(0, 120).map((segment) => {
-                const index = speakerIndex.get(segment.speaker) || 0;
-                const left = Math.max(0, Math.min(100, (segment.start / maxEnd) * 100));
-                const width = Math.max(0.8, Math.min(100 - left, ((segment.end - segment.start) / maxEnd) * 100));
-                return `<span class="speaker-segment" title="${htmlEscape(`${segment.speaker} ${fmtTimestamp(segment.start)}-${fmtTimestamp(segment.end)}`)}" style="--speaker-color:${speakerColor(index)};--segment-top:${12 + index * 28}px;--segment-left:${left}%;--segment-width:${width}%"></span>`;
+              ${speakerTimelineBuckets(segments, speakerIndex, maxEnd).map((bucket) => {
+                const left = Math.max(0, Math.min(100, (bucket.start / maxEnd) * 100));
+                const width = Math.max(0.8, Math.min(100 - left, ((bucket.end - bucket.start) / maxEnd) * 100));
+                return `<span class="speaker-segment" title="${htmlEscape(bucket.title)}" style="--speaker-color:${speakerColor(bucket.index)};--segment-top:${12 + bucket.index * 28}px;--segment-left:${left}%;--segment-width:${width}%"></span>`;
               }).join("")}
             </div>
           </div>
@@ -8452,7 +8608,34 @@
           </div>
         `;
       });
-      return `<div class="reader-transcript">${rows.join("")}</div>`;
+      // A very long talk draws its first chunk now and the rest on request,
+      // so the page stays light. No virtualizing: find-in-page works on what
+      // is drawn, and Show more draws the next chunk.
+      readerPendingRows = rows.slice(READER_CHUNK_ROWS);
+      const more = readerPendingRows.length
+        ? `<div class="reader-more"><button class="button ghost" type="button" data-reader-more>${readerMoreLabel()}</button></div>` : "";
+      return `<div class="reader-transcript">${rows.slice(0, READER_CHUNK_ROWS).join("")}</div>${more}`;
+    }
+
+    const READER_CHUNK_ROWS = 200;
+    let readerPendingRows = [];
+
+    function readerMoreLabel() {
+      const left = readerPendingRows.length;
+      return `Show more (${left} ${left === 1 ? "paragraph" : "paragraphs"} left)`;
+    }
+
+    function showMoreReaderRows(button) {
+      const holder = button.closest(".reader-more");
+      const list = holder && holder.previousElementSibling;
+      if (!list || !readerPendingRows.length) {
+        if (holder) holder.remove();
+        return;
+      }
+      list.insertAdjacentHTML("beforeend", readerPendingRows.splice(0, READER_CHUNK_ROWS).join(""));
+      if (readerPendingRows.length) button.textContent = readerMoreLabel();
+      else holder.remove();
+      loadReaderImages();
     }
 
     // The saved Markdown as the document (notes, pages, posts, threads, and
@@ -8826,6 +9009,7 @@
       els.yoinkSubhead.textContent = readerMetaLine(row, sidecar);
       els.yoinkCrumbTopic.textContent = topic;
       els.yoinkCrumbTopic.setAttribute("data-reader-topic", topic);
+      els.yoinkCrumbTopic.title = topic;
       els.yoinkCrumbTopicItem.classList.toggle("hidden", !topic);
       els.yoinkSourceLink.href = sourceUrl || "#";
       els.yoinkSourceLink.textContent = sourceLinkLabel(row, sidecar);
@@ -13082,7 +13266,28 @@
       loadLibrary({ reset: true });
     }
 
-    function renderLibraryUnavailable(detail) {
+    // A rate-limited Library gets one automatic retry after the wait the
+    // helper names (5 seconds when it names none). The Retry button is
+    // always there for any further try.
+    const LIBRARY_RETRY_DEFAULT_SECONDS = 5;
+    const LIBRARY_RETRY_MAX_SECONDS = 60;
+
+    function scheduleLibraryAutoRetry(err) {
+      clearTimeout(state.libraryRetryTimer);
+      state.libraryRetryTimer = null;
+      if (!err || err.status !== 429 || state.libraryAutoRetried) return;
+      state.libraryAutoRetried = true;
+      const seconds = Number.isFinite(err.retryAfter) && err.retryAfter > 0
+        ? Math.min(err.retryAfter, LIBRARY_RETRY_MAX_SECONDS) : LIBRARY_RETRY_DEFAULT_SECONDS;
+      const request = state.libraryRequest;
+      state.libraryRetryTimer = setTimeout(() => {
+        state.libraryRetryTimer = null;
+        if (state.libraryState === "unavailable" && request === state.libraryRequest) loadLibrary({ reset: true, jobs: false });
+      }, seconds * 1000);
+    }
+
+    function renderLibraryUnavailable(detail, err = null) {
+      scheduleLibraryAutoRetry(err);
       state.libraryState = "unavailable";
       state.libraryErrorDetail = detail || state.libraryErrorDetail || "";
       state.hasMore = false;
@@ -13093,7 +13298,12 @@
       els.pageSummary.textContent = "Try again in a moment.";
       els.loadMore.classList.add("hidden");
       els.libraryEmpty.classList.add("hidden");
-      els.libraryGrid.innerHTML = degradedState("Library needs a moment.", "Your saved uoinks are still here. Try again in a bit.", state.libraryErrorDetail);
+      els.libraryGrid.innerHTML = degradedState(
+        "Library needs a moment.",
+        "Your saved uoinks are still here. Try again in a bit.",
+        state.libraryErrorDetail,
+        `<div class="degraded-actions"><button class="button ghost" type="button" data-library-reload>Retry</button></div>`
+      );
     }
 
     function renderLibraryInvalidRange(message = "Start date has to be before end date.") {
@@ -13134,6 +13344,8 @@
       // the newest one's answer (or error) is shown, so typing "ai agents"
       // after "ai" never leaves the "ai" results under the new search.
       const request = ++state.libraryRequest;
+      clearTimeout(state.libraryRetryTimer);
+      state.libraryRetryTimer = null;
       const dateMessage = libraryDateRangeMessage();
       if (dateMessage) {
         state.loading = false;
@@ -13189,6 +13401,7 @@
         state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
         state.libraryState = normalizeLibraryState(data, rows);
         state.libraryErrorDetail = "";
+        state.libraryAutoRetried = false;
         state.library = reset ? rows : state.library.concat(rows);
         state.offset += rows.length;
         state.hasMore = state.offset < state.total;
@@ -13200,7 +13413,7 @@
         if (isInvalidRangeError(err)) {
           renderLibraryInvalidRange("Start date has to be before end date.");
         } else {
-          renderLibraryUnavailable(err.message);
+          renderLibraryUnavailable(err.message, err);
         }
       } finally {
         if (request === state.libraryRequest) {
@@ -13371,7 +13584,7 @@
       const availabilityLabel = sourceAvailabilityLabel(row);
       // Phase 2: the real author is the "who" (X author, r/<sub>, YouTube
       // channel), never the bare host.
-      const author = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
+      const authorText = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
       const platformLabel = htmlEscape(live ? `${platformChipLabel(platform)} live` : platformChipLabel(platform));
       const sourceType = htmlEscape(podcast ? "Podcast" : sourceTypeLabel(row));
       const hook = htmlEscape(prettyHook(row.hook_type));
@@ -13380,6 +13593,9 @@
         ? `<button class="hook-chip" type="button" data-hook-explain="${htmlEscape(row.hook_type || "other")}" title="What's a ${hook} hook?">${hook}${htmlEscape(confidence)}</button>`
         : "";
       const age = fmtAge(row.yoinked_at);
+      // Only the author gives way on a narrow row. Its tooltip holds the whole
+      // line, so a cut name can still be read in full.
+      const author = `<span class="card-author" title="${authorText} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}">${authorText}</span>`;
       const current = state.activeTab === "yoink" && videoIdOf(state.selectedYoink) === String(row.video_id || row.slug || "")
         ? ' aria-current="true"' : "";
       return `
@@ -13388,7 +13604,7 @@
             <img alt="" data-thumb-for="${id}" class="hidden">
             <span class="source-type-chip">${sourceType}</span>
           </div>
-          <div class="row-body">
+          <div class="row-body" title="${title}">
             <div class="card-title">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             ${libraryMatchHtml(row)}
@@ -14556,6 +14772,8 @@
       els.sidebarTopics.classList.toggle("hidden", !topics.length || !["library", "yoink"].includes(tab));
     }
 
+    const TOPIC_OVERVIEW_LIMIT = 10;
+
     function renderTopicOverview() {
       const wrap = els.topicOverview;
       if (!wrap) return;
@@ -14567,9 +14785,25 @@
         wrap.innerHTML = "";
         return;
       }
-      topics.sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0));
+      // Biggest first; topics with the same count sort by name, ignoring
+      // case and reading digits as numbers ("Topic 2" before "Topic 10").
+      const naturalOrder = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+      topics.sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0)
+        || naturalOrder.compare(String(a.label || a.value || ""), String(b.label || b.value || "")));
       const active = state.filters.topic || "";
-      wrap.innerHTML = topics.map((t) => {
+      // A long list shows its top topics and a "+N more" toggle. The topic
+      // that is filtering Library stays in view even when it is further down.
+      let shown = topics;
+      let hiddenCount = 0;
+      if (topics.length > TOPIC_OVERVIEW_LIMIT && !state.topicOverviewExpanded) {
+        shown = topics.slice(0, TOPIC_OVERVIEW_LIMIT);
+        const current = topics.find((t) => String(t.value || "") === active);
+        if (current && !shown.includes(current)) shown.push(current);
+        hiddenCount = topics.length - shown.length;
+      }
+      const toggle = topics.length <= TOPIC_OVERVIEW_LIMIT ? ""
+        : `<button type="button" class="topic-overview-more" data-topic-overview-more aria-expanded="${state.topicOverviewExpanded ? "true" : "false"}">${state.topicOverviewExpanded ? "Show fewer" : `+${hiddenCount} more`}</button>`;
+      wrap.innerHTML = shown.map((t) => {
         const value = String(t.value || "");
         const label = String(t.label || t.value || "");
         const count = Number(t.count) || 0;
@@ -14580,8 +14814,8 @@
         const classes = ["topic-overview-chip",
           active === value ? "active" : "",
           isUncat ? "uncategorized" : ""].filter(Boolean).join(" ");
-        return `<button type="button" class="${classes}" data-topic-overview="${htmlEscape(value)}" title="${htmlEscape(hint)}" aria-pressed="${active === value}">${htmlEscape(label)}<span>${count}</span></button>`;
-      }).join("");
+        return `<button type="button" class="${classes}" data-topic-overview="${htmlEscape(value)}" title="${htmlEscape(hint)}" aria-pressed="${active === value}"><b class="topic-overview-label">${htmlEscape(label)}</b><span>${count}</span></button>`;
+      }).join("") + toggle;
       wrap.classList.remove("hidden");
     }
 
@@ -15059,7 +15293,9 @@
       const kind = transcriptKind(source);
       if (kind === "captions") return `${platformChipLabel(platformOf(row))} captions`;
       if (kind === "asr") return captionSkipLine(row) || "transcript by Whisper";
-      if (row.has_transcript === false) return "No transcript";
+      // Notes, pages, articles and images never have a transcript, so there is
+      // nothing to say about one.
+      if (row.has_transcript === false) return isTimedMedia(row) ? "No transcript" : "";
       if (source) return `Transcript: ${humanLabel(source)}`;
       return "";
     }
@@ -19809,6 +20045,11 @@
           dismissYoutubeBotCheck();
           return;
         }
+        if (event.target.closest("[data-library-reload]")) {
+          state.libraryAutoRetried = false;
+          loadLibrary({ reset: true });
+          return;
+        }
         const kindChip = event.target.closest("[data-library-kind]");
         if (kindChip) {
           setLibraryKind(kindChip.dataset.libraryKind || "");
@@ -19834,6 +20075,11 @@
           dropLibraryCaptureRow(key);
           state.libraryDismissed.add(key);
           renderLibraryCaptures();
+          return;
+        }
+        const readerMore = event.target.closest("[data-reader-more]");
+        if (readerMore) {
+          showMoreReaderRows(readerMore);
           return;
         }
         const readerTopic = event.target.closest("[data-reader-topic]");
@@ -19970,6 +20216,11 @@
         }
         const openPath = event.target.closest("[data-open-path]");
         if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch(() => showToast("Couldn't open that folder."));
+        if (event.target.closest("[data-topic-overview-more]")) {
+          state.topicOverviewExpanded = !state.topicOverviewExpanded;
+          renderTopicOverview();
+          return;
+        }
         const overviewChip = event.target.closest("[data-topic-overview]");
         if (overviewChip) {
           const value = overviewChip.dataset.topicOverview || "";

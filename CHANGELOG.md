@@ -10,6 +10,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Dashboard on a phone: a long error message or source address no longer stretches the
+  item page past the screen. Long topic names in the breadcrumb end in an ellipsis with the
+  full name on hover.
+- Dashboard speaker timeline: a long talk now draws across the whole bar instead of only
+  its first 120 turns.
+- Dashboard Library: the sort menu sits on the same row as Filters and All words on wide
+  screens. On a card, a long author name is cut with an ellipsis (full name on hover) while
+  the platform and age stay visible. Hovering a card shows its full title.
+- Dashboard Activity no longer says "No transcript" for notes and pages. Activity tables
+  stay inside their box on a phone.
+- Dashboard reader: very long transcripts show the first 200 paragraphs with a Show more
+  button instead of drawing everything at once.
+- Dashboard dates in the future read "in 3 days" instead of "just now".
+- Dashboard sidebar topics sort by count, then by name the way a person would ("Topic 2"
+  before "Topic 10"), stay on one line, and fold into a "+N more" button when the list is long.
+- When Library hits the request limit it now shows a Retry button and tries once more by
+  itself after a few seconds.
+
 ## [3.16.3] - 2026-11-10
 
 ### Changed
