@@ -7,6 +7,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const cp = require('node:child_process');
+const http = require('node:http');
 const readline = require('node:readline');
 const net = require('./net.js');
 
@@ -209,10 +210,10 @@ function childEnv(extra) {
   return { ...process.env, ...(extra || {}), [LAUNCHER_ENV]: '1' };
 }
 
-async function installedVersion(inst, deps) {
+async function installedVersion(inst, deps, timeoutMs) {
   const inv = cliInvocation(inst);
   try {
-    const r = await deps.capture(inv.cmd, [...inv.args, 'status'], { env: inv.env });
+    const r = await deps.capture(inv.cmd, [...inv.args, 'status'], { env: inv.env, timeoutMs });
     if (r.code !== 0) return { version: null, status: null };
     const status = JSON.parse(r.stdout.slice(r.stdout.indexOf('{')));
     return { version: typeof status.version === 'string' ? status.version : null, status };
@@ -240,7 +241,24 @@ function defaultDeps() {
     stdout: out,
     stderr: err,
     isTTY: Boolean(process.stdin.isTTY && err.isTTY),
+    now: () => performance.now(),
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+    // The same token-gated local endpoint used by the menu bar's Quit action.
+    // Never follow redirects or put the token in a URL or process arguments.
+    quitHelper: (token, timeoutMs) =>
+      new Promise((resolve) => {
+        const req = http.request({
+          hostname: '127.0.0.1', port: 5179, path: '/helper/quit', method: 'POST',
+          headers: { 'X-Uoink-Token': token, 'Content-Type': 'application/json', 'Content-Length': 2 },
+        }, (res) => {
+          res.resume();
+          resolve(res.statusCode === 200);
+        });
+        const timer = setTimeout(() => req.destroy(new Error('Quit request timed out.')), timeoutMs);
+        req.on('close', () => { clearTimeout(timer); resolve(false); });
+        req.on('error', () => resolve(false));
+        req.end('{}');
+      }),
     ask: (question) =>
       new Promise((resolve) => {
         const rl = readline.createInterface({ input: process.stdin, output: err });
@@ -451,6 +469,67 @@ function lexists(p, deps) {
 
 const reason = (e) => (e && (e.code || e.message)) || String(e);
 
+const MAC_HELPER_WAIT_MS = 15000;
+const MAC_QUIT_MESSAGE = 'Quit Uoink from the menu bar, then run npx uoink update again.';
+
+async function waitForMacStatus(inst, deps, deadline, matches) {
+  while (deps.now() < deadline) {
+    const result = await installedVersion(inst, deps, Math.max(1, Math.ceil(deadline - deps.now())));
+    if (matches(result)) return true;
+    const remaining = deadline - deps.now();
+    if (remaining <= 0) break;
+    await deps.sleep(Math.min(500, remaining));
+  }
+  return false;
+}
+
+async function stopMacHelper(appDir, deps, ui) {
+  const installed = findInstalled(deps);
+  const target = lexists(appDir, deps)
+    ? { kind: 'posix', cli: path.join(appDir, 'Contents', 'Helpers', 'uoink') } : null;
+  const checked = new Set();
+  // /Applications and ~/Applications can both contain an app. An idle copy
+  // found first must not hide a running helper in the bundle being replaced.
+  for (const inst of [installed, target]) {
+    if (!inst) continue;
+    const cli = realPath(inst.cli, deps) || inst.cli;
+    if (checked.has(cli)) continue;
+    checked.add(cli);
+    await stopMacInstance(inst, deps, ui);
+  }
+}
+
+async function stopMacInstance(inst, deps, ui) {
+  const { status } = await installedVersion(inst, deps, MAC_HELPER_WAIT_MS);
+  if (status && status.helper_running === false) return;
+  // A failed status command does not prove that it is safe to replace the app.
+  if (!status || status.helper_running !== true) throw new UserError(MAC_QUIT_MESSAGE);
+
+  ui.say('Quitting Uoink before replacing the app...');
+  const deadline = deps.now() + MAC_HELPER_WAIT_MS;
+  let requested = false;
+  // The installed CLI has no stop command. Its status supplies the data folder
+  // containing the local token used by the helper's graceful quit endpoint.
+  try {
+    if (typeof status.data_dir === 'string' && path.isAbsolute(status.data_dir)) {
+      const token = deps.fs.readFileSync(path.join(status.data_dir, 'token.txt'), 'utf8').trim();
+      if (token) requested = await deps.quitHelper(token, 3000);
+    }
+  } catch {
+    /* An older or inaccessible install can still receive an AppleScript Quit. */
+  }
+  if (!requested && deps.now() < deadline) {
+    try {
+      await deps.capture('/usr/bin/osascript', ['-e', 'quit app "Uoink"'], { timeoutMs: Math.ceil(deadline - deps.now()) });
+    } catch {
+      /* Only an explicit helper_running: false below permits the swap. */
+    }
+  }
+  if (!await waitForMacStatus(inst, deps, deadline, ({ status }) => status && status.helper_running === false)) {
+    throw new UserError(MAC_QUIT_MESSAGE);
+  }
+}
+
 // Replace appDir with the staged copy so there is never a moment with no
 // Uoink.app: move the old one aside, move the new one in, and only then
 // delete the old one. If the new one can't go in, the old one goes back.
@@ -538,6 +617,16 @@ async function installMac(file, tmp, deps, ui) {
     if (cpy.code !== 0) {
       deps.fs.rmSync(staged, { recursive: true, force: true });
       throw new UserError(`Copy failed: ${cpy.stderr.trim() || `ditto exit ${cpy.code}`}`);
+    }
+    try {
+      await stopMacHelper(appDir, deps, ui);
+    } catch (e) {
+      try {
+        deps.fs.rmSync(staged, { recursive: true, force: true });
+      } catch {
+        /* Preserve the quit instruction if cleanup also fails. */
+      }
+      throw e;
     }
     swapIntoPlace(staged, appDir, deps, ui);
   } finally {
@@ -664,22 +753,34 @@ function bannerPlan(ui, plan, where, big, installed) {
 }
 
 async function afterInstall(opts, deps, ui, plan, appDir) {
-  const inst = findInstalled(deps) || (appDir ? { kind: 'posix', cli: path.join(appDir, 'Contents', 'Helpers', 'uoink') } : null);
+  // Check the bundle just installed, even if another Uoink CLI is on PATH.
+  const inst = appDir ? { kind: 'posix', cli: path.join(appDir, 'Contents', 'Helpers', 'uoink') } : findInstalled(deps);
   if (!inst) {
     ui.say('');
     ui.say(`Uoink ${plan.version} is installed. Open a new terminal so the uoink command is on your PATH.`);
     return;
   }
-  const { version, status } = await installedVersion(inst, deps);
-  ui.say('');
-  ui.say(version ? `Uoink ${version} is installed.` : `Uoink ${plan.version} is installed.`);
-  if (status && status.helper_running === false) {
-    if (deps.platform === 'darwin') {
-      // Open the bundle installMac just put in place. The CLI found above can
-      // be a symlink elsewhere (~/.local/bin/uoink), so never derive it from that.
-      await deps.capture('/usr/bin/open', ['-a', appDir || 'Uoink']);
-      ui.say('Started Uoink (it runs in the menu bar).');
-    } else {
+  if (deps.platform === 'darwin' && appDir) {
+    ui.say('');
+    ui.say(`Uoink ${plan.version} is installed.`);
+    const deadline = deps.now() + MAC_HELPER_WAIT_MS;
+    let started = false;
+    try {
+      const opened = await deps.capture('/usr/bin/open', ['-a', appDir], { timeoutMs: MAC_HELPER_WAIT_MS });
+      if (opened.code === 0) {
+        started = await waitForMacStatus(inst, deps, deadline,
+          ({ version, status }) => version === plan.version && status && status.helper_running === true);
+      }
+    } catch {
+      /* The install succeeded, but opening or confirming the helper did not. */
+    }
+    ui.say(started ? `Started Uoink ${plan.version} (it runs in the menu bar).`
+      : `Open Uoink from Applications to start version ${plan.version}.`);
+  } else {
+    const { version, status } = await installedVersion(inst, deps);
+    ui.say('');
+    ui.say(version ? `Uoink ${version} is installed.` : `Uoink ${plan.version} is installed.`);
+    if (status && status.helper_running === false) {
       ui.say('Open Uoink from the Start menu to start it.');
     }
   }
