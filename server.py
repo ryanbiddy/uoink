@@ -12088,14 +12088,6 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             if item.get("legacy_episode_id") is None:
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_episode_row")
-            episode = podcasts.get_episode(_get_index(), int(item["legacy_episode_id"]))
-            if (episode and source_subscriptions.is_suggested_episode_guid(episode.get("guid"))
-                    and episode.get("guid") != item.get("entry_id")):
-                # 3.17: saved from a podcast suggestion and already in (or
-                # entering) the library under that save's GUID. Capturing it
-                # again would only repeat the download and transcription.
-                return source_subscriptions.CaptureOutcome(
-                    "preflight_failed", code="already_in_library", terminal=True)
             meta = json.loads(item.get("metadata_json") or "{}")
             if not podcasts._is_http_url(meta.get("audio_url")):
                 return source_subscriptions.CaptureOutcome(
@@ -12119,6 +12111,18 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # Standing capture never authorizes a first model download.
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_transcription_setup")
+            try:
+                episode = podcasts.get_episode(_get_index(), int(item["legacy_episode_id"]))
+            except Exception:
+                # Duplicate suppression is optional when the index is unavailable.
+                episode = None
+            if (episode and source_subscriptions.is_suggested_episode_guid(episode.get("guid"))
+                    and episode.get("guid") != item.get("entry_id")):
+                # 3.17: saved from a podcast suggestion and already in (or
+                # entering) the library under that save's GUID. Capturing it
+                # again would only repeat the download and transcription.
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="already_in_library", terminal=True)
             return None
         if not source_subscriptions._VIDEO_ID_RE.match(item.get("entry_id") or ""):
             return source_subscriptions.CaptureOutcome(
