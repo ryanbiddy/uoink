@@ -367,25 +367,225 @@ test('mac install: starts the installed app bundle even when the CLI found is a 
     },
     realpathSync: (p) => (p === link ? helper : fs.realpathSync(p)),
   };
+  let started = false;
   s.deps.capture = async (cmd, args) => {
     s.calls.capture.push({ cmd, args });
     if (cmd === '/usr/bin/hdiutil' && args[0] === 'attach') {
       fs.mkdirSync(path.join(args[args.indexOf('-mountpoint') + 1], 'Uoink.app', 'Contents'), { recursive: true });
     }
     if (cmd === '/usr/bin/ditto') fs.cpSync(args[0], args[1], { recursive: true });
+    if (cmd === '/usr/bin/open') started = true;
     if (args.includes('status')) {
-      return { code: 0, stdout: JSON.stringify({ ok: true, version: '9.9.9', helper_running: false }), stderr: '' };
+      return { code: 0, stdout: JSON.stringify({ ok: true, version: '9.9.9', helper_running: started }), stderr: '' };
     }
     return { code: 0, stdout: '', stderr: '' };
   };
   assert.equal(await main(['install', '--version', '9.9.9', '--yes', '--no-connect'], s.deps), 0, s.err.text());
   assert.ok(fs.existsSync(path.join(appDir, 'Contents')), 'the app was installed');
   const status = s.calls.capture.filter((c) => c.args.includes('status'));
-  assert.ok(status.length > 0 && status.every((c) => c.cmd === link), 'the symlinked CLI is the one found');
+  assert.equal(status[0].cmd, link, 'the old CLI is found through the symlink');
+  assert.equal(status.at(-1).cmd, helper, 'the new version is checked using the installed bundle');
   const opens = s.calls.capture.filter((c) => c.cmd === '/usr/bin/open').map((c) => c.args);
   assert.deepEqual(opens, [['-a', appDir]], 'opens the bundle, not three folders above the symlink');
   assert.match(s.out.text(), /Started Uoink/);
 });
+
+async function macInstallSetup(t, options = {}) {
+  const dmg = Buffer.from('fake mac update');
+  const rel = await fakeRelease({
+    'Uoink-9.9.9-macos-arm64.dmg': dmg,
+    'SHA256SUMS.txt': Buffer.from(`${sha(dmg)}  Uoink-9.9.9-macos-arm64.dmg\n`),
+  });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, platform: 'darwin', arch: 'arm64', osRelease: '24.1.0' });
+  const appDir = path.join(s.deps.homedir, 'Applications', 'Uoink.app');
+  const helper = path.join(appDir, 'Contents', 'Helpers', 'uoink');
+  const marker = path.join(appDir, 'Contents', 'marker');
+  fs.mkdirSync(path.dirname(helper), { recursive: true });
+  fs.writeFileSync(helper, '#!/bin/sh\n');
+  fs.writeFileSync(marker, 'old');
+  const dataDir = path.join(s.root, 'profile');
+  fs.mkdirSync(dataDir);
+  if (!options.noToken) fs.writeFileSync(path.join(dataDir, 'token.txt'), 'test-local-quit-token');
+  const systemCli = '/Applications/Uoink.app/Contents/Helpers/uoink';
+  const otherCli = path.join(s.root, 'other-uoink');
+  if (options.otherInstall) fs.writeFileSync(otherCli, '#!/bin/sh\n');
+  const events = [];
+  let now = 0;
+  let running = options.running ?? true;
+  let stopping = false;
+  let opened = false;
+  let stopPolls = 0;
+  let startPolls = 0;
+  s.deps.now = () => now;
+  s.deps.sleep = async (ms) => { now += ms; };
+  s.deps.fs = {
+    ...fs,
+    accessSync: (p, mode) => {
+      if (p === '/Applications') throw Object.assign(new Error('EACCES'), { code: 'EACCES' });
+      return fs.accessSync(p, mode);
+    },
+    statSync: (p, ...rest) => {
+      if (options.otherInstall && p === systemCli) return fs.statSync(otherCli);
+      if (String(p).replace(/\\/g, '/').startsWith('/Applications/')) throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+      return fs.statSync(p, ...rest);
+    },
+    realpathSync: (p) => (options.otherInstall && p === systemCli ? otherCli : fs.realpathSync(p)),
+    renameSync: (from, to) => {
+      assert.equal(running, false, 'the helper must stop before either bundle is renamed');
+      events.push(path.basename(from) === '.Uoink.app.new' ? 'swap' : 'move-old');
+      return fs.renameSync(from, to);
+    },
+  };
+  s.deps.quitHelper = async (token, timeoutMs) => {
+    assert.equal(token, 'test-local-quit-token');
+    assert.ok(timeoutMs > 0 && timeoutMs <= 15000);
+    events.push('quit-endpoint');
+    stopping = true;
+    return !options.quitRejected;
+  };
+  s.deps.capture = async (cmd, args, opts = {}) => {
+    s.calls.capture.push({ cmd, args, opts });
+    if (cmd === '/usr/bin/hdiutil' && args[0] === 'attach') {
+      const source = path.join(args[args.indexOf('-mountpoint') + 1], 'Uoink.app', 'Contents');
+      fs.mkdirSync(path.join(source, 'Helpers'), { recursive: true });
+      fs.writeFileSync(path.join(source, 'Helpers', 'uoink'), '#!/bin/sh\n');
+      fs.writeFileSync(path.join(source, 'marker'), 'new');
+    }
+    if (cmd === '/usr/bin/ditto') fs.cpSync(args[0], args[1], { recursive: true });
+    if (cmd === '/usr/bin/osascript') {
+      assert.deepEqual(args, ['-e', 'quit app "Uoink"']);
+      events.push('quit-applescript');
+      if (options.appleScriptFails) return { code: 1, stdout: '', stderr: 'Quit failed' };
+      stopping = true;
+    }
+    if (cmd === '/usr/bin/open') {
+      assert.deepEqual(args, ['-a', appDir]);
+      assert.equal(fs.readFileSync(marker, 'utf8'), 'new', 'open happens after the swap');
+      events.push('open');
+      opened = true;
+      if (options.openFails) return { code: 1, stdout: '', stderr: 'Launch failed' };
+    }
+    if (args.includes('status')) {
+      if (options.otherInstall && cmd === systemCli) {
+        events.push('status:other:false');
+        return { code: 0, stdout: JSON.stringify({ ok: true, version: '9.9.8', helper_running: false }), stderr: '' };
+      }
+      assert.equal(cmd, helper);
+      const version = fs.readFileSync(marker, 'utf8') === 'old' ? '9.9.8' : (options.startVersion || '9.9.9');
+      if (opened) {
+        startPolls++;
+        running = !options.startFails && startPolls >= 2;
+      } else if (stopping) {
+        stopPolls++;
+        if (!options.wontStop && stopPolls >= 2) running = false;
+      }
+      events.push(`status:${version}:${running}`);
+      if (options.badStatus && (!options.badStatusAfterQuit || stopping)) {
+        return { code: 0, stdout: 'not JSON', stderr: '' };
+      }
+      return { code: 0, stdout: JSON.stringify({ ok: true, version, helper_running: running, data_dir: dataDir }), stderr: '' };
+    }
+    return { code: 0, stdout: '', stderr: '' };
+  };
+  return { ...s, appDir, events, elapsed: () => now, marker: () => fs.readFileSync(marker, 'utf8') };
+}
+
+for (const command of ['update', 'install']) {
+  test(`mac ${command}: quits, waits, swaps, opens the bundle and confirms the new version`, async (t) => {
+    const s = await macInstallSetup(t);
+    const args = command === 'install' ? ['install', '--version', '9.9.9'] : ['update'];
+    assert.equal(await main([...args, '--yes', '--no-connect'], s.deps), 0, s.err.text());
+    assert.equal(s.marker(), 'new');
+    const quit = s.events.indexOf('quit-endpoint');
+    const stopped = s.events.indexOf('status:9.9.8:false');
+    const swap = s.events.indexOf('swap');
+    const opened = s.events.indexOf('open');
+    const confirmed = s.events.indexOf('status:9.9.9:true');
+    assert.ok(quit > 0 && quit < stopped && stopped < swap && swap < opened && opened < confirmed, s.events.join(', '));
+    assert.ok(s.elapsed() >= 1000, 'waits for shutdown and startup');
+    assert.ok(!s.events.includes('quit-applescript'), 'uses the graceful endpoint when available');
+    assert.match(s.out.text(), /Started Uoink 9\.9\.9/);
+    assert.deepEqual(fs.readdirSync(path.dirname(s.appDir)), ['Uoink.app']);
+    assert.deepEqual(fs.readdirSync(s.tmpRoot), []);
+  });
+}
+
+test('mac update: a helper that will not stop leaves the old bundle untouched and exits 1', async (t) => {
+  const s = await macInstallSetup(t, { wontStop: true });
+  assert.equal(await main(['update', '--yes'], s.deps), 1);
+  assert.equal(s.elapsed(), 15000, 'stops waiting at the deadline');
+  assert.equal(s.marker(), 'old');
+  assert.ok(!s.events.some((e) => ['move-old', 'swap', 'open'].includes(e)));
+  assert.match(s.err.text(), /Quit Uoink from the menu bar, then run npx uoink update again\./);
+  assert.ok(s.calls.capture.some((c) => c.cmd === '/usr/bin/hdiutil' && c.args[0] === 'detach'));
+  assert.deepEqual(fs.readdirSync(path.dirname(s.appDir)), ['Uoink.app']);
+  assert.deepEqual(fs.readdirSync(s.tmpRoot), []);
+});
+
+test('mac update: a stopped helper needs no quit request', async (t) => {
+  const s = await macInstallSetup(t, { running: false });
+  assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.ok(!s.events.some((e) => e.startsWith('quit-')));
+  assert.equal(s.marker(), 'new');
+  assert.match(s.out.text(), /Started Uoink 9\.9\.9/);
+});
+
+test('mac update: an idle system copy does not hide a running app in the user Applications folder', async (t) => {
+  const s = await macInstallSetup(t, { otherInstall: true });
+  assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.ok(s.events.includes('status:other:false'));
+  assert.ok(s.events.includes('quit-endpoint'));
+  const stopped = s.events.indexOf('status:9.9.8:false');
+  assert.ok(stopped >= 0 && stopped < s.events.indexOf('swap'));
+  assert.equal(s.marker(), 'new');
+  assert.match(s.out.text(), /Started Uoink 9\.9\.9/);
+});
+
+test('mac update: a failed AppleScript quit cannot authorize a swap', async (t) => {
+  const s = await macInstallSetup(t, { noToken: true, appleScriptFails: true });
+  assert.equal(await main(['update', '--yes'], s.deps), 1);
+  assert.equal(s.elapsed(), 15000);
+  assert.equal(s.marker(), 'old');
+  assert.ok(s.events.includes('quit-applescript'));
+  assert.ok(!s.events.includes('move-old') && !s.events.includes('swap') && !s.events.includes('open'));
+  assert.match(s.err.text(), /Quit Uoink from the menu bar/);
+});
+
+for (const options of [{ noToken: true }, { quitRejected: true }]) {
+  test(`mac update: falls back to AppleScript when ${options.noToken ? 'the token is missing' : 'the quit endpoint fails'}`, async (t) => {
+    const s = await macInstallSetup(t, options);
+    assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+    assert.ok(s.events.includes('quit-applescript'));
+    assert.ok(s.events.indexOf('status:9.9.8:false') < s.events.indexOf('swap'));
+    const quit = s.calls.capture.find((c) => c.cmd === '/usr/bin/osascript');
+    assert.ok(quit.opts.timeoutMs > 0 && quit.opts.timeoutMs <= 15000);
+  });
+}
+
+for (const afterQuit of [false, true]) {
+  test(`mac update: unreadable status ${afterQuit ? 'after quitting' : 'before quitting'} never permits a swap`, async (t) => {
+    const s = await macInstallSetup(t, { badStatus: true, badStatusAfterQuit: afterQuit });
+    assert.equal(await main(['update', '--version', '9.9.9', '--yes'], s.deps), 1);
+    assert.equal(s.marker(), 'old');
+    assert.ok(!s.events.includes('move-old') && !s.events.includes('swap') && !s.events.includes('open'));
+    assert.match(s.err.text(), /Quit Uoink from the menu bar/);
+  });
+}
+
+for (const [name, options] of [
+  ['open fails', { openFails: true }],
+  ['the helper stays stopped', { startFails: true }],
+  ['status still reports the old version', { startVersion: '9.9.8' }],
+]) {
+  test(`mac update: says to open Uoink from Applications when ${name}`, async (t) => {
+    const s = await macInstallSetup(t, options);
+    assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+    assert.equal(s.marker(), 'new', 'the install itself succeeded');
+    assert.match(s.out.text(), /Open Uoink from Applications/);
+    assert.doesNotMatch(s.out.text(), /Started Uoink/);
+  });
+}
 
 // ---- download counter ----
 

@@ -8,6 +8,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const cp = require('node:child_process');
+const http = require('node:http');
+const { EventEmitter } = require('node:events');
 
 const { main, findInstalled, installMac, defaultDeps, makeUi, LAUNCHER_ENV, PKG_DIR } = require('../lib/main.js');
 
@@ -216,12 +218,57 @@ test('bin/uoink.js with the guard set exits 1 without running the CLI', (t) => {
 
 // ---- Mac install: the old app survives a failed swap ----
 
+test('the graceful quit request sends its token only in a header to the local endpoint and follows no redirects', async (t) => {
+  const calls = [];
+  let statusCode = 200;
+  t.mock.method(http, 'request', (opts, response) => {
+    const req = new EventEmitter();
+    req.end = (body) => {
+      calls.push({ opts, body });
+      queueMicrotask(() => {
+        response({ statusCode, headers: { location: 'https://example.com/quit' }, resume() {} });
+        req.emit('close');
+      });
+    };
+    return req;
+  });
+  const deps = defaultDeps();
+  assert.equal(await deps.quitHelper('test-local-quit-token', 1000), true);
+  statusCode = 302;
+  assert.equal(await deps.quitHelper('test-local-quit-token', 1000), false);
+  assert.equal(calls.length, 2, 'a redirect does not create another request');
+  for (const { opts, body } of calls) {
+    assert.deepEqual(opts, {
+      hostname: '127.0.0.1', port: 5179, path: '/helper/quit', method: 'POST',
+      headers: { 'X-Uoink-Token': 'test-local-quit-token', 'Content-Type': 'application/json', 'Content-Length': 2 },
+    });
+    assert.equal(body, '{}');
+  }
+});
+
+test('the graceful quit request times out when the local endpoint does not reply', async (t) => {
+  let destroyed = false;
+  t.mock.method(http, 'request', () => {
+    const req = new EventEmitter();
+    req.end = () => {};
+    req.destroy = (error) => {
+      destroyed = true;
+      req.emit('error', error);
+      req.emit('close');
+    };
+    return req;
+  });
+  assert.equal(await defaultDeps().quitHelper('test-local-quit-token', 1), false);
+  assert.equal(destroyed, true);
+});
+
 function macSetup(t, fsOver = {}) {
   const root = tempRoot(t);
   const home = path.join(root, 'home');
   const apps = path.join(home, 'Applications');
   const appDir = path.join(apps, 'Uoink.app');
   write(path.join(appDir, 'Contents', 'marker'), 'old');
+  write(path.join(appDir, 'Contents', 'Helpers', 'uoink'), REAL_CLI);
   const tmp = path.join(root, 'tmp');
   fs.mkdirSync(tmp);
   const captures = [];
@@ -235,7 +282,7 @@ function macSetup(t, fsOver = {}) {
     stdout: sink(),
     stderr: err,
     fs: {
-      ...fs,
+      ...fsWithLinks(),
       // Never touch a real /Applications: it is "not writable" here.
       accessSync: (p, mode) => {
         if (p === '/Applications') throw Object.assign(new Error('EACCES'), { code: 'EACCES' });
@@ -249,6 +296,9 @@ function macSetup(t, fsOver = {}) {
         write(path.join(args[args.indexOf('-mountpoint') + 1], 'Uoink.app', 'Contents', 'marker'), 'new');
       }
       if (cmd === '/usr/bin/ditto') fs.cpSync(args[0], args[1], { recursive: true });
+      if (args.includes('status')) {
+        return { code: 0, stdout: JSON.stringify({ ok: true, version: '9.9.8', helper_running: false }), stderr: '' };
+      }
       return { code: 0, stdout: '', stderr: '' };
     },
   };

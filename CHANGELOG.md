@@ -73,6 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- `npx uoink update` on a Mac quits the running Uoink before replacing it and starts the new version after.
 - Tray menu Settings opens the dashboard's Settings page, and the command line says "1 result" instead of "1 result(s)".
 - One title limit for every source: titles longer than 300 characters (YouTube, podcasts,
   pages, X, Reddit, imports, notes, images) are cut at a safe point, never inside an emoji or
