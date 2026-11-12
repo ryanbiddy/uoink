@@ -130,6 +130,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Android share target) fills the Paste a link box and asks "Shared from another app. Send it
   to Uoink?", and nothing reaches the relay until you tap Send. Before, any page or message
   that opened such a link on a paired phone could add a link to your inbox.
+- Podcast suggestions: Save checks that transcription is set up before it downloads anything.
+  If it isn't, the card says to set it up in Settings and nothing is downloaded. A save that
+  fails for any reason stays on its card with the reason and Try again.
+- Podcast suggestions: saving an episode from a show you follow, or following the show after
+  saving, keeps one copy of the episode in Podcasts and the Library. The next feed check gives
+  the saved episode the feed's own ID instead of adding it a second time.
+- Podcast suggestions: a refresh no longer brings back an episode you marked Not interested or
+  saved while it was running.
+- Podcast suggestions: artwork loads only from Apple's image servers (mzstatic.com). Any other
+  artwork is dropped and the card shows its letter tile.
 
 ## [3.16.3] - 2026-11-10
 

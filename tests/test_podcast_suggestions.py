@@ -6,8 +6,11 @@ are called directly with a stubbed response writer.
 from __future__ import annotations
 
 import json
+import re
 import sys
+import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 
@@ -17,7 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import index as index_mod  # noqa: E402
 import podcasts  # noqa: E402
 import server  # noqa: E402
+import source_subscriptions as ss  # noqa: E402
 import suggestions  # noqa: E402
+from source_subscriptions_fixtures import OPERATOR, Clock, FakeAdapter, make_service  # noqa: E402
 from test_dashboard_runthrough_fixes import run_js  # noqa: E402
 
 NOW = 1_800_000_000.0
@@ -49,7 +54,10 @@ def _seed_library(index, root):
     return titles
 
 
-def _row(track, title, show="Show A", *, audio=None, desc="", art="https://img.example.test/a.jpg",
+APPLE_ART = "https://is1-ssl.mzstatic.com/image/thumb/Podcasts/a/160x160bb.jpg"
+
+
+def _row(track, title, show="Show A", *, audio=None, desc="", art=APPLE_ART,
          feed="https://feeds.example.test/a.xml", cid=11):
     return {"trackId": track, "trackName": title, "collectionName": show, "collectionId": cid,
             "episodeUrl": audio or f"https://cdn.example.test/{track}.mp3",
@@ -281,7 +289,18 @@ def test_list_off_returns_nothing_and_no_words_sent(monkeypatch, idx, tmp_path):
     handler._handle_podcast_suggestions_list()
     status, body = resp.sent[0]
     assert status == 200 and body["enabled"] is False and body["items"] == []
-    assert "itunes.apple.com" in body["disclosure"]
+    # The disclosure names the one host the words go to. Parse the host out
+    # and compare it exactly (never a substring test on a URL-like string).
+    named = re.findall(r"\(([a-z0-9.-]+)\)", body["disclosure"])
+    assert [urlparse("https://" + host).hostname for host in named] == ["itunes.apple.com"]
+    # ...and it is the host the search really calls.
+    called = []
+    monkeypatch.setattr(suggestions, "_research", lambda: type(
+        "R", (), {"http_get_json": staticmethod(lambda url: called.append(url) or {})}))
+    suggestions.default_fetch("pricing", 5)
+    suggestions.default_lookup("42")
+    assert [urlparse(url).hostname for url in called] == ["itunes.apple.com"] * 2
+    assert all(urlparse(url).scheme == "https" for url in called)
 
 
 def test_list_on_shows_cache_and_the_words(monkeypatch, idx, tmp_path):
@@ -326,9 +345,17 @@ def test_save_unknown_is_404(monkeypatch, idx, tmp_path):
     assert resp.sent[0][0] == 404
 
 
+def _transcription_ready(monkeypatch, *, model=True):
+    """Pretend local transcription is set up (or that only the model is missing)."""
+    monkeypatch.setattr(server._platform, "media_capability", lambda: {"available": True})
+    monkeypatch.setattr(server.whisper_runner, "is_transcription_available", lambda: True)
+    monkeypatch.setattr(server.whisper_runner, "is_model_downloaded", lambda _root, _model: model)
+
+
 def test_save_registers_one_episode_without_subscribing(monkeypatch, idx, tmp_path):
     item = _cache_item(tmp_path)
     handler, resp = _handler(monkeypatch, idx, tmp_path)
+    _transcription_ready(monkeypatch)
     polled, queued = [], []
     monkeypatch.setattr(server, "_poll_podcast_feed_for_watch", lambda fid: polled.append(fid))
     monkeypatch.setattr(podcasts, "download_episode_audio", lambda *a, **k: {"ok": True})
@@ -346,8 +373,11 @@ def test_save_registers_one_episode_without_subscribing(monkeypatch, idx, tmp_pa
 
 
 def test_save_reports_missing_transcription_setup(monkeypatch, idx, tmp_path):
+    # Setup looked fine before the download, then the queue still refused
+    # (for example the model was removed meanwhile).
     item = _cache_item(tmp_path)
     _handler(monkeypatch, idx, tmp_path)
+    _transcription_ready(monkeypatch)
     monkeypatch.setattr(podcasts, "download_episode_audio", lambda *a, **k: {"ok": True})
     monkeypatch.setattr(server, "_queue_podcast_transcription",
                         lambda eid, **kw: ({"ok": False}, 412))
@@ -365,6 +395,267 @@ def test_follow_turns_a_saved_show_on(monkeypatch, idx, tmp_path):
     handler._handle_podcast_suggestions_follow({"id": item["id"]})
     assert resp.sent[-1][0] == 200
     assert podcasts.list_feeds(idx)[0]["enabled"] == 1
+
+
+# ---- 3.17.0 review fixes -------------------------------------------------------
+
+RSS_DATE = "Sun, 01 Nov 2026 07:00:00 -0000"   # the feed's copy of Apple's 2026-11-01
+
+
+def _downloaded(calls):
+    """A download stub that leaves the row the way a real download does."""
+    def fake(idx_, episode_id, **_kw):
+        calls.append(episode_id)
+        podcasts.set_episode_status(idx_, episode_id, "downloaded")
+        return {"ok": True, "episode_id": episode_id}
+    return fake
+
+
+def _save(monkeypatch, item, *, queue=({"ok": True}, 202)):
+    _transcription_ready(monkeypatch)
+    downloads, queued = [], []
+    monkeypatch.setattr(podcasts, "download_episode_audio", _downloaded(downloads))
+    monkeypatch.setattr(server, "_queue_podcast_transcription",
+                        lambda eid, **kw: queued.append(eid) or queue)
+    server._run_podcast_suggestion_save(item["id"], item)
+    return downloads, queued
+
+
+def _rss_entry(guid, item, *, audio=None, title=None):
+    return {"guid": guid, "title": title or item["title"],
+            "audio_url": audio or "http://www.cdn.example.test/e1.mp3?updated=1730000000",
+            "episode_page_url": f"https://pod.example.test/rss/{guid}", "published_at": RSS_DATE}
+
+
+def test_save_checks_transcription_setup_before_downloading(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    _handler(monkeypatch, idx, tmp_path)
+    _transcription_ready(monkeypatch, model=False)          # the Whisper model is missing
+    downloads, queued = [], []
+    monkeypatch.setattr(podcasts, "download_episode_audio", _downloaded(downloads))
+    monkeypatch.setattr(server, "_queue_podcast_transcription",
+                        lambda eid, **kw: queued.append(eid) or ({"ok": True}, 202))
+    server._run_podcast_suggestion_save(item["id"], item)
+    assert server._podcast_suggestion_saves[item["id"]] == {
+        "state": "failed", "message": "Set up transcription in Settings first, then save it again."}
+    assert downloads == [] and queued == []
+    assert podcasts.list_feeds(idx) == [] and podcasts.list_episodes(idx) == []
+    assert suggestions.get_item(tmp_path, item["id"]) is not None
+
+
+def test_failed_or_running_save_stays_on_its_card(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    other = _cache_item(tmp_path, sid="sg_bbbbbbbbbbbb", title="Launch week",
+                        episode_url="https://cdn.example.test/e2.mp3")
+    handler, resp = _handler(monkeypatch, idx, tmp_path)
+    downloads, _ = _save(monkeypatch, item, queue=({"ok": False}, 503))
+    # The audio came down, so the episode row now looks like library work.
+    assert podcasts.list_episodes(idx)[0]["status"] == "downloaded" and len(downloads) == 1
+    assert [i["id"] for i in suggestions.current(tmp_path, idx)["items"]] == [other["id"]]
+    handler._handle_podcast_suggestions_list()
+    cards = {c["id"]: c for c in resp.sent[-1][1]["items"]}
+    assert set(cards) == {item["id"], other["id"]}
+    assert cards[item["id"]]["save_state"] == "failed"
+    assert cards[item["id"]]["save_message"] == "Transcription is not available right now."
+    html = run_js("forYouPodCardHtml(%s)" % json.dumps(cards[item["id"]]))
+    assert "Try again" in html and "Transcription is not available right now." in html
+    # A save still running keeps its card too.
+    server._podcast_suggestion_set_state(item["id"], "saving", "Saving...")
+    handler._handle_podcast_suggestions_list()
+    assert {c["id"]: c["save_state"] for c in resp.sent[-1][1]["items"]}[item["id"]] == "saving"
+    # Try again: the same row is reused, and this time it is saved.
+    downloads, queued = _save(monkeypatch, item)
+    assert server._podcast_suggestion_saves[item["id"]]["state"] == "saved"
+    assert len(podcasts.list_episodes(idx)) == 1 and downloads == queued == [podcasts.list_episodes(idx)[0]["id"]]
+    # Dismissing a failed card still hides it.
+    server._podcast_suggestion_set_state(other["id"], "failed", "Couldn't save this episode.")
+    handler._handle_podcast_suggestions_dismiss({"id": other["id"]})
+    handler._handle_podcast_suggestions_list()
+    assert resp.sent[-1][1]["items"] == []
+
+
+def test_episode_matching_rules():
+    rows = [
+        {"id": 1, "audio_url": "https://cdn.example.test/play?id=1", "title": "A",
+         "published_at": None, "yoink_video_id": None},
+        {"id": 2, "audio_url": "https://traffic.example.test/show/ep-2.mp3?dest=9",
+         "title": "Pricing for makers!", "published_at": RSS_DATE, "yoink_video_id": None},
+    ]
+    match = ss.match_podcast_episode
+    assert match(rows, audio_url="http://www.traffic.example.test/show/ep-2.mp3")["id"] == 2
+    assert match(rows, audio_url="https://cdn.example.test/play?id=1")["id"] == 1
+    assert match(rows, audio_url="https://cdn.example.test/play?id=2") is None  # query ids never collapse
+    assert match(rows, title="Pricing for Makers", published="2026-11-01T00:00:00Z")["id"] == 2
+    assert match(rows, title="Pricing for Makers", published="2026-11-05T00:00:00Z") is None
+    assert match(rows, title="Pricing for Makers") is None
+    # A row already in the library wins a tie.
+    twins = [{**rows[1], "id": 3}, {**rows[1], "id": 4, "yoink_video_id": "episode_x"}]
+    assert match(twins, audio_url=rows[1]["audio_url"])["id"] == 4
+
+
+def test_save_then_poll_adopts_the_feed_guid_without_a_twin(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    _handler(monkeypatch, idx, tmp_path)
+    _save(monkeypatch, item)
+    feed_id = podcasts.list_feeds(idx)[0]["id"]
+    [saved] = podcasts.list_episodes(idx, feed_id=feed_id)
+    assert ss.is_suggested_episode_guid(saved["guid"])
+    rss = [_rss_entry("rss-1", item), _rss_entry("rss-2", item, audio="https://cdn.example.test/e9.mp3",
+                                                  title="Another episode")]
+    assert podcasts.upsert_episodes(idx, feed_id, rss) == (1, 1)
+    assert podcasts.upsert_episodes(idx, feed_id, rss) == (0, 2)        # stable on the next poll
+    rows = {r["guid"]: r for r in podcasts.list_episodes(idx, feed_id=feed_id)}
+    assert set(rows) == {"rss-1", "rss-2"} and rows["rss-1"]["id"] == saved["id"]
+    assert rows["rss-1"]["episode_page_url"] == "https://pod.example.test/e1"   # Apple's page kept
+
+
+def test_save_then_follow_and_poll_through_the_source_service(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    handler, resp = _handler(monkeypatch, idx, tmp_path)
+    _save(monkeypatch, item)
+    feed = podcasts.list_feeds(idx)[0]
+    [saved] = podcasts.list_episodes(idx, feed_id=feed["id"])
+    handler._handle_podcast_suggestions_follow({"id": item["id"]})
+    assert resp.sent[-1][0] == 200 and podcasts.get_feed(idx, feed["id"])["enabled"] == 1
+
+    def obs(entry_id, audio, title):
+        return ss.Observation(
+            entry_id=entry_id, title=title, canonical_url=f"https://pod.example.test/rss/{entry_id}",
+            published_at_ms=ss.parse_published_ms(RSS_DATE),
+            metadata={"identity_method": "guid", "audio_url": audio, "published_raw": RSS_DATE,
+                      "duration_raw": "45:00"})
+
+    adapter = FakeAdapter([ss.AdapterResult("snapshot", coverage="complete", observations=[
+        obs("rss-1", "https://cdn.example.test/e1.mp3?updated=1730000000", item["title"]),
+        obs("rss-2", "https://cdn.example.test/e9.mp3", "Another episode")])])
+    service = make_service(idx, clock=Clock(int(time.time() * 1000) + 1000), adapter=adapter)
+    source_id = ss.legacy_source_id(idx._conn, feed_id=feed["id"])
+    result = service.refresh_source(OPERATOR, {"source_id": source_id})
+    assert result["ok"] is True, result
+    rows = {r["guid"]: r for r in podcasts.list_episodes(idx, feed_id=feed["id"])}
+    assert set(rows) == {"rss-1", "rss-2"} and rows["rss-1"]["id"] == saved["id"]
+    linked = idx._conn.execute(
+        "SELECT legacy_episode_id FROM source_items WHERE entry_id='rss-1'").fetchone()[0]
+    assert linked == saved["id"]
+    # Its library id is now the one the feed implies, so standing capture and
+    # the save can never publish the episode twice.
+    source_key = idx._conn.execute(
+        "SELECT source_key FROM source_subscriptions WHERE source_id=?", (source_id,)).fetchone()[0]
+    episode = podcasts.get_episode_with_feed(idx, saved["id"])
+    assert podcasts._episode_corpus_id(episode)[0] == ss.podcast_corpus_id(source_key, "rss-1")
+
+
+def test_poll_keeps_the_guid_of_a_saved_episode_already_in_the_library(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    _handler(monkeypatch, idx, tmp_path)
+    _save(monkeypatch, item)
+    feed = podcasts.list_feeds(idx)[0]
+    [saved] = podcasts.list_episodes(idx, feed_id=feed["id"])
+    # The transcript is done (publishing may be under way): the GUID is frozen.
+    with idx.write_transaction() as conn:
+        conn.execute("UPDATE podcast_episodes SET transcript_status='done' WHERE id=?", (saved["id"],))
+    assert podcasts.upsert_episodes(idx, feed["id"], [_rss_entry("rss-1", item)]) == (0, 1)
+    with idx.write_transaction() as conn:
+        conn.execute("UPDATE podcast_episodes SET yoink_video_id='episode_0123456789a', "
+                     "status='transcribed' WHERE id=?", (saved["id"],))
+    assert podcasts.upsert_episodes(idx, feed["id"], [_rss_entry("rss-1", item)]) == (0, 1)
+    [row] = podcasts.list_episodes(idx, feed_id=feed["id"])
+    assert row["id"] == saved["id"] and row["guid"] == saved["guid"]    # its library id came from it
+    # Standing capture of that feed entry stops at preflight, before any download.
+    _transcription_ready(monkeypatch)
+    backend = server._ServerCaptureBackend()
+    source = {"source_id": "src", "kind": "podcast_rss", "source_key": feed["feed_url"],
+              "legacy_feed_id": feed["id"]}
+    entry = {"item_id": "si_1", "entry_id": "rss-1", "legacy_episode_id": row["id"],
+             "metadata_json": json.dumps({"audio_url": "https://cdn.example.test/e1.mp3"})}
+    refused = backend.preflight(entry, source)
+    assert refused.code == "already_in_library" and refused.terminal is True
+    # An ordinary feed row is untouched by that check.
+    podcasts.upsert_episodes(idx, feed["id"], [_rss_entry(
+        "rss-2", item, audio="https://cdn.example.test/e9.mp3", title="Another episode")])
+    plain = next(r for r in podcasts.list_episodes(idx, feed_id=feed["id"]) if r["guid"] == "rss-2")
+    assert backend.preflight({**entry, "entry_id": "rss-2", "legacy_episode_id": plain["id"]},
+                             source) is None
+
+
+def test_follow_poll_then_save_reuses_the_feed_row(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    _handler(monkeypatch, idx, tmp_path)
+    feed = podcasts.add_feed(idx, item["feed_url"])
+    podcasts.upsert_episodes(idx, feed["id"], [_rss_entry("rss-1", item)])
+    [rss_row] = podcasts.list_episodes(idx, feed_id=feed["id"])
+    downloads, queued = _save(monkeypatch, item)
+    [row] = podcasts.list_episodes(idx, feed_id=feed["id"])
+    assert row["id"] == rss_row["id"] and row["guid"] == "rss-1"
+    assert downloads == queued == [rss_row["id"]]
+    assert podcasts.get_feed(idx, feed["id"])["enabled"] == 1        # a followed show stays followed
+    assert server._podcast_suggestion_saves[item["id"]]["state"] == "saved"
+
+
+def test_save_reuses_a_feed_row_with_the_same_title_and_day(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    _handler(monkeypatch, idx, tmp_path)
+    feed = podcasts.add_feed(idx, item["feed_url"])
+    podcasts.upsert_episodes(idx, feed["id"], [
+        _rss_entry("rss-1", item, audio="https://tracker.example.test/r/xyz123.mp3"),
+        {**_rss_entry("rss-old", item, audio="https://tracker.example.test/r/old.mp3"),
+         "published_at": "Mon, 01 Sep 2025 07:00:00 -0000"}])
+    _save(monkeypatch, item)
+    rows = podcasts.list_episodes(idx, feed_id=feed["id"])
+    assert sorted(r["guid"] for r in rows) == ["rss-1", "rss-old"]
+    assert [r["status"] for r in rows if r["guid"] == "rss-1"] == ["downloaded"]
+
+
+def test_refresh_keeps_dismissals_and_saves_made_while_it_waits(idx, tmp_path):
+    _seed_library(idx, tmp_path)
+    first = [_row(1, "Pricing one", "Show A", cid=1), _row(2, "Pricing two", "Show B", cid=2)]
+    assert _refresh(idx, tmp_path, Fake({"pricing": first}))["status"] == "refreshed"
+    ids = [i["id"] for i in suggestions.current(tmp_path)["items"]]
+    assert len(ids) == 2
+
+    def slow_apple(term, limit):
+        if term == "pricing":
+            # The user acts on the shelf while the refresh waits on Apple.
+            suggestions.dismiss(tmp_path, ids[0])
+            suggestions.mark_saved(tmp_path, ids[1])
+            return {"results": first + [_row(3, "Pricing three", "Show C", cid=3)]}
+        return {"results": []}
+
+    assert _refresh(idx, tmp_path, slow_apple, now=NOW + DAY + 10)["status"] == "refreshed"
+    cache = suggestions.load_cache(tmp_path)
+    assert cache["dismissed"] == [ids[0]] and cache["saved"] == [ids[1]]
+    assert [i["title"] for i in cache["items"]] == ["Pricing three"]
+    assert cache["refreshed_ts"] == NOW + DAY + 10
+
+
+def test_artwork_only_from_apple_image_hosts(tmp_path):
+    big = "https://is5-ssl.mzstatic.com/image/thumb/Podcasts/b/600x600bb.jpg"
+    for raw, want in {
+        APPLE_ART: APPLE_ART,
+        big: big,
+        "https://img.example.test/a.jpg": "",
+        "https://mzstatic.com.example.test/a.jpg": "",
+        "https://is1-ssl.mzstatic.com.example.test/a.jpg": "",
+        "https://example.test/is1-ssl.mzstatic.com/a.jpg": "",
+        "https://user@is1-ssl.mzstatic.com/a.jpg": "",
+        "https://is1-ssl.mzstatic.com:8443/a.jpg": "",
+        "http://is1-ssl.mzstatic.com/a.jpg": "",
+        "javascript:alert(1)": "",
+    }.items():
+        assert suggestions.artwork_url(raw) == want, raw
+    # A foreign 160px image falls back to Apple's 600px one, or to nothing.
+    parsed = suggestions.parse_episodes({"results": [
+        {**_row(1, "One"), "artworkUrl160": "https://img.example.test/a.jpg", "artworkUrl600": big},
+        _row(2, "Two", art="https://img.example.test/b.jpg")]})
+    assert [p["artwork"] for p in parsed] == [big, ""]
+    # A cache written before the check never hands another host to the page...
+    suggestions.save_cache(tmp_path, {**suggestions._empty_cache(), "items": [
+        {"id": "sg_aaaaaaaaaaaa", "title": "T", "show": "Show", "artwork": "https://img.example.test/a.jpg"}]})
+    [item] = suggestions.current(tmp_path)["items"]
+    assert item["artwork"] == ""
+    # ...and the card shows its letter tile instead of an image.
+    html = run_js("forYouPodCardHtml(%s)" % json.dumps(item))
+    assert "<img" not in html and "<span>S</span>" in html
 
 
 def test_new_module_is_registered_for_every_package():
