@@ -143,12 +143,24 @@ def top_terms(idx, profile: dict | None = None, *, limit: int = MAX_TERMS) -> li
         return []
     avoid = {t for t in (profile or {}).get("avoid_terms", []) if t}
     counts: dict[str, int] = {}
+    phrase_counts: dict[str, int] = {}
+
+    def keep(tok):
+        return (len(tok) >= 3 and not tok.isdigit()
+                and tok not in taste_scoring._STOPWORDS and tok not in _EXTRA_STOPWORDS
+                and not any(a in tok or tok in a for a in avoid))
 
     def vote(text):
         for tok in set(taste_scoring._tokenize(text)):
             if tok in _EXTRA_STOPWORDS or any(a in tok or tok in a for a in avoid):
                 continue
             counts[tok] = counts.get(tok, 0) + 1
+        # Two-word phrases ("claude code", "product market") search far more
+        # precisely than single words, so recurring ones go first.
+        words = re.findall(r"[a-z0-9]+", str(text or "").lower())
+        pairs = {f"{a} {b}" for a, b in zip(words, words[1:]) if keep(a) and keep(b)}
+        for phrase in pairs:
+            phrase_counts[phrase] = phrase_counts.get(phrase, 0) + 1
 
     for row in rows:
         vote(row.get('title'))
@@ -159,9 +171,21 @@ def top_terms(idx, profile: dict | None = None, *, limit: int = MAX_TERMS) -> li
             vote(feed.get("title"))
     except Exception as exc:
         log.info("suggestions: followed shows unavailable: %s", exc)
-    ranked = sorted(((t, n) for t, n in counts.items() if n >= MIN_TERM_COUNT),
-                    key=lambda kv: (-kv[1], kv[0]))
-    return ranked[:limit]
+    phrases = sorted(((t, n) for t, n in phrase_counts.items() if n >= MIN_TERM_COUNT),
+                     key=lambda kv: (-kv[1], kv[0]))[:limit]
+    in_phrase = {w for p, _ in phrases for w in p.split()}
+    words = sorted(((t, n) for t, n in counts.items()
+                    if n >= MIN_TERM_COUNT and t not in in_phrase),
+                   key=lambda kv: (-kv[1], kv[0]))
+    return (phrases + words)[:limit]
+
+
+def mentions_term(term: str, *texts) -> bool:
+    """True when every word of the search term appears in the episode's own
+    title or description. Apple's search also matches show names and authors,
+    which brings in unrelated shows."""
+    haystack = set(re.findall(r"[a-z0-9]+", " ".join(str(t or "") for t in texts).lower()))
+    return all(word in haystack for word in term.split())
 
 
 def library_size(idx) -> int:
@@ -323,7 +347,8 @@ def refresh(idx, data_root, *, enabled: bool, fetch=None, now=None, sleep=None,
             for ep in episodes:
                 if (ep["id"] in dismissed or ep["id"] in pool
                         or _norm_title(ep["title"]) in titles
-                        or (ep["episode_url"] and _norm_url(ep["episode_url"]) in urls)):
+                        or (ep["episode_url"] and _norm_url(ep["episode_url"]) in urls)
+                        or not mentions_term(term, ep["title"], ep["description"])):
                     continue
                 scored = taste_scoring.score_candidate(
                     profile, {"title": ep["title"], "channel": ep["show"]})

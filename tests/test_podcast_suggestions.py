@@ -108,7 +108,27 @@ def test_terms_come_from_recurring_words_and_followed_shows(idx, tmp_path):
     for feed in podcasts.list_feeds(idx):
         podcasts.record_feed_meta(idx, feed["id"], title="Daily Writing Show", description=None,
                                   homepage=None, etag=None, last_modified=None, ok=True)
-    assert dict(suggestions.top_terms(idx, limit=10))["writing"] >= 2
+    # Two followed shows share the phrase "daily writing", so the phrase wins
+    # over its single words (it searches far more precisely).
+    terms = dict(suggestions.top_terms(idx, limit=10))
+    assert terms["daily writing"] >= 2
+    assert "writing" not in terms and "daily" not in terms
+
+
+def test_recurring_phrases_come_before_single_words(idx, tmp_path):
+    for i, title in enumerate(["Claude Code tips", "Shipping with Claude Code", "Pricing basics",
+                               "Pricing pages", "Pricing tiers", "Notes"]):
+        _seed(idx, tmp_path, i, title, channel=f"Chan{i}")
+    ranked = [w for w, _ in suggestions.top_terms(idx)]
+    assert ranked[0] == "claude code"
+    assert "pricing" in ranked and "claude" not in ranked and "code" not in ranked
+
+
+def test_episodes_must_mention_the_term_themselves():
+    assert suggestions.mentions_term("claude code", "Claude Code in practice", "")
+    assert suggestions.mentions_term("pricing", "Episode 12", "We talk pricing pages.")
+    assert not suggestions.mentions_term("launch", "Raising toddlers", "A parenting show")
+    assert not suggestions.mentions_term("claude code", "Claude Monet", "Painting in Giverny")
 
 
 def test_only_topic_words_are_sent_and_calls_are_capped(idx, tmp_path):
