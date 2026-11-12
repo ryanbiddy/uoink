@@ -654,6 +654,7 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
         'third-party-notices\yt-dlp-ejs-0.8.0-LICENSES.txt',
         'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
         'third-party-notices\mozilla-readability-APACHE-2.0.txt',
+        'third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt',
         'third-party-notices\EmbeddingGemma-NOTICE.md',
         'third-party-notices\Gemma-Terms-of-Use.txt',
         'third-party-notices\Gemma-Prohibited-Use-Policy.txt',

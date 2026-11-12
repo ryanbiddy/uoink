@@ -169,6 +169,7 @@ DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
 # The dashboard's @font-face rules load these (SIL OFL, shipped with the
 # app). Only these exact files are served, without a token.
 BRAND_FONTS_DIR = HERE / "assets" / "brand" / "fonts"
+DASHBOARD_QRCODE_PATH = HERE / "assets" / "dashboard" / "qrcode.js"
 BRAND_FONT_FILES = frozenset({"inter.woff", "inter-italic.woff", "bungee.woff", "jetbrains-mono.woff"})
 
 # v2.5: per-file sidecar data-shape version. v2.5+ writers stamp every new
@@ -12573,6 +12574,7 @@ _relay_state = {
     "last_error": None,
     "last_capture_error": None,
     "picked_up_total": 0,
+    "last_pickup_at": None,
     "last_pending_count": None,
     "polling": False,
     "generation": 0,
@@ -12626,6 +12628,7 @@ def _relay_status_payload(settings: dict | None = None) -> dict:
         "last_error": snapshot["last_error"],
         "last_capture_error": snapshot["last_capture_error"],
         "picked_up_total": snapshot["picked_up_total"],
+        "last_pickup_at": snapshot.get("last_pickup_at"),
         "last_pending_count": snapshot["last_pending_count"],
         "polling": snapshot["polling"],
     }
@@ -12688,6 +12691,34 @@ def _relay_exception_text(exc: BaseException) -> str:
     if isinstance(exc, (urllib.error.URLError, OSError)):
         return "Couldn't reach the relay. Check the address and your connection."
     return "Checking the relay failed. Uoink will try again."
+
+
+def _relay_pairing() -> dict:
+    """Ask the saved relay for its push token, using the saved pull token, so
+    the dashboard can draw the phone's QR code. The pull token never leaves
+    this function. `state` is one of: paired, old_relay, not_configured, error.
+    A relay deployed before 3.17 answers 404 (no /v1/pairing); a pull-token
+    listing tells that apart from a wrong address."""
+    settings = _read_settings()
+    base = settings.get("relay_url") or ""
+    token = _get_saved_relay_token()
+    if not base or not token:
+        return {"ok": True, "state": "not_configured",
+                "message": "Add the relay address and pull token first."}
+    try:
+        status, payload = _relay_http("GET", f"{base}/v1/pairing", token)
+        if status == 404:
+            status2, _ = _relay_http("GET", f"{base}/v1/links", token)
+            if status2 == 200:
+                return {"ok": True, "state": "old_relay",
+                        "message": "Update your relay: Render > uoink-relay > Manual Deploy."}
+            return {"ok": True, "state": "error", "message": _relay_status_error(status2)}
+    except Exception as exc:
+        return {"ok": True, "state": "error", "message": _relay_exception_text(exc)}
+    push = payload.get("push_token")
+    if status == 200 and isinstance(push, str) and _RELAY_TOKEN_RE.match(push):
+        return {"ok": True, "state": "paired", "push_token": push}
+    return {"ok": True, "state": "error", "message": _relay_status_error(status)}
 
 
 def _relay_delete(base: str, token: str, link_id: str) -> bool:
@@ -12800,6 +12831,7 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
         return "deferred"
     with _relay_cond:
         _relay_state["picked_up_total"] += 1
+        _relay_state["last_pickup_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     if result.get("ok") is not True:
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
                                         _relay_capture_failure_reason(result, url))
@@ -16976,6 +17008,9 @@ class Handler(BaseHTTPRequestHandler):
             # opening folders, so the route can stay unauthenticated while the
             # user-data APIs remain token-gated.
             return self._handle_dashboard()
+        if bare == "/dashboard/qrcode.js":
+            # Public static file: the vendored QR encoder the phone setup uses.
+            return self._send_file(DASHBOARD_QRCODE_PATH, "text/javascript; charset=utf-8")
         if bare.startswith("/brand/fonts/"):
             # Public, like /dashboard: the bundled fonts the dashboard loads.
             # Static product files, no user data; anything else is a 404.
@@ -22050,6 +22085,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(*_zing_handoff(body.get("video_id"), body.get("allow_download") is True))
         if bare == "/relay/check":
             return self._send_json(200, _relay_request_check())
+        if bare == "/relay/pairing":
+            return self._send_json(200, _relay_pairing())
         if bare == "/settings/usage-prompt":
             return self._handle_usage_prompt()
         if bare == "/settings/output-folder/pick":

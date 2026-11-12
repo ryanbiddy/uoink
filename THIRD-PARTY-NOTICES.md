@@ -271,3 +271,13 @@ line, sits beside the font files in `assets/brand/fonts/` and
   licence `jetbrains-mono-OFL.txt`.
 - OFL text: https://openfontlicense.org
 
+
+
+## Bundled JavaScript (not a Python package)
+
+The dashboard's phone-inbox setup draws its QR code on this computer with
+[qrcode-generator 1.4.4](https://github.com/kazuhikoarase/qrcode-generator)
+(MIT), copyright (c) 2009 Kazuhiko Arase, shipped unchanged as
+`assets/dashboard/qrcode.js`. No outside QR service is used.
+See the [MIT license](third-party-notices/qrcode-generator-1.4.4-MIT-LICENSE.txt).
+

@@ -524,7 +524,7 @@ def test_status_route_reports_without_the_token(settings_route):
     probe.do_GET()
     assert probe.status == 200
     assert set(probe.payload) == {"ok", "enabled", "configured", "last_poll_at", "last_ok_at",
-                                  "last_error", "last_capture_error", "picked_up_total",
+                                  "last_error", "last_capture_error", "picked_up_total", "last_pickup_at",
                                   "last_pending_count", "polling"}
     assert probe.payload["enabled"] is True and probe.payload["configured"] is True
     assert TOKEN not in json.dumps(probe.payload)

@@ -10,6 +10,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Phone inbox setup is now three numbered steps in Settings: make your relay (Deploy to
+  Render), connect it (with a Connected or Not connected status and the reason, including
+  a relay that is asleep), and set up your phone with a QR code. When it all works the card
+  collapses to "Phone inbox is on" with the last pickup time. The QR code is drawn on your
+  computer (qrcode-generator, MIT) and never goes through an outside service.
+- The relay now serves a phone page at `/phone`. The QR code opens it with the push token in
+  the URL fragment, so the token never reaches a server log. It has a Paste a link box, adds
+  Uoink to the Android share sheet once installed, walks through the one-time iPhone Shortcut,
+  and has a Forget this phone button. New relay endpoint `GET /v1/pairing` (pull token
+  required) returns the push token so the dashboard can build the QR code. A relay deployed
+  before this release answers 404: Uoink says to update it (Render > uoink-relay > Manual
+  Deploy) and lets you paste the push token meanwhile.
+- The phone inbox status now includes `last_pickup_at`.
+
+### Changed
+
+- `docs/relay.md` leads with the QR path. The Shortcut, HTTP Shortcuts and curl recipes are
+  the manual fallback.
+
 ### Fixed
 
 - Dashboard on a phone: a long error message or source address no longer stretches the
