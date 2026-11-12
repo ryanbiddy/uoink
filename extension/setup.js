@@ -41,7 +41,7 @@ async function showStoreInstall() {
 }
 
 function downloadUrl(os) {
-  return `${GET_BASE}/${os === "mac" ? "mac" : "windows"}?v=${os === "mac" ? PUBLISHED_MAC_DMG : PUBLISHED_INSTALLER_VERSION}`;
+  return `${GET_BASE}/${os === "mac" ? "mac" : "windows"}?v=${os === "mac" ? PUBLISHED_MAC_DMG : PUBLISHED_INSTALLER_VERSION}&from=extension`;
 }
 
 // Chrome reports "arm" for Apple silicon and "x86-64" for Intel.

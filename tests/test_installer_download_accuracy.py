@@ -49,10 +49,10 @@ def test_setup_page_points_to_the_verified_published_installer() -> None:
     assert 'const GET_BASE = "https://usage.uoink.app/get";' in script
     assert (
         "`${GET_BASE}/${os === \"mac\" ? \"mac\" : \"windows\"}"
-        "?v=${os === \"mac\" ? PUBLISHED_MAC_DMG : PUBLISHED_INSTALLER_VERSION}`"
+        "?v=${os === \"mac\" ? PUBLISHED_MAC_DMG : PUBLISHED_INSTALLER_VERSION}&from=extension`"
     ) in script
     assert (
-        f'href="https://usage.uoink.app/get/windows?v={PUBLISHED_VERSION}"'
+        f'href="https://usage.uoink.app/get/windows?v={PUBLISHED_VERSION}&from=extension"'
     ) in html
     assert "data-win-only" in html
     # The Mac DMG ships in the same release as the installer: one constant.
