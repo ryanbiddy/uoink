@@ -57,6 +57,7 @@ $requiredFiles = @(
     'notes.py',
     'images.py',
     'taste_scoring.py',
+    'suggestions.py',
     'uoink_store.py',
     'extension\store-config.json',
     'defaults\style_anchors.json',

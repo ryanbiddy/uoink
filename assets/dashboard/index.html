@@ -5055,6 +5055,86 @@
     .research-report p { white-space: pre-wrap; }
     .research-receipts { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
     .research-progress { min-height: 24px; overflow-wrap: anywhere; }
+
+    /* For You podcast suggestions (3.17). Own classes only: the shared
+       .home-shelves / .home-shelf rules belong to the Library shelves. */
+    .for-you-pod-teaser {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 16px;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--surface);
+    }
+    .for-you-pod-panel .panel-head { flex-wrap: wrap; gap: 8px; }
+    .for-you-pod-teaser-copy { flex: 1 1 260px; min-width: 0; }
+    .for-you-pod-teaser h2 { margin: 0 0 4px; font-size: 15px; overflow-wrap: anywhere; }
+    .for-you-pod-teaser p { margin: 0; color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
+    .for-you-pod-teaser-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .for-you-pod-list {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x proximity;
+    }
+    .for-you-pod-card {
+      flex: 0 0 300px;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 12px;
+      align-content: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--surface);
+      scroll-snap-align: start;
+    }
+    .for-you-pod-art {
+      position: relative;
+      width: 72px;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface-sel);
+      color: var(--text-2);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 22px;
+    }
+    .for-you-pod-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .for-you-pod-body { min-width: 0; display: grid; gap: 4px; align-content: start; }
+    .for-you-pod-title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow-wrap: anywhere;
+    }
+    .for-you-pod-show, .for-you-pod-meta, .for-you-pod-reason, .for-you-pod-note {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-2);
+      overflow-wrap: anywhere;
+    }
+    .for-you-pod-show { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .for-you-pod-note { color: var(--fail); }
+    .for-you-pod-actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+    .for-you-pod-empty { margin: 0; color: var(--text-2); overflow-wrap: anywhere; }
+    @media (max-width: 620px) {
+      .for-you-pod-list { flex-direction: column; overflow-x: visible; }
+      .for-you-pod-card { flex: 0 0 auto; }
+    }
   </style>
 </head>
 <body>
@@ -5149,6 +5229,17 @@
               <p class="setting-copy" id="importsNote" style="margin-top:0">Videos you imported and haven't opened yet, best match for your taste first.</p>
               <div class="feature-grid" id="importCards"></div>
             </div>
+          </div>
+
+          <div class="panel for-you-pod-panel hidden" id="forYouPodPanel" style="margin-bottom:16px" aria-labelledby="forYouPodTitle">
+            <div class="panel-head">
+              <div class="panel-title" id="forYouPodTitle">Podcast episodes picked for you</div>
+              <div class="inline-row">
+                <button class="button ghost hidden" type="button" id="forYouPodRefresh">Refresh</button>
+                <button class="button ghost" type="button" id="forYouPodCollapse" aria-expanded="true" aria-controls="forYouPodBody">Hide</button>
+              </div>
+            </div>
+            <div class="panel-body" id="forYouPodBody"></div>
           </div>
 
           <div class="feature-grid" id="worthCards"></div>
@@ -6263,6 +6354,14 @@
                 <button class="button" type="button" id="autoUoinkScan">Scan my sources now</button>
               </div>
               <p class="setting-copy">Only works over sources you already track &mdash; no web crawling, no new accounts. Capture uses the same local download + transcription as a manual save, so there is <strong>no AI spend</strong>. Reversible: turn it off any time, and auto-captured uoinks are ordinary uoinks you can delete.</p>
+            </div>
+
+            <div class="setting-block" id="suggest-podcasts">
+              <h2>Suggest podcasts</h2>
+              <p class="setting-copy">Off by default. When on, Uoink picks podcast episodes you might want to save, based on what you already saved. About once a day it sends a few topic words from your library (never titles, links or transcripts) to Apple's podcast search at itunes.apple.com, and the show artwork loads from Apple. Nothing else leaves your computer. Picks show up in For You.</p>
+              <label class="inline-row"><input id="suggestPodcastsToggle" type="checkbox" aria-describedby="suggestPodcastsToggleSaveStatus suggestPodcastsWords"> Suggest podcasts from what I save</label>
+              <div class="setting-feedback"><span class="setting-status" id="suggestPodcastsToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="suggestPodcastsToggleSaveRetry" type="button" data-setting-retry="suggestPodcastsToggle">Retry save</button></div>
+              <p class="setting-copy-dim" id="suggestPodcastsWords" style="font-size:12px;color:var(--dim);margin-top:8px;overflow-wrap:anywhere">Checking which words it would send...</p>
             </div>
 
             <div class="setting-block" id="source-availability">
@@ -12257,6 +12356,271 @@
           <button class="row-link" type="button" data-gap-topic="${htmlEscape(item.topic || "")}">Fill gap</button>
         </div>
       `;
+    }
+
+    // ---- Podcast suggestions in For You (3.17) --------------------------
+    // Off until the user turns it on. Only topic words leave the computer, and
+    // the opt-in copy names them. The Library carries a small teaser that links
+    // here; the cards live in the For You view.
+    const FOR_YOU_POD_COLLAPSE_KEY = "uoink.forYouPod.collapsed";
+    const FOR_YOU_POD_CARD_KEY = "uoink.forYouPod.cardDismissed";
+    const FOR_YOU_POD_MIN_LIBRARY = 5;
+    const forYouPod = { data: null, error: "", timer: null, polls: 0, followed: new Set() };
+
+    function forYouPodStore(key, value) {
+      try {
+        if (value === undefined) return localStorage.getItem(key);
+        localStorage.setItem(key, value);
+      } catch (_) { /* private window or blocked storage: the page still works */ }
+      return null;
+    }
+
+    function forYouPodWords(data) {
+      const words = data && Array.isArray(data.send_terms) ? data.send_terms : [];
+      return words.join(", ");
+    }
+
+    function forYouPodLength(seconds) {
+      const n = Number(seconds);
+      if (!Number.isFinite(n) || n <= 0) return "";
+      const minutes = Math.max(1, Math.round(n / 60));
+      if (minutes < 60) return `${minutes} min`;
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m ? `${h} hr ${m} min` : `${h} hr`;
+    }
+
+    function forYouPodSendLine(data) {
+      const words = forYouPodWords(data);
+      return words
+        ? `Turning this on sends these topic words to Apple's podcast search about once a day: ${words}. No titles, links or transcripts leave your computer.`
+        : "Turning this on sends a few topic words from what you save to Apple's podcast search about once a day. No titles, links or transcripts leave your computer.";
+    }
+
+    // The Library teaser. Returns "" when the shelf should stay hidden.
+    function forYouPodTeaserHtml(data, ctx = {}) {
+      if (!data) return "";
+      const title = '<h2 id="forYouShelfTitle">';
+      if (!data.enabled) {
+        if (Number(data.library_size || 0) < FOR_YOU_POD_MIN_LIBRARY || ctx.dismissed) return "";
+        return `<div class="for-you-pod-teaser"><div class="for-you-pod-teaser-copy">${title}Get podcast suggestions from what you save</h2><p>${htmlEscape(forYouPodSendLine(data))}</p></div><div class="for-you-pod-teaser-actions"><button class="button primary" type="button" data-for-you-pod="on">Turn on</button><button class="button ghost" type="button" data-for-you-pod="hide">Not now</button></div></div>`;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      let line;
+      if (items.length) line = `${items.length} podcast episode${items.length === 1 ? "" : "s"} picked for you`;
+      else if (!data.enough) line = "Save a few things and podcast suggestions show up here.";
+      else if (data.refreshing) line = "Looking for podcast episodes you might like...";
+      else if (data.error) line = "Couldn't reach Apple's podcast search. Try again later.";
+      else line = "No new podcast picks right now. Check back tomorrow.";
+      const link = items.length ? '<div class="for-you-pod-teaser-actions"><a class="route-link" href="#for-you">See all</a></div>' : "";
+      return `<div class="for-you-pod-teaser"><div class="for-you-pod-teaser-copy">${title}Podcasts for you</h2><p>${htmlEscape(line)}</p></div>${link}</div>`;
+    }
+
+    function forYouPodCardHtml(item) {
+      const id = htmlEscape(item.id || "");
+      const title = htmlEscape(item.title || "Untitled episode");
+      const show = htmlEscape(item.show || "Unknown show");
+      const length = forYouPodLength(item.duration_s);
+      const initial = htmlEscape(String(item.show || item.title || "P").trim().charAt(0).toUpperCase() || "P");
+      const art = item.artwork
+        ? `<img src="${htmlEscape(item.artwork)}" alt="" width="72" height="72" loading="lazy" referrerpolicy="no-referrer">`
+        : "";
+      const st = item.save_state || "";
+      const saveLabel = st === "saving" ? "Saving..." : st === "saved" ? "Saved" : "Save";
+      const saveAttrs = st === "saving" || st === "saved" ? ' disabled aria-busy="' + (st === "saving") + '"' : "";
+      const followed = forYouPod.followed.has(item.id);
+      const note = st === "failed" && item.save_message ? item.save_message : st === "saved" ? (item.save_message || "") : "";
+      return `<article class="for-you-pod-card" data-for-you-pod-id="${id}">
+        <div class="for-you-pod-art" aria-hidden="true"><span>${initial}</span>${art}</div>
+        <div class="for-you-pod-body">
+          <h3 class="for-you-pod-title" title="${title}">${title}</h3>
+          <p class="for-you-pod-show" title="${show}">${show}</p>
+          ${length ? `<p class="for-you-pod-meta">${htmlEscape(length)}</p>` : ""}
+          <p class="for-you-pod-reason">${htmlEscape(item.reason || "")}</p>
+          ${note ? `<p class="for-you-pod-note" role="status">${htmlEscape(note)}</p>` : ""}
+        </div>
+        <div class="for-you-pod-actions">
+          <button class="button primary" type="button" data-for-you-pod="save" data-id="${id}"${saveAttrs}>${st === "failed" ? "Try again" : saveLabel}</button>
+          <button class="button ghost" type="button" data-for-you-pod="follow" data-id="${id}"${followed ? " disabled" : ""}>${followed ? "Following" : "Follow show"}</button>
+          <button class="button link" type="button" data-for-you-pod="dismiss" data-id="${id}" aria-label="Not interested in ${title}">Not interested</button>
+        </div>
+      </article>`;
+    }
+
+    // The For You panel body. Always returns something: loading, error, off,
+    // not enough saved yet, empty, or the cards.
+    function forYouPodPanelHtml(data, error) {
+      if (!data) {
+        return error
+          ? `<p class="for-you-pod-empty">Couldn't load podcast suggestions. ${htmlEscape(error)}</p><div class="inline-row" style="margin-top:8px"><button class="button" type="button" data-for-you-pod="reload">Try again</button></div>`
+          : '<p class="for-you-pod-empty" role="status">Looking for podcast episodes...</p>';
+      }
+      if (!data.enabled) {
+        return `<p class="for-you-pod-empty">Off. ${htmlEscape(forYouPodSendLine(data))}</p><div class="inline-row" style="margin-top:8px"><button class="button primary" type="button" data-for-you-pod="on">Turn on</button></div>`;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (items.length) return `<div class="for-you-pod-list">${items.map(forYouPodCardHtml).join("")}</div>`;
+      if (!data.enough) return '<p class="for-you-pod-empty">Save a few things and podcast suggestions show up here.</p>';
+      if (data.refreshing) return '<p class="for-you-pod-empty" role="status">Looking for podcast episodes you might like...</p>';
+      if (data.error || error) {
+        return '<p class="for-you-pod-empty">Couldn\'t reach Apple\'s podcast search. Try again later.</p><div class="inline-row" style="margin-top:8px"><button class="button" type="button" data-for-you-pod="refresh">Try again</button></div>';
+      }
+      return '<p class="for-you-pod-empty">No new podcast picks right now. Check back tomorrow.</p>';
+    }
+
+    function forYouPodRender() {
+      const data = forYouPod.data;
+      const shelf = document.getElementById("forYouShelf");
+      const panel = document.getElementById("forYouPodPanel");
+      const body = document.getElementById("forYouPodBody");
+      const words = document.getElementById("suggestPodcastsWords");
+      if (shelf) {
+        const html = forYouPodTeaserHtml(data, { dismissed: forYouPodStore(FOR_YOU_POD_CARD_KEY) === "1" });
+        shelf.innerHTML = html;
+        shelf.classList.toggle("hidden", !html);
+      }
+      if (words) {
+        const list = forYouPodWords(data);
+        words.textContent = list
+          ? `Words it would send right now: ${list}.`
+          : "Nothing would be sent yet. Save a few more things first.";
+      }
+      if (panel && body) {
+        const visible = !data || data.enabled || Number(data.library_size || 0) >= FOR_YOU_POD_MIN_LIBRARY;
+        panel.classList.toggle("hidden", !visible);
+        const collapsed = forYouPodStore(FOR_YOU_POD_COLLAPSE_KEY) === "1";
+        const toggle = document.getElementById("forYouPodCollapse");
+        body.classList.toggle("hidden", collapsed);
+        if (toggle) {
+          toggle.textContent = collapsed ? "Show" : "Hide";
+          toggle.setAttribute("aria-expanded", String(!collapsed));
+        }
+        const refresh = document.getElementById("forYouPodRefresh");
+        if (refresh) refresh.classList.toggle("hidden", !(data && data.enabled));
+        body.innerHTML = forYouPodPanelHtml(data, forYouPod.error);
+      }
+    }
+
+    function forYouPodSchedule() {
+      clearTimeout(forYouPod.timer);
+      const data = forYouPod.data;
+      // Work in flight keeps polling. A first load that failed (helper still
+      // starting, token busy) retries a few times, then stays quiet.
+      const busy = data ? ((data.items || []).some((i) => i.save_state === "saving") || data.refreshing) : forYouPod.polls < 3;
+      if (!busy || forYouPod.polls >= 200) return;
+      forYouPod.polls += 1;
+      forYouPod.timer = setTimeout(forYouPodLoad, 3000);
+    }
+
+    async function forYouPodLoad() {
+      clearTimeout(forYouPod.timer);
+      try {
+        forYouPod.data = await authFetch("/suggestions/podcasts");
+        forYouPod.error = "";
+      } catch (err) {
+        // Keep the last good list on screen; show the failure only when there is none.
+        forYouPod.error = (err && err.message) || "The helper did not answer.";
+      }
+      forYouPodRender();
+      forYouPodSchedule();
+    }
+
+    async function forYouPodTurnOn() {
+      const control = document.getElementById("suggestPodcastsToggle");
+      try {
+        await saveSettingsPatch({ suggest_podcasts: true }, "suggestPodcastsToggle");
+        if (!(state.settings || {}).suggest_podcasts) throw new Error("not saved");
+        if (control) control.checked = true;
+        await authFetch("/suggestions/podcasts/refresh", { method: "POST", body: "{}" });
+      } catch (err) {
+        showToast("Couldn't turn on podcast suggestions.");
+      }
+      forYouPod.polls = 0;
+      await forYouPodLoad();
+    }
+
+    async function forYouPodAct(action, id) {
+      const items = (forYouPod.data && forYouPod.data.items) || [];
+      const item = items.find((i) => i.id === id);
+      try {
+        if (action === "save" && item) {
+          item.save_state = "saving";
+          item.save_message = "";
+          forYouPodRender();
+          await authFetch("/suggestions/podcasts/save", { method: "POST", body: JSON.stringify({ id }) });
+          forYouPod.polls = 0;
+          forYouPodSchedule();
+        } else if (action === "follow" && item) {
+          const res = await authFetch("/suggestions/podcasts/follow", { method: "POST", body: JSON.stringify({ id }) });
+          forYouPod.followed.add(id);
+          showToast((res && res.message) || "Following this show.");
+          forYouPodRender();
+        } else if (action === "dismiss" && item) {
+          forYouPod.data.items = items.filter((i) => i.id !== id);
+          forYouPodRender();
+          await authFetch("/suggestions/podcasts/dismiss", { method: "POST", body: JSON.stringify({ id }) });
+        }
+      } catch (err) {
+        if (action === "save" && item) {
+          item.save_state = "failed";
+          item.save_message = (err && err.message) || "Couldn't save this episode.";
+          forYouPodRender();
+        } else {
+          showToast((err && err.message) || "That didn't work. Try again.");
+        }
+      }
+    }
+
+    function forYouPodClick(event) {
+      const target = event.target;
+      const button = target && typeof target.closest === "function" ? target.closest("[data-for-you-pod]") : null;
+      if (!button) return;
+      const action = button.dataset.forYouPod;
+      if (action === "on") forYouPodTurnOn();
+      else if (action === "hide") { forYouPodStore(FOR_YOU_POD_CARD_KEY, "1"); forYouPodRender(); }
+      else if (action === "reload") forYouPodLoad();
+      else if (action === "refresh") forYouPodRefreshNow();
+      else forYouPodAct(action, button.dataset.id);
+    }
+
+    async function forYouPodRefreshNow() {
+      try {
+        await authFetch("/suggestions/podcasts/refresh", { method: "POST", body: "{}" });
+      } catch (err) {
+        showToast((err && err.message) || "Couldn't refresh podcast suggestions.");
+      }
+      forYouPod.polls = 0;
+      await forYouPodLoad();
+    }
+
+    function wireForYouPod() {
+      for (const id of ["forYouShelf", "forYouPodBody"]) {
+        const box = document.getElementById(id);
+        if (box) box.addEventListener("click", forYouPodClick);
+      }
+      const body = document.getElementById("forYouPodBody");
+      // Image errors do not bubble: capture them to fall back to the letter tile.
+      if (body) body.addEventListener("error", (event) => {
+        if (event.target && event.target.tagName === "IMG") event.target.classList.add("hidden");
+      }, true);
+      const collapse = document.getElementById("forYouPodCollapse");
+      if (collapse) collapse.addEventListener("click", () => {
+        forYouPodStore(FOR_YOU_POD_COLLAPSE_KEY, forYouPodStore(FOR_YOU_POD_COLLAPSE_KEY) === "1" ? "0" : "1");
+        forYouPodRender();
+      });
+      const refresh = document.getElementById("forYouPodRefresh");
+      if (refresh) refresh.addEventListener("click", forYouPodRefreshNow);
+      const toggle = document.getElementById("suggestPodcastsToggle");
+      if (toggle) toggle.addEventListener("change", () => {
+        // The settings handler saves first; this runs after the save settles.
+        settingsWriteQueue.then(async () => {
+          if (toggle.checked) {
+            try { await authFetch("/suggestions/podcasts/refresh", { method: "POST", body: "{}" }); } catch (_) { /* shown by the shelf */ }
+          }
+          forYouPod.polls = 0;
+          forYouPodLoad();
+        });
+      });
     }
 
     function renderForYou(payload) {
@@ -18318,6 +18682,7 @@
       notificationsEnabled: ["notifications_enabled", true],
       usageSharing: ["usage_sharing", false],
       autoUpdateCheck: ["auto_update_check", false],
+      suggestPodcastsToggle: ["suggest_podcasts", false],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -19889,7 +20254,7 @@
       } else {
         stopLibraryActivityTimer();
       }
-      if (tab === "for-you") loadForYou();
+      if (tab === "for-you") { loadForYou(); forYouPodLoad(); }
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
@@ -21146,6 +21511,7 @@
       hydrateMarks();
       wireEvents();
       wireLibraryActivityEvents();
+      wireForYouPod();
       wireRoutes();
       showUsagePrompt();
       applyHashRoute();
@@ -21158,6 +21524,7 @@
       syncDashboardTheme();
       await refreshJobs();
       await loadLibrary({ reset: true });
+      forYouPodLoad();
       await loadLibraryActivity(false);
       startLibraryActivityTimer();
       await loadResume();
