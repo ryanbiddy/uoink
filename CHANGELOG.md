@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Command line: `uoink --help` now describes Uoink instead of internals, every command has a
+  help line, `uoink serve --help` prints help instead of starting the helper, and an unknown
+  command, an empty search, a missing tool name and a stopped helper each say what to do next.
+- AI tool errors no longer show file paths, and the common ones (missing url, query, job id,
+  playlist link, Anthropic key) say what to pass or where to fix it. A site that is not on the
+  allowed list names the dashboard setting instead of an internal route.
+- Tray menu: recent items with an ampersand, a line break or a very long title show cleanly
+  (ellipsis instead of a hard cut), and the status lines read in plain words.
+- First-run window: the start-failure message says what to try. Extension page: the heading
+  no longer leaves one word alone on a phone-width line.
 - Dashboard on a phone: a long error message or source address no longer stretches the
   item page past the screen. Long topic names in the breadcrumb end in an ellipsis with the
   full name on hover.

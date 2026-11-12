@@ -440,7 +440,7 @@
         eyebrow: "Diagnostics",
         pill: "Uoink failed to start",
         headline: "Uoink couldn't <em>start.</em>",
-        copy: detail || "Uoink failed to start. Check the helper log.",
+        copy: detail || "Uoink could not start. Open it again from the Start menu. If this keeps happening, Open diagnostics shows why.",
         primary: { text: "Open diagnostics", action: "dashboard" },
         secondary: { text: "Dismiss", action: "dismiss" },
       });
@@ -515,7 +515,7 @@
       els.steps.innerHTML = `
         <li>Open ${escapeHtml(browserName)} extensions (or paste ${escapeHtml(extensionUrl)} in its address bar)</li>
         <li>Turn ON "Developer mode" (top-right toggle)</li>
-        <li>Click "Load unpacked" -> select this folder:</li>
+        <li>Click "Load unpacked", then select this folder:</li>
       `;
       els.steps.hidden = false;
       els.extensionPath.textContent = extensionPath || "Extension folder unavailable";
@@ -530,7 +530,7 @@
       }
       const params = new URLSearchParams(location.search);
       if (params.get("state") === "failed" || params.get("status") === "failed") {
-        setFailure(params.get("detail") || "Uoink failed to start. Check the helper log.");
+        setFailure(params.get("detail") || "Uoink could not start. Open it again from the Start menu. If this keeps happening, Open diagnostics shows why.");
         return;
       }
 
@@ -543,7 +543,7 @@
         if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
       }
       if (!health || health.ok === false) {
-        setFailure("Uoink failed to start. Check the helper log.");
+        setFailure("Uoink could not start. Open it again from the Start menu. If this keeps happening, Open diagnostics shows why.");
         return;
       }
 
@@ -565,7 +565,7 @@
         if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
       }
       if (!diag || diag.ok === false) {
-        setFailure("Uoink failed to start. Check the helper log.");
+        setFailure("Uoink could not start. Open it again from the Start menu. If this keeps happening, Open diagnostics shows why.");
         return;
       }
       const keyCheck = Array.isArray(diag.checks)

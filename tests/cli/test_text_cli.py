@@ -103,7 +103,9 @@ def test_missing_metadata_keeps_the_full_slug_and_never_guesses_a_source(samples
 
 
 def test_empty_and_bounded_results_keep_existing_limits(samples, library):
-    assert cli.human({"ok": True, "hits": []}) == "0 result(s)"
+    # 2026-11-12 touchpoints pass: an empty result says what to do next.
+    assert cli.human({"ok": True, "hits": []}).startswith("No results. Try other words")
+    assert cli.human({"ok": True, "yoinks": []}) == "Nothing saved yet. Save a link with: uoink capture <url>"
     rows = samples["recent"]["yoinks"] * 6
     text = cli.human({"ok": True, "yoinks": rows}, index=library)
     assert text.startswith("12 result(s)\n") and text.endswith("More results in JSON output.")
@@ -175,3 +177,28 @@ def test_research_status_and_zero_scores_do_not_add_empty_lines(samples, changes
     assert len(text.splitlines()) == 1 and text.endswith(status)
     if changes.get("duration_s", 1) is None:
         assert "duration unknown" in text
+
+
+
+def test_error_text_is_plain_and_says_what_next():
+    assert "uoink tools" in cli.error_text({"ok": False, "error": "tool not found"})
+    refusal = {"ok": False, "error": {"code": "invalid_request", "message": "The request is invalid.",
+                                      "details": {"reason": "integer_out_of_range"}}}
+    assert cli.error_text(refusal).endswith("(integer out of range)")
+
+
+def test_help_names_every_command_and_serve_help_does_not_start_the_helper(capsys):
+    import pytest
+    text = cli.parser().format_help()
+    for word in ("recent", "note", "status", "skill"):
+        assert f"{word} " in text
+    assert "embedded" not in text and "._pth" not in text
+    with pytest.raises(SystemExit) as stop:
+        cli.main(["serve", "--help"])
+    assert stop.value.code == 0
+    assert "Run the Uoink helper" in capsys.readouterr().out
+
+
+def test_unknown_command_points_at_help(capsys):
+    assert cli.main(["bogus"]) == 2
+    assert "Run 'uoink --help'" in capsys.readouterr().err

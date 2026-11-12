@@ -635,7 +635,7 @@ def main() -> int:
     window_kwargs = {"url": _splash_url()}
     if not _helper_health_ok():
         window_kwargs = {
-            "html": _failed_splash_html("Uoink failed to start. Check the helper log."),
+            "html": _failed_splash_html("Uoink could not start. Open it again from the Start menu. If this keeps happening, Open diagnostics shows why."),
         }
     window = webview.create_window(
         "Uoink",
