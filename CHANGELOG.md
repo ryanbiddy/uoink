@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `npx uoink`: a zero-dependency npm package (`packaging/npm/`) that downloads the official
+  installer from the GitHub release, checks its SHA-256 against `SHA256SUMS.txt`, installs
+  Uoink (Windows per user, Mac Apple silicon) and points you at `uoink connect`. When Uoink
+  is already installed, `npx uoink <command>` runs the installed CLI. It asks before
+  downloading, resumes a dropped download, and has `--dry-run`. It has no install script.
+  Not published yet.
+
 ### Fixed
 
 - Dashboard on a phone: a long error message or source address no longer stretches the

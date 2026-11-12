@@ -47,3 +47,12 @@ watchers) and a repository at least 30 days old, so start with a tap:
 `brew audit --cask --strict --online ryanbiddy/uoink/uoink` and `brew style`
 check it on a Mac. Bump `version` and `sha256` for each release; `livecheck`
 reads the latest GitHub release.
+
+## npm (`npx uoink`)
+
+`npm/` is the `uoink` package on npm: `npx uoink` downloads the installer from the
+GitHub release, verifies its SHA-256 and installs it. It carries no installer, so its
+code rarely changes, but `package.json` `version` must equal the repo `VERSION` file
+(`node --test` in `npm/` fails if not, and CI runs it). Bump it with the rest of a
+release: set `version` in `npm/package.json` to the new `VERSION`, run `node --test`,
+then publish (see `npm/PUBLISH.md`). The owner publishes; nothing here does.
