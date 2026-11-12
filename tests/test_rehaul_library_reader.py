@@ -141,7 +141,7 @@ def test_library_activity_is_a_collapsed_insights_section_below_the_list():
 def test_saved_rows_hold_a_thumbnail_title_source_line_and_one_state_line():
     card = _between(SCRIPT, "function cardHtml(row)", "async function loadThumbnail")
     for marker in ('<div class="row-thumb" aria-hidden="true">', '<img alt="" data-thumb-for="${id}" class="hidden">',
-                   '<div class="card-title">${title}</div>', '<div class="card-source">${author} &middot; ${platformLabel}',
+                   '<div class="card-title" title="${title}">${title}</div>','<div class="card-source">${author} &middot; ${platformLabel}',
                    '<div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>'):
         assert marker in card
     detail = _between(SCRIPT, "function savedRowDetail(row)", "function savedStateLine(row)")

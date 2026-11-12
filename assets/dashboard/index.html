@@ -14045,7 +14045,8 @@
       }
     }
 
-    document.getElementById("rediscoverShelf").addEventListener("click", (event) => {
+    // Optional chaining: test harnesses load this script with stub elements.
+    document.getElementById("rediscoverShelf")?.addEventListener?.("click", (event) => {
       const open = event.target.closest("[data-remember-open]");
       if (open) { navigateTo(routeHash("item", open.dataset.rememberOpen)); return; }
       const toggle = event.target.closest("[data-remember-toggle]");
