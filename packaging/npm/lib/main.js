@@ -114,13 +114,13 @@ function findInstalled(deps) {
   const pathDirs = (env.PATH || env.Path || '').split(path.delimiter).filter(Boolean);
   const notOurs = (dir) => !/node_modules|[\\/]_npx[\\/]|[\\/]npm-cache[\\/]/i.test(dir);
   if (platform === 'win32') {
-    if (env.LOCALAPPDATA) add(path.win32.join(env.LOCALAPPDATA, 'Uoink', 'cli', 'uoink.cmd'));
-    for (const d of pathDirs.filter(notOurs)) add(path.win32.join(d, 'uoink.cmd'));
+    if (env.LOCALAPPDATA) add(path.join(env.LOCALAPPDATA, 'Uoink', 'cli', 'uoink.cmd'));
+    for (const d of pathDirs.filter(notOurs)) add(path.join(d, 'uoink.cmd'));
     for (const c of cands) {
       if (!isExecutableFile(c, deps)) continue;
-      const root = path.win32.resolve(path.win32.dirname(c), '..');
-      const python = path.win32.join(root, 'python', 'python.exe');
-      const script = path.win32.join(root, 'uoink_cli.py');
+      const root = path.resolve(path.dirname(c), '..');
+      const python = path.join(root, 'python', 'python.exe');
+      const script = path.join(root, 'uoink_cli.py');
       if (isExecutableFile(python, deps) && isExecutableFile(script, deps)) {
         return { kind: 'win', cli: c, python, script };
       }
