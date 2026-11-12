@@ -94,7 +94,10 @@ def load_cache(data_root) -> dict:
     for key in ("terms", "items", "dismissed", "saved"):
         if isinstance(raw.get(key), list):
             cache[key] = raw[key]
-    cache["items"] = [i for i in cache["items"] if isinstance(i, dict) and i.get("id")]
+    # Artwork is re-checked on read too, so a cache written before the host
+    # check existed never reaches the dashboard with another host.
+    cache["items"] = [{**i, "artwork": artwork_url(i.get("artwork"))}
+                      for i in cache["items"] if isinstance(i, dict) and i.get("id")]
     cache["dismissed"] = [str(d) for d in cache["dismissed"]][-MAX_DISMISSED:]
     cache["saved"] = [str(d) for d in cache["saved"]][-MAX_DISMISSED:]
     if isinstance(raw.get("last_error"), str):
@@ -255,6 +258,30 @@ def _http_url(value) -> str:
     return text[:600] if p.scheme in ("http", "https") and p.netloc else ""
 
 
+ARTWORK_HOST_SUFFIX = ".mzstatic.com"   # Apple's image CDN (is1-ssl.mzstatic.com ...)
+
+
+def artwork_url(value) -> str:
+    """The artwork URL when it is https on Apple's image CDN, else "".
+
+    The dashboard loads it as an <img>, so a stray host in Apple's JSON would
+    become a request to someone else. The host is compared exactly after
+    parsing; any other artwork is dropped and the card shows its letter tile."""
+    url = _http_url(value)
+    if not url:
+        return ""
+    try:
+        p = urlparse(url)
+        host = (p.hostname or "").lower()
+        port = p.port
+    except ValueError:
+        return ""
+    if (p.scheme != "https" or p.username is not None or p.password is not None
+            or port not in (None, 443)):
+        return ""
+    return url if host.endswith(ARTWORK_HOST_SUFFIX) else ""
+
+
 def _clip(value, n) -> str:
     return re.sub(r"\s+", " ", str(value or "")).strip()[:n]
 
@@ -271,7 +298,8 @@ def parse_episodes(payload) -> list[dict]:
         if not title or not (audio or page):
             continue
         ident = str(row.get("trackId") or audio or page)
-        art = _http_url(row.get("artworkUrl160") or row.get("artworkUrl600") or row.get("artworkUrl60"))
+        art = next((a for a in (artwork_url(row.get(k)) for k in
+                                ("artworkUrl160", "artworkUrl600", "artworkUrl60")) if a), "")
         millis = row.get("trackTimeMillis")
         out.append({
             "id": "sg_" + hashlib.sha1(ident.encode("utf-8")).hexdigest()[:12],
@@ -281,7 +309,7 @@ def parse_episodes(payload) -> list[dict]:
             "episode_url": audio,
             "page_url": page,
             "feed_url": _http_url(row.get("feedUrl")),
-            "artwork": art if art.startswith("https://") else "",
+            "artwork": art,
             "duration_s": int(millis / 1000) if isinstance(millis, (int, float)) and millis > 0 else None,
             "released": _clip(row.get("releaseDate"), 40),
             "description": _clip(row.get("description"), 400),
@@ -361,11 +389,10 @@ def refresh(idx, data_root, *, enabled: bool, fetch=None, now=None, sleep=None,
                 ep["term"] = term
                 ep["reason"] = _reason(term, count, scored, ep["show"])
                 pool[ep["id"]] = ep
-        cache["attempt_ts"] = t
         if not ok_calls:
-            cache["last_error"] = error_code or "fetch_failed"
-            save_cache(data_root, cache)
-            return {"status": "failed", "error": cache["last_error"]}
+            error = error_code or "fetch_failed"
+            _commit_refresh(data_root, attempt_ts=t, last_error=error)
+            return {"status": "failed", "error": error}
         ranked = sorted(pool.values(), key=lambda e: (-e["score"], e["title"]))
         per_term_cap = max(3, -(-MAX_ITEMS // len(terms)))
         picked, by_term, by_show = [], {}, {}
@@ -379,11 +406,35 @@ def refresh(idx, data_root, *, enabled: bool, fetch=None, now=None, sleep=None,
             if len(picked) >= MAX_ITEMS:
                 break
         picked.sort(key=lambda e: (-e["score"], e["title"]))
-        cache.update(items=picked, terms=[w for w, _ in terms], refreshed_ts=t, last_error=None)
-        save_cache(data_root, cache)
-        return {"status": "refreshed", "count": len(picked)}
+        kept = _commit_refresh(data_root, items=picked, terms=[w for w, _ in terms],
+                               attempt_ts=t, refreshed_ts=t, last_error=None)
+        return {"status": "refreshed", "count": len(kept["items"])}
     finally:
         _refresh_lock.release()
+
+
+def _commit_refresh(data_root, **fields) -> dict:
+    """Write a refresh's results without losing what happened while it waited
+    on Apple. Under the same lock as every other cache write, reload the cache
+    as it is now and change only the fields a refresh owns. Dismissals and
+    saves made meanwhile stay (and drop matching new items), and a feed URL
+    looked up meanwhile carries over to the same item."""
+    with _lock:
+        latest = load_cache(data_root)
+        if "items" in fields:
+            gone = set(latest["dismissed"]) | set(latest["saved"])
+            known = {i["id"]: i for i in latest["items"]}
+            items = []
+            for item in fields["items"]:
+                if item["id"] in gone:
+                    continue
+                if not item.get("feed_url") and known.get(item["id"], {}).get("feed_url"):
+                    item = {**item, "feed_url": known[item["id"]]["feed_url"]}
+                items.append(item)
+            fields["items"] = items
+        latest.update(fields)
+        save_cache(data_root, latest)
+        return latest
 
 
 def is_due(data_root, now=None) -> bool:
@@ -401,16 +452,23 @@ def refreshing() -> bool:
 
 # ---- reads and small writes -------------------------------------------------------
 
-def current(data_root, idx=None) -> dict:
+def current(data_root, idx=None, *, keep=()) -> dict:
     """What the shelf shows: the cached list minus dismissed, saved and (when an
-    index is given) anything that has since landed in the library."""
+    index is given) anything that has since landed in the library.
+
+    ``keep`` holds suggestion ids whose save is still running or failed. Those
+    stay on the shelf so the card can show progress, the error and Try again:
+    the save itself writes the episode row that would otherwise hide it.
+    Dismissing one still hides it."""
     cache = load_cache(data_root)
+    keep = set(keep or ())
     hidden = set(cache["dismissed"]) | set(cache["saved"])
     titles, urls = library_fingerprints(idx) if idx is not None else (set(), set())
     items = [i for i in cache["items"]
              if i["id"] not in hidden
-             and _norm_title(i.get("title")) not in titles
-             and not (i.get("episode_url") and _norm_url(i["episode_url"]) in urls)]
+             and (i["id"] in keep
+                  or (_norm_title(i.get("title")) not in titles
+                      and not (i.get("episode_url") and _norm_url(i["episode_url"]) in urls)))]
     return {"items": items, "terms": cache["terms"], "refreshed_ts": cache["refreshed_ts"],
             "last_error": cache["last_error"]}
 

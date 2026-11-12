@@ -11800,6 +11800,14 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             if item.get("legacy_episode_id") is None:
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_episode_row")
+            episode = podcasts.get_episode(_get_index(), int(item["legacy_episode_id"]))
+            if (episode and source_subscriptions.is_suggested_episode_guid(episode.get("guid"))
+                    and episode.get("guid") != item.get("entry_id")):
+                # 3.17: saved from a podcast suggestion and already in (or
+                # entering) the library under that save's GUID. Capturing it
+                # again would only repeat the download and transcription.
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="already_in_library", terminal=True)
             meta = json.loads(item.get("metadata_json") or "{}")
             if not podcasts._is_http_url(meta.get("audio_url")):
                 return source_subscriptions.CaptureOutcome(
@@ -12391,12 +12399,41 @@ def _podcast_suggestion_set_state(sid: str, state: str, message: str) -> None:
         _podcast_suggestion_saves[sid] = {"state": state, "message": message}
 
 
+_SUGGESTION_SETUP_MESSAGE = "Set up transcription in Settings first, then save it again."
+
+
+def _podcast_suggestion_setup_problem() -> str | None:
+    """Why a suggested episode can't be transcribed right now, or None.
+
+    Local checks only, the same ones standing capture runs at preflight. The
+    save runs them before anything is registered or downloaded, so a missing
+    Whisper model never leaves a downloaded episode with no transcript."""
+    try:
+        if not _platform.media_capability().get("available"):
+            return _SUGGESTION_SETUP_MESSAGE
+        if not whisper_runner.is_transcription_available():
+            return _SUGGESTION_SETUP_MESSAGE
+        model = whisper_runner.normalize_model((_read_settings() or {}).get("whisper_model"))
+        if not whisper_runner.is_model_downloaded(DATA_ROOT, model):
+            return _SUGGESTION_SETUP_MESSAGE
+    except Exception:
+        log.exception("podcast suggestion: transcription check failed")
+        return _SUGGESTION_SETUP_MESSAGE
+    return None
+
+
 def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
     """Put exactly one episode in the podcast tables without subscribing.
 
     A show that is not already followed is added switched off (no polling, no
     auto-ingest), and only this episode is inserted from Apple's result. No
-    feed is fetched. Following a show is a separate, explicit action."""
+    feed is fetched. Following a show is a separate, explicit action.
+
+    When the feed already has this episode (same audio, or same title and
+    date), that row is reused, so a followed show keeps one row per episode
+    under its real GUID. Otherwise the row gets a marked stand-in GUID that a
+    later poll of the feed swaps for the real one (podcasts.upsert_episodes,
+    source_subscriptions.project_podcast_episode)."""
     existed = any(f.get("feed_url") == feed_url for f in podcasts.list_feeds(idx))
     feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
     feed_id = int(feed["id"])
@@ -12405,7 +12442,12 @@ def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
         podcasts.record_feed_meta(
             idx, feed_id, title=item.get("show") or None, description=None,
             homepage=None, etag=None, last_modified=None, ok=True)
-    guid = item.get("episode_url") or item["id"]
+    same = podcasts.find_feed_episode(
+        idx, feed_id, audio_url=item.get("episode_url"), title=item.get("title"),
+        published=item.get("released") or None)
+    if same is not None:
+        return same
+    guid = source_subscriptions.suggested_episode_guid(item.get("episode_url"))
     podcasts.upsert_episodes(idx, feed_id, [{
         "guid": guid, "title": item.get("title"), "audio_url": item.get("episode_url"),
         "episode_page_url": item.get("page_url") or None,
@@ -12429,6 +12471,9 @@ def _run_podcast_suggestion_save(sid: str, item: dict) -> None:
         idx = _get_index()
         if not item.get("episode_url"):
             return fail("This episode has no audio Uoink can save.")
+        problem = _podcast_suggestion_setup_problem()
+        if problem:
+            return fail(problem)          # nothing registered, nothing downloaded
         feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
         episode = _register_suggested_episode(idx, feed_url, item)
         if episode.get("yoink_video_id"):
@@ -18949,10 +18994,13 @@ class Handler(BaseHTTPRequestHandler):
     # ---- 3.17 podcast suggestions (Library "Suggested for you") ----------
     def _podcast_suggestions_payload(self) -> dict:
         enabled = _podcast_suggestions_enabled()
-        shown = suggestions.current(DATA_ROOT, _get_index()) if enabled else {
-            "items": [], "terms": [], "refreshed_ts": 0, "last_error": None}
         with _podcast_suggestion_saves_lock:
             states = dict(_podcast_suggestion_saves)
+        # A save in progress or one that failed stays on its card (with its
+        # message and Try again) even though its episode row now exists.
+        keep = {sid for sid, st in states.items() if st.get("state") in ("saving", "failed")}
+        shown = suggestions.current(DATA_ROOT, _get_index(), keep=keep) if enabled else {
+            "items": [], "terms": [], "refreshed_ts": 0, "last_error": None}
         items = [{**item, "save_state": states.get(item["id"], {}).get("state"),
                   "save_message": states.get(item["id"], {}).get("message")}
                  for item in shown["items"]]

@@ -495,9 +495,18 @@ def _upsert_episodes_with_ids(
         auto_ingest_requested = (
             1 if feed and feed["auto_ingest"] and existing_episode_count else 0
         )
+        # 3.17: episodes saved from a podcast suggestion before this feed
+        # listed them. Empty for nearly every feed, so this costs one read.
+        suggested = source_subscriptions.suggested_podcast_episodes(conn, feed_id)
         for ep in episodes:
             guid = (ep.get("guid") or "").strip()
             if not guid:
+                continue
+            if suggested and source_subscriptions.adopt_suggested_podcast_episode(
+                    conn, feed_id, guid, audio_url=ep.get("audio_url"),
+                    title=ep.get("title"), published=ep.get("published_at"),
+                    page_url=ep.get("episode_page_url"), candidates=suggested) is not None:
+                seen += 1
                 continue
             cur = conn.execute(
                 "INSERT OR IGNORE INTO podcast_episodes "
@@ -889,6 +898,20 @@ def get_episode(idx, episode_id: int) -> dict | None:
         "SELECT * FROM podcast_episodes WHERE id=?",
         (episode_id,)).fetchone()
     return dict(row) if row else None
+
+
+def find_feed_episode(idx, feed_id: int, *, audio_url=None, title=None,
+                      published=None) -> dict | None:
+    """The episode of this feed that is the same as an outside copy of it
+    (same audio, or same title within a day), or None. A podcast suggestion
+    save uses it so a show that is already followed keeps one row per
+    episode, under the feed's real GUID."""
+    with idx._lock:
+        rows = [dict(r) for r in idx._conn.execute(
+            "SELECT * FROM podcast_episodes WHERE feed_id=? ORDER BY id",
+            (int(feed_id),)).fetchall()]
+    return source_subscriptions.match_podcast_episode(
+        rows, audio_url=audio_url, title=title, published=published)
 
 
 def get_episode_with_feed(idx, episode_id: int) -> dict | None:
