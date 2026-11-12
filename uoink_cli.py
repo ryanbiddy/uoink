@@ -27,6 +27,12 @@ import uoink_install_isolation as isolation  # noqa: E402
 
 
 # Mirrors uoink_mcp_tools.STDIO_TOOLSETS without importing the registry at parse time.
+HELP_DESCRIPTION = (
+    "Search your Uoink library, capture links and connect AI agents.\n"
+    "Every command prints JSON. Add --text for a short readable version.\n"
+    "Run 'uoink <command> --help' for one command."
+)
+
 TOOLSETS = ("full", "core", "search", "research")
 
 
@@ -36,6 +42,9 @@ class UsageError(ValueError):
 
 class Parser(argparse.ArgumentParser):
     def error(self, message):
+        if "invalid choice: " in message and message.startswith("argument <command>"):
+            bad = message.split("invalid choice: ", 1)[1].split(" (", 1)[0]
+            message = f"unknown command {bad}. Run 'uoink --help' to see the commands."
         raise UsageError(message)
 
 
@@ -43,44 +52,47 @@ def parser():
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--text", dest="text_output", action="store_true", default=argparse.SUPPRESS,
                         help="short human rendering instead of JSON")
-    root = Parser(prog="uoink", parents=[common], description=__doc__)
-    sub = root.add_subparsers(dest="command")
+    root = Parser(prog="uoink", parents=[common], description=HELP_DESCRIPTION,
+                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = root.add_subparsers(dest="command", metavar="<command>")
     def command(name, **kw):
         return sub.add_parser(name, parents=[common], **kw)
     listing = command("tools", help="list registry tools")
-    listing.add_argument("--toolset", choices=TOOLSETS, default="full")
+    listing.add_argument("--toolset", choices=TOOLSETS, default="full", help="which tools to list (default full)")
     listing.add_argument("--json", action="store_true", help="include client input schemas")
     call = command("call", help="call any registry tool")
-    call.add_argument("tool")
+    call.add_argument("tool", help="tool name; run 'uoink tools --text' to list them")
     source = call.add_mutually_exclusive_group()
-    source.add_argument("--args")
-    source.add_argument("--args-file", type=Path)
-    call.add_argument("pairs", nargs="*", metavar="key=value")
+    source.add_argument("--args", help="tool arguments as one JSON object")
+    source.add_argument("--args-file", type=Path, help="read the JSON arguments from a file")
+    call.add_argument("pairs", nargs="*", metavar="key=value", help="one argument, repeatable")
     search = command("search", help="bounded library search with stored timing")
-    search.add_argument("query")
-    search.add_argument("--limit", type=int, default=5)
+    search.add_argument("query", help="words to look for in your library")
+    search.add_argument("--limit", type=int, default=5, help="most results to show (default 5)")
     capture = command("capture", help="route a URL through existing capture tools")
-    capture.add_argument("url")
-    recent = command("recent")
-    recent.add_argument("--limit", type=int, default=20)
+    capture.add_argument("url", help="video, playlist, post or page link")
+    recent = command("recent", help="list the newest items in your library")
+    recent.add_argument("--limit", type=int, default=20, help="most items to show (default 20)")
     get = command("get", help="get a bounded library card by item id")
-    get.add_argument("id")
+    get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
     imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
                       "Reddit thread or YouTube playlist (50 per batch)")
-    imports.add_argument("url")
+    imports.add_argument("url", help="list, thread or playlist link")
     imports.add_argument("--limit", type=int, default=50, help="videos per batch, 1-50 (default 50)")
     imports.add_argument("--offset", type=int, default=0,
                          help="start position; use the printed next offset for the next batch")
     imports.add_argument("--preview", action="store_true", help="count without queueing")
     saves = command("import", help="import Watch Later, Reddit saves or X bookmarks from a file")
-    saves.add_argument("file", type=Path)
-    saves.add_argument("--source", choices=("watch_later", "x_bookmarks", "reddit_saved"))
+    saves.add_argument("file", type=Path, help="a .csv or .txt saves file")
+    saves.add_argument("--source", choices=("watch_later", "x_bookmarks", "reddit_saved"),
+                       help="where the file came from (default: detect)")
     saves.add_argument("--limit", type=int, default=50, help="items per batch, 1-50 (default 50)")
     saves.add_argument("--offset", type=int, default=0, help="start position in the staged list")
     saves.add_argument("--preview", action="store_true", help="count without queueing")
     research = command("research", help="discover sources, capture evidence and publish a research report")
-    research.add_argument("words", nargs="+", metavar="QUESTION|status|publish|open|list")
+    research.add_argument("words", nargs="+", metavar="WORDS",
+                          help="a question to research, or status, publish, open or list")
     research.add_argument("--sources", help="comma-separated source kinds (library,youtube,podcast,hn,hackertube)")
     research.add_argument("--max", dest="max_sources", type=int, help="maximum sources (default 12)")
     research.add_argument("--asr-minutes", type=int, help="ASR budget in minutes (default 120)")
@@ -91,23 +103,25 @@ def parser():
     research.add_argument("--claims", type=Path, help="publish payload JSON, without run_id")
     research.add_argument("--json", action="store_true", help="one JSON result on stdout (the default)")
     research.add_argument("--explain", action="store_true", help="show the full candidate score breakdown")
-    note = command("note")
-    note.add_argument("text")
-    note.add_argument("--title")
-    command("status")
+    note = command("note", help="save a note to your library")
+    note.add_argument("text", help="the note text")
+    note.add_argument("--title", help="a title for the note")
+    command("status", help="show the version, data folder and whether the helper is running")
     connect = command("connect", help="print local connection recipes; never writes client files")
-    connect.add_argument("client", nargs="?")
-    connect.add_argument("--list", action="store_true")
+    connect.add_argument("client", nargs="?", help="client name; use --list to see them")
+    connect.add_argument("--list", action="store_true", help="list the supported clients")
     connect.add_argument("--deeplink", action="store_true", help="print a Cursor or VS Code install link")
     connect.add_argument("--toolset", choices=TOOLSETS, default=None,
                          help="tools to serve: full (99), core (36), search (9) or research (7); default full, core for Cursor")
-    skill = command("skill")
+    skill = command("skill", help="find or install the Uoink agent skill")
     skill_sub = skill.add_subparsers(dest="skill_command", required=True)
-    skill_sub.add_parser("path")
-    install = skill_sub.add_parser("install")
+    skill_sub.add_parser("path", help="print where the skill files are")
+    install = skill_sub.add_parser("install", help="copy the skill into an agent's skills folder")
     install.add_argument("--to", type=Path, required=True, help="parent skills directory; copies into <dir>/uoink")
-    install.add_argument("--force", action="store_true")
-    serve = command("serve", help="run the original helper CLI; remaining args pass through")
+    install.add_argument("--force", action="store_true", help="replace an existing copy")
+    serve = command("serve", help="run the original helper CLI; remaining args pass through",
+                    description="Run the Uoink helper in this terminal. Other words and flags go to "
+                                "the helper, for example: uoink serve doctor")
     serve.add_argument("server_args", nargs=argparse.REMAINDER)
     # No --text: the session speaks only JSON-RPC. The toolset stays an env var,
     # as it is for uoink_mcp.py.
@@ -219,7 +233,12 @@ def friendly_call(ns, server):
 def error_text(payload):
     error = payload.get("error", "operation failed")
     if isinstance(error, dict):
-        return f"{error.get('code', 'error')}: {error.get('message', error)}"
+        details = error.get("details")
+        reason = details.get("reason") if isinstance(details, dict) else None
+        extra = f" ({str(reason).replace('_', ' ')})" if reason else ""
+        return f"{error.get('code', 'error')}: {error.get('message', error)}{extra}"
+    if str(error) == "tool not found":
+        return "No tool has that name. Run 'uoink tools --text' to see the names."
     return str(error)
 
 
@@ -491,7 +510,7 @@ def human(payload, *, index=None):
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
     if "data_dir" in payload:
         return (f"Uoink {payload['version']}\nData: {payload['data_dir']}\n"
-                f"Helper: {'running' if payload['helper_running'] else 'not running'}\n"
+                f"Helper: {'running' if payload['helper_running'] else 'not running (open Uoink to start it)'}\n"
                 f"Tools: {payload['tool_counts']['full']} full, {payload['tool_counts']['core']} core")
     def label(value):
         return terminal_label(value)[:240]
@@ -530,6 +549,10 @@ def human(payload, *, index=None):
         return "\n".join(line for line in lines if line)
     if "hits" in payload or "yoinks" in payload:
         rows = payload.get("hits", payload.get("yoinks", []))
+        if not rows:
+            return ("No results. Try other words, or run 'uoink recent --text' to see what is saved."
+                    if "hits" in payload else
+                    "Nothing saved yet. Save a link with: uoink capture <url>")
         lines = [f"{len(rows)} result(s)"]
         for row in rows[:10]:
             row = text_library_row(row, index)
@@ -647,6 +670,8 @@ def main(argv=None):
         isolation.apply_from_process(raw)
         clean = isolation.strip_cli(raw)
         # Let serve forward all legacy flags without argparse interpreting them.
+        if clean[:1] == ["serve"] and any(a in ("-h", "--help") for a in clean[1:]):
+            parser().parse_args(["serve", "--help"])
         if not clean or clean[0] == "serve":
             forwarded = list(raw)
             if clean:
@@ -655,7 +680,7 @@ def main(argv=None):
                 return backend().run_cli(forwarded)
         ns = parser().parse_args(clean)
         if ns.command is None:
-            raise UsageError("choose a command; use uoink --help")
+            raise UsageError("choose a command. Run 'uoink --help' to see them")
         if ns.command == "mcp":
             mcp_session = True
             return serve_mcp()

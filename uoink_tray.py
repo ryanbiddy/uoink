@@ -71,6 +71,16 @@ def update_item_latest(data) -> str | None:
     return latest[:32] or None
 
 
+def menu_label(value, limit: int = 48) -> str:
+    """One clean menu line: single line, no stray whitespace, a trailing
+    ellipsis when cut, and '&' doubled on Windows (a lone '&' disappears and
+    underlines the next letter in a native menu)."""
+    text = " ".join(str(value).split()) or "untitled"
+    if len(text) > limit:
+        text = text[: limit - 1].rstrip() + "…"
+    return text.replace("&", "&&") if sys.platform == "win32" else text
+
+
 class UoinkTray:
     def __init__(self, *, host: str, port: int, version: str,
                  token_path: Path, output_dir: Path, dashboard_url: str,
@@ -155,9 +165,9 @@ class UoinkTray:
     def _status_text(self) -> str:
         return {
             "running": "Uoink: Running ✓",
-            "yoinking": "Uoink: Yoinking…",
-            "degraded": "Uoink: Degraded health!",
-            "offline": "Uoink: Offline",
+            "yoinking": "Uoink: Saving…",
+            "degraded": "Uoink: Running, with problems (open the dashboard)",
+            "offline": "Uoink: Not responding",
         }[self._state]
 
     def _dot_color(self):
@@ -280,7 +290,7 @@ class UoinkTray:
         from pystray import MenuItem  # lazy
         items = []
         for row in self._recent:
-            title = (row.get("title") or row.get("slug") or "untitled")[:48]
+            title = menu_label(row.get("title") or row.get("slug") or "untitled")
             folder = row.get("folder") or row.get("path")
 
             def _open(_icon, _item, folder=folder):
