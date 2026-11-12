@@ -28,6 +28,7 @@
     "library_briefs.py",
     "library_cards.py",
     "library_faithfulness.py",
+    "library_remember.py",
     "library_media.py",
     "library_mirror.py",
     "library_mirror_vault_io.py",

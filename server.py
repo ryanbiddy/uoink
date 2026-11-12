@@ -104,6 +104,7 @@ import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
+import library_remember  # noqa: E402  -- Library Rediscover shelf + idea starters
 import usage_meter  # noqa: E402  -- D-17 real model-usage meter (KV rollup)
 import corpus_contract  # noqa: E402  -- versioned read boundary for consumers
 import corpus_provider  # noqa: E402  -- Uoink provider for corpus contract v1
@@ -980,6 +981,8 @@ def _default_settings() -> dict:
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
         "source_availability_check_enabled": True,
+        # Library "Rediscover" shelf and idea starters. Local only.
+        "rediscover_shelves_enabled": True,
         # CM-11: when a downloaded video exposes no subtitle track, use a
         # local faster-whisper model (the user's download, else the copy the
         # installer bundles). Default ON because
@@ -1221,6 +1224,9 @@ def _normalize_settings(data: dict) -> dict:
     )
     clean["source_availability_check_enabled"] = bool(
         clean.get("source_availability_check_enabled", True)
+    )
+    clean["rediscover_shelves_enabled"] = bool(
+        clean.get("rediscover_shelves_enabled", True)
     )
     clean["asr_fallback_enabled"] = bool(
         clean.get("asr_fallback_enabled", True)
@@ -1702,6 +1708,7 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("transcript_reliability_auto_check")
         ),
         "source_availability_check_enabled": normalized["source_availability_check_enabled"],
+        "rediscover_shelves_enabled": normalized["rediscover_shelves_enabled"],
         "asr_fallback_enabled": bool(
             data.get("asr_fallback_enabled", True)
         ),
@@ -17162,6 +17169,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_corrections()
         if bare == "/memory/search":
             return self._handle_memory_search()
+        if bare == "/library/remember":
+            return self._handle_library_remember()
         if bare == "/reliability/model/status":
             return self._handle_reliability_model_status()
         m = re.fullmatch(r"/reliability/([^/]+)", bare)
@@ -19827,6 +19836,7 @@ class Handler(BaseHTTPRequestHandler):
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
             "source_availability_check_enabled",
+            "rediscover_shelves_enabled",
             "asr_fallback_enabled",          # CM-11 caption-less video ASR
             "claim_verification_enabled",  # v3 A2 -- default OFF (claims
                                             # extracted on yoink only when on)
@@ -22119,6 +22129,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_correct(body)
         if bare == "/memory/delete":
             return self._handle_memory_delete(body)
+        if bare == "/library/opened":
+            return self._handle_library_opened(body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
         if bare == "/reliability/model/download":
@@ -22619,6 +22631,40 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {"ok": True, "correction_id": correction_id})
 
     # ---- /memory/delete ----
+    def _handle_library_remember(self):
+        """GET /library/remember[?today=YYYY-MM-DD] -- the Library's
+        Rediscover picks and idea starters. Local only, token-gated, light
+        rows only (no transcripts). Empty lists when the setting is off."""
+        qs = parse_qs(urlparse(self.path).query)
+        today = None
+        if qs.get("today"):
+            today = library_remember.parse_today(qs["today"][0])
+            if today is None:
+                return self._send_json(400, {"ok": False, "error": "today must be YYYY-MM-DD"})
+        if not _read_settings().get("rediscover_shelves_enabled", True):
+            return self._send_json(200, {
+                "ok": True, "enabled": False, "rediscover": [], "starters": []})
+        try:
+            rows = _get_index().remember_rows()
+            result = library_remember.build_remember(rows, today)
+        except Exception:
+            log.exception("/library/remember failed")
+            return self._send_json(503, {"ok": False, "error": "rediscover unavailable"})
+        return self._send_json(200, {"ok": True, "enabled": True, **result})
+
+    def _handle_library_opened(self, body):
+        """POST /library/opened {video_id} -- note that the reader opened a
+        saved item (local timestamp, for the Rediscover shelf)."""
+        video_id = str((body or {}).get("video_id") or "").strip() if isinstance(body, dict) else ""
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        try:
+            recorded = _get_index().mark_opened(video_id)
+        except Exception:
+            log.exception("/library/opened failed")
+            return self._send_json(503, {"ok": False, "error": "could not record the open"})
+        return self._send_json(200, {"ok": True, "recorded": bool(recorded)})
+
     def _handle_memory_delete(self, body: dict):
         """Soft-delete a yoink: move its folder into _yoink-trash/ and set
         the index row's deleted_at. Reversible via /memory/restore until the

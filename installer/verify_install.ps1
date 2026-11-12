@@ -45,6 +45,7 @@ $requiredFiles = @(
     'uoink_agent_runtime.py',
     'source_manifest.py',
     'source_availability.py',
+    'library_remember.py',
     'openapi_bridge.py',
     'reddit_extractor.py',
     'x_extractor.py',

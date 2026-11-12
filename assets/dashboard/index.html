@@ -999,6 +999,34 @@
       display: none;
     }
 
+    /* Home shelves above the Library list (Rediscover here, For you from another lane). */
+    .home-shelves { display: grid; gap: 16px; min-width: 0; }
+    .home-shelf { min-width: 0; }
+    .home-shelf.hidden { display: none; }
+    .home-shelves > .home-shelf:last-child:not(.hidden),
+    .home-shelves > .home-shelf:not(.hidden):not(:last-child) { margin-bottom: 0; }
+    .home-shelves:has(.home-shelf:not(.hidden)) { margin: 0 0 var(--space-6); }
+    #rediscoverShelf { display: grid; gap: 16px; }
+    .remember-shelf { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; background: var(--surface); }
+    .remember-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .remember-head h2 { margin: 0; font-size: 1rem; overflow-wrap: anywhere; }
+    .remember-note { margin: 2px 0 0; color: var(--text-2); font-size: 0.85rem; overflow-wrap: anywhere; }
+    .remember-body { margin-top: 10px; }
+    .remember-body[hidden] { display: none; }
+    .remember-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); }
+    .remember-card { display: grid; align-content: start; gap: 4px; min-width: 0; text-align: left; font: inherit; color: var(--text);
+      background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; cursor: pointer; }
+    .remember-card:hover, .remember-card:focus-visible { background: var(--surface-sel); border-color: var(--line-strong); }
+    .remember-why { font-size: 0.78rem; color: var(--text-2); overflow-wrap: anywhere; }
+    .remember-title { font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .remember-kind { font-size: 0.75rem; color: var(--text-2); text-transform: capitalize; }
+    .remember-ideas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+    .remember-idea { display: grid; gap: 8px; align-content: start; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+    .remember-idea-prompt { margin: 0; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+    .remember-idea-items { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 0.85rem; min-width: 0; }
+    .remember-idea-items li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .remember-idea-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
     /* Re-haul Library list: one row per capture -- a thumbnail (the real
        thumbnail.jpg, else a neutral block naming the kind), the title in
        two lines at most, source . platform . time, then one state line.
@@ -5560,6 +5588,10 @@
           <!-- Captures that are still working, waiting on YouTube, or failed
                (from the jobs stream and the retry queue), above the saved list. -->
           <div class="library-captures hidden" id="libraryCaptures" role="group" aria-label="Captures in progress"></div>
+          <div class="home-shelves" id="homeShelves">
+            <section class="home-shelf hidden" id="rediscoverShelf" aria-labelledby="rediscoverShelfTitle"></section>
+            <section class="home-shelf hidden" id="forYouShelf" aria-labelledby="forYouShelfTitle"></section>
+          </div>
           <div id="libraryGrid" class="library-list"></div>
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
@@ -6201,6 +6233,13 @@
               <p class="setting-copy">On by default. About once a week, Uoink asks each source's site whether it is still up, from this computer only. It makes a few requests at a time and backs off when a site asks it to slow down. Nothing about your library is sent anywhere. Turn it off any time.</p>
               <label class="inline-row"><input id="sourceAvailabilityToggle" type="checkbox" checked aria-describedby="sourceAvailabilityToggleSaveStatus"> Check if saved sources go offline</label>
               <div class="setting-feedback"><span class="setting-status" id="sourceAvailabilityToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="sourceAvailabilityToggleSaveRetry" type="button" data-setting-retry="sourceAvailabilityToggle">Retry save</button></div>
+            </div>
+
+            <div class="setting-block" id="rediscover-shelves">
+              <h2>Rediscover and idea starters</h2>
+              <p class="setting-copy">On by default. The Library shows a few older saves each day and ideas built from saves that share a topic. It all runs on this computer. Nothing is sent anywhere, and no AI is called.</p>
+              <label class="inline-row"><input id="rediscoverShelvesToggle" type="checkbox" checked aria-describedby="rediscoverShelvesToggleSaveStatus"> Show Rediscover and idea starters</label>
+              <div class="setting-feedback"><span class="setting-status" id="rediscoverShelvesToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="rediscoverShelvesToggleSaveRetry" type="button" data-setting-retry="rediscoverShelvesToggle">Retry save</button></div>
             </div>
 
             <div class="setting-block">
@@ -9288,6 +9327,7 @@
       state.selectedYoinkMarkdownError = "";
       state.retranscribeStatus = "";
       state.retranscribing = false;
+      noteItemOpened(row);
       renderYoinkDetail();
       switchTab("yoink", { fromRoute: Boolean(options && options.fromRoute) });
       const isNote = isNoteContent(row);
@@ -13357,6 +13397,7 @@
       if (state.libraryResetPending) reset = true;
       state.loading = true;
       if (reset && (!semanticState || semanticWarming())) loadLibrarySearchMode();
+      if (reset) loadRemember();
       if (reset) {
         state.libraryResetPending = false;
         state.offset = 0;
@@ -13423,7 +13464,153 @@
       }
     }
 
+    // ---- Rediscover shelf + idea starters (Library) ---------------------
+    // Server picks are seeded by the day (GET /library/remember), so a refresh
+    // keeps the same cards. Everything here is local. Collapse is per browser.
+    // Renders only into #rediscoverShelf.
+    const REMEMBER_COLLAPSE_KEY = "uoink.remember.collapsed";
+
+    function rememberCollapsedMap() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(REMEMBER_COLLAPSE_KEY) || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) { return {}; }
+    }
+
+    function setRememberCollapsed(shelf, collapsed) {
+      const map = rememberCollapsedMap();
+      map[shelf] = Boolean(collapsed);
+      try { localStorage.setItem(REMEMBER_COLLAPSE_KEY, JSON.stringify(map)); } catch (_) {}
+    }
+
+    // What the Library shows right now: nothing when the switch is off, a
+    // search or filter is active, or the server sent nothing.
+    function rememberShelfPlan(data, { enabled = true, filtersActive = false } = {}) {
+      const empty = { rediscover: [], starters: [] };
+      if (!enabled || filtersActive || !data || data.enabled === false) return empty;
+      return {
+        rediscover: Array.isArray(data.rediscover) ? data.rediscover.slice(0, 4) : [],
+        starters: Array.isArray(data.starters) ? data.starters.slice(0, 3) : [],
+      };
+    }
+
+    function rememberCardHtml(card) {
+      const id = htmlEscape(card.video_id || "");
+      const title = htmlEscape(card.title || "Untitled uoink");
+      return `<button class="remember-card" type="button" data-remember-open="${id}" title="${title}">`
+        + `<span class="remember-why">${htmlEscape(card.reason || "")}</span>`
+        + `<span class="remember-title">${title}</span>`
+        + `<span class="remember-kind">${htmlEscape(card.kind || "item")}</span></button>`;
+    }
+
+    function rememberStarterHtml(starter, index) {
+      const items = (starter.items || []).map((item) => {
+        const title = htmlEscape(item.title || "Untitled uoink");
+        return `<li title="${title}">${title}</li>`;
+      }).join("");
+      return `<article class="remember-idea"><p class="remember-idea-prompt">${htmlEscape(starter.prompt || "")}</p>`
+        + `<ul class="remember-idea-items">${items}</ul>`
+        + `<div class="remember-idea-actions">`
+        + `<button class="button primary small" type="button" data-remember-write="${index}">Write from these</button>`
+        + `<button class="button ghost small" type="button" data-remember-copy="${index}">Copy prompt</button></div></article>`;
+    }
+
+    function rememberBlockHtml(shelf, title, note, innerHtml, collapsed) {
+      const key = shelf === "rediscover" ? "rediscoverShelfTitle" : "ideaStartersTitle";
+      const bodyId = `remember-${shelf}-body`;
+      return `<div class="remember-shelf" data-remember-shelf="${shelf}">`
+        + `<div class="remember-head"><div><h2 id="${key}">${title}</h2><p class="remember-note">${note}</p></div>`
+        + `<button class="button ghost small" type="button" data-remember-toggle="${shelf}" aria-expanded="${collapsed ? "false" : "true"}" aria-controls="${bodyId}">${collapsed ? "Show" : "Hide"}</button></div>`
+        + `<div class="remember-body" id="${bodyId}"${collapsed ? " hidden" : ""}>${innerHtml}</div></div>`;
+    }
+
+    function rememberShelfHtml(plan, collapsedMap) {
+      const parts = [];
+      if (plan.rediscover.length) {
+        parts.push(rememberBlockHtml("rediscover", "Rediscover",
+          "A few things you saved, picked fresh each day. Nothing leaves this computer.",
+          `<div class="remember-grid">${plan.rediscover.map(rememberCardHtml).join("")}</div>`,
+          Boolean(collapsedMap.rediscover)));
+      }
+      if (plan.starters.length) {
+        parts.push(rememberBlockHtml("starters", "Idea starters",
+          "Saves that share a topic, ready to write from or paste into your AI.",
+          `<div class="remember-ideas">${plan.starters.map(rememberStarterHtml).join("")}</div>`,
+          Boolean(collapsedMap.starters)));
+      }
+      return parts.join("");
+    }
+
+    function renderRemember() {
+      const root = document.getElementById("rediscoverShelf");
+      if (!root) return;
+      const enabled = !(state.settings && state.settings.rediscover_shelves_enabled === false);
+      const plan = rememberShelfPlan(state.remember, { enabled, filtersActive: hasLibraryFilters() });
+      const html = rememberShelfHtml(plan, rememberCollapsedMap());
+      root.innerHTML = html;
+      root.classList.toggle("hidden", !html);
+    }
+
+    async function loadRemember(force = false) {
+      const stamp = new Date().toDateString();
+      if (!force && state.rememberDay === stamp && state.remember) return;
+      try {
+        const data = await authFetch("/library/remember");
+        state.remember = data;
+        state.rememberDay = stamp;
+      } catch (_) {
+        state.remember = null;
+      }
+      renderRemember();
+    }
+
+    // Local "last opened" mark for the Rediscover shelf. Best effort.
+    function noteItemOpened(row) {
+      const id = row ? videoIdOf(row) : "";
+      if (!id) return;
+      authFetch("/library/opened", { method: "POST", body: JSON.stringify({ video_id: id }) }).catch(() => {});
+    }
+
+    async function writeFromStarter(index) {
+      const starter = state.remember && state.remember.starters && state.remember.starters[index];
+      const first = starter && starter.items && starter.items[0];
+      if (!first) return;
+      await writeFromSource(first.video_id);
+      // Generate takes one source, so the shared topic carries the rest.
+      if (els.generateTopicInput) els.generateTopicInput.value = starter.topic;
+      showToast(`Started from the first one. Topic is set to ${starter.topic}.`);
+    }
+
+    async function copyStarterPrompt(index) {
+      const starter = state.remember && state.remember.starters && state.remember.starters[index];
+      if (!starter) return;
+      try {
+        await navigator.clipboard.writeText(starter.copy_prompt);
+        showToast("Prompt copied. It names your saves by title and stays here until you paste it.");
+      } catch (_) {
+        showToast("Couldn't copy. Select the titles by hand instead.");
+      }
+    }
+
+    document.getElementById("rediscoverShelf").addEventListener("click", (event) => {
+      const open = event.target.closest("[data-remember-open]");
+      if (open) { navigateTo(routeHash("item", open.dataset.rememberOpen)); return; }
+      const toggle = event.target.closest("[data-remember-toggle]");
+      if (toggle) {
+        setRememberCollapsed(toggle.dataset.rememberToggle, toggle.getAttribute("aria-expanded") === "true");
+        renderRemember();
+        const again = document.querySelector(`[data-remember-toggle="${toggle.dataset.rememberToggle}"]`);
+        if (again) again.focus();
+        return;
+      }
+      const write = event.target.closest("[data-remember-write]");
+      if (write) { writeFromStarter(Number(write.dataset.rememberWrite)).catch(() => showToast("Couldn't open Write from this.")); return; }
+      const copy = event.target.closest("[data-remember-copy]");
+      if (copy) copyStarterPrompt(Number(copy.dataset.rememberCopy));
+    });
+
     function renderLibrary() {
+      renderRemember();
       renderTopicOverview();
       const captureCount = renderLibraryCaptures();
       // The helper orders every match by the Sort control (D26), so the
@@ -18057,6 +18244,7 @@
       writingAttachAllToggle: ["writing_default_attach_all_screenshots", false],
       autoUoinkToggle: ["auto_uoink_enabled", false],
       sourceAvailabilityToggle: ["source_availability_check_enabled", true],
+      rediscoverShelvesToggle: ["rediscover_shelves_enabled", true],
       outputFolder: ["output_dir", ""],
       defaultEvidenceSources: ["default_evidence_sources", []],
       defaultTargetLength: ["default_target_length", "5m"],
@@ -18327,6 +18515,7 @@
           renderLibraryAvailability(null);
           loadLibraryAvailability();
         }
+        if (field === "rediscover_shelves_enabled") loadRemember(true);
         if (field === "writing_show_screenshot_picker") renderWritingScreenshots();
         if (field === "card_image") {
           loadLibrary({ reset: true }).catch(() => {});

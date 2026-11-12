@@ -177,6 +177,7 @@ Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_playbooks.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\discovery_scrapecreators.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_briefs.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\library_remember.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror_vault_io.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_media.py"; DestDir: "{app}"; Flags: ignoreversion

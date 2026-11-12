@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Library: a "Rediscover" shelf above the list (up to 4 saves picked fresh each day: saved about a week ago, about a month ago, on this day in an earlier year, or never opened) and up to 3 "Idea starters" built from saves that share a topic, with Write from these and Copy prompt. Everything is local, with no network or AI calls. A Settings switch turns both off and each shelf collapses per browser. Uoink now notes when you last opened an item (new `item_opens` table, migration 0034).
+
 ### Fixed
 
 - Dashboard on a phone: a long error message or source address no longer stretches the
