@@ -115,6 +115,52 @@ def test_scrub_stays_quick_on_a_huge_message():
     assert time.perf_counter() - started < 2
 
 
+@pytest.mark.parametrize("text", [
+    pytest.param("'" + "\\" * 19999, id="quoted-backslashes"),
+    pytest.param("\\" * 100000, id="bare-backslashes"),
+    pytest.param(
+        ("failed: C:\\cache\\a b\\c.txt https://example.test/a '"
+         + "\\" * 1999 + " /tmp/cache.json; ") * 50,
+        id="mixed-error"),
+])
+def test_redact_paths_stays_quick_on_long_errors(text):
+    import time
+    started = time.perf_counter()
+    tools._redact_paths(text)
+    elapsed = time.perf_counter() - started
+    assert elapsed < 0.5, f"path redaction took {elapsed:.3f}s"
+
+
+def test_path_pattern_stays_quick_without_input_cap():
+    import time
+    text = "'" + "\\" * 99999
+    started = time.perf_counter()
+    redacted = tools._PATH_IN_ERROR.sub("<path>", text)
+    elapsed = time.perf_counter() - started
+    assert elapsed < 0.5, f"path pattern took {elapsed:.3f}s"
+    assert redacted == text
+
+
+def test_redact_paths_caps_long_errors_before_redaction():
+    prefix = "failed: C:\\cache\\a b\\c.txt "
+    assert tools._redact_paths(prefix + "x" * 5000) == (
+        "failed: <path> " + "x" * (4000 - len(prefix)))
+    assert tools._redact_paths("x" * 4000) == "x" * 4000
+
+
+def test_handler_error_strings_are_capped(monkeypatch):
+    spec = tools.TOOL_REGISTRY["get_job_status"]
+    patched = dataclasses.replace(
+        spec, handler=lambda _a: {"ok": False, "error": "x" * 100000})
+    monkeypatch.setitem(tools.TOOL_REGISTRY, "get_job_status", patched)
+    result = tools.call_tool("get_job_status", {})
+    assert result["error"] == "x" * 4000
+
+
+def test_redact_paths_keeps_sentence_after_unc_path():
+    assert tools._redact_paths(r"\\server\share\a b\c.txt failed") == "<path> failed"
+
+
 def test_missing_input_messages_say_what_to_pass():
     import server
     tools.bind_backend(server)

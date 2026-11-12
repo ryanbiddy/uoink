@@ -6704,7 +6704,8 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
 _PATH_START = (
     r"(?<![\w/.:-])(?:"
     r"[A-Za-z]:[\\/]+"                      # C:\ or C:/
-    r"|\\{2,}(?=[^\s\\/])"                  # \\server\share (UNC)
+    # Don't retry a UNC start at every backslash in a run.
+    r"|(?<!\\)\\{2,}(?=[^\s\\/])"           # \\server\share (UNC)
     r"|file:/+"                             # file:///C:/... and file:///Users/...
     r"|~[\\/]+"                             # ~/Library/...
     r"|/(?:Users|home|var|tmp|private|opt|etc|mnt|media|root|srv"
@@ -6729,7 +6730,8 @@ _PATH_IN_ERROR = re.compile(
 
 
 def _redact_paths(text: str) -> str:
-    return _PATH_IN_ERROR.sub("<path>", text)
+    # Bound handler errors too; not every caller uses _scrub_error_text.
+    return _PATH_IN_ERROR.sub("<path>", text[:4000])
 
 
 def _scrub_error_text(value: Any) -> str:
