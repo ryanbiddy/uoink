@@ -113,6 +113,7 @@ import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
 import source_availability  # noqa: E402  -- bounded source availability checks
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
+import suggestions  # noqa: E402  -- 3.17 podcast suggestions (opt-in, topic words only)
 import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
 import research  # noqa: E402  -- Research run storage and source discovery
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
@@ -1037,6 +1038,10 @@ def _default_settings() -> dict:
         # Daily update check against api.github.com. Off until the user turns
         # it on; the Check now button works either way.
         "auto_update_check": False,
+        # Podcast suggestions: off until the user turns it on. When on, a few
+        # topic words (never titles, links or transcripts) go to Apple's
+        # podcast search about once a day (suggestions.py).
+        "suggest_podcasts": False,
         "anthropic_key_invalid": False,
         "scrapecreators_enabled": False,
         "scrapecreators_agent_calls_enabled": False,
@@ -1241,6 +1246,7 @@ def _normalize_settings(data: dict) -> dict:
     clean["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
     clean["usage_sharing_prompt_seen"] = clean.get("usage_sharing_prompt_seen") is True
     clean["auto_update_check"] = clean.get("auto_update_check") is True
+    clean["suggest_podcasts"] = clean.get("suggest_podcasts") is True
     clean["notifications_enabled"] = bool(
         clean.get("notifications_enabled", True)
     )
@@ -1768,6 +1774,7 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("notifications_enabled", True)
         ),
         "auto_update_check": data.get("auto_update_check") is True,
+        "suggest_podcasts": data.get("suggest_podcasts") is True,
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
@@ -12323,6 +12330,105 @@ def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
     return result
 
 
+# ---- 3.17 podcast suggestions ---------------------------------------------
+_podcast_suggestion_saves: dict[str, dict] = {}
+_podcast_suggestion_saves_lock = threading.Lock()
+
+
+def _podcast_suggestions_enabled() -> bool:
+    return (_read_settings() or {}).get("suggest_podcasts") is True
+
+
+def _podcast_suggestions_refresh_async(*, force: bool = False) -> bool:
+    """Refresh the suggestion cache off the request thread. Returns False when
+    nothing was started (off, busy, or not due)."""
+    if not _podcast_suggestions_enabled() or suggestions.refreshing():
+        return False
+    if not force and not suggestions.is_due(DATA_ROOT):
+        return False
+
+    def _run():
+        try:
+            suggestions.refresh(_get_index(), DATA_ROOT, enabled=_podcast_suggestions_enabled(),
+                                force=force)
+        except Exception:
+            log.exception("podcast suggestions refresh failed")
+
+    threading.Thread(target=_run, name="uoink-suggestions", daemon=True).start()
+    return True
+
+
+def _podcast_suggestion_set_state(sid: str, state: str, message: str) -> None:
+    with _podcast_suggestion_saves_lock:
+        _podcast_suggestion_saves[sid] = {"state": state, "message": message}
+
+
+def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
+    """Put exactly one episode in the podcast tables without subscribing.
+
+    A show that is not already followed is added switched off (no polling, no
+    auto-ingest), and only this episode is inserted from Apple's result. No
+    feed is fetched. Following a show is a separate, explicit action."""
+    existed = any(f.get("feed_url") == feed_url for f in podcasts.list_feeds(idx))
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed_id = int(feed["id"])
+    if not existed:
+        podcasts.set_feed_enabled(idx, feed_id, False)
+        podcasts.record_feed_meta(
+            idx, feed_id, title=item.get("show") or None, description=None,
+            homepage=None, etag=None, last_modified=None, ok=True)
+    guid = item.get("episode_url") or item["id"]
+    podcasts.upsert_episodes(idx, feed_id, [{
+        "guid": guid, "title": item.get("title"), "audio_url": item.get("episode_url"),
+        "episode_page_url": item.get("page_url") or None,
+        "duration_seconds": item.get("duration_s"),
+        "published_at": item.get("released") or None,
+        "description": item.get("description") or None}])
+    for row in podcasts.list_episodes(idx, feed_id=feed_id, limit=1000):
+        if row.get("guid") == guid:
+            return row
+    raise suggestions.SuggestionError("Couldn't prepare this episode.", "failed")
+
+
+def _run_podcast_suggestion_save(sid: str, item: dict) -> None:
+    """Save one suggested episode the way a feed episode is saved: download it
+    and queue the normal transcription that publishes it into the library. The
+    show is not followed (see _register_suggested_episode)."""
+    def fail(message):
+        _podcast_suggestion_set_state(sid, "failed", message)
+
+    try:
+        idx = _get_index()
+        if not item.get("episode_url"):
+            return fail("This episode has no audio Uoink can save.")
+        feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
+        episode = _register_suggested_episode(idx, feed_url, item)
+        if episode.get("yoink_video_id"):
+            suggestions.mark_saved(DATA_ROOT, sid)
+            return _podcast_suggestion_set_state(sid, "saved", "Already in your library.")
+        episode_id = int(episode["id"])
+        downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+        if not downloaded.get("ok"):
+            return fail("Couldn't download the audio. Try again later.")
+        settings = _read_settings() or {}
+        queued, status = _queue_podcast_transcription(
+            episode_id,
+            model=whisper_runner.normalize_model(settings.get("whisper_model")),
+            diarize=bool(settings.get("diarization_default")),
+            consent_given=False, publish_to_corpus=True)
+        if status == 412:
+            return fail("Set up transcription in Settings first, then save it again.")
+        if not queued.get("ok"):
+            return fail("Transcription is not available right now.")
+        suggestions.mark_saved(DATA_ROOT, sid)
+        _podcast_suggestion_set_state(sid, "saved", "Saved. Transcribing now.")
+    except suggestions.SuggestionError as exc:
+        fail(str(exc))
+    except Exception:
+        log.exception("podcast suggestion save failed")
+        fail("Couldn't save this episode.")
+
+
 def _heartbeat_note_poll(ok: bool, *, error: str | None = None) -> None:
     """One feed poll finished. A failure never advances the success stamp.
     ``error`` is a short *kind* (an exception class name or a fixed
@@ -17022,6 +17128,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/suggestions/podcasts":
+            return self._handle_podcast_suggestions_list()
         if bare == "/sources":
             return self._handle_sources_list()
         if bare == "/sources/status":
@@ -18774,6 +18882,91 @@ class Handler(BaseHTTPRequestHandler):
             consent_given=consent_given)
         return self._send_json(status, result)
 
+    # ---- 3.17 podcast suggestions (Library "Suggested for you") ----------
+    def _podcast_suggestions_payload(self) -> dict:
+        enabled = _podcast_suggestions_enabled()
+        shown = suggestions.current(DATA_ROOT, _get_index()) if enabled else {
+            "items": [], "terms": [], "refreshed_ts": 0, "last_error": None}
+        with _podcast_suggestion_saves_lock:
+            states = dict(_podcast_suggestion_saves)
+        items = [{**item, "save_state": states.get(item["id"], {}).get("state"),
+                  "save_message": states.get(item["id"], {}).get("message")}
+                 for item in shown["items"]]
+        ready = suggestions.readiness(_get_index())
+        return {"ok": True, "enabled": enabled, "items": items, "count": len(items),
+                "enough": ready["enough"], "library_size": ready["library_size"],
+                "send_terms": ready["terms"],
+                "terms": shown["terms"], "refreshed_ts": shown["refreshed_ts"],
+                "refreshing": suggestions.refreshing(), "error": shown["last_error"],
+                "disclosure": suggestions.DISCLOSURE}
+
+    def _handle_podcast_suggestions_list(self):
+        if not self._require_token():
+            return
+        _podcast_suggestions_refresh_async()
+        return self._send_json(200, self._podcast_suggestions_payload())
+
+    def _handle_podcast_suggestions_refresh(self, body):
+        if not _podcast_suggestions_enabled():
+            return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
+        started = _podcast_suggestions_refresh_async(force=True)
+        return self._send_json(202, {**self._podcast_suggestions_payload(), "started": started})
+
+    def _podcast_suggestion_id(self, body):
+        sid = body.get("id") if isinstance(body, dict) else None
+        if not isinstance(sid, str) or not re.fullmatch(r"sg_[0-9a-f]{12}", sid):
+            self._send_json(400, {"ok": False, "error": "id (suggestion id) required"})
+            return None
+        return sid
+
+    def _handle_podcast_suggestions_dismiss(self, body):
+        sid = self._podcast_suggestion_id(body)
+        if sid is None:
+            return
+        suggestions.dismiss(DATA_ROOT, sid)
+        return self._send_json(200, {"ok": True, "id": sid})
+
+    def _handle_podcast_suggestions_save(self, body):
+        sid = self._podcast_suggestion_id(body)
+        if sid is None:
+            return
+        if not _podcast_suggestions_enabled():
+            return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
+        item = suggestions.get_item(DATA_ROOT, sid)
+        if item is None:
+            return self._send_json(404, {"ok": False, "error": "That suggestion is gone. Refresh the list."})
+        with _podcast_suggestion_saves_lock:
+            current = _podcast_suggestion_saves.get(sid)
+            if current and current["state"] in ("saving", "saved"):
+                return self._send_json(202, {"ok": True, "id": sid, **current})
+            _podcast_suggestion_saves[sid] = {"state": "saving", "message": "Saving..."}
+        threading.Thread(target=_run_podcast_suggestion_save, args=(sid, item),
+                         name="uoink-suggestion-save", daemon=True).start()
+        return self._send_json(202, {"ok": True, "id": sid, "state": "saving",
+                                     "message": "Saving..."})
+
+    def _handle_podcast_suggestions_follow(self, body):
+        sid = self._podcast_suggestion_id(body)
+        if sid is None:
+            return
+        if not _podcast_suggestions_enabled():
+            return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
+        try:
+            feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
+            row = podcasts.add_feed(_get_index(), feed_url)
+            if not row.get("enabled", 1):
+                podcasts.set_feed_enabled(_get_index(), int(row["id"]), True)
+        except suggestions.SuggestionError as exc:
+            status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
+            return self._send_json(status, {"ok": False, "error": str(exc)})
+        except ValueError as exc:
+            return self._send_json(400, {"ok": False, "error": str(exc)})
+        except Exception:
+            log.exception("/suggestions/podcasts/follow failed")
+            return self._send_json(500, {"ok": False, "error": "Couldn't follow this show."})
+        return self._send_json(200, {"ok": True, "id": sid, "feed_id": row.get("id"),
+                                     "message": "Following. New episodes show up under Podcasts."})
+
     def _handle_podcasts_episode_to_corpus(self, body):
         """POST /podcasts/episodes/to-corpus {episode_id}."""
         if not isinstance(body, dict):
@@ -19842,6 +20035,7 @@ class Handler(BaseHTTPRequestHandler):
             "usage_sharing",
             "usage_sharing_prompt_seen",
             "auto_update_check",            # daily GitHub release check (default OFF)
+            "suggest_podcasts",             # 3.17 podcast suggestions (default OFF)
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -22200,6 +22394,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_transcribe(body)
         if bare == "/podcasts/episodes/to-corpus":
             return self._handle_podcasts_episode_to_corpus(body)
+        if bare == "/suggestions/podcasts/refresh":
+            return self._handle_podcast_suggestions_refresh(body)
+        if bare == "/suggestions/podcasts/dismiss":
+            return self._handle_podcast_suggestions_dismiss(body)
+        if bare == "/suggestions/podcasts/save":
+            return self._handle_podcast_suggestions_save(body)
+        if bare == "/suggestions/podcasts/follow":
+            return self._handle_podcast_suggestions_follow(body)
         if bare == "/playlists/monitored":
             return self._handle_monitored_playlist_add(body)
         if bare == "/playlists/monitored/remove":

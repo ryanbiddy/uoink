@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Podcast suggestions in For You, off by default (Settings, Suggest podcasts). When on, Uoink
+  sends a few topic words from what you save (never titles, links or transcripts) to Apple's
+  podcast search about once a day and shows episodes you might want, each with the reason.
+  Save downloads and transcribes just that episode without following the show. Follow show and
+  Not interested are separate. The Library shows a small teaser that links to For You. With
+  fewer than 5 saved items it says to save a few more and sends nothing.
+
 ### Fixed
 
 - Dashboard on a phone: a long error message or source address no longer stretches the

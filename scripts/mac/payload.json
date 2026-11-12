@@ -62,6 +62,7 @@
     "source_manifest.py",
     "source_subscriptions.py",
     "suite_service.py",
+    "suggestions.py",
     "taste_scoring.py",
     "third-party-notices",
     "topics.json",
