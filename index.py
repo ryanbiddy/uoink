@@ -2909,6 +2909,43 @@ class Index:
         self._notify_source_changed(video_id)
         return dict(row) if row else None
 
+    # ---- Rediscover shelf (local, no network) ---------------------------
+    def mark_opened(self, video_id: str) -> bool:
+        """Record that the reader opened this saved item. False when it is
+        not a live saved item, so deleted or unknown ids leave no row."""
+        if not video_id:
+            return False
+        with self._lock, self._rollback_on_error():
+            live = self._conn.execute(
+                "SELECT 1 FROM yoinks WHERE video_id=? AND deleted_at IS NULL",
+                (video_id,)).fetchone()
+            if not live:
+                return False
+            self._conn.execute(
+                "INSERT INTO item_opens (video_id, last_opened_at) VALUES (?, ?) "
+                "ON CONFLICT(video_id) DO UPDATE SET last_opened_at=excluded.last_opened_at",
+                (video_id, _now_iso()))
+            self._conn.commit()
+        return True
+
+    # Engagement that shows the person has already looked at an item.
+    _TOUCH_EVENTS = ("opened", "recent_open", "paste", "cite", "search_click")
+
+    def remember_rows(self) -> list[dict]:
+        """Light rows for every live saved item: just what the Rediscover
+        shelf and idea starters need. One pass, no text columns."""
+        marks = ",".join("?" * len(self._TOUCH_EVENTS))
+        with self.search_read() as db:
+            rows = db.execute(
+                "SELECT y.video_id, y.title, y.topic, y.yoinked_at, y.source_type, "
+                "y.platform, y.author, y.channel, o.last_opened_at AS last_opened_at, "
+                "EXISTS(SELECT 1 FROM engagement_events e WHERE e.video_id=y.video_id "
+                f"AND e.event_type IN ({marks})) AS touched "
+                "FROM yoinks y LEFT JOIN item_opens o ON o.video_id=y.video_id "
+                "WHERE y.deleted_at IS NULL",
+                self._TOUCH_EVENTS).fetchall()
+        return [{key: r[key] for key in r.keys()} for r in rows]
+
     def prune_trash(self, now: datetime) -> list[str]:
         """Return the video_ids whose deleted_at is older than the 30-day
         trash-retention window. The caller (server.py) hard-removes each
