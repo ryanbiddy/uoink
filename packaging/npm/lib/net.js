@@ -100,6 +100,36 @@ function request(rawUrl, opts = {}) {
   });
 }
 
+// GET url without following redirects and return the validated Location of a
+// 3xx answer. Throws on anything else (so callers can fall back).
+function firstRedirect(rawUrl, opts = {}) {
+  return new Promise((resolve, reject) => {
+    let u;
+    try {
+      u = checkUrl(rawUrl, opts);
+    } catch (e) {
+      reject(e);
+      return;
+    }
+    const mod = u.protocol === 'http:' ? http : https;
+    const req = mod.get(u, { headers: { 'user-agent': 'uoink-npm-installer', ...(opts.headers || {}) } }, (res) => {
+      res.resume();
+      const status = res.statusCode || 0;
+      if (![301, 302, 303, 307, 308].includes(status) || !res.headers.location) {
+        reject(new HttpError(status, u.toString()));
+        return;
+      }
+      try {
+        resolve(checkUrl(new URL(res.headers.location, u).toString(), opts).toString());
+      } catch (e) {
+        reject(e);
+      }
+    });
+    req.setTimeout(opts.timeoutMs ?? 10000, () => req.destroy(new Error('Timed out waiting for a redirect.')));
+    req.on('error', reject);
+  });
+}
+
 async function fetchText(url, opts = {}) {
   const { res, url: finalUrl } = await request(url, opts);
   if ((res.statusCode || 0) >= 400) {
@@ -170,7 +200,7 @@ async function download(url, dest, opts = {}) {
   let attempt = 0;
   for (;;) {
     try {
-      const headers = {};
+      const headers = { ...(opts.headers || {}) };
       if (got > 0) headers.range = `bytes=${got}-`;
       const { res, url: finalUrl } = await request(url, { ...opts, headers });
       const status = res.statusCode || 0;
@@ -235,6 +265,7 @@ module.exports = {
   checkUrl,
   request,
   fetchText,
+  firstRedirect,
   parseSums,
   sha256File,
   freeBytes,

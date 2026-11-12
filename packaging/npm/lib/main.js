@@ -169,6 +169,7 @@ function defaultDeps() {
     tmpRoot: os.tmpdir(),
     base: BASE,
     netOpts: {},
+    counterBase: 'https://usage.uoink.app',
     stdout: out,
     stderr: err,
     isTTY: Boolean(process.stdin.isTTY && err.isTTY),
@@ -274,7 +275,9 @@ async function resolvePlan(opts, deps) {
   if (opts.version && asset.version !== opts.version) {
     throw new UserError(`Release v${opts.version} lists ${asset.name}, which does not match the version.`);
   }
-  return { ...asset, sumsUrl, url: `${dl}/${asset.name}` };
+  const os = asset.kind === 'exe' ? 'windows' : 'mac';
+  const counterUrl = deps.counterBase ? `${deps.counterBase}/get/${os}?v=${asset.version}&from=npm` : null;
+  return { ...asset, sumsUrl, url: `${dl}/${asset.name}`, counterUrl };
 }
 
 // ---------- download with progress ----------
@@ -313,6 +316,37 @@ function explainError(e, deps) {
   if (code === 'ENOSPC') return 'The disk is full. Free some space and run the command again.';
   if (code === 'EACCES' || code === 'EPERM') return `Permission denied: ${e.path || e.message}`;
   return e && e.message ? e.message : String(e);
+}
+
+// ---------- download source ----------
+
+function userAgent(deps) {
+  const os = deps.platform === 'win32' ? 'Windows NT 10.0' : 'Macintosh; Mac OS X';
+  return `uoink-npm/${PKG_VERSION} (${os})`;
+}
+
+// Ask the download counter once for the GitHub URL it redirects to. Returns
+// that final GitHub URL, so a retry never goes back through the counter. Any
+// counter failure falls back to GitHub directly. A redirect to a different
+// file than the one we verify is a hard error.
+async function chooseSource(plan, deps, ui) {
+  if (!plan.counterUrl) return plan.url;
+  let target;
+  try {
+    target = await net.firstRedirect(plan.counterUrl, {
+      ...deps.netOpts,
+      headers: { 'user-agent': userAgent(deps) },
+      timeoutMs: deps.counterTimeoutMs ?? 10000,
+    });
+  } catch {
+    ui.warn('Download counter unavailable, downloading from GitHub directly.');
+    return plan.url;
+  }
+  const name = decodeURIComponent(new URL(target).pathname.split('/').pop());
+  if (name !== plan.name) {
+    throw new UserError(`The download link points to ${name}, but the checksum list names ${plan.name}. Nothing was downloaded.`);
+  }
+  return target;
 }
 
 // ---------- install steps ----------
@@ -449,8 +483,10 @@ async function installFlow(opts, deps, ui, ctx = {}) {
     const file = path.join(tmp, plan.name);
     const prog = makeProgress(deps, ui);
     prog.start(plan.name);
-    await net.download(plan.url, file, {
+    const source = await chooseSource(plan, deps, ui);
+    await net.download(source, file, {
       ...deps.netOpts,
+      headers: { 'user-agent': userAgent(deps) },
       sleep: deps.sleep,
       spaceDir: tmp,
       freeBytes: deps.freeBytes,
@@ -485,7 +521,7 @@ function bannerPlan(ui, plan, where, big, installed) {
     `  Downloads ${plan.name} (${big}) from GitHub, checks its SHA-256 against the release's SHA256SUMS.txt,`,
     `  then runs the official installer. Installs to ${where}.`,
     `  Needs about twice the download size free in your temp folder while it works.`,
-    `  ${ui.dim(`Installer: ${plan.url}`)}`,
+    `  ${ui.dim(`Installer: ${plan.counterUrl || plan.url}`)}`,
     `  ${ui.dim(`Checksums: ${plan.sumsUrl}`)}`,
   ];
   return lines.join('\n');

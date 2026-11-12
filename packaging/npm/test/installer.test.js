@@ -22,7 +22,7 @@ function sink() {
 function fakeRelease(files, opts = {}) {
   const hits = [];
   const server = http.createServer((req, res) => {
-    hits.push({ url: req.url, range: req.headers.range || null });
+    hits.push({ url: req.url, range: req.headers.range || null, ua: req.headers['user-agent'] || '' });
     if (opts.handler && opts.handler(req, res, files)) return;
     const m = /\/download\/(?:v[\d.]+\/)?([^/]+)$/.exec(req.url);
     const body = m && files[m[1]];
@@ -64,6 +64,7 @@ function setup(t, extra = {}) {
     isTTY: false,
     sleep: async () => {},
     netOpts: { allowHttp: true, allowedHosts: ['127.0.0.1'] },
+    counterBase: null,
     run: async (cmd, args) => {
       calls.run.push({ cmd, args });
       return { code: 0 };
@@ -335,4 +336,115 @@ test('--help works and unknown options are rejected', async (t) => {
   assert.match(s.out.text(), /--dry-run/);
   const s2 = setup(t);
   assert.equal(await main(['--wat'], s2.deps), 1);
+});
+
+// ---- download counter ----
+
+function counterHandler(rel, mode = {}) {
+  return (req, res) => {
+    if (!req.url.startsWith('/get/')) return false;
+    if (mode.status) { res.writeHead(mode.status).end(); return true; }
+    if (mode.hang) return true;
+    const u = new URL(req.url, 'http://x');
+    const v = u.searchParams.get('v');
+    const name = mode.name || `Uoink-Setup-${v}.exe`;
+    res.writeHead(302, { location: `${rel.base()}/download/v${v}/${name}` }).end();
+    return true;
+  };
+}
+
+async function counterRelease(mode, extra) {
+  let ref = null;
+  const rel = await fakeRelease(exeFiles(), {
+    handler(req, res, files) {
+      if (extra && extra(req, res, files)) return true;
+      return counterHandler({ base: () => ref.base }, mode)(req, res);
+    },
+  });
+  ref = rel;
+  return rel;
+}
+
+test('counter: downloads through /get/windows with explicit version and from=npm, then GitHub URL', async (t) => {
+  const rel = await counterRelease({});
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: rel.base });
+  assert.equal(await main(['--yes'], s.deps), 0, s.err.text());
+  const get = rel.hits.filter((h) => h.url.startsWith('/get/'));
+  assert.equal(get.length, 1);
+  assert.equal(get[0].url, '/get/windows?v=9.9.9&from=npm');
+  assert.ok(rel.hits.some((h) => h.url === '/download/v9.9.9/Uoink-Setup-9.9.9.exe'));
+  assert.equal(s.calls.run.length, 1);
+  // checksums come straight from the release, never the counter
+  assert.ok(rel.hits.some((h) => h.url === '/latest/download/SHA256SUMS.txt'));
+});
+
+test('counter: sends a browser-like uoink-npm user agent with the OS label', async (t) => {
+  const rel = await counterRelease({});
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: rel.base });
+  await main(['--yes'], s.deps);
+  const { PKG_VERSION } = require('../lib/main.js');
+  const get = rel.hits.find((h) => h.url.startsWith('/get/'));
+  assert.equal(get.ua, `uoink-npm/${PKG_VERSION} (Windows NT 10.0)`);
+  const mac = require('../lib/main.js');
+  assert.ok(mac);
+});
+
+test('counter: a Range retry goes to the GitHub URL, never back through the counter', async (t) => {
+  let first = true;
+  const rel = await counterRelease({}, (req, res, files) => {
+    if (!req.url.endsWith('.exe')) return false;
+    const body = files['Uoink-Setup-9.9.9.exe'];
+    if (first) {
+      first = false;
+      res.writeHead(200, { 'content-length': body.length });
+      res.write(body.subarray(0, 500));
+      setTimeout(() => res.destroy(), 20);
+      return true;
+    }
+    const start = Number(/bytes=(d+)-/.exec(req.headers.range || '')?.[1] ?? 0);
+    res.writeHead(206, { 'content-length': body.length - start, 'content-range': `bytes ${start}-${body.length - 1}/${body.length}` });
+    res.end(body.subarray(start));
+    return true;
+  });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: rel.base });
+  assert.equal(await main(['--yes'], s.deps), 0, s.err.text());
+  assert.equal(rel.hits.filter((h) => h.url.startsWith('/get/')).length, 1);
+  assert.ok(rel.hits.some((h) => h.range === 'bytes=500-' && h.url.startsWith('/download/v9.9.9/')));
+});
+
+test('counter: 5xx falls back to the direct GitHub URL', async (t) => {
+  const rel = await counterRelease({ status: 503 });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: rel.base });
+  assert.equal(await main(['--yes'], s.deps), 0, s.err.text());
+  assert.ok(rel.hits.some((h) => h.url === '/latest/download/Uoink-Setup-9.9.9.exe'));
+  assert.match(s.err.text(), /GitHub directly/);
+});
+
+test('counter: no redirect within the timeout falls back', async (t) => {
+  const rel = await counterRelease({ hang: true });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: rel.base, counterTimeoutMs: 150 });
+  assert.equal(await main(['--yes'], s.deps), 0, s.err.text());
+  assert.ok(rel.hits.some((h) => h.url === '/latest/download/Uoink-Setup-9.9.9.exe'));
+});
+
+test('counter: an unreachable counter falls back', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: 'http://127.0.0.1:9' });
+  assert.equal(await main(['--yes'], s.deps), 0, s.err.text());
+});
+
+test('counter: a redirect to a different file than the verified one aborts', async (t) => {
+  const rel = await counterRelease({ name: 'Uoink-Setup-1.0.0.exe' });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, counterBase: rel.base });
+  assert.equal(await main(['--yes'], s.deps), 1);
+  assert.match(s.err.text(), /checksum list names/);
+  assert.equal(s.calls.run.length, 0);
+  assert.ok(!rel.hits.some((h) => h.url.endsWith('.exe')));
 });
