@@ -1357,6 +1357,10 @@ class Index:
                     sidecar_path=record.get("sidecar_path"),
                 ),
             }
+        if isinstance(record.get("title"), str):
+            from provenance import clamp_title
+            # One title limit for every source; truncates, never rejects.
+            record = {**record, "title": clamp_title(record["title"])}
         values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(

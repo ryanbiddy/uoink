@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- One title limit for every source: titles longer than 300 characters (YouTube, podcasts,
+  pages, X, Reddit, imports, notes, images) are cut at a safe point, never inside an emoji or
+  accent, and end in an ellipsis. Notes used to cap at 200. Saved items are not rewritten.
+- Dashboard Library on a phone-width window: the "Write from this" row no longer leaves a
+  blank gap under each card on a computer with a mouse. A card title now shows in full on hover.
 - Dashboard on a phone: a long error message or source address no longer stretches the
   item page past the screen. Long topic names in the breadcrumb end in an ellipsis with the
   full name on hover.
