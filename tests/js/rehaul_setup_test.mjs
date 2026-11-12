@@ -101,7 +101,7 @@ const groups = {
     const mac=await setup({os:'mac',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
     assert.equal(mac.el('download-btn').hidden,false);
     assert.equal(mac.el('manual-install').hidden,true);
-    assert.equal(mac.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.16.3&from=extension');
+    assert.equal(mac.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.17.0&from=extension');
     assert.equal(mac.el('download-btn').textContent,'Download for Mac');
     assert.match(mac.el('install-instructions').textContent,/drag Uoink to Applications/);
     const win=await setup({os:'win',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
@@ -145,7 +145,7 @@ const groups = {
     const arm=await setup({os:'mac',fetch:down});
     arm.ctx.chrome.runtime.getPlatformInfo=cb=>cb({os:'mac',arch:'arm'});
     assert.equal(arm.el('download-btn').hidden,false);
-    assert.equal(arm.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.16.3&from=extension');
+    assert.equal(arm.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.17.0&from=extension');
     assert.match(arm.el('funnel-os').textContent,/Apple silicon/);
     // Intel Mac: a clear note, no download, manual instructions.
     const intelSource=readFileSync(join(EXT,'setup.js'),'utf8').replace('chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os, info && info.arch));','chrome.runtime.getPlatformInfo(info => setPlatform("mac", "x86-64"));');
@@ -161,7 +161,7 @@ const groups = {
     assert.match(linux.el('funnel-next').textContent,/no Linux installer/i);
     // Win: Windows download through the counted redirect.
     const win=await setup({os:'win',fetch:down});
-    assert.equal(win.el('download-btn').href,'https://usage.uoink.app/get/windows?v=3.16.3&from=extension');
+    assert.equal(win.el('download-btn').href,'https://usage.uoink.app/get/windows?v=3.17.0&from=extension');
   },
   async navigation_motion() {
     for (const reducedMotion of [true, false]) {

@@ -7,7 +7,7 @@ const HEARTBEAT_MS = 10000;
 // The one version constant for download links. Bump it when a release is
 // published; the Mac DMG and the Windows installer ship together. Set
 // PUBLISHED_MAC_DMG to "" to fall back to the manual Mac instructions.
-const PUBLISHED_INSTALLER_VERSION = "3.16.3";
+const PUBLISHED_INSTALLER_VERSION = "3.17.0";
 const PUBLISHED_MAC_DMG = PUBLISHED_INSTALLER_VERSION;
 // Same tracked redirect the uoink.app buttons use (it counts downloads without
 // IP addresses or cookies, then sends the visitor to the GitHub release asset).

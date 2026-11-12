@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published release tag to list (for example v3.16.3)
+        description: Published release tag to list (for example v3.17.0)
         required: true
 
 permissions:
