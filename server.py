@@ -855,6 +855,23 @@ ROLE_MIXED = "mixed"
 _ROLE_ENUM = (ROLE_CREATOR, ROLE_RESEARCHER, ROLE_MARKETER, ROLE_MIXED)
 
 
+# "After a save" (3.17.0): what the browser extension does once a capture is
+# saved. The extension keeps a chrome.storage copy; this is the source of truth
+# so the dashboard and the extension agree.
+AFTER_SAVE_STAY = "stay"
+_AFTER_SAVE_ENUM = (AFTER_SAVE_STAY, "claude", "chatgpt", "copy")
+
+
+def _normalize_after_save(value) -> str:
+    """Clamp settings.after_save to the bounded enum; unknown values and
+    older settings.json files fall back to staying on the page."""
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in _AFTER_SAVE_ENUM:
+            return v
+    return AFTER_SAVE_STAY
+
+
 def _normalize_role(value) -> str:
     """Clamp a settings.role value to the bounded enum. Unknown values
     (including None and pre-v3.1 settings.json files that omit the field)
@@ -995,6 +1012,7 @@ def _default_settings() -> dict:
         # axis until the user (or onboarding) picks. Drives Library
         # default sort + filter-chip emphasis per ROADMAP P2.
         "role": "mixed",
+        "after_save": AFTER_SAVE_STAY,
         # v3.1 live stream behavior. wait_for_end (default) -> we queue the
         # URL and re-attempt periodically until the broadcast ends and a
         # recording is available. extract_when_recorded -> we attempt
@@ -1744,6 +1762,8 @@ def _public_settings(data: dict | None = None) -> dict:
         # v3.1 P2 -- role drives dashboard default sort + filter chip
         # emphasis. Always returned; the dashboard reads this on load.
         "role": _normalize_role(data.get("role")),
+        "after_save": _normalize_after_save(data.get("after_save")),
+        "after_save_supported": list(_AFTER_SAVE_ENUM),
         # v3.1: live stream behavior + the bounded supported list so the
         # Settings UI can render the radio without hard-coding enum strings.
         "live_stream_behavior": _normalize_live_behavior(
@@ -19864,6 +19884,7 @@ class Handler(BaseHTTPRequestHandler):
                          "research_network_sources",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
+                         "after_save",            # 3.17.0 extension After a save
                          "live_stream_behavior",  # v3.1 live
                          "whisper_model",         # v3.1 A1/podcast
                          "dashboard_theme",       # Settings > App > Appearance
@@ -20101,6 +20122,16 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 return self._send_json(400, {
                     "ok": False, "error": "role must be a string"})
+        if "after_save" in body:
+            raw_after = body.get("after_save")
+            if raw_after is None or raw_after == "":
+                data["after_save"] = AFTER_SAVE_STAY
+            elif isinstance(raw_after, str) and raw_after.strip().lower() in _AFTER_SAVE_ENUM:
+                data["after_save"] = raw_after.strip().lower()
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": f"after_save must be one of {list(_AFTER_SAVE_ENUM)}"})
         if "live_stream_behavior" in body:
             raw_lsb = body.get("live_stream_behavior")
             if raw_lsb is None or raw_lsb == "":

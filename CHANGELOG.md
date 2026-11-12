@@ -46,6 +46,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (ellipsis instead of a hard cut), and the status lines read in plain words.
 - First-run window: the start-failure message says what to try. Extension page: the heading
   no longer leaves one word alone on a phone-width line.
+### Changed
+
+- Saving no longer opens a Claude tab or overwrites your clipboard. A new setting, After a
+  save, has four choices: Stay on the page (the new default), Copy then open Claude, Copy then
+  open ChatGPT, and Copy only. Pick it in the toolbar popup or in dashboard Settings under
+  Capture. With the default, the notification says the capture is in your library and offers
+  Copy for Claude and Copy for ChatGPT, and the YouTube button turns into "Saved. Copy for
+  Claude" for a few seconds. Your very first save offers "See it in Claude". Nothing leaves the
+  computer until you click one of those.
+
+### Fixed
+
+- Browser extension: the YouTube button no longer grows without limit when a research session has a long name. The label ends in an ellipsis and the full name shows on hover. A failed capture whose stored error is a script error now says "Something went wrong inside Uoink. Try again." instead of showing the raw error.
 - Dashboard on a phone: a long error message or source address no longer stretches the
   item page past the screen. Long topic names in the breadcrumb end in an ellipsis with the
   full name on hover.

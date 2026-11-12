@@ -253,6 +253,9 @@ export function makeEnv(opts = {}) {
   const env = {
     sent: [],
     notifications: [],
+    notificationButtonListeners: [],
+    notificationClosedListeners: [],
+    contextMenuListeners: [],
     tabsCreated: [],
     fetches: [],
     toasts: [],
@@ -313,6 +316,13 @@ export function makeEnv(opts = {}) {
         if (typeof cb === "function") Promise.resolve().then(() => cb(id));
         return Promise.resolve(id);
       },
+      // Listeners are kept so a test can click a notification button
+      // (env.clickNotificationButton) or close a notification.
+      onButtonClicked: { addListener(fn) { env.notificationButtonListeners.push(fn); } },
+      onClosed: { addListener(fn) { env.notificationClosedListeners.push(fn); } },
+    }),
+    contextMenus: withFallback({
+      onClicked: { addListener(fn) { env.contextMenuListeners.push(fn); } },
     }),
     tabs: withFallback({
       create(props, cb) {
@@ -403,6 +413,19 @@ export function makeEnv(opts = {}) {
     }
     resolve(undefined);
   });
+  // Fire every pending timeout once (the expiry of the in-page Copy window).
+  env.runTimeouts = () => {
+    for (const [id, fn] of [...env.timeouts]) { env.timeouts.delete(id); fn(); }
+  };
+  env.clickContextMenu = async (info, tab) => {
+    for (const fn of env.contextMenuListeners) await fn(info, tab);
+  };
+  env.clickNotificationButton = (id, index) => {
+    for (const fn of env.notificationButtonListeners) fn(id, index);
+  };
+  env.closeNotification = (id) => {
+    for (const fn of env.notificationClosedListeners) fn(id);
+  };
   env.notifyMessages = () => env.sent.filter((m) => m && m.type === "notify");
   env.setupTabsOpened = () => env.sent.filter((m) => m && m.type === "openTab"
     && /setup\.html/.test(String(m.url || "")));

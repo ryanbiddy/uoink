@@ -40,8 +40,11 @@
       .replace(/\b(?:Bearer|Basic)\s+[a-z0-9+/_=.-]+/gi, "[redacted]")
       .replace(/\bsk-[a-z0-9_-]{12,}/gi, "[redacted]");
     const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    return (lines.filter(s => /^ERROR:/i.test(s)).pop()
+    const picked = (lines.filter(s => /^ERROR:/i.test(s)).pop()
       || lines.filter(s => !/^(Command|Exit code):/i.test(s)).pop() || "The capture failed. Try again.").slice(0, 600);
+    // A script error name means a bug, not something the user can act on.
+    return /^(?:Uncaught\s+)?(?:Type|Reference|Range|Syntax)Error\b/.test(picked)
+      ? "Something went wrong inside Uoink. Try again." : picked;
   }
   function time(row) {
     const raw = row.finishedAt || row.completed_at || row.updated_at || row.failed_at || row.yoinked_at

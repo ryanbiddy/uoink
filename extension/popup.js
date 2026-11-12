@@ -1193,6 +1193,31 @@ async function researchSessionAction(action) {
   } catch (error) { status.textContent = error.message || "Couldn't update this session."; }
   finally { sessionBusy = false; buttons.forEach(button => { button.disabled = false; }); }
 }
+// "After a save": what a finished capture does. Stored in chrome.storage.local
+// (STC.getAfterSave / setAfterSave); the worker and the in-page button read it.
+const AFTER_SAVE_HINTS = {
+  stay: "Saves to your library only. The notification offers Copy for Claude and Copy for ChatGPT.",
+  claude: "Copies the capture to your clipboard, then opens a new Claude chat.",
+  chatgpt: "Copies the capture to your clipboard, then opens ChatGPT.",
+  copy: "Copies the capture to your clipboard and stays where you are.",
+};
+async function initAfterSave() {
+  const select = document.getElementById("after-save-select");
+  const hint = document.getElementById("after-save-hint");
+  for (const choice of STC.AFTER_SAVE_CHOICES) {
+    const option = element("option", "", choice.label);
+    option.value = choice.value;
+    select.appendChild(option);
+  }
+  select.value = await STC.getAfterSave();
+  hint.textContent = AFTER_SAVE_HINTS[select.value] || "";
+  select.addEventListener("change", async () => {
+    const { value, synced } = await STC.setAfterSave(select.value);
+    select.value = value;
+    hint.textContent = (AFTER_SAVE_HINTS[value] || "") + (synced ? "" : " Saved in this browser. The dashboard will match once the helper is running.");
+  });
+}
+initAfterSave();
 document.getElementById("research-session").addEventListener("toggle", event => {
   if (event.target.open) refreshResearchSession();
 });
