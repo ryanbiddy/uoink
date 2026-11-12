@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Browser extension: the YouTube button no longer grows without limit when a research session has a long name. The label ends in an ellipsis and the full name shows on hover. A failed capture whose stored error is a script error now says "Something went wrong inside Uoink. Try again." instead of showing the raw error.
 - Dashboard on a phone: a long error message or source address no longer stretches the
   item page past the screen. Long topic names in the breadcrumb end in an ellipsis with the
   full name on hover.

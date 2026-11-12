@@ -16,6 +16,7 @@
 
   const BTN_CLASS = "uoink-btn";
   const BTN_ID = "stc-yt-send-to-claude";
+  const LABEL_CLASS = "stc-yt-label";
   const ANCHOR_SELECTORS = [
     "ytd-watch-metadata #top-level-buttons-computed",
     "#top-level-buttons-computed",
@@ -106,6 +107,12 @@
         background: #A3370A;
         color: #FFFFFF;
         transform: translateY(1px) scale(0.97);
+      }
+      .${BTN_CLASS} .${LABEL_CLASS} {
+        min-width: 0;
+        max-width: min(260px, calc(100vw - 150px));
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .${BTN_CLASS}[disabled] { opacity: 0.7; cursor: progress; }
       .${BTN_CLASS}.stc-yt-error { background: #3A1F1F; color: #FFD9D9; }
@@ -201,8 +208,12 @@
     }
     while (chromeWrap.firstChild) btn.appendChild(chromeWrap.firstChild);
     const labelEl = document.createElement("span");
+    labelEl.className = LABEL_CLASS;
     labelEl.textContent = label;
     btn.appendChild(labelEl);
+    // A long label (an active session's name) is cut with an ellipsis; the
+    // full text stays in the tooltip. Later states set their own title.
+    btn.title = String(label).length > 24 ? String(label) : "";
   }
 
   function resetButtonAfter(btn, ms) {
@@ -574,7 +585,10 @@
       } catch (e) {
         console.warn("[Uoink] after-save notice failed", e);
       }
-      const label = first ? "Saved. See it in Claude" : "Saved. Copy for Claude";
+      // A narrow window has no room for "Saved." in front.
+      const narrow = window.innerWidth < 520;
+      const label = first ? (narrow ? "See it in Claude" : "Saved. See it in Claude")
+        : (narrow ? "Copy for Claude" : "Saved. Copy for Claude");
       setButtonState(btn, "success", label);
       btn.title = `Saved to your library: ${data.folder}. Click to copy it and open Claude.`;
       // The paste text stays in this page script's memory for the window only.

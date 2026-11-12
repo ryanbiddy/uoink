@@ -1005,10 +1005,10 @@
 
     if (stay) {
       if (firstTime) return FIRST_SAVE_MSG;
-      const topic = data && data.topic && data.topic !== "Uncategorized" ? data.topic : null;
-      return topic
-        ? `Saved to your library under ${topic}. Copy it for Claude or ChatGPT below if you want it in a chat.`
-        : "Saved to your library. Copy it for Claude or ChatGPT below if you want it in a chat.";
+      const rawTopic = data && data.topic && data.topic !== "Uncategorized" ? String(data.topic).trim() : "";
+      const topic = rawTopic.length > 40 ? `${rawTopic.slice(0, 39).trimEnd()}…` : rawTopic;
+      const tail = "To paste it into Claude or ChatGPT, use the buttons here or the Uoink popup.";
+      return topic ? `Saved to your library under ${topic}. ${tail}` : `Saved to your library. ${tail}`;
     }
     if (firstTime && copied) return FIRST_UOINK_MSG;
 
