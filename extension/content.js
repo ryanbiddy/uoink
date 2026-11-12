@@ -37,6 +37,10 @@
   const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
   // How long the button offers "Copy for Claude" after a save (Stay on the page).
   const AFTER_SAVE_WINDOW_MS = 8000;
+  // The button lives in YouTube's DOM, where the page's own scripts can read
+  // its title. So the title never names data.folder or any local path (it
+  // often holds the user's account name); it only says the save happened.
+  const SAVED_TITLE = "Saved to your library.";
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
@@ -563,7 +567,7 @@
       notify("Uoink ready",
              "Click the Uoink icon to pick which screenshots to include.");
       setButtonState(btn, "success", "Pick screenshots →");
-      btn.title = `Saved to: ${data.folder}. Click the Uoink icon to finish.`;
+      btn.title = `${SAVED_TITLE} Click the Uoink icon to finish.`;
       resetButtonAfter(btn, 5000);
       return;
     }
@@ -590,7 +594,7 @@
       const label = first ? (narrow ? "See it in Claude" : "Saved. See it in Claude")
         : (narrow ? "Copy for Claude" : "Saved. Copy for Claude");
       setButtonState(btn, "success", label);
-      btn.title = `Saved to your library: ${data.folder}. Click to copy it and open Claude.`;
+      btn.title = `${SAVED_TITLE} Click to copy it and open Claude.`;
       // The paste text stays in this page script's memory for the window only.
       const pending = { text: clipboardText, data, expires: Date.now() + AFTER_SAVE_WINDOW_MS };
       btn._afterSavePending = pending;
@@ -635,7 +639,7 @@
     notify("Uoinked ★", message);
 
     setButtonState(btn, "success", "Uoinked ★");
-    btn.title = `Saved to: ${data.folder}`;
+    btn.title = SAVED_TITLE;
     resetButtonAfter(btn, 3000);
   }
 
@@ -680,7 +684,7 @@
            `End the session in the popup to send to Claude or ChatGPT.`);
 
     setButtonState(btn, "success", `Added (${data.video_count})`);
-    btn.title = `Saved to: ${data.folder}`;
+    btn.title = SAVED_TITLE;
     resetButtonAfter(btn, 3000);
   }
 

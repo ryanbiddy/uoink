@@ -6,8 +6,10 @@
 // Both paths run the real scripts: the service worker queue (background.js) and the
 // in-page YouTube button (content.js, talking to a real background.js).
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
-import { jsonResponse, makeEnv, settle } from "./ext_fake_env.mjs";
+import { EXT, jsonResponse, makeEnv, settle } from "./ext_fake_env.mjs";
 
 const YT_URL = "https://www.youtube.com/watch?v=abc123def45";
 const PASTE = "# Some video\n\nTranscript with embedded screenshots.";
@@ -23,12 +25,13 @@ const CHATGPT = "https://chatgpt.com/";
 function pathOf(url) { return new URL(url).pathname; }
 
 // A real background.js. copyOk:false makes the offscreen clipboard write fail.
-async function worker({ store, capture = CAPTURE, copyOk = true, settings = {}, corpus = FILE_MD, helperDown = false } = {}) {
+// helperFetch replaces the fake helper (the parked one below).
+async function worker({ store, capture = CAPTURE, copyOk = true, settings = {}, corpus = FILE_MD, helperDown = false, helperFetch } = {}) {
   store = store || { local: {}, sync: {}, session: {} };
   const writes = [];
   const env = makeEnv({
     store,
-    fetch: (url, init) => {
+    fetch: helperFetch || ((url, init) => {
       const path = pathOf(url);
       if (path === "/token") return jsonResponse({ token: "t" });
       if (path === "/health") return jsonResponse({ ok: true });
@@ -44,7 +47,7 @@ async function worker({ store, capture = CAPTURE, copyOk = true, settings = {}, 
       }
       if (path === "/extract" || path === "/extract/page") return jsonResponse(capture);
       return jsonResponse({ ok: true });
-    },
+    }),
     onSend: (msg) => {
       if (msg && msg.target === "offscreen") {
         if (msg.type === "copy") writes.push(msg.text);
@@ -236,6 +239,191 @@ test("setAfterSave writes the helper and the cache; offline it marks the change 
   assert.deepEqual(JSON.parse(JSON.stringify(await off.env.ctx.STC.setAfterSave("copy"))), { value: "copy", synced: false });
   assert.equal(off.store.local.after_save_dirty, true);
   assert.equal((await off.env.ctx.STC.setAfterSave("bogus")).value, "stay");
+});
+
+// ---- two quick picks: the last one wins -------------------------------------------
+// A helper whose /settings requests wait until the test answers them, so the
+// requests of two quick picks can come back in either order. A POST answered ok
+// lands on the helper at that moment (answer order is the order the helper took
+// them in); a failed one never reaches it. auto=true answers at once.
+function parkedHelper(initial) {
+  const h = { value: initial, parked: [], auto: false };
+  h.fetch = (url, init) => {
+    const path = pathOf(url);
+    if (path === "/token") return jsonResponse({ token: "t" });
+    if (path === "/queue/status") return jsonResponse({ ok: true, pending_count: 0 });
+    if (path === "/extract" || path === "/extract/page") return jsonResponse(CAPTURE);
+    if (path !== "/settings") return jsonResponse({ ok: true });
+    const post = !!(init && init.method === "POST");
+    const sent = post ? JSON.parse(init.body).after_save : "read";
+    return new Promise((resolve, reject) => {
+      const req = {
+        sent,
+        ok() {
+          if (post) h.value = sent;
+          resolve(jsonResponse(post ? { ok: true } : { ok: true, settings: { after_save: h.value } }));
+        },
+        fail() { reject(new TypeError("Failed to fetch")); },
+      };
+      if (h.auto) req.ok(); else h.parked.push(req);
+    });
+  };
+  // Answer ("ok" or "fail") the parked request that sent `sent` ("read" for a GET).
+  h.answer = async (sent, how) => {
+    await settle();
+    const i = h.parked.findIndex((r) => r.sent === sent);
+    assert.ok(i >= 0, `a parked /settings request for ${sent} (parked: ${h.parked.map((r) => r.sent).join(",") || "none"})`);
+    h.parked.splice(i, 1)[0][how]();
+    await settle();
+  };
+  return h;
+}
+
+// Claude, then Stay right after. Each case answers the two requests in another
+// order. Whatever happens, Stay is what a capture does and what the helper ends
+// up with: a late answer to the Claude pick never clears Stay's dirty mark.
+const TWO_PICKS = [
+  { name: "Stay fails, then Claude succeeds late", answers: [["stay", "fail"], ["claude", "ok"]], dirty: true },
+  { name: "Claude succeeds, then Stay fails", answers: [["claude", "ok"], ["stay", "fail"]], dirty: true },
+  { name: "Stay succeeds, then Claude succeeds late (the helper took Claude last)", answers: [["stay", "ok"], ["claude", "ok"]], dirty: true },
+  { name: "Claude succeeds, then Stay succeeds", answers: [["claude", "ok"], ["stay", "ok"]], dirty: false },
+  { name: "Stay succeeds, then Claude fails late", answers: [["stay", "ok"], ["claude", "fail"]], dirty: false },
+];
+for (const c of TWO_PICKS) {
+  test(`Claude then Stay, ${c.name}: Stay wins`, async () => {
+    const helper = parkedHelper("stay");
+    const w = await worker({ helperFetch: helper.fetch });
+    const STC = w.env.ctx.STC;
+    const first = STC.setAfterSave("claude");
+    await settle();
+    const second = STC.setAfterSave("stay");
+    for (const [sent, how] of c.answers) await helper.answer(sent, how);
+    await first;
+    assert.equal((await second).value, "stay");
+    assert.equal(w.store.local.after_save, "stay");
+    assert.equal(w.store.local.after_save_dirty, c.dirty, "dirty while the helper may not hold Stay");
+    // The next read pushes a dirty Stay and never takes the helper's Claude over it.
+    const read = STC.getAfterSave();
+    await helper.answer(c.dirty ? "stay" : "read", "ok");
+    assert.equal(await read, "stay");
+    assert.equal(helper.value, "stay");
+    assert.equal(w.store.local.after_save, "stay");
+    assert.equal(w.store.local.after_save_dirty, false);
+    // A capture now copies nothing and opens no tab.
+    helper.auto = true;
+    await saveViaQueue(w);
+    assert.equal(w.writes.length, 0, "no clipboard write");
+    assert.deepEqual(w.env.tabsCreated.map((t) => t.url), [], "no new tab");
+  });
+}
+
+// A capture starts reading the setting (the cache says Copy, the dashboard has
+// since set Claude), and the user picks Stay in the popup before that read
+// answers. Stay's request fails. The read's late Claude must not replace Stay.
+for (const where of ["the popup's own context", "the worker, with the popup as another context"]) {
+  for (const order of [["read", "stay"], ["stay", "read"]]) {
+    test(`a helper read answered after a new pick keeps the pick (${where}, ${order.join(" then ")} answered)`, async () => {
+      const helper = parkedHelper("claude");
+      const store = { local: { after_save: "copy" }, sync: {}, session: {} };
+      const w = await worker({ store, helperFetch: helper.fetch });
+      let popupSTC = w.env.ctx.STC;
+      if (where.startsWith("the worker")) {
+        const popup = makeEnv({ store, fetch: helper.fetch });
+        popup.load("lib/extract.js");
+        popupSTC = popup.ctx.STC;
+      }
+      const read = w.env.ctx.STC.getAfterSave();
+      await settle();
+      const pick = popupSTC.setAfterSave("stay");
+      for (const sent of order) await helper.answer(sent, sent === "read" ? "ok" : "fail");
+      assert.equal(await read, "stay", "the newer local pick is what the read returns");
+      assert.deepEqual(JSON.parse(JSON.stringify(await pick)), { value: "stay", synced: false });
+      assert.equal(store.local.after_save, "stay");
+      assert.equal(store.local.after_save_dirty, true);
+      const next = w.env.ctx.STC.getAfterSave();
+      await helper.answer("stay", "ok");
+      assert.equal(await next, "stay");
+      assert.equal(helper.value, "stay");
+      assert.equal(store.local.after_save_dirty, false);
+    });
+  }
+}
+
+// ---- the popup's menu ---------------------------------------------------------------
+// popup.js's real initAfterSave, in a popup context with the menu and hint elements.
+const POPUP_SRC = readFileSync(join(EXT, "popup.js"), "utf8");
+function popupAfterSaveSlice() {
+  const start = POPUP_SRC.indexOf("const AFTER_SAVE_HINTS");
+  const end = POPUP_SRC.indexOf("\ninitAfterSave();", start);
+  assert.ok(start >= 0 && end > start, "popup.js After a save slice found");
+  return POPUP_SRC.slice(start, end);
+}
+function popupMenu(helper) {
+  const popup = makeEnv({ fetch: helper.fetch });
+  popup.load("lib/extract.js");
+  const select = popup.document.createElement("select");
+  select.id = "after-save-select";
+  const hint = popup.document.createElement("p");
+  hint.id = "after-save-hint";
+  popup.document.body.appendChild(select);
+  popup.document.body.appendChild(hint);
+  popup.ctx.element = (tag, className, text) => {
+    const el = popup.document.createElement(tag);
+    el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  };
+  popup.runSource(popupAfterSaveSlice(), "popup.js");
+  const ready = popup.runSource("initAfterSave()", "probe.js");
+  const pick = (value) => { select.value = value; select.dispatchEvent({ type: "change" }); };
+  return { popup, select, hint, ready, pick };
+}
+
+for (const order of [["stay", "claude"], ["claude", "stay"]]) {
+  test(`popup: Claude then Stay, ${order.join(" then ")} answered: the menu never goes back to Claude`, async () => {
+    const helper = parkedHelper("copy");
+    const m = popupMenu(helper);
+    await helper.answer("read", "ok");
+    await m.ready;
+    assert.equal(m.select.value, "copy");
+    assert.equal(m.select.children.length, 4);
+    m.pick("claude");
+    await settle();
+    m.pick("stay");
+    // Stay's request fails and Claude's succeeds, in either order.
+    for (const sent of order) {
+      await helper.answer(sent, sent === "stay" ? "fail" : "ok");
+      assert.equal(m.select.value, "stay", `after the ${sent} answer`);
+    }
+    assert.match(m.hint.textContent, /^Saves to your library only\./);
+    assert.match(m.hint.textContent, /Saved in this browser\./, "Stay did not reach the helper");
+    assert.equal(m.popup.store.local.after_save, "stay");
+    assert.equal(m.popup.store.local.after_save_dirty, true);
+  });
+}
+
+test("popup: a pick made while the menu is still loading is saved and kept", async () => {
+  const helper = parkedHelper("claude");
+  const m = popupMenu(helper);
+  await settle();
+  m.pick("copy");
+  await helper.answer("read", "ok");
+  await m.ready;
+  assert.equal(m.select.value, "copy", "the late load does not replace the pick");
+  await helper.answer("copy", "ok");
+  assert.equal(m.select.value, "copy");
+  assert.equal(m.hint.textContent, "Copies the capture to your clipboard and stays where you are.");
+  assert.equal(helper.value, "copy");
+  assert.equal(m.popup.store.local.after_save_dirty, false);
+});
+
+test("popup: the menu shows the helper's choice when nothing was picked", async () => {
+  const helper = parkedHelper("chatgpt");
+  const m = popupMenu(helper);
+  await helper.answer("read", "ok");
+  await m.ready;
+  assert.equal(m.select.value, "chatgpt");
+  assert.equal(m.hint.textContent, "Copies the capture to your clipboard, then opens ChatGPT.");
 });
 
 // ---- the right-click X Article fallback path ----------------------------------------
