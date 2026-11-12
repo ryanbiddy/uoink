@@ -19825,7 +19825,8 @@
       const token = relayElement("relayToken").value.trim();
       if (token) patch.relay_token = token;
       // First time through the guided steps: saving an address and a token means "turn it on".
-      if (token && patch.relay_url && !patch.relay_enabled && settings.relay_token_set !== true) {
+      const autoEnabled = Boolean(token && patch.relay_url && !patch.relay_enabled && settings.relay_token_set !== true);
+      if (autoEnabled) {
         patch.relay_enabled = true;
         relayElement("relayEnabled").checked = true;
       }
@@ -19840,7 +19841,14 @@
         return Promise.resolve(false);
       }
       return queueSettingSave("relayUrl", async () => {
-        const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
+        let data;
+        try {
+          data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
+        } catch (err) {
+          // Nothing saved (the credential store may not have answered). Don't leave the inbox looking switched on.
+          if (autoEnabled) relayElement("relayEnabled").checked = false;
+          throw err;
+        }
         const stored = data.settings;
         if (!stored || !Object.prototype.hasOwnProperty.call(stored, "relay_token_set")) throw unsupportedSettingError();
         if (stored.relay_url !== patch.relay_url.replace(/\/+$/, "") || stored.relay_enabled !== patch.relay_enabled
@@ -19853,6 +19861,7 @@
       }, () => {
         relayElement("relayToken").value = "";
         relayElement("relayUrl").value = state.settings.relay_url || "";
+        relayElement("relayEnabled").checked = state.settings.relay_enabled === true;
         relayElement("relayToken").placeholder = state.settings.relay_token_set === true ? "Saved" : "Paste the pull token";
         relayStatusData = null;
         phonePairing = null;

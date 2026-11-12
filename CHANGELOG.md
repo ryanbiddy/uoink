@@ -70,11 +70,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the manual fallback. The phone inbox status now includes `last_pickup_at`.
 - The MCP server still exposes 99 tools by default, 36 with
   `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
+- Isolated test installs keep secrets in a file inside their own profile and never touch the system credential store.
 
 ### Fixed
 
 - `npx uoink update` on a Mac quits the running Uoink before replacing it and starts the new version after.
 - The browser extension says ⌘V instead of Ctrl+V on a Mac.
+- If the system credential store (Keychain or Windows Credential Manager) doesn't answer, saving a relay token now says so instead of freezing Uoink.
 - Tray menu Settings opens the dashboard's Settings page, and the command line says "1 result" instead of "1 result(s)".
 - One title limit for every source: titles longer than 300 characters (YouTube, podcasts,
   pages, X, Reddit, imports, notes, images) are cut at a safe point, never inside an emoji or

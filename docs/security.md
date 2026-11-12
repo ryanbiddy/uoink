@@ -35,8 +35,8 @@ The helper never binds to a public network interface. Browser pages cannot use t
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
 | Another installed browser extension calls `/token` | Yes, for direct requests from unlisted extensions | The extension uses POST so Chromium sends its Origin, which must match the allowlist. An originless worker GET with `Sec-Fetch-Site: none` is refused, including from extensions with helper host access. The default ID is `bkcapfidedhfcjpmjabeopfbcjcbmdmi`; local configuration can add trusted IDs. Residual risk: an extension with permission to inject script into the helper dashboard can still read `/token` from that page's own origin. A launch-scoped dashboard bootstrap would close this later. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
-| Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink` in normal mode; deterministic profile-derived `Uoink-isolated-<hash>` in isolated mode; the v2.1 install migration moves normal entries from legacy `Yoink`), not in `settings.json`, and is never returned by `GET /settings`. |
-| ScrapeCreators API key disclosure | Mitigated | The key uses the same isolated credential namespace, username `scrapecreators_key`, with no plaintext or environment fallback. Settings expose only presence and invalid status. Requests send it only in the `x-api-key` header to the pinned host; errors omit credential and vendor exception text. |
+| Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink`; the v2.1 install migration moves entries from legacy `Yoink`), or, for an isolated profile, in an owner-only `credentials.json` inside that profile. It is not in `settings.json` and is never returned by `GET /settings`. |
+| ScrapeCreators API key disclosure | Mitigated | The key uses the same credential storage, username `scrapecreators_key`, with no plaintext or environment fallback. Settings expose only presence and invalid status. Requests send it only in the `x-api-key` header to the pinned host; errors omit credential and vendor exception text. |
 | Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
 
 ## Public endpoints
@@ -460,21 +460,23 @@ Comment Intelligence, Hook Type, Entity Extraction, Writing Studio saved-key gen
 Starting in v2.0, the key is stored through Python `keyring`:
 
 - Service (normal mode): `Uoink` (renamed from `Yoink` in v2.1; the first-run install migration copies the entry and deletes the legacy one)
-- Service (isolated mode): `Uoink-isolated-<hash>` where `<hash>` is a deterministic 32-character hex digest of the canonical validated profile path (`hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]`). This separates profile credentials even when sharing loopback ports and preserves credential identity across port changes. Path resolution errors do not select an alternate credential namespace.
 - Username: `anthropic_key`
 - Windows backend: Windows Credential Manager
 - macOS backend: macOS Keychain
 
 `settings.json` stores only public booleans and key status flags. `GET /settings` returns `anthropic_key_set: true|false`, never the key itself.
 
-Isolated mode credential semantics:
+A `keyring` call has no timeout of its own and can wait behind an OS prompt (a locked keychain, an access prompt after an update). Since 3.17.0 each call runs on a worker thread, one at a time in request order, and the caller waits at most 10 seconds. A save that runs out of time answers `{ok:false, code:"credential_store_unavailable"}` and changes no settings. A read that can't get an answer uses the last value the helper saw. No call runs while the settings lock is held, so `/health` and `GET /settings` keep answering.
 
-- Read, write, and delete operations in isolated mode operate strictly on the profile's isolated service namespace (`Uoink-isolated-<hash>`).
+Isolated mode credential semantics (since 3.17.0):
+
+- An isolated profile (and any helper run with `UOINK_CREDENTIAL_STORE=file`) keeps the Anthropic key, the ScrapeCreators key and the phone inbox pull token in `credentials.json` inside the profile, written atomically with owner-only permissions where the OS supports them. It never imports or calls `keyring`, so a test profile can't raise an OS prompt or add entries to the real store.
 - Isolated reads fail closed when no key is present: they never fall back to the ordinary `Uoink` service or legacy `Yoink` service.
-- Two profiles sharing a loopback port do not share credentials.
-- A profile that changes ports retains its credential identity because the namespace is derived solely from the canonical profile path.
-- In isolated mode, plaintext `anthropic_key` migration from the isolated `settings.json` writes exclusively to the isolated service namespace.
-- Destructive operations such as Anthropic 401 invalid-key resets clear only the isolated profile's credential entry, never mutating or clearing ordinary `Uoink` credentials.
+- Two profiles sharing a loopback port do not share credentials, and a profile that changes ports keeps its credentials, because the file lives in the profile folder.
+- An unreadable `credentials.json` is never overwritten: reads return nothing and saves fail until it is fixed or removed.
+- In isolated mode, plaintext `anthropic_key` migration from the isolated `settings.json` writes only to the profile's `credentials.json`.
+- Destructive operations such as Anthropic 401 invalid-key resets clear only the isolated profile's entry, never ordinary `Uoink` credentials.
+- Before 3.17.0, isolated profiles used the keyring service `Uoink-isolated-<hash>` (a digest of the canonical profile path). Uoink no longer reads those entries.
 - Normal (non-isolated) mode retains existing `Uoink` storage with `Yoink` read fallback and one-time install migration.
 
 Migration behavior:
@@ -763,11 +765,12 @@ has an 8-second timeout and an 8 MB response cap. Only one request can be in
 flight per process, with at least one second between sends and at most three
 requests per run. A 429 or 5xx stops the run without an automatic retry.
 Credits count requests sent, including failures, in a local UTC daily ledger.
-A 401/403 preserves the key and marks it invalid; the settings lock and key
-comparison keep a late response from invalidating a replacement credential.
+A 401/403 preserves the key and marks it invalid; a key comparison plus a save
+counter checked under the settings lock keep a late response from invalidating
+a replacement credential.
 
-API key storage uses username `scrapecreators_key` in `Uoink` or the
-profile-specific `Uoink-isolated-<hash>` service. Isolated storage fails closed.
+API key storage uses username `scrapecreators_key` in the `Uoink` keyring
+service, or in an isolated profile's `credentials.json`. Isolated storage fails closed.
 There is no plaintext or environment-variable fallback. Requests send only
 the creator identifier/search terms, pagination parameters, key header and
 Uoink user agent; library content is not sent. No ScrapeCreators thumbnails
