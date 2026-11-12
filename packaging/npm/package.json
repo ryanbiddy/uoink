@@ -1,0 +1,41 @@
+{
+  "name": "uoink",
+  "version": "3.16.3",
+  "description": "Install Uoink from the terminal: downloads the official installer, verifies its SHA-256, installs it and helps connect your AI agent.",
+  "bin": {
+    "uoink": "bin/uoink.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "license": "MIT",
+  "author": "Replay Ryan Tools",
+  "homepage": "https://uoink.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryanbiddy/uoink.git",
+    "directory": "packaging/npm"
+  },
+  "bugs": {
+    "url": "https://github.com/ryanbiddy/uoink/issues"
+  },
+  "keywords": [
+    "uoink",
+    "mcp",
+    "ai-agent",
+    "claude-code",
+    "codex",
+    "transcripts",
+    "local-first",
+    "research"
+  ]
+}

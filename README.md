@@ -10,7 +10,7 @@ Free and open source (MIT). Windows 10/11 and Mac (Apple silicon, macOS 15+). Li
 
 ## Quick start
 
-1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`. For Linux, see [the Linux guide](docs/linux.md).
+1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, on a Mac run `brew install --cask ryanbiddy/uoink/uoink`, or on Windows and Apple-silicon Macs run `npx uoink` (it checks the download's SHA-256 first). For Linux, see [the Linux guide](docs/linux.md).
 2. **Connect your AI:** `uoink connect claude-code`. For other clients run `uoink connect --list`; Claude Desktop can use the `.mcpb` extension from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
 3. **Ask:** *"uoink https://youtu.be/… and tell me where they explain the eval setup."* Later: *"which of my saved talks disagreed about that?"*
 

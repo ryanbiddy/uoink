@@ -190,6 +190,10 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: npm installer tests (no network, about a second)
+        working-directory: packaging/npm
+        run: node --test
+
       - name: Parse extension JavaScript
         run: |
           find extension -name '*.js' -print0 | xargs -0 -n1 node --check

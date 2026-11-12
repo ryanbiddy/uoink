@@ -22,6 +22,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and `node scripts/store_screenshots.mjs <folder>` regenerates the setup and popup shots.
 - `scripts/build_cws.py` refuses any test, mock, source map, key or doc file even if added to
   its allowlist, and tests check the zip name, contents, receipt and missing `key` field.
+- `npx uoink`: a zero-dependency npm package (`packaging/npm/`) that downloads the official
+  installer from the GitHub release, checks its SHA-256 against `SHA256SUMS.txt`, installs
+  Uoink (Windows per user, Mac Apple silicon) and points you at `uoink connect`. When Uoink
+  is already installed, `npx uoink <command>` runs the installed CLI. It asks before
+  downloading, resumes a dropped download, and has `--dry-run`. It has no install script.
+  Not published yet.
 
 ### Fixed
 
