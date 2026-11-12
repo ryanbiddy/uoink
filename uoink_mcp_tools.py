@@ -6699,7 +6699,8 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
 
 
 _PATH_IN_ERROR = re.compile(
-    r"(?:[A-Za-z]:[\\/]|\\\\|/(?:Users|home|var|tmp|private|opt|etc)/)[^\s'\"<>|]*")
+    # The lookbehind keeps URLs intact: "https://" and "example.com/home/" are not paths.
+    r"(?<![\w/.:-])(?:[A-Za-z]:[\\/]|\\\\|/(?:Users|home|var|tmp|private|opt|etc)/)[^\s'\"<>|]*")
 
 
 def _scrub_error_text(value: Any) -> str:

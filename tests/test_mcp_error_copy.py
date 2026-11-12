@@ -12,6 +12,14 @@ def test_scrub_removes_paths_and_clips():
     assert len(tools._scrub_error_text("x" * 900)) <= 200
 
 
+def test_scrub_keeps_urls():
+    text = tools._scrub_error_text(
+        "could not fetch https://example.com/home/page and http://example.test/Users/x")
+    assert "https://example.com/home/page" in text
+    assert "http://example.test/Users/x" in text
+    assert "<path>" not in text
+
+
 def test_unexpected_exception_has_no_path_and_a_next_step(monkeypatch):
     spec = tools.TOOL_REGISTRY["get_job_status"]
 
