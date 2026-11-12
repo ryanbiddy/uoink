@@ -133,14 +133,14 @@ not required.
 ## Phone inbox (optional)
 
 Share a link from your phone's share sheet and Uoink captures it on your
-computer, with no phone app. Deploy a small relay to your own Render account,
-point an iOS Shortcut or Android share target at it, then add it in
-**Settings > Capture > Phone inbox**. The relay holds only the link and an
+computer, with no phone app. Three steps in **Settings > Capture > Phone
+inbox**: deploy a small relay to your own (free) Render account, connect it,
+then scan a QR code with your phone. The relay holds only the link and an
 optional note, until Uoink picks it up or for 7 days at most.
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink)
 
-Setup, the Shortcut recipe and the free-plan tradeoffs are in
+Setup, the manual Shortcut fallback and the free-plan tradeoffs are in
 [docs/relay.md](docs/relay.md).
 
 ## How it works

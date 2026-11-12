@@ -3376,6 +3376,24 @@
     #tab-settings .job-sub,
     #tab-settings .topic-field span { font-family: var(--font-ui); }
     .phone-inbox select.field { justify-self: start; width: auto; }
+    .phone-inbox .phone-flow strong { color: var(--text); }
+    .phone-steps { display: grid; gap: 16px; min-width: 0; }
+    .phone-step { display: grid; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .phone-step h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0; font-size: 15px; color: var(--text); }
+    .phone-step-num { display: inline-grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--action); color: var(--on-action); font-size: 13px; font-weight: 700; }
+    .phone-pill { margin-left: auto; padding: 2px 10px; border: 1px solid var(--line-strong, var(--line)); border-radius: 99px; color: var(--text-2); font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .phone-pill[data-state="connected"] { border-color: var(--ok); color: var(--ok); }
+    .phone-pill[data-state="error"] { color: var(--vermillion); }
+    .phone-summary { display: grid; gap: 8px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .phone-summary-title { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text); font-weight: 600; }
+    .phone-dot { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--ok); }
+    .phone-step a.button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    .phone-qr-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; min-width: 0; }
+    .phone-qr { width: 224px; max-width: 100%; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; line-height: 0; }
+    .phone-qr svg { display: block; width: 100%; height: auto; }
+    .phone-qr-side { display: grid; gap: 12px; min-width: 0; }
+    .phone-old, .phone-error { display: grid; gap: 12px; min-width: 0; }
+    @media (max-width: 600px) { .phone-qr-wrap { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
     .setting-feedback { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .setting-status { color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
     .setting-status[data-state="error"] { color: var(--vermillion); }
@@ -6277,22 +6295,72 @@
 
             <div class="setting-block phone-inbox" id="phone-inbox">
               <h2>Phone inbox</h2>
-              <p class="setting-copy">Share a link from your phone and Uoink captures it here. Links travel through a small relay that runs on your own Render account. It holds each link only until Uoink picks it up, and never longer than 7 days.</p>
-              <p class="setting-copy"><a href="https://github.com/ryanbiddy/uoink/blob/main/docs/relay.md" data-product-link target="_blank" rel="noreferrer">Set up a relay</a></p>
-              <label for="relayUrl">Relay address</label>
-              <input class="field" id="relayUrl" type="url" inputmode="url" maxlength="2048" placeholder="https://your-relay.onrender.com" autocomplete="off" spellcheck="false" aria-describedby="relayUrlSaveStatus">
-              <label for="relayToken">Pull token</label>
-              <input class="field" id="relayToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false" aria-describedby="relayTokenHint relayUrlSaveStatus">
-              <p class="setting-copy" id="relayTokenHint">RELAY_PULL_TOKEN from the relay's Environment page on Render. Uoink keeps it in the system credential store.</p>
-              <label class="inline-row" for="relayEnabled"><input id="relayEnabled" type="checkbox"> Pick up links shared from my phone</label>
-              <label for="relayPollMinutes">Check every</label>
-              <select class="field" id="relayPollMinutes"><option value="2">2 minutes</option><option value="5" selected>5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select>
-              <div class="inline-row">
-                <button class="button" type="button" id="relaySave">Save</button>
-                <button class="button ghost" type="button" id="relayCheck" disabled>Check now</button>
+              <p class="setting-copy phone-flow"><strong>Your phone &rarr; your relay &rarr; Uoink on this computer.</strong> Share a link from your phone and Uoink captures it here. The relay is a tiny service that runs on your own Render account (a free account is enough). It holds links only, never your library, and deletes each link after Uoink picks it up or after 7 days.</p>
+
+              <div class="phone-summary hidden" id="phoneSummary">
+                <p class="phone-summary-title"><span class="phone-dot" aria-hidden="true"></span>Phone inbox is on</p>
+                <p class="setting-copy" id="phoneSummaryText"></p>
+                <div class="inline-row">
+                  <button class="button ghost" type="button" id="phoneSummaryCheck">Check now</button>
+                  <button class="button ghost" type="button" id="phoneShowSetup">Show phone setup again</button>
+                </div>
               </div>
-              <div class="setting-feedback"><span class="setting-status" id="relayUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="relayUrlSaveRetry" type="button" data-setting-retry="relayUrl">Retry save</button></div>
-              <p class="setting-copy" id="relayStatus" role="status" aria-live="polite">Off.</p>
+
+              <div class="phone-steps" id="phoneSteps">
+                <div class="phone-step" role="group" aria-labelledby="phoneStep1Title">
+                  <h3 id="phoneStep1Title"><span class="phone-step-num" aria-hidden="true">1</span>Make your relay</h3>
+                  <p class="setting-copy">You need a Render account first. Signing up is free. Then select Deploy to Render. It creates one small web service (uoink-relay) and one small Key Value store for waiting links, and Render generates two secret tokens for you.</p>
+                  <p class="setting-copy"><a class="button" href="https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink" data-product-link target="_blank" rel="noreferrer">Deploy to Render</a></p>
+                  <p class="setting-copy">When it finishes, copy the relay's address, then open uoink-relay &gt; Environment and copy RELAY_PULL_TOKEN. <a href="https://github.com/ryanbiddy/uoink/blob/main/docs/relay.md" data-product-link target="_blank" rel="noreferrer">Set up a relay</a></p>
+                </div>
+
+                <div class="phone-step" role="group" aria-labelledby="phoneStep2Title">
+                  <h3 id="phoneStep2Title"><span class="phone-step-num" aria-hidden="true">2</span>Connect it <span class="phone-pill" id="phoneConnPill" data-state="off">Not connected</span></h3>
+                  <label for="relayUrl">Relay address</label>
+                  <input class="field" id="relayUrl" type="url" inputmode="url" maxlength="2048" placeholder="https://your-relay.onrender.com" autocomplete="off" spellcheck="false" aria-describedby="relayUrlSaveStatus">
+                  <label for="relayToken">Pull token</label>
+                  <input class="field" id="relayToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false" aria-describedby="relayTokenHint relayUrlSaveStatus">
+                  <p class="setting-copy" id="relayTokenHint">RELAY_PULL_TOKEN from the relay's Environment page on Render. Uoink keeps it in the system credential store.</p>
+                  <label class="inline-row" for="relayEnabled"><input id="relayEnabled" type="checkbox"> Pick up links shared from my phone</label>
+                  <label for="relayPollMinutes">Check every</label>
+                  <select class="field" id="relayPollMinutes"><option value="2">2 minutes</option><option value="5" selected>5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select>
+                  <div class="inline-row">
+                    <button class="button" type="button" id="relaySave">Save</button>
+                    <button class="button ghost" type="button" id="relayCheck" disabled>Check now</button>
+                  </div>
+                  <div class="setting-feedback"><span class="setting-status" id="relayUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="relayUrlSaveRetry" type="button" data-setting-retry="relayUrl">Retry save</button></div>
+                  <p class="setting-copy" id="relayStatus" role="status" aria-live="polite">Off.</p>
+                  <p class="setting-copy">A free Render service sleeps when nobody uses it, so the first check can take up to a minute.</p>
+                </div>
+
+                <div class="phone-step" role="group" aria-labelledby="phoneStep3Title">
+                  <h3 id="phoneStep3Title"><span class="phone-step-num" aria-hidden="true">3</span>Set up your phone</h3>
+                  <p class="setting-copy" id="phoneLocked">Connect your relay in step 2 first. The QR code shows up here once it is connected.</p>
+                  <p class="setting-copy hidden" id="phoneLoading" role="status">Getting the pairing key from your relay. If it was asleep, this can take up to a minute.</p>
+                  <div class="phone-old hidden" id="phoneOld">
+                    <p class="setting-copy" id="phoneOldText"><strong>Update your relay: Render &gt; uoink-relay &gt; Manual Deploy.</strong> Your relay was deployed before this feature, so it can't hand over its push token. Until you update it, paste the push token here: Render &gt; uoink-relay &gt; Environment &gt; RELAY_PUSH_TOKEN.</p>
+                    <label for="phonePushToken">Push token</label>
+                    <input class="field" id="phonePushToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false">
+                    <div class="inline-row"><button class="button" type="button" id="phonePushApply">Show QR code</button></div>
+                    <p class="setting-status" id="phonePushStatus" role="status" aria-live="polite"></p>
+                  </div>
+                  <div class="phone-error hidden" id="phoneError">
+                    <p class="setting-copy" id="phoneErrorText" role="status"></p>
+                    <div class="inline-row"><button class="button ghost" type="button" id="phoneRetry">Try again</button></div>
+                  </div>
+                  <div class="phone-qr-wrap hidden" id="phoneQrWrap">
+                    <div class="phone-qr" id="phoneQr"></div>
+                    <div class="phone-qr-side">
+                      <p class="setting-copy">Scan this with your phone's camera. It opens a page on your own relay, with the key it needs. Nothing goes through an outside service. On Android, install the page to add Uoink to the share sheet. On iPhone, the page walks you through a one-time Shortcut.</p>
+                      <div class="inline-row">
+                        <button class="button" type="button" id="phoneDone">I scanned it</button>
+                        <button class="button ghost" type="button" id="phoneCopyLink">Copy pairing link</button>
+                      </div>
+                      <p class="setting-status" id="phoneStep3Status" role="status" aria-live="polite"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="setting-block">
@@ -6872,6 +6940,7 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="/dashboard/qrcode.js"></script>
   <script>
     const state = {
       token: "",
@@ -7392,6 +7461,7 @@
       ];
       const base = target.origin + target.pathname;
       if (target.href.includes("#")) return false;
+      if (target.href === "https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink") return true;
       if (base === "https://twitter.com/intent/tweet") {
         const keys = [...target.searchParams.keys()];
         return keys.every((key) => key === "text" || key === "url")
@@ -19103,6 +19173,15 @@
     let relayStatusTimer = null;
     let relayStatusRefreshes = 0;
     let relayStatusRequest = 0;
+    // Guided phone setup (steps 1 to 3, the QR code, the collapsed summary).
+    const PHONE_DONE_KEY = "uoink.phoneSetupDone";
+    let phonePairing = null;          // { state, push_token?, message? } answered by /relay/pairing
+    let phonePairingFor = "";         // the relay address that answer belongs to
+    let phonePairingBusy = false;
+    let phonePairingScheduled = false;
+    let phoneManualPush = "";         // push token pasted for a relay without /v1/pairing
+    let phoneSetupExpanded = false;
+    let phoneRenderedUrl = "";
 
     function relayElement(id) { return document.getElementById(id); }
 
@@ -19137,6 +19216,170 @@
       } else text = `On. Uoink checks every ${minutes} minutes.`;
       relayElement("relayStatus").textContent = text;
       relayElement("relayCheck").disabled = !relayReady(settings) || Boolean(status.polling);
+      renderPhoneSetup();
+    }
+
+    function phoneSetupDone() {
+      try { return localStorage.getItem(PHONE_DONE_KEY) === "1"; } catch (err) { return false; }
+    }
+
+    function setPhoneSetupDone(on) {
+      try { if (on) localStorage.setItem(PHONE_DONE_KEY, "1"); else localStorage.removeItem(PHONE_DONE_KEY); } catch (err) { /* private window */ }
+    }
+
+    // Where the relay stands: off, unconfigured, checking, error (with the
+    // helper's plain reason) or connected (a check has succeeded).
+    function relayConnection(settings = state.settings || {}, status = relayStatusData || {}) {
+      if (settings.relay_enabled !== true) return { state: "off" };
+      if (!settings.relay_url || settings.relay_token_set !== true) return { state: "unconfigured" };
+      if (status.polling) return { state: "checking" };
+      if (status.last_error) return { state: "error", reason: status.last_error };
+      if (status.last_ok_at) return { state: "connected", at: status.last_ok_at };
+      return { state: "checking" };
+    }
+
+    function phonePushTokenNow() {
+      if (phonePairing && phonePairing.state === "paired") return phonePairing.push_token || "";
+      if (phonePairing && phonePairing.state === "old_relay") return phoneManualPush;
+      return "";
+    }
+
+    // The page the QR code opens. The token rides in the fragment (after #),
+    // which a browser never sends to the relay, so it stays out of its logs.
+    function phonePairingUrl(settings = state.settings || {}) {
+      const token = phonePushTokenNow();
+      const base = String(settings.relay_url || "").replace(/\/+$/, "");
+      return token && base ? `${base}/phone#t=${encodeURIComponent(token)}` : "";
+    }
+
+    // A QR code as one inline SVG path, drawn on this computer by the
+    // vendored qrcode-generator. White background and a 4-module quiet zone
+    // so it scans in dark mode too. Returns "" if the encoder isn't loaded.
+    function phoneQrSvg(text) {
+      if (typeof qrcode !== "function" || !text) return "";
+      const qr = qrcode(0, "M");
+      qr.addData(text);
+      qr.make();
+      const count = qr.getModuleCount();
+      const quiet = 4;
+      const size = count + quiet * 2;
+      let path = "";
+      for (let row = 0; row < count; row += 1) {
+        for (let col = 0; col < count; col += 1) {
+          if (qr.isDark(row, col)) path += `M${col + quiet} ${row + quiet}h1v1h-1z`;
+        }
+      }
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img" aria-label="QR code that opens the phone page on your relay"><rect width="${size}" height="${size}" fill="#fff"/><path d="${path}" fill="#000"/></svg>`;
+    }
+
+    function schedulePhonePairing() {
+      if (phonePairingScheduled || phonePairingBusy) return;
+      phonePairingScheduled = true;
+      window.setTimeout(startPhonePairing, 0);
+    }
+
+    async function startPhonePairing() {
+      phonePairingScheduled = false;
+      if (phonePairingBusy) return;
+      phonePairingBusy = true;
+      const forUrl = (state.settings || {}).relay_url || "";
+      let answer;
+      try {
+        // A sleeping free relay can take about a minute to wake.
+        const data = await settingsRequest("/relay/pairing", { method: "POST", body: "{}", timeoutMs: 100000 });
+        answer = ["paired", "old_relay", "error", "not_configured"].includes(data.state)
+          ? { state: data.state, push_token: data.push_token, message: data.message }
+          : { state: "error", message: "The helper gave an answer Uoink didn't expect. Update Uoink, then try again." };
+      } catch (err) {
+        answer = { state: "error", message: `Couldn't get the pairing key: ${settingError(err)}` };
+      }
+      phonePairingBusy = false;
+      if (forUrl === ((state.settings || {}).relay_url || "")) phonePairing = answer;
+      renderPhoneSetup();
+    }
+
+    function renderPhoneSetup() {
+      const settings = state.settings || {};
+      const status = relayStatusData || {};
+      const conn = relayConnection(settings, status);
+      const connected = conn.state === "connected";
+      const show = (id, on) => relayElement(id).classList.toggle("hidden", !on);
+      if ((settings.relay_url || "") !== phonePairingFor) {
+        phonePairing = null; phoneManualPush = ""; phoneRenderedUrl = ""; phonePairingFor = settings.relay_url || "";
+      }
+      if (!connected) phonePairing = phonePairing && phonePairing.state === "error" ? null : phonePairing;
+
+      const pill = relayElement("phoneConnPill");
+      pill.textContent = connected ? "Connected" : conn.state === "checking" ? "Checking…" : "Not connected";
+      pill.dataset.state = connected ? "connected" : conn.state === "error" ? "error" : conn.state === "checking" ? "checking" : "off";
+      pill.setAttribute("title", conn.state === "error" ? (conn.reason || "") : "");
+
+      const collapsed = connected && (phoneSetupDone() || Number(status.picked_up_total) > 0) && !phoneSetupExpanded;
+      show("phoneSummary", collapsed);
+      show("phoneSteps", !collapsed);
+      if (collapsed) {
+        const pickup = status.last_pickup_at ? `Last link picked up ${relayAgo(status.last_pickup_at)}` : "No links picked up yet";
+        const checked = relayAgo(status.last_ok_at || status.last_poll_at) || "just now";
+        relayElement("phoneSummaryText").textContent = `${pickup} · last checked ${checked}`;
+        relayElement("phoneSummaryCheck").disabled = Boolean(status.polling);
+      }
+
+      let part = "locked";
+      let qrUrl = "";
+      if (connected) {
+        if (!phonePairing) { part = "loading"; schedulePhonePairing(); }
+        else if (phonePairing.state === "paired" || (phonePairing.state === "old_relay" && phoneManualPush)) {
+          qrUrl = phonePairingUrl(settings);
+          part = "qr";
+        } else if (phonePairing.state === "old_relay") part = "old";
+        else part = "error";
+      }
+      if (part === "qr") {
+        if (qrUrl !== phoneRenderedUrl || !relayElement("phoneQr").innerHTML) {
+          let svg = "";
+          try { svg = phoneQrSvg(qrUrl); } catch (err) { svg = ""; }
+          if (svg) { relayElement("phoneQr").innerHTML = svg; phoneRenderedUrl = qrUrl; }
+          else {
+            part = "error";
+            relayElement("phoneErrorText").textContent = "Couldn't draw the QR code on this computer. Reload Uoink and try again.";
+          }
+        }
+      } else {
+        relayElement("phoneQr").innerHTML = "";
+        phoneRenderedUrl = "";
+      }
+      if (part === "error" && phonePairing && phonePairing.message) relayElement("phoneErrorText").textContent = phonePairing.message;
+      show("phoneLocked", part === "locked");
+      show("phoneLoading", part === "loading");
+      show("phoneOld", part === "old");
+      show("phoneError", part === "error");
+      show("phoneQrWrap", part === "qr");
+      if (part === "qr" && phonePairing && phonePairing.state === "old_relay") {
+        relayElement("phoneStep3Status").textContent = "If your phone says the page was not found, your relay still needs the update: Render > uoink-relay > Manual Deploy.";
+      }
+    }
+
+    function applyPhonePushToken() {
+      const input = relayElement("phonePushToken");
+      const value = input.value.trim();
+      if (!/^[\x21-\x7e]{32,4096}$/.test(value)) {
+        relayElement("phonePushStatus").textContent = "That doesn't look like RELAY_PUSH_TOKEN. It is at least 32 characters with no spaces.";
+        return;
+      }
+      relayElement("phonePushStatus").textContent = "";
+      phoneManualPush = value;
+      input.value = "";
+      renderPhoneSetup();
+    }
+
+    async function copyPhonePairingLink() {
+      const url = phonePairingUrl();
+      if (!url) return;
+      let ok = false;
+      try { await navigator.clipboard.writeText(url); ok = true; } catch (err) { ok = false; }
+      relayElement("phoneStep3Status").textContent = ok
+        ? "Copied. Anyone with this link can send links to your relay, so share it only with your own phone."
+        : "Couldn't copy. Scan the QR code instead.";
     }
 
     function renderRelaySettings(versions = {}, previous = null) {
@@ -19215,6 +19458,11 @@
       };
       const token = relayElement("relayToken").value.trim();
       if (token) patch.relay_token = token;
+      // First time through the guided steps: saving an address and a token means "turn it on".
+      if (token && patch.relay_url && !patch.relay_enabled && settings.relay_token_set !== true) {
+        patch.relay_enabled = true;
+        relayElement("relayEnabled").checked = true;
+      }
       if (patch.relay_enabled && !patch.relay_url) {
         noteRelayEdit();
         setSettingFeedback("relayUrl", "Not saved: enter the relay address first.", "error");
@@ -19241,6 +19489,7 @@
         relayElement("relayUrl").value = state.settings.relay_url || "";
         relayElement("relayToken").placeholder = state.settings.relay_token_set === true ? "Saved" : "Paste the pull token";
         relayStatusData = null;
+        phonePairing = null;
         renderRelayStatus();
         if (relayReady()) window.setTimeout(loadRelayStatus, 3000);
       });
@@ -19251,6 +19500,12 @@
       for (const id of ["relayEnabled", "relayPollMinutes"]) relayElement(id).addEventListener("change", noteRelayEdit);
       relayElement("relaySave").addEventListener("click", saveRelaySettings);
       relayElement("relayCheck").addEventListener("click", checkRelayNow);
+      relayElement("phoneSummaryCheck").addEventListener("click", () => { if (!relayElement("relayCheck").disabled) checkRelayNow(); });
+      relayElement("phoneShowSetup").addEventListener("click", () => { phoneSetupExpanded = true; renderPhoneSetup(); });
+      relayElement("phoneDone").addEventListener("click", () => { setPhoneSetupDone(true); phoneSetupExpanded = false; renderPhoneSetup(); });
+      relayElement("phoneCopyLink").addEventListener("click", copyPhonePairingLink);
+      relayElement("phonePushApply").addEventListener("click", applyPhonePushToken);
+      relayElement("phoneRetry").addEventListener("click", () => { phonePairing = null; renderPhoneSetup(); });
     }
 
     function wireSettingsAutosave() {
