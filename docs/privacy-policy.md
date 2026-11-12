@@ -205,12 +205,17 @@ Uoink stores the following on your Windows machine:
 - **Library index** — `%LOCALAPPDATA%\Uoink\index.db`. SQLite database with FTS5 search index, taxonomy classifications, entity graph, queue, and corrections. Local-only; never transmitted.
 - **Anthropic API key** — Windows Credential Manager, via Python `keyring`. Service `Uoink` (migrated from the legacy `Yoink` service on first launch), username `anthropic_key`. Never stored in plaintext in any settings file.
 - **ScrapeCreators API key** — Windows Credential Manager, via `keyring`,
-  username `scrapecreators_key` in the same service. Isolated profiles use
-  `Uoink-isolated-<hash>` for both keys, with no fallback to the normal profile.
+  username `scrapecreators_key` in the same service.
 - **Phone inbox pull token** — when you save one, Windows Credential Manager
-  via `keyring`, username `relay_pull_token` in the same service (the isolated
-  service for an isolated profile). `settings.json` keeps only the relay
-  address, the on/off choice and the check interval.
+  via `keyring`, username `relay_pull_token` in the same service.
+  `settings.json` keeps only the relay address, the on/off choice and the
+  check interval.
+- **Isolated test profiles** — keep all three of these in `credentials.json`
+  inside the profile folder, readable only by your account where the system
+  supports it, and never touch Credential Manager. There is no fallback to the
+  normal profile. Before 3.17.0 they used the Credential Manager service
+  `Uoink-isolated-<hash>`. Uoink no longer reads those entries, and you can
+  delete them.
 - **Discovery runs** — `discovery\runs\<YYYY-MM>\<run_id>.json` beneath the
   local data folder. These store the submitted query, handle or channel_id;
   run identity, provider, endpoint, mode, platform and fetch time; credit counts,

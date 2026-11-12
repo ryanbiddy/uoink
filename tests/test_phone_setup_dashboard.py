@@ -337,3 +337,39 @@ return { body: requests[0].body, checked: getEl('relayEnabled').checked };
 })()
 """)
     assert out["body"]["relay_enabled"] is True and out["checked"] is True
+
+
+def test_a_credential_store_that_does_not_answer_shows_in_step_two_and_turns_nothing_on():
+    message = "The system credential store didn't answer. Unlock it or allow access, then select Save again."
+    out = run_js("""
+(async () => {
+globalThis.reply = () => ({ ok: false, code: 'credential_store_unavailable', error: %s });
+state.settings = { relay_token_set: false };
+getEl('relayUrl').value = 'https://my-relay.onrender.com';
+getEl('relayToken').value = 'pull-token-from-render-0123456789abcdef';
+getEl('relayEnabled').checked = false;
+getEl('relayPollMinutes').value = '5';
+const saved = await saveRelaySettings();
+await settingsWriteQueue;
+const failed = { saved, sent: requests[0].body.relay_enabled, status: getEl('relayUrlSaveStatus').textContent,
+  kind: getEl('relayUrlSaveStatus').dataset.state, retry: !hidden('relayUrlSaveRetry'),
+  checked: getEl('relayEnabled').checked, token: getEl('relayToken').value, settings: { ...state.settings } };
+// The user unlocks the store and retries: the same save goes through and the box follows it.
+globalThis.reply = (path, body) => ({ ok: true, settings: { relay_url: body.relay_url, relay_enabled: body.relay_enabled,
+  relay_poll_minutes: body.relay_poll_minutes, relay_token_set: true } });
+await settingEdit('relayUrl').retry();
+await settingsWriteQueue;
+return { failed, retried: { sent: requests[1].body.relay_enabled, status: getEl('relayUrlSaveStatus').textContent,
+  checked: getEl('relayEnabled').checked, token: getEl('relayToken').value } };
+})()
+""" % json.dumps(message))
+    failed, retried = out["failed"], out["retried"]
+    assert failed["saved"] is False and failed["sent"] is True
+    assert failed["status"] == f"Not saved: {message}"
+    assert failed["kind"] == "error" and failed["retry"] is True
+    # Nothing was saved, so the inbox isn't shown as on, and the pasted token
+    # stays in the field for the next Save.
+    assert failed["checked"] is False
+    assert failed["token"] == "pull-token-from-render-0123456789abcdef"
+    assert failed["settings"] == {"relay_token_set": False}
+    assert retried == {"sent": True, "status": "Saved", "checked": True, "token": ""}
