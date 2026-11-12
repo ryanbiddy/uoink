@@ -6687,7 +6687,7 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
             if not _platform.library_mirror_capability()["available"]:
                 result["capabilities"] = _platform.platform_capabilities()
         if isinstance(result, dict) and result.get("ok") is False and isinstance(result.get("error"), str):
-            result["error"] = _PATH_IN_ERROR.sub("<path>", result["error"])
+            result["error"] = _redact_paths(result["error"])
         return result
     except RateLimitExceeded as e:
         if name.startswith("research_"):
@@ -6698,15 +6698,46 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
                     "Check that Uoink is running, then try again.")
 
 
+# Where a local path starts. The lookbehind keeps URLs intact: in
+# "https://example.com/home/x" neither "//" nor "/home/" starts a path.
+# Separators may be doubled (repr() of a Windows path writes "C:\\Users").
+_PATH_START = (
+    r"(?<![\w/.:-])(?:"
+    r"[A-Za-z]:[\\/]+"                      # C:\ or C:/
+    r"|\\{2,}(?=[^\s\\/])"                  # \\server\share (UNC)
+    r"|file:/+"                             # file:///C:/... and file:///Users/...
+    r"|~[\\/]+"                             # ~/Library/...
+    r"|/(?:Users|home|var|tmp|private|opt|etc|mnt|media|root|srv"
+    r"|Applications|Library|Volumes|System)[\\/]+"
+    r")"
+)
+_PATH_SEG = r"[^\s\\/'\"<>|]"
+# Then separator-joined segments. A segment that another separator follows may
+# hold single spaces ("Mary Anne", "Program Files (x86)"); a word after such a
+# space can't hold ":", so "a.db to E:\b" stays two paths. The last segment
+# runs to whitespace and leaves trailing punctuation, so the sentence after
+# the path survives.
+_PATH_BODY = (
+    rf"(?:{_PATH_SEG}+(?:[ ][^\s\\/'\"<>|:]+)*[\\/]+)*"
+    rf"(?:{_PATH_SEG}*[^\s\\/'\"<>|.,;:!?)\]}}])?"
+)
 _PATH_IN_ERROR = re.compile(
-    # The lookbehind keeps URLs intact: "https://" and "example.com/home/" are not paths.
-    r"(?<![\w/.:-])(?:[A-Za-z]:[\\/]|\\\\|/(?:Users|home|var|tmp|private|opt|etc)/)[^\s'\"<>|]*")
+    # A quoted span holding a path ('C:\Users\Mary Anne\x.db', the way repr()
+    # writes one) goes whole, spaces and all. Otherwise the bare path.
+    rf"(?<!\w)(?P<q>['\"])[^'\"\n]*?{_PATH_START}[^\n]{{0,600}}?(?P=q)(?!\w)"
+    rf"|{_PATH_START}{_PATH_BODY}")
+
+
+def _redact_paths(text: str) -> str:
+    return _PATH_IN_ERROR.sub("<path>", text)
 
 
 def _scrub_error_text(value: Any) -> str:
     """One short line for an AI client: no file paths, no traceback lines."""
-    text = " ".join(str(value).split())
-    text = _PATH_IN_ERROR.sub("<path>", text)
+    # Only 200 characters are kept, so a huge exception message is cut first
+    # to keep the path search quick.
+    text = " ".join(str(value)[:4000].split())
+    text = _redact_paths(text)
     return text[:200].rstrip(" .") or "unknown error"
 
 

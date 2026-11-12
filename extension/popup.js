@@ -1209,13 +1209,22 @@ async function initAfterSave() {
     option.value = choice.value;
     select.appendChild(option);
   }
-  select.value = await STC.getAfterSave();
-  hint.textContent = AFTER_SAVE_HINTS[select.value] || "";
-  select.addEventListener("change", async () => {
-    const { value, synced } = await STC.setAfterSave(select.value);
+  // Each pick bumps `picks`. An answer that comes back after a newer pick (or
+  // the first load finishing after the user already picked) is dropped, so a
+  // slow reply never puts an older choice back in the menu.
+  let picks = 0;
+  const show = (value, note) => {
     select.value = value;
-    hint.textContent = (AFTER_SAVE_HINTS[value] || "") + (synced ? "" : " Saved in this browser. The dashboard will match once the helper is running.");
+    hint.textContent = (AFTER_SAVE_HINTS[value] || "") + note;
+  };
+  select.addEventListener("change", async () => {
+    const mine = ++picks;
+    const { value, synced } = await STC.setAfterSave(select.value);
+    if (mine !== picks) return;
+    show(value, synced ? "" : " Saved in this browser. The dashboard will match once the helper is running.");
   });
+  const loaded = await STC.getAfterSave();
+  if (picks === 0) show(loaded, "");
 }
 initAfterSave();
 document.getElementById("research-session").addEventListener("toggle", event => {

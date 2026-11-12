@@ -99,6 +99,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   has a long name. The label ends in an ellipsis and the full name shows on hover. A failed
   capture whose stored error is a script error now says "Something went wrong inside Uoink.
   Try again." instead of showing the raw error.
+- Browser extension: after a save, the YouTube button's hover text no longer names the folder
+  the item went to. YouTube's own page could read that text, and the folder path often holds
+  your account name. It now says "Saved to your library."
 - Command line: `uoink --help` now describes Uoink instead of internals, every command has a
   help line, `uoink serve --help` prints help instead of starting the helper, and an unknown
   command, an empty search, a missing tool name and a stopped helper each say what to do next.

@@ -915,9 +915,21 @@
   }
   // The helper's /settings holds the truth (the dashboard edits it too);
   // chrome.storage.local is a cache so a save never waits on, or breaks without,
-  // the helper. A change made while the helper was unreachable is marked dirty
-  // and pushed on the next read.
+  // the helper. A change the helper hasn't confirmed is marked dirty and pushed
+  // on the next read, and a read never trades a dirty choice for the helper's.
+  // Last pick wins: each change gets a revision (after_save_rev), and a helper
+  // answer clears the dirty mark only while its revision is still the newest.
+  // So Claude then Stay, with Stay's request failing and Claude's succeeding
+  // late, leaves Stay marked dirty instead of letting the helper's Claude win.
   const AFTER_SAVE_DIRTY_KEY = "after_save_dirty";
+  const AFTER_SAVE_REV_KEY = "after_save_rev";
+  // The newest revision this context wrote. Time-based so a popup opened later
+  // never reuses a revision an earlier popup left in storage.
+  let _afterSaveRev = 0;
+  function _nextAfterSaveRev() {
+    _afterSaveRev = Math.max(Date.now(), _afterSaveRev + 1);
+    return _afterSaveRev;
+  }
   function _localGet(defaults) {
     return new Promise((r) => {
       try { chrome.storage.local.get(defaults, (i) => r(i || {})); } catch { r({}); }
@@ -928,35 +940,58 @@
       try { chrome.storage.local.set(items, () => r()); } catch { r(); }
     });
   }
+  function _readAfterSaveCache() {
+    return _localGet({
+      [AFTER_SAVE_KEY]: AFTER_SAVE_DEFAULT, [AFTER_SAVE_DIRTY_KEY]: false, [AFTER_SAVE_REV_KEY]: 0,
+    });
+  }
+  // The helper took `value`, sent at revision `rev`. If that is still the newest
+  // pick, the cache is clean. If a newer pick came since, keep it dirty: this
+  // answer may have landed on the helper after the newer one, so the helper
+  // could hold the older choice now, and the next read pushes the newest again.
+  async function _afterSaveConfirmed(rev, value) {
+    const now = await _readAfterSaveCache();
+    const newest = (Number(now[AFTER_SAVE_REV_KEY]) || 0) === rev && _afterSaveRev <= rev
+      && normalizeAfterSave(now[AFTER_SAVE_KEY]) === value;
+    await _localSet({ [AFTER_SAVE_DIRTY_KEY]: !newest });
+    return newest;
+  }
   async function getAfterSave() {
-    const stored = await _localGet({ [AFTER_SAVE_KEY]: AFTER_SAVE_DEFAULT, [AFTER_SAVE_DIRTY_KEY]: false });
+    const stored = await _readAfterSaveCache();
     const cached = normalizeAfterSave(stored[AFTER_SAVE_KEY]);
+    const rev = Number(stored[AFTER_SAVE_REV_KEY]) || 0;
     try {
       if (stored[AFTER_SAVE_DIRTY_KEY]) {
         const pushed = await updateSettings({ after_save: cached });
-        if (pushed && pushed.ok) await _localSet({ [AFTER_SAVE_DIRTY_KEY]: false });
+        if (pushed && pushed.ok) await _afterSaveConfirmed(rev, cached);
         return cached;
       }
       const res = await getSettings();
       const remote = res && res.ok && res.settings && res.settings.after_save;
       if (typeof remote === "string") {
+        // A pick made while this read was out (the popup) beats the helper's answer.
+        const now = await _readAfterSaveCache();
+        const current = normalizeAfterSave(now[AFTER_SAVE_KEY]);
+        if (now[AFTER_SAVE_DIRTY_KEY] || (Number(now[AFTER_SAVE_REV_KEY]) || 0) !== rev
+          || _afterSaveRev > rev) return current;
         const value = normalizeAfterSave(remote);
-        if (value !== cached) await _localSet({ [AFTER_SAVE_KEY]: value });
+        if (value !== current) await _localSet({ [AFTER_SAVE_KEY]: value });
         return value;
       }
     } catch { /* helper unreachable: use the cache */ }
     return cached;
   }
-  // Returns {value, synced}. synced=false means only this browser has it so far.
+  // Returns {value, synced}. synced=false means the helper doesn't have this
+  // pick yet (unreachable, or a newer pick is still on its way).
   async function setAfterSave(value) {
     const v = normalizeAfterSave(value);
-    await _localSet({ [AFTER_SAVE_KEY]: v, [AFTER_SAVE_DIRTY_KEY]: true });
+    const rev = _nextAfterSaveRev();
+    await _localSet({ [AFTER_SAVE_KEY]: v, [AFTER_SAVE_DIRTY_KEY]: true, [AFTER_SAVE_REV_KEY]: rev });
     let synced = false;
     try {
       const res = await updateSettings({ after_save: v });
-      synced = !!(res && res.ok);
+      if (res && res.ok) synced = await _afterSaveConfirmed(rev, v);
     } catch { synced = false; }
-    if (synced) await _localSet({ [AFTER_SAVE_DIRTY_KEY]: false });
     return { value: v, synced };
   }
   async function isFirstSave() {

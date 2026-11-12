@@ -18,7 +18,7 @@ async function content(platform, options = {}) {
     href,
     onSend: (msg) => {
       if (msg.type === "stcPing") return { ok: options.online !== false };
-      if (CAPTURE_TYPES.has(msg.type)) return { data: CAPTURE };
+      if (CAPTURE_TYPES.has(msg.type)) return { data: options.capture || CAPTURE };
       if (msg.type === "copyToClipboard" && options.copy) return options.copy(msg);
       return { ok: true };
     },
@@ -26,7 +26,7 @@ async function content(platform, options = {}) {
     fetch: (url) => {
       const path = new URL(url).pathname;
       if (path === "/token") return jsonResponse({ token: "synthetic-token" });
-      if (path === "/settings") return jsonResponse({ ok: true, settings: {} });
+      if (path === "/settings") return jsonResponse({ ok: true, settings: options.settings || {} });
       throw new Error(`Unexpected fixture fetch: ${path}`);
     },
   });
@@ -137,6 +137,63 @@ for (const sender of [null, {}, { id: "other-extension" }]) {
     await settle();
     assert.equal(captures(env).length, 0);
   });
+}
+
+// The helper answers a save with its local folder, which often holds the
+// user's account name. The page scripts' button sits in the site's own DOM,
+// where the site's scripts can read every title and text, so the folder must
+// never land there: not in a title, a label, markup or a data attribute.
+const LOCAL_FOLDERS = [
+  "C:\\Users\\SyntheticUser\\Documents\\Uoink\\Tech\\synthetic-saved-folder",
+  "/Users/syntheticuser/Library/Application Support/Uoink/Tech/synthetic-saved-folder",
+];
+const FOLDER_PIECES = ["SyntheticUser", "syntheticuser", "synthetic-saved-folder", "Application Support",
+  "Documents", "C:\\", "/Users/"];
+
+function pageDom(env) {
+  const els = [env.document.head, env.document.body, ...env.document.head._all(), ...env.document.body._all()];
+  return els.map((el) => JSON.stringify({
+    title: el.title, text: el._text, html: el._html, id: el.id,
+    className: el.className, dataset: el.dataset, style: el.style,
+  })).join("\n");
+}
+
+function assertNoFolderInPage(env, label) {
+  const dom = pageDom(env);
+  for (const piece of FOLDER_PIECES) {
+    assert.ok(!dom.includes(JSON.stringify(piece).slice(1, -1)), `${label}: page DOM holds "${piece}"`);
+  }
+}
+
+const SAVE_PATHS = [
+  ["YouTube, Stay on the page", "youtube", { local: { after_save: "stay" } }],
+  ["YouTube, Stay on the page, after the first save", "youtube",
+    { local: { after_save: "stay", has_completed_first_yoink: true } }],
+  ["YouTube, copy then open Claude", "youtube", { local: { after_save: "claude" } }],
+  ["YouTube, copy then open ChatGPT", "youtube", { local: { after_save: "chatgpt" } }],
+  ["YouTube, copy only", "youtube", { local: { after_save: "copy" } }],
+  ["YouTube, screenshot picker", "youtube", { settings: { smart_screenshot_picker_enabled: true } }],
+  ["YouTube, research session add", "youtube",
+    { local: { active_session: { id: "synthetic-session", name: "Research" } } }],
+  ["Reddit", "reddit", {}],
+  ["X article", "article", {}],
+];
+for (const folder of LOCAL_FOLDERS) {
+  for (const [name, platform, options] of SAVE_PATHS) {
+    test(`${name}: the saved folder (${folder.startsWith("/") ? "Mac" : "Windows"}) never reaches the page DOM`, async () => {
+      const capture = { ...CAPTURE, folder, title: "Synthetic title", topic: "Tech" };
+      const { env, btn } = await content(platform, { ...options, capture });
+      btn.userClick();
+      await settle(200);
+      assert.equal(captures(env).length, 1, "the save ran");
+      if (platform === "youtube") assert.match(btn.title, /^Saved to your library\./, "the title still says it saved");
+      assertNoFolderInPage(env, "after the save");
+      // Stay on the page: the second click copies and opens Claude.
+      btn.userClick();
+      await settle(200);
+      assertNoFolderInPage(env, "after the second click");
+    });
+  }
 }
 
 async function worker(options = {}) {
