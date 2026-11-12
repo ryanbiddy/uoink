@@ -49,7 +49,7 @@ this code, rather than a promise of approval.
 | Optional usage counts | Endpoint at `uoink_usage.py:33`, opt-in state at `uoink_usage.py:145`, bounded payload at `uoink_usage.py:350`, POST at `uoink_usage.py:447`. | Listing/form match the live policy's opt-in counts. Do not promise zero network traffic or conflate helper model telemetry with this switch. |
 | Limited Use | Usage counts support product operation; captures serve the disclosed purpose. No ads, sale, creditworthiness use or unrelated extension-data transfer found. Public-policy snapshot: `_scratch/cws/privacy-live.html`. | **Before submission:** publish the affirmative Limited Use statement prepared in `docs/store/privacy-practices.md`. It was absent from the live page. |
 | Store metadata | Existing image files in `docs/store/screenshots/` show July UI; the prior listing said 3.2.8. | Text refreshed for 3.11. Recapture plan in `SCREENSHOTS.md`; old images remain reference-only. |
-| Review authentication | New store ID is loaded at `server.py:360`. Existing public installer predates this work. | **Before submission:** Ryan must create the item, paste its ID and release the matching helper. The health probe alone does not prove capture authentication. |
+| Review authentication | New store ID is loaded at `server.py:360`. Existing public installer predates this work. | **Before submission:** the owner must create the item, paste its ID and release the matching helper. The health probe alone does not prove capture authentication. |
 
 Google's [User Data FAQ](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)
 requires disclosure even for local-only handling. The live

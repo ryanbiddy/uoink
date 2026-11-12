@@ -1,6 +1,6 @@
-# 3.11 submission checklist
+# 3.17.0 submission checklist
 
-The account, fee, upload and submission are Ryan's actions. Start with
+The account, fee, upload and submission are the owner's actions. Start with
 [SUBMIT-NOW.md](SUBMIT-NOW.md) for the click sequence.
 
 ## Prepared in this worktree
@@ -15,23 +15,24 @@ The account, fee, upload and submission are Ryan's actions. Start with
 - [x] Offline Chrome smoke and requested static/security/setup checks recorded.
 - [x] Existing screenshot and tile inventory inspected.
 
-## Ryan's gates before Submit for review
+## Owner's gates before Submit for review
 
 - [ ] Register/pay the one-time developer fee and enable 2-Step Verification.
-- [ ] Create the draft item by uploading `dist/uoink-extension-3.11.0-cws.zip`.
+- [ ] Create the draft item by uploading `dist/uoink-extension-3.17.0-cws.zip`.
 - [ ] **Paste the store ID here:** `extension/store-config.json`, value of
   `chrome_web_store_id`. Keep `chrome_web_store_url` empty until the link is live.
 - [ ] Release a helper containing that config and `uoink_store.py`.
   Public users must get a helper that recognizes the store ID without manual edits.
 - [ ] Confirm the helper download used by setup includes the store ID. The public
-  v3.11.0 installer exists, but it predates this pass; this pass did not replace it.
+  v3.17.0 installer and the setup page's download links are the ones to check.
 - [ ] Verify a real capture and clipboard copy with the store identity in a
   disposable profile, using permitted source material.
 - [ ] Publish the Limited Use statement from `privacy-practices.md` on `/privacy`.
-- [x] Recapture the images in `SCREENSHOTS.md` (3.12.0, 2026-10-31).
+- [x] Capture the setup page and popup images in `SCREENSHOTS.md` (3.17.0, 2026-11-12). Dashboard shots are kept from 3.12.0: check them against the final app.
 - [ ] Upload at least one current shot, in the order `SCREENSHOTS.md` lists.
 - [ ] Verify `hi@uoink.app` receives mail and the support URL works.
 - [ ] Fill out all fields and choose Public or Unlisted distribution.
+- [ ] Keep or delete each "[if shipped]" line in `listing.md` and `permissions-justification.md`.
 - [ ] Paste the reviewer test instructions. Leave usage sharing off for testing.
 - [ ] Submit for review with deferred publication until the helper is ready.
 

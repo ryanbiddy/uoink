@@ -56,7 +56,7 @@ if [[ ! -f extension/setup.js ]]; then
 else
   INSTALLER_LINE="$(grep -n '^const INSTALLER_PUBLISHED' extension/setup.js | head -1)"
   VERSION_FOR_URL="$(tr -d '[:space:]' < VERSION 2>/dev/null || true)"
-  DOWNLOAD_LINE="$(grep -n "download/v${VERSION_FOR_URL}/Uoink-Setup-${VERSION_FOR_URL}\\.exe" extension/setup.js | head -1)"
+  DOWNLOAD_LINE="$(grep -n "PUBLISHED_INSTALLER_VERSION = \"${VERSION_FOR_URL}\"" extension/setup.js | head -1)"
   if [[ -n "$INSTALLER_LINE" ]] && echo "$INSTALLER_LINE" | grep -q 'INSTALLER_PUBLISHED = true'; then
     ok "setup.js: INSTALLER_PUBLISHED = true  ($INSTALLER_LINE)"
   elif [[ -n "$DOWNLOAD_LINE" ]]; then

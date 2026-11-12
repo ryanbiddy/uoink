@@ -13,6 +13,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Library: a "Rediscover" shelf above the list (up to 4 saves picked fresh each day: saved about a week ago, about a month ago, on this day in an earlier year, or never opened) and up to 3 "Idea starters" built from saves that share a topic, with Write from these and Copy prompt. Everything is local, with no network or AI calls. A Settings switch turns both off and each shelf collapses per browser. Uoink now notes when you last opened an item (new `item_opens` table, migration 0034).
+- Chrome Web Store package for 3.17.0 is ready to submit. A store install now opens a setup
+  page that says "Uoink needs its free desktop app", names your system, links the right
+  download (Windows, or Mac with Apple silicon; Intel Macs and Linux get a plain note),
+  waits for the app to start and switches to "Connected" with a first thing to try. Download
+  links go through the same counted redirect as uoink.app. The store docs, listing text,
+  permission notes, reviewer steps and 1280x800 screenshots in `docs/store/` are refreshed,
+  and `node scripts/store_screenshots.mjs <folder>` regenerates the setup and popup shots.
+- `scripts/build_cws.py` refuses any test, mock, source map, key or doc file even if added to
+  its allowlist, and tests check the zip name, contents, receipt and missing `key` field.
 
 ### Fixed
 
