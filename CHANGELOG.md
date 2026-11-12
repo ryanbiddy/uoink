@@ -73,6 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Tray menu Settings opens the dashboard's Settings page, and the command line says "1 result" instead of "1 result(s)".
 - One title limit for every source: titles longer than 300 characters (YouTube, podcasts,
   pages, X, Reddit, imports, notes, images) are cut at a safe point, never inside an emoji or
   accent, and end in an ellipsis. Notes used to cap at 200. Saved items are not rewritten.

@@ -553,7 +553,7 @@ def human(payload, *, index=None):
             return ("No results. Try other words, or run 'uoink recent --text' to see what is saved."
                     if "hits" in payload else
                     "Nothing saved yet. Save a link with: uoink capture <url>")
-        lines = [f"{len(rows)} result(s)"]
+        lines = [f"{len(rows)} {'result' if len(rows) == 1 else 'results'}"]
         for row in rows[:10]:
             row = text_library_row(row, index)
             identity = row.get("item_id") or row.get("video_id") or row.get("slug") or ""

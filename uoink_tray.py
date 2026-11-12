@@ -261,11 +261,9 @@ class UoinkTray:
         self._open_path(self.output_dir)
 
     def _open_settings(self, *_):
-        # Tier 1 fallback: the extension owns the setup page and we don't know
-        # its id from here, and the helper serves no setup.html, so point at the
-        # dashboard (Codex's /dashboard, where settings live). Best-effort.
+        # Open Settings, keeping the query string and replacing any fragment.
         self._touch()
-        webbrowser.open(self.dashboard_url)
+        webbrowser.open(self.dashboard_url.split("#", 1)[0] + "#settings")
 
     def _open_update(self, *_):
         # The update notice and the Check now button live in Settings, App.
