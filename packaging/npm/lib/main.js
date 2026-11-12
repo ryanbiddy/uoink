@@ -675,7 +675,9 @@ async function afterInstall(opts, deps, ui, plan, appDir) {
   ui.say(version ? `Uoink ${version} is installed.` : `Uoink ${plan.version} is installed.`);
   if (status && status.helper_running === false) {
     if (deps.platform === 'darwin') {
-      await deps.capture('/usr/bin/open', ['-a', appDir ? path.dirname(path.dirname(path.dirname(inst.cli))) : 'Uoink']);
+      // Open the bundle installMac just put in place. The CLI found above can
+      // be a symlink elsewhere (~/.local/bin/uoink), so never derive it from that.
+      await deps.capture('/usr/bin/open', ['-a', appDir || 'Uoink']);
       ui.say('Started Uoink (it runs in the menu bar).');
     } else {
       ui.say('Open Uoink from the Start menu to start it.');

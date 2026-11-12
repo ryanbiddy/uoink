@@ -115,6 +115,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `npx uoink update` on a Mac moves the old Uoink.app aside, puts the new one in, and only then
   deletes the old one. If the new one can't go in, the old one is put back, so a failed update
   never leaves you without Uoink.
+- `npx uoink` on a Mac starts the Uoink.app it just installed. When the `uoink` command it found
+  was a link such as `~/.local/bin/uoink`, it used to try to open your home folder instead.
 - The relay phone page test reads the inline script and style with an HTML parser, so it finds
   the tags in any case (clears a CodeQL alert).
 
