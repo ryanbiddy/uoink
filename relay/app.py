@@ -627,7 +627,7 @@ _PHONE_SCRIPT = r"""
     $("sendbtn").disabled = true;
     send({ url: text }, $("result")).then(function (ok) {
       $("sendbtn").disabled = false;
-      if (ok) $("link").value = "";
+      if (ok) { $("link").value = ""; $("sharedbox").hidden = true; }
     });
   });
 
@@ -661,19 +661,26 @@ _PHONE_SCRIPT = r"""
   });
 
   // Android share target: the manifest sends a shared link here as ?url=&text=&title=.
+  // Any web page or message can open /phone?url=... on a paired phone, so a
+  // share is never sent by itself. It fills the box and waits for Send.
   var params = new URLSearchParams(window.location.search);
-  var shared = [params.get("url"), params.get("text"), params.get("title")].filter(function (v) { return v && v.trim(); });
+  var shared = [];
+  ["url", "text", "title"].forEach(function (name) {
+    var value = (params.get(name) || "").trim();
+    if (!value) return;
+    for (var i = 0; i < shared.length; i++) {
+      if (shared[i].indexOf(value) !== -1) return;
+      if (value.indexOf(shared[i]) !== -1) { shared[i] = value; return; }
+    }
+    shared.push(value);
+  });
   if (shared.length) {
     try { window.history.replaceState(null, "", window.location.pathname); } catch (e) {}
-    var body = {};
-    if (params.get("url")) body.url = params.get("url");
-    if (params.get("text")) body.text = params.get("text");
-    if (params.get("title")) body.title = params.get("title");
+    $("link").value = shared.join(" ");
     $("sharedbox").hidden = false;
     if (paired()) {
-      send(body, $("sharedresult"));
+      say($("sharedresult"), "Shared from another app. Send it to Uoink? Check the link below, then tap Send.", "");
     } else {
-      $("link").value = shared.join(" ");
       say($("sharedresult"), "This phone isn't paired yet, so nothing was sent. Scan the QR code in Uoink, then send it from the box below.", "bad");
     }
   }

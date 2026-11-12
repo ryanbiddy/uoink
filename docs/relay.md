@@ -69,7 +69,9 @@ scripts, fonts or analytics and a strict Content Security Policy:
   90 seconds.
 - **Android:** install the page (Chrome menu, **Install app** or **Add to Home
   screen**). It then appears in the share sheet, because its manifest declares
-  a share target. Share a link from any app and pick Uoink.
+  a share target. Share a link from any app and pick Uoink. The page fills in
+  the shared link and sends it only when you tap **Send**, so a link that some
+  other page or message opens on your phone is never sent by itself.
 - **iPhone:** add the page to the Home Screen to paste links quickly. iPhone
   web pages cannot join the Share sheet, so the page also shows a short,
   one-time Shortcut recipe with **Copy address** and **Copy Authorization

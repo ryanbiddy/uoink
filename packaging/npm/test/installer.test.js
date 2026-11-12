@@ -338,6 +338,55 @@ test('--help works and unknown options are rejected', async (t) => {
   assert.equal(await main(['--wat'], s2.deps), 1);
 });
 
+test('mac install: starts the installed app bundle even when the CLI found is a symlink', async (t) => {
+  const DMG = Buffer.from('fake mac disk image bytes '.repeat(50));
+  const rel = await fakeRelease({
+    'Uoink-9.9.9-macos-arm64.dmg': DMG,
+    'SHA256SUMS.txt': Buffer.from(`${sha(DMG)}  Uoink-9.9.9-macos-arm64.dmg\n`),
+  });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, platform: 'darwin', arch: 'arm64', osRelease: '24.1.0' });
+  const home = s.deps.homedir;
+  const appDir = path.join(home, 'Applications', 'Uoink.app');
+  // ~/.local/bin/uoink is a symlink to the app's helper (made by an earlier install).
+  const link = path.join(home, '.local', 'bin', 'uoink');
+  fs.mkdirSync(path.dirname(link), { recursive: true });
+  fs.writeFileSync(link, '#!/bin/sh\n');
+  const helper = path.join(appDir, 'Contents', 'Helpers', 'uoink');
+  const enoent = () => Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+  s.deps.fs = {
+    ...fs,
+    // Never touch this computer's own /Applications: "not writable", and hidden.
+    accessSync: (p, mode) => {
+      if (p === '/Applications') throw Object.assign(new Error('EACCES'), { code: 'EACCES' });
+      return fs.accessSync(p, mode);
+    },
+    statSync: (p, ...rest) => {
+      if (String(p).replace(/\\/g, '/').startsWith('/Applications/')) throw enoent();
+      return fs.statSync(p, ...rest);
+    },
+    realpathSync: (p) => (p === link ? helper : fs.realpathSync(p)),
+  };
+  s.deps.capture = async (cmd, args) => {
+    s.calls.capture.push({ cmd, args });
+    if (cmd === '/usr/bin/hdiutil' && args[0] === 'attach') {
+      fs.mkdirSync(path.join(args[args.indexOf('-mountpoint') + 1], 'Uoink.app', 'Contents'), { recursive: true });
+    }
+    if (cmd === '/usr/bin/ditto') fs.cpSync(args[0], args[1], { recursive: true });
+    if (args.includes('status')) {
+      return { code: 0, stdout: JSON.stringify({ ok: true, version: '9.9.9', helper_running: false }), stderr: '' };
+    }
+    return { code: 0, stdout: '', stderr: '' };
+  };
+  assert.equal(await main(['install', '--version', '9.9.9', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.ok(fs.existsSync(path.join(appDir, 'Contents')), 'the app was installed');
+  const status = s.calls.capture.filter((c) => c.args.includes('status'));
+  assert.ok(status.length > 0 && status.every((c) => c.cmd === link), 'the symlinked CLI is the one found');
+  const opens = s.calls.capture.filter((c) => c.cmd === '/usr/bin/open').map((c) => c.args);
+  assert.deepEqual(opens, [['-a', appDir]], 'opens the bundle, not three folders above the symlink');
+  assert.match(s.out.text(), /Started Uoink/);
+});
+
 // ---- download counter ----
 
 function counterHandler(rel, mode = {}) {
