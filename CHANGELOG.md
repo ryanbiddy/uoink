@@ -123,6 +123,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Security
 
+- Relay phone page: a link with a different key no longer replaces the phone's pairing without asking.
 - The relay phone page no longer sends a shared link by itself. Opening `/phone?url=...` (the
   Android share target) fills the Paste a link box and asks "Shared from another app. Send it
   to Uoink?", and nothing reaches the relay until you tap Send. Before, any page or message
