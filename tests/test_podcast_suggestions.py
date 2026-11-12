@@ -10,6 +10,8 @@ import re
 import sys
 import time
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import pytest
@@ -595,6 +597,62 @@ def test_poll_keeps_the_guid_of_a_saved_episode_already_in_the_library(monkeypat
     plain = next(r for r in podcasts.list_episodes(idx, feed_id=feed["id"]) if r["guid"] == "rss-2")
     assert backend.preflight({**entry, "entry_id": "rss-2", "legacy_episode_id": plain["id"]},
                              source) is None
+
+
+@pytest.mark.parametrize("gate,code,terminal", [
+    ("audio_url", "no_audio_url", True),
+    ("public_url", "validation_error", True),
+    ("media", "media_requires_ffmpeg", True),
+    ("transcription", "missing_transcription_setup", False),
+    ("model", "missing_transcription_setup", False),
+])
+def test_preflight_gates_precede_suggestion_lookup(monkeypatch, idx, tmp_path, gate, code, terminal):
+    idx.close()
+    lookup = Mock(wraps=podcasts.get_episode)
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(podcasts, "get_episode", lookup)
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    monkeypatch.setattr(server._platform, "sys", SimpleNamespace(platform="darwin"))
+    monkeypatch.setattr(server._platform, "mac_bundle_contents", lambda: tmp_path)
+    _transcription_ready(monkeypatch, model=gate != "model")
+    monkeypatch.setattr(server._platform, "media_capability", lambda: {
+        "available": gate != "media", "code": "media_requires_ffmpeg"})
+    monkeypatch.setattr(server.whisper_runner, "is_transcription_available",
+                        lambda: gate != "transcription")
+
+    def check_url(url):
+        if gate == "public_url":
+            raise ss.ServiceError("validation_error", "private address refused")
+        return url
+
+    monkeypatch.setattr(ss, "check_public_http_url", check_url)
+    item = {"legacy_episode_id": 1, "entry_id": "rss-1", "metadata_json": json.dumps({
+        "audio_url": None if gate == "audio_url" else "https://cdn.example.test/e1.mp3"})}
+
+    outcome = server._ServerCaptureBackend().preflight(item, {"kind": "podcast_rss"})
+
+    assert outcome.status == "preflight_failed"
+    assert outcome.code == code and outcome.terminal is terminal
+    lookup.assert_not_called()
+
+
+@pytest.mark.parametrize("index_state", ["closed", "missing_row", "lookup_error"])
+def test_preflight_tolerates_unavailable_episode_lookup(monkeypatch, idx, index_state):
+    _transcription_ready(monkeypatch)
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    monkeypatch.setattr(server._platform, "mac_bundle_contents", lambda: None)
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    lookup = Mock(wraps=podcasts.get_episode)
+    if index_state == "closed":
+        idx.close()
+    elif index_state == "lookup_error":
+        lookup.side_effect = LookupError("episode missing")
+    monkeypatch.setattr(podcasts, "get_episode", lookup)
+    item = {"legacy_episode_id": 1, "entry_id": "rss-1", "metadata_json": json.dumps({
+        "audio_url": "https://cdn.example.test/e1.mp3"})}
+
+    assert server._ServerCaptureBackend().preflight(item, {"kind": "podcast_rss"}) is None
+    lookup.assert_called_once_with(idx, 1)
 
 
 def test_follow_poll_then_save_reuses_the_feed_row(monkeypatch, idx, tmp_path):
