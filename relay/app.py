@@ -526,6 +526,7 @@ _PHONE_SCRIPT = r"""
   "use strict";
   var KEY = "uoink-relay-push-token";
   var memory = "";
+  var pending = "";
   function $(id) { return document.getElementById(id); }
   function read() {
     try { return window.localStorage.getItem(KEY) || memory; } catch (e) { return memory; }
@@ -545,9 +546,19 @@ _PHONE_SCRIPT = r"""
 
   // Take the token out of the address bar at once.
   var fresh = tokenFrom(window.location.hash);
-  if (fresh && validToken(fresh)) write(fresh);
   if (window.location.hash) {
     try { window.history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
+  }
+  if (validToken(fresh)) {
+    var stored = read();
+    if (!stored) {
+      write(fresh);
+    } else if (stored === fresh) {
+      say($("pairresult"), "Already paired", "ok");
+    } else {
+      pending = fresh;
+      say($("pairresult"), "This link would pair this phone with a different key. Pair with the new key?", "");
+    }
   }
 
   var UA = navigator.userAgent || "";
@@ -565,6 +576,8 @@ _PHONE_SCRIPT = r"""
     $("sendcard").hidden = !on;
     $("forget").hidden = !on;
     $("shortcutcopy").hidden = !on;
+    $("pairnotice").hidden = !$("pairresult").textContent;
+    $("pairchoice").hidden = !pending;
   }
 
   function explain(status, data) {
@@ -634,15 +647,31 @@ _PHONE_SCRIPT = r"""
   $("pairform").addEventListener("submit", function (event) {
     event.preventDefault();
     var token = tokenFrom($("pairlink").value);
-    if (!validToken(token)) { say($("pairresult"), "That isn't a pairing link from Uoink.", "bad"); return; }
+    if (!validToken(token)) { say($("pairresult"), "That isn't a pairing link from Uoink.", "bad"); render(); return; }
     write(token);
+    pending = "";
     $("pairlink").value = "";
-    say($("pairresult"), "Paired.", "ok");
+    say($("pairresult"), "Paired with the new key", "ok");
+    render();
+  });
+
+  $("pairnew").addEventListener("click", function () {
+    if (!pending) return;
+    write(pending);
+    pending = "";
+    say($("pairresult"), "Paired with the new key", "ok");
+    render();
+  });
+  $("pairkeep").addEventListener("click", function () {
+    pending = "";
+    say($("pairresult"), "Kept the current key", "ok");
     render();
   });
 
   $("forget").addEventListener("click", function () {
     write("");
+    pending = "";
+    say($("pairresult"), "", "");
     say($("result"), "", "");
     render();
   });
@@ -697,13 +726,17 @@ _PHONE_SCRIPT = r"""
 
 _PHONE_BODY = """<main>
 <div class="top"><h1><span class="mark"></span>Send to Uoink</h1><span class="pill" id="pill">Not paired</span></div>
+<div class="card" id="pairnotice" hidden>
+<p class="result" id="pairresult" role="status"></p>
+<div class="row" id="pairchoice" hidden><button class="primary" id="pairnew" type="button">Pair with new key</button><button id="pairkeep" type="button">Keep current</button></div>
+</div>
 <div class="card" id="unpaired" hidden>
 <h2>Pair this phone</h2>
 <p>Open Uoink on your computer, go to Settings, then Phone inbox, and scan the QR code with this phone's camera. That opens this page with the key it needs.</p>
 <details><summary>Pair with a link instead</summary>
 <form id="pairform"><p class="muted">In Uoink, choose Copy pairing link, send it to this phone and paste it here.</p>
 <input id="pairlink" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Pairing link">
-<div class="row"><button class="primary" type="submit">Pair</button></div><p class="result" id="pairresult" role="status"></p></form></details>
+<div class="row"><button class="primary" type="submit">Pair</button></div></form></details>
 </div>
 <div class="card" id="sharedbox" hidden><h2>Shared link</h2><p class="result" id="sharedresult" role="status"></p></div>
 <div class="card" id="sendcard">

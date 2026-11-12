@@ -104,7 +104,8 @@ def test_phone_page_is_served_with_its_own_strict_csp_and_no_token(relay):
     # No outside scripts, styles, fonts, images or analytics.
     assert not re.search(r'(?:src|href)="https?://', html)
     assert " style=" not in html and " onclick=" not in html
-    for words in ("Paste a link", "Forget this phone", "Add to Home Screen", "Send from the Share sheet"):
+    for words in ("Paste a link", "Forget this phone", "Add to Home Screen", "Send from the Share sheet",
+                  "Pair with new key", "Keep current"):
         assert words in html
     assert "history.replaceState" in html and "localStorage" in html
 
@@ -168,7 +169,10 @@ function el(id) {
     listeners: {}, addEventListener(t, f) { (this.listeners[t] ||= []).push(f); } };
 }
 el('sharedbox').hidden = true;   // hidden in the page's HTML until a share arrives
+el('pairnotice').hidden = true;
+el('pairchoice').hidden = true;
 const storage = Object.assign({}, cfg.storage || {});
+const writes = [];
 const history = [];
 const calls = [];
 const replies = (cfg.replies || []).slice();
@@ -178,7 +182,8 @@ const ctx = {
   window: {
     location: { hash: cfg.hash || '', search: cfg.search || '', pathname: '/phone', origin: 'https://relay.example.test' },
     history: { replaceState: (a, b, url) => history.push(url) },
-    localStorage: { getItem: (k) => (k in storage ? storage[k] : null), setItem: (k, v) => { storage[k] = String(v); },
+    localStorage: { getItem: (k) => (k in storage ? storage[k] : null),
+      setItem: (k, v) => { storage[k] = String(v); writes.push({ key: k, value: String(v) }); },
       removeItem: (k) => { delete storage[k]; } },
     setTimeout: (fn, ms) => setTimeout(fn, Math.min(ms, 5)), clearTimeout,
   },
@@ -192,13 +197,27 @@ const ctx = {
 };
 vm.createContext(ctx);
 vm.runInContext(script, ctx);
+function pairingState() {
+  return { storage: { ...storage }, writes: writes.slice(), pill: el('pill').textContent,
+    pairResult: el('pairresult').textContent, pairNoticeHidden: el('pairnotice').hidden,
+    pairChoiceHidden: el('pairchoice').hidden };
+}
 (async () => {
-  const out = {};
   await new Promise((r) => setTimeout(r, 30));
-  out.history = history; out.storage = storage; out.calls = calls;
-  out.pill = els.pill.textContent; out.unpairedHidden = els.unpaired.hidden; out.sendHidden = els.sendcard.hidden;
+  const out = pairingState();
+  out.history = history; out.calls = calls;
+  out.unpairedHidden = els.unpaired.hidden; out.sendHidden = els.sendcard.hidden;
   out.shared = els.sharedresult && els.sharedresult.textContent; out.link = el('link').value;
   out.sharedHidden = el('sharedbox').hidden; out.callsBeforeSend = calls.slice();
+  if (cfg.pairlink !== undefined) {
+    el('pairlink').value = cfg.pairlink;
+    els.pairform.listeners.submit[0]({ preventDefault() {} });
+    out.afterPaste = pairingState(); out.pairlinkAfter = el('pairlink').value;
+  }
+  if (cfg.pairAction) {
+    els[cfg.pairAction].listeners.click[0]();
+    out.afterPair = pairingState();
+  }
   if (cfg.submit !== undefined || cfg.press) {
     if (cfg.submit !== undefined) el('link').value = cfg.submit;   // press: tap Send on what is already there
     await els.sendform.listeners.submit[0]({ preventDefault() {} });
@@ -212,6 +231,8 @@ vm.runInContext(script, ctx);
 """
 
 TOKEN = "T" * 40
+NEW_TOKEN = "N" * 40
+STORAGE_KEY = "uoink-relay-push-token"
 
 
 def run_page(**cfg):
@@ -229,6 +250,80 @@ def test_page_stores_the_fragment_token_and_clears_the_address_bar():
     assert out["storage"] == {"uoink-relay-push-token": TOKEN}
     assert out["history"] == ["/phone"]          # no #t= left in the address bar
     assert out["pill"] == "Paired" and out["unpairedHidden"] is True and out["sendHidden"] is False
+    assert out["writes"] == [{"key": STORAGE_KEY, "value": TOKEN}]
+    assert out["pairChoiceHidden"] is True and out["calls"] == []
+
+
+def test_page_with_the_same_fragment_token_says_already_paired_without_writing():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + TOKEN)
+    assert out["storage"] == {STORAGE_KEY: TOKEN} and out["writes"] == []
+    assert out["pairResult"] == "Already paired" and out["pairNoticeHidden"] is False
+    assert out["pairChoiceHidden"] is True and out["pill"] == "Paired"
+    assert out["history"] == ["/phone"] and out["calls"] == []
+
+
+def test_page_with_a_different_fragment_token_waits_for_confirmation():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN)
+    assert out["storage"] == {STORAGE_KEY: TOKEN} and out["writes"] == []
+    assert out["pairResult"] == "This link would pair this phone with a different key. Pair with the new key?"
+    assert out["pairNoticeHidden"] is False and out["pairChoiceHidden"] is False
+    assert out["pill"] == "Paired" and out["history"] == ["/phone"] and out["calls"] == []
+
+
+def test_pair_with_new_key_replaces_the_token_only_after_the_tap():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN, pairAction="pairnew",
+                   submit="https://example.com/a")
+    assert out["storage"] == {STORAGE_KEY: TOKEN} and out["writes"] == []
+    after = out["afterPair"]
+    assert after["storage"] == {STORAGE_KEY: NEW_TOKEN}
+    assert after["writes"] == [{"key": STORAGE_KEY, "value": NEW_TOKEN}]
+    assert after["pairResult"] == "Paired with the new key" and after["pairNoticeHidden"] is False
+    assert after["pairChoiceHidden"] is True and after["pill"] == "Paired"
+    assert out["history"] == ["/phone"] and out["callsBeforeSend"] == []
+    assert [call["auth"] for call in out["calls"]] == ["Bearer " + NEW_TOKEN]
+
+
+@pytest.mark.parametrize("action", [None, "pairkeep"])
+def test_pending_or_declined_pairing_keeps_sending_with_the_current_token(action):
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN, pairAction=action,
+                   submit="https://example.com/a")
+    state = out["afterPair"] if action else out
+    assert state["storage"] == {STORAGE_KEY: TOKEN} and state["writes"] == []
+    assert state["pairChoiceHidden"] is bool(action) and state["pill"] == "Paired"
+    assert out["history"] == ["/phone"] and out["callsBeforeSend"] == []
+    assert [call["auth"] for call in out["calls"]] == ["Bearer " + TOKEN]
+
+
+@pytest.mark.parametrize("stored", [None, TOKEN])
+@pytest.mark.parametrize("fragment", ["#t=short", "#t=", "#t=%ZZ", "#t=%00" + TOKEN, "#unrelated"])
+def test_invalid_fragments_are_stripped_without_changing_pairing(stored, fragment):
+    storage = {STORAGE_KEY: stored} if stored else {}
+    out = run_page(storage=storage, hash=fragment, search="?view=pairing")
+    assert out["history"] == ["/phone?view=pairing"]
+    assert out["storage"] == storage and out["writes"] == []
+    assert out["pairChoiceHidden"] is True and out["calls"] == []
+
+
+@pytest.mark.parametrize("stored", [None, TOKEN])
+def test_pasted_pairing_link_stores_the_new_key_on_submit(stored):
+    storage = {STORAGE_KEY: stored} if stored else {}
+    out = run_page(storage=storage, pairlink="https://relay.example.test/phone#t=" + NEW_TOKEN)
+    assert out["storage"] == storage and out["writes"] == []
+    after = out["afterPaste"]
+    assert after["storage"] == {STORAGE_KEY: NEW_TOKEN}
+    assert after["writes"] == [{"key": STORAGE_KEY, "value": NEW_TOKEN}]
+    assert after["pairResult"] == "Paired with the new key" and after["pairNoticeHidden"] is False
+    assert after["pairChoiceHidden"] is True and after["pill"] == "Paired"
+    assert out["pairlinkAfter"] == "" and out["calls"] == []
+
+
+def test_pasting_a_link_clears_any_pending_fragment_key():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN,
+                   pairlink="https://relay.example.test/phone#t=" + TOKEN, pairAction="pairnew")
+    assert out["afterPaste"] == out["afterPair"]
+    assert out["afterPair"]["storage"] == {STORAGE_KEY: TOKEN}
+    assert out["afterPair"]["writes"] == [{"key": STORAGE_KEY, "value": TOKEN}]
+    assert out["history"] == ["/phone"]
 
 
 def test_page_without_a_token_asks_to_pair_and_sends_nothing():
