@@ -22,6 +22,28 @@ const POPUP_SENDER = { id: "test-extension-id", url: "chrome-extension://test-ex
 const CLAUDE = "https://claude.ai/new";
 const CHATGPT = "https://chatgpt.com/";
 
+for (const [label, navigator, shortcut] of [
+  ["Mac userAgentData", { userAgentData: { platform: "macOS" }, platform: "Win32" }, "⌘V"],
+  ["Mac platform fallback", { platform: "MacIntel" }, "⌘V"],
+  ["Mac userAgent fallback", { userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" }, "⌘V"],
+  ["Windows userAgentData", { userAgentData: { platform: "Windows" }, platform: "MacIntel" }, "Ctrl+V"],
+  ["Windows platform fallback", { platform: "Win32" }, "Ctrl+V"],
+  ["Linux", { platform: "Linux x86_64" }, "Ctrl+V"],
+  ["unknown platform", {}, "Ctrl+V"],
+  ["missing navigator", undefined, "Ctrl+V"],
+]) {
+  test(`copied capture paste hint: ${label}`, async () => {
+    const env = makeEnv();
+    env.ctx.navigator = navigator;
+    env.store.local.has_completed_first_yoink = true;
+    env.load("lib/extract.js");
+
+    const message = await env.ctx.STC.buildUoinkedMessage(CAPTURE, true, "copy");
+    assert.ok(message.includes(`Paste with ${shortcut} in Claude or ChatGPT.`), message);
+    assert.ok(!message.includes(shortcut === "⌘V" ? "Ctrl+V" : "⌘V"), message);
+  });
+}
+
 function pathOf(url) { return new URL(url).pathname; }
 
 // A real background.js. copyOk:false makes the offscreen clipboard write fail.

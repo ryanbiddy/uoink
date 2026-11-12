@@ -1,6 +1,8 @@
 """One shared title limit (300 characters), enforced where items are saved."""
+import sys
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -125,3 +127,13 @@ def test_store_boundary_clamps_every_source(idx, name, vid, platform):
     assert len(idx.get_yoink(vid + "y")["title"]) == 300
     idx.upsert_yoink({"video_id": vid + "z", "slug": vid + "z", "title": "", "platform": platform, "yoinked_at": "2026-11-12T00:00:00Z", "corpus_path": "c", "sidecar_path": "s"})
     assert idx.get_yoink(vid + "z")["title"] == ""
+
+
+def test_store_title_limit_survives_provenance_stub(idx, monkeypatch):
+    monkeypatch.setitem(sys.modules, "provenance", SimpleNamespace())
+    idx.upsert_yoink({
+        "video_id": "stubbed", "slug": "stubbed", "title": "T" * 500,
+        "source_type": "youtube", "yoinked_at": "2026-11-12T00:00:00Z",
+        "corpus_path": "c", "sidecar_path": "s",
+    })
+    assert idx.get_yoink("stubbed")["title"] == "T" * 299 + "…"

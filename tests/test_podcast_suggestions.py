@@ -152,6 +152,25 @@ def test_only_topic_words_are_sent_and_calls_are_capped(idx, tmp_path):
     assert "http" not in blob and "vid0000" not in blob
 
 
+@pytest.mark.parametrize("avoid,expected", [
+    ("- pricing\n", ["launch"]),
+    ("- pricing\n- launch\n", []),
+])
+def test_preview_matches_sent_terms_with_avoid_note(idx, tmp_path, avoid, expected):
+    import memory_layer
+
+    _seed_library(idx, tmp_path)
+    memory_layer.set_anchor(idx, "avoid", avoid)
+    preview = suggestions.readiness(idx)
+    fake = Fake({})
+    result = _refresh(idx, tmp_path, fake)
+
+    assert preview["terms"] == expected
+    assert preview["terms"] == [term for term, _ in fake.calls]
+    assert preview["enough"] is bool(expected)
+    assert result["status"] == ("refreshed" if expected else "not_enough")
+
+
 def test_dedupe_dismissed_scoring_order_and_reason(idx, tmp_path):
     _seed_library(idx, tmp_path)
     podcasts.add_feed(idx, "https://feeds.example.test/own.xml")

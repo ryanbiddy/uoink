@@ -1052,7 +1052,8 @@
     const topicLine = realTopic ? `Saved to: ${realTopic}. ` : "";
     const tail = "Comments and any enabled AI analyses will arrive shortly in the saved corpus file.";
     if (copied) {
-      return `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim();
+      const pasteShortcut = _platform() === "mac" ? "⌘V" : "Ctrl+V";
+      return `${topicLine}Paste with ${pasteShortcut} in Claude or ChatGPT. ${tail}`.trim();
     }
     return `${topicLine}Clipboard was blocked. Open the saved file in the uoink folder.`.trim();
   }
