@@ -53,7 +53,7 @@ DEFAULT_AUTHOR = "You"
 MIN_TEXT_CHARS = 1
 # Hard cap so a runaway paste can't blow up the row / FTS entry.
 MAX_TEXT_CHARS = 200_000
-MAX_TITLE_CHARS = 200
+from provenance import MAX_TITLE_CHARS, clamp_title  # one shared title limit (300)
 
 _SLUG_STRIP_RE = re.compile(r"[^a-z0-9]+")
 # Leading markdown heading / quote / list markers to strip when deriving a
@@ -80,9 +80,7 @@ def derive_title(text: str) -> str:
     for raw_line in (text or "").splitlines():
         line = _LEAD_MARKER_RE.sub("", raw_line).strip()
         if line:
-            if len(line) > MAX_TITLE_CHARS:
-                line = line[:MAX_TITLE_CHARS].rstrip() + "..."
-            return line
+            return clamp_title(line)
     return "Untitled note"
 
 
@@ -101,8 +99,7 @@ def build_note(text: str, title: str | None = None,
         body = body[:MAX_TEXT_CHARS]
 
     clean_title = (title or "").strip()
-    if len(clean_title) > MAX_TITLE_CHARS:
-        clean_title = clean_title[:MAX_TITLE_CHARS].rstrip() + "..."
+    clean_title = clamp_title(clean_title)
     if not clean_title:
         clean_title = derive_title(body)
 

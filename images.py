@@ -61,7 +61,7 @@ DEFAULT_AUTHOR = "You"
 # out through the /file route without hitting its own cap.
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 MIN_IMAGE_BYTES = 8  # smaller than any real header -> not an image
-MAX_TITLE_CHARS = 200
+from provenance import MAX_TITLE_CHARS, clamp_title  # one shared title limit (300)
 MAX_CAPTION_CHARS = 20_000
 
 # The only formats we accept, keyed by the extension we write on disk. Kept in
@@ -119,14 +119,10 @@ def derive_title(caption: str | None, filename: str | None) -> str:
     for raw_line in (caption or "").splitlines():
         line = _LEAD_MARKER_RE.sub("", raw_line).strip()
         if line:
-            if len(line) > MAX_TITLE_CHARS:
-                line = line[:MAX_TITLE_CHARS].rstrip() + "..."
-            return line
+            return clamp_title(line)
     stem = Path((filename or "").strip()).stem.strip()
     if stem:
-        if len(stem) > MAX_TITLE_CHARS:
-            stem = stem[:MAX_TITLE_CHARS].rstrip() + "..."
-        return stem
+        return clamp_title(stem)
     return "Saved image"
 
 

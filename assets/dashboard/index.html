@@ -4486,6 +4486,12 @@
         grid-column: 2;
         justify-content: flex-start;
       }
+      /* Single column: the actions wrap onto their own row. A hover-hidden
+         row still takes that height and left a blank gap under every card
+         in a hover-capable narrow window, so show it always here. */
+      .uoink-card .row-actions {
+        opacity: 1;
+      }
       .library-head h1,
       #tab-yoink h1 {
         font-size: 26px;
@@ -6025,7 +6031,7 @@
             <div class="eyebrow">Your own words</div>
             <h2>Jot a note</h2>
             <p class="universal-lede">Write a thought, a musing, a reminder to yourself. It lands in your corpus like anything else, authored by You, queryable by you and your AI. Markdown works.</p>
-            <input class="field" id="noteTitleInput" type="text" autocomplete="off" placeholder="Title (optional, we'll use your first line)" aria-label="Note title">
+            <input class="field" id="noteTitleInput" type="text" maxlength="300" autocomplete="off" placeholder="Title (optional, we'll use your first line)" aria-label="Note title">
             <textarea class="field note-capture-text" id="noteTextInput" rows="5" placeholder="What's on your mind?" aria-label="Note text" aria-describedby="noteCaptureNote"></textarea>
             <div class="universal-capture-row">
               <button class="button" type="button" id="noteSaveButton" disabled>Save note</button>
@@ -13605,7 +13611,7 @@
             <span class="source-type-chip">${sourceType}</span>
           </div>
           <div class="row-body" title="${title}">
-            <div class="card-title">${title}</div>
+            <div class="card-title" title="${title}">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
@@ -14354,7 +14360,7 @@
         <article class="capture-row" data-capture-key="${htmlEscape(item.key)}">
           <div class="row-thumb" aria-hidden="true"><span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
           <div class="row-body">
-            <div class="card-title">${htmlEscape(item.title)}</div>
+            <div class="card-title" title="${htmlEscape(item.title)}">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
             <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${item.detail ? `<span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span>` : ""}</div>
             ${renderErrorDetails(item.errorDetail)}
