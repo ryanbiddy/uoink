@@ -22,6 +22,13 @@
     .setup-progress { display: flex; gap: 24px; padding: 0; margin: 24px 0 0; list-style: none; }
     .setup-progress a { display: flex; align-items: center; min-height: 44px; gap: 8px; color: var(--text-2); text-decoration: none; border-bottom: 2px solid var(--line); }
     .setup-progress a[aria-current="step"] { color: var(--text); border-color: var(--action); font-weight: 600; }
+    .funnel { margin: 24px 0 0; padding: 20px 24px; border: 1px solid var(--line); border-left: 4px solid var(--action); border-radius: var(--radius-input); background: var(--surface); }
+    .funnel[data-state="connected"] { border-left-color: var(--ok); }
+    .funnel h2 { margin: 0 0 4px; }
+    .funnel p { margin: 4px 0 8px; overflow-wrap: anywhere; }
+    .funnel ol { margin: 8px 0 0; padding-left: 20px; }
+    .funnel li { margin: 4px 0; overflow-wrap: anywhere; }
+    .funnel-os { display: inline-block; margin: 0 0 8px; padding: 2px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); color: var(--text-2); font-size: 13px; }
     .step { border-bottom: 1px solid var(--line); padding: 28px 0; scroll-margin-top: 24px; }
     .step-heading { display: grid; grid-template-columns: 44px 1fr; align-items: baseline; }
     .step-number { color: var(--text-2); font-size: 14px; font-weight: 600; }
@@ -83,10 +90,16 @@
         <p>Open <code>chrome://extensions</code>, turn on Developer mode, click <strong>Load unpacked</strong>, and select the helper's <code>extension</code> folder. Use one copy of Uoink at a time.</p>
       </details>
     </div>
+    <div id="funnel" class="funnel" data-state="checking" role="group" aria-labelledby="funnel-title" aria-live="polite">
+      <span id="funnel-os" class="funnel-os" hidden></span>
+      <h2 id="funnel-title">Checking for Uoink</h2>
+      <p id="funnel-body" class="secondary">Looking for the Uoink app on this computer.</p>
+      <ol id="funnel-next" class="secondary" hidden></ol>
+    </div>
     <p id="settings-moved" class="notice" hidden>Settings now live in the dashboard. <a id="settings-destination" href="http://127.0.0.1:5179/dashboard#settings/capture" target="_blank" rel="noopener">Open dashboard Settings</a>.</p>
     <nav aria-label="Setup steps">
       <ol class="setup-progress">
-        <li><a id="progress-install" href="#install" aria-current="step"><span aria-hidden="true">1</span> Install</a></li>
+        <li id="progress-install-item"><a id="progress-install" href="#install" aria-current="step"><span aria-hidden="true">1</span> Install</a></li>
         <li><a id="progress-verify" href="#verify"><span aria-hidden="true">2</span> Verify</a></li>
         <li><a id="progress-capture" href="#first-capture"><span aria-hidden="true">3</span> First capture</a></li>
       </ol>
@@ -97,7 +110,7 @@
         <p>The helper runs on your computer and saves captures to your local library.</p>
         <p id="install-instructions" class="secondary">Download the Windows installer, open it, and follow the installation steps.</p>
         <div class="actions">
-          <a id="download-btn" class="button primary" data-win-only href="https://github.com/ryanbiddy/uoink/releases/download/v3.16.3/Uoink-Setup-3.16.3.exe" target="_blank" rel="noopener">Download for Windows</a>
+          <a id="download-btn" class="button primary" data-win-only href="https://usage.uoink.app/get/windows?v=3.16.3" target="_blank" rel="noopener">Download for Windows</a>
           <a id="manual-install" class="button" href="https://github.com/ryanbiddy/uoink/blob/main/REQUIREMENTS.md" target="_blank" rel="noopener" hidden>Manual install instructions</a>
           <a id="skip-install" href="#verify">Already installed? Verify</a>
         </div>

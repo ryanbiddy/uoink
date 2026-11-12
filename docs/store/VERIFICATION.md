@@ -1,5 +1,10 @@
 # Build and verification receipt
 
+> Historical: this receipt is the 2026-10-24 build of 3.11.0 and is kept for its
+> method. The receipt for the current zip is printed by `python scripts/build_cws.py`
+> (path, size, SHA-256, file list) and written next to the zip as
+> `dist/uoink-extension-<VERSION>-cws.contents.json`.
+
 Prepared on 2026-10-24 in `feat/cws-ready`. No commits, pushes, ref changes,
 account creation, uploads or submissions. Release version fields remain 3.11.0.
 
@@ -131,6 +136,6 @@ The test exposed an offscreen-document startup race. Callers now share the
 lookup and creation promise and wait until the document is ready. The final
 browser run and regression test passed after that fix.
 
-Successful capture with a store identity remains a release check after Ryan
+Successful capture with a store identity remains a release check after the owner
 creates the draft and includes its ID in the helper. This pass did not run the
-public installer, use Ryan's library, or invent replacement store screenshots.
+public installer, use the owner's library, or invent replacement store screenshots.

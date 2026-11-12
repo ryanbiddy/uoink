@@ -4,14 +4,20 @@
 const SERVER = "http://127.0.0.1:5179";
 const POLL_MS = 2000;
 const HEARTBEAT_MS = 10000;
-// Release download target; 3.16.3, its GitHub release and uoink.app go live together.
+// The one version constant for download links. Bump it when a release is
+// published; the Mac DMG and the Windows installer ship together. Set
+// PUBLISHED_MAC_DMG to "" to fall back to the manual Mac instructions.
 const PUBLISHED_INSTALLER_VERSION = "3.16.3";
-// Version of the published Mac DMG (Uoink-<version>-macos-arm64.dmg). Empty
-// until that release asset exists; bump it with PUBLISHED_INSTALLER_VERSION.
-const PUBLISHED_MAC_DMG = "3.16.3";
+const PUBLISHED_MAC_DMG = PUBLISHED_INSTALLER_VERSION;
+// Same tracked redirect the uoink.app buttons use (it counts downloads without
+// IP addresses or cookies, then sends the visitor to the GitHub release asset).
+const GET_BASE = "https://usage.uoink.app/get";
 const RUNNING_COPY = { win: "Running on this PC", mac: "Running on this Mac", linux: "Running on this computer" };
 const $ = (id) => document.getElementById(id);
 let platformOs = "win";
+let platformArch = "";
+let funnelState = "checking";
+let downloadClicked = false;
 let helperUp = false;
 let pollTimer = null;
 let probe = null;
@@ -34,26 +40,92 @@ async function showStoreInstall() {
   $("store-install").hidden = false;
 }
 
-function setPlatform(os) {
+function downloadUrl(os) {
+  return `${GET_BASE}/${os === "mac" ? "mac" : "windows"}?v=${os === "mac" ? PUBLISHED_MAC_DMG : PUBLISHED_INSTALLER_VERSION}`;
+}
+
+// Chrome reports "arm" for Apple silicon and "x86-64" for Intel.
+function isIntelMac() { return platformOs === "mac" && /^x86/i.test(platformArch); }
+
+function setPlatform(os, arch) {
   const value = String(os || "").toLowerCase();
   platformOs = /^(mac|darwin)/.test(value) ? "mac" : /^(linux|cros|openbsd)/.test(value) ? "linux" : "win";
+  if (arch !== undefined) platformArch = String(arch || "");
   document.body.dataset.platform = platformOs;
   const windows = platformOs === "win";
-  const macDownload = platformOs === "mac" && PUBLISHED_MAC_DMG !== "";
+  const macDownload = platformOs === "mac" && PUBLISHED_MAC_DMG !== "" && !isIntelMac();
   $("download-btn").hidden = !windows && !macDownload;
   $("manual-install").hidden = windows || macDownload;
-  const installerName = `Uoink-Setup-${PUBLISHED_INSTALLER_VERSION}.exe`;
-  $("download-btn").href = `https://github.com/ryanbiddy/uoink/releases/download/v${PUBLISHED_INSTALLER_VERSION}/${installerName}`;
+  $("download-btn").href = downloadUrl("win");
+  $("download-btn").textContent = "Download for Windows";
   if (macDownload) {
-    $("download-btn").href = `https://github.com/ryanbiddy/uoink/releases/download/v${PUBLISHED_MAC_DMG}/Uoink-${PUBLISHED_MAC_DMG}-macos-arm64.dmg`;
+    $("download-btn").href = downloadUrl("mac");
     $("download-btn").textContent = "Download for Mac";
   }
   $("install-instructions").textContent = windows
     ? "Download the Windows installer, open it, and follow the installation steps. Agent connections include all 99 Uoink tools."
     : macDownload
       ? "Download Uoink for Mac (Apple silicon), open it, and drag Uoink to Applications. Then open Uoink from Applications."
-      : `No ${platformOs === "mac" ? "Mac" : "Linux"} download is published yet. Use the manual install instructions.`;
+      : isIntelMac()
+        ? "The Mac app is built for Apple silicon (M1 or newer) and does not run on Intel Macs. Use the manual install instructions."
+        : `No ${platformOs === "mac" ? "Mac" : "Linux"} download is published yet. Use the manual install instructions.`;
   if (!helperUp && $("status-block").dataset.state === "down") $("status-instructions").textContent = helperOfflineDetail();
+  renderFunnel();
+}
+
+// Store-first funnel. States: checking (first probe pending), needs-app (helper
+// not found), connecting (the download was started, waiting for the helper) and
+// connected. Pure rendering from helperUp, probeDone and downloadClicked.
+function funnelCopy() {
+  const where = { win: "this PC", mac: "this Mac", linux: "this computer" }[platformOs];
+  const why = "Uoink saves transcripts to your own disk, so it needs a small app on your computer. It is free and has no account.";
+  if (funnelState === "connected") {
+    return { title: "Connected", body: `Uoink is running on ${where}. Your captures save to your own library on this computer.`,
+      next: ["Open any YouTube video and click the Uoink button, or paste a link in step 3 below.", "Your saved video shows up in the Library with its transcript."] };
+  }
+  if (funnelState === "connecting") {
+    const how = platformOs === "mac" ? "Open the downloaded file, drag Uoink to Applications, then open Uoink."
+      : "Open the installer you just downloaded and finish it. Uoink starts when it is done.";
+    return { title: "Waiting for Uoink to start", body: why, next: [how, "This page connects by itself. You do not need to refresh."] };
+  }
+  if (funnelState === "checking") return { title: "Checking for Uoink", body: "Looking for the Uoink app on this computer.", next: [] };
+  const intel = isIntelMac();
+  const unsupported = intel || platformOs === "linux";
+  return {
+    title: "Uoink needs its free desktop app",
+    body: why,
+    next: unsupported
+      ? [intel ? "This Mac has an Intel chip. The Mac app is built for Apple silicon (M1 or newer), so there is no download for it yet."
+          : "There is no Linux installer. Linux users can run the helper from source.",
+        "Use the manual install instructions below. This page connects once the helper is running."]
+      : ["Download the app and open it.", "Come back to this tab. It connects by itself and shows what to try first."],
+  };
+}
+
+function renderFunnel() {
+  const copy = funnelCopy();
+  document.body.dataset.funnel = funnelState;
+  $("funnel").dataset.state = funnelState;
+  $("funnel-title").textContent = copy.title;
+  $("funnel-body").textContent = copy.body;
+  const list = $("funnel-next");
+  list.replaceChildren();
+  for (const line of copy.next) {
+    const li = document.createElement("li");
+    li.textContent = line;
+    list.appendChild(li);
+  }
+  list.hidden = !copy.next.length;
+  const connected = funnelState === "connected";
+  $("install").hidden = connected;
+  $("progress-install-item").hidden = connected;
+  $("funnel-os").hidden = connected || funnelState === "checking";
+  $("funnel-os").textContent = { win: "Windows 10 or 11", mac: isIntelMac() ? "Mac with an Intel chip" : "Mac with Apple silicon", linux: "Linux" }[platformOs];
+}
+
+function setFunnel(helperAnswered) {
+  funnelState = helperAnswered ? "connected" : downloadClicked ? "connecting" : "needs-app";
+  renderFunnel();
 }
 
 function helperOfflineDetail() {
@@ -111,7 +183,8 @@ function showConnection(up) {
   $("status-text").textContent = up ? RUNNING_COPY[platformOs] : "Uoink is offline";
   $("status-instructions").textContent = up ? "Connected. You can start your first capture." : helperOfflineDetail();
   if (!up) $("diagnose").hidden = true;
-  markCurrent(up ? "capture" : "verify");
+  setFunnel(up);
+  markCurrent(up ? "capture" : funnelState === "needs-app" ? "install" : "verify");
   renderAvailability();
 }
 
@@ -273,6 +346,10 @@ $("skip-install").addEventListener("click", (event) => {
   checkConnection(true);
 });
 $("verify-btn").addEventListener("click", () => checkConnection(true));
+$("download-btn").addEventListener("click", () => {
+  downloadClicked = true;
+  if (!helperUp) setFunnel(false);
+});
 $("uoink-suggested-btn").addEventListener("click", startFirstCapture);
 $("first-capture-url").addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.isComposing) startFirstCapture();
@@ -295,7 +372,8 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("hashchange", applySource);
 setPlatform("win");
-chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os));
+renderFunnel();
+chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os, info && info.arch));
 applySource();
 showStoreInstall();
 checkConnection();

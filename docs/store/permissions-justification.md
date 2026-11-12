@@ -1,4 +1,4 @@
-# Permission justifications for 3.12
+# Permission justifications for 3.17.0
 
 Paste each paragraph into the matching Privacy practices field. All eight
 API permissions remain because they have live callers. Three unused host
@@ -16,6 +16,8 @@ Writes the capture the user requested to the clipboard, including its text and s
 ## notifications
 
 Shows the result of a user-requested capture or copy, including failures and an unavailable helper. Notifications do not contain advertising. Queued jobs do not trigger desktop notifications.
+
+[if shipped] A finished save can show a notification with two buttons, "Copy for Claude" and "Copy for ChatGPT". Pressing one copies that capture to the clipboard (using the clipboardWrite permission below) and, only if the user chose that in the "After a save" setting, opens Claude or ChatGPT in a new tab. Nothing is pasted or submitted for the user. The buttons use the same notifications permission and send no data anywhere. Delete this paragraph if the buttons are cut.
 
 ## storage
 
@@ -36,6 +38,14 @@ Runs bundled code to read a selected page's feed links or preview metadata, and 
 ## offscreen
 
 Creates a packaged offscreen document so capture work in the Manifest V3 service worker can write to the clipboard. The same document checks the browser's color-scheme preference. It does not load a remote document.
+
+## Coverage check (every manifest permission)
+
+`extension/manifest.json` lists eight API permissions: alarms, clipboardWrite,
+notifications, storage, contextMenus, activeTab, scripting and offscreen. Each has
+a paragraph above. `tests/test_cws_release.py` fails if a permission is added to
+the manifest without a heading here. The host permissions are explained next.
+No `<all_urls>`, tabs, cookies, history or downloads permission is requested.
 
 ## Host permissions
 

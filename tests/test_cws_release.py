@@ -1,6 +1,7 @@
 """Store packaging and link switches; temporary files only, no helper or network."""
 import importlib.util
 import json
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -106,3 +107,72 @@ def test_store_ui_behaviour():
     result = subprocess.run(["node", "tests/js/cws_store_links_test.mjs"], cwd=ROOT,
                             capture_output=True, text=True, encoding="utf-8", timeout=30)
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_zip_is_clean_named_for_version_and_receipt_matches(release):
+    builder = script("build_cws")
+    version = (release / "VERSION").read_text().strip()
+    archive = builder.build(release)
+    assert archive.name == f"uoink-extension-{version}-cws.zip"
+    with zipfile.ZipFile(archive) as z:
+        names = z.namelist()
+        manifest = json.loads(z.read("manifest.json"))
+        source_key = json.loads((release / "extension/manifest.json").read_text())["key"]
+        assert "key" not in manifest and source_key not in z.read("manifest.json").decode()
+        assert manifest["version"] == version and manifest["manifest_version"] == 3
+        assert not [n for n in names if builder.FORBIDDEN.search(n)], names
+        assert not [n for n in names if re.search(r"(^|/)(tests?|mocks?)(/|$)|\.map$|\.pem$|\.md$", n)]
+        assert "setup.html" in names and "setup.js" in names
+        sizes = {i.filename: i.file_size for i in z.infolist()}
+    receipt = json.loads(archive.with_suffix(".contents.json").read_text())
+    assert receipt["version"] == version and receipt["bytes"] == archive.stat().st_size
+    assert {f["path"]: f["bytes"] for f in receipt["files"]} == sizes
+    lines = builder.report(archive)
+    assert lines[0] == str(archive) and lines[1] == f"{archive.stat().st_size:,} bytes"
+    assert len(lines) == 3 + len(names)
+
+
+def test_build_refuses_a_forbidden_name_even_if_allowlisted(release, monkeypatch):
+    builder = script("build_cws")
+    monkeypatch.setattr(builder, "ALLOWLIST", builder.ALLOWLIST | {"lib/popup.test.js"})
+    with pytest.raises(ValueError, match="test, mock"):
+        builder.build(release)
+
+
+def test_store_docs_name_one_version_that_is_not_older_than_version_file():
+    def parse(v):
+        return tuple(int(x) for x in v.split("."))
+    current = parse((ROOT / "VERSION").read_text().strip())
+    submit = (ROOT / "docs/store/SUBMIT-NOW.md").read_text(encoding="utf-8")
+    found = set(re.findall(r"uoink-extension-(\d+\.\d+\.\d+)-cws\.zip", submit))
+    found |= set(re.findall(r"Submit Uoink (\d+\.\d+\.\d+) to the Chrome Web Store", submit))
+    found |= set(re.findall(r"detected name is \*\*Uoink\*\*, version \*\*(\d+\.\d+\.\d+)\*\*", submit))
+    assert len(found) == 1, f"SUBMIT-NOW.md names more than one version: {sorted(found)}"
+    # VERSION may still be the previous release before the owner bumps it for 3.17.0.
+    assert parse(found.pop()) >= current, "SUBMIT-NOW.md is older than VERSION"
+    for name in ("README.md", "SUBMISSION-CHECKLIST.md", "listing.md", "permissions-justification.md", "SCREENSHOTS.md"):
+        text = (ROOT / "docs/store" / name).read_text(encoding="utf-8")
+        first = text.splitlines()[0]
+        assert "3.12 " not in first and "3.11 " not in first, name
+
+
+def test_every_manifest_permission_is_justified_for_the_store():
+    manifest = json.loads((ROOT / "extension/manifest.json").read_text(encoding="utf-8"))
+    text = (ROOT / "docs/store/permissions-justification.md").read_text(encoding="utf-8")
+    headings = set(re.findall(r"^## (\w+)$", text, re.M))
+    missing = [p for p in manifest["permissions"] if p not in headings]
+    assert not missing, f"permissions-justification.md has no section for {missing}"
+    for host in manifest["host_permissions"]:
+        assert host in text or host.replace("https://*.", "https://*.") in text, host
+
+
+def test_store_screenshots_are_1280x800_and_listed():
+    import struct
+    shots = sorted((ROOT / "docs/store/screenshots").glob("*.png"))
+    listing = (ROOT / "docs/store/SCREENSHOTS.md").read_text(encoding="utf-8")
+    assert len(shots) >= 5
+    for path in shots:
+        data = path.read_bytes()
+        assert data[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10]), path.name
+        assert struct.unpack(">II", data[16:24]) == (1280, 800), path.name
+        assert path.name in listing, f"{path.name} is not described in SCREENSHOTS.md"

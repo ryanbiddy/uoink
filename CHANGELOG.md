@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Chrome Web Store package for 3.17.0 is ready to submit. A store install now opens a setup
+  page that says "Uoink needs its free desktop app", names your system, links the right
+  download (Windows, or Mac with Apple silicon; Intel Macs and Linux get a plain note),
+  waits for the app to start and switches to "Connected" with a first thing to try. Download
+  links go through the same counted redirect as uoink.app. The store docs, listing text,
+  permission notes, reviewer steps and 1280x800 screenshots in `docs/store/` are refreshed,
+  and `node scripts/store_screenshots.mjs <folder>` regenerates the setup and popup shots.
+- `scripts/build_cws.py` refuses any test, mock, source map, key or doc file even if added to
+  its allowlist, and tests check the zip name, contents, receipt and missing `key` field.
+
 ### Fixed
 
 - Dashboard on a phone: a long error message or source address no longer stretches the

@@ -45,25 +45,18 @@ def test_setup_page_points_to_the_verified_published_installer() -> None:
         f'const PUBLISHED_INSTALLER_VERSION = "{PUBLISHED_VERSION}";'
     )
     assert declaration in script
+    # Downloads go through the same counted redirect uoink.app uses.
+    assert 'const GET_BASE = "https://usage.uoink.app/get";' in script
     assert (
-        "const installerName = "
-        "`Uoink-Setup-${PUBLISHED_INSTALLER_VERSION}.exe`;"
+        "`${GET_BASE}/${os === \"mac\" ? \"mac\" : \"windows\"}"
+        "?v=${os === \"mac\" ? PUBLISHED_MAC_DMG : PUBLISHED_INSTALLER_VERSION}`"
     ) in script
     assert (
-        "`https://github.com/ryanbiddy/uoink/releases/download/"
-        "v${PUBLISHED_INSTALLER_VERSION}/${installerName}`"
-    ) in script
-    assert (
-        f'href="https://github.com/ryanbiddy/uoink/releases/download/'
-        f'v{PUBLISHED_VERSION}/{PUBLISHED_ASSET}"'
+        f'href="https://usage.uoink.app/get/windows?v={PUBLISHED_VERSION}"'
     ) in html
     assert "data-win-only" in html
-    # The Mac DMG ships in the same release as the installer.
-    assert f'const PUBLISHED_MAC_DMG = "{PUBLISHED_VERSION}";' in script
-    assert (
-        "`https://github.com/ryanbiddy/uoink/releases/download/"
-        "v${PUBLISHED_MAC_DMG}/Uoink-${PUBLISHED_MAC_DMG}-macos-arm64.dmg`"
-    ) in script
+    # The Mac DMG ships in the same release as the installer: one constant.
+    assert "const PUBLISHED_MAC_DMG = PUBLISHED_INSTALLER_VERSION;" in script
     assert "Uoink-Setup-3.2.2.exe" not in script + html
 
 

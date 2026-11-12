@@ -38,3 +38,18 @@ NASA host were added to the page allowlist, which is the same step a user
 takes the first time they save a page from a site. The profile's topic list
 was set to two topics, "Moon and tides" and "Photosynthesis", before capture,
 through the same `/settings` save that the Settings topics editor uses.
+
+## 3.17.0 additions (2026-11-12)
+
+Shots 04 and 06 to 09 and `09-popup-offline` use mock data made by
+`scripts/store_screenshots.mjs`, not a real library. They show:
+
+- "The Origin of the Moon - OpenStax" (Introduction to Astronomy, CC BY on
+  YouTube, https://www.youtube.com/watch?v=V9w3Fhh9BkM) and "Phases of the Moon -
+  OER" (Center for eLearning, FSCJ, CC BY, https://www.youtube.com/watch?v=4kDqdNTBJL0)
+  as saved items.
+- "Lesson 9 - Lecture 4 - Mercury - OpenStax" (CC BY,
+  https://www.youtube.com/watch?v=Gg7QsqdoZbg) as the current tab, with its YouTube
+  thumbnail.
+
+The setup shots show only the extension's own page and no saved sources.
