@@ -1,8 +1,12 @@
 // Uoink — content script.
 // Injects an Uoink button under the YouTube player (alongside Like / Share /
 // Download) that POSTs the current video URL to the local helper server,
-// copies the returned markdown to the clipboard, and opens claude.ai in a
-// new tab.
+// which saves it to the local library. What happens next follows the
+// "After a save" setting (chrome.storage.local `after_save`):
+//   stay (default) -- nothing is copied or opened; the notification offers
+//                     Copy for Claude / Copy for ChatGPT buttons
+//   claude / chatgpt -- copy the markdown, then open that site in a new tab
+//   copy -- copy only
 //
 // Network/storage logic lives in lib/extract.js (exposed as window.STC) and
 // is shared with background.js.
@@ -30,6 +34,8 @@
   const SHORTS_FLOATING_CLASS = "stc-yt-shorts-floating";
   const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
   const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
+  // How long the button offers "Copy for Claude" after a save (Stay on the page).
+  const AFTER_SAVE_WINDOW_MS = 8000;
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
@@ -445,7 +451,37 @@
     resetButtonAfter(btn, 5000);
   }
 
+  // The button after a "Stay on the page" save: copy the item, open Claude.
+  async function copyPendingForClaude(btn) {
+    const pending = btn._afterSavePending;
+    btn._afterSavePending = null;
+    if (!pending || pending.expires < Date.now()) {
+      setButtonState(btn, "default", defaultLabel());
+      return;
+    }
+    rememberClipboardBudget(pending.data, pending.text);
+    let copied = false;
+    try {
+      const response = await chrome.runtime.sendMessage({ type: "copyToClipboard", text: pending.text });
+      copied = !!(response && response.ok === true);
+    } catch (e) {
+      console.warn("[Uoink] extension clipboard copy failed", e);
+    }
+    if (!copied) {
+      try { await chrome.runtime.sendMessage({ type: "clipboardRetry", text: pending.text }); } catch { /* ignore */ }
+      setButtonState(btn, "error", "Copy blocked");
+      btn.title = "Couldn't copy to clipboard. Use the notification's Try again button.";
+      resetButtonAfter(btn, 5000);
+      return;
+    }
+    markClipboardUoinkNow();
+    openTab("https://claude.ai/new");
+    setButtonState(btn, "success", "Copied. Paste in Claude");
+    resetButtonAfter(btn, 3000);
+  }
+
   async function onClick(btn) {
+    if (btn._afterSavePending) return copyPendingForClaude(btn);
     const url = normalizedCurrentVideoUrl();
     if (!url) return;
 
@@ -526,6 +562,32 @@
     // The file version (yoink_md) is the dev-mode fallback when Pillow
     // wasn't bundled or paste generation failed.
     const clipboardText = data.corpus_md_paste || data.yoink_md;
+    const afterSave = await STC.getAfterSave();
+    if (afterSave === "stay") {
+      // Saved to the library; no clipboard write, no new tab. The notification
+      // (some systems hide its buttons) and this button both offer the copy.
+      const first = await STC.isFirstSave();
+      try {
+        await chrome.runtime.sendMessage({
+          type: "afterSaveNotice", topic: data.topic || null, folder: data.folder || null,
+        });
+      } catch (e) {
+        console.warn("[Uoink] after-save notice failed", e);
+      }
+      const label = first ? "Saved. See it in Claude" : "Saved. Copy for Claude";
+      setButtonState(btn, "success", label);
+      btn.title = `Saved to your library: ${data.folder}. Click to copy it and open Claude.`;
+      // The paste text stays in this page script's memory for the window only.
+      const pending = { text: clipboardText, data, expires: Date.now() + AFTER_SAVE_WINDOW_MS };
+      btn._afterSavePending = pending;
+      setTimeout(() => {
+        if (btn._afterSavePending === pending) {
+          btn._afterSavePending = null;
+          setButtonState(btn, "default", defaultLabel());
+        }
+      }, AFTER_SAVE_WINDOW_MS + 50);
+      return;
+    }
     rememberClipboardBudget(data, clipboardText);
     let copied = false;
     try {
@@ -549,7 +611,8 @@
     }
 
     markClipboardUoinkNow();
-    openTab("https://claude.ai/new");
+    const destination = STC.afterSaveChoice(afterSave);
+    if (destination.url) openTab(destination.url);
 
     // Same shared helper used by the SW queue path. First successful uoink
     // (whether triggered here or through the right-click menu) gets the

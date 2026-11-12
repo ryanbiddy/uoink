@@ -93,6 +93,10 @@
     .hook-form option { background: var(--surface); color: var(--text); }
     .hook-correction-message { color: var(--text-2); font-size: 12px; margin-top: 4px; overflow-wrap: anywhere; }
     .hook-correction-message.error { color: var(--rust-bright); }
+    .after-save-form { margin-top: 12px; }
+    .after-save-form label { display: block; margin-bottom: 4px; color: var(--text-2); font-size: 12px; }
+    .after-save-form select { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--line-strong); border-radius: var(--radius-input); padding: 8px; background: var(--surface); color: var(--text); }
+    .after-save-form option { background: var(--surface); color: var(--text); }
     .prompt-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
     .prompt-row span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
     @media (prefers-reduced-motion: reduce) { .step.advanced { animation: none; } }
@@ -133,6 +137,14 @@
         <p class="hint">Copy a prompt after pasting your capture into Claude or ChatGPT.</p>
         <p id="starter-prompts-status" class="hint" role="status" aria-live="polite"></p>
         <div id="starter-prompts-list"></div>
+      </details>
+      <details id="after-save" class="picker">
+        <summary>After a save</summary>
+        <div class="after-save-form">
+          <label for="after-save-select">What Uoink does once a capture is saved</label>
+          <select id="after-save-select"></select>
+          <p id="after-save-hint" class="hint" role="status" aria-live="polite"></p>
+        </div>
       </details>
       <details id="research-session" class="picker">
         <summary>Research session</summary>

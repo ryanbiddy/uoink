@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Saving no longer opens a Claude tab or overwrites your clipboard. A new setting, After a
+  save, has four choices: Stay on the page (the new default), Copy then open Claude, Copy then
+  open ChatGPT, and Copy only. Pick it in the toolbar popup or in dashboard Settings under
+  Capture. With the default, the notification says the capture is in your library and offers
+  Copy for Claude and Copy for ChatGPT, and the YouTube button turns into "Saved. Copy for
+  Claude" for a few seconds. Your very first save offers "See it in Claude". Nothing leaves the
+  computer until you click one of those.
+
 ### Fixed
 
 - Dashboard on a phone: a long error message or source address no longer stretches the

@@ -6173,6 +6173,19 @@
               <div class="setting-feedback"><span class="setting-status" id="screenshotIntervalSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="screenshotIntervalSaveRetry" type="button" data-setting-retry="screenshotInterval">Retry save</button></div>
             </div>
 
+            <div class="setting-block" id="after-save">
+              <h2>After a save</h2>
+              <p class="setting-copy" id="afterSaveCopy">What the browser extension does once a capture is saved. Saves always go to your library. Copying only happens on this computer.</p>
+              <label for="afterSave">After a save</label>
+              <select class="field" id="afterSave" style="max-width:280px" aria-describedby="afterSaveCopy afterSaveSaveStatus">
+                <option value="stay">Stay on the page</option>
+                <option value="claude">Copy, then open Claude</option>
+                <option value="chatgpt">Copy, then open ChatGPT</option>
+                <option value="copy">Copy only</option>
+              </select>
+              <div class="setting-feedback"><span class="setting-status" id="afterSaveSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="afterSaveSaveRetry" type="button" data-setting-retry="afterSave">Retry save</button></div>
+            </div>
+
             <div class="setting-block">
               <h2>Auto-uoink playlists</h2>
               <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
@@ -18066,6 +18079,7 @@
       mirrorScriptsToggle: ["mirror_scripts_to_obsidian", false],
       dashboardTheme: ["dashboard_theme", "system"],
       cardImage: ["card_image", "middle"],
+      afterSave: ["after_save", "stay"],
     };
     const TASTE_FIELDS = { tasteHooks: "preferred_hooks", tasteFormats: "preferred_formats", tasteAvoid: "avoid" };
     const settingEdits = new Map();

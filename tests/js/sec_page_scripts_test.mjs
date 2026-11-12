@@ -205,7 +205,7 @@ for (const [name, options, copied] of [
 ]) {
   test(`YouTube copy via worker/offscreen: ${name}; corpus never enters page DOM`, async () => {
     const background = await worker(options);
-    const { env, btn } = await content("youtube", { copy: (msg) => options.portCloses
+    const { env, btn } = await content("youtube", { local: { after_save: "claude" }, copy: (msg) => options.portCloses
       ? { __reject: "Synthetic closed worker port" } : background.env.dispatch(msg) });
     const observed = watchPageClipboard(env);
     btn.userClick();

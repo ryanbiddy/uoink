@@ -35,6 +35,16 @@ const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
 const _clipboardRetryPayloads = new Map();
 const _queueViewNotificationIds = new Set();
 let _ensureOffscreenInflight = null;
+// After a save = "Stay on the page": the notification's two buttons copy the
+// saved item and open a chat. Only notificationId -> {slug} is kept, in
+// chrome.storage.session (a recycled worker still answers a click); the text is
+// fetched from the helper again when a button is clicked, never stored.
+const AFTER_SAVE_SESSION_KEY = "after_save_notes";
+const AFTER_SAVE_KEEP = 10;
+const AFTER_SAVE_BUTTONS = [
+  { title: "Copy for Claude", firstTitle: "See it in Claude", url: "https://claude.ai/new" },
+  { title: "Copy for ChatGPT", firstTitle: "Copy for ChatGPT", url: "https://chatgpt.com/" },
+];
 
 const LINK_PATTERNS = [
   "https://www.youtube.com/watch*",
@@ -547,6 +557,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
+  // After a save = "Stay on the page", from the in-page button: only the slug
+  // arrives; the notification buttons fetch the text again when clicked.
+  if (msg.type === "afterSaveNotice") {
+    const data = {
+      topic: typeof msg.topic === "string" ? msg.topic.slice(0, 80) : null,
+      folder: typeof msg.folder === "string" ? msg.folder : null,
+    };
+    notifyAfterSaveFor(data).then((id) => sendResponse({ ok: true, id }), () => sendResponse({ ok: false }));
+    return true;
+  }
+
   if (msg.type === "clipboardRetry" && typeof msg.text === "string") {
     notifyClipboardRetry(msg.text).then((id) => sendResponse({ ok: !!id, id }));
     return true;
@@ -740,6 +761,74 @@ async function serverQueueHasRoom() {
   return pending < 5;
 }
 
+function slugFromFolder(folder) {
+  if (typeof folder !== "string" || !folder) return null;
+  const parts = folder.split(/[\\/]+/).filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : null;
+}
+
+async function _readAfterSaveSession() {
+  try {
+    const got = await chrome.storage.session.get({ [AFTER_SAVE_SESSION_KEY]: {} });
+    const value = got && got[AFTER_SAVE_SESSION_KEY];
+    return value && typeof value === "object" ? value : {};
+  } catch { return {}; }
+}
+
+async function _writeAfterSaveSession(map) {
+  try { await chrome.storage.session.set({ [AFTER_SAVE_SESSION_KEY]: map }); } catch { /* ignore */ }
+}
+
+async function _forgetAfterSave(id) {
+  const map = await _readAfterSaveSession();
+  if (id in map) { delete map[id]; await _writeAfterSaveSession(map); }
+}
+
+// Nothing is copied or opened. Says the capture is in the library and offers two
+// buttons (the very first save offers "See it in Claude" instead of the plain one).
+async function notifyAfterSaveFor(data) {
+  const first = await STC.isFirstSave();
+  const message = await STC.buildUoinkedMessage(data, false, "stay");
+  const slug = slugFromFolder(data && data.folder);
+  const options = slug ? {
+    buttons: AFTER_SAVE_BUTTONS.map((b) => ({ title: first ? b.firstTitle : b.title })),
+  } : {};
+  const id = await notify("Uoinked ★", message, options);
+  if (!id || !slug) return id;
+  const map = await _readAfterSaveSession();
+  map[id] = { slug, at: Date.now() };
+  const ids = Object.keys(map).sort((a, b) => (map[a].at || 0) - (map[b].at || 0));
+  while (ids.length > AFTER_SAVE_KEEP) delete map[ids.shift()];
+  await _writeAfterSaveSession(map);
+  return id;
+}
+
+async function handleAfterSaveButton(id, buttonIndex) {
+  const target = AFTER_SAVE_BUTTONS[buttonIndex];
+  if (!target) return;
+  const note = (await _readAfterSaveSession())[id];
+  if (!note || !note.slug) return;
+  let text = "";
+  try { text = await STC.getCorpusMarkdown(note.slug); } catch { text = ""; }
+  if (!text) {
+    notify("Copy failed", "Uoink couldn't read that save from the helper. Check that the helper is running, then use Send to Claude or ChatGPT in the Uoink popup.");
+    return;
+  }
+  const budget = globalThis.YoinkUI.clipboardBudgetFromData({}, text);
+  if (budget) {
+    try { await chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget }); } catch { /* ignore */ }
+  }
+  const ok = await copyToClipboard(text);
+  if (!ok) {
+    await notifyClipboardRetry(text);
+    return;
+  }
+  await _forgetAfterSave(id);
+  await markClipboardYoinkNow();
+  const url = allowedTabUrl(target.url);
+  if (url) await chrome.tabs.create({ url, active: true });
+}
+
 async function notifyClipboardRetry(text) {
   const id = await notify("Clipboard copy blocked", "Your uoink is ready. Click Try again to copy it.", {
     buttons: [{ title: "Try again" }],
@@ -753,6 +842,10 @@ try {
     if (_queueViewNotificationIds.has(id)) {
       _queueViewNotificationIds.delete(id);
       tryOpenPopup();
+      return;
+    }
+    if (!_clipboardRetryPayloads.has(id) && buttonIndex <= 1) {
+      handleAfterSaveButton(id, buttonIndex).catch((e) => console.warn("[stc] after-save button failed", e));
       return;
     }
     if (buttonIndex !== 0 || !_clipboardRetryPayloads.has(id)) return;
@@ -770,6 +863,7 @@ try {
   chrome.notifications.onClosed.addListener((id) => {
     _clipboardRetryPayloads.delete(id);
     _queueViewNotificationIds.delete(id);
+    _forgetAfterSave(id).catch(() => { /* ignore */ });
   });
 } catch { /* notifications unavailable in some test contexts */ }
 
@@ -1445,6 +1539,13 @@ async function runExtractJob(job) {
   // Fall back to the file version if the server didn't generate one
   // (Pillow missing in dev, generation failure, etc).
   const clipboardText = data.corpus_md_paste || data.yoink_md;
+  const afterSave = await STC.getAfterSave();
+  if (afterSave === "stay") {
+    // Default: the save is in the library; nothing is copied or opened.
+    await notifyAfterSaveFor(data);
+    await publishPopupResult(job, { ok: true, message: "Saved to your library." });
+    return;
+  }
   await rememberClipboardBudget(data, clipboardText);
   const copied = await copyToClipboard(clipboardText);
   if (!copied) {
@@ -1459,14 +1560,21 @@ async function runExtractJob(job) {
     STC.logEngagement("paste", "popup", { length: clipboardText.length }).catch(() => {});
   }
   await markClipboardYoinkNow();
-  await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
+  const destination = STC.afterSaveChoice(afterSave);
+  const tabUrl = destination.url && allowedTabUrl(destination.url);
+  if (tabUrl) await chrome.tabs.create({ url: tabUrl, active: true });
 
   // Shared helper handles first-yoink-vs-subsequent copy + atomically marks
   // the has_completed_first_yoink flag. Same code is called from content.js
   // so the in-page YouTube button gets the same first-time CTA.
   const message = await STC.buildUoinkedMessage(data, copied);
   notify("Uoinked ★", message);
-  await publishPopupResult(job, { ok: true, message: "Uoinked ★ Paste in Claude." });
+  await publishPopupResult(job, {
+    ok: true,
+    message: afterSave === "chatgpt" ? "Uoinked ★ Paste in ChatGPT."
+      : afterSave === "copy" ? "Uoinked ★ Copied. Paste it in your AI."
+      : "Uoinked ★ Paste in Claude.",
+  });
 }
 
 // E7: a thrown capture request is not proof the helper is down. Say what it
@@ -1595,11 +1703,18 @@ async function captureXArticleFromTab(tabId, pageUrl) {
            { requireInteraction: true });
     return;
   }
-  // Rare success (a genuinely readable page): copy + open like a normal page.
+  // Rare success (a genuinely readable page): follow After a save like a normal page.
   const clipboardText = pageData.corpus_md_paste || pageData.yoink_md;
-  if (clipboardText) {
+  const afterSave = await STC.getAfterSave();
+  if (clipboardText && afterSave === "stay") {
+    await notifyAfterSaveFor(pageData);
+  } else if (clipboardText) {
     await rememberClipboardBudget(pageData, clipboardText);
     const copied = await copyToClipboard(clipboardText);
+    const destination = STC.afterSaveChoice(afterSave);
+    const tabUrl = copied && destination.url && allowedTabUrl(destination.url);
+    if (tabUrl) await chrome.tabs.create({ url: tabUrl, active: true });
+    if (copied) await markClipboardYoinkNow();
     const message = await STC.buildUoinkedMessage(pageData, copied);
     notify("Uoinked ★", message);
   } else {
