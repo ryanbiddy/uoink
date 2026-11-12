@@ -403,7 +403,7 @@ test('counter: a Range retry goes to the GitHub URL, never back through the coun
       setTimeout(() => res.destroy(), 20);
       return true;
     }
-    const start = Number(/bytes=(d+)-/.exec(req.headers.range || '')?.[1] ?? 0);
+    const start = Number(/bytes=(\d+)-/.exec(req.headers.range || '')?.[1] ?? 0);
     res.writeHead(206, { 'content-length': body.length - start, 'content-range': `bytes ${start}-${body.length - 1}/${body.length}` });
     res.end(body.subarray(start));
     return true;
