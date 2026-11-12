@@ -138,7 +138,10 @@ def top_terms(idx, profile: dict | None = None, *, limit: int = MAX_TERMS) -> li
 
     Only words that appear in at least MIN_TERM_COUNT different saved items
     count, so one long title never becomes a topic. Words the user listed in
-    their avoid note are skipped."""
+    their avoid note are skipped. Load the current taste profile when none is
+    supplied, so the disclosure preview and refresh use the same filtering."""
+    if profile is None:
+        profile = taste_scoring.build_taste_profile(idx)
     try:
         rows = idx.search_yoinks_for_memory(limit=200).get("results") or []
     except Exception as exc:
