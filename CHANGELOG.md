@@ -109,6 +109,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (ellipsis instead of a hard cut), and the status lines read in plain words.
 - First-run window: the start-failure message says what to try. Extension page: the heading
   no longer leaves one word alone on a phone-width line.
+- `npx uoink` on a Mac or Linux with a global `npm i -g uoink` no longer starts itself in a
+  loop. It skips any `uoink` on PATH that leads back to the npm package (a symlink, another
+  copy or a pnpm shim), and a launcher started by another launcher stops with a plain message.
+- `npx uoink update` on a Mac moves the old Uoink.app aside, puts the new one in, and only then
+  deletes the old one. If the new one can't go in, the old one is put back, so a failed update
+  never leaves you without Uoink.
+- The relay phone page test reads the inline script and style with an HTML parser, so it finds
+  the tags in any case (clears a CodeQL alert).
+
+### Security
+
+- The relay phone page no longer sends a shared link by itself. Opening `/phone?url=...` (the
+  Android share target) fills the Paste a link box and asks "Shared from another app. Send it
+  to Uoink?", and nothing reaches the relay until you tap Send. Before, any page or message
+  that opened such a link on a paired phone could add a link to your inbox.
 
 ## [3.16.3] - 2026-11-10
 

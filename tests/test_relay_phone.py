@@ -11,6 +11,7 @@ import shutil
 import struct
 import subprocess
 import zlib
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -45,6 +46,43 @@ def test_pairing_goes_through_the_failed_auth_limiter(relay):
 
 # ---- /phone ----------------------------------------------------------------
 
+class _BlockParser(HTMLParser):
+    """Collects the attributes and raw text of every <script> and <style>."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=False)
+        self.blocks = {"script": [], "style": []}
+        self._open = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.blocks:          # HTMLParser lower-cases tag names
+            self._open = (tag, attrs, [])
+
+    def handle_data(self, data):
+        if self._open:
+            self._open[2].append(data)
+
+    def handle_endtag(self, tag):
+        if self._open and tag == self._open[0]:
+            name, attrs, parts = self._open
+            self.blocks[name].append((attrs, "".join(parts)))
+            self._open = None
+
+
+def _inline_blocks(html):
+    parser = _BlockParser()
+    parser.feed(html)
+    parser.close()
+    assert parser._open is None, "unclosed script or style element"
+    return parser.blocks
+
+
+def test_block_parser_finds_tags_in_any_case():
+    blocks = _inline_blocks("<SCRIPT>a()</SCRIPT ><Style>b{}</STYLE><script src=x></script>")
+    assert blocks["script"] == [([], "a()"), ([("src", "x")], "")]
+    assert blocks["style"] == [([], "b{}")]
+
+
 def test_phone_page_is_served_with_its_own_strict_csp_and_no_token(relay):
     status, _, headers, raw = relay.request("GET", "/phone")
     html = raw.decode("utf-8")
@@ -54,9 +92,12 @@ def test_phone_page_is_served_with_its_own_strict_csp_and_no_token(relay):
     assert "default-src 'none'" in csp and "connect-src 'self'" in csp and "manifest-src 'self'" in csp
     assert "unsafe-inline" not in csp and "unsafe-eval" not in csp and "script-src 'sha256-" in csp
     assert headers["cache-control"] == "no-store" and headers["referrer-policy"] == "no-referrer"
-    # The hashes in the header match the inline blocks exactly.
-    script = re.search(r"<script>(.*?)</script>", html, re.S).group(1)
-    style = re.search(r"<style>(.*?)</style>", html, re.S).group(1)
+    # The hashes in the header match the inline blocks exactly. A real HTML
+    # parser finds every script and style element, whatever the tag's case.
+    blocks = _inline_blocks(html)
+    assert [attrs for attrs, _ in blocks["script"]] == [[]], "exactly one inline script, no src"
+    assert len(blocks["style"]) == 1, "exactly one inline style block"
+    script, style = blocks["script"][0][1], blocks["style"][0][1]
     for text, directive in ((script, "script-src"), (style, "style-src")):
         digest = base64.b64encode(hashlib.sha256(text.encode()).digest()).decode()
         assert f"{directive} 'sha256-{digest}'" in csp
@@ -126,6 +167,7 @@ function el(id) {
   return els[id] = { id, hidden: false, textContent: '', className: '', value: '', disabled: false, open: false,
     listeners: {}, addEventListener(t, f) { (this.listeners[t] ||= []).push(f); } };
 }
+el('sharedbox').hidden = true;   // hidden in the page's HTML until a share arrives
 const storage = Object.assign({}, cfg.storage || {});
 const history = [];
 const calls = [];
@@ -155,12 +197,14 @@ vm.runInContext(script, ctx);
   await new Promise((r) => setTimeout(r, 30));
   out.history = history; out.storage = storage; out.calls = calls;
   out.pill = els.pill.textContent; out.unpairedHidden = els.unpaired.hidden; out.sendHidden = els.sendcard.hidden;
-  out.shared = els.sharedresult && els.sharedresult.textContent; out.link = els.link && els.link.value;
-  if (cfg.submit !== undefined) {
-    el('link').value = cfg.submit;
+  out.shared = els.sharedresult && els.sharedresult.textContent; out.link = el('link').value;
+  out.sharedHidden = el('sharedbox').hidden; out.callsBeforeSend = calls.slice();
+  if (cfg.submit !== undefined || cfg.press) {
+    if (cfg.submit !== undefined) el('link').value = cfg.submit;   // press: tap Send on what is already there
     await els.sendform.listeners.submit[0]({ preventDefault() {} });
     await new Promise((r) => setTimeout(r, 150));
     out.result = els.result.textContent; out.resultClass = els.result.className; out.calls = calls;
+    out.linkAfter = el('link').value; out.sharedHiddenAfter = el('sharedbox').hidden;
   }
   if (cfg.forget) { els.forget.listeners.click[0](); out.afterForget = { storage, pill: els.pill.textContent }; }
   process.stdout.write(JSON.stringify(out));
@@ -213,17 +257,68 @@ def test_a_sleeping_relay_is_retried_automatically_then_succeeds():
     assert len(out["calls"]) == 3 and out["result"].startswith("Sent.")
 
 
-def test_android_share_target_sends_the_shared_url_with_the_stored_token():
-    out = run_page(storage={"uoink-relay-push-token": TOKEN},
-                   search="?title=A+video&text=Look&url=https%3A%2F%2Fexample.com%2Fv")
+SHARE = "?title=A+video&text=Look&url=https%3A%2F%2Fexample.com%2Fv"
+
+
+def test_android_share_target_fills_the_box_and_sends_nothing_by_itself():
+    # Anyone can make a paired phone open /phone?url=..., so loading the page
+    # must never send. It fills the box and asks.
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=SHARE)
+    assert out["calls"] == []
+    assert out["link"] == "https://example.com/v Look A video"
+    assert out["sharedHidden"] is False and out["shared"].startswith("Shared from another app. Send it to Uoink?")
+    assert out["history"] == ["/phone"]          # the query is gone, so a reload does not ask again
+
+
+def test_android_share_target_sends_only_when_send_is_tapped():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=SHARE, press=True)
+    assert out["callsBeforeSend"] == []
     assert out["calls"] == [{"url": "/v1/links", "auth": "Bearer " + TOKEN,
-                             "body": {"url": "https://example.com/v", "text": "Look", "title": "A video"}}]
-    assert out["shared"].startswith("Sent.") and "/phone" in out["history"]
+                             "body": {"url": "https://example.com/v Look A video"}}]
+    assert out["result"].startswith("Sent.") and out["linkAfter"] == "" and out["sharedHiddenAfter"] is True
+
+
+def test_android_share_target_sends_what_the_person_edited():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=SHARE, submit="https://example.com/other")
+    assert out["callsBeforeSend"] == []
+    assert [call["body"] for call in out["calls"]] == [{"url": "https://example.com/other"}]
+
+
+@pytest.mark.parametrize("search,box", [
+    ("?url=https%3A%2F%2Fexample.com%2Fv&text=https%3A%2F%2Fexample.com%2Fv", "https://example.com/v"),
+    ("?url=https%3A%2F%2Fexample.com%2Fv&text=Look+https%3A%2F%2Fexample.com%2Fv", "Look https://example.com/v"),
+    ("?text=https%3A%2F%2Fexample.com%2Fv&title=A+video", "https://example.com/v A video"),
+    ("?title=+&text=", None),
+])
+def test_share_target_box_has_each_shared_part_once(search, box):
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=search)
+    assert out["calls"] == []
+    if box is None:
+        assert out["link"] == "" and out["sharedHidden"] is True and out["history"] == []
+    else:
+        assert out["link"] == box and out["sharedHidden"] is False
+
+
+@pytest.mark.parametrize("box,note", [
+    ("https://example.com/v Look A video", "Look A video"),
+    ("Look https://example.com/v", "Look"),
+    ("https://example.com/v", None),
+])
+def test_the_relay_reads_the_link_and_note_from_the_filled_box(box, note):
+    # What the box sends is what the relay stores: the first link, and the
+    # words around it as the note.
+    assert app.resolve_share(box, [None, None], None) == ("https://example.com/v", note)
 
 
 def test_share_target_on_an_unpaired_phone_keeps_the_text_and_says_so():
     out = run_page(search="?text=Look+https%3A%2F%2Fexample.com%2Fv")
     assert out["calls"] == [] and "isn't paired" in out["shared"] and "example.com/v" in out["link"]
+
+
+def test_share_target_ignores_a_token_in_the_query():
+    # Only the fragment can pair the phone. A ?t= in the query is not a token.
+    out = run_page(search="?url=https%3A%2F%2Fexample.com%2Fv&t=" + TOKEN)
+    assert out["storage"] == {} and out["calls"] == [] and out["pill"] == "Not paired"
 
 
 def test_forget_this_phone_clears_the_token():

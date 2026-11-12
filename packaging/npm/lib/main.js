@@ -16,6 +16,10 @@ const LINUX_DOCS = `https://github.com/${REPO}/blob/main/docs/linux.md`;
 const MAC_DOCS = `https://github.com/${REPO}/blob/main/docs/mac/INSTALL.md`;
 const CONNECT_DOCS = `https://github.com/${REPO}/blob/main/docs/connect-your-agent.md`;
 const PKG_VERSION = require('../package.json').version;
+const PKG_DIR = path.resolve(__dirname, '..');
+// Set on every child process. If a launcher starts with it already set, an
+// earlier launcher started it, so it must not pass through again.
+const LAUNCHER_ENV = 'UOINK_NPM_LAUNCHER';
 
 const HELP = `uoink: install Uoink, or run the installed Uoink CLI
 
@@ -99,6 +103,62 @@ function isExecutableFile(p, deps) {
   }
 }
 
+function realPath(p, deps) {
+  try {
+    return deps.fs.realpathSync(p);
+  } catch {
+    return null;
+  }
+}
+
+function isInside(child, dir) {
+  const rel = path.relative(dir, child);
+  return rel === '' || (rel !== '..' && !rel.startsWith(`..${path.sep}`) && !path.isAbsolute(rel));
+}
+
+// A pnpm or yarn global install puts a small shell script on PATH instead of
+// a symlink. It names this package's bin/uoink.js.
+function namesThisPackage(file, deps) {
+  let fd;
+  try {
+    fd = deps.fs.openSync(file, 'r');
+    const buf = Buffer.alloc(4096);
+    const n = deps.fs.readSync(fd, buf, 0, buf.length, 0);
+    return /node_modules[\\/]+uoink[\\/]+bin[\\/]+uoink\.js/i.test(buf.subarray(0, n).toString('utf8'));
+  } catch {
+    return false;
+  } finally {
+    if (fd !== undefined) {
+      try {
+        deps.fs.closeSync(fd);
+      } catch {
+        /* already closed */
+      }
+    }
+  }
+}
+
+// True when a resolved candidate is this npm launcher (or another copy of it)
+// rather than the Uoink desktop CLI. A global `npm i -g uoink` puts a uoink
+// symlink on PATH that points at bin/uoink.js, and running that would start
+// this launcher again.
+function isNpmLauncher(real, deps) {
+  const own = deps.pkgDir || PKG_DIR;
+  for (const dir of new Set([own, realPath(own, deps)].filter(Boolean))) {
+    if (isInside(real, dir)) return true;
+  }
+  if (/\.[cm]?js$/i.test(real)) return true;
+  return namesThisPackage(real, deps);
+}
+
+// The candidate's real path when it is a usable file and not this launcher.
+function usableCli(p, deps) {
+  if (!isExecutableFile(p, deps)) return null;
+  const real = realPath(p, deps);
+  if (!real || isNpmLauncher(real, deps)) return null;
+  return real;
+}
+
 // Returns { kind: 'win'|'posix', cli, python?, script? } or null.
 function findInstalled(deps) {
   const { platform, env } = deps;
@@ -117,7 +177,7 @@ function findInstalled(deps) {
     if (env.LOCALAPPDATA) add(path.join(env.LOCALAPPDATA, 'Uoink', 'cli', 'uoink.cmd'));
     for (const d of pathDirs.filter(notOurs)) add(path.join(d, 'uoink.cmd'));
     for (const c of cands) {
-      if (!isExecutableFile(c, deps)) continue;
+      if (!usableCli(c, deps)) continue;
       const root = path.resolve(path.dirname(c), '..');
       const python = path.join(root, 'python', 'python.exe');
       const script = path.join(root, 'uoink_cli.py');
@@ -133,13 +193,20 @@ function findInstalled(deps) {
   }
   add(path.join(home, '.local', 'bin', 'uoink'));
   for (const d of pathDirs.filter(notOurs)) add(path.join(d, 'uoink'));
-  for (const c of cands) if (isExecutableFile(c, deps)) return { kind: 'posix', cli: c };
+  for (const c of cands) if (usableCli(c, deps)) return { kind: 'posix', cli: c };
   return null;
 }
 
 function cliInvocation(inst) {
-  if (inst.kind === 'win') return { cmd: inst.python, args: [inst.script], env: { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' } };
-  return { cmd: inst.cli, args: [], env: {} };
+  if (inst.kind === 'win') {
+    return { cmd: inst.python, args: [inst.script], env: { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1', [LAUNCHER_ENV]: '1' } };
+  }
+  return { cmd: inst.cli, args: [], env: { [LAUNCHER_ENV]: '1' } };
+}
+
+// The environment for every child process: ours, plus the recursion guard.
+function childEnv(extra) {
+  return { ...process.env, ...(extra || {}), [LAUNCHER_ENV]: '1' };
 }
 
 async function installedVersion(inst, deps) {
@@ -186,7 +253,7 @@ function defaultDeps() {
     // Run a program and wait. Never uses a shell.
     run: (cmd, args, opts = {}) =>
       new Promise((resolve) => {
-        const c = cp.spawn(cmd, args, { stdio: 'inherit', env: { ...process.env, ...(opts.env || {}) }, windowsHide: false });
+        const c = cp.spawn(cmd, args, { stdio: 'inherit', env: childEnv(opts.env), windowsHide: false });
         c.on('error', (e) => resolve({ code: -1, error: e }));
         c.on('exit', (code, sig) => resolve({ code: code === null ? 128 : code, signal: sig }));
       }),
@@ -195,7 +262,7 @@ function defaultDeps() {
         cp.execFile(
           cmd,
           args,
-          { env: { ...process.env, ...(opts.env || {}) }, maxBuffer: 16 * 1024 * 1024, timeout: opts.timeoutMs ?? 60000, windowsHide: true },
+          { env: childEnv(opts.env), maxBuffer: 16 * 1024 * 1024, timeout: opts.timeoutMs ?? 60000, windowsHide: true },
           (e, stdout, stderr) => resolve({ code: e ? (typeof e.code === 'number' ? e.code : 1) : 0, stdout: String(stdout || ''), stderr: String(stderr || '') })
         );
       }),
@@ -373,6 +440,76 @@ function writable(dir, deps) {
   }
 }
 
+function lexists(p, deps) {
+  try {
+    deps.fs.lstatSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const reason = (e) => (e && (e.code || e.message)) || String(e);
+
+// Replace appDir with the staged copy so there is never a moment with no
+// Uoink.app: move the old one aside, move the new one in, and only then
+// delete the old one. If the new one can't go in, the old one goes back.
+function swapIntoPlace(staged, appDir, deps, ui) {
+  const old = path.join(path.dirname(appDir), `.Uoink.app.old-${process.pid}`);
+  const dropStaged = () => {
+    try {
+      deps.fs.rmSync(staged, { recursive: true, force: true });
+    } catch {
+      /* a hidden leftover; the next install removes it */
+    }
+  };
+  try {
+    deps.fs.rmSync(old, { recursive: true, force: true });
+  } catch {
+    /* if it is still there, the move aside below fails and says so */
+  }
+  const hadOld = lexists(appDir, deps);
+  if (hadOld) {
+    try {
+      deps.fs.renameSync(appDir, old);
+    } catch (e) {
+      dropStaged();
+      throw new UserError(`Could not move the current Uoink.app aside to replace it (${reason(e)}). Your current Uoink was not changed. Quit Uoink and try again.`);
+    }
+  }
+  try {
+    deps.fs.renameSync(staged, appDir);
+  } catch (e) {
+    let restored = !hadOld;
+    if (hadOld) {
+      try {
+        deps.fs.renameSync(old, appDir);
+        restored = true;
+      } catch {
+        /* reported below */
+      }
+    }
+    dropStaged();
+    if (!restored) {
+      throw new UserError(
+        `Could not move the new Uoink.app into place (${reason(e)}), and could not put the current one back.\n` +
+          `Your current Uoink is at ${old}\nTo put it back, run: mv "${old}" "${appDir}"`
+      );
+    }
+    throw new UserError(
+      `Could not move the new Uoink.app into place (${reason(e)}). ` +
+        (hadOld ? 'Your current Uoink was put back unchanged. Quit Uoink and try again.' : 'Try again.')
+    );
+  }
+  if (hadOld) {
+    try {
+      deps.fs.rmSync(old, { recursive: true, force: true });
+    } catch (e) {
+      ui.warn(`Uoink is updated, but the previous copy could not be removed (${reason(e)}). You can delete ${old}`);
+    }
+  }
+}
+
 async function installMac(file, tmp, deps, ui) {
   if (Number.parseInt(deps.osRelease, 10) < 24) {
     throw new UserError('Uoink needs macOS 15 or newer.');
@@ -402,8 +539,7 @@ async function installMac(file, tmp, deps, ui) {
       deps.fs.rmSync(staged, { recursive: true, force: true });
       throw new UserError(`Copy failed: ${cpy.stderr.trim() || `ditto exit ${cpy.code}`}`);
     }
-    deps.fs.rmSync(appDir, { recursive: true, force: true });
-    deps.fs.renameSync(staged, appDir);
+    swapIntoPlace(staged, appDir, deps, ui);
   } finally {
     let d = await deps.capture('/usr/bin/hdiutil', ['detach', mnt]);
     if (d.code !== 0) d = await deps.capture('/usr/bin/hdiutil', ['detach', '-force', mnt]);
@@ -573,7 +709,16 @@ async function main(argv, injected = {}) {
     // Installed: everything except our own commands goes to the CLI.
     const own = isOwnInvocation(argv);
     const inst = findInstalled(deps);
-    if (inst && !own) return await passthrough(inst, argv, deps);
+    if (inst && !own) {
+      if (deps.env[LAUNCHER_ENV]) {
+        ui.fail(
+          `stopped to avoid a loop. This npx uoink was started by another npx uoink (${LAUNCHER_ENV} is set), so it will not run ${inst.cli} again.\n` +
+            'If that file is the npm package and not the Uoink app, remove it with "npm uninstall -g uoink" and try again.'
+        );
+        return 1;
+      }
+      return await passthrough(inst, argv, deps);
+    }
 
     if (!own) {
       ui.fail('Uoink is not installed yet, so there is no CLI to run. Install it first with: npx uoink');
@@ -625,4 +770,20 @@ function pickable(deps) {
   return assetFor(deps.platform, deps.arch, '0.0.0') !== null;
 }
 
-module.exports = { main, pickAsset, assetFor, cmpVersion, findInstalled, parseOwnArgs, isOwnInvocation, unsupportedMessage, PKG_VERSION, BASE };
+module.exports = {
+  main,
+  pickAsset,
+  assetFor,
+  cmpVersion,
+  findInstalled,
+  parseOwnArgs,
+  isOwnInvocation,
+  unsupportedMessage,
+  installMac,
+  defaultDeps,
+  makeUi,
+  LAUNCHER_ENV,
+  PKG_DIR,
+  PKG_VERSION,
+  BASE,
+};
