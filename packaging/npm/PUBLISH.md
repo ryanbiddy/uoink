@@ -12,7 +12,7 @@ Nothing in the repo publishes this package. You do it once with your own npm acc
    ```sh
    cd packaging/npm
    node --test
-   npm pack --dry-run        # expect 5 files: LICENSE, README.md, bin/uoink.js, lib/main.js, lib/net.js, package.json
+   npm pack --dry-run        # expect 6 files: LICENSE, README.md, bin/uoink.js, lib/main.js, lib/net.js, package.json
    npm publish --access public
    ```
 5. Check it: `npx uoink --help`, then `npx uoink --dry-run` in a scratch folder.
