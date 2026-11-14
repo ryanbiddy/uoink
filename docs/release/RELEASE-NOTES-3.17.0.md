@@ -77,9 +77,9 @@ See [docs/linux.md](https://github.com/ryanbiddy/uoink/blob/v3.17.0/docs/linux.m
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `Uoink-Setup-3.17.0.exe` | WIN_EXE_SIZE B | `WIN_EXE_SHA256` |
-| `uoink-3.17.0.mcpb` | WIN_MCPB_SIZE B | `WIN_MCPB_SHA256` |
-| `Uoink-3.17.0-macos-arm64.dmg` | MAC_DMG_SIZE B | `MAC_DMG_SHA256` |
-| `uoink-3.17.0-macos.mcpb` | MAC_MCPB_SIZE B | `MAC_MCPB_SHA256` |
+| `Uoink-Setup-3.17.0.exe` | 549,046,889 B | `18c047b548d3e8b62fb5717baab0ee0abe4671a72859629150bc70d19e517e63` |
+| `uoink-3.17.0.mcpb` | 121,239 B | `67e21de726f5e4fe100d3022d53cf4eb0e3e620a5963f1f64a45d9a47c2a8068` |
+| `Uoink-3.17.0-macos-arm64.dmg` | 513,362,549 B | `a8dcacbb3d783f80ef96f37a319335ca3ced0eb4fccbaf88108894d3d69b0a0a` |
+| `uoink-3.17.0-macos.mcpb` | 117,709 B | `77dc64507fb2b31342b5633274c6fe0412936b88585a32b7d87435fc41ad0ffa` |
 
-The Mac DMG is signed with Developer ID and notarized (mac-qualify run MAC_RUN_ID).
+The Mac DMG is signed with Developer ID and notarized (mac-qualify run 43286208807).
