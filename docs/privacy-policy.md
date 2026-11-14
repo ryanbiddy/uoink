@@ -1,6 +1,6 @@
 # Uoink Privacy Policy
 
-**Repository draft, not yet effective. Last reviewed 2026-10-21.**
+**Repository draft, not yet effective. Last reviewed 2026-11-14.**
 
 This policy explains exactly what Uoink does and does not do with your
 data. It is written to be read, not to be skimmed past. If anything here
@@ -21,7 +21,9 @@ a key test, or an AI action that you or a connected agent start on demand.
 Optional ScrapeCreators discovery sends your search terms or creator identifier
 with your key only after you enable it and authorize the call. The optional
 phone inbox contacts only the relay address you set, on your own Render
-account, after you turn it on. The rest of
+account, after you turn it on. Optional podcast suggestions (off by default)
+send a few topic words to Apple's podcast search about once a day after you
+turn them on. The rest of
 this document names those requests, browser visits from dashboard links,
 and the local data they create.
 
@@ -121,8 +123,22 @@ Uoink makes these outbound requests:
   optional note until Uoink picks it up, or for 7 days at most, and its own
   log lines record only method, route, status and duration. Render, as the
   host, handles those requests under its own policy. Capturing a picked-up
-  link then contacts its source service as above. See
-  [docs/relay.md](relay.md).
+  link then contacts its source service as above. To draw the phone setup QR
+  code, the dashboard also asks your relay for its push token
+  (`GET /v1/pairing`, with the pull token). The QR code is drawn on your
+  computer, and the push token rides in the part of the link after `#`, which
+  browsers never send to a server. See [docs/relay.md](relay.md).
+- **Podcast suggestions: only if you turn them on.** They are off by default
+  (Settings, Suggest podcasts). When on, Uoink picks up to 4 topic words or
+  short phrases that recur in the titles of your saves and sends each one as
+  a search to Apple's podcast search at `itunes.apple.com`. It never sends
+  titles, links, transcripts or notes, and with fewer than 5 saved items it
+  sends nothing. It refreshes at most once a day, or when you press Refresh
+  (at most every 10 minutes). Episode artwork loads from Apple's image
+  servers. Saving a suggested episode asks `itunes.apple.com` for that show's
+  feed address by the show ID Apple returned, then captures the episode like
+  any podcast capture. Apple receives the normal request metadata, such as
+  your IP address and Uoink's user agent.
 - **GitHub release check — only when you click `Check now` or turn on the
   daily check.** The daily check is off by default. When on, the dashboard
   asks at most once a day. Either way it requests the latest Uoink release
@@ -300,7 +316,8 @@ you ask it to capture (for example YouTube, Reddit, X, or a supplied web/feed
 host), Anthropic for enabled automatic analysis, key tests or AI actions that
 you or a connected agent start with your key, ScrapeCreators for authorized
 discovery or balance checks after you enable it, the relay you deploy to your
-own Render account if you turn on the phone inbox, Hugging Face for model
+own Render account if you turn on the phone inbox, Apple's podcast search if
+you turn on podcast suggestions, Hugging Face for model
 loading during requested speaker labeling, and GitHub when you request an
 update check. Their handling of request data is governed by their own
 policies and, where applicable, the terms of your account.
