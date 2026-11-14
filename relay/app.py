@@ -6,6 +6,9 @@ the pull token, captures each one locally and deletes it here. A link and its
 optional note are the only things stored, and every key expires after seven
 days through the store's native TTL.
 
+The relay also serves a small phone page (GET /phone) that the Uoink dashboard
+opens through a QR code, so the phone needs no hand-built Shortcut.
+
 Standard library only, except redis-py for Render Key Value.
 """
 from __future__ import annotations
@@ -19,13 +22,16 @@ import os
 import re
 import secrets
 import signal
+import struct
 import sys
 import threading
 import time
 import unicodedata
+import zlib
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Callable
 from urllib.parse import parse_qs, urlsplit
@@ -473,6 +479,386 @@ _PAGE_CSP = (f"default-src 'none'; style-src 'sha256-{_PAGE_STYLE_HASH}'; "
 _JSON_CSP = "default-src 'none'; frame-ancestors 'none'"
 
 
+# --------------------------------------------------------------------------
+# The phone page (GET /phone). The Uoink dashboard shows a QR code that opens
+# https://<relay>/phone#t=<push token>. The token sits in the URL fragment, so
+# it is never sent to this server or written to a log. The page keeps it in
+# the phone's localStorage and removes it from the address bar.
+# --------------------------------------------------------------------------
+_PHONE_STYLE = """
+:root{color-scheme:light dark;--bg:#fafafa;--card:#fff;--text:#1b1b1b;--muted:#5d5d5d;--line:#dcdcdc;--acid:#FFD23F;--on-acid:#1b1b1b;--ok:#0d6b2b;--bad:#b3261e;--link:#0b57d0}
+@media (prefers-color-scheme:dark){:root{--bg:#121212;--card:#1c1c1c;--text:#f2f2f2;--muted:#a8a8a8;--line:#333;--ok:#6fd28a;--bad:#ff8a80;--link:#8ab4f8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:34rem;margin:0 auto;padding:20px 16px 40px}
+h1{margin:0;font-size:1.5rem;line-height:1.2}
+h2{margin:0 0 8px;font-size:1.05rem}
+p{margin:0 0 10px;overflow-wrap:anywhere}
+a{color:var(--link)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.mark{display:inline-block;width:14px;height:14px;border-radius:4px;background:var(--acid);margin-right:8px}
+.pill{font-size:.8rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.on{border-color:var(--ok);color:var(--ok)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+.muted{color:var(--muted);font-size:.92rem}
+textarea,input{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:48px}
+textarea{min-height:96px;resize:vertical}
+button{font:inherit;min-height:48px;padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+button.primary{background:var(--acid);border-color:var(--acid);color:var(--on-acid);font-weight:600}
+button:disabled{opacity:.55}
+:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.result{min-height:1.5em;margin:10px 0 0}
+.result.ok{color:var(--ok)}
+.result.bad{color:var(--bad)}
+details{border-top:1px solid var(--line);padding:10px 0}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+summary::after{content:"+";margin-left:auto;padding-left:12px;color:var(--muted);font-weight:400}
+details[open] summary::after{content:"−"}
+ol{margin:6px 0 10px;padding-left:1.3rem}
+li{margin:0 0 6px;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+"""
+
+_PHONE_SCRIPT = r"""
+(function () {
+  "use strict";
+  var KEY = "uoink-relay-push-token";
+  var memory = "";
+  var pending = "";
+  function $(id) { return document.getElementById(id); }
+  function read() {
+    try { return window.localStorage.getItem(KEY) || memory; } catch (e) { return memory; }
+  }
+  function write(value) {
+    memory = value || "";
+    try {
+      if (value) window.localStorage.setItem(KEY, value); else window.localStorage.removeItem(KEY);
+    } catch (e) {}
+  }
+  function validToken(value) { return typeof value === "string" && /^[\x21-\x7e]{32,}$/.test(value); }
+  function tokenFrom(text) {
+    var match = /[#&]t=([^&\s]+)/.exec(text || "");
+    if (!match) return "";
+    try { return decodeURIComponent(match[1]); } catch (e) { return ""; }
+  }
+
+  // Take the token out of the address bar at once.
+  var fresh = tokenFrom(window.location.hash);
+  if (window.location.hash) {
+    try { window.history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
+  }
+  if (validToken(fresh)) {
+    var stored = read();
+    if (!stored) {
+      write(fresh);
+    } else if (stored === fresh) {
+      say($("pairresult"), "Already paired", "ok");
+    } else {
+      pending = fresh;
+      say($("pairresult"), "This link would pair this phone with a different key. Pair with the new key?", "");
+    }
+  }
+
+  var UA = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(UA);
+
+  function say(el, text, kind) { el.textContent = text; el.className = "result" + (kind ? " " + kind : ""); }
+
+  function paired() { return validToken(read()); }
+  function render() {
+    var on = paired();
+    $("pill").textContent = on ? "Paired" : "Not paired";
+    $("pill").className = "pill" + (on ? " on" : "");
+    $("unpaired").hidden = on;
+    $("sendcard").hidden = !on;
+    $("forget").hidden = !on;
+    $("shortcutcopy").hidden = !on;
+    $("pairnotice").hidden = !$("pairresult").textContent;
+    $("pairchoice").hidden = !pending;
+  }
+
+  function explain(status, data) {
+    if (status === 401) return "This phone's key doesn't match your relay. Scan the QR code in Uoink again.";
+    if (status === 403) return "That key can't add links. Scan the QR code in Uoink again.";
+    if (status === 429) return "The relay is busy or full right now. Try again in a minute.";
+    if (status === 400 || status === 413 || status === 415) {
+      return "That didn't look like a link." + ((data && data.error) ? " (" + data.error + ")" : "");
+    }
+    return "The relay had a problem (" + status + "). Try again in a minute.";
+  }
+
+  // A free Render service sleeps after 15 quiet minutes and takes about a
+  // minute to wake. A network failure or a 502/503/504 gets automatic retries.
+  var WAKE_MS = 90000;
+  function send(body, outEl) {
+    var token = read();
+    if (!validToken(token)) { say(outEl, "This phone isn't paired yet. Scan the QR code in Uoink.", "bad"); return Promise.resolve(false); }
+    var started = Date.now();
+    say(outEl, "Sending...", "");
+    function attempt() {
+      var controller = typeof AbortController === "function" ? new AbortController() : null;
+      var timer = controller ? window.setTimeout(function () { controller.abort(); }, 20000) : 0;
+      function again() {
+        if (Date.now() - started >= WAKE_MS) {
+          say(outEl, "Couldn't reach the relay. Check your connection and try again.", "bad");
+          return false;
+        }
+        say(outEl, "Waking your relay, this can take a minute. Hang on, trying again automatically.", "");
+        return new Promise(function (resolve) { window.setTimeout(resolve, 4000); }).then(attempt);
+      }
+      return fetch("/v1/links", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller ? controller.signal : undefined,
+        cache: "no-store",
+        referrerPolicy: "no-referrer"
+      }).then(function (response) {
+        if (timer) window.clearTimeout(timer);
+        if (response.status === 502 || response.status === 503 || response.status === 504) return again();
+        return response.json().catch(function () { return {}; }).then(function (data) {
+          if (response.status === 201) { say(outEl, "Sent. Uoink picks it up the next time it checks on your computer.", "ok"); return true; }
+          if (response.status === 200) { say(outEl, "That link is already waiting for Uoink.", "ok"); return true; }
+          say(outEl, explain(response.status, data), "bad");
+          return false;
+        });
+      }, function () {
+        if (timer) window.clearTimeout(timer);
+        return again();
+      });
+    }
+    return attempt();
+  }
+
+  $("sendform").addEventListener("submit", function (event) {
+    event.preventDefault();
+    var text = $("link").value.trim();
+    if (!text) { say($("result"), "Paste a link first.", "bad"); return; }
+    $("sendbtn").disabled = true;
+    send({ url: text }, $("result")).then(function (ok) {
+      $("sendbtn").disabled = false;
+      if (ok) { $("link").value = ""; $("sharedbox").hidden = true; }
+    });
+  });
+
+  $("pairform").addEventListener("submit", function (event) {
+    event.preventDefault();
+    var token = tokenFrom($("pairlink").value);
+    if (!validToken(token)) { say($("pairresult"), "That isn't a pairing link from Uoink.", "bad"); render(); return; }
+    write(token);
+    pending = "";
+    $("pairlink").value = "";
+    say($("pairresult"), "Paired with the new key", "ok");
+    render();
+  });
+
+  $("pairnew").addEventListener("click", function () {
+    if (!pending) return;
+    write(pending);
+    pending = "";
+    say($("pairresult"), "Paired with the new key", "ok");
+    render();
+  });
+  $("pairkeep").addEventListener("click", function () {
+    pending = "";
+    say($("pairresult"), "Kept the current key", "ok");
+    render();
+  });
+
+  $("forget").addEventListener("click", function () {
+    write("");
+    pending = "";
+    say($("pairresult"), "", "");
+    say($("result"), "", "");
+    render();
+  });
+
+  function copyText(value, out) {
+    function done(ok) { say(out, ok ? "Copied." : "Couldn't copy. Press and hold the text instead.", ok ? "ok" : "bad"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(function () { done(true); }, function () { done(false); });
+      return;
+    }
+    done(false);
+  }
+  $("copyaddr").addEventListener("click", function () { copyText(window.location.origin + "/v1/links", $("copyresult")); });
+  $("copykey").addEventListener("click", function () {
+    if (paired()) copyText("Bearer " + read(), $("copyresult"));
+  });
+
+  // Android share target: the manifest sends a shared link here as ?url=&text=&title=.
+  // Any web page or message can open /phone?url=... on a paired phone, so a
+  // share is never sent by itself. It fills the box and waits for Send.
+  var params = new URLSearchParams(window.location.search);
+  var shared = [];
+  ["url", "text", "title"].forEach(function (name) {
+    var value = (params.get(name) || "").trim();
+    if (!value) return;
+    for (var i = 0; i < shared.length; i++) {
+      if (shared[i].indexOf(value) !== -1) return;
+      if (value.indexOf(shared[i]) !== -1) { shared[i] = value; return; }
+    }
+    shared.push(value);
+  });
+  if (shared.length) {
+    try { window.history.replaceState(null, "", window.location.pathname); } catch (e) {}
+    $("link").value = shared.join(" ");
+    $("sharedbox").hidden = false;
+    if (paired()) {
+      say($("sharedresult"), "Shared from another app. Send it to Uoink? Check the link below, then tap Send.", "");
+    } else {
+      say($("sharedresult"), "This phone isn't paired yet, so nothing was sent. Scan the QR code in Uoink, then send it from the box below.", "bad");
+    }
+  }
+
+  var which = isIOS ? "ios" : (isAndroid ? "android" : "");
+  if (which) { var det = $("how-" + which); if (det) det.open = true; }
+  if (isIOS) $("iosonly").hidden = false;
+  render();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/phone-sw.js", { scope: "/phone" }).catch(function () {});
+  }
+})();
+"""
+
+_PHONE_BODY = """<main>
+<div class="top"><h1><span class="mark"></span>Send to Uoink</h1><span class="pill" id="pill">Not paired</span></div>
+<div class="card" id="pairnotice" hidden>
+<p class="result" id="pairresult" role="status"></p>
+<div class="row" id="pairchoice" hidden><button class="primary" id="pairnew" type="button">Pair with new key</button><button id="pairkeep" type="button">Keep current</button></div>
+</div>
+<div class="card" id="unpaired" hidden>
+<h2>Pair this phone</h2>
+<p>Open Uoink on your computer, go to Settings, then Phone inbox, and scan the QR code with this phone's camera. That opens this page with the key it needs.</p>
+<details><summary>Pair with a link instead</summary>
+<form id="pairform"><p class="muted">In Uoink, choose Copy pairing link, send it to this phone and paste it here.</p>
+<input id="pairlink" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Pairing link">
+<div class="row"><button class="primary" type="submit">Pair</button></div></form></details>
+</div>
+<div class="card" id="sharedbox" hidden><h2>Shared link</h2><p class="result" id="sharedresult" role="status"></p></div>
+<div class="card" id="sendcard">
+<h2>Paste a link</h2>
+<form id="sendform">
+<textarea id="link" rows="3" inputmode="url" autocapitalize="off" spellcheck="false" aria-label="Link to send" placeholder="Paste a link here"></textarea>
+<div class="row"><button class="primary" id="sendbtn" type="submit">Send</button></div>
+<p class="result" id="result" role="status" aria-live="polite"></p>
+</form>
+<p class="muted">Uoink on your computer captures it the next time it checks. The relay deletes it after pickup, or after 7 days.</p>
+</div>
+<div class="card">
+<h2>Send faster</h2>
+<details id="how-android"><summary>Android: add to Home Screen</summary>
+<ol><li>In Chrome, open the menu and choose Install app or Add to Home screen.</li>
+<li>After that, Uoink shows up in the share sheet. Share a link from YouTube, X or any page and pick Uoink.</li></ol></details>
+<details id="how-ios"><summary>iPhone: add to Home Screen</summary>
+<ol><li>In Safari, tap Share, then Add to Home Screen.</li>
+<li>Open it from your Home Screen to paste links quickly. If it says Not paired, open Pair with a link and paste the pairing link from Uoink.</li></ol></details>
+<details id="iosonly" hidden><summary>iPhone: Send from the Share sheet</summary>
+<p class="muted">iPhone web pages can't appear in the Share sheet, so make a one-time Shortcut. It takes about two minutes.</p>
+<ol><li>Open the Shortcuts app and tap the plus button. Name it Send to Uoink.</li>
+<li>Open the shortcut's details and turn on Show in Share Sheet. Allow URLs and Text.</li>
+<li>Add the action Get Contents of URL. Paste this address with the first button below.</li>
+<li>Tap Show More. Set Method to POST. Add the header Authorization and paste its value with the second button below.</li>
+<li>Set Request Body to JSON. Add a Text field named url and set it to Shortcut Input.</li>
+<li>Done. Share any page and pick Send to Uoink.</li></ol>
+<div class="row" id="shortcutcopy"><button id="copyaddr" type="button">Copy address</button><button id="copykey" type="button">Copy Authorization value</button></div>
+<p class="result" id="copyresult" role="status"></p></details>
+</div>
+<p class="muted">This page talks only to your own relay. Nothing is tracked, and there are no ads or outside scripts.</p>
+<div class="row"><button id="forget" type="button" hidden>Forget this phone</button></div>
+</main>"""
+
+
+def _csp_hash(text: str) -> str:
+    return "'sha256-" + base64.b64encode(hashlib.sha256(text.encode("utf-8")).digest()).decode("ascii") + "'"
+
+
+_PHONE_HTML = ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+               "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">"
+               "<meta name=\"robots\" content=\"noindex,nofollow\">"
+               "<meta name=\"theme-color\" content=\"#FFD23F\">"
+               "<meta name=\"mobile-web-app-capable\" content=\"yes\">"
+               "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">"
+               "<meta name=\"apple-mobile-web-app-title\" content=\"Uoink\">"
+               "<link rel=\"icon\" href=\"/phone-icon-192.png\">"
+               "<link rel=\"manifest\" href=\"/phone.webmanifest\">"
+               "<link rel=\"apple-touch-icon\" href=\"/phone-icon-180.png\">"
+               "<title>Send to Uoink</title><style>" + _PHONE_STYLE + "</style></head><body>"
+               + _PHONE_BODY + "<script>" + _PHONE_SCRIPT + "</script></body></html>").encode("utf-8")
+_PHONE_CSP = ("default-src 'none'; script-src " + _csp_hash(_PHONE_SCRIPT)
+              + "; style-src " + _csp_hash(_PHONE_STYLE)
+              + "; img-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; "
+              "base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+_PHONE_SW = (b"// Uoink Relay phone page. A fetch handler lets Android treat the page as "
+             b"installable; it stores nothing.\n"
+             b"self.addEventListener('fetch', function () {});\n")
+_PHONE_ASSET_CSP = "default-src 'none'; frame-ancestors 'none'"
+PHONE_ICON_SIZES = (180, 192, 512)
+
+_PHONE_MANIFEST = json.dumps({
+    "name": "Send to Uoink",
+    "short_name": "Uoink",
+    "description": "Send links from this phone to Uoink on your computer.",
+    "id": "/phone",
+    "start_url": "/phone",
+    "scope": "/phone",
+    "display": "standalone",
+    "background_color": "#FFD23F",
+    "theme_color": "#FFD23F",
+    "icons": [
+        {"src": "/phone-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+        {"src": "/phone-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+    ],
+    "share_target": {
+        "action": "/phone",
+        "method": "GET",
+        "enctype": "application/x-www-form-urlencoded",
+        "params": {"title": "title", "text": "text", "url": "url"},
+    },
+}, ensure_ascii=False).encode("utf-8")
+
+
+def _png(width: int, height: int, rows: list) -> bytes:
+    raw = b"".join(b"\x00" + bytes(row) for row in rows)
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        body = kind + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b""))
+
+
+@lru_cache(maxsize=None)
+def phone_icon(size: int) -> bytes:
+    """A flat Uoink-yellow square with a dark U, drawn here so the relay
+    needs no image files or libraries. Full bleed, so it also works masked."""
+    yellow, dark = (0xFF, 0xD2, 0x3F), (0x1B, 0x1B, 0x1B)
+    half = size * 0.19            # centre line to the outer edge of the U
+    stroke = size * 0.095
+    top, centre_y = size * 0.27, size * 0.55
+    rows = []
+    for y in range(size):
+        row = bytearray(yellow * size)
+        py = y + 0.5
+        spans = []
+        if top <= py <= centre_y:
+            spans = [(size / 2 - half, size / 2 - half + stroke), (size / 2 + half - stroke, size / 2 + half)]
+        elif centre_y < py <= centre_y + half:
+            dy = py - centre_y
+            outer = (half * half - dy * dy) ** 0.5
+            inner_sq = (half - stroke) ** 2 - dy * dy
+            inner = inner_sq ** 0.5 if inner_sq > 0 else 0.0
+            spans = [(size / 2 - outer, size / 2 - inner), (size / 2 + inner, size / 2 + outer)]
+        for left, right in spans:
+            for x in range(max(0, int(left + 0.5)), min(size, int(right + 0.5))):
+                row[x * 3:x * 3 + 3] = bytes(dark)
+        rows.append(row)
+    return _png(size, size, rows)
+
+
 class RelayHandler(BaseHTTPRequestHandler):
     server_version = "uoink-relay"
     sys_version = ""
@@ -631,6 +1017,27 @@ class RelayHandler(BaseHTTPRequestHandler):
         if path == "/":
             self._begin("/")
             return self._send(200, _PAGE, "text/html; charset=utf-8", _PAGE_CSP)
+        if path == "/phone":
+            self._begin("/phone")
+            return self._send(200, _PHONE_HTML, "text/html; charset=utf-8", _PHONE_CSP)
+        if path == "/phone.webmanifest":
+            self._begin("/phone.webmanifest")
+            return self._send(200, _PHONE_MANIFEST, "application/manifest+json; charset=utf-8", _PHONE_ASSET_CSP)
+        if path == "/phone-sw.js":
+            self._begin("/phone-sw.js")
+            return self._send(200, _PHONE_SW, "text/javascript; charset=utf-8", _PHONE_ASSET_CSP)
+        icon = re.fullmatch(r"/phone-icon-(\d+)\.png", path)
+        if icon and int(icon.group(1)) in PHONE_ICON_SIZES:
+            self._begin("/phone-icon")
+            return self._send(200, phone_icon(int(icon.group(1))), "image/png", _PHONE_ASSET_CSP)
+        if path == "/v1/pairing":
+            # Same limiter as every other authed route. The pull token already
+            # belongs to the same person as the push token, so showing the
+            # push token to it widens nothing that matters (docs/relay.md).
+            self._begin("/v1/pairing")
+            if not self._authorize("pull"):
+                return None
+            return self._json(200, {"ok": True, "push_token": self.relay.config.push_token})
         if path == "/v1/links":
             self._begin("/v1/links")
             if not self._authorize("pull"):

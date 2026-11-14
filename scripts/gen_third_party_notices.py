@@ -110,6 +110,16 @@ the upstream JavaScript implementation. See the
 """
 
 
+QRCODE_BLOCK = """\n## Bundled JavaScript (not a Python package)
+
+The dashboard's phone-inbox setup draws its QR code on this computer with
+[qrcode-generator 1.4.4](https://github.com/kazuhikoarase/qrcode-generator)
+(MIT), copyright (c) 2009 Kazuhiko Arase, shipped unchanged as
+`assets/dashboard/qrcode.js`. No outside QR service is used.
+See the [MIT license](third-party-notices/qrcode-generator-1.4.4-MIT-LICENSE.txt).
+"""
+
+
 WHISPER_PIN = Path(__file__).resolve().with_name("whisper_model_pin.json")
 
 
@@ -315,7 +325,7 @@ def main() -> int:
         url = row.get("URL") or row.get("Home-page") or ""
         lines.append(f"| {name} | {version} | {lic} | {url} |")
     lines += ["", supplemental, "", EMBEDDINGGEMMA_BLOCK, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
-              "", DENO_BLOCK, "", whisper_model_block(), "", BUNDLED_FONTS_BLOCK, ""]
+              "", DENO_BLOCK, "", whisper_model_block(), "", BUNDLED_FONTS_BLOCK, "", QRCODE_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

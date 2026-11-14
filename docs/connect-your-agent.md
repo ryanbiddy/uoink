@@ -3,6 +3,8 @@
 Install [Uoink for Windows](https://github.com/ryanbiddy/uoink/releases/latest)
 first. In the installer, leave **Add the uoink command to PATH for AI agents**
 checked, then open a new terminal. The agent CLI ships with Uoink 3.10.0.
+With Node installed, `npx uoink` does the download, checksum and install for you,
+and once Uoink is installed `npx uoink connect claude-code` runs the CLI directly.
 In PowerShell, check the install:
 
 ```powershell

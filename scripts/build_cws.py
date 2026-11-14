@@ -62,6 +62,8 @@ uoink-memory.html
 uoink-memory.js
 """.split())
 DEV_ONLY = frozenset({"lib/mock-api.js"})
+# Belt and braces on top of the allowlist: nothing like this may ever ship.
+FORBIDDEN = re.compile(r"(^|/)(tests?|mocks?|node_modules)(/|$)|mock|\.map$|\.pem$|\.md$|\.test\.|_test\.", re.I)
 
 
 def build(root: Path = ROOT) -> Path:
@@ -71,6 +73,9 @@ def build(root: Path = ROOT) -> Path:
              (hasattr(p, "is_junction") and p.is_junction())]
     if links:
         raise ValueError(f"Links are not allowed in the package source: {links}")
+    bad = sorted(n for n in ALLOWLIST if FORBIDDEN.search(n))
+    if bad:
+        raise ValueError(f"Allowlist names a test, mock, source map, key or doc file: {bad}")
     unexpected = set(files) - ALLOWLIST - DEV_ONLY
     missing = ALLOWLIST - set(files)
     if unexpected or missing:
@@ -123,9 +128,14 @@ def build(root: Path = ROOT) -> Path:
     return out
 
 
-if __name__ == "__main__":
-    archive = build()
-    print(f"{archive}\n{archive.stat().st_size:,} bytes\nSHA-256 {hashlib.sha256(archive.read_bytes()).hexdigest()}")
+def report(archive: Path) -> list[str]:
+    """Lines the build prints: path, size, hash, then the file list."""
+    lines = [str(archive), f"{archive.stat().st_size:,} bytes",
+             f"SHA-256 {hashlib.sha256(archive.read_bytes()).hexdigest()}"]
     with zipfile.ZipFile(archive) as z:
-        for item in z.infolist():
-            print(f"{item.file_size:>8}  {item.filename}")
+        lines += [f"{item.file_size:>8}  {item.filename}" for item in z.infolist()]
+    return lines
+
+
+if __name__ == "__main__":
+    print(chr(10).join(report(build())))

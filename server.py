@@ -52,13 +52,12 @@ if sys.platform == "darwin":
     sys.dont_write_bytecode = True
     os.environ["PYTHONDONTWRITEBYTECODE"] = "1"  # inherited by app workers
 
-try:
-    import keyring as _keyring
-except Exception as _keyring_error:  # pragma: no cover - env-specific
-    _keyring = None
-    _KEYRING_IMPORT_ERROR = str(_keyring_error)
-else:
-    _KEYRING_IMPORT_ERROR = None
+# keyring loads on first use (_keyring_module), never at import: isolated
+# profiles keep secrets in a profile file and must not touch the OS store.
+# Tests set _keyring to a fake, or to None for "keyring is missing".
+_KEYRING_NOT_LOADED = object()
+_keyring = _KEYRING_NOT_LOADED
+_KEYRING_IMPORT_ERROR: str | None = None
 
 # --- Import helpers from the existing CLI script ---------------------------
 HERE = Path(__file__).parent.resolve()
@@ -104,6 +103,7 @@ import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
+import library_remember  # noqa: E402  -- Library Rediscover shelf + idea starters
 import usage_meter  # noqa: E402  -- D-17 real model-usage meter (KV rollup)
 import corpus_contract  # noqa: E402  -- versioned read boundary for consumers
 import corpus_provider  # noqa: E402  -- Uoink provider for corpus contract v1
@@ -113,6 +113,7 @@ import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
 import source_availability  # noqa: E402  -- bounded source availability checks
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
+import suggestions  # noqa: E402  -- 3.17 podcast suggestions (opt-in, topic words only)
 import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
 import research  # noqa: E402  -- Research run storage and source discovery
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
@@ -169,6 +170,7 @@ DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
 # The dashboard's @font-face rules load these (SIL OFL, shipped with the
 # app). Only these exact files are served, without a token.
 BRAND_FONTS_DIR = HERE / "assets" / "brand" / "fonts"
+DASHBOARD_QRCODE_PATH = HERE / "assets" / "dashboard" / "qrcode.js"
 BRAND_FONT_FILES = frozenset({"inter.woff", "inter-italic.woff", "bungee.woff", "jetbrains-mono.woff"})
 
 # v2.5: per-file sidecar data-shape version. v2.5+ writers stamp every new
@@ -854,6 +856,23 @@ ROLE_MIXED = "mixed"
 _ROLE_ENUM = (ROLE_CREATOR, ROLE_RESEARCHER, ROLE_MARKETER, ROLE_MIXED)
 
 
+# "After a save" (3.17.0): what the browser extension does once a capture is
+# saved. The extension keeps a chrome.storage copy; this is the source of truth
+# so the dashboard and the extension agree.
+AFTER_SAVE_STAY = "stay"
+_AFTER_SAVE_ENUM = (AFTER_SAVE_STAY, "claude", "chatgpt", "copy")
+
+
+def _normalize_after_save(value) -> str:
+    """Clamp settings.after_save to the bounded enum; unknown values and
+    older settings.json files fall back to staying on the page."""
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in _AFTER_SAVE_ENUM:
+            return v
+    return AFTER_SAVE_STAY
+
+
 def _normalize_role(value) -> str:
     """Clamp a settings.role value to the bounded enum. Unknown values
     (including None and pre-v3.1 settings.json files that omit the field)
@@ -980,6 +999,8 @@ def _default_settings() -> dict:
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
         "source_availability_check_enabled": True,
+        # Library "Rediscover" shelf and idea starters. Local only.
+        "rediscover_shelves_enabled": True,
         # CM-11: when a downloaded video exposes no subtitle track, use a
         # local faster-whisper model (the user's download, else the copy the
         # installer bundles). Default ON because
@@ -992,6 +1013,7 @@ def _default_settings() -> dict:
         # axis until the user (or onboarding) picks. Drives Library
         # default sort + filter-chip emphasis per ROADMAP P2.
         "role": "mixed",
+        "after_save": AFTER_SAVE_STAY,
         # v3.1 live stream behavior. wait_for_end (default) -> we queue the
         # URL and re-attempt periodically until the broadcast ends and a
         # recording is available. extract_when_recorded -> we attempt
@@ -1037,6 +1059,10 @@ def _default_settings() -> dict:
         # Daily update check against api.github.com. Off until the user turns
         # it on; the Check now button works either way.
         "auto_update_check": False,
+        # Podcast suggestions: off until the user turns it on. When on, a few
+        # topic words (never titles, links or transcripts) go to Apple's
+        # podcast search about once a day (suggestions.py).
+        "suggest_podcasts": False,
         "anthropic_key_invalid": False,
         "scrapecreators_enabled": False,
         "scrapecreators_agent_calls_enabled": False,
@@ -1222,6 +1248,9 @@ def _normalize_settings(data: dict) -> dict:
     clean["source_availability_check_enabled"] = bool(
         clean.get("source_availability_check_enabled", True)
     )
+    clean["rediscover_shelves_enabled"] = bool(
+        clean.get("rediscover_shelves_enabled", True)
+    )
     clean["asr_fallback_enabled"] = bool(
         clean.get("asr_fallback_enabled", True)
     )
@@ -1241,6 +1270,7 @@ def _normalize_settings(data: dict) -> dict:
     clean["usage_sharing"] = clean.get("usage_sharing") is True and not uoink_usage.forced_off()
     clean["usage_sharing_prompt_seen"] = clean.get("usage_sharing_prompt_seen") is True
     clean["auto_update_check"] = clean.get("auto_update_check") is True
+    clean["suggest_podcasts"] = clean.get("suggest_podcasts") is True
     clean["notifications_enabled"] = bool(
         clean.get("notifications_enabled", True)
     )
@@ -1296,9 +1326,10 @@ def _read_settings() -> dict:
 
 
 @contextlib.contextmanager
-def _settings_file_lock():
-    """Serialize settings writers and consent sync across helper/stdio processes."""
-    path = _settings_path().with_suffix(".json.lock")
+def _settings_file_lock(path: Path | None = None):
+    """Serialize settings writers and consent sync across helper/stdio processes.
+    `path` names another lock file (the profile's credentials file uses one)."""
+    path = path or _settings_path().with_suffix(".json.lock")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a+b") as lock:
         if os.name == "nt":
@@ -1452,43 +1483,308 @@ def _pick_output_folder(initial_dir: Path | None = None) -> str | None:
     return _pick_output_folder_tk(initial_dir)
 
 
+# ---- Credential store ---------------------------------------------------------
+# Every saved secret goes through the helpers below: the Anthropic key, the
+# ScrapeCreators key and the relay pull token.
+#
+# Normal installs use the OS store through keyring (macOS Keychain, Windows
+# Credential Manager). A keyring call has no timeout of its own: it can sit
+# behind an OS prompt (a locked keychain, an access prompt after an update,
+# "Keychain Not Found") for as long as the prompt is up. So each call runs on
+# a worker thread, and its caller waits at most CREDENTIAL_STORE_TIMEOUT_SEC.
+# Calls take turns first in, first out, one at a time. A caller that gives up
+# while waiting leaves the line, so its call never runs later. The only call
+# that can finish after its caller gave up is the one already inside the OS,
+# and it finishes before any call behind it starts, so a late write can't land
+# on top of a newer one. Nothing holds _settings_lock across one of these calls.
+#
+# Isolated installs (and UOINK_CREDENTIAL_STORE=file) keep secrets in
+# credentials.json inside their own profile and never load keyring, so a test
+# profile can't raise an OS prompt or leave entries in the real store.
+CREDENTIAL_STORE_TIMEOUT_SEC = 10.0
+# A read waits this long behind another credential call, then uses the last
+# value this process saw. It doesn't wait at all behind a call that's slow.
+CREDENTIAL_STORE_READ_WAIT_SEC = 0.25
+CREDENTIAL_STORE_UNAVAILABLE = "credential_store_unavailable"
+CREDENTIAL_STORE_TIMEOUT_MESSAGE = (
+    "The system credential store didn't answer. "
+    "Unlock it or allow access, then select Save again.")
+CREDENTIAL_STORE_ERROR_MESSAGE = (
+    "The system credential store didn't save this. "
+    "Unlock it or allow access, then select Save again.")
+CREDENTIAL_FILE_NAME = "credentials.json"
+
+
+class CredentialStoreTimeout(CredentialStoreError):
+    """The OS credential store didn't answer in time."""
+
+
+class _CredentialTurns:
+    """First in, first out turns for OS credential calls. A turn lasts from
+    the moment its caller gets it until the worker's call returns."""
+
+    def __init__(self) -> None:
+        self._cond = threading.Condition()
+        self._next = 0
+        self._serving = 0
+        self._gave_up: set[int] = set()
+        self._held_since: float | None = None
+
+    def acquire(self, wait: float) -> bool:
+        deadline = time.monotonic() + max(0.0, wait)
+        with self._cond:
+            ticket = self._next
+            self._next += 1
+            while self._serving != ticket:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    self._gave_up.add(ticket)
+                    return False
+                self._cond.wait(remaining)
+            self._held_since = time.monotonic()
+            return True
+
+    def release(self) -> None:
+        with self._cond:
+            self._held_since = None
+            self._serving += 1
+            while self._serving in self._gave_up:
+                self._gave_up.discard(self._serving)
+                self._serving += 1
+            self._cond.notify_all()
+
+    def busy_for(self) -> float:
+        """Seconds the current call has been running, 0.0 when idle."""
+        with self._cond:
+            if self._held_since is None:
+                return 0.0
+            return time.monotonic() - self._held_since
+
+
+_credential_turns = _CredentialTurns()
+_credential_memory_lock = threading.Lock()
+_credential_last_seen: dict[tuple[str, str], str] = {}
+_credential_write_generations: dict[str, int] = {}
+_credential_file_lock = threading.Lock()
+
+
+def _keyring_missing_error() -> CredentialStoreError:
+    detail = (
+        f"keyring import failed: {_KEYRING_IMPORT_ERROR}"
+        if _KEYRING_IMPORT_ERROR else
+        "keyring is not installed"
+    )
+    return CredentialStoreError(
+        "Anthropic API key storage unavailable. Install keyring or run the "
+        f"Windows installer. Details: {detail}"
+    )
+
+
+def _keyring_module():
+    """The keyring package, imported on first use. None when it's missing."""
+    global _keyring, _KEYRING_IMPORT_ERROR
+    if _keyring is _KEYRING_NOT_LOADED:
+        try:
+            import keyring as module
+        except Exception as e:  # pragma: no cover - env-specific
+            _KEYRING_IMPORT_ERROR = str(e)
+            _keyring = None
+        else:
+            _keyring = module
+    return _keyring
+
+
+def _credential_store_mode() -> str:
+    """"file" for isolated installs and UOINK_CREDENTIAL_STORE=file, else
+    "keyring" (the OS store, under _keyring_service_name())."""
+    if _isolated_binding() is not None:
+        return "file"
+    if os.environ.get("UOINK_CREDENTIAL_STORE", "").strip().lower() == "file":
+        return "file"
+    return "keyring"
+
+
 def _credential_store_error() -> CredentialStoreError | None:
-    if _keyring is None:
-        detail = (
-            f"keyring import failed: {_KEYRING_IMPORT_ERROR}"
-            if _KEYRING_IMPORT_ERROR else
-            "keyring is not installed"
-        )
-        return CredentialStoreError(
-            "Anthropic API key storage unavailable. Install keyring or run the "
-            f"Windows installer. Details: {detail}"
-        )
+    if _credential_store_mode() == "file":
+        return None
+    if _keyring_module() is None:
+        return _keyring_missing_error()
     return None
 
 
-def _get_saved_anthropic_key() -> str:
-    err = _credential_store_error()
-    if err:
-        log.debug("%s", err)
-        return ""
+def _remember_credential(service: str, username: str, value: str) -> None:
+    with _credential_memory_lock:
+        if value:
+            _credential_last_seen[(service, username)] = value
+        else:
+            _credential_last_seen.pop((service, username), None)
+
+
+def _last_seen_credential(service: str, username: str) -> str:
+    with _credential_memory_lock:
+        return _credential_last_seen.get((service, username), "")
+
+
+def _bump_credential_generation(username: str) -> None:
+    with _credential_memory_lock:
+        _credential_write_generations[username] = _credential_write_generations.get(username, 0) + 1
+
+
+def _credential_generation(username: str) -> int:
+    """Counts saves of one secret, so a check that read it can tell whether a
+    save started since."""
+    with _credential_memory_lock:
+        return _credential_write_generations.get(username, 0)
+
+
+def _keyring_call(fn, *, read: bool = False):
+    """Run fn(keyring) on a worker thread, in turn, and return its result.
+    Raises CredentialStoreTimeout when the turn plus the call take longer than
+    CREDENTIAL_STORE_TIMEOUT_SEC. A read waits for its turn only briefly.
+    fn's own exceptions re-raise here."""
+    turns = _credential_turns  # the worker releases this same line, even late
+    timeout = max(0.0, float(CREDENTIAL_STORE_TIMEOUT_SEC))
+    deadline = time.monotonic() + timeout
+    wait = timeout
+    if read:
+        wait = (0.0 if turns.busy_for() >= CREDENTIAL_STORE_READ_WAIT_SEC
+                else min(timeout, CREDENTIAL_STORE_READ_WAIT_SEC))
+    if not turns.acquire(wait):
+        raise CredentialStoreTimeout("credential store busy")
+    if time.monotonic() >= deadline:
+        # No time left to wait for an answer: don't start a call that would
+        # finish after this caller reported a failure.
+        turns.release()
+        raise CredentialStoreTimeout("credential store busy")
+    done = threading.Event()
+    outcome: dict = {}
+
+    def run() -> None:
+        try:
+            backend = _keyring_module()
+            if backend is None:
+                raise _keyring_missing_error()
+            outcome["value"] = fn(backend)
+        except BaseException as e:  # handed to the caller below
+            outcome["error"] = e
+        finally:
+            turns.release()
+            done.set()
+
     try:
-        binding = _isolated_binding()
-        if binding is not None:
-            service = _isolated_keyring_service(binding.profile)
-            key = _keyring.get_password(service, KEYRING_ANTHROPIC_USERNAME)
-            return key or ""
-        key = _keyring.get_password(KEYRING_SERVICE, KEYRING_ANTHROPIC_USERNAME)
-        if key:
-            return key
+        threading.Thread(target=run, name="uoink-credential-store", daemon=True).start()
+    except BaseException:
+        turns.release()
+        raise
+    if not done.wait(max(0.0, deadline - time.monotonic())):
+        raise CredentialStoreTimeout("credential store did not answer")
+    if "error" in outcome:
+        raise outcome["error"]
+    return outcome.get("value")
+
+
+def _keyring_read(username: str, services: tuple[str, ...]) -> str:
+    """The first non-empty value among `services`. When the store doesn't
+    answer in time, the last value this process saw. Other errors raise."""
+    def op(backend) -> str:
+        value = ""
+        for service in services:
+            found = backend.get_password(service, username)
+            if isinstance(found, str) and found:
+                value = found
+                break
+        _remember_credential(services[0], username, value)
+        return value
+
+    try:
+        return _keyring_call(op, read=True)
+    except CredentialStoreTimeout:
+        return _last_seen_credential(services[0], username)
+
+
+def _credential_file_path() -> Path:
+    return _settings_path().with_name(CREDENTIAL_FILE_NAME)
+
+
+def _load_credential_file(path: Path) -> dict[str, str]:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError):
+        # Never echo the file's text: it holds secrets.
+        raise CredentialStoreError("credential file unreadable") from None
+    entries = raw.get("entries") if isinstance(raw, dict) else None
+    if not isinstance(entries, dict):
+        raise CredentialStoreError("credential file unreadable")
+    return {name: value for name, value in entries.items()
+            if isinstance(name, str) and isinstance(value, str) and value}
+
+
+def _file_credential_get(username: str) -> str:
+    with _credential_file_lock:
+        return _load_credential_file(_credential_file_path()).get(username, "")
+
+
+def _file_credential_put(username: str, value: str) -> None:
+    """Save, or clear with "", one secret in the profile's credentials.json.
+    Written to a new owner-only file, then swapped in."""
+    path = _credential_file_path()
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with _credential_file_lock, _settings_file_lock(path.with_name(CREDENTIAL_FILE_NAME + ".lock")):
+            entries = _load_credential_file(path)
+            if value:
+                entries[username] = value
+            elif entries.pop(username, None) is None:
+                return
+            payload = json.dumps({"version": 1, "entries": entries}, indent=2).encode("utf-8")
+            tmp = path.with_name(f".{CREDENTIAL_FILE_NAME}.{uuid.uuid4().hex}.tmp")
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600)
+            try:
+                with os.fdopen(fd, "wb") as handle:
+                    handle.write(payload)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                os.replace(tmp, path)
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    tmp.unlink()
+                raise
+    except OSError:
+        raise CredentialStoreError("credential file write failed") from None
+
+
+def _credential_store_failure(exc: CredentialStoreError) -> dict:
+    """The /settings reply for a secret that wasn't saved."""
+    return {
+        "ok": False,
+        "code": CREDENTIAL_STORE_UNAVAILABLE,
+        "error": (CREDENTIAL_STORE_TIMEOUT_MESSAGE if isinstance(exc, CredentialStoreTimeout)
+                  else CREDENTIAL_STORE_ERROR_MESSAGE),
+    }
+
+
+def _get_saved_anthropic_key() -> str:
+    if _credential_store_mode() == "file":
+        try:
+            return _file_credential_get(KEYRING_ANTHROPIC_USERNAME)
+        except CredentialStoreError as e:
+            log.warning("credential read failed: %s", e)
+            return ""
+    services = (_keyring_service_name(),)
+    if _isolated_binding() is None:
         # Alias window: if the install migration hasn't yet copied the key
         # from the legacy "Yoink" service (e.g. keyring was briefly
         # unavailable at first boot), still honour the old entry so AI
         # features don't silently break. migrate_install.py performs the
         # one-time copy; this is the read-time safety net.
-        legacy = _keyring.get_password(
-            KEYRING_SERVICE_LEGACY, KEYRING_ANTHROPIC_USERNAME
-        )
-        return legacy or ""
+        services += (KEYRING_SERVICE_LEGACY,)
+    try:
+        return _keyring_read(KEYRING_ANTHROPIC_USERNAME, services)
+    except CredentialStoreError as e:
+        log.debug("%s", e)
+        return ""
     except Exception as e:
         log.warning("credential read failed: %s", e)
         return ""
@@ -1496,65 +1792,73 @@ def _get_saved_anthropic_key() -> str:
 
 def _store_saved_anthropic_key(key: str) -> None:
     key = (key or "").strip()
-    err = _credential_store_error()
-    if err:
-        if key:
-            raise err
+    _bump_credential_generation(KEYRING_ANTHROPIC_USERNAME)
+    if _credential_store_mode() == "file":
+        _file_credential_put(KEYRING_ANTHROPIC_USERNAME, key)
         return
-    try:
-        service = _keyring_service_name()
+    service = _keyring_service_name()
+
+    def op(backend) -> None:
         if key:
-            _keyring.set_password(
-                service,
-                KEYRING_ANTHROPIC_USERNAME,
-                key,
-            )
+            backend.set_password(service, KEYRING_ANTHROPIC_USERNAME, key)
         else:
             try:
-                _keyring.delete_password(
-                    service,
-                    KEYRING_ANTHROPIC_USERNAME,
-                )
+                backend.delete_password(service, KEYRING_ANTHROPIC_USERNAME)
             except Exception:
                 # Missing entries and unavailable delete backends both mean
-                # the credential is no longer retrievable by Yoink.
+                # the credential is no longer retrievable by Uoink.
                 pass
+        _remember_credential(service, KEYRING_ANTHROPIC_USERNAME, key)
+
+    try:
+        _keyring_call(op)
+    except CredentialStoreError as e:
+        # A timeout, or keyring missing. Clearing with no store is a no-op.
+        if key or isinstance(e, CredentialStoreTimeout):
+            raise
     except Exception as e:
         raise CredentialStoreError(f"credential write failed: {e}") from e
 
 
 def _get_saved_scrapecreators_key() -> str:
     """Read only this profile's namespace. No legacy or environment fallback."""
-    if _keyring is None:
-        return ""
     try:
-        value = _keyring.get_password(_keyring_service_name(), KEYRING_SCRAPECREATORS_USERNAME)
-        return value if isinstance(value, str) else ""
+        if _credential_store_mode() == "file":
+            return _file_credential_get(KEYRING_SCRAPECREATORS_USERNAME)
+        return _keyring_read(KEYRING_SCRAPECREATORS_USERNAME, (_keyring_service_name(),))
     except Exception:
         # Credential backends can include the secret in their exception text.
         return ""
 
 
 def _store_saved_scrapecreators_key(key: str) -> None:
-    if _keyring is None:
-        raise CredentialStoreError("ScrapeCreators credential store unavailable")
-    try:
-        service = _keyring_service_name()
+    _bump_credential_generation(KEYRING_SCRAPECREATORS_USERNAME)
+    if _credential_store_mode() == "file":
+        _file_credential_put(KEYRING_SCRAPECREATORS_USERNAME, key)
+        return
+    service = _keyring_service_name()
+
+    def op(backend) -> None:
         if key:
-            _keyring.set_password(service, KEYRING_SCRAPECREATORS_USERNAME, key)
-        elif _keyring.get_password(service, KEYRING_SCRAPECREATORS_USERNAME) is not None:
-            _keyring.delete_password(service, KEYRING_SCRAPECREATORS_USERNAME)
+            backend.set_password(service, KEYRING_SCRAPECREATORS_USERNAME, key)
+        elif backend.get_password(service, KEYRING_SCRAPECREATORS_USERNAME) is not None:
+            backend.delete_password(service, KEYRING_SCRAPECREATORS_USERNAME)
+        _remember_credential(service, KEYRING_SCRAPECREATORS_USERNAME, key)
+
+    try:
+        _keyring_call(op)
+    except CredentialStoreTimeout:
+        raise
     except Exception:
         raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
 
 
 def _get_saved_relay_token() -> str:
-    """The relay pull token from this profile's keyring namespace only."""
-    if _keyring is None:
-        return ""
+    """The relay pull token from this profile's store only."""
     try:
-        value = _keyring.get_password(_keyring_service_name(), KEYRING_RELAY_USERNAME)
-        return value if isinstance(value, str) else ""
+        if _credential_store_mode() == "file":
+            return _file_credential_get(KEYRING_RELAY_USERNAME)
+        return _keyring_read(KEYRING_RELAY_USERNAME, (_keyring_service_name(),))
     except Exception:
         # Credential backends can include the secret in their exception text.
         return ""
@@ -1563,17 +1867,27 @@ def _get_saved_relay_token() -> str:
 def _store_saved_relay_token(token: str) -> None:
     """Save or clear the pull token. A backend that accepts the write but
     cannot read it back (the null keyring) counts as unavailable."""
-    if _keyring is None:
-        raise CredentialStoreError("relay credential store unavailable")
-    try:
-        service = _keyring_service_name()
+    _bump_credential_generation(KEYRING_RELAY_USERNAME)
+    if _credential_store_mode() == "file":
+        _file_credential_put(KEYRING_RELAY_USERNAME, token)
+        return
+    service = _keyring_service_name()
+
+    def op(backend) -> bool:
         if token:
-            _keyring.set_password(service, KEYRING_RELAY_USERNAME, token)
-            readable = _keyring.get_password(service, KEYRING_RELAY_USERNAME) == token
+            backend.set_password(service, KEYRING_RELAY_USERNAME, token)
+            readable = backend.get_password(service, KEYRING_RELAY_USERNAME) == token
         else:
-            if _keyring.get_password(service, KEYRING_RELAY_USERNAME) is not None:
-                _keyring.delete_password(service, KEYRING_RELAY_USERNAME)
+            if backend.get_password(service, KEYRING_RELAY_USERNAME) is not None:
+                backend.delete_password(service, KEYRING_RELAY_USERNAME)
             readable = True
+        _remember_credential(service, KEYRING_RELAY_USERNAME, token if readable else "")
+        return readable
+
+    try:
+        readable = _keyring_call(op)
+    except CredentialStoreTimeout:
+        raise
     except Exception:
         raise CredentialStoreError("relay credential store unavailable") from None
     if not readable:
@@ -1620,9 +1934,14 @@ def _normalize_relay_url(value) -> tuple[str | None, str | None]:
 def _mark_scrapecreators_key_invalid(invalid: bool = True, *, expected_key: str | None = None) -> None:
     # A 401/403 preserves the saved key for the user to replace or clear.
     # Serialize with settings saves, and ignore a response for a replaced key.
+    # The key is read before taking _settings_lock (a credential call can wait
+    # on an OS prompt); the save generation catches a save that starts between.
+    generation = _credential_generation(KEYRING_SCRAPECREATORS_USERNAME)
+    if expected_key is not None and _get_saved_scrapecreators_key() != expected_key:
+        return
     with _settings_lock:
         try:
-            if expected_key is not None and _get_saved_scrapecreators_key() != expected_key:
+            if _credential_generation(KEYRING_SCRAPECREATORS_USERNAME) != generation:
                 return
             data = _read_settings()
             data["scrapecreators_key_invalid"] = invalid
@@ -1702,6 +2021,7 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("transcript_reliability_auto_check")
         ),
         "source_availability_check_enabled": normalized["source_availability_check_enabled"],
+        "rediscover_shelves_enabled": normalized["rediscover_shelves_enabled"],
         "asr_fallback_enabled": bool(
             data.get("asr_fallback_enabled", True)
         ),
@@ -1737,6 +2057,8 @@ def _public_settings(data: dict | None = None) -> dict:
         # v3.1 P2 -- role drives dashboard default sort + filter chip
         # emphasis. Always returned; the dashboard reads this on load.
         "role": _normalize_role(data.get("role")),
+        "after_save": _normalize_after_save(data.get("after_save")),
+        "after_save_supported": list(_AFTER_SAVE_ENUM),
         # v3.1: live stream behavior + the bounded supported list so the
         # Settings UI can render the radio without hard-coding enum strings.
         "live_stream_behavior": _normalize_live_behavior(
@@ -1768,6 +2090,7 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("notifications_enabled", True)
         ),
         "auto_update_check": data.get("auto_update_check") is True,
+        "suggest_podcasts": data.get("suggest_podcasts") is True,
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
@@ -11788,6 +12111,18 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 # Standing capture never authorizes a first model download.
                 return source_subscriptions.CaptureOutcome(
                     "preflight_failed", code="missing_transcription_setup")
+            try:
+                episode = podcasts.get_episode(_get_index(), int(item["legacy_episode_id"]))
+            except Exception:
+                # Duplicate suppression is optional when the index is unavailable.
+                episode = None
+            if (episode and source_subscriptions.is_suggested_episode_guid(episode.get("guid"))
+                    and episode.get("guid") != item.get("entry_id")):
+                # 3.17: saved from a podcast suggestion and already in (or
+                # entering) the library under that save's GUID. Capturing it
+                # again would only repeat the download and transcription.
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="already_in_library", terminal=True)
             return None
         if not source_subscriptions._VIDEO_ID_RE.match(item.get("entry_id") or ""):
             return source_subscriptions.CaptureOutcome(
@@ -12323,6 +12658,142 @@ def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
     return result
 
 
+# ---- 3.17 podcast suggestions ---------------------------------------------
+_podcast_suggestion_saves: dict[str, dict] = {}
+_podcast_suggestion_saves_lock = threading.Lock()
+
+
+def _podcast_suggestions_enabled() -> bool:
+    return (_read_settings() or {}).get("suggest_podcasts") is True
+
+
+def _podcast_suggestions_refresh_async(*, force: bool = False) -> bool:
+    """Refresh the suggestion cache off the request thread. Returns False when
+    nothing was started (off, busy, or not due)."""
+    if not _podcast_suggestions_enabled() or suggestions.refreshing():
+        return False
+    if not force and not suggestions.is_due(DATA_ROOT):
+        return False
+
+    def _run():
+        try:
+            suggestions.refresh(_get_index(), DATA_ROOT, enabled=_podcast_suggestions_enabled(),
+                                force=force)
+        except Exception:
+            log.exception("podcast suggestions refresh failed")
+
+    threading.Thread(target=_run, name="uoink-suggestions", daemon=True).start()
+    return True
+
+
+def _podcast_suggestion_set_state(sid: str, state: str, message: str) -> None:
+    with _podcast_suggestion_saves_lock:
+        _podcast_suggestion_saves[sid] = {"state": state, "message": message}
+
+
+_SUGGESTION_SETUP_MESSAGE = "Set up transcription in Settings first, then save it again."
+
+
+def _podcast_suggestion_setup_problem() -> str | None:
+    """Why a suggested episode can't be transcribed right now, or None.
+
+    Local checks only, the same ones standing capture runs at preflight. The
+    save runs them before anything is registered or downloaded, so a missing
+    Whisper model never leaves a downloaded episode with no transcript."""
+    try:
+        if not _platform.media_capability().get("available"):
+            return _SUGGESTION_SETUP_MESSAGE
+        if not whisper_runner.is_transcription_available():
+            return _SUGGESTION_SETUP_MESSAGE
+        model = whisper_runner.normalize_model((_read_settings() or {}).get("whisper_model"))
+        if not whisper_runner.is_model_downloaded(DATA_ROOT, model):
+            return _SUGGESTION_SETUP_MESSAGE
+    except Exception:
+        log.exception("podcast suggestion: transcription check failed")
+        return _SUGGESTION_SETUP_MESSAGE
+    return None
+
+
+def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
+    """Put exactly one episode in the podcast tables without subscribing.
+
+    A show that is not already followed is added switched off (no polling, no
+    auto-ingest), and only this episode is inserted from Apple's result. No
+    feed is fetched. Following a show is a separate, explicit action.
+
+    When the feed already has this episode (same audio, or same title and
+    date), that row is reused, so a followed show keeps one row per episode
+    under its real GUID. Otherwise the row gets a marked stand-in GUID that a
+    later poll of the feed swaps for the real one (podcasts.upsert_episodes,
+    source_subscriptions.project_podcast_episode)."""
+    existed = any(f.get("feed_url") == feed_url for f in podcasts.list_feeds(idx))
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed_id = int(feed["id"])
+    if not existed:
+        podcasts.set_feed_enabled(idx, feed_id, False)
+        podcasts.record_feed_meta(
+            idx, feed_id, title=item.get("show") or None, description=None,
+            homepage=None, etag=None, last_modified=None, ok=True)
+    same = podcasts.find_feed_episode(
+        idx, feed_id, audio_url=item.get("episode_url"), title=item.get("title"),
+        published=item.get("released") or None)
+    if same is not None:
+        return same
+    guid = source_subscriptions.suggested_episode_guid(item.get("episode_url"))
+    podcasts.upsert_episodes(idx, feed_id, [{
+        "guid": guid, "title": item.get("title"), "audio_url": item.get("episode_url"),
+        "episode_page_url": item.get("page_url") or None,
+        "duration_seconds": item.get("duration_s"),
+        "published_at": item.get("released") or None,
+        "description": item.get("description") or None}])
+    for row in podcasts.list_episodes(idx, feed_id=feed_id, limit=1000):
+        if row.get("guid") == guid:
+            return row
+    raise suggestions.SuggestionError("Couldn't prepare this episode.", "failed")
+
+
+def _run_podcast_suggestion_save(sid: str, item: dict) -> None:
+    """Save one suggested episode the way a feed episode is saved: download it
+    and queue the normal transcription that publishes it into the library. The
+    show is not followed (see _register_suggested_episode)."""
+    def fail(message):
+        _podcast_suggestion_set_state(sid, "failed", message)
+
+    try:
+        idx = _get_index()
+        if not item.get("episode_url"):
+            return fail("This episode has no audio Uoink can save.")
+        problem = _podcast_suggestion_setup_problem()
+        if problem:
+            return fail(problem)          # nothing registered, nothing downloaded
+        feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
+        episode = _register_suggested_episode(idx, feed_url, item)
+        if episode.get("yoink_video_id"):
+            suggestions.mark_saved(DATA_ROOT, sid)
+            return _podcast_suggestion_set_state(sid, "saved", "Already in your library.")
+        episode_id = int(episode["id"])
+        downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+        if not downloaded.get("ok"):
+            return fail("Couldn't download the audio. Try again later.")
+        settings = _read_settings() or {}
+        queued, status = _queue_podcast_transcription(
+            episode_id,
+            model=whisper_runner.normalize_model(settings.get("whisper_model")),
+            diarize=bool(settings.get("diarization_default")),
+            consent_given=False, publish_to_corpus=True)
+        if status == 412:
+            return fail("Set up transcription in Settings first, then save it again.")
+        if not queued.get("ok"):
+            return fail("Transcription is not available right now.")
+        suggestions.mark_saved(DATA_ROOT, sid)
+        _podcast_suggestion_set_state(sid, "saved", "Saved. Transcribing now.")
+    except suggestions.SuggestionError as exc:
+        fail(str(exc))
+    except Exception:
+        log.exception("podcast suggestion save failed")
+        fail("Couldn't save this episode.")
+
+
 def _heartbeat_note_poll(ok: bool, *, error: str | None = None) -> None:
     """One feed poll finished. A failure never advances the success stamp.
     ``error`` is a short *kind* (an exception class name or a fixed
@@ -12573,6 +13044,7 @@ _relay_state = {
     "last_error": None,
     "last_capture_error": None,
     "picked_up_total": 0,
+    "last_pickup_at": None,
     "last_pending_count": None,
     "polling": False,
     "generation": 0,
@@ -12626,6 +13098,7 @@ def _relay_status_payload(settings: dict | None = None) -> dict:
         "last_error": snapshot["last_error"],
         "last_capture_error": snapshot["last_capture_error"],
         "picked_up_total": snapshot["picked_up_total"],
+        "last_pickup_at": snapshot.get("last_pickup_at"),
         "last_pending_count": snapshot["last_pending_count"],
         "polling": snapshot["polling"],
     }
@@ -12688,6 +13161,34 @@ def _relay_exception_text(exc: BaseException) -> str:
     if isinstance(exc, (urllib.error.URLError, OSError)):
         return "Couldn't reach the relay. Check the address and your connection."
     return "Checking the relay failed. Uoink will try again."
+
+
+def _relay_pairing() -> dict:
+    """Ask the saved relay for its push token, using the saved pull token, so
+    the dashboard can draw the phone's QR code. The pull token never leaves
+    this function. `state` is one of: paired, old_relay, not_configured, error.
+    A relay deployed before 3.17 answers 404 (no /v1/pairing); a pull-token
+    listing tells that apart from a wrong address."""
+    settings = _read_settings()
+    base = settings.get("relay_url") or ""
+    token = _get_saved_relay_token()
+    if not base or not token:
+        return {"ok": True, "state": "not_configured",
+                "message": "Add the relay address and pull token first."}
+    try:
+        status, payload = _relay_http("GET", f"{base}/v1/pairing", token)
+        if status == 404:
+            status2, _ = _relay_http("GET", f"{base}/v1/links", token)
+            if status2 == 200:
+                return {"ok": True, "state": "old_relay",
+                        "message": "Update your relay: Render > uoink-relay > Manual Deploy."}
+            return {"ok": True, "state": "error", "message": _relay_status_error(status2)}
+    except Exception as exc:
+        return {"ok": True, "state": "error", "message": _relay_exception_text(exc)}
+    push = payload.get("push_token")
+    if status == 200 and isinstance(push, str) and _RELAY_TOKEN_RE.match(push):
+        return {"ok": True, "state": "paired", "push_token": push}
+    return {"ok": True, "state": "error", "message": _relay_status_error(status)}
 
 
 def _relay_delete(base: str, token: str, link_id: str) -> bool:
@@ -12800,6 +13301,7 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
         return "deferred"
     with _relay_cond:
         _relay_state["picked_up_total"] += 1
+        _relay_state["last_pickup_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     if result.get("ok") is not True:
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
                                         _relay_capture_failure_reason(result, url))
@@ -16976,6 +17478,9 @@ class Handler(BaseHTTPRequestHandler):
             # opening folders, so the route can stay unauthenticated while the
             # user-data APIs remain token-gated.
             return self._handle_dashboard()
+        if bare == "/dashboard/qrcode.js":
+            # Public static file: the vendored QR encoder the phone setup uses.
+            return self._send_file(DASHBOARD_QRCODE_PATH, "text/javascript; charset=utf-8")
         if bare.startswith("/brand/fonts/"):
             # Public, like /dashboard: the bundled fonts the dashboard loads.
             # Static product files, no user data; anything else is a 404.
@@ -17022,6 +17527,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/suggestions/podcasts":
+            return self._handle_podcast_suggestions_list()
         if bare == "/sources":
             return self._handle_sources_list()
         if bare == "/sources/status":
@@ -17162,6 +17669,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_corrections()
         if bare == "/memory/search":
             return self._handle_memory_search()
+        if bare == "/library/remember":
+            return self._handle_library_remember()
         if bare == "/reliability/model/status":
             return self._handle_reliability_model_status()
         m = re.fullmatch(r"/reliability/([^/]+)", bare)
@@ -18774,6 +19283,94 @@ class Handler(BaseHTTPRequestHandler):
             consent_given=consent_given)
         return self._send_json(status, result)
 
+    # ---- 3.17 podcast suggestions (Library "Suggested for you") ----------
+    def _podcast_suggestions_payload(self) -> dict:
+        enabled = _podcast_suggestions_enabled()
+        with _podcast_suggestion_saves_lock:
+            states = dict(_podcast_suggestion_saves)
+        # A save in progress or one that failed stays on its card (with its
+        # message and Try again) even though its episode row now exists.
+        keep = {sid for sid, st in states.items() if st.get("state") in ("saving", "failed")}
+        shown = suggestions.current(DATA_ROOT, _get_index(), keep=keep) if enabled else {
+            "items": [], "terms": [], "refreshed_ts": 0, "last_error": None}
+        items = [{**item, "save_state": states.get(item["id"], {}).get("state"),
+                  "save_message": states.get(item["id"], {}).get("message")}
+                 for item in shown["items"]]
+        ready = suggestions.readiness(_get_index())
+        return {"ok": True, "enabled": enabled, "items": items, "count": len(items),
+                "enough": ready["enough"], "library_size": ready["library_size"],
+                "send_terms": ready["terms"],
+                "terms": shown["terms"], "refreshed_ts": shown["refreshed_ts"],
+                "refreshing": suggestions.refreshing(), "error": shown["last_error"],
+                "disclosure": suggestions.DISCLOSURE}
+
+    def _handle_podcast_suggestions_list(self):
+        if not self._require_token():
+            return
+        _podcast_suggestions_refresh_async()
+        return self._send_json(200, self._podcast_suggestions_payload())
+
+    def _handle_podcast_suggestions_refresh(self, body):
+        if not _podcast_suggestions_enabled():
+            return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
+        started = _podcast_suggestions_refresh_async(force=True)
+        return self._send_json(202, {**self._podcast_suggestions_payload(), "started": started})
+
+    def _podcast_suggestion_id(self, body):
+        sid = body.get("id") if isinstance(body, dict) else None
+        if not isinstance(sid, str) or not re.fullmatch(r"sg_[0-9a-f]{12}", sid):
+            self._send_json(400, {"ok": False, "error": "id (suggestion id) required"})
+            return None
+        return sid
+
+    def _handle_podcast_suggestions_dismiss(self, body):
+        sid = self._podcast_suggestion_id(body)
+        if sid is None:
+            return
+        suggestions.dismiss(DATA_ROOT, sid)
+        return self._send_json(200, {"ok": True, "id": sid})
+
+    def _handle_podcast_suggestions_save(self, body):
+        sid = self._podcast_suggestion_id(body)
+        if sid is None:
+            return
+        if not _podcast_suggestions_enabled():
+            return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
+        item = suggestions.get_item(DATA_ROOT, sid)
+        if item is None:
+            return self._send_json(404, {"ok": False, "error": "That suggestion is gone. Refresh the list."})
+        with _podcast_suggestion_saves_lock:
+            current = _podcast_suggestion_saves.get(sid)
+            if current and current["state"] in ("saving", "saved"):
+                return self._send_json(202, {"ok": True, "id": sid, **current})
+            _podcast_suggestion_saves[sid] = {"state": "saving", "message": "Saving..."}
+        threading.Thread(target=_run_podcast_suggestion_save, args=(sid, item),
+                         name="uoink-suggestion-save", daemon=True).start()
+        return self._send_json(202, {"ok": True, "id": sid, "state": "saving",
+                                     "message": "Saving..."})
+
+    def _handle_podcast_suggestions_follow(self, body):
+        sid = self._podcast_suggestion_id(body)
+        if sid is None:
+            return
+        if not _podcast_suggestions_enabled():
+            return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
+        try:
+            feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
+            row = podcasts.add_feed(_get_index(), feed_url)
+            if not row.get("enabled", 1):
+                podcasts.set_feed_enabled(_get_index(), int(row["id"]), True)
+        except suggestions.SuggestionError as exc:
+            status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
+            return self._send_json(status, {"ok": False, "error": str(exc)})
+        except ValueError as exc:
+            return self._send_json(400, {"ok": False, "error": str(exc)})
+        except Exception:
+            log.exception("/suggestions/podcasts/follow failed")
+            return self._send_json(500, {"ok": False, "error": "Couldn't follow this show."})
+        return self._send_json(200, {"ok": True, "id": sid, "feed_id": row.get("id"),
+                                     "message": "Following. New episodes show up under Podcasts."})
+
     def _handle_podcasts_episode_to_corpus(self, body):
         """POST /podcasts/episodes/to-corpus {episode_id}."""
         if not isinstance(body, dict):
@@ -19789,8 +20386,7 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_settings_post(self, body: dict):
         self._mac_bootout_pending = False
         try:
-            with _settings_lock:
-                return self._handle_settings_post_locked(body)
+            return self._handle_settings_post_locked(body)
         finally:
             if self._mac_bootout_pending:
                 # Disabling login startup can stop this launchd-owned process.
@@ -19805,6 +20401,9 @@ class Handler(BaseHTTPRequestHandler):
                         log.warning("Login startup disable failed; LaunchAgent retained: %s", exc)
 
     def _handle_settings_post_locked(self, body: dict):
+        """Validate, save any secrets, then apply the rest under _settings_lock.
+        The lock is never held while saving a secret: a credential call can
+        wait on an OS prompt, and every settings read (/health too) takes it."""
         defer_stop = sys.platform == "darwin" and body.get("autostart") is False
         if defer_stop:
             from helper import mac_lifecycle
@@ -19827,6 +20426,7 @@ class Handler(BaseHTTPRequestHandler):
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
             "source_availability_check_enabled",
+            "rediscover_shelves_enabled",
             "asr_fallback_enabled",          # CM-11 caption-less video ASR
             "claim_verification_enabled",  # v3 A2 -- default OFF (claims
                                             # extracted on yoink only when on)
@@ -19842,6 +20442,7 @@ class Handler(BaseHTTPRequestHandler):
             "usage_sharing",
             "usage_sharing_prompt_seen",
             "auto_update_check",            # daily GitHub release check (default OFF)
+            "suggest_podcasts",             # 3.17 podcast suggestions (default OFF)
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -19854,6 +20455,7 @@ class Handler(BaseHTTPRequestHandler):
                          "research_network_sources",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
+                         "after_save",            # 3.17.0 extension After a save
                          "live_stream_behavior",  # v3.1 live
                          "whisper_model",         # v3.1 A1/podcast
                          "dashboard_theme",       # Settings > App > Appearance
@@ -19935,22 +20537,53 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False, "error": ("relay_token must be the relay's pull token: 32 to 4096 "
                                            "characters with no spaces, or null to clear")})
 
+        if not self._settings_post_store_credentials(body):
+            return None
+        with _settings_lock:
+            data = self._settings_post_apply(body, boolean_fields=boolean_fields,
+                                             relay_url=relay_url, defer_stop=defer_stop)
+        if data is None:
+            return None
+        if any(f in body for f in ("relay_enabled", "relay_url", "relay_token", "relay_poll_minutes")):
+            _relay_settings_changed()
+        settings = _public_settings(data)
+        if defer_stop:
+            self._mac_bootout_pending = True
+            settings["autostart"] = False
+        self._send_json(200, {"ok": True, "settings": settings})
+
+    def _settings_post_store_credentials(self, body: dict) -> bool:
+        """Save the secrets in a /settings body, with _settings_lock released.
+        On failure, reply with the credential-store error and return False:
+        the rest of the body isn't applied, so nothing says a secret is saved
+        (or the relay is on) when it isn't."""
+        try:
+            if "scrapecreators_key" in body:
+                _store_saved_scrapecreators_key((body["scrapecreators_key"] or "").strip())
+            if "relay_token" in body:
+                _store_saved_relay_token((body["relay_token"] or "").strip())
+            if "anthropic_key" in body:
+                raw_key = body.get("anthropic_key")
+                _store_saved_anthropic_key("" if raw_key is None else raw_key.strip())
+        except CredentialStoreError as e:
+            # Exception text can carry a backend's details, so log the kind only.
+            log.warning("settings credential write failed (%s)", type(e).__name__)
+            self._send_json(200, _credential_store_failure(e))
+            return False
+        return True
+
+    def _settings_post_apply(self, body: dict, *, boolean_fields: tuple, relay_url,
+                             defer_stop: bool) -> dict | None:
+        """Apply a validated /settings body. Runs under _settings_lock, after
+        any secrets in it are saved. Returns the saved settings, or None after
+        replying with an error."""
         data = _read_settings()
         if "research_network_sources" in body:
             data["research_network_sources"] = research.normalize_consent(body["research_network_sources"])
         if "scrapecreators_daily_credit_cap" in body:
             data["scrapecreators_daily_credit_cap"] = body["scrapecreators_daily_credit_cap"]
         if "scrapecreators_key" in body:
-            try:
-                _store_saved_scrapecreators_key((body["scrapecreators_key"] or "").strip())
-            except CredentialStoreError:
-                return self._send_json(200, {"ok": False, "error": "credential store unavailable"})
             data["scrapecreators_key_invalid"] = False
-        if "relay_token" in body:
-            try:
-                _store_saved_relay_token((body["relay_token"] or "").strip())
-            except CredentialStoreError:
-                return self._send_json(200, {"ok": False, "error": "credential store unavailable"})
         if "relay_url" in body:
             data["relay_url"] = relay_url
         if "relay_poll_minutes" in body:
@@ -19967,16 +20600,6 @@ class Handler(BaseHTTPRequestHandler):
         if "clipboard_screenshot_cap" in body:
             data["clipboard_screenshot_cap"] = int(body["clipboard_screenshot_cap"])
         if "anthropic_key" in body:
-            raw_key = body.get("anthropic_key")
-            key = "" if raw_key is None else raw_key.strip()
-            try:
-                _store_saved_anthropic_key(key)
-            except CredentialStoreError as e:
-                log.warning("settings credential write failed: %s", e)
-                return self._send_json(200, {
-                    "ok": False,
-                    "error": "credential store unavailable",
-                })
             data["anthropic_key_invalid"] = False
         # ---- Tier 2 extras ----
         if "output_dir" in body:
@@ -20091,6 +20714,16 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 return self._send_json(400, {
                     "ok": False, "error": "role must be a string"})
+        if "after_save" in body:
+            raw_after = body.get("after_save")
+            if raw_after is None or raw_after == "":
+                data["after_save"] = AFTER_SAVE_STAY
+            elif isinstance(raw_after, str) and raw_after.strip().lower() in _AFTER_SAVE_ENUM:
+                data["after_save"] = raw_after.strip().lower()
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": f"after_save must be one of {list(_AFTER_SAVE_ENUM)}"})
         if "live_stream_behavior" in body:
             raw_lsb = body.get("live_stream_behavior")
             if raw_lsb is None or raw_lsb == "":
@@ -20155,13 +20788,7 @@ class Handler(BaseHTTPRequestHandler):
         except OSError as e:
             log.warning("settings write failed: %s", e)
             return self._send_json(200, {"ok": False, "error": "settings write failed"})
-        if any(f in body for f in ("relay_enabled", "relay_url", "relay_token", "relay_poll_minutes")):
-            _relay_settings_changed()
-        settings = _public_settings(data)
-        if defer_stop:
-            self._mac_bootout_pending = True
-            settings["autostart"] = False
-        self._send_json(200, {"ok": True, "settings": settings})
+        return data
 
     # ---- /settings/test-key ----
     def _handle_settings_test_key(self, body: dict):
@@ -22050,6 +22677,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(*_zing_handoff(body.get("video_id"), body.get("allow_download") is True))
         if bare == "/relay/check":
             return self._send_json(200, _relay_request_check())
+        if bare == "/relay/pairing":
+            return self._send_json(200, _relay_pairing())
         if bare == "/settings/usage-prompt":
             return self._handle_usage_prompt()
         if bare == "/settings/output-folder/pick":
@@ -22119,6 +22748,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_correct(body)
         if bare == "/memory/delete":
             return self._handle_memory_delete(body)
+        if bare == "/library/opened":
+            return self._handle_library_opened(body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
         if bare == "/reliability/model/download":
@@ -22200,6 +22831,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_transcribe(body)
         if bare == "/podcasts/episodes/to-corpus":
             return self._handle_podcasts_episode_to_corpus(body)
+        if bare == "/suggestions/podcasts/refresh":
+            return self._handle_podcast_suggestions_refresh(body)
+        if bare == "/suggestions/podcasts/dismiss":
+            return self._handle_podcast_suggestions_dismiss(body)
+        if bare == "/suggestions/podcasts/save":
+            return self._handle_podcast_suggestions_save(body)
+        if bare == "/suggestions/podcasts/follow":
+            return self._handle_podcast_suggestions_follow(body)
         if bare == "/playlists/monitored":
             return self._handle_monitored_playlist_add(body)
         if bare == "/playlists/monitored/remove":
@@ -22619,6 +23258,40 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {"ok": True, "correction_id": correction_id})
 
     # ---- /memory/delete ----
+    def _handle_library_remember(self):
+        """GET /library/remember[?today=YYYY-MM-DD] -- the Library's
+        Rediscover picks and idea starters. Local only, token-gated, light
+        rows only (no transcripts). Empty lists when the setting is off."""
+        qs = parse_qs(urlparse(self.path).query)
+        today = None
+        if qs.get("today"):
+            today = library_remember.parse_today(qs["today"][0])
+            if today is None:
+                return self._send_json(400, {"ok": False, "error": "today must be YYYY-MM-DD"})
+        if not _read_settings().get("rediscover_shelves_enabled", True):
+            return self._send_json(200, {
+                "ok": True, "enabled": False, "rediscover": [], "starters": []})
+        try:
+            rows = _get_index().remember_rows()
+            result = library_remember.build_remember(rows, today)
+        except Exception:
+            log.exception("/library/remember failed")
+            return self._send_json(503, {"ok": False, "error": "rediscover unavailable"})
+        return self._send_json(200, {"ok": True, "enabled": True, **result})
+
+    def _handle_library_opened(self, body):
+        """POST /library/opened {video_id} -- note that the reader opened a
+        saved item (local timestamp, for the Rediscover shelf)."""
+        video_id = str((body or {}).get("video_id") or "").strip() if isinstance(body, dict) else ""
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        try:
+            recorded = _get_index().mark_opened(video_id)
+        except Exception:
+            log.exception("/library/opened failed")
+            return self._send_json(503, {"ok": False, "error": "could not record the open"})
+        return self._send_json(200, {"ok": True, "recorded": bool(recorded)})
+
     def _handle_memory_delete(self, body: dict):
         """Soft-delete a yoink: move its folder into _yoink-trash/ and set
         the index row's deleted_at. Reversible via /memory/restore until the

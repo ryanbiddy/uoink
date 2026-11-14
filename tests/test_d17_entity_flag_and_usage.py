@@ -73,6 +73,9 @@ def test_entity_extraction_flag_settable_via_settings_post(monkeypatch):
 
     class Probe:
         _handle_settings_post_locked = server.Handler._handle_settings_post_locked
+        # 3.17.0 split the handler: secrets save outside the settings lock.
+        _settings_post_store_credentials = server.Handler._settings_post_store_credentials
+        _settings_post_apply = server.Handler._settings_post_apply
 
         def __init__(self):
             self.responses = []

@@ -1,0 +1,444 @@
+"""Uoink Relay phone setup: GET /v1/pairing, the /phone page, its manifest,
+share target, service worker and icons. Real server, MemoryStore, loopback.
+The page's script also runs in Node against a tiny fake DOM."""
+from __future__ import annotations
+
+import base64
+import hashlib
+import json
+import re
+import shutil
+import struct
+import subprocess
+import zlib
+from html.parser import HTMLParser
+from pathlib import Path
+
+import pytest
+
+from tests.test_relay_service import PULL, PUSH, app, relay  # noqa: F401  (relay is a fixture)
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+# ---- /v1/pairing ---------------------------------------------------------
+
+def test_pairing_needs_the_pull_token_and_returns_the_push_token(relay):
+    status, payload, headers, _ = relay.request("GET", "/v1/pairing", token=PULL)
+    assert status == 200 and payload == {"ok": True, "push_token": PUSH}
+    assert headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize("token,status", [(None, 401), ("wrong-" + "x" * 40, 401), (PUSH, 403)])
+def test_pairing_rejects_push_wrong_and_missing_tokens(relay, token, status):
+    got, payload, _, raw = relay.request("GET", "/v1/pairing", token=token)
+    assert got == status and payload["ok"] is False
+    assert PUSH.encode() not in raw
+
+
+def test_pairing_goes_through_the_failed_auth_limiter(relay):
+    for _ in range(app.AUTH_FAIL_LIMIT):
+        assert relay.request("GET", "/v1/pairing", token="wrong-" + "x" * 40)[0] == 401
+    assert relay.request("GET", "/v1/pairing", token="wrong-" + "x" * 40)[0] == 429
+    # A valid token is never refused.
+    assert relay.request("GET", "/v1/pairing", token=PULL)[0] == 200
+
+
+# ---- /phone ----------------------------------------------------------------
+
+class _BlockParser(HTMLParser):
+    """Collects the attributes and raw text of every <script> and <style>."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=False)
+        self.blocks = {"script": [], "style": []}
+        self._open = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.blocks:          # HTMLParser lower-cases tag names
+            self._open = (tag, attrs, [])
+
+    def handle_data(self, data):
+        if self._open:
+            self._open[2].append(data)
+
+    def handle_endtag(self, tag):
+        if self._open and tag == self._open[0]:
+            name, attrs, parts = self._open
+            self.blocks[name].append((attrs, "".join(parts)))
+            self._open = None
+
+
+def _inline_blocks(html):
+    parser = _BlockParser()
+    parser.feed(html)
+    parser.close()
+    assert parser._open is None, "unclosed script or style element"
+    return parser.blocks
+
+
+def test_block_parser_finds_tags_in_any_case():
+    blocks = _inline_blocks("<SCRIPT>a()</SCRIPT ><Style>b{}</STYLE><script src=x></script>")
+    assert blocks["script"] == [([], "a()"), ([("src", "x")], "")]
+    assert blocks["style"] == [([], "b{}")]
+
+
+def test_phone_page_is_served_with_its_own_strict_csp_and_no_token(relay):
+    status, _, headers, raw = relay.request("GET", "/phone")
+    html = raw.decode("utf-8")
+    assert status == 200 and headers["content-type"].startswith("text/html")
+    assert PUSH not in html and PULL not in html
+    csp = headers["content-security-policy"]
+    assert "default-src 'none'" in csp and "connect-src 'self'" in csp and "manifest-src 'self'" in csp
+    assert "unsafe-inline" not in csp and "unsafe-eval" not in csp and "script-src 'sha256-" in csp
+    assert headers["cache-control"] == "no-store" and headers["referrer-policy"] == "no-referrer"
+    # The hashes in the header match the inline blocks exactly. A real HTML
+    # parser finds every script and style element, whatever the tag's case.
+    blocks = _inline_blocks(html)
+    assert [attrs for attrs, _ in blocks["script"]] == [[]], "exactly one inline script, no src"
+    assert len(blocks["style"]) == 1, "exactly one inline style block"
+    script, style = blocks["script"][0][1], blocks["style"][0][1]
+    for text, directive in ((script, "script-src"), (style, "style-src")):
+        digest = base64.b64encode(hashlib.sha256(text.encode()).digest()).decode()
+        assert f"{directive} 'sha256-{digest}'" in csp
+    # No outside scripts, styles, fonts, images or analytics.
+    assert not re.search(r'(?:src|href)="https?://', html)
+    assert " style=" not in html and " onclick=" not in html
+    for words in ("Paste a link", "Forget this phone", "Add to Home Screen", "Send from the Share sheet",
+                  "Pair with new key", "Keep current"):
+        assert words in html
+    assert "history.replaceState" in html and "localStorage" in html
+
+
+def test_phone_page_is_the_same_static_page_whatever_the_query(relay):
+    # Fragments never leave the phone; the server only ever sees /phone.
+    a = relay.request("GET", "/phone")[3]
+    b = relay.request("GET", "/phone?url=https%3A%2F%2Fexample.com%2Fa")[3]
+    assert a == b
+
+
+def test_manifest_has_a_share_target_and_installable_icons(relay):
+    status, _, headers, raw = relay.request("GET", "/phone.webmanifest")
+    manifest = json.loads(raw)
+    assert status == 200 and "manifest+json" in headers["content-type"]
+    assert manifest["start_url"] == "/phone" and manifest["display"] == "standalone"
+    assert manifest["share_target"] == {"action": "/phone", "method": "GET",
+                                        "enctype": "application/x-www-form-urlencoded",
+                                        "params": {"title": "title", "text": "text", "url": "url"}}
+    assert manifest["share_target"]["action"].startswith(manifest["scope"])
+    assert {icon["sizes"] for icon in manifest["icons"]} == {"192x192", "512x512"}
+    for icon in manifest["icons"]:
+        got, _, h, body = relay.request("GET", icon["src"])
+        assert got == 200 and h["content-type"] == "image/png" and body.startswith(b"\x89PNG\r\n\x1a\n")
+
+
+def test_icons_are_valid_pngs_of_the_right_size(relay):
+    for size in (180, 192, 512):
+        _, _, _, raw = relay.request("GET", f"/phone-icon-{size}.png")
+        width, height = struct.unpack(">II", raw[16:24])
+        assert (width, height) == (size, size)
+        idat = raw[raw.index(b"IDAT") + 4:raw.index(b"IEND") - 8]
+        data = zlib.decompress(idat)
+        assert len(data) == size * (size * 3 + 1)
+        assert bytes([0xFF, 0xD2, 0x3F]) in data   # Uoink yellow
+    assert relay.request("GET", "/phone-icon-999.png")[0] == 404
+
+
+def test_service_worker_is_served_and_caches_nothing(relay):
+    status, _, headers, raw = relay.request("GET", "/phone-sw.js")
+    assert status == 200 and "javascript" in headers["content-type"]
+    assert b"fetch" in raw and b"caches" not in raw
+
+
+def test_phone_routes_do_not_take_posts(relay):
+    assert relay.request("POST", "/phone", {"url": "https://example.com"}, token=PUSH)[0] == 404
+
+
+# ---- the page's script, run for real in Node under a fake DOM --------------
+
+SCRIPT = re.search(r'_PHONE_SCRIPT = r"""(.*?)"""', (ROOT / "relay" / "app.py").read_text(encoding="utf-8"), re.S).group(1)
+
+HARNESS = r"""
+const vm = require('node:vm');
+const script = require('node:fs').readFileSync(0, 'utf8');
+const cfg = JSON.parse(process.argv[1]);
+const els = {};
+function el(id) {
+  if (els[id]) return els[id];
+  return els[id] = { id, hidden: false, textContent: '', className: '', value: '', disabled: false, open: false,
+    listeners: {}, addEventListener(t, f) { (this.listeners[t] ||= []).push(f); } };
+}
+el('sharedbox').hidden = true;   // hidden in the page's HTML until a share arrives
+el('pairnotice').hidden = true;
+el('pairchoice').hidden = true;
+const storage = Object.assign({}, cfg.storage || {});
+const writes = [];
+const history = [];
+const calls = [];
+const replies = (cfg.replies || []).slice();
+const ctx = {
+  document: { getElementById: el },
+  navigator: { userAgent: cfg.ua || 'Mozilla/5.0 (Linux; Android 14) Chrome/120', maxTouchPoints: 5 },
+  window: {
+    location: { hash: cfg.hash || '', search: cfg.search || '', pathname: '/phone', origin: 'https://relay.example.test' },
+    history: { replaceState: (a, b, url) => history.push(url) },
+    localStorage: { getItem: (k) => (k in storage ? storage[k] : null),
+      setItem: (k, v) => { storage[k] = String(v); writes.push({ key: k, value: String(v) }); },
+      removeItem: (k) => { delete storage[k]; } },
+    setTimeout: (fn, ms) => setTimeout(fn, Math.min(ms, 5)), clearTimeout,
+  },
+  fetch: async (url, opts) => {
+    calls.push({ url, auth: opts.headers.Authorization, body: JSON.parse(opts.body) });
+    const r = replies.shift() || { status: 201, json: { ok: true } };
+    if (r.reject) throw new Error('offline');
+    return { status: r.status, json: async () => r.json || {} };
+  },
+  URLSearchParams, AbortController, Promise, JSON, setTimeout, clearTimeout,
+};
+vm.createContext(ctx);
+vm.runInContext(script, ctx);
+function pairingState() {
+  return { storage: { ...storage }, writes: writes.slice(), pill: el('pill').textContent,
+    pairResult: el('pairresult').textContent, pairNoticeHidden: el('pairnotice').hidden,
+    pairChoiceHidden: el('pairchoice').hidden };
+}
+(async () => {
+  await new Promise((r) => setTimeout(r, 30));
+  const out = pairingState();
+  out.history = history; out.calls = calls;
+  out.unpairedHidden = els.unpaired.hidden; out.sendHidden = els.sendcard.hidden;
+  out.shared = els.sharedresult && els.sharedresult.textContent; out.link = el('link').value;
+  out.sharedHidden = el('sharedbox').hidden; out.callsBeforeSend = calls.slice();
+  if (cfg.pairlink !== undefined) {
+    el('pairlink').value = cfg.pairlink;
+    els.pairform.listeners.submit[0]({ preventDefault() {} });
+    out.afterPaste = pairingState(); out.pairlinkAfter = el('pairlink').value;
+  }
+  if (cfg.pairAction) {
+    els[cfg.pairAction].listeners.click[0]();
+    out.afterPair = pairingState();
+  }
+  if (cfg.submit !== undefined || cfg.press) {
+    if (cfg.submit !== undefined) el('link').value = cfg.submit;   // press: tap Send on what is already there
+    await els.sendform.listeners.submit[0]({ preventDefault() {} });
+    await new Promise((r) => setTimeout(r, 150));
+    out.result = els.result.textContent; out.resultClass = els.result.className; out.calls = calls;
+    out.linkAfter = el('link').value; out.sharedHiddenAfter = el('sharedbox').hidden;
+  }
+  if (cfg.forget) { els.forget.listeners.click[0](); out.afterForget = { storage, pill: els.pill.textContent }; }
+  process.stdout.write(JSON.stringify(out));
+})();
+"""
+
+TOKEN = "T" * 40
+NEW_TOKEN = "N" * 40
+STORAGE_KEY = "uoink-relay-push-token"
+
+
+def run_page(**cfg):
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("Node.js is not installed")
+    result = subprocess.run([node, "-e", HARNESS, json.dumps(cfg)], input=SCRIPT, text=True, encoding="utf-8",
+                            capture_output=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    return json.loads(result.stdout)
+
+
+def test_page_stores_the_fragment_token_and_clears_the_address_bar():
+    out = run_page(hash="#t=" + TOKEN)
+    assert out["storage"] == {"uoink-relay-push-token": TOKEN}
+    assert out["history"] == ["/phone"]          # no #t= left in the address bar
+    assert out["pill"] == "Paired" and out["unpairedHidden"] is True and out["sendHidden"] is False
+    assert out["writes"] == [{"key": STORAGE_KEY, "value": TOKEN}]
+    assert out["pairChoiceHidden"] is True and out["calls"] == []
+
+
+def test_page_with_the_same_fragment_token_says_already_paired_without_writing():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + TOKEN)
+    assert out["storage"] == {STORAGE_KEY: TOKEN} and out["writes"] == []
+    assert out["pairResult"] == "Already paired" and out["pairNoticeHidden"] is False
+    assert out["pairChoiceHidden"] is True and out["pill"] == "Paired"
+    assert out["history"] == ["/phone"] and out["calls"] == []
+
+
+def test_page_with_a_different_fragment_token_waits_for_confirmation():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN)
+    assert out["storage"] == {STORAGE_KEY: TOKEN} and out["writes"] == []
+    assert out["pairResult"] == "This link would pair this phone with a different key. Pair with the new key?"
+    assert out["pairNoticeHidden"] is False and out["pairChoiceHidden"] is False
+    assert out["pill"] == "Paired" and out["history"] == ["/phone"] and out["calls"] == []
+
+
+def test_pair_with_new_key_replaces_the_token_only_after_the_tap():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN, pairAction="pairnew",
+                   submit="https://example.com/a")
+    assert out["storage"] == {STORAGE_KEY: TOKEN} and out["writes"] == []
+    after = out["afterPair"]
+    assert after["storage"] == {STORAGE_KEY: NEW_TOKEN}
+    assert after["writes"] == [{"key": STORAGE_KEY, "value": NEW_TOKEN}]
+    assert after["pairResult"] == "Paired with the new key" and after["pairNoticeHidden"] is False
+    assert after["pairChoiceHidden"] is True and after["pill"] == "Paired"
+    assert out["history"] == ["/phone"] and out["callsBeforeSend"] == []
+    assert [call["auth"] for call in out["calls"]] == ["Bearer " + NEW_TOKEN]
+
+
+@pytest.mark.parametrize("action", [None, "pairkeep"])
+def test_pending_or_declined_pairing_keeps_sending_with_the_current_token(action):
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN, pairAction=action,
+                   submit="https://example.com/a")
+    state = out["afterPair"] if action else out
+    assert state["storage"] == {STORAGE_KEY: TOKEN} and state["writes"] == []
+    assert state["pairChoiceHidden"] is bool(action) and state["pill"] == "Paired"
+    assert out["history"] == ["/phone"] and out["callsBeforeSend"] == []
+    assert [call["auth"] for call in out["calls"]] == ["Bearer " + TOKEN]
+
+
+@pytest.mark.parametrize("stored", [None, TOKEN])
+@pytest.mark.parametrize("fragment", ["#t=short", "#t=", "#t=%ZZ", "#t=%00" + TOKEN, "#unrelated"])
+def test_invalid_fragments_are_stripped_without_changing_pairing(stored, fragment):
+    storage = {STORAGE_KEY: stored} if stored else {}
+    out = run_page(storage=storage, hash=fragment, search="?view=pairing")
+    assert out["history"] == ["/phone?view=pairing"]
+    assert out["storage"] == storage and out["writes"] == []
+    assert out["pairChoiceHidden"] is True and out["calls"] == []
+
+
+@pytest.mark.parametrize("stored", [None, TOKEN])
+def test_pasted_pairing_link_stores_the_new_key_on_submit(stored):
+    storage = {STORAGE_KEY: stored} if stored else {}
+    out = run_page(storage=storage, pairlink="https://relay.example.test/phone#t=" + NEW_TOKEN)
+    assert out["storage"] == storage and out["writes"] == []
+    after = out["afterPaste"]
+    assert after["storage"] == {STORAGE_KEY: NEW_TOKEN}
+    assert after["writes"] == [{"key": STORAGE_KEY, "value": NEW_TOKEN}]
+    assert after["pairResult"] == "Paired with the new key" and after["pairNoticeHidden"] is False
+    assert after["pairChoiceHidden"] is True and after["pill"] == "Paired"
+    assert out["pairlinkAfter"] == "" and out["calls"] == []
+
+
+def test_pasting_a_link_clears_any_pending_fragment_key():
+    out = run_page(storage={STORAGE_KEY: TOKEN}, hash="#t=" + NEW_TOKEN,
+                   pairlink="https://relay.example.test/phone#t=" + TOKEN, pairAction="pairnew")
+    assert out["afterPaste"] == out["afterPair"]
+    assert out["afterPair"]["storage"] == {STORAGE_KEY: TOKEN}
+    assert out["afterPair"]["writes"] == [{"key": STORAGE_KEY, "value": TOKEN}]
+    assert out["history"] == ["/phone"]
+
+
+def test_page_without_a_token_asks_to_pair_and_sends_nothing():
+    out = run_page(submit="https://example.com/a")
+    assert out["pill"] == "Not paired" and out["sendHidden"] is True
+    assert out["calls"] == [] and "isn't paired" in out["result"]
+
+
+def test_send_posts_with_the_stored_token_and_reports_success():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, submit="https://example.com/a")
+    assert out["calls"] == [{"url": "/v1/links", "auth": "Bearer " + TOKEN, "body": {"url": "https://example.com/a"}}]
+    assert out["result"].startswith("Sent.") and "ok" in out["resultClass"]
+
+
+@pytest.mark.parametrize("status,words", [(401, "doesn't match"), (403, "can't add"), (429, "busy or full"),
+                                          (400, "didn't look like a link")])
+def test_send_failures_are_plain(status, words):
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, submit="nope",
+                   replies=[{"status": status, "json": {"error": "no http(s) link found"}}])
+    assert words in out["result"] and "bad" in out["resultClass"]
+
+
+def test_a_sleeping_relay_is_retried_automatically_then_succeeds():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, submit="https://example.com/a",
+                   replies=[{"reject": True}, {"status": 503}, {"status": 201, "json": {"ok": True}}])
+    assert len(out["calls"]) == 3 and out["result"].startswith("Sent.")
+
+
+SHARE = "?title=A+video&text=Look&url=https%3A%2F%2Fexample.com%2Fv"
+
+
+def test_android_share_target_fills_the_box_and_sends_nothing_by_itself():
+    # Anyone can make a paired phone open /phone?url=..., so loading the page
+    # must never send. It fills the box and asks.
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=SHARE)
+    assert out["calls"] == []
+    assert out["link"] == "https://example.com/v Look A video"
+    assert out["sharedHidden"] is False and out["shared"].startswith("Shared from another app. Send it to Uoink?")
+    assert out["history"] == ["/phone"]          # the query is gone, so a reload does not ask again
+
+
+def test_android_share_target_sends_only_when_send_is_tapped():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=SHARE, press=True)
+    assert out["callsBeforeSend"] == []
+    assert out["calls"] == [{"url": "/v1/links", "auth": "Bearer " + TOKEN,
+                             "body": {"url": "https://example.com/v Look A video"}}]
+    assert out["result"].startswith("Sent.") and out["linkAfter"] == "" and out["sharedHiddenAfter"] is True
+
+
+def test_android_share_target_sends_what_the_person_edited():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=SHARE, submit="https://example.com/other")
+    assert out["callsBeforeSend"] == []
+    assert [call["body"] for call in out["calls"]] == [{"url": "https://example.com/other"}]
+
+
+@pytest.mark.parametrize("search,box", [
+    ("?url=https%3A%2F%2Fexample.com%2Fv&text=https%3A%2F%2Fexample.com%2Fv", "https://example.com/v"),
+    ("?url=https%3A%2F%2Fexample.com%2Fv&text=Look+https%3A%2F%2Fexample.com%2Fv", "Look https://example.com/v"),
+    ("?text=https%3A%2F%2Fexample.com%2Fv&title=A+video", "https://example.com/v A video"),
+    ("?title=+&text=", None),
+])
+def test_share_target_box_has_each_shared_part_once(search, box):
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, search=search)
+    assert out["calls"] == []
+    if box is None:
+        assert out["link"] == "" and out["sharedHidden"] is True and out["history"] == []
+    else:
+        assert out["link"] == box and out["sharedHidden"] is False
+
+
+@pytest.mark.parametrize("box,note", [
+    ("https://example.com/v Look A video", "Look A video"),
+    ("Look https://example.com/v", "Look"),
+    ("https://example.com/v", None),
+])
+def test_the_relay_reads_the_link_and_note_from_the_filled_box(box, note):
+    # What the box sends is what the relay stores: the first link, and the
+    # words around it as the note.
+    assert app.resolve_share(box, [None, None], None) == ("https://example.com/v", note)
+
+
+def test_share_target_on_an_unpaired_phone_keeps_the_text_and_says_so():
+    out = run_page(search="?text=Look+https%3A%2F%2Fexample.com%2Fv")
+    assert out["calls"] == [] and "isn't paired" in out["shared"] and "example.com/v" in out["link"]
+
+
+def test_share_target_ignores_a_token_in_the_query():
+    # Only the fragment can pair the phone. A ?t= in the query is not a token.
+    out = run_page(search="?url=https%3A%2F%2Fexample.com%2Fv&t=" + TOKEN)
+    assert out["storage"] == {} and out["calls"] == [] and out["pill"] == "Not paired"
+
+
+def test_forget_this_phone_clears_the_token():
+    out = run_page(storage={"uoink-relay-push-token": TOKEN}, forget=True)
+    assert out["afterForget"] == {"storage": {}, "pill": "Not paired"}
+
+
+# ---- docs and packaging ---------------------------------------------------------
+
+def test_docs_lead_with_the_qr_path_and_say_the_pull_token_reveals_the_push_token():
+    docs = (ROOT / "docs" / "relay.md").read_text(encoding="utf-8")
+    assert docs.index("The quick way: three steps in Uoink") < docs.index("Manual setup (fallback)")
+    assert "pull token now also reveals the push token" in docs
+    assert "Manual Deploy" in docs and "Waking your relay" in docs and "/v1/pairing" in docs
+    assert "Signing up is free" in docs
+
+
+def test_the_qr_encoder_and_its_license_ship_everywhere_the_dashboard_does():
+    for rel, needle in (("build.ps1", "qrcode-generator-1.4.4-MIT-LICENSE.txt"),
+                        ("installer/uoink.iss", "qrcode-generator-1.4.4-MIT-LICENSE.txt"),
+                        ("THIRD-PARTY-NOTICES.md", "qrcode-generator 1.4.4"),
+                        ("scripts/gen_third_party_notices.py", "qrcode-generator 1.4.4")):
+        assert needle in (ROOT / rel).read_text(encoding="utf-8"), rel
+    assert (ROOT / "third-party-notices" / "qrcode-generator-1.4.4-MIT-LICENSE.txt").read_text(
+        encoding="utf-8").startswith("MIT License")
+    payload = json.loads((ROOT / "scripts" / "mac" / "payload.json").read_text(encoding="utf-8"))
+    assert "assets/dashboard" in payload["paths"] and "third-party-notices" in payload["paths"]
+    assert (ROOT / "assets" / "dashboard" / "qrcode.js").is_file()

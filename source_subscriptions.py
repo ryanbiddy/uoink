@@ -5132,14 +5132,22 @@ def project_podcast_episode(conn, source: dict, item_id: str, entry_id: str, tit
     if feed_id is None:
         return None
     try:
-        conn.execute(
-            "INSERT OR IGNORE INTO podcast_episodes (feed_id, guid, title, audio_url, "
-            "episode_page_url, duration_seconds, published_at, description, status, discovered_at, "
-            "auto_ingest_requested) VALUES (?,?,?,?,?,?,?,NULL,'new',?,0)",
-            (int(feed_id), entry_id, title, audio_url, page_url, _duration_seconds(duration_raw),
-             published_raw, now_iso))
-        row = conn.execute("SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=?",
-                           (int(feed_id), entry_id)).fetchone()
+        # 3.17: an episode first saved from a podcast suggestion is the same
+        # episode; adopt (or reuse) that row instead of inserting a twin.
+        adopted = adopt_suggested_podcast_episode(
+            conn, int(feed_id), entry_id, audio_url=audio_url, title=title,
+            published=published_raw, page_url=page_url)
+        if adopted is not None:
+            row = (adopted,)
+        else:
+            conn.execute(
+                "INSERT OR IGNORE INTO podcast_episodes (feed_id, guid, title, audio_url, "
+                "episode_page_url, duration_seconds, published_at, description, status, "
+                "discovered_at, auto_ingest_requested) VALUES (?,?,?,?,?,?,?,NULL,'new',?,0)",
+                (int(feed_id), entry_id, title, audio_url, page_url,
+                 _duration_seconds(duration_raw), published_raw, now_iso))
+            row = conn.execute("SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=?",
+                               (int(feed_id), entry_id)).fetchone()
     except sqlite3.OperationalError:
         return None
     if row is None:
@@ -5147,6 +5155,132 @@ def project_podcast_episode(conn, source: dict, item_id: str, entry_id: str, tit
     conn.execute("UPDATE source_items SET legacy_episode_id=COALESCE(legacy_episode_id, ?) "
                  "WHERE item_id=?", (int(row[0]), item_id))
     return int(row[0])
+
+
+# ---- 3.17 podcast suggestions: one row per episode -------------------------
+# A suggestion save knows Apple's copy of an episode (its audio URL, title and
+# date), never the feed's own GUID, so it stores the episode under this marked
+# stand-in GUID. When the followed feed later lists the same episode, the poll
+# adopts the real GUID on that row instead of inserting a twin.
+SUGGESTED_EPISODE_GUID_PREFIX = "uoink-suggested:"
+_MEDIA_FILE_EXTENSIONS = (".mp3", ".m4a", ".aac", ".ogg", ".oga", ".opus", ".wav",
+                          ".flac", ".mp4", ".m4v", ".mov", ".webm")
+
+
+def suggested_episode_guid(audio_url: str) -> str:
+    return SUGGESTED_EPISODE_GUID_PREFIX + str(audio_url or "").strip()
+
+
+def is_suggested_episode_guid(guid: Any) -> bool:
+    return isinstance(guid, str) and guid.startswith(SUGGESTED_EPISODE_GUID_PREFIX)
+
+
+def podcast_audio_keys(url: Any) -> tuple[str, str]:
+    """``(exact, path)`` keys for comparing two copies of one enclosure URL.
+
+    ``exact`` ignores the scheme, host case, a leading ``www.`` and the
+    fragment. ``path`` also drops the query (hosts add ``?updated=`` style
+    stamps), but only when the last path segment names a media file: a host
+    that identifies episodes by query (``/play?id=7``) must not collapse every
+    episode onto one key. Empty strings mean "no usable key"."""
+    try:
+        parsed = urllib.parse.urlparse(str(url or "").strip())
+        host = (parsed.hostname or "").lower()
+    except ValueError:
+        return "", ""
+    if parsed.scheme.lower() not in ("http", "https") or not host:
+        return "", ""
+    if host.startswith("www."):
+        host = host[4:]
+    path = parsed.path.rstrip("/")
+    exact = host + path + ("?" + parsed.query if parsed.query else "")
+    last = path.rsplit("/", 1)[-1].lower()
+    return exact, (host + path if last.endswith(_MEDIA_FILE_EXTENSIONS) else "")
+
+
+def _episode_title_key(value: Any) -> str:
+    return re.sub(r"[\W_]+", " ", str(value or "").casefold()).strip()
+
+
+def match_podcast_episode(rows: list[dict], *, audio_url: Any = None, title: Any = None,
+                          published: Any = None) -> dict | None:
+    """The row in ``rows`` that is the same episode, or None.
+
+    Same audio first (exact key, then the media-file path key), then the same
+    title published within a day (Apple and RSS write dates differently).
+    Rows already in the library win ties so a match never strands them."""
+    def pick(found):
+        if not found:
+            return None
+        return sorted(found, key=lambda r: (r.get("yoink_video_id") is None, int(r["id"])))[0]
+
+    exact, path = podcast_audio_keys(audio_url)
+    if exact:
+        found = pick([r for r in rows if podcast_audio_keys(r.get("audio_url"))[0] == exact])
+        if found is not None:
+            return found
+    if path:
+        found = pick([r for r in rows if podcast_audio_keys(r.get("audio_url"))[1] == path])
+        if found is not None:
+            return found
+    name = _episode_title_key(title)
+    when = parse_published_ms(published)
+    if not name or when is None:
+        return None
+
+    def same_day(row):
+        ms = parse_published_ms(row.get("published_at"))
+        return ms is not None and abs(ms - when) <= 86_400_000  # one day
+
+    return pick([r for r in rows if _episode_title_key(r.get("title")) == name and same_day(r)])
+
+
+def suggested_podcast_episodes(conn, feed_id: int) -> list[dict]:
+    """Rows of one feed that a suggestion save created and no poll has adopted."""
+    try:
+        return [dict(r) for r in conn.execute(
+            "SELECT id, guid, audio_url, title, published_at, yoink_video_id, transcript_status "
+            "FROM podcast_episodes WHERE feed_id=? AND substr(guid, 1, ?)=?",
+            (int(feed_id), len(SUGGESTED_EPISODE_GUID_PREFIX),
+             SUGGESTED_EPISODE_GUID_PREFIX)).fetchall()]
+    except sqlite3.OperationalError:
+        return []
+
+
+def adopt_suggested_podcast_episode(conn, feed_id: int, guid: Any, *, audio_url: Any = None,
+                                    title: Any = None, published: Any = None,
+                                    page_url: Any = None,
+                                    candidates: list[dict] | None = None) -> int | None:
+    """A poll found ``guid``. When no row has that GUID yet but a suggestion
+    save already stored the same episode, return that row's id so the caller
+    skips its insert (no twin row, no second library entry).
+
+    The row takes the feed's real GUID while it is not yet published and its
+    transcript is not done, so its eventual library id is the one the feed
+    implies. A row already in the library (or about to be) keeps its GUID:
+    its library id was derived from it. The guard sits in the UPDATE itself,
+    so a transcription finishing concurrently cannot slip between check and
+    write. ``candidates`` (from ``suggested_podcast_episodes``) lets a batch
+    reuse one read; an adopted row is removed from it."""
+    guid = guid.strip() if isinstance(guid, str) else ""
+    if not guid or is_suggested_episode_guid(guid):
+        return None
+    rows = suggested_podcast_episodes(conn, feed_id) if candidates is None else candidates
+    if not rows:
+        return None
+    if conn.execute("SELECT 1 FROM podcast_episodes WHERE feed_id=? AND guid=?",
+                    (int(feed_id), guid)).fetchone():
+        return None
+    match = match_podcast_episode(rows, audio_url=audio_url, title=title, published=published)
+    if match is None:
+        return None
+    cur = conn.execute(
+        "UPDATE podcast_episodes SET guid=?, episode_page_url=COALESCE(episode_page_url, ?) "
+        "WHERE id=? AND yoink_video_id IS NULL AND COALESCE(transcript_status, '')<>'done'",
+        (guid, _http_link(page_url), int(match["id"])))
+    if cur.rowcount and candidates is not None:
+        candidates.remove(match)
+    return int(match["id"])
 
 
 def _duration_seconds(raw) -> int | None:

@@ -893,9 +893,134 @@
   // Returns the message string to pass to chrome.notifications.create (each
   // caller fires it via its own context-appropriate path). Atomically marks
   // has_completed_first_yoink on the first successful + copied uoink.
-  async function buildUoinkedMessage(data, copied) {
+  // "After a save" setting (extension-local, chrome.storage.local).
+  //   stay    -- save only; the notification offers Copy for Claude / ChatGPT
+  //   claude  -- copy, then open claude.ai/new (the pre-3.17 behaviour)
+  //   chatgpt -- copy, then open chatgpt.com
+  //   copy    -- copy only
+  const AFTER_SAVE_KEY = "after_save";
+  const AFTER_SAVE_DEFAULT = "stay";
+  const AFTER_SAVE_CHOICES = [
+    { value: "stay", label: "Stay on the page", url: null, copy: false },
+    { value: "claude", label: "Copy, then open Claude", url: "https://claude.ai/new", copy: true },
+    { value: "chatgpt", label: "Copy, then open ChatGPT", url: "https://chatgpt.com/", copy: true },
+    { value: "copy", label: "Copy only", url: null, copy: true },
+  ];
+  function normalizeAfterSave(value) {
+    return AFTER_SAVE_CHOICES.some((c) => c.value === value) ? value : AFTER_SAVE_DEFAULT;
+  }
+  function afterSaveChoice(value) {
+    const v = normalizeAfterSave(value);
+    return AFTER_SAVE_CHOICES.find((c) => c.value === v);
+  }
+  // The helper's /settings holds the truth (the dashboard edits it too);
+  // chrome.storage.local is a cache so a save never waits on, or breaks without,
+  // the helper. A change the helper hasn't confirmed is marked dirty and pushed
+  // on the next read, and a read never trades a dirty choice for the helper's.
+  // Last pick wins: each change gets a revision (after_save_rev), and a helper
+  // answer clears the dirty mark only while its revision is still the newest.
+  // So Claude then Stay, with Stay's request failing and Claude's succeeding
+  // late, leaves Stay marked dirty instead of letting the helper's Claude win.
+  const AFTER_SAVE_DIRTY_KEY = "after_save_dirty";
+  const AFTER_SAVE_REV_KEY = "after_save_rev";
+  // The newest revision this context wrote. Time-based so a popup opened later
+  // never reuses a revision an earlier popup left in storage.
+  let _afterSaveRev = 0;
+  function _nextAfterSaveRev() {
+    _afterSaveRev = Math.max(Date.now(), _afterSaveRev + 1);
+    return _afterSaveRev;
+  }
+  function _localGet(defaults) {
+    return new Promise((r) => {
+      try { chrome.storage.local.get(defaults, (i) => r(i || {})); } catch { r({}); }
+    });
+  }
+  function _localSet(items) {
+    return new Promise((r) => {
+      try { chrome.storage.local.set(items, () => r()); } catch { r(); }
+    });
+  }
+  function _readAfterSaveCache() {
+    return _localGet({
+      [AFTER_SAVE_KEY]: AFTER_SAVE_DEFAULT, [AFTER_SAVE_DIRTY_KEY]: false, [AFTER_SAVE_REV_KEY]: 0,
+    });
+  }
+  // The helper took `value`, sent at revision `rev`. If that is still the newest
+  // pick, the cache is clean. If a newer pick came since, keep it dirty: this
+  // answer may have landed on the helper after the newer one, so the helper
+  // could hold the older choice now, and the next read pushes the newest again.
+  async function _afterSaveConfirmed(rev, value) {
+    const now = await _readAfterSaveCache();
+    const newest = (Number(now[AFTER_SAVE_REV_KEY]) || 0) === rev && _afterSaveRev <= rev
+      && normalizeAfterSave(now[AFTER_SAVE_KEY]) === value;
+    await _localSet({ [AFTER_SAVE_DIRTY_KEY]: !newest });
+    return newest;
+  }
+  async function getAfterSave() {
+    const stored = await _readAfterSaveCache();
+    const cached = normalizeAfterSave(stored[AFTER_SAVE_KEY]);
+    const rev = Number(stored[AFTER_SAVE_REV_KEY]) || 0;
+    try {
+      if (stored[AFTER_SAVE_DIRTY_KEY]) {
+        const pushed = await updateSettings({ after_save: cached });
+        if (pushed && pushed.ok) await _afterSaveConfirmed(rev, cached);
+        return cached;
+      }
+      const res = await getSettings();
+      const remote = res && res.ok && res.settings && res.settings.after_save;
+      if (typeof remote === "string") {
+        // A pick made while this read was out (the popup) beats the helper's answer.
+        const now = await _readAfterSaveCache();
+        const current = normalizeAfterSave(now[AFTER_SAVE_KEY]);
+        if (now[AFTER_SAVE_DIRTY_KEY] || (Number(now[AFTER_SAVE_REV_KEY]) || 0) !== rev
+          || _afterSaveRev > rev) return current;
+        const value = normalizeAfterSave(remote);
+        if (value !== current) await _localSet({ [AFTER_SAVE_KEY]: value });
+        return value;
+      }
+    } catch { /* helper unreachable: use the cache */ }
+    return cached;
+  }
+  // Returns {value, synced}. synced=false means the helper doesn't have this
+  // pick yet (unreachable, or a newer pick is still on its way).
+  async function setAfterSave(value) {
+    const v = normalizeAfterSave(value);
+    const rev = _nextAfterSaveRev();
+    await _localSet({ [AFTER_SAVE_KEY]: v, [AFTER_SAVE_DIRTY_KEY]: true, [AFTER_SAVE_REV_KEY]: rev });
+    let synced = false;
+    try {
+      const res = await updateSettings({ after_save: v });
+      if (res && res.ok) synced = await _afterSaveConfirmed(rev, v);
+    } catch { synced = false; }
+    return { value: v, synced };
+  }
+  async function isFirstSave() {
+    const stored = await _localGet({ has_completed_first_yoink: false });
+    return !stored.has_completed_first_yoink;
+  }
+  // The saved item's markdown (file version) by folder slug, from the helper.
+  async function getCorpusMarkdown(slug) {
+    if (typeof slug !== "string" || !slug) return "";
+    const res = await _authedFetch("/mcp/v1/tools/call", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "get_uoink_corpus", arguments: { slug } }),
+    });
+    const body = await res.json().catch(() => null);
+    const data = body && body.result && body.result.structuredContent;
+    return data && data.ok && typeof data.corpus_md === "string" ? data.corpus_md : "";
+  }
+
+  // mode (optional): the After a save value. "stay" says it was saved and how
+  // to use the library from an AI; any other value (or none) keeps the
+  // clipboard wording. The first-uoink flag is set once the user has been
+  // told, whether or not anything was copied.
+  async function buildUoinkedMessage(data, copied, mode) {
     const FIRST_UOINK_MSG =
-      "Your first corpus is in your clipboard. Paste in Claude to see what it can do →";
+      "Copied to your clipboard. Paste it in Claude or ChatGPT to see what it can do.";
+    const FIRST_SAVE_MSG =
+      "Saved to your library. Once Uoink is connected, ask Claude or ChatGPT about it.";
+    const stay = mode === "stay";
     let firstTime = false;
     try {
       const stored = await new Promise((r) => {
@@ -904,7 +1029,7 @@
         } catch { r({ has_completed_first_yoink: false }); }
       });
       firstTime = !stored.has_completed_first_yoink;
-      if (firstTime && copied) {
+      if (firstTime && (copied || stay)) {
         await new Promise((r) => {
           try {
             chrome.storage.local.set({ has_completed_first_yoink: true }, () => r());
@@ -913,6 +1038,13 @@
       }
     } catch { /* fall through to topic-aware copy */ }
 
+    if (stay) {
+      if (firstTime) return FIRST_SAVE_MSG;
+      const rawTopic = data && data.topic && data.topic !== "Uncategorized" ? String(data.topic).trim() : "";
+      const topic = rawTopic.length > 40 ? `${rawTopic.slice(0, 39).trimEnd()}…` : rawTopic;
+      const tail = "To paste it into Claude or ChatGPT, use the buttons here or the Uoink popup.";
+      return topic ? `Saved to your library under ${topic}. ${tail}` : `Saved to your library. ${tail}`;
+    }
     if (firstTime && copied) return FIRST_UOINK_MSG;
 
     // Topic-aware default copy (subsequent uoinks).
@@ -920,7 +1052,8 @@
     const topicLine = realTopic ? `Saved to: ${realTopic}. ` : "";
     const tail = "Comments and any enabled AI analyses will arrive shortly in the saved corpus file.";
     if (copied) {
-      return `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim();
+      const pasteShortcut = _platform() === "mac" ? "⌘V" : "Ctrl+V";
+      return `${topicLine}Paste with ${pasteShortcut} in Claude or ChatGPT. ${tail}`.trim();
     }
     return `${topicLine}Clipboard was blocked. Open the saved file in the uoink folder.`.trim();
   }
@@ -1353,6 +1486,15 @@
     listRecent,
     openFolder,
     buildUoinkedMessage,
+    AFTER_SAVE_KEY,
+    AFTER_SAVE_DEFAULT,
+    AFTER_SAVE_CHOICES,
+    normalizeAfterSave,
+    afterSaveChoice,
+    getAfterSave,
+    setAfterSave,
+    isFirstSave,
+    getCorpusMarkdown,
     buildYoinkedMessage: buildUoinkedMessage,
     getToken,
     friendlyError,

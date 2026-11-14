@@ -37,6 +37,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -155,7 +156,28 @@ def legacy_desktop_corpus_present() -> bool:
 # --------------------------------------------------------------------------
 # Keyring migration (non-fatal -- design Q4 A)
 # --------------------------------------------------------------------------
+# A keyring call can wait on an OS prompt with no timeout of its own. These
+# calls run on a worker and are given up on after this long. One at a time:
+# while one is stuck, the next returns its fallback at once.
+KEYRING_TIMEOUT_SEC = 10.0
+_keyring_turn = threading.Lock()
+
+
+def _credential_store_off_limits() -> bool:
+    """Isolated installs (and UOINK_CREDENTIAL_STORE=file) keep secrets in
+    their own profile and never touch the OS credential store."""
+    try:
+        import uoink_install_isolation as iso
+        if iso.current_binding() is not None:
+            return True
+    except Exception:
+        pass
+    return os.environ.get("UOINK_CREDENTIAL_STORE", "").strip().lower() == "file"
+
+
 def _keyring():
+    if _credential_store_off_limits():
+        return None
     try:
         import keyring
         return keyring
@@ -164,12 +186,43 @@ def _keyring():
         return None
 
 
+def _keyring_bounded(fn, fallback):
+    """fn() on a worker thread; `fallback` if the store is busy with a stuck
+    call or doesn't answer within KEYRING_TIMEOUT_SEC. fn's errors re-raise."""
+    turn = _keyring_turn  # the worker releases this same lock, even late
+    if not turn.acquire(blocking=False):
+        return fallback
+    outcome: dict = {}
+    done = threading.Event()
+
+    def run() -> None:
+        try:
+            outcome["value"] = fn()
+        except BaseException as e:  # handed to the caller below
+            outcome["error"] = e
+        finally:
+            turn.release()
+            done.set()
+
+    try:
+        threading.Thread(target=run, name="uoink-migrate-keyring", daemon=True).start()
+    except BaseException:
+        turn.release()
+        raise
+    if not done.wait(KEYRING_TIMEOUT_SEC):
+        return fallback
+    if "error" in outcome:
+        raise outcome["error"]
+    return outcome["value"]
+
+
 def _legacy_keyring_key_present() -> bool:
     kr = _keyring()
     if kr is None:
         return False
     try:
-        return bool(kr.get_password(KEYRING_SERVICE_OLD, KEYRING_USERNAME))
+        return _keyring_bounded(
+            lambda: bool(kr.get_password(KEYRING_SERVICE_OLD, KEYRING_USERNAME)), False)
     except Exception:
         return False
 
@@ -181,7 +234,8 @@ def _migrate_keyring(dry_run: bool) -> str:
     kr = _keyring()
     if kr is None:
         return "skipped: keyring unavailable"
-    try:
+
+    def move() -> str:
         existing_new = kr.get_password(KEYRING_SERVICE_NEW, KEYRING_USERNAME)
         if existing_new:
             return "skipped: new entry already present"
@@ -197,6 +251,10 @@ def _migrate_keyring(dry_run: bool) -> str:
             log.warning("migration: copied key but couldn't delete legacy entry: %s", e)
         log.info("migration: Anthropic key moved Yoink->Uoink in credential store")
         return "migrated"
+
+    try:
+        # A stuck store leaves the legacy entry in place for the next boot.
+        return _keyring_bounded(move, "failed (non-fatal): credential store did not answer")
     except Exception as e:
         # Non-fatal: surfaced in /diagnose as "re-enter your key".
         log.error("migration: keyring migration failed (non-fatal): %s", e)

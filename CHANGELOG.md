@@ -10,16 +10,87 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-11-12
+
+### Added
+
+- Library: a "Rediscover" shelf above the list (up to 4 saves picked fresh each day: saved
+  about a week ago, about a month ago, on this day in an earlier year, or never opened) and up
+  to 3 "Idea starters" built from saves that share a topic, with Write from these and Copy
+  prompt. Everything is local, with no network or AI calls. A Settings switch turns both off
+  and each shelf collapses per browser. Uoink now notes when you last opened an item (new
+  `item_opens` table, migration 0034).
+- Podcast suggestions in For You, off by default (Settings, Suggest podcasts). When on, Uoink
+  sends a few topic words from what you save (never titles, links or transcripts) to Apple's
+  podcast search about once a day and shows episodes you might want, each with the reason.
+  Recurring two-word phrases are searched first, and an episode must name the search words in
+  its own title or description. Save downloads and transcribes just that episode without
+  following the show. Follow show and Not interested are separate. The Library shows a small
+  teaser that links to For You. With fewer than 5 saved items it says to save a few more and
+  sends nothing.
+- Phone inbox setup is now three numbered steps in Settings: make your relay (Deploy to
+  Render), connect it (with a Connected or Not connected status and the reason, including
+  a relay that is asleep), and set up your phone with a QR code. When it all works the card
+  collapses to "Phone inbox is on" with the last pickup time. The QR code is drawn on your
+  computer (qrcode-generator, MIT) and never goes through an outside service.
+- The relay now serves a phone page at `/phone`. The QR code opens it with the push token in
+  the URL fragment, so the token never reaches a server log. It has a Paste a link box, adds
+  Uoink to the Android share sheet once installed, walks through the one-time iPhone Shortcut,
+  and has a Forget this phone button. New relay endpoint `GET /v1/pairing` (pull token
+  required) returns the push token so the dashboard can build the QR code. A relay deployed
+  before this release answers 404: Uoink says to update it (Render > uoink-relay > Manual
+  Deploy) and lets you paste the push token meanwhile.
+- `npx uoink`: a zero-dependency npm package (`packaging/npm/`) that downloads the official
+  installer, checks its SHA-256 against `SHA256SUMS.txt`, installs Uoink (Windows per user,
+  Mac Apple silicon) and points you at `uoink connect`. When Uoink is already installed,
+  `npx uoink <command>` runs the installed CLI. It asks before downloading, resumes a dropped
+  download, has `--dry-run`, and has no install script. Downloads go through the same counted
+  link as uoink.app (`from=npm`), with GitHub as the fallback. Not published yet.
+- Chrome Web Store package for 3.17.0 is ready to submit. A store install now opens a setup
+  page that says "Uoink needs its free desktop app", names your system, links the right
+  download (Windows, or Mac with Apple silicon; Intel Macs and Linux get a plain note),
+  waits for the app to start and switches to "Connected" with a first thing to try. Download
+  links go through the same counted redirect as uoink.app (`from=extension`). The store docs,
+  listing text, permission notes, reviewer steps and 1280x800 screenshots in `docs/store/` are
+  refreshed, and `node scripts/store_screenshots.mjs <folder>` regenerates the setup and popup
+  shots.
+- `scripts/build_cws.py` refuses any test, mock, source map, key or doc file even if added to
+  its allowlist, and tests check the zip name, contents, receipt and missing `key` field.
+
+### Changed
+
+- Saving no longer opens a Claude tab or overwrites your clipboard. A new setting, After a
+  save, has four choices: Stay on the page (the new default), Copy then open Claude, Copy then
+  open ChatGPT, and Copy only. Pick it in the toolbar popup or in dashboard Settings under
+  Capture. With the default, the notification says the capture is in your library and offers
+  Copy for Claude and Copy for ChatGPT, and the YouTube button turns into "Saved. Copy for
+  Claude" for a few seconds. Your very first save offers "See it in Claude". Nothing leaves the
+  computer until you click one of those.
+- `docs/relay.md` leads with the QR path. The Shortcut, HTTP Shortcuts and curl recipes are
+  the manual fallback. The phone inbox status now includes `last_pickup_at`.
+- The MCP server still exposes 99 tools by default, 36 with
+  `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
+- Isolated test installs keep secrets in a file inside their own profile and never touch the system credential store.
+
 ### Fixed
 
+- `npx uoink update` on a Mac quits the running Uoink before replacing it and starts the new version after.
+- The browser extension says ⌘V instead of Ctrl+V on a Mac.
+- If the system credential store (Keychain or Windows Credential Manager) doesn't answer, saving a relay token now says so instead of freezing Uoink.
+- Tray menu Settings opens the dashboard's Settings page, and the command line says "1 result" instead of "1 result(s)".
+- One title limit for every source: titles longer than 300 characters (YouTube, podcasts,
+  pages, X, Reddit, imports, notes, images) are cut at a safe point, never inside an emoji or
+  accent, and end in an ellipsis. Notes used to cap at 200. Saved items are not rewritten.
 - Dashboard on a phone: a long error message or source address no longer stretches the
   item page past the screen. Long topic names in the breadcrumb end in an ellipsis with the
   full name on hover.
-- Dashboard speaker timeline: a long talk now draws across the whole bar instead of only
-  its first 120 turns.
+- Dashboard Library on a phone-width window: the "Write from this" row no longer leaves a
+  blank gap under each card on a computer with a mouse. A card title now shows in full on hover.
 - Dashboard Library: the sort menu sits on the same row as Filters and All words on wide
   screens. On a card, a long author name is cut with an ellipsis (full name on hover) while
-  the platform and age stay visible. Hovering a card shows its full title.
+  the platform and age stay visible.
+- Dashboard speaker timeline: a long talk now draws across the whole bar instead of only
+  its first 120 turns.
 - Dashboard Activity no longer says "No transcript" for notes and pages. Activity tables
   stay inside their box on a phone.
 - Dashboard reader: very long transcripts show the first 200 paragraphs with a Show more
@@ -29,6 +100,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   before "Topic 10"), stay on one line, and fold into a "+N more" button when the list is long.
 - When Library hits the request limit it now shows a Retry button and tries once more by
   itself after a few seconds.
+- Browser extension: the YouTube button no longer grows without limit when a research session
+  has a long name. The label ends in an ellipsis and the full name shows on hover. A failed
+  capture whose stored error is a script error now says "Something went wrong inside Uoink.
+  Try again." instead of showing the raw error.
+- Browser extension: after a save, the YouTube button's hover text no longer names the folder
+  the item went to. YouTube's own page could read that text, and the folder path often holds
+  your account name. It now says "Saved to your library."
+- Command line: `uoink --help` now describes Uoink instead of internals, every command has a
+  help line, `uoink serve --help` prints help instead of starting the helper, and an unknown
+  command, an empty search, a missing tool name and a stopped helper each say what to do next.
+- AI tool errors no longer show file paths (links are kept), and the common ones (missing url,
+  query, job id, playlist link, Anthropic key) say what to pass or where to fix it. A site that
+  is not on the allowed list names the dashboard setting instead of an internal route.
+- Tray menu: recent items with an ampersand, a line break or a very long title show cleanly
+  (ellipsis instead of a hard cut), and the status lines read in plain words.
+- First-run window: the start-failure message says what to try. Extension page: the heading
+  no longer leaves one word alone on a phone-width line.
+- `npx uoink` on a Mac or Linux with a global `npm i -g uoink` no longer starts itself in a
+  loop. It skips any `uoink` on PATH that leads back to the npm package (a symlink, another
+  copy or a pnpm shim), and a launcher started by another launcher stops with a plain message.
+- `npx uoink update` on a Mac moves the old Uoink.app aside, puts the new one in, and only then
+  deletes the old one. If the new one can't go in, the old one is put back, so a failed update
+  never leaves you without Uoink.
+- `npx uoink` on a Mac starts the Uoink.app it just installed. When the `uoink` command it found
+  was a link such as `~/.local/bin/uoink`, it used to try to open your home folder instead.
+- The relay phone page test reads the inline script and style with an HTML parser, so it finds
+  the tags in any case (clears a CodeQL alert).
+
+### Security
+
+- Relay phone page: a link with a different key no longer replaces the phone's pairing without asking.
+- The relay phone page no longer sends a shared link by itself. Opening `/phone?url=...` (the
+  Android share target) fills the Paste a link box and asks "Shared from another app. Send it
+  to Uoink?", and nothing reaches the relay until you tap Send. Before, any page or message
+  that opened such a link on a paired phone could add a link to your inbox.
+- Podcast suggestions: Save checks that transcription is set up before it downloads anything.
+  If it isn't, the card says to set it up in Settings and nothing is downloaded. A save that
+  fails for any reason stays on its card with the reason and Try again.
+- Podcast suggestions: saving an episode from a show you follow, or following the show after
+  saving, keeps one copy of the episode in Podcasts and the Library. The next feed check gives
+  the saved episode the feed's own ID instead of adding it a second time.
+- Podcast suggestions: a refresh no longer brings back an episode you marked Not interested or
+  saved while it was running.
+- Podcast suggestions: artwork loads only from Apple's image servers (mzstatic.com). Any other
+  artwork is dropped and the card shows its letter tile.
 
 ## [3.16.3] - 2026-11-10
 

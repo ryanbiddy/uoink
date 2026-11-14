@@ -26,7 +26,7 @@
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.16.3"
+#define AppVersion    "3.17.0"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
@@ -137,6 +137,7 @@ Source: "staging\third-party-notices\deno-2.9.8-MIT-LICENSE.txt"; DestDir: "{app
 Source: "staging\third-party-notices\yt-dlp-ejs-0.8.0-LICENSES.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\faster-whisper-base-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
@@ -177,6 +178,7 @@ Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_playbooks.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\discovery_scrapecreators.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_briefs.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\library_remember.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror_vault_io.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_media.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -222,6 +224,7 @@ Source: "staging\source_manifest.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
 ; U-15 X text/thread capture. server.py imports x_extractor at module top, so it
 ; MUST be in Inno's installed file list too -- build.ps1 staging coverage alone is
 ; not enough. Its absence here is why v3.2.6 shipped without it and the helper

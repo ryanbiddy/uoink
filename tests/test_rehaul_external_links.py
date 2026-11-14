@@ -448,6 +448,11 @@ def test_dashboard_init_does_not_request_remote_features():
         "autoCheckUpdatesOnLoad",
         # Asks the local helper whether Zing is installed; no remote request.
         "loadZingStatus",
+        # Wires the For You podcast panel's buttons; fetches nothing at init.
+        "wireForYouPod",
+        # Asks the local helper for cached podcast suggestions. The helper
+        # contacts Apple only when the user turned Suggest podcasts on.
+        "forYouPodLoad",
     ]
     _run_js(f"""
 const calls = [], requests = [];

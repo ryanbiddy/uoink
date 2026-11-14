@@ -238,7 +238,7 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
-        return _err("url required")
+        return _err("url is required: pass the page or video link to capture.")
     url = b._normalize_youtube_url(raw_url.strip())
     if not url:
         return _err("URL must be a youtube.com or youtu.be video link")
@@ -317,10 +317,10 @@ def uoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
-        return _err("playlist URL invalid")
+        return _err("That is not a playlist link. Pass a YouTube playlist URL that contains list=.")
     url = b._normalize_playlist_url(raw_url.strip())
     if not url:
-        return _err("playlist URL invalid")
+        return _err("That is not a playlist link. Pass a YouTube playlist URL that contains list=.")
     interval = _limit_int(args.get("interval"), default=30, low=5, high=300)
     refusal = _platform.capability_refusal(_platform.media_capability())
     if refusal is not None:
@@ -338,10 +338,10 @@ def get_job_status(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     job_id = args.get("job_id")
     if not isinstance(job_id, str) or not b._is_valid_job_id(job_id):
-        return {**_err("job id invalid"), "helper_recovery": recovery}
+        return {**_err("job_id is not valid. Use the job_id that the capture call returned."), "helper_recovery": recovery}
     job = b._get_public_job(job_id)
     if not job:
-        return {**_err("job not found"), "helper_recovery": recovery}
+        return {**_err("No job with that id. Use the job_id that the capture call returned."), "helper_recovery": recovery}
     return _ok(job=job, helper_recovery=recovery)
 
 
@@ -349,7 +349,7 @@ def cancel_job(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     job_id = args.get("job_id")
     if not isinstance(job_id, str) or not b._is_valid_job_id(job_id):
-        return _err("job id invalid")
+        return _err("job_id is not valid. Use the job_id that the capture call returned.")
     job, error, _status = b._cancel_playlist_job(job_id)
     if error:
         return _err(error)
@@ -392,7 +392,7 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     # ({slug, title, snippet, score}); optional channel / hook_type filters.
     query = args.get("query")
     if not isinstance(query, str) or not query.strip():
-        return _err("query required")
+        return _err("query is required: pass the words to search for.")
     match = args.get("match", "forgiving")
     if match not in ("forgiving", "strict"):
         return _err("match must be forgiving or strict")
@@ -505,7 +505,7 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
         return _err("uoink not found")
     video_id = _read_sidecar(folder).get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
-        return _err("uoink has no video_id")
+        return _err("This saved item has no video_id, so it cannot be used here.")
     transcript: list[dict[str, Any]] = []
     screenshots: list[dict[str, Any]] = []
     for r in _b()._get_index().get_citations(video_id):
@@ -556,7 +556,7 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
         return _err("mode must be auto, keyword, semantic or hybrid")
     query = args.get("query")
     if not isinstance(query, str) or not query.strip():
-        return _err("query required")
+        return _err("query is required: pass the words to search for.")
     match = args.get("match", "forgiving")
     if match not in ("forgiving", "strict"):
         return _err("match must be forgiving or strict")
@@ -646,7 +646,7 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
         # Fall back to the sidecar's own snapshot if the index lacks a row.
         health = sidecar.get("health")
     if not isinstance(health, dict):
-        return _err("no health data for this uoink")
+        return _err("This item has no health data saved. Capture it again to record extraction health.")
     return _ok(video_id=video_id or None, health=health,
                youtube_bot_check=_b()._youtube_bot_check_status())
 
@@ -659,7 +659,7 @@ def classify_facets(args: dict[str, Any]) -> dict[str, Any]:
     duration metadata) if the agent didn't supply them. Zero outbound calls."""
     video_id = (args.get("video_id") or "").strip()
     if not video_id:
-        return _err("video_id required")
+        return _err("video_id is required: use an id from search_library or list_recent_uoinks.")
     server = _b()
     body = {k: args.get(k) for k in (
         "format", "performance_tier", "production_style", "length_bucket",
@@ -1629,7 +1629,7 @@ def get_writing_piece(args: dict[str, Any]) -> dict[str, Any]:
         return _err("piece id (integer) is required")
     piece = _ws.get_piece(server._get_index(), piece_id)
     if piece is None:
-        return _err("piece not found")
+        return _err("No writing piece with that id. Use list_writing_pieces to see saved pieces.")
     return _ok(piece=piece)
 
 
@@ -1717,7 +1717,7 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
         # The clipboard copy repeats yoink_md with screenshots inlined as
         # base64; an agent reply never needs it.
         return {k: v for k, v in probe.payload.items() if k != "corpus_md_paste"}
-    return _err("uoink_url returned no result")
+    return _err("The capture finished without a result. Check that Uoink is running, then try again.")
 
 
 @uoink_usage.capture("note")
@@ -2237,7 +2237,7 @@ def get_workspace(args: dict[str, Any]) -> dict[str, Any]:
     except Exception as e:
         return _err(f"get_workspace failed: {e}")
     if ws is None:
-        return _err("workspace not found")
+        return _err("No workspace with that id. Use list_workspaces to see saved workspaces.")
     try:
         crit = _ws.critique_log_for(server._get_index(), workspace_id.strip())
     except Exception:
@@ -2331,7 +2331,7 @@ def get_claim(args: dict[str, Any]) -> dict[str, Any]:
     except Exception as e:
         return _err(f"get_claim failed: {e}")
     if row is None:
-        return _err("claim not found")
+        return _err("No claim with that id. Use extract_claims to create claims first.")
     return _ok(claim=row)
 
 
@@ -2442,7 +2442,7 @@ def get_script(args: dict[str, Any]) -> dict[str, Any]:
     except Exception as e:
         return _err(f"get_script failed: {e}")
     if row is None:
-        return _err("script not found")
+        return _err("No script with that id. Pass a script_id from an earlier write call.")
     return _ok(script=row)
 
 
@@ -2470,7 +2470,7 @@ def get_transcript_reliability(args: dict[str, Any]) -> dict[str, Any]:
     """
     video_id = args.get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
-        return _err("video_id required")
+        return _err("video_id is required: use an id from search_library or list_recent_uoinks.")
     folder, _row = _b()._folder_for_video_id(video_id.strip())
     if not folder:
         return _err("uoink not found")
@@ -2484,14 +2484,14 @@ def analyze_comments_tool(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     key = _saved_key()
     if not key:
-        return _err("anthropic key not configured")
+        return _err("An Anthropic API key is not set up. Add it in the Uoink dashboard under Settings, then try again.")
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
         return _err("uoink not found")
     comments = _comments_for_folder(folder)
     if len(comments) < 5:
-        return _err("not enough comments to analyze")
+        return _err("This item has too few saved comments to analyze. Capture a page or video that has comments.")
     try:
         analysis = b.analyze_comments(comments, api_key=key)
         b._replace_comment_intelligence_section(
@@ -2513,7 +2513,7 @@ def classify_hook(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     key = _saved_key()
     if not key:
-        return _err("anthropic key not configured")
+        return _err("An Anthropic API key is not set up. Add it in the Uoink dashboard under Settings, then try again.")
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
@@ -6686,13 +6686,61 @@ def call_tool(name: str, arguments: dict[str, Any] | None = None, *,
             import _platform
             if not _platform.library_mirror_capability()["available"]:
                 result["capabilities"] = _platform.platform_capabilities()
+        if isinstance(result, dict) and result.get("ok") is False and isinstance(result.get("error"), str):
+            result["error"] = _redact_paths(result["error"])
         return result
     except RateLimitExceeded as e:
         if name.startswith("research_"):
             return {"ok": False, "error": str(e), "code": "rate_limited"}
         return _err(str(e))
     except Exception as e:
-        return _err(f"tool failed: {e}")
+        return _err(f"That tool hit a problem and stopped: {_scrub_error_text(e)}. "
+                    "Check that Uoink is running, then try again.")
+
+
+# Where a local path starts. The lookbehind keeps URLs intact: in
+# "https://example.com/home/x" neither "//" nor "/home/" starts a path.
+# Separators may be doubled (repr() of a Windows path writes "C:\\Users").
+_PATH_START = (
+    r"(?<![\w/.:-])(?:"
+    r"[A-Za-z]:[\\/]+"                      # C:\ or C:/
+    # Don't retry a UNC start at every backslash in a run.
+    r"|(?<!\\)\\{2,}(?=[^\s\\/])"           # \\server\share (UNC)
+    r"|file:/+"                             # file:///C:/... and file:///Users/...
+    r"|~[\\/]+"                             # ~/Library/...
+    r"|/(?:Users|home|var|tmp|private|opt|etc|mnt|media|root|srv"
+    r"|Applications|Library|Volumes|System)[\\/]+"
+    r")"
+)
+_PATH_SEG = r"[^\s\\/'\"<>|]"
+# Then separator-joined segments. A segment that another separator follows may
+# hold single spaces ("Mary Anne", "Program Files (x86)"); a word after such a
+# space can't hold ":", so "a.db to E:\b" stays two paths. The last segment
+# runs to whitespace and leaves trailing punctuation, so the sentence after
+# the path survives.
+_PATH_BODY = (
+    rf"(?:{_PATH_SEG}+(?:[ ][^\s\\/'\"<>|:]+)*[\\/]+)*"
+    rf"(?:{_PATH_SEG}*[^\s\\/'\"<>|.,;:!?)\]}}])?"
+)
+_PATH_IN_ERROR = re.compile(
+    # A quoted span holding a path ('C:\Users\Mary Anne\x.db', the way repr()
+    # writes one) goes whole, spaces and all. Otherwise the bare path.
+    rf"(?<!\w)(?P<q>['\"])[^'\"\n]*?{_PATH_START}[^\n]{{0,600}}?(?P=q)(?!\w)"
+    rf"|{_PATH_START}{_PATH_BODY}")
+
+
+def _redact_paths(text: str) -> str:
+    # Bound handler errors too; not every caller uses _scrub_error_text.
+    return _PATH_IN_ERROR.sub("<path>", text[:4000])
+
+
+def _scrub_error_text(value: Any) -> str:
+    """One short line for an AI client: no file paths, no traceback lines."""
+    # Only 200 characters are kept, so a huge exception message is cut first
+    # to keep the path search quick.
+    text = " ".join(str(value)[:4000].split())
+    text = _redact_paths(text)
+    return text[:200].rstrip(" .") or "unknown error"
 
 
 # Registry tools whose successful result carries saved third-party text

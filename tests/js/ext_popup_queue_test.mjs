@@ -167,7 +167,9 @@ function popupSlice(from, to) {
 // store: chrome.storage to start from (a worker Chrome restarted shares the
 // one the stopped worker left).
 async function makeWorker({ routes = {}, platform, store } = {}) {
-  store = store || { local: {}, sync: {}, session: {} };
+  // These E1 scenarios cover the copy-then-open-Claude path, which is the "claude"
+  // choice of After a save since 3.17.0 (the default is now "stay").
+  store = store || { local: { after_save: "claude" }, sync: {}, session: {} };
   const helper = (url, init) => {
     const path = pathOf(url);
     if (path === "/token") return jsonResponse({ token: "test-token" });
@@ -1298,7 +1300,7 @@ const REUSED = {
 // A session the old worker left mid-job: `current` running, `queue` behind it.
 function stoppedStore(current, queue = []) {
   return {
-    local: {},
+    local: { after_save: "claude" },
     sync: {},
     session: { busy: true, current: { startedAt: Date.now() - 60 * 1000, ...current }, queue },
   };

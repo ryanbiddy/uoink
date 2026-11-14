@@ -30,6 +30,7 @@ import urllib.request
 import pytest
 import _platform
 import uoink_usage
+from provenance import clamp_title
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -90,8 +91,10 @@ def capture(tmp_path, monkeypatch):
     for column, kind in (("schema_version", "INTEGER"), ("source_type", "TEXT"),
                          ("platform", "TEXT"), ("author", "TEXT"), ("deleted_at", "TEXT")):
         conn.execute(f"ALTER TABLE yoinks ADD COLUMN {column} {kind}")
+    # The AST loader copies methods without their module-level imports.
     index_scope = {"threading": threading, "unicodedata": unicodedata,
-                   "contextmanager": contextmanager, "suppress": suppress}
+                   "contextmanager": contextmanager, "suppress": suppress,
+                   "_clamp_title": clamp_title}
     _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
           index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
     _load(ROOT / "index.py", {"__init__", "upsert_yoink", "_rollback_on_error", "get_yoink", "get_by_slug",

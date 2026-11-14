@@ -1193,6 +1193,40 @@ async function researchSessionAction(action) {
   } catch (error) { status.textContent = error.message || "Couldn't update this session."; }
   finally { sessionBusy = false; buttons.forEach(button => { button.disabled = false; }); }
 }
+// "After a save": what a finished capture does. Stored in chrome.storage.local
+// (STC.getAfterSave / setAfterSave); the worker and the in-page button read it.
+const AFTER_SAVE_HINTS = {
+  stay: "Saves to your library only. The notification offers Copy for Claude and Copy for ChatGPT.",
+  claude: "Copies the capture to your clipboard, then opens a new Claude chat.",
+  chatgpt: "Copies the capture to your clipboard, then opens ChatGPT.",
+  copy: "Copies the capture to your clipboard and stays where you are.",
+};
+async function initAfterSave() {
+  const select = document.getElementById("after-save-select");
+  const hint = document.getElementById("after-save-hint");
+  for (const choice of STC.AFTER_SAVE_CHOICES) {
+    const option = element("option", "", choice.label);
+    option.value = choice.value;
+    select.appendChild(option);
+  }
+  // Each pick bumps `picks`. An answer that comes back after a newer pick (or
+  // the first load finishing after the user already picked) is dropped, so a
+  // slow reply never puts an older choice back in the menu.
+  let picks = 0;
+  const show = (value, note) => {
+    select.value = value;
+    hint.textContent = (AFTER_SAVE_HINTS[value] || "") + note;
+  };
+  select.addEventListener("change", async () => {
+    const mine = ++picks;
+    const { value, synced } = await STC.setAfterSave(select.value);
+    if (mine !== picks) return;
+    show(value, synced ? "" : " Saved in this browser. The dashboard will match once the helper is running.");
+  });
+  const loaded = await STC.getAfterSave();
+  if (picks === 0) show(loaded, "");
+}
+initAfterSave();
 document.getElementById("research-session").addEventListener("toggle", event => {
   if (event.target.open) refreshResearchSession();
 });

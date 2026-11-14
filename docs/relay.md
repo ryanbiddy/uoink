@@ -4,7 +4,12 @@ Share a link from your phone, and Uoink on your computer captures it the next
 time it checks. There is no phone app and no Uoink cloud. The link travels
 through a small relay that you deploy to your own Render account.
 
-**What it is.** A tiny web service with two endpoints. Your phone adds a link
+**The flow:** your phone, then your relay, then Uoink on your computer.
+**What it costs:** a free Render account (you sign up once, and the relay runs
+on Render's free plan). The relay holds links only, and deletes each one after
+Uoink picks it up or after 7 days.
+
+**What it is.** A tiny web service with a few endpoints. Your phone adds a link
 to it with one token. Uoink lists pending links with a second token, captures
 each one locally exactly like `uoink capture <url>`, then deletes it from the
 relay.
@@ -14,36 +19,104 @@ never sees your captures, transcripts or notes in Uoink. It holds a link and
 an optional note, and nothing else, until Uoink picks it up. Anything Uoink
 hasn't picked up after 7 days is deleted.
 
-## 1. Deploy the relay
+## The quick way: three steps in Uoink
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink)
+Open **Dashboard > Settings > Capture > Phone inbox**. It walks you through
+three numbered steps.
 
-The button reads [`render.yaml`](../render.yaml) and creates two things on your
-Render account:
+1. **Make your relay.** You need a Render account first. Signing up is free.
+   Then select **Deploy to Render**:
 
-- `uoink-relay`, a free Python web service (the code is in [`relay/`](../relay/app.py));
-- `uoink-relay-kv`, a free Key Value instance that only `uoink-relay` can reach.
+   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink)
 
-Render generates both tokens for you. When it finishes, note the relay's
-address, for example `https://uoink-relay-abcd.onrender.com`. Open it in a
-browser: you should see a short "Uoink Relay" page.
+   The button reads [`render.yaml`](../render.yaml) and creates two things on
+   your Render account:
 
-Updates to the Uoink repository don't redeploy your relay. To take a newer
-relay version, choose **Manual Deploy** on the service in Render.
+   - `uoink-relay`, a free Python web service (the code is in [`relay/`](../relay/app.py));
+   - `uoink-relay-kv`, a free Key Value instance that only `uoink-relay` can reach.
 
-## 2. Find the two tokens
+   Render generates both tokens for you. When it finishes, copy the relay's
+   address, for example `https://uoink-relay-abcd.onrender.com`, and open
+   **uoink-relay > Environment** to copy `RELAY_PULL_TOKEN`.
+
+2. **Connect it.** Paste the relay address and the pull token and select
+   **Save**. Uoink checks the relay and shows **Connected**, or **Not
+   connected** with the reason: a wrong address, a wrong token, or a relay
+   that is still asleep. A free Render service sleeps when nobody uses it, so
+   the first check can take up to a minute. Uoink stores the pull token in your
+   system's credential store, never in `settings.json`.
+
+3. **Set up your phone.** Once step 2 says Connected, Uoink shows a QR code.
+   Scan it with the phone's camera. Uoink draws the code on your computer, and
+   no outside QR service is used. The code opens
+   `https://<your-relay>/phone#t=<push token>`, a page your own relay serves.
+   The token sits after the `#`, so the browser never sends it to the relay
+   and it never reaches a log. The page keeps it in the phone's local storage
+   and removes it from the address bar.
+
+When all three work, the card collapses to **Phone inbox is on**, with the last
+pickup time and a **Show phone setup again** link. **Copy pairing link** in
+step 3 gives you the same link as text, to paste into the page's **Pair with a
+link** box when a camera is not handy.
+
+### The phone page
+
+`GET /phone` on your relay is a small page for the phone, with no outside
+scripts, fonts or analytics and a strict Content Security Policy:
+
+- **Paste a link** and **Send**, with a plain sent or failed result. If the
+  relay was asleep, the page says it is waking and retries by itself for up to
+  90 seconds.
+- **Android:** install the page (Chrome menu, **Install app** or **Add to Home
+  screen**). It then appears in the share sheet, because its manifest declares
+  a share target. Share a link from any app and pick Uoink. The page fills in
+  the shared link and sends it only when you tap **Send**, so a link that some
+  other page or message opens on your phone is never sent by itself.
+- **iPhone:** add the page to the Home Screen to paste links quickly. iPhone
+  web pages cannot join the Share sheet, so the page also shows a short,
+  one-time Shortcut recipe with **Copy address** and **Copy Authorization
+  value** buttons.
+- **Forget this phone** clears the stored token.
+
+### Older relays: update to get the QR code
+
+A relay deployed before Uoink 3.17 has no `/phone` page and no `/v1/pairing`
+endpoint, so the dashboard cannot read its push token. Uoink notices the 404
+and says **Update your relay: Render > uoink-relay > Manual Deploy**. Updates
+to the Uoink repository never redeploy your relay by themselves, so choose
+**Manual Deploy** on the service in Render, then check again. Until then you
+can paste the push token (**Render > uoink-relay > Environment >
+`RELAY_PUSH_TOKEN`**) into the dashboard, or use the manual setup below.
+
+### Security note: the pull token now also reveals the push token
+
+`GET /v1/pairing` requires the pull token and returns the push token. Both
+tokens belong to you and sit side by side on your Render service, so this does
+not widen access in a way that matters, but it is worth saying plainly:
+anyone who holds the **pull** token can now also read the **push** token, and
+so could add links to your relay. The push token still cannot read or delete
+anything. The call goes through the same wrong-token limiter as every other
+route, and the push token on it answers `403`. Keep the pull token private,
+and rotate both (see below) if it leaks.
+
+## Manual setup (fallback)
+
+Use these if you would rather not use the QR code, or your phone cannot scan.
+
+### 1. Find the two tokens
 
 In the Render dashboard, open **uoink-relay > Environment**.
 
 - `RELAY_PUSH_TOKEN` goes on your phone. It can only add links.
-- `RELAY_PULL_TOKEN` goes in Uoink. It can only list and delete links.
+- `RELAY_PULL_TOKEN` goes in Uoink. It can list and delete links, and it can
+  read the push token for pairing.
 
 Each token is at least 32 characters, and the two must differ, or the relay
 refuses to start.
 
-## 3. Set up your phone
+### 2. Set up your phone by hand
 
-### iPhone and iPad: a Shortcut
+#### iPhone and iPad: a Shortcut
 
 In the Shortcuts app, create a shortcut with these actions:
 
@@ -61,7 +134,7 @@ first `http` or `https` link and keeps the rest as the note. To add your own
 note, add a `note` field to the JSON body (for example from an **Ask for
 Input** action).
 
-### Android: HTTP Shortcuts
+#### Android: HTTP Shortcuts
 
 Install the free **HTTP Shortcuts** app and create a shortcut:
 
@@ -74,7 +147,7 @@ Install the free **HTTP Shortcuts** app and create a shortcut:
 The relay also reads `url`, `text` and `title` form fields, and a plain-text
 body.
 
-### Any device: curl
+#### Any device: curl
 
 ```sh
 curl -X POST https://<your-relay>.onrender.com/v1/links \
@@ -86,19 +159,20 @@ curl -X POST https://<your-relay>.onrender.com/v1/links \
 A new link answers `201` with its `id` and `expires_at`. Sharing a link that
 is still waiting answers `200` with the same `id`.
 
-## 4. Set up Uoink
+### 3. Set up Uoink by hand
 
-Open **Dashboard > Settings > Capture > Phone inbox**:
+In **Dashboard > Settings > Capture > Phone inbox**, step 2 holds these fields:
 
 1. **Relay address**: the `https://...onrender.com` address.
-2. **Pull token**: paste `RELAY_PULL_TOKEN`. Uoink stores it in your system's
-   credential store, never in `settings.json`, and the field shows **Saved**
+2. **Pull token**: paste `RELAY_PULL_TOKEN`. The field shows **Saved**
    afterwards.
 3. Turn on **Pick up links shared from my phone**, pick how often to check,
    and select **Save**.
 
 **Check now** checks at once. The status line shows when Uoink last checked
 and how many links it picked up, or what went wrong.
+
+## What Uoink does with each link
 
 Each link is captured with the same tool `uoink capture` uses: YouTube videos
 and playlists, X posts, Reddit threads, podcast feeds and web pages. If the
@@ -119,7 +193,8 @@ The free plan works for a personal inbox, with two tradeoffs:
 
 - **The relay sleeps.** A free web service stops after 15 minutes with no
   requests and takes about a minute to wake. The first share after a quiet
-  spell is slow, and Uoink waits up to 90 seconds when it checks.
+  spell is slow, and Uoink waits up to 90 seconds when it checks. The phone
+  page says "Waking your relay" and retries by itself.
 - **Restarts drop waiting links.** Free Key Value keeps data in memory only.
   If Render restarts it, links Uoink hasn't picked up yet are lost. Render
   allows one free Key Value instance per workspace.
@@ -134,8 +209,10 @@ none to wait or go missing. Change the plan on each service in Render.
 1. In Render, open **uoink-relay > Environment**, edit `RELAY_PUSH_TOKEN` or
    `RELAY_PULL_TOKEN` (at least 32 random characters, no spaces) and save
    the change so Render redeploys the relay with it.
-2. Put the new push token in your Shortcut or HTTP Shortcuts request.
-3. Paste the new pull token in **Settings > Phone inbox** and select **Save**.
+2. Paste the new pull token in **Settings > Phone inbox** and select **Save**.
+3. Scan the new QR code with the phone, or put the new push token in your
+   Shortcut or HTTP Shortcuts request. On the phone page, **Forget this
+   phone** clears the old key first.
 
 To stop using the relay, turn off **Pick up links shared from my phone** in
 Uoink, then suspend or delete both services in Render.
@@ -148,11 +225,13 @@ Uoink, then suspend or delete both services in Render.
 | The relay's own log lines | Method, route, status code and duration only. Never tokens, links, notes or IP addresses | Render's log retention |
 | Uoink settings | Relay address, on/off, check interval | Until you change them |
 | System credential store | The pull token | Until you replace it |
+| The phone (browser local storage) | The push token, after you scan the QR code | Until you select **Forget this phone** |
 
 Render hosts the relay, so its platform handles each request under Render's own policy.
-The relay has no page that shows your links. `GET /healthz` answers whether
-the store is reachable, with no counts. Every response is marked
-`Cache-Control: no-store`.
+The relay has no page that shows your links. The `/phone` page is static and
+holds no token or link, and the push token in the QR code follows a `#`, so it
+is never sent to the server. `GET /healthz` answers whether the store is
+reachable, with no counts. Every response is marked `Cache-Control: no-store`.
 
 Abuse limits: after 30 requests with a missing or wrong token from one address
 in 10 minutes, further wrong-token requests from that address get `429` until
@@ -164,12 +243,17 @@ and answers `429 inbox full` past that.
 
 ## Troubleshooting
 
+- **Uoink says "Update your relay".** Your relay was deployed before the phone
+  page existed. Render > uoink-relay > Manual Deploy, then check again.
+- **The phone page says Not paired.** Scan the QR code in Uoink again, or paste
+  the pairing link into **Pair with a link**. An iPhone Home Screen icon keeps
+  its own storage, so pair again from inside the icon if it asks.
 - **The Shortcut says 401.** The push token is wrong or has a typo. The
   header must be `Bearer ` followed by the token.
 - **403.** The push and pull tokens are swapped. The phone uses
   `RELAY_PUSH_TOKEN`; Uoink uses `RELAY_PULL_TOKEN`.
 - **The Shortcut times out.** The relay was asleep. Try again; the next share
-  is fast.
+  is fast. The phone page retries by itself.
 - **Uoink says it "didn't answer within 90 seconds".** Same cause. Uoink tries
   again at the next check.
 - **Uoink says "There's no relay at this address".** Copy the address from

@@ -74,6 +74,10 @@ def fake_kr(monkeypatch):
     backend = RecordingFakeKeyring()
     monkeypatch.setattr(server, "_keyring", backend)
     monkeypatch.setattr(server, "_KEYRING_IMPORT_ERROR", None)
+    # Since 3.17.0 an isolated profile keeps secrets in its own
+    # credentials.json and never calls keyring (tests/test_credential_store_safety.py).
+    # These tests pin the namespaced keyring path that the OS store still uses.
+    monkeypatch.setattr(server, "_credential_store_mode", lambda: "keyring")
     return backend
 
 

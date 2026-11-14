@@ -946,6 +946,9 @@ def settings_route(tmp_path, monkeypatch):
     fake = FakeKeyring()
     monkeypatch.setattr(server, "_keyring", fake)
     monkeypatch.setattr(server, "_isolated_binding", lambda: SimpleNamespace(profile=tmp_path))
+    # The OS credential store path, through a fake keyring. An isolated
+    # profile uses its credentials.json by default instead.
+    monkeypatch.setattr(server, "_credential_store_mode", lambda: "keyring")
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
     monkeypatch.setattr(server, "_load_topics", lambda: {})
     monkeypatch.setattr(server, "_reliability_model_status", lambda *args: {})

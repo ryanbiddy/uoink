@@ -68,8 +68,10 @@ a {
 }
 
 h1 {
-  max-width: 12ch;
+  max-width: 14ch;
   margin: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
   color: var(--text);
   font-size: clamp(38px, 8vw, 72px);
   line-height: 0.96;
@@ -124,6 +126,7 @@ h1 {
 
 .hint {
   margin: 18px 0 0;
+  overflow-wrap: anywhere;
   color: var(--text-2);
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;

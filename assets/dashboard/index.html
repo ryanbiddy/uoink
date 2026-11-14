@@ -999,6 +999,34 @@
       display: none;
     }
 
+    /* Home shelves above the Library list (Rediscover here, For you from another lane). */
+    .home-shelves { display: grid; gap: 16px; min-width: 0; }
+    .home-shelf { min-width: 0; }
+    .home-shelf.hidden { display: none; }
+    .home-shelves > .home-shelf:last-child:not(.hidden),
+    .home-shelves > .home-shelf:not(.hidden):not(:last-child) { margin-bottom: 0; }
+    .home-shelves:has(.home-shelf:not(.hidden)) { margin: 0 0 var(--space-6); }
+    #rediscoverShelf { display: grid; gap: 16px; }
+    .remember-shelf { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; background: var(--surface); }
+    .remember-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .remember-head h2 { margin: 0; font-size: 1rem; overflow-wrap: anywhere; }
+    .remember-note { margin: 2px 0 0; color: var(--text-2); font-size: 0.85rem; overflow-wrap: anywhere; }
+    .remember-body { margin-top: 10px; }
+    .remember-body[hidden] { display: none; }
+    .remember-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); }
+    .remember-card { display: grid; align-content: start; gap: 4px; min-width: 0; text-align: left; font: inherit; color: var(--text);
+      background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; cursor: pointer; }
+    .remember-card:hover, .remember-card:focus-visible { background: var(--surface-sel); border-color: var(--line-strong); }
+    .remember-why { font-size: 0.78rem; color: var(--text-2); overflow-wrap: anywhere; }
+    .remember-title { font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .remember-kind { font-size: 0.75rem; color: var(--text-2); text-transform: capitalize; }
+    .remember-ideas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+    .remember-idea { display: grid; gap: 8px; align-content: start; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+    .remember-idea-prompt { margin: 0; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+    .remember-idea-items { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 0.85rem; min-width: 0; }
+    .remember-idea-items li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .remember-idea-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
     /* Re-haul Library list: one row per capture -- a thumbnail (the real
        thumbnail.jpg, else a neutral block naming the kind), the title in
        two lines at most, source . platform . time, then one state line.
@@ -3348,6 +3376,24 @@
     #tab-settings .job-sub,
     #tab-settings .topic-field span { font-family: var(--font-ui); }
     .phone-inbox select.field { justify-self: start; width: auto; }
+    .phone-inbox .phone-flow strong { color: var(--text); }
+    .phone-steps { display: grid; gap: 16px; min-width: 0; }
+    .phone-step { display: grid; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .phone-step h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0; font-size: 15px; color: var(--text); }
+    .phone-step-num { display: inline-grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--action); color: var(--on-action); font-size: 13px; font-weight: 700; }
+    .phone-pill { margin-left: auto; padding: 2px 10px; border: 1px solid var(--line-strong, var(--line)); border-radius: 99px; color: var(--text-2); font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .phone-pill[data-state="connected"] { border-color: var(--ok); color: var(--ok); }
+    .phone-pill[data-state="error"] { color: var(--vermillion); }
+    .phone-summary { display: grid; gap: 8px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .phone-summary-title { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text); font-weight: 600; }
+    .phone-dot { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--ok); }
+    .phone-step a.button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    .phone-qr-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: start; min-width: 0; }
+    .phone-qr { width: 224px; max-width: 100%; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; line-height: 0; }
+    .phone-qr svg { display: block; width: 100%; height: auto; }
+    .phone-qr-side { display: grid; gap: 12px; min-width: 0; }
+    .phone-old, .phone-error { display: grid; gap: 12px; min-width: 0; }
+    @media (max-width: 600px) { .phone-qr-wrap { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
     .setting-feedback { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .setting-status { color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
     .setting-status[data-state="error"] { color: var(--vermillion); }
@@ -4486,6 +4532,12 @@
         grid-column: 2;
         justify-content: flex-start;
       }
+      /* Single column: the actions wrap onto their own row. A hover-hidden
+         row still takes that height and left a blank gap under every card
+         in a hover-capable narrow window, so show it always here. */
+      .uoink-card .row-actions {
+        opacity: 1;
+      }
       .library-head h1,
       #tab-yoink h1 {
         font-size: 26px;
@@ -5003,6 +5055,86 @@
     .research-report p { white-space: pre-wrap; }
     .research-receipts { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
     .research-progress { min-height: 24px; overflow-wrap: anywhere; }
+
+    /* For You podcast suggestions (3.17). Own classes only: the shared
+       .home-shelves / .home-shelf rules belong to the Library shelves. */
+    .for-you-pod-teaser {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 16px;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--surface);
+    }
+    .for-you-pod-panel .panel-head { flex-wrap: wrap; gap: 8px; }
+    .for-you-pod-teaser-copy { flex: 1 1 260px; min-width: 0; }
+    .for-you-pod-teaser h2 { margin: 0 0 4px; font-size: 15px; overflow-wrap: anywhere; }
+    .for-you-pod-teaser p { margin: 0; color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
+    .for-you-pod-teaser-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .for-you-pod-list {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x proximity;
+    }
+    .for-you-pod-card {
+      flex: 0 0 300px;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 12px;
+      align-content: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--card-radius);
+      background: var(--surface);
+      scroll-snap-align: start;
+    }
+    .for-you-pod-art {
+      position: relative;
+      width: 72px;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface-sel);
+      color: var(--text-2);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 22px;
+    }
+    .for-you-pod-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .for-you-pod-body { min-width: 0; display: grid; gap: 4px; align-content: start; }
+    .for-you-pod-title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow-wrap: anywhere;
+    }
+    .for-you-pod-show, .for-you-pod-meta, .for-you-pod-reason, .for-you-pod-note {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-2);
+      overflow-wrap: anywhere;
+    }
+    .for-you-pod-show { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .for-you-pod-note { color: var(--fail); }
+    .for-you-pod-actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+    .for-you-pod-empty { margin: 0; color: var(--text-2); overflow-wrap: anywhere; }
+    @media (max-width: 620px) {
+      .for-you-pod-list { flex-direction: column; overflow-x: visible; }
+      .for-you-pod-card { flex: 0 0 auto; }
+    }
   </style>
 </head>
 <body>
@@ -5097,6 +5229,17 @@
               <p class="setting-copy" id="importsNote" style="margin-top:0">Videos you imported and haven't opened yet, best match for your taste first.</p>
               <div class="feature-grid" id="importCards"></div>
             </div>
+          </div>
+
+          <div class="panel for-you-pod-panel hidden" id="forYouPodPanel" style="margin-bottom:16px" aria-labelledby="forYouPodTitle">
+            <div class="panel-head">
+              <div class="panel-title" id="forYouPodTitle">Podcast episodes picked for you</div>
+              <div class="inline-row">
+                <button class="button ghost hidden" type="button" id="forYouPodRefresh">Refresh</button>
+                <button class="button ghost" type="button" id="forYouPodCollapse" aria-expanded="true" aria-controls="forYouPodBody">Hide</button>
+              </div>
+            </div>
+            <div class="panel-body" id="forYouPodBody"></div>
           </div>
 
           <div class="feature-grid" id="worthCards"></div>
@@ -5560,6 +5703,10 @@
           <!-- Captures that are still working, waiting on YouTube, or failed
                (from the jobs stream and the retry queue), above the saved list. -->
           <div class="library-captures hidden" id="libraryCaptures" role="group" aria-label="Captures in progress"></div>
+          <div class="home-shelves" id="homeShelves">
+            <section class="home-shelf hidden" id="rediscoverShelf" aria-labelledby="rediscoverShelfTitle"></section>
+            <section class="home-shelf hidden" id="forYouShelf" aria-labelledby="forYouShelfTitle"></section>
+          </div>
           <div id="libraryGrid" class="library-list"></div>
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
@@ -6025,7 +6172,7 @@
             <div class="eyebrow">Your own words</div>
             <h2>Jot a note</h2>
             <p class="universal-lede">Write a thought, a musing, a reminder to yourself. It lands in your corpus like anything else, authored by You, queryable by you and your AI. Markdown works.</p>
-            <input class="field" id="noteTitleInput" type="text" autocomplete="off" placeholder="Title (optional, we'll use your first line)" aria-label="Note title">
+            <input class="field" id="noteTitleInput" type="text" maxlength="300" autocomplete="off" placeholder="Title (optional, we'll use your first line)" aria-label="Note title">
             <textarea class="field note-capture-text" id="noteTextInput" rows="5" placeholder="What's on your mind?" aria-label="Note text" aria-describedby="noteCaptureNote"></textarea>
             <div class="universal-capture-row">
               <button class="button" type="button" id="noteSaveButton" disabled>Save note</button>
@@ -6173,6 +6320,19 @@
               <div class="setting-feedback"><span class="setting-status" id="screenshotIntervalSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="screenshotIntervalSaveRetry" type="button" data-setting-retry="screenshotInterval">Retry save</button></div>
             </div>
 
+            <div class="setting-block" id="after-save">
+              <h2>After a save</h2>
+              <p class="setting-copy" id="afterSaveCopy">What the browser extension does once a capture is saved. Saves always go to your library. Copying only happens on this computer.</p>
+              <label for="afterSave">After a save</label>
+              <select class="field" id="afterSave" style="max-width:280px" aria-describedby="afterSaveCopy afterSaveSaveStatus">
+                <option value="stay">Stay on the page</option>
+                <option value="claude">Copy, then open Claude</option>
+                <option value="chatgpt">Copy, then open ChatGPT</option>
+                <option value="copy">Copy only</option>
+              </select>
+              <div class="setting-feedback"><span class="setting-status" id="afterSaveSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="afterSaveSaveRetry" type="button" data-setting-retry="afterSave">Retry save</button></div>
+            </div>
+
             <div class="setting-block">
               <h2>Auto-uoink playlists</h2>
               <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
@@ -6196,11 +6356,26 @@
               <p class="setting-copy">Only works over sources you already track &mdash; no web crawling, no new accounts. Capture uses the same local download + transcription as a manual save, so there is <strong>no AI spend</strong>. Reversible: turn it off any time, and auto-captured uoinks are ordinary uoinks you can delete.</p>
             </div>
 
+            <div class="setting-block" id="suggest-podcasts">
+              <h2>Suggest podcasts</h2>
+              <p class="setting-copy">Off by default. When on, Uoink picks podcast episodes you might want to save, based on what you already saved. About once a day it sends a few topic words from your library (never titles, links or transcripts) to Apple's podcast search at itunes.apple.com, and the show artwork loads from Apple. Nothing else leaves your computer. Picks show up in For You.</p>
+              <label class="inline-row"><input id="suggestPodcastsToggle" type="checkbox" aria-describedby="suggestPodcastsToggleSaveStatus suggestPodcastsWords"> Suggest podcasts from what I save</label>
+              <div class="setting-feedback"><span class="setting-status" id="suggestPodcastsToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="suggestPodcastsToggleSaveRetry" type="button" data-setting-retry="suggestPodcastsToggle">Retry save</button></div>
+              <p class="setting-copy-dim" id="suggestPodcastsWords" style="font-size:12px;color:var(--dim);margin-top:8px;overflow-wrap:anywhere">Checking which words it would send...</p>
+            </div>
+
             <div class="setting-block" id="source-availability">
               <h2>Check if saved sources go offline</h2>
               <p class="setting-copy">On by default. About once a week, Uoink asks each source's site whether it is still up, from this computer only. It makes a few requests at a time and backs off when a site asks it to slow down. Nothing about your library is sent anywhere. Turn it off any time.</p>
               <label class="inline-row"><input id="sourceAvailabilityToggle" type="checkbox" checked aria-describedby="sourceAvailabilityToggleSaveStatus"> Check if saved sources go offline</label>
               <div class="setting-feedback"><span class="setting-status" id="sourceAvailabilityToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="sourceAvailabilityToggleSaveRetry" type="button" data-setting-retry="sourceAvailabilityToggle">Retry save</button></div>
+            </div>
+
+            <div class="setting-block" id="rediscover-shelves">
+              <h2>Rediscover and idea starters</h2>
+              <p class="setting-copy">On by default. The Library shows a few older saves each day and ideas built from saves that share a topic. It all runs on this computer. Nothing is sent anywhere, and no AI is called.</p>
+              <label class="inline-row"><input id="rediscoverShelvesToggle" type="checkbox" checked aria-describedby="rediscoverShelvesToggleSaveStatus"> Show Rediscover and idea starters</label>
+              <div class="setting-feedback"><span class="setting-status" id="rediscoverShelvesToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="rediscoverShelvesToggleSaveRetry" type="button" data-setting-retry="rediscoverShelvesToggle">Retry save</button></div>
             </div>
 
             <div class="setting-block">
@@ -6219,22 +6394,72 @@
 
             <div class="setting-block phone-inbox" id="phone-inbox">
               <h2>Phone inbox</h2>
-              <p class="setting-copy">Share a link from your phone and Uoink captures it here. Links travel through a small relay that runs on your own Render account. It holds each link only until Uoink picks it up, and never longer than 7 days.</p>
-              <p class="setting-copy"><a href="https://github.com/ryanbiddy/uoink/blob/main/docs/relay.md" data-product-link target="_blank" rel="noreferrer">Set up a relay</a></p>
-              <label for="relayUrl">Relay address</label>
-              <input class="field" id="relayUrl" type="url" inputmode="url" maxlength="2048" placeholder="https://your-relay.onrender.com" autocomplete="off" spellcheck="false" aria-describedby="relayUrlSaveStatus">
-              <label for="relayToken">Pull token</label>
-              <input class="field" id="relayToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false" aria-describedby="relayTokenHint relayUrlSaveStatus">
-              <p class="setting-copy" id="relayTokenHint">RELAY_PULL_TOKEN from the relay's Environment page on Render. Uoink keeps it in the system credential store.</p>
-              <label class="inline-row" for="relayEnabled"><input id="relayEnabled" type="checkbox"> Pick up links shared from my phone</label>
-              <label for="relayPollMinutes">Check every</label>
-              <select class="field" id="relayPollMinutes"><option value="2">2 minutes</option><option value="5" selected>5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select>
-              <div class="inline-row">
-                <button class="button" type="button" id="relaySave">Save</button>
-                <button class="button ghost" type="button" id="relayCheck" disabled>Check now</button>
+              <p class="setting-copy phone-flow"><strong>Your phone &rarr; your relay &rarr; Uoink on this computer.</strong> Share a link from your phone and Uoink captures it here. The relay is a tiny service that runs on your own Render account (a free account is enough). It holds links only, never your library, and deletes each link after Uoink picks it up or after 7 days.</p>
+
+              <div class="phone-summary hidden" id="phoneSummary">
+                <p class="phone-summary-title"><span class="phone-dot" aria-hidden="true"></span>Phone inbox is on</p>
+                <p class="setting-copy" id="phoneSummaryText"></p>
+                <div class="inline-row">
+                  <button class="button ghost" type="button" id="phoneSummaryCheck">Check now</button>
+                  <button class="button ghost" type="button" id="phoneShowSetup">Show phone setup again</button>
+                </div>
               </div>
-              <div class="setting-feedback"><span class="setting-status" id="relayUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="relayUrlSaveRetry" type="button" data-setting-retry="relayUrl">Retry save</button></div>
-              <p class="setting-copy" id="relayStatus" role="status" aria-live="polite">Off.</p>
+
+              <div class="phone-steps" id="phoneSteps">
+                <div class="phone-step" role="group" aria-labelledby="phoneStep1Title">
+                  <h3 id="phoneStep1Title"><span class="phone-step-num" aria-hidden="true">1</span>Make your relay</h3>
+                  <p class="setting-copy">You need a Render account first. Signing up is free. Then select Deploy to Render. It creates one small web service (uoink-relay) and one small Key Value store for waiting links, and Render generates two secret tokens for you.</p>
+                  <p class="setting-copy"><a class="button" href="https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink" data-product-link target="_blank" rel="noreferrer">Deploy to Render</a></p>
+                  <p class="setting-copy">When it finishes, copy the relay's address, then open uoink-relay &gt; Environment and copy RELAY_PULL_TOKEN. <a href="https://github.com/ryanbiddy/uoink/blob/main/docs/relay.md" data-product-link target="_blank" rel="noreferrer">Set up a relay</a></p>
+                </div>
+
+                <div class="phone-step" role="group" aria-labelledby="phoneStep2Title">
+                  <h3 id="phoneStep2Title"><span class="phone-step-num" aria-hidden="true">2</span>Connect it <span class="phone-pill" id="phoneConnPill" data-state="off">Not connected</span></h3>
+                  <label for="relayUrl">Relay address</label>
+                  <input class="field" id="relayUrl" type="url" inputmode="url" maxlength="2048" placeholder="https://your-relay.onrender.com" autocomplete="off" spellcheck="false" aria-describedby="relayUrlSaveStatus">
+                  <label for="relayToken">Pull token</label>
+                  <input class="field" id="relayToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false" aria-describedby="relayTokenHint relayUrlSaveStatus">
+                  <p class="setting-copy" id="relayTokenHint">RELAY_PULL_TOKEN from the relay's Environment page on Render. Uoink keeps it in the system credential store.</p>
+                  <label class="inline-row" for="relayEnabled"><input id="relayEnabled" type="checkbox"> Pick up links shared from my phone</label>
+                  <label for="relayPollMinutes">Check every</label>
+                  <select class="field" id="relayPollMinutes"><option value="2">2 minutes</option><option value="5" selected>5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select>
+                  <div class="inline-row">
+                    <button class="button" type="button" id="relaySave">Save</button>
+                    <button class="button ghost" type="button" id="relayCheck" disabled>Check now</button>
+                  </div>
+                  <div class="setting-feedback"><span class="setting-status" id="relayUrlSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="relayUrlSaveRetry" type="button" data-setting-retry="relayUrl">Retry save</button></div>
+                  <p class="setting-copy" id="relayStatus" role="status" aria-live="polite">Off.</p>
+                  <p class="setting-copy">A free Render service sleeps when nobody uses it, so the first check can take up to a minute.</p>
+                </div>
+
+                <div class="phone-step" role="group" aria-labelledby="phoneStep3Title">
+                  <h3 id="phoneStep3Title"><span class="phone-step-num" aria-hidden="true">3</span>Set up your phone</h3>
+                  <p class="setting-copy" id="phoneLocked">Connect your relay in step 2 first. The QR code shows up here once it is connected.</p>
+                  <p class="setting-copy hidden" id="phoneLoading" role="status">Getting the pairing key from your relay. If it was asleep, this can take up to a minute.</p>
+                  <div class="phone-old hidden" id="phoneOld">
+                    <p class="setting-copy" id="phoneOldText"><strong>Update your relay: Render &gt; uoink-relay &gt; Manual Deploy.</strong> Your relay was deployed before this feature, so it can't hand over its push token. Until you update it, paste the push token here: Render &gt; uoink-relay &gt; Environment &gt; RELAY_PUSH_TOKEN.</p>
+                    <label for="phonePushToken">Push token</label>
+                    <input class="field" id="phonePushToken" type="password" maxlength="4096" autocomplete="new-password" spellcheck="false">
+                    <div class="inline-row"><button class="button" type="button" id="phonePushApply">Show QR code</button></div>
+                    <p class="setting-status" id="phonePushStatus" role="status" aria-live="polite"></p>
+                  </div>
+                  <div class="phone-error hidden" id="phoneError">
+                    <p class="setting-copy" id="phoneErrorText" role="status"></p>
+                    <div class="inline-row"><button class="button ghost" type="button" id="phoneRetry">Try again</button></div>
+                  </div>
+                  <div class="phone-qr-wrap hidden" id="phoneQrWrap">
+                    <div class="phone-qr" id="phoneQr"></div>
+                    <div class="phone-qr-side">
+                      <p class="setting-copy">Scan this with your phone's camera. It opens a page on your own relay, with the key it needs. Nothing goes through an outside service. On Android, install the page to add Uoink to the share sheet. On iPhone, the page walks you through a one-time Shortcut.</p>
+                      <div class="inline-row">
+                        <button class="button" type="button" id="phoneDone">I scanned it</button>
+                        <button class="button ghost" type="button" id="phoneCopyLink">Copy pairing link</button>
+                      </div>
+                      <p class="setting-status" id="phoneStep3Status" role="status" aria-live="polite"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="setting-block">
@@ -6814,6 +7039,7 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="/dashboard/qrcode.js"></script>
   <script>
     const state = {
       token: "",
@@ -7334,6 +7560,7 @@
       ];
       const base = target.origin + target.pathname;
       if (target.href.includes("#")) return false;
+      if (target.href === "https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink") return true;
       if (base === "https://twitter.com/intent/tweet") {
         const keys = [...target.searchParams.keys()];
         return keys.every((key) => key === "text" || key === "url")
@@ -9288,6 +9515,7 @@
       state.selectedYoinkMarkdownError = "";
       state.retranscribeStatus = "";
       state.retranscribing = false;
+      noteItemOpened(row);
       renderYoinkDetail();
       switchTab("yoink", { fromRoute: Boolean(options && options.fromRoute) });
       const isNote = isNoteContent(row);
@@ -12130,6 +12358,271 @@
       `;
     }
 
+    // ---- Podcast suggestions in For You (3.17) --------------------------
+    // Off until the user turns it on. Only topic words leave the computer, and
+    // the opt-in copy names them. The Library carries a small teaser that links
+    // here; the cards live in the For You view.
+    const FOR_YOU_POD_COLLAPSE_KEY = "uoink.forYouPod.collapsed";
+    const FOR_YOU_POD_CARD_KEY = "uoink.forYouPod.cardDismissed";
+    const FOR_YOU_POD_MIN_LIBRARY = 5;
+    const forYouPod = { data: null, error: "", timer: null, polls: 0, followed: new Set() };
+
+    function forYouPodStore(key, value) {
+      try {
+        if (value === undefined) return localStorage.getItem(key);
+        localStorage.setItem(key, value);
+      } catch (_) { /* private window or blocked storage: the page still works */ }
+      return null;
+    }
+
+    function forYouPodWords(data) {
+      const words = data && Array.isArray(data.send_terms) ? data.send_terms : [];
+      return words.join(", ");
+    }
+
+    function forYouPodLength(seconds) {
+      const n = Number(seconds);
+      if (!Number.isFinite(n) || n <= 0) return "";
+      const minutes = Math.max(1, Math.round(n / 60));
+      if (minutes < 60) return `${minutes} min`;
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m ? `${h} hr ${m} min` : `${h} hr`;
+    }
+
+    function forYouPodSendLine(data) {
+      const words = forYouPodWords(data);
+      return words
+        ? `Turning this on sends these topic words to Apple's podcast search about once a day: ${words}. No titles, links or transcripts leave your computer.`
+        : "Turning this on sends a few topic words from what you save to Apple's podcast search about once a day. No titles, links or transcripts leave your computer.";
+    }
+
+    // The Library teaser. Returns "" when the shelf should stay hidden.
+    function forYouPodTeaserHtml(data, ctx = {}) {
+      if (!data) return "";
+      const title = '<h2 id="forYouShelfTitle">';
+      if (!data.enabled) {
+        if (Number(data.library_size || 0) < FOR_YOU_POD_MIN_LIBRARY || ctx.dismissed) return "";
+        return `<div class="for-you-pod-teaser"><div class="for-you-pod-teaser-copy">${title}Get podcast suggestions from what you save</h2><p>${htmlEscape(forYouPodSendLine(data))}</p></div><div class="for-you-pod-teaser-actions"><button class="button primary" type="button" data-for-you-pod="on">Turn on</button><button class="button ghost" type="button" data-for-you-pod="hide">Not now</button></div></div>`;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      let line;
+      if (items.length) line = `${items.length} podcast episode${items.length === 1 ? "" : "s"} picked for you`;
+      else if (!data.enough) line = "Save a few things and podcast suggestions show up here.";
+      else if (data.refreshing) line = "Looking for podcast episodes you might like...";
+      else if (data.error) line = "Couldn't reach Apple's podcast search. Try again later.";
+      else line = "No new podcast picks right now. Check back tomorrow.";
+      const link = items.length ? '<div class="for-you-pod-teaser-actions"><a class="route-link" href="#for-you">See all</a></div>' : "";
+      return `<div class="for-you-pod-teaser"><div class="for-you-pod-teaser-copy">${title}Podcasts for you</h2><p>${htmlEscape(line)}</p></div>${link}</div>`;
+    }
+
+    function forYouPodCardHtml(item) {
+      const id = htmlEscape(item.id || "");
+      const title = htmlEscape(item.title || "Untitled episode");
+      const show = htmlEscape(item.show || "Unknown show");
+      const length = forYouPodLength(item.duration_s);
+      const initial = htmlEscape(String(item.show || item.title || "P").trim().charAt(0).toUpperCase() || "P");
+      const art = item.artwork
+        ? `<img src="${htmlEscape(item.artwork)}" alt="" width="72" height="72" loading="lazy" referrerpolicy="no-referrer">`
+        : "";
+      const st = item.save_state || "";
+      const saveLabel = st === "saving" ? "Saving..." : st === "saved" ? "Saved" : "Save";
+      const saveAttrs = st === "saving" || st === "saved" ? ' disabled aria-busy="' + (st === "saving") + '"' : "";
+      const followed = forYouPod.followed.has(item.id);
+      const note = st === "failed" && item.save_message ? item.save_message : st === "saved" ? (item.save_message || "") : "";
+      return `<article class="for-you-pod-card" data-for-you-pod-id="${id}">
+        <div class="for-you-pod-art" aria-hidden="true"><span>${initial}</span>${art}</div>
+        <div class="for-you-pod-body">
+          <h3 class="for-you-pod-title" title="${title}">${title}</h3>
+          <p class="for-you-pod-show" title="${show}">${show}</p>
+          ${length ? `<p class="for-you-pod-meta">${htmlEscape(length)}</p>` : ""}
+          <p class="for-you-pod-reason">${htmlEscape(item.reason || "")}</p>
+          ${note ? `<p class="for-you-pod-note" role="status">${htmlEscape(note)}</p>` : ""}
+        </div>
+        <div class="for-you-pod-actions">
+          <button class="button primary" type="button" data-for-you-pod="save" data-id="${id}"${saveAttrs}>${st === "failed" ? "Try again" : saveLabel}</button>
+          <button class="button ghost" type="button" data-for-you-pod="follow" data-id="${id}"${followed ? " disabled" : ""}>${followed ? "Following" : "Follow show"}</button>
+          <button class="button link" type="button" data-for-you-pod="dismiss" data-id="${id}" aria-label="Not interested in ${title}">Not interested</button>
+        </div>
+      </article>`;
+    }
+
+    // The For You panel body. Always returns something: loading, error, off,
+    // not enough saved yet, empty, or the cards.
+    function forYouPodPanelHtml(data, error) {
+      if (!data) {
+        return error
+          ? `<p class="for-you-pod-empty">Couldn't load podcast suggestions. ${htmlEscape(error)}</p><div class="inline-row" style="margin-top:8px"><button class="button" type="button" data-for-you-pod="reload">Try again</button></div>`
+          : '<p class="for-you-pod-empty" role="status">Looking for podcast episodes...</p>';
+      }
+      if (!data.enabled) {
+        return `<p class="for-you-pod-empty">Off. ${htmlEscape(forYouPodSendLine(data))}</p><div class="inline-row" style="margin-top:8px"><button class="button primary" type="button" data-for-you-pod="on">Turn on</button></div>`;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (items.length) return `<div class="for-you-pod-list">${items.map(forYouPodCardHtml).join("")}</div>`;
+      if (!data.enough) return '<p class="for-you-pod-empty">Save a few things and podcast suggestions show up here.</p>';
+      if (data.refreshing) return '<p class="for-you-pod-empty" role="status">Looking for podcast episodes you might like...</p>';
+      if (data.error || error) {
+        return '<p class="for-you-pod-empty">Couldn\'t reach Apple\'s podcast search. Try again later.</p><div class="inline-row" style="margin-top:8px"><button class="button" type="button" data-for-you-pod="refresh">Try again</button></div>';
+      }
+      return '<p class="for-you-pod-empty">No new podcast picks right now. Check back tomorrow.</p>';
+    }
+
+    function forYouPodRender() {
+      const data = forYouPod.data;
+      const shelf = document.getElementById("forYouShelf");
+      const panel = document.getElementById("forYouPodPanel");
+      const body = document.getElementById("forYouPodBody");
+      const words = document.getElementById("suggestPodcastsWords");
+      if (shelf) {
+        const html = forYouPodTeaserHtml(data, { dismissed: forYouPodStore(FOR_YOU_POD_CARD_KEY) === "1" });
+        shelf.innerHTML = html;
+        shelf.classList.toggle("hidden", !html);
+      }
+      if (words) {
+        const list = forYouPodWords(data);
+        words.textContent = list
+          ? `Words it would send right now: ${list}.`
+          : "Nothing would be sent yet. Save a few more things first.";
+      }
+      if (panel && body) {
+        const visible = !data || data.enabled || Number(data.library_size || 0) >= FOR_YOU_POD_MIN_LIBRARY;
+        panel.classList.toggle("hidden", !visible);
+        const collapsed = forYouPodStore(FOR_YOU_POD_COLLAPSE_KEY) === "1";
+        const toggle = document.getElementById("forYouPodCollapse");
+        body.classList.toggle("hidden", collapsed);
+        if (toggle) {
+          toggle.textContent = collapsed ? "Show" : "Hide";
+          toggle.setAttribute("aria-expanded", String(!collapsed));
+        }
+        const refresh = document.getElementById("forYouPodRefresh");
+        if (refresh) refresh.classList.toggle("hidden", !(data && data.enabled));
+        body.innerHTML = forYouPodPanelHtml(data, forYouPod.error);
+      }
+    }
+
+    function forYouPodSchedule() {
+      clearTimeout(forYouPod.timer);
+      const data = forYouPod.data;
+      // Work in flight keeps polling. A first load that failed (helper still
+      // starting, token busy) retries a few times, then stays quiet.
+      const busy = data ? ((data.items || []).some((i) => i.save_state === "saving") || data.refreshing) : forYouPod.polls < 3;
+      if (!busy || forYouPod.polls >= 200) return;
+      forYouPod.polls += 1;
+      forYouPod.timer = setTimeout(forYouPodLoad, 3000);
+    }
+
+    async function forYouPodLoad() {
+      clearTimeout(forYouPod.timer);
+      try {
+        forYouPod.data = await authFetch("/suggestions/podcasts");
+        forYouPod.error = "";
+      } catch (err) {
+        // Keep the last good list on screen; show the failure only when there is none.
+        forYouPod.error = (err && err.message) || "The helper did not answer.";
+      }
+      forYouPodRender();
+      forYouPodSchedule();
+    }
+
+    async function forYouPodTurnOn() {
+      const control = document.getElementById("suggestPodcastsToggle");
+      try {
+        await saveSettingsPatch({ suggest_podcasts: true }, "suggestPodcastsToggle");
+        if (!(state.settings || {}).suggest_podcasts) throw new Error("not saved");
+        if (control) control.checked = true;
+        await authFetch("/suggestions/podcasts/refresh", { method: "POST", body: "{}" });
+      } catch (err) {
+        showToast("Couldn't turn on podcast suggestions.");
+      }
+      forYouPod.polls = 0;
+      await forYouPodLoad();
+    }
+
+    async function forYouPodAct(action, id) {
+      const items = (forYouPod.data && forYouPod.data.items) || [];
+      const item = items.find((i) => i.id === id);
+      try {
+        if (action === "save" && item) {
+          item.save_state = "saving";
+          item.save_message = "";
+          forYouPodRender();
+          await authFetch("/suggestions/podcasts/save", { method: "POST", body: JSON.stringify({ id }) });
+          forYouPod.polls = 0;
+          forYouPodSchedule();
+        } else if (action === "follow" && item) {
+          const res = await authFetch("/suggestions/podcasts/follow", { method: "POST", body: JSON.stringify({ id }) });
+          forYouPod.followed.add(id);
+          showToast((res && res.message) || "Following this show.");
+          forYouPodRender();
+        } else if (action === "dismiss" && item) {
+          forYouPod.data.items = items.filter((i) => i.id !== id);
+          forYouPodRender();
+          await authFetch("/suggestions/podcasts/dismiss", { method: "POST", body: JSON.stringify({ id }) });
+        }
+      } catch (err) {
+        if (action === "save" && item) {
+          item.save_state = "failed";
+          item.save_message = (err && err.message) || "Couldn't save this episode.";
+          forYouPodRender();
+        } else {
+          showToast((err && err.message) || "That didn't work. Try again.");
+        }
+      }
+    }
+
+    function forYouPodClick(event) {
+      const target = event.target;
+      const button = target && typeof target.closest === "function" ? target.closest("[data-for-you-pod]") : null;
+      if (!button) return;
+      const action = button.dataset.forYouPod;
+      if (action === "on") forYouPodTurnOn();
+      else if (action === "hide") { forYouPodStore(FOR_YOU_POD_CARD_KEY, "1"); forYouPodRender(); }
+      else if (action === "reload") forYouPodLoad();
+      else if (action === "refresh") forYouPodRefreshNow();
+      else forYouPodAct(action, button.dataset.id);
+    }
+
+    async function forYouPodRefreshNow() {
+      try {
+        await authFetch("/suggestions/podcasts/refresh", { method: "POST", body: "{}" });
+      } catch (err) {
+        showToast((err && err.message) || "Couldn't refresh podcast suggestions.");
+      }
+      forYouPod.polls = 0;
+      await forYouPodLoad();
+    }
+
+    function wireForYouPod() {
+      for (const id of ["forYouShelf", "forYouPodBody"]) {
+        const box = document.getElementById(id);
+        if (box) box.addEventListener("click", forYouPodClick);
+      }
+      const body = document.getElementById("forYouPodBody");
+      // Image errors do not bubble: capture them to fall back to the letter tile.
+      if (body) body.addEventListener("error", (event) => {
+        if (event.target && event.target.tagName === "IMG") event.target.classList.add("hidden");
+      }, true);
+      const collapse = document.getElementById("forYouPodCollapse");
+      if (collapse) collapse.addEventListener("click", () => {
+        forYouPodStore(FOR_YOU_POD_COLLAPSE_KEY, forYouPodStore(FOR_YOU_POD_COLLAPSE_KEY) === "1" ? "0" : "1");
+        forYouPodRender();
+      });
+      const refresh = document.getElementById("forYouPodRefresh");
+      if (refresh) refresh.addEventListener("click", forYouPodRefreshNow);
+      const toggle = document.getElementById("suggestPodcastsToggle");
+      if (toggle) toggle.addEventListener("change", () => {
+        // The settings handler saves first; this runs after the save settles.
+        settingsWriteQueue.then(async () => {
+          if (toggle.checked) {
+            try { await authFetch("/suggestions/podcasts/refresh", { method: "POST", body: "{}" }); } catch (_) { /* shown by the shelf */ }
+          }
+          forYouPod.polls = 0;
+          forYouPodLoad();
+        });
+      });
+    }
+
     function renderForYou(payload) {
       const worth = Array.isArray(payload.worth_revisiting) ? payload.worth_revisiting : [];
       const connections = Array.isArray(payload.connections) ? payload.connections : [];
@@ -13357,6 +13850,7 @@
       if (state.libraryResetPending) reset = true;
       state.loading = true;
       if (reset && (!semanticState || semanticWarming())) loadLibrarySearchMode();
+      if (reset) loadRemember();
       if (reset) {
         state.libraryResetPending = false;
         state.offset = 0;
@@ -13423,7 +13917,154 @@
       }
     }
 
+    // ---- Rediscover shelf + idea starters (Library) ---------------------
+    // Server picks are seeded by the day (GET /library/remember), so a refresh
+    // keeps the same cards. Everything here is local. Collapse is per browser.
+    // Renders only into #rediscoverShelf.
+    const REMEMBER_COLLAPSE_KEY = "uoink.remember.collapsed";
+
+    function rememberCollapsedMap() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(REMEMBER_COLLAPSE_KEY) || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) { return {}; }
+    }
+
+    function setRememberCollapsed(shelf, collapsed) {
+      const map = rememberCollapsedMap();
+      map[shelf] = Boolean(collapsed);
+      try { localStorage.setItem(REMEMBER_COLLAPSE_KEY, JSON.stringify(map)); } catch (_) {}
+    }
+
+    // What the Library shows right now: nothing when the switch is off, a
+    // search or filter is active, or the server sent nothing.
+    function rememberShelfPlan(data, { enabled = true, filtersActive = false } = {}) {
+      const empty = { rediscover: [], starters: [] };
+      if (!enabled || filtersActive || !data || data.enabled === false) return empty;
+      return {
+        rediscover: Array.isArray(data.rediscover) ? data.rediscover.slice(0, 4) : [],
+        starters: Array.isArray(data.starters) ? data.starters.slice(0, 3) : [],
+      };
+    }
+
+    function rememberCardHtml(card) {
+      const id = htmlEscape(card.video_id || "");
+      const title = htmlEscape(card.title || "Untitled uoink");
+      return `<button class="remember-card" type="button" data-remember-open="${id}" title="${title}">`
+        + `<span class="remember-why">${htmlEscape(card.reason || "")}</span>`
+        + `<span class="remember-title">${title}</span>`
+        + `<span class="remember-kind">${htmlEscape(card.kind || "item")}</span></button>`;
+    }
+
+    function rememberStarterHtml(starter, index) {
+      const items = (starter.items || []).map((item) => {
+        const title = htmlEscape(item.title || "Untitled uoink");
+        return `<li title="${title}">${title}</li>`;
+      }).join("");
+      return `<article class="remember-idea"><p class="remember-idea-prompt">${htmlEscape(starter.prompt || "")}</p>`
+        + `<ul class="remember-idea-items">${items}</ul>`
+        + `<div class="remember-idea-actions">`
+        + `<button class="button primary small" type="button" data-remember-write="${index}">Write from these</button>`
+        + `<button class="button ghost small" type="button" data-remember-copy="${index}">Copy prompt</button></div></article>`;
+    }
+
+    function rememberBlockHtml(shelf, title, note, innerHtml, collapsed) {
+      const key = shelf === "rediscover" ? "rediscoverShelfTitle" : "ideaStartersTitle";
+      const bodyId = `remember-${shelf}-body`;
+      return `<div class="remember-shelf" data-remember-shelf="${shelf}">`
+        + `<div class="remember-head"><div><h2 id="${key}">${title}</h2><p class="remember-note">${note}</p></div>`
+        + `<button class="button ghost small" type="button" data-remember-toggle="${shelf}" aria-expanded="${collapsed ? "false" : "true"}" aria-controls="${bodyId}">${collapsed ? "Show" : "Hide"}</button></div>`
+        + `<div class="remember-body" id="${bodyId}"${collapsed ? " hidden" : ""}>${innerHtml}</div></div>`;
+    }
+
+    function rememberShelfHtml(plan, collapsedMap) {
+      const parts = [];
+      if (plan.rediscover.length) {
+        parts.push(rememberBlockHtml("rediscover", "Rediscover",
+          "A few things you saved, picked fresh each day. Nothing leaves this computer.",
+          `<div class="remember-grid">${plan.rediscover.map(rememberCardHtml).join("")}</div>`,
+          Boolean(collapsedMap.rediscover)));
+      }
+      if (plan.starters.length) {
+        parts.push(rememberBlockHtml("starters", "Idea starters",
+          "Saves that share a topic, ready to write from or paste into your AI.",
+          `<div class="remember-ideas">${plan.starters.map(rememberStarterHtml).join("")}</div>`,
+          Boolean(collapsedMap.starters)));
+      }
+      return parts.join("");
+    }
+
+    function renderRemember() {
+      const root = document.getElementById("rediscoverShelf");
+      if (!root) return;
+      const enabled = !(state.settings && state.settings.rediscover_shelves_enabled === false);
+      const plan = rememberShelfPlan(state.remember, { enabled, filtersActive: hasLibraryFilters() });
+      const html = rememberShelfHtml(plan, rememberCollapsedMap());
+      root.innerHTML = html;
+      root.classList.toggle("hidden", !html);
+    }
+
+    async function loadRemember(force = false) {
+      const stamp = new Date().toDateString();
+      if (!force && state.rememberDay === stamp && state.remember) return;
+      try {
+        const data = await authFetch("/library/remember");
+        state.remember = data;
+        state.rememberDay = stamp;
+      } catch (_) {
+        state.remember = null;
+      }
+      renderRemember();
+    }
+
+    // Local "last opened" mark for the Rediscover shelf. Best effort.
+    function noteItemOpened(row) {
+      const id = row ? videoIdOf(row) : "";
+      if (!id) return;
+      authFetch("/library/opened", { method: "POST", body: JSON.stringify({ video_id: id }) }).catch(() => {});
+    }
+
+    async function writeFromStarter(index) {
+      const starter = state.remember && state.remember.starters && state.remember.starters[index];
+      const first = starter && starter.items && starter.items[0];
+      if (!first) return;
+      await writeFromSource(first.video_id);
+      // Generate takes one source, so the shared topic carries the rest.
+      if (els.generateTopicInput) els.generateTopicInput.value = starter.topic;
+      showToast(`Started from the first one. Topic is set to ${starter.topic}.`);
+    }
+
+    async function copyStarterPrompt(index) {
+      const starter = state.remember && state.remember.starters && state.remember.starters[index];
+      if (!starter) return;
+      try {
+        await navigator.clipboard.writeText(starter.copy_prompt);
+        showToast("Prompt copied. It names your saves by title and stays here until you paste it.");
+      } catch (_) {
+        showToast("Couldn't copy. Select the titles by hand instead.");
+      }
+    }
+
+    // Optional chaining: test harnesses load this script with stub elements.
+    document.getElementById("rediscoverShelf")?.addEventListener?.("click", (event) => {
+      const open = event.target.closest("[data-remember-open]");
+      if (open) { navigateTo(routeHash("item", open.dataset.rememberOpen)); return; }
+      const toggle = event.target.closest("[data-remember-toggle]");
+      if (toggle) {
+        setRememberCollapsed(toggle.dataset.rememberToggle, toggle.getAttribute("aria-expanded") === "true");
+        renderRemember();
+        const again = document.querySelector(`[data-remember-toggle="${toggle.dataset.rememberToggle}"]`);
+        if (again) again.focus();
+        return;
+      }
+      const write = event.target.closest("[data-remember-write]");
+      if (write) { writeFromStarter(Number(write.dataset.rememberWrite)).catch(() => showToast("Couldn't open Write from this.")); return; }
+      const copy = event.target.closest("[data-remember-copy]");
+      if (copy) copyStarterPrompt(Number(copy.dataset.rememberCopy));
+    });
+
     function renderLibrary() {
+      renderRemember();
       renderTopicOverview();
       const captureCount = renderLibraryCaptures();
       // The helper orders every match by the Sort control (D26), so the
@@ -13605,7 +14246,7 @@
             <span class="source-type-chip">${sourceType}</span>
           </div>
           <div class="row-body" title="${title}">
-            <div class="card-title">${title}</div>
+            <div class="card-title" title="${title}">${title}</div>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
@@ -14354,7 +14995,7 @@
         <article class="capture-row" data-capture-key="${htmlEscape(item.key)}">
           <div class="row-thumb" aria-hidden="true"><span class="source-type-chip">${htmlEscape(item.kind)}</span></div>
           <div class="row-body">
-            <div class="card-title">${htmlEscape(item.title)}</div>
+            <div class="card-title" title="${htmlEscape(item.title)}">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
             <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${item.detail ? `<span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span>` : ""}</div>
             ${renderErrorDetails(item.errorDetail)}
@@ -18042,6 +18683,7 @@
       notificationsEnabled: ["notifications_enabled", true],
       usageSharing: ["usage_sharing", false],
       autoUpdateCheck: ["auto_update_check", false],
+      suggestPodcastsToggle: ["suggest_podcasts", false],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -18057,6 +18699,7 @@
       writingAttachAllToggle: ["writing_default_attach_all_screenshots", false],
       autoUoinkToggle: ["auto_uoink_enabled", false],
       sourceAvailabilityToggle: ["source_availability_check_enabled", true],
+      rediscoverShelvesToggle: ["rediscover_shelves_enabled", true],
       outputFolder: ["output_dir", ""],
       defaultEvidenceSources: ["default_evidence_sources", []],
       defaultTargetLength: ["default_target_length", "5m"],
@@ -18066,6 +18709,7 @@
       mirrorScriptsToggle: ["mirror_scripts_to_obsidian", false],
       dashboardTheme: ["dashboard_theme", "system"],
       cardImage: ["card_image", "middle"],
+      afterSave: ["after_save", "stay"],
     };
     const TASTE_FIELDS = { tasteHooks: "preferred_hooks", tasteFormats: "preferred_formats", tasteAvoid: "avoid" };
     const settingEdits = new Map();
@@ -18327,6 +18971,7 @@
           renderLibraryAvailability(null);
           loadLibraryAvailability();
         }
+        if (field === "rediscover_shelves_enabled") loadRemember(true);
         if (field === "writing_show_screenshot_picker") renderWritingScreenshots();
         if (field === "card_image") {
           loadLibrary({ reset: true }).catch(() => {});
@@ -18894,6 +19539,15 @@
     let relayStatusTimer = null;
     let relayStatusRefreshes = 0;
     let relayStatusRequest = 0;
+    // Guided phone setup (steps 1 to 3, the QR code, the collapsed summary).
+    const PHONE_DONE_KEY = "uoink.phoneSetupDone";
+    let phonePairing = null;          // { state, push_token?, message? } answered by /relay/pairing
+    let phonePairingFor = "";         // the relay address that answer belongs to
+    let phonePairingBusy = false;
+    let phonePairingScheduled = false;
+    let phoneManualPush = "";         // push token pasted for a relay without /v1/pairing
+    let phoneSetupExpanded = false;
+    let phoneRenderedUrl = "";
 
     function relayElement(id) { return document.getElementById(id); }
 
@@ -18928,6 +19582,170 @@
       } else text = `On. Uoink checks every ${minutes} minutes.`;
       relayElement("relayStatus").textContent = text;
       relayElement("relayCheck").disabled = !relayReady(settings) || Boolean(status.polling);
+      renderPhoneSetup();
+    }
+
+    function phoneSetupDone() {
+      try { return localStorage.getItem(PHONE_DONE_KEY) === "1"; } catch (err) { return false; }
+    }
+
+    function setPhoneSetupDone(on) {
+      try { if (on) localStorage.setItem(PHONE_DONE_KEY, "1"); else localStorage.removeItem(PHONE_DONE_KEY); } catch (err) { /* private window */ }
+    }
+
+    // Where the relay stands: off, unconfigured, checking, error (with the
+    // helper's plain reason) or connected (a check has succeeded).
+    function relayConnection(settings = state.settings || {}, status = relayStatusData || {}) {
+      if (settings.relay_enabled !== true) return { state: "off" };
+      if (!settings.relay_url || settings.relay_token_set !== true) return { state: "unconfigured" };
+      if (status.polling) return { state: "checking" };
+      if (status.last_error) return { state: "error", reason: status.last_error };
+      if (status.last_ok_at) return { state: "connected", at: status.last_ok_at };
+      return { state: "checking" };
+    }
+
+    function phonePushTokenNow() {
+      if (phonePairing && phonePairing.state === "paired") return phonePairing.push_token || "";
+      if (phonePairing && phonePairing.state === "old_relay") return phoneManualPush;
+      return "";
+    }
+
+    // The page the QR code opens. The token rides in the fragment (after #),
+    // which a browser never sends to the relay, so it stays out of its logs.
+    function phonePairingUrl(settings = state.settings || {}) {
+      const token = phonePushTokenNow();
+      const base = String(settings.relay_url || "").replace(/\/+$/, "");
+      return token && base ? `${base}/phone#t=${encodeURIComponent(token)}` : "";
+    }
+
+    // A QR code as one inline SVG path, drawn on this computer by the
+    // vendored qrcode-generator. White background and a 4-module quiet zone
+    // so it scans in dark mode too. Returns "" if the encoder isn't loaded.
+    function phoneQrSvg(text) {
+      if (typeof qrcode !== "function" || !text) return "";
+      const qr = qrcode(0, "M");
+      qr.addData(text);
+      qr.make();
+      const count = qr.getModuleCount();
+      const quiet = 4;
+      const size = count + quiet * 2;
+      let path = "";
+      for (let row = 0; row < count; row += 1) {
+        for (let col = 0; col < count; col += 1) {
+          if (qr.isDark(row, col)) path += `M${col + quiet} ${row + quiet}h1v1h-1z`;
+        }
+      }
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img" aria-label="QR code that opens the phone page on your relay"><rect width="${size}" height="${size}" fill="#fff"/><path d="${path}" fill="#000"/></svg>`;
+    }
+
+    function schedulePhonePairing() {
+      if (phonePairingScheduled || phonePairingBusy) return;
+      phonePairingScheduled = true;
+      window.setTimeout(startPhonePairing, 0);
+    }
+
+    async function startPhonePairing() {
+      phonePairingScheduled = false;
+      if (phonePairingBusy) return;
+      phonePairingBusy = true;
+      const forUrl = (state.settings || {}).relay_url || "";
+      let answer;
+      try {
+        // A sleeping free relay can take about a minute to wake.
+        const data = await settingsRequest("/relay/pairing", { method: "POST", body: "{}", timeoutMs: 100000 });
+        answer = ["paired", "old_relay", "error", "not_configured"].includes(data.state)
+          ? { state: data.state, push_token: data.push_token, message: data.message }
+          : { state: "error", message: "The helper gave an answer Uoink didn't expect. Update Uoink, then try again." };
+      } catch (err) {
+        answer = { state: "error", message: `Couldn't get the pairing key: ${settingError(err)}` };
+      }
+      phonePairingBusy = false;
+      if (forUrl === ((state.settings || {}).relay_url || "")) phonePairing = answer;
+      renderPhoneSetup();
+    }
+
+    function renderPhoneSetup() {
+      const settings = state.settings || {};
+      const status = relayStatusData || {};
+      const conn = relayConnection(settings, status);
+      const connected = conn.state === "connected";
+      const show = (id, on) => relayElement(id).classList.toggle("hidden", !on);
+      if ((settings.relay_url || "") !== phonePairingFor) {
+        phonePairing = null; phoneManualPush = ""; phoneRenderedUrl = ""; phonePairingFor = settings.relay_url || "";
+      }
+      if (!connected) phonePairing = phonePairing && phonePairing.state === "error" ? null : phonePairing;
+
+      const pill = relayElement("phoneConnPill");
+      pill.textContent = connected ? "Connected" : conn.state === "checking" ? "Checking…" : "Not connected";
+      pill.dataset.state = connected ? "connected" : conn.state === "error" ? "error" : conn.state === "checking" ? "checking" : "off";
+      pill.setAttribute("title", conn.state === "error" ? (conn.reason || "") : "");
+
+      const collapsed = connected && (phoneSetupDone() || Number(status.picked_up_total) > 0) && !phoneSetupExpanded;
+      show("phoneSummary", collapsed);
+      show("phoneSteps", !collapsed);
+      if (collapsed) {
+        const pickup = status.last_pickup_at ? `Last link picked up ${relayAgo(status.last_pickup_at)}` : "No links picked up yet";
+        const checked = relayAgo(status.last_ok_at || status.last_poll_at) || "just now";
+        relayElement("phoneSummaryText").textContent = `${pickup} · last checked ${checked}`;
+        relayElement("phoneSummaryCheck").disabled = Boolean(status.polling);
+      }
+
+      let part = "locked";
+      let qrUrl = "";
+      if (connected) {
+        if (!phonePairing) { part = "loading"; schedulePhonePairing(); }
+        else if (phonePairing.state === "paired" || (phonePairing.state === "old_relay" && phoneManualPush)) {
+          qrUrl = phonePairingUrl(settings);
+          part = "qr";
+        } else if (phonePairing.state === "old_relay") part = "old";
+        else part = "error";
+      }
+      if (part === "qr") {
+        if (qrUrl !== phoneRenderedUrl || !relayElement("phoneQr").innerHTML) {
+          let svg = "";
+          try { svg = phoneQrSvg(qrUrl); } catch (err) { svg = ""; }
+          if (svg) { relayElement("phoneQr").innerHTML = svg; phoneRenderedUrl = qrUrl; }
+          else {
+            part = "error";
+            relayElement("phoneErrorText").textContent = "Couldn't draw the QR code on this computer. Reload Uoink and try again.";
+          }
+        }
+      } else {
+        relayElement("phoneQr").innerHTML = "";
+        phoneRenderedUrl = "";
+      }
+      if (part === "error" && phonePairing && phonePairing.message) relayElement("phoneErrorText").textContent = phonePairing.message;
+      show("phoneLocked", part === "locked");
+      show("phoneLoading", part === "loading");
+      show("phoneOld", part === "old");
+      show("phoneError", part === "error");
+      show("phoneQrWrap", part === "qr");
+      if (part === "qr" && phonePairing && phonePairing.state === "old_relay") {
+        relayElement("phoneStep3Status").textContent = "If your phone says the page was not found, your relay still needs the update: Render > uoink-relay > Manual Deploy.";
+      }
+    }
+
+    function applyPhonePushToken() {
+      const input = relayElement("phonePushToken");
+      const value = input.value.trim();
+      if (!/^[\x21-\x7e]{32,4096}$/.test(value)) {
+        relayElement("phonePushStatus").textContent = "That doesn't look like RELAY_PUSH_TOKEN. It is at least 32 characters with no spaces.";
+        return;
+      }
+      relayElement("phonePushStatus").textContent = "";
+      phoneManualPush = value;
+      input.value = "";
+      renderPhoneSetup();
+    }
+
+    async function copyPhonePairingLink() {
+      const url = phonePairingUrl();
+      if (!url) return;
+      let ok = false;
+      try { await navigator.clipboard.writeText(url); ok = true; } catch (err) { ok = false; }
+      relayElement("phoneStep3Status").textContent = ok
+        ? "Copied. Anyone with this link can send links to your relay, so share it only with your own phone."
+        : "Couldn't copy. Scan the QR code instead.";
     }
 
     function renderRelaySettings(versions = {}, previous = null) {
@@ -19006,6 +19824,12 @@
       };
       const token = relayElement("relayToken").value.trim();
       if (token) patch.relay_token = token;
+      // First time through the guided steps: saving an address and a token means "turn it on".
+      const autoEnabled = Boolean(token && patch.relay_url && !patch.relay_enabled && settings.relay_token_set !== true);
+      if (autoEnabled) {
+        patch.relay_enabled = true;
+        relayElement("relayEnabled").checked = true;
+      }
       if (patch.relay_enabled && !patch.relay_url) {
         noteRelayEdit();
         setSettingFeedback("relayUrl", "Not saved: enter the relay address first.", "error");
@@ -19017,7 +19841,14 @@
         return Promise.resolve(false);
       }
       return queueSettingSave("relayUrl", async () => {
-        const data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
+        let data;
+        try {
+          data = await settingsRequest("/settings", { method: "POST", body: JSON.stringify(patch) });
+        } catch (err) {
+          // Nothing saved (the credential store may not have answered). Don't leave the inbox looking switched on.
+          if (autoEnabled) relayElement("relayEnabled").checked = false;
+          throw err;
+        }
         const stored = data.settings;
         if (!stored || !Object.prototype.hasOwnProperty.call(stored, "relay_token_set")) throw unsupportedSettingError();
         if (stored.relay_url !== patch.relay_url.replace(/\/+$/, "") || stored.relay_enabled !== patch.relay_enabled
@@ -19030,8 +19861,10 @@
       }, () => {
         relayElement("relayToken").value = "";
         relayElement("relayUrl").value = state.settings.relay_url || "";
+        relayElement("relayEnabled").checked = state.settings.relay_enabled === true;
         relayElement("relayToken").placeholder = state.settings.relay_token_set === true ? "Saved" : "Paste the pull token";
         relayStatusData = null;
+        phonePairing = null;
         renderRelayStatus();
         if (relayReady()) window.setTimeout(loadRelayStatus, 3000);
       });
@@ -19042,6 +19875,12 @@
       for (const id of ["relayEnabled", "relayPollMinutes"]) relayElement(id).addEventListener("change", noteRelayEdit);
       relayElement("relaySave").addEventListener("click", saveRelaySettings);
       relayElement("relayCheck").addEventListener("click", checkRelayNow);
+      relayElement("phoneSummaryCheck").addEventListener("click", () => { if (!relayElement("relayCheck").disabled) checkRelayNow(); });
+      relayElement("phoneShowSetup").addEventListener("click", () => { phoneSetupExpanded = true; renderPhoneSetup(); });
+      relayElement("phoneDone").addEventListener("click", () => { setPhoneSetupDone(true); phoneSetupExpanded = false; renderPhoneSetup(); });
+      relayElement("phoneCopyLink").addEventListener("click", copyPhonePairingLink);
+      relayElement("phonePushApply").addEventListener("click", applyPhonePushToken);
+      relayElement("phoneRetry").addEventListener("click", () => { phonePairing = null; renderPhoneSetup(); });
     }
 
     function wireSettingsAutosave() {
@@ -19425,7 +20264,7 @@
       } else {
         stopLibraryActivityTimer();
       }
-      if (tab === "for-you") loadForYou();
+      if (tab === "for-you") { loadForYou(); forYouPodLoad(); }
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
@@ -20682,6 +21521,7 @@
       hydrateMarks();
       wireEvents();
       wireLibraryActivityEvents();
+      wireForYouPod();
       wireRoutes();
       showUsagePrompt();
       applyHashRoute();
@@ -20694,6 +21534,7 @@
       syncDashboardTheme();
       await refreshJobs();
       await loadLibrary({ reset: true });
+      forYouPodLoad();
       await loadLibraryActivity(false);
       startLibraryActivityTimer();
       await loadResume();

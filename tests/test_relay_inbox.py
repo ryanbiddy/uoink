@@ -92,6 +92,10 @@ def settings_route(tmp_path, monkeypatch, relay_state):
     fake = FakeKeyring()
     monkeypatch.setattr(server, "_keyring", fake)
     monkeypatch.setattr(server, "_isolated_binding", lambda: SimpleNamespace(profile=tmp_path))
+    # These tests cover the OS credential store path, through a fake keyring.
+    # An isolated profile uses its credentials.json by default instead
+    # (tests/test_credential_store_safety.py).
+    monkeypatch.setattr(server, "_credential_store_mode", lambda: "keyring")
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
     monkeypatch.setattr(server, "_load_topics", lambda: {})
     monkeypatch.setattr(server, "_reliability_model_status", lambda *args: {})
@@ -199,10 +203,15 @@ def test_a_credential_store_that_forgets_the_token_is_reported(settings_route, m
     _, folder = settings_route
     monkeypatch.setattr(server, "_keyring", NullKeyring())
     probe = post_settings({"relay_token": TOKEN, "relay_enabled": True})
-    assert probe.status == 200 and probe.payload == {"ok": False, "error": "credential store unavailable"}
+    # 3.17.0: a plain message the dashboard shows as is, plus a stable code
+    # (was the bare "credential store unavailable").
+    unsaved = {"ok": False, "code": "credential_store_unavailable",
+               "error": "The system credential store didn't save this. "
+                        "Unlock it or allow access, then select Save again."}
+    assert probe.status == 200 and probe.payload == unsaved
     assert not (folder / "settings.json").exists()
     monkeypatch.setattr(server, "_keyring", None)
-    assert post_settings({"relay_token": TOKEN}).payload["error"] == "credential store unavailable"
+    assert post_settings({"relay_token": TOKEN}).payload == unsaved
     assert TOKEN not in caplog.text
 
 
@@ -524,7 +533,7 @@ def test_status_route_reports_without_the_token(settings_route):
     probe.do_GET()
     assert probe.status == 200
     assert set(probe.payload) == {"ok", "enabled", "configured", "last_poll_at", "last_ok_at",
-                                  "last_error", "last_capture_error", "picked_up_total",
+                                  "last_error", "last_capture_error", "picked_up_total", "last_pickup_at",
                                   "last_pending_count", "polling"}
     assert probe.payload["enabled"] is True and probe.payload["configured"] is True
     assert TOKEN not in json.dumps(probe.payload)

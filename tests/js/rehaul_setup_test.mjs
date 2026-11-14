@@ -78,14 +78,14 @@ const groups = {
   async platforms() {
     // Without a published DMG, Mac users get the manual instructions.
     const setupSource = readFileSync(join(EXT, 'setup.js'), 'utf8')
-      .replace(/const PUBLISHED_MAC_DMG = "[^"]*";/,'const PUBLISHED_MAC_DMG = "";');
+      .replace(/const PUBLISHED_MAC_DMG = [^;]*;/,'const PUBLISHED_MAC_DMG = "";');
     const version = setupSource.match(/const PUBLISHED_INSTALLER_VERSION = "([^"]+)";/)[1];
     for (const [os,word] of [['win','Start Menu'],['mac','Applications'],['linux','Terminal']]) {
       const env=await setup({os,setupSource,fetch:()=>jsonResponse({ok:false},503)});
       assert.match(env.el('status-instructions').textContent,new RegExp(word));
       assert.equal(env.el('download-btn').hidden,os!=='win');
       assert.equal(env.el('manual-install').hidden,os==='win');
-      assert.equal(env.el('download-btn').href,`https://github.com/ryanbiddy/uoink/releases/download/v${version}/Uoink-Setup-${version}.exe`);
+      assert.equal(env.el('download-btn').href,`https://usage.uoink.app/get/windows?v=${version}&from=extension`);
       if(os!=='win') assert.doesNotMatch(env.el('status-instructions').textContent,/Windows/);
       if(os!=='win') assert.doesNotMatch(env.el('install-instructions').textContent,/Windows/);
     }
@@ -97,17 +97,71 @@ const groups = {
   async mac_download() {
     // The release publishes the Mac DMG next to the Windows installer.
     const published = readFileSync(join(EXT, 'setup.js'), 'utf8');
-    assert.match(published,/const PUBLISHED_MAC_DMG = "3.16.3";/);
+    assert.match(published,/const PUBLISHED_MAC_DMG = PUBLISHED_INSTALLER_VERSION;/);
     const mac=await setup({os:'mac',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
     assert.equal(mac.el('download-btn').hidden,false);
     assert.equal(mac.el('manual-install').hidden,true);
-    assert.equal(mac.el('download-btn').href,'https://github.com/ryanbiddy/uoink/releases/download/v3.16.3/Uoink-3.16.3-macos-arm64.dmg');
+    assert.equal(mac.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.17.0&from=extension');
     assert.equal(mac.el('download-btn').textContent,'Download for Mac');
     assert.match(mac.el('install-instructions').textContent,/drag Uoink to Applications/);
     const win=await setup({os:'win',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
-    assert.match(win.el('download-btn').href,/Uoink-Setup-[0-9.]+\.exe$/);
+    assert.match(win.el('download-btn').href,/^https:\/\/usage\.uoink\.app\/get\/windows\?v=[0-9.]+&from=extension$/);
     const linux=await setup({os:'linux',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
     assert.equal(linux.el('download-btn').hidden,true);
+  },
+  async funnel() {
+    const text=env=>env.el('funnel-title').textContent;
+    // Helper missing, Windows: needs-app, then connecting after the download click.
+    let up=false;
+    const env=await setup({os:'win',fetch:path=>up?jsonResponse(path==='/health'?{ok:true}:{ok:true,checks:[]}):jsonResponse({ok:false},503)});
+    assert.equal(env.el('funnel').dataset.state,'needs-app');
+    assert.equal(text(env),'Uoink needs its free desktop app');
+    assert.match(env.el('funnel-body').textContent,/saves transcripts to your own disk/);
+    assert.match(env.el('funnel-os').textContent,/Windows/);
+    assert.equal(env.el('install').hidden,false);
+    env.el('download-btn').click();await settle();
+    assert.equal(env.el('funnel').dataset.state,'connecting');
+    assert.equal(text(env),'Waiting for Uoink to start');
+    assert.match(env.el('funnel-next').textContent,/connects by itself/);
+    // The poll keeps going and flips to connected once the helper answers.
+    up=true;await env.fireTimer(2000);
+    assert.equal(env.el('funnel').dataset.state,'connected');
+    assert.equal(text(env),'Connected');
+    assert.match(env.el('funnel-body').textContent,/this PC/);
+    assert.match(env.el('funnel-next').textContent,/Library/);
+    assert.equal(env.el('install').hidden,true);
+    assert.equal(env.el('funnel-os').hidden,true);
+    // The helper going away brings the download back.
+    up=false;await env.fireTimer(10000);
+    assert.equal(env.el('funnel').dataset.state,'connecting');
+    assert.equal(env.el('install').hidden,false);
+    // Helper already running on first load: never shows the download prompt.
+    const running=await setup({os:'mac'});
+    assert.equal(running.el('funnel').dataset.state,'connected');
+    assert.match(running.el('funnel-body').textContent,/this Mac/);
+  },
+  async funnel_os() {
+    const down=()=>jsonResponse({ok:false},503);
+    const arm=await setup({os:'mac',fetch:down});
+    arm.ctx.chrome.runtime.getPlatformInfo=cb=>cb({os:'mac',arch:'arm'});
+    assert.equal(arm.el('download-btn').hidden,false);
+    assert.equal(arm.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.17.0&from=extension');
+    assert.match(arm.el('funnel-os').textContent,/Apple silicon/);
+    // Intel Mac: a clear note, no download, manual instructions.
+    const intelSource=readFileSync(join(EXT,'setup.js'),'utf8').replace('chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os, info && info.arch));','chrome.runtime.getPlatformInfo(info => setPlatform("mac", "x86-64"));');
+    const intel=await setup({os:'mac',fetch:down,setupSource:intelSource});
+    assert.equal(intel.el('download-btn').hidden,true);
+    assert.equal(intel.el('manual-install').hidden,false);
+    assert.match(intel.el('funnel-os').textContent,/Intel/);
+    assert.match(intel.el('funnel-next').textContent,/Intel chip/);
+    assert.match(intel.el('install-instructions').textContent,/Apple silicon/);
+    // Linux: no installer, a note instead.
+    const linux=await setup({os:'linux',fetch:down});
+    assert.equal(linux.el('download-btn').hidden,true);
+    assert.match(linux.el('funnel-next').textContent,/no Linux installer/i);
+    // Win: Windows download through the counted redirect.
+    const win=await setup({os:'win',fetch:down});
+    assert.equal(win.el('download-btn').href,'https://usage.uoink.app/get/windows?v=3.17.0&from=extension');
   },
   async navigation_motion() {
     for (const reducedMotion of [true, false]) {

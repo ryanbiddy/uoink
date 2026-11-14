@@ -6,6 +6,57 @@ import json
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlparse
+import unicodedata
+
+# One title limit for every source (notes, images, YouTube, podcasts, pages,
+# X, Reddit, imports). Enforced at the single store boundary
+# (index.upsert_yoink) and by the note/image builders.
+MAX_TITLE_CHARS = 300
+_ZWJ = "‍"
+
+
+def _is_continuation(ch: str) -> bool:
+    """True when ch must stay attached to the character before it."""
+    cp = ord(ch)
+    return (
+        ch == _ZWJ
+        or unicodedata.category(ch) in ("Mn", "Mc", "Me")
+        or 0xFE00 <= cp <= 0xFE0F      # variation selectors
+        or 0x1F3FB <= cp <= 0x1F3FF    # emoji skin tones
+        or 0xE0020 <= cp <= 0xE007F    # emoji tag sequences
+        or 0xDC00 <= cp <= 0xDFFF      # lone low surrogate
+    )
+
+
+def clamp_title(title, limit: int = MAX_TITLE_CHARS):
+    """Cap a title at `limit` characters, ending with an ellipsis.
+
+    Titles within the limit come back unchanged. Longer ones are cut at a
+    grapheme-safe point (never inside a surrogate pair, a ZWJ emoji sequence,
+    a combining-mark cluster or a flag pair), trailing whitespace is trimmed
+    and one "…" is appended, so the result is never longer than `limit`.
+    Non-strings pass through untouched."""
+    if not isinstance(title, str) or len(title) <= limit:
+        return title
+    cut = max(limit - 1, 0)
+    start = cut
+    while cut > 0 and (
+        _is_continuation(title[cut])
+        or title[cut - 1] == _ZWJ
+        or 0xD800 <= ord(title[cut - 1]) <= 0xDBFF
+    ):
+        cut -= 1
+    # Regional indicators pair up into flags: don't split a pair.
+    run = 0
+    i = cut
+    while i > 0 and 0x1F1E6 <= ord(title[i - 1]) <= 0x1F1FF:
+        run += 1
+        i -= 1
+    if run % 2 == 1 and cut < len(title) and 0x1F1E6 <= ord(title[cut]) <= 0x1F1FF:
+        cut -= 1
+    if cut <= 0:
+        cut = start  # one unbroken cluster longer than the limit: hard cut
+    return title[:cut].rstrip() + "…"
 
 
 _KIND_ALIASES = {

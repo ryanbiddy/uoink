@@ -469,9 +469,9 @@ def extract_page(idx, url: str, *,
     if enforce_allowlist and not host_is_allowed(idx, canonical):
         host = urlparse(canonical).hostname
         return {"ok": False, "code": "host_not_allowed",
-                "error": (f"host '{host}' is not in the allowlist. "
-                          f"Add it via /extract/page/allowlist or the "
-                          f"Sites Settings panel.")}
+                "error": (f"Uoink only captures pages from sites you have allowed, and "
+                          f"'{host}' is not on that list. Add it in the dashboard under "
+                          f"Settings, Sites Uoink works on, then try again.")}
     depth = max(0, min(int(follow_links_depth or 0),
                           _MAX_FOLLOW_LINKS_DEPTH))
 

@@ -10,7 +10,7 @@ Free and open source (MIT). Windows 10/11 and Mac (Apple silicon, macOS 15+). Li
 
 ## Quick start
 
-1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`. For Linux, see [the Linux guide](docs/linux.md).
+1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, on a Mac run `brew install --cask ryanbiddy/uoink/uoink`, or on Windows and Apple-silicon Macs run `npx uoink` (it checks the download's SHA-256 first). For Linux, see [the Linux guide](docs/linux.md).
 2. **Connect your AI:** `uoink connect claude-code`. For other clients run `uoink connect --list`; Claude Desktop can use the `.mcpb` extension from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
 3. **Ask:** *"uoink https://youtu.be/… and tell me where they explain the eval setup."* Later: *"which of my saved talks disagreed about that?"*
 
@@ -98,13 +98,13 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.16.3.exe` from the [v3.16.3 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.16.3). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.17.0.exe` from the [v3.17.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.17.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 <!-- store-install:start -->
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
 <!-- store-install:end -->
 
-**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.16.3-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
+**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.17.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
 
 The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
 
@@ -133,14 +133,14 @@ not required.
 ## Phone inbox (optional)
 
 Share a link from your phone's share sheet and Uoink captures it on your
-computer, with no phone app. Deploy a small relay to your own Render account,
-point an iOS Shortcut or Android share target at it, then add it in
-**Settings > Capture > Phone inbox**. The relay holds only the link and an
+computer, with no phone app. Three steps in **Settings > Capture > Phone
+inbox**: deploy a small relay to your own (free) Render account, connect it,
+then scan a QR code with your phone. The relay holds only the link and an
 optional note, until Uoink picks it up or for 7 days at most.
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ryanbiddy/uoink)
 
-Setup, the Shortcut recipe and the free-plan tradeoffs are in
+Setup, the manual Shortcut fallback and the free-plan tradeoffs are in
 [docs/relay.md](docs/relay.md).
 
 ## How it works

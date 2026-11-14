@@ -1,35 +1,50 @@
-# Submit Uoink 3.16.3 to the Chrome Web Store
+# Submit Uoink 3.17.0 to the Chrome Web Store
 
-Allow about 15 minutes for the dashboard work once your images and helper
-release are ready. Account verification, helper packaging, screenshot capture
-and Google's review are extra. Ryan does every account, payment, upload and
-submission step. Nothing in this worktree publishes anything.
+Allow about 15 minutes for the dashboard work. The zip, listing text,
+screenshots and reviewer notes are ready. Account verification and Google's
+review are extra. The owner does every account, payment, upload and submission
+step (every step below marked "owner" is theirs). Nothing in this repo publishes
+anything.
+
+Version: this package is Uoink 3.17.0. The zip name and the manifest version
+both come from the repo's `VERSION` file through `python scripts/build_cws.py`.
+`tests/test_cws_release.py` fails if these docs name a different version, so
+rebuild and re-read the file names if `VERSION` changes.
+
+What a store install does for a stranger: Chrome opens the setup tab, which
+says "Uoink needs its free desktop app", offers the right download for
+Windows or an Apple-silicon Mac (Intel Mac and Linux get a plain note), waits
+for the app to start, then shows "Connected" with a first thing to try. Chrome
+Web Store installs also work in Edge, Brave, Arc, Opera and Vivaldi with the
+same extension ID, which the helper already trusts. Edge Add-ons and Firefox
+are not part of this submission.
 
 ## Before opening the dashboard
 
 Have these ready:
 
-- `dist/uoink-extension-3.16.3-cws.zip`, built with `python scripts/build_cws.py`.
+- `dist/uoink-extension-3.17.0-cws.zip`, built with `python scripts/build_cws.py`.
 - `listing.md`, `permissions-justification.md`, `privacy-practices.md` and
   `reviewer-test-instructions.md` from this folder.
-- The 1280x800 screenshots in `screenshots/`, listed in `SCREENSHOTS.md`. They
-  are 3.12.0 captures from 2026-10-31. Upload at least one.
+- The 1280x800 screenshots in `screenshots/`, listed in `SCREENSHOTS.md`
+  (upload order is in that file). Captured 2026-11-12 for 3.17.0 or kept from
+  3.12.0 where the UI is unchanged. Upload at least one, up to five.
 - `extension/icons/icon128.png`; optional small and marquee tiles in `tiles/`.
 - A monitored support email. Verify that `hi@uoink.app` receives mail.
 - The Limited Use statement from `privacy-practices.md`, published on
   https://uoink.app/privacy. The live policy already covers opt-in usage counts.
 
-The public v3.14.0 installer and DMG trust the store item ID (since 3.11.2), so
-a store install connects to the helper with no extra step. 3.14.0 adds the
-saves collector content script; its reviewer text is in
-`permissions-justification.md`.
+The public installer and DMG trust the store item ID (since 3.11.2), so
+a store install connects to the helper with no extra step. The saves
+collector content script (3.14.0) and the notification buttons (3.17.0) have
+their reviewer text in `permissions-justification.md`.
 
 ## 1. Register and secure the account, about 3 minutes
 
 1. Open the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole/).
 2. Sign in with the Google account you want to own Uoink. Read and accept the
    developer agreement and policies, then pay the **$5 one-time registration
-   fee** shown in registration. Ryan pays it himself.
+   fee** shown in registration. the owner pays it themselves.
 3. In [Google Account security](https://myaccount.google.com/security), enable
    **2-Step Verification** if it is not already enabled. Return to the dashboard.
 4. Open **Account**. Complete the publisher name, contact email and any required
@@ -43,8 +58,8 @@ also references the $5 registration fee. Extra account checks can take longer.
 ## 2. Create the draft and copy its ID, about 2 minutes
 
 5. Click **Add new item** (or **New item**).
-6. Click **Browse files**, select `dist/uoink-extension-3.16.3-cws.zip`, then
-   upload it. Confirm the detected name is **Uoink**, version **3.16.3**, MV3.
+6. Click **Browse files**, select `dist/uoink-extension-3.17.0-cws.zip`, then
+   upload it. Confirm the detected name is **Uoink**, version **3.17.0**, MV3.
 7. Open **Package**. Copy the **Item ID**, a 32-letter string. It exists now,
    before review. **View public key** on this tab is for matching development
    installs to that item; do not replace Uoink's existing developer key.
@@ -101,7 +116,7 @@ describes these tabs. Dashboard labels can change; keep the field values above.
 
 14. Resolve any incomplete-field messages. Check the helper requirement is
     prominent, the privacy URL opens without sign-in, and the screenshots are
-    the 3.12.0 set from `SCREENSHOTS.md`.
+    the set from `SCREENSHOTS.md`.
 15. Click **Submit for review**. In the confirmation dialog, turn off automatic
     publication so you can coordinate the helper and website. Confirm submission.
 16. Enable review/staged notifications on **Account** and monitor that inbox.
@@ -140,12 +155,12 @@ update the same item. Increase the version for a changed package; metadata-only
 corrections do not require a new zip. Keep the item ID and its helper configuration.
 Do not create another item to avoid the decision.
 
-If the finding is mistaken, Ryan can use the dashboard's appeal action with a
+If the finding is mistaken, the owner can use the dashboard's appeal action with a
 short explanation, the relevant source paths and reproducible test steps.
 Google permits one appeal per violation decision. For likely issues and concrete
 mitigations, use [POLICY-AUDIT.md](POLICY-AUDIT.md). No one was contacted in this pass.
 
-## Edge Add-ons
+## Edge Add-ons (not part of this submission)
 
 The current key-free zip is a candidate for Edge too. Microsoft generally
 supports [porting Chromium extensions](https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/port-chrome-extension)
