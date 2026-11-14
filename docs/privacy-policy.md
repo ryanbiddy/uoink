@@ -120,17 +120,24 @@ Uoink makes these outbound requests:
   and delete each one after it captures it. Uoink sends nothing else to the
   relay: no library content, transcripts or settings. The relay runs on your
   own Render account, not a Uoink server. It holds a shared link and an
-  optional note until Uoink picks it up, or for 7 days at most, and its own
+  optional note, with an ID, the time it arrived and a hash of the link that
+  stops duplicates, until Uoink picks it up, or for 7 days at most, and its own
   log lines record only method, route, status and duration. Render, as the
   host, handles those requests under its own policy. Capturing a picked-up
   link then contacts its source service as above. To draw the phone setup QR
   code, the dashboard also asks your relay for its push token
   (`GET /v1/pairing`, with the pull token). The QR code is drawn on your
-  computer, and the push token rides in the part of the link after `#`, which
-  browsers never send to a server. See [docs/relay.md](relay.md).
+  computer, and the push token rides in the part of the link after `#`, so
+  opening the link never puts it in a server log. The phone page then keeps
+  the push token in the phone browser's local storage and sends it to your
+  relay only to authorize each link you send. An Android share opens the
+  phone page with the shared link in its address, so the relay receives it
+  then (its own log keeps only the route). The link is saved only when you
+  tap Send. See [docs/relay.md](relay.md).
 - **Podcast suggestions: only if you turn them on.** They are off by default
   (Settings, Suggest podcasts). When on, Uoink picks up to 4 topic words or
-  short phrases that recur in the titles of your saves and sends each one as
+  short phrases that recur in the titles of your saves and of shows you
+  follow, and sends each one as
   a search to Apple's podcast search at `itunes.apple.com`. It never sends
   titles, links, transcripts or notes, and with fewer than 5 saved items it
   sends nothing. It refreshes at most once a day, or when you press Refresh
