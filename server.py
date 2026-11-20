@@ -15994,6 +15994,35 @@ def _enrich_x_video_metadata(url: str, metadata: dict) -> dict:
     return enriched
 
 
+_X_OPEN_URL_RE = re.compile(r"^https://(?:x|twitter)\.com/[A-Za-z0-9_/]+$")
+
+
+def _x_cut_off_detail(sidecar: dict) -> dict | None:
+    """{reason, open_url, title?} when an X save holds only part of the
+    text: "long_post" (X cut it) or "article" (the post only links to an
+    X Article). The reader offers the FxTwitter switch or the open-tab
+    save. None once it is whole or the Article was saved on its own."""
+    if not isinstance(sidecar, dict):
+        return None
+    meta = sidecar.get("metadata") if isinstance(sidecar.get("metadata"), dict) else {}
+    cut = meta.get("text_cut_off")
+    if isinstance(cut, dict):
+        open_url = cut.get("open_url")
+        if cut.get("saved_as") or not isinstance(open_url, str) or not _X_OPEN_URL_RE.match(open_url):
+            return None
+        out = {"reason": "article" if cut.get("reason") == "article" else "long_post", "open_url": open_url}
+        title = cut.get("title")
+        if isinstance(title, str) and title.strip():
+            out["title"] = title.strip()[:200]
+        return out
+    marker = sidecar.get("x_text")
+    if isinstance(marker, dict) and marker.get("long_post") and marker.get("text_completeness") != "complete":
+        tweet_id = x_extractor.tweet_id_from_url(str(sidecar.get("url") or ""))
+        if tweet_id:
+            return {"reason": "long_post", "open_url": f"https://x.com/i/status/{tweet_id}"}
+    return None
+
+
 _x_text_repair_job = None
 _x_text_repair_job_lock = threading.Lock()
 
@@ -22736,6 +22765,11 @@ class Handler(BaseHTTPRequestHandler):
                         })
                 clean_diar["segments"] = clean_diar_segs
             filtered["diarization"] = clean_diar
+
+        # 3.18.0: an X save that holds only part of the post's text.
+        cut_off = _x_cut_off_detail(data)
+        if cut_off:
+            filtered["x_text_cut_off"] = cut_off
 
         return self._send_json(200, {
             "ok": True,

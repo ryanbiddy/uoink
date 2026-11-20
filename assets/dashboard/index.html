@@ -4119,6 +4119,15 @@
       overflow-wrap: anywhere;
     }
 
+    /* 3.18.0: an X save that holds only part of the post. */
+    .reader-cutoff { display: grid; gap: var(--space-3); }
+    .reader-cutoff p { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+    .reader-cutoff .soft-note { color: var(--muted); font-size: 13px; }
+    .x-repair-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+    .x-repair-list li { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+    .x-repair-list a { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .x-repair-list span { flex: 0 0 auto; color: var(--muted); font-size: 12px; }
+
     .reader-more {
       margin-top: var(--space-4);
     }
@@ -5995,6 +6004,14 @@
 
           <div class="reader-body">
             <p class="reader-note hidden" id="yoinkTranscriptNote" role="note"></p>
+            <div class="reader-note reader-cutoff hidden" id="yoinkXCutOff" role="group" aria-labelledby="yoinkXCutOffText">
+              <p id="yoinkXCutOffText"></p>
+              <div class="inline-row">
+                <button class="button" type="button" id="yoinkXCutOffFix"></button>
+                <a class="button ghost" id="yoinkXCutOffOpen" href="#" target="_blank" rel="noreferrer"></a>
+              </div>
+              <p class="soft-note" id="yoinkXCutOffStatus" role="status" aria-live="polite"></p>
+            </div>
             <article class="reader-doc" id="yoinkDetail" aria-label="Transcript"></article>
             <details class="reader-section hidden" id="yoinkCommentsSection">
               <summary class="reader-section-title">Comments <span class="reader-section-meta" id="yoinkCommentsMeta"></span></summary>
@@ -6371,6 +6388,14 @@
               <div class="setting-feedback"><span class="setting-status" id="sourceAvailabilityToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="sourceAvailabilityToggleSaveRetry" type="button" data-setting-retry="sourceAvailabilityToggle">Retry save</button></div>
             </div>
 
+            <div class="setting-block" id="x-full-text">
+              <h2>Long X posts and Articles</h2>
+              <p class="setting-copy">From a pasted link, X gives Uoink only the first 280 or so characters of a long post and none of an X Article. Saving from the open post with the extension gets the whole text from your own page, and nothing is sent anywhere.</p>
+              <label class="inline-row"><input id="fxtwitterToggle" type="checkbox" data-reveal-focus aria-describedby="fxtwitterToggleSaveStatus fxtwitterCopy"> Get full long posts and Articles through FxTwitter</label>
+              <div class="setting-feedback"><span class="setting-status" id="fxtwitterToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="fxtwitterToggleSaveRetry" type="button" data-setting-retry="fxtwitterToggle">Retry save</button></div>
+              <p class="setting-copy" id="fxtwitterCopy">Off by default. FxTwitter is a free community service at api.fxtwitter.com. When this is on and X cuts a post short, Uoink asks FxTwitter for that one post. It sees only the link of the post, never your library or your X account.</p>
+            </div>
+
             <div class="setting-block" id="rediscover-shelves">
               <h2>Rediscover and idea starters</h2>
               <p class="setting-copy">On by default. The Library shows a few older saves each day and ideas built from saves that share a topic. It all runs on this computer. Nothing is sent anywhere, and no AI is called.</p>
@@ -6736,6 +6761,22 @@
                 <button class="button ghost" type="button" id="libraryMirrorResync">Resync</button>
               </div>
               <p class="setting-copy" id="libraryMirrorPreviewOut"></p>
+            </div>
+
+            <div class="setting-block" id="x-text-repair">
+              <h2>Fix cut-off X posts</h2>
+              <p class="setting-copy" id="xTextRepairCount" role="status" aria-live="polite">Counting X saves...</p>
+              <p class="setting-copy hidden" id="xTextRepairHow"></p>
+              <div class="inline-row" id="xTextRepairControls">
+                <button class="button" type="button" id="xTextRepairStart">Start</button>
+                <button class="button ghost" type="button" id="xTextRepairPause">Pause</button>
+                <button class="button ghost" type="button" id="xTextRepairStop">Stop</button>
+              </div>
+              <p class="setting-copy hidden" id="xTextRepairProgress" role="status" aria-live="polite"></p>
+              <details class="manual-path hidden" id="xTextRepairListBox">
+                <summary id="xTextRepairListLabel">Posts to open and save</summary>
+                <ul class="x-repair-list" id="xTextRepairList"></ul>
+              </details>
             </div>
 
             <div class="setting-block">
@@ -9220,6 +9261,7 @@
         els.yoinkSourceLink.classList.add("hidden");
         els.yoinkImportNote.classList.add("hidden");
         els.yoinkTranscriptNote.classList.add("hidden");
+        renderXCutOff(null, null);
         els.yoinkCommentsSection.classList.add("hidden");
         els.yoinkAnalysisSection.classList.add("hidden");
         els.yoinkFactMeta.textContent = copy.factMeta;
@@ -9247,6 +9289,7 @@
       const note = transcriptNoteText(row, sidecar);
       els.yoinkTranscriptNote.textContent = note;
       els.yoinkTranscriptNote.classList.toggle("hidden", !note);
+      renderXCutOff(row, sidecar);
       els.yoinkFactMeta.textContent = isNote
         ? noteReadinessLabel()
         : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
@@ -9265,6 +9308,213 @@
       els.yoinkAnalysisSection.classList.toggle("hidden", !analysis);
       els.yoinkFacts.innerHTML = yoinkFactsHtml(row, sidecar);
       loadReaderImages();
+    }
+
+    // ---- 3.18.0: an X save that holds only part of the post ---------------
+    // The helper's details carry x_text_cut_off {reason, open_url, title?}:
+    // X cut a long post short, or the post only links to an X Article. Two
+    // ways to get the rest: the FxTwitter switch (then Uoink fetches it), or
+    // open it on X and save it with the extension from the open tab.
+    const xCutOff = { busy: false, videoId: "", message: "" };
+
+    function xTextFxOn() {
+      return Boolean((state.settings || {}).fxtwitter_enrichment_enabled);
+    }
+
+    function renderXCutOff(row, sidecar) {
+      const box = document.getElementById("yoinkXCutOff");
+      if (!box) return;
+      const cut = row && sidecar ? sidecar.x_text_cut_off : null;
+      const videoId = row ? videoIdOf(row) : "";
+      if (videoId !== xCutOff.videoId) Object.assign(xCutOff, { videoId, message: "" });
+      box.classList.toggle("hidden", !cut || !cut.open_url);
+      if (!cut || !cut.open_url) return;
+      const article = cut.reason === "article";
+      const fxOn = xTextFxOn();
+      document.getElementById("yoinkXCutOffText").textContent = article
+        ? `This post links to an X Article${cut.title ? `, "${cut.title}"` : ""}, so Uoink saved the post and a preview. To save the Article, open it on X and click Uoink this article in the extension, or let Uoink get it through FxTwitter.`
+        : "X cut this post short, so Uoink saved only the start. To save all of it, open it on X and click Uoink this post in the extension, or let Uoink get it through FxTwitter.";
+      const fix = document.getElementById("yoinkXCutOffFix");
+      fix.textContent = xCutOff.busy ? "Getting it..." : fxOn ? "Get it through FxTwitter" : "Turn on FxTwitter and get it";
+      fix.disabled = xCutOff.busy;
+      const open = document.getElementById("yoinkXCutOffOpen");
+      open.href = cut.open_url;
+      open.textContent = article ? "Open the Article on X" : "Open the post on X";
+      document.getElementById("yoinkXCutOffStatus").textContent = xCutOff.message
+        || (fxOn ? "" : "FxTwitter is a free community service. Turning it on lets Uoink send it the link of a post X cut short.");
+    }
+
+    async function fixXCutOff() {
+      const row = state.selectedYoink;
+      const videoId = row ? videoIdOf(row) : "";
+      if (!videoId || xCutOff.busy) return;
+      xCutOff.busy = true;
+      xCutOff.message = "";
+      renderXCutOff(row, state.selectedYoinkSidecar);
+      try {
+        if (!xTextFxOn()) {
+          const saved = await saveSettingsPatch({ fxtwitter_enrichment_enabled: true }, "fxtwitterToggle");
+          if (!saved || !xTextFxOn()) throw new Error("Couldn't turn on FxTwitter. Try the switch in Settings, Capture.");
+        }
+        let reply;
+        try {
+          reply = await authFetch("/library/x-text-repair", { method: "POST", body: JSON.stringify({ action: "fix", video_id: videoId }) });
+        } catch (err) {
+          reply = (err && err.data && err.data.outcome) ? err.data : null;
+          if (!reply) throw err;
+        }
+        if (state.selectedYoink !== row) return;
+        if (reply.saved_as) {
+          xCutOff.message = "Saved the Article as its own item in your library.";
+        } else if (reply.ok) {
+          xCutOff.message = "";
+          await openYoinkDetail(row, { fromRoute: true });
+          return;
+        } else {
+          xCutOff.message = reply.error || reply.note || "Couldn't get the full text this time.";
+        }
+      } catch (err) {
+        xCutOff.message = (err && err.message) || "Couldn't get the full text this time.";
+      } finally {
+        xCutOff.busy = false;
+        if (state.selectedYoink === row) renderXCutOff(row, state.selectedYoinkSidecar);
+      }
+    }
+
+    // The FxTwitter switch changed (Settings or the reader's button).
+    function xTextSwitchChanged() {
+      const toggle = document.getElementById("fxtwitterToggle");
+      if (toggle) toggle.checked = xTextFxOn();
+      if (state.selectedYoink) renderXCutOff(state.selectedYoink, state.selectedYoinkSidecar);
+      if (xRepair.status) loadXTextRepair();
+    }
+
+    // ---- 3.18.0: Fix cut-off X posts (Settings, Library and export) -------
+    // Self-contained: this markup block, this state and one timer. The
+    // helper's job runs only when the person starts it with the FxTwitter
+    // switch on. With it off, the block counts the saves and explains both
+    // ways to fix them.
+    const xRepair = { status: null, timer: 0, busy: false };
+    const X_REPAIR_SEC_PER_POST = 3.5;
+
+    async function loadXTextRepair() {
+      try {
+        xRepair.status = await authFetch("/library/x-text-repair");
+      } catch (err) {
+        xRepair.status = { ok: false, error: (err && err.message) || "the helper didn't answer" };
+      }
+      renderXTextRepair();
+      window.clearTimeout(xRepair.timer);
+      const s = xRepair.status;
+      if (s && s.ok && (s.running || s.counting) && state.activeTab === "settings") {
+        xRepair.timer = window.setTimeout(loadXTextRepair, s.running ? 3000 : 1500);
+      }
+    }
+
+    function xRepairRoughTime(count) {
+      const minutes = Math.ceil((count * X_REPAIR_SEC_PER_POST) / 60);
+      return minutes < 2 ? "about a minute" : minutes < 90 ? `about ${minutes} minutes` : `about ${Math.round(minutes / 60)} hours`;
+    }
+
+    function renderXTextRepair() {
+      const el = (id) => document.getElementById(id);
+      if (!el("x-text-repair")) return;
+      const s = xRepair.status || { ok: true, counting: true };
+      const n = Number(s.candidates) || 0;
+      const articles = Number(s.articles) || 0;
+      const posts = n - articles;
+      const fxOn = s.ok ? Boolean(s.fxtwitter) : xTextFxOn();
+      const live = s.running || s.status === "paused" || s.status === "interrupted";
+      let count;
+      if (s.ok === false) count = `Couldn't check X saves: ${s.error}.`;
+      else if (s.counting) count = "Counting X saves...";
+      else if (!n) count = s.fixed_total ? `No X saves look cut off. Uoink has fixed ${s.fixed_total.toLocaleString()}.` : "No X saves look cut off.";
+      else {
+        const parts = [];
+        if (posts) parts.push(`${posts.toLocaleString()} X save${posts === 1 ? "" : "s"} may be cut off`);
+        if (articles) parts.push(`${articles.toLocaleString()} saved post${articles === 1 ? " only links" : "s only link"} to an X Article`);
+        count = `${parts.join(" and ")}.`;
+      }
+      el("xTextRepairCount").textContent = count;
+      const how = el("xTextRepairHow");
+      const showHow = s.ok !== false && !s.counting && (n > 0 || live);
+      how.classList.toggle("hidden", !showHow);
+      if (showHow) {
+        how.innerHTML = fxOn
+          ? `Start asks X which saves are long posts, then gets each one's full text from FxTwitter, one post every few seconds (${htmlEscape(xRepairRoughTime(n))} for these). Only the post's text changes. Notes, tags, shelves and transcripts stay, and a post that is gone keeps what you saved. Pause any time, it picks up where it left off, even after a restart.`
+          : `Two ways to fix them. Turn on <a href="#settings/x-full-text">Get full long posts and Articles through FxTwitter</a>, then press Start here. Or open each post on X and click Uoink this post in the extension, which saves the whole text from your own page and sends nothing anywhere.`;
+      }
+      const controls = el("xTextRepairControls");
+      controls.classList.toggle("hidden", s.ok === false || s.counting || (!n && !live));
+      const start = el("xTextRepairStart");
+      start.textContent = s.status === "paused" || s.status === "interrupted" ? "Resume" : "Start";
+      start.disabled = xRepair.busy || !fxOn || Boolean(s.running) || (!n && !live);
+      start.title = fxOn ? "" : "Turn on the FxTwitter switch in Capture first.";
+      el("xTextRepairPause").disabled = xRepair.busy || !s.running;
+      el("xTextRepairStop").disabled = xRepair.busy || !live;
+      const progress = el("xTextRepairProgress");
+      const run = s.run || {};
+      let line = "";
+      if (s.running) {
+        const wait = Number(s.backoff_until) * 1000 - Date.now();
+        line = `Checked ${Number(run.checked || 0).toLocaleString()} of ${Number(s.total || 0).toLocaleString()}. Fixed ${Number(run.fixed || 0).toLocaleString()}.`;
+        if (s.current && s.current.title) line += ` Now: ${s.current.title}`;
+        if (wait > 0) line += ` Waiting about ${Math.ceil(wait / 60000)} min because a service asked Uoink to slow down.`;
+      } else if (s.status === "paused") {
+        line = `Paused after ${Number(run.checked || 0).toLocaleString()} of ${Number(s.total || 0).toLocaleString()}.${s.reason ? ` ${s.reason}` : ""}`;
+      } else if (s.status === "interrupted") {
+        line = "The helper restarted mid-run. It picks up again on its own in a moment.";
+      } else if (s.status === "done" || s.status === "stopped") {
+        const bits = [`Fixed ${Number(run.fixed || 0).toLocaleString()}`];
+        if (run.already_full) bits.push(`${Number(run.already_full).toLocaleString()} were already whole`);
+        if (run.gone) bits.push(`${Number(run.gone).toLocaleString()} are gone from X and keep their saved text`);
+        if (run.unchanged || run.failed) bits.push(`${Number((run.unchanged || 0) + (run.failed || 0)).toLocaleString()} can be tried again later`);
+        line = `${s.status === "done" ? "Last run done" : "Stopped"}. ${bits.join(", ")}.`;
+      }
+      progress.textContent = line;
+      progress.classList.toggle("hidden", !line);
+      const sample = Array.isArray(s.sample) ? s.sample : [];
+      const listBox = el("xTextRepairListBox");
+      listBox.classList.toggle("hidden", !sample.length);
+      el("xTextRepairListLabel").textContent = sample.length < n
+        ? `Posts to open and save (first ${sample.length} of ${n.toLocaleString()})`
+        : "Posts to open and save";
+      el("xTextRepairList").innerHTML = sample.map((item) => {
+        const label = item.title || item.url;
+        return `<li><a href="${htmlEscape(item.url)}" target="_blank" rel="noreferrer" title="${htmlEscape(label)}">${htmlEscape(label)}</a>${item.kind === "article" ? "<span>Article</span>" : ""}</li>`;
+      }).join("");
+    }
+
+    async function xTextRepairAction(action) {
+      if (xRepair.busy) return;
+      xRepair.busy = true;
+      renderXTextRepair();
+      try {
+        xRepair.status = await authFetch("/library/x-text-repair", { method: "POST", body: JSON.stringify({ action }) });
+      } catch (err) {
+        const data = (err && err.data) || {};
+        xRepair.status = data.status ? { ...data, ok: true } : { ...(xRepair.status || {}), ok: true };
+        const progress = document.getElementById("xTextRepairProgress");
+        xRepair.busy = false;
+        renderXTextRepair();
+        progress.textContent = data.error || (err && err.message) || "The helper didn't answer.";
+        progress.classList.remove("hidden");
+        return;
+      }
+      xRepair.busy = false;
+      renderXTextRepair();
+      window.clearTimeout(xRepair.timer);
+      xRepair.timer = window.setTimeout(loadXTextRepair, 1500);
+    }
+
+    for (const [id, onClick] of [
+      ["yoinkXCutOffFix", fixXCutOff],
+      ["xTextRepairStart", () => xTextRepairAction("start")],
+      ["xTextRepairPause", () => xTextRepairAction("pause")],
+      ["xTextRepairStop", () => xTextRepairAction("stop")],
+    ]) {
+      const node = document.getElementById(id);
+      if (node && typeof node.addEventListener === "function") node.addEventListener("click", onClick);
     }
 
     // "Channel · YouTube · 12:04 · saved Oct 3, 2026" under the title.
@@ -16416,7 +16666,7 @@
         if (request !== settingsReadVersion) return;
         status.textContent = `Could not load settings: ${settingError(err)} Use Reload to try again.`;
       }
-      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt(), loadSemanticStatus(), loadRelayStatus()]);
+      await Promise.all([loadSettingsMcp(), loadTasteSettings(), loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup(), loadAIPricing(), loadHookCorrections(), loadSkillSystemPrompt(), loadSemanticStatus(), loadRelayStatus(), typeof loadXTextRepair === "function" ? loadXTextRepair() : null]);
       els.helperStatus.textContent = els.helperStatusText ? els.helperStatusText.textContent : "See the helper status in the sidebar.";
     }
 
@@ -18699,6 +18949,7 @@
       writingAttachAllToggle: ["writing_default_attach_all_screenshots", false],
       autoUoinkToggle: ["auto_uoink_enabled", false],
       sourceAvailabilityToggle: ["source_availability_check_enabled", true],
+      fxtwitterToggle: ["fxtwitter_enrichment_enabled", false],
       rediscoverShelvesToggle: ["rediscover_shelves_enabled", true],
       outputFolder: ["output_dir", ""],
       defaultEvidenceSources: ["default_evidence_sources", []],
@@ -18972,6 +19223,7 @@
           loadLibraryAvailability();
         }
         if (field === "rediscover_shelves_enabled") loadRemember(true);
+        if (field === "fxtwitter_enrichment_enabled" && typeof xTextSwitchChanged === "function") xTextSwitchChanged();
         if (field === "writing_show_screenshot_picker") renderWritingScreenshots();
         if (field === "card_image") {
           loadLibrary({ reset: true }).catch(() => {});

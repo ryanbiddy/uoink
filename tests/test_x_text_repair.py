@@ -222,6 +222,7 @@ def test_run_fixes_cut_off_saves_and_keeps_everything_else(lib, net):
     post = sidecar["metadata"]["x_capture"]["posts"][-1]
     assert post["text"].endswith("FULL-TEXT-END") and post["text_completeness"] == "complete"
     assert post["text_repair"]["original_text"] == LONG["syndication"]["text"]
+    assert sidecar["metadata"]["text_cut_off"] is None  # the reader stops offering a fix
     assert json.loads(row["metadata_json"])["x_capture"]["posts"][-1]["text"].endswith("FULL-TEXT-END")
     assert [r["video_id"] for r in idx.search("checker")] == [ids["thread"]]
 
@@ -483,3 +484,36 @@ def test_article_link_post_saves_the_article_as_its_own_item(lib, net):
     assert sidecar["metadata"]["text_cut_off"]["saved_as"].startswith("x-article_")
     job.refresh_scan(wait=True)
     assert job.status()["candidates"] == 0
+
+
+# ---- the reader's prompt and the dashboard block ------------------------------------
+def test_details_name_a_cut_off_save_until_it_is_whole():
+    import server
+    long_cut = {"metadata": {"text_cut_off": {"reason": "long_post",
+                                              "open_url": "https://x.com/example_writer/status/1900000000000000002"}}}
+    assert server._x_cut_off_detail(long_cut) == {
+        "reason": "long_post", "open_url": "https://x.com/example_writer/status/1900000000000000002"}
+    article = {"metadata": {"text_cut_off": {"reason": "article", "title": "Build notes",
+                                             "open_url": "https://x.com/i/article/1900000000000000777"}}}
+    assert server._x_cut_off_detail(article)["title"] == "Build notes"
+    saved = {"metadata": {"text_cut_off": dict(article["metadata"]["text_cut_off"], saved_as="x-article_1")}}
+    assert server._x_cut_off_detail(saved) is None
+    assert server._x_cut_off_detail({"metadata": {"text_cut_off": {"reason": "long_post",
+                                                                  "open_url": "javascript:alert(1)"}}}) is None
+    video = {"url": "https://x.com/example_maker/status/1900000000000000003",
+             "x_text": {"long_post": True, "text_completeness": "truncated"}}
+    assert server._x_cut_off_detail(video)["open_url"] == "https://x.com/i/status/1900000000000000003"
+    video["x_text"]["text_completeness"] = "complete"
+    assert server._x_cut_off_detail(video) is None
+    assert server._x_cut_off_detail({"metadata": {"text_cut_off": None}}) is None
+
+
+def test_dashboard_block_and_prompt_js():
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not available")
+    script = Path(__file__).parent / "js" / "x_text_repair_ui_test.mjs"
+    proc = subprocess.run([node, str(script)], capture_output=True, text=True, encoding="utf-8", timeout=120)
+    assert proc.returncode == 0, proc.stdout + proc.stderr

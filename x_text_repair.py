@@ -273,6 +273,12 @@ def rewrite_video(row: dict, record: dict, *, index=None, lock=None) -> dict:
             metadata["description"] = new_body
             metadata["x_text"] = text_marker(record)
             _write_json(meta_path, metadata)
+        sidecar_path = Path(row.get("sidecar_path") or meta_path)
+        if sidecar_path != meta_path:  # the reader's copy of the marker
+            sidecar = _read_json(sidecar_path)
+            if isinstance(sidecar, dict):
+                sidecar["x_text"] = text_marker(record)
+                _write_json(sidecar_path, sidecar)
     if index is not None:
         _heal_bindings(index, row["video_id"])
     if outcome == "already_full":
@@ -346,12 +352,18 @@ def rewrite_thread(row: dict, records: dict, *, index=None, lock=None) -> dict:
             fixed += 1
         if not fixed:
             raise RewriteSkipped("already_full", "Saved text is already whole.")
+        whole = all(isinstance(p, dict) and p.get("text_completeness") == "complete" for p in posts)
+        cut = sidecar["metadata"].get("text_cut_off")
+        if whole and isinstance(cut, dict) and cut.get("reason") == "long_post":
+            sidecar["metadata"]["text_cut_off"] = None  # the reader stops asking
         try:
             row_meta = json.loads(row.get("metadata_json") or "{}")
         except (TypeError, ValueError):
             row_meta = {}
         if isinstance(row_meta, dict) and isinstance(row_meta.get("x_capture"), dict):
             row_meta["x_capture"]["posts"] = posts
+            if "text_cut_off" in row_meta:
+                row_meta["text_cut_off"] = sidecar["metadata"].get("text_cut_off")
             metadata_json = json.dumps(row_meta, ensure_ascii=False)
         else:
             metadata_json = None
