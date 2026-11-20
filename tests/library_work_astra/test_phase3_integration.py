@@ -57,6 +57,8 @@ def server_parts(rig):
         _get_index=lambda: rig.idx, maybe_toast=lambda *a, **k: None,
         _heartbeat_note_poll=lambda *a, **k: None,
         _heartbeat_note_ingest=lambda: None, _heartbeat_note_tick=lambda **k: None,
+        # 3.18 podcast publication passes the shelf router; this keeps 3.17's shelf.
+        _route_topic=lambda metadata, **k: 'Uncategorized',
     )
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), 'exec'), namespace)
     namespace['launches'] = launches
