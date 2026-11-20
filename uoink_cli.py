@@ -34,6 +34,8 @@ HELP_DESCRIPTION = (
 )
 
 TOOLSETS = ("full", "core", "search", "research")
+BACKFILL_ACTIONS = ("status", "start", "pause", "resume")
+BACKFILL_ROUTE = "/library/transcript-backfill"
 
 
 class UsageError(ValueError):
@@ -107,6 +109,15 @@ def parser():
     note.add_argument("text", help="the note text")
     note.add_argument("--title", help="a title for the note")
     command("status", help="show the version, data folder and whether the helper is running")
+    backfill = command("backfill", help="transcribe saves that have video but no words (runs in the helper)",
+                       description="Find saves that have video but no transcript and transcribe them with "
+                                   "the local model, one at a time, longest first. It runs inside the "
+                                   "helper, so it keeps going after this command ends and pauses while "
+                                   "you capture. Nothing leaves this computer except fetching media again "
+                                   "from where it was saved.")
+    backfill.add_argument("action", choices=BACKFILL_ACTIONS, help="status, start, pause or resume")
+    backfill.add_argument("--order", choices=("longest", "newest"),
+                          help="with start: longest first (default) or newest saved first")
     connect = command("connect", help="print local connection recipes; never writes client files")
     connect.add_argument("client", nargs="?", help="client name; use --list to see them")
     connect.add_argument("--list", action="store_true", help="list the supported clients")
@@ -228,6 +239,107 @@ def friendly_call(ns, server):
         raise UsageError(route.get("note") or "unsupported capture URL")
     name, key = CAPTURE_TOOLS[route["source"]]
     return name, {key: route["canonical"]}
+
+
+def backfill_command(ns, server, *, running=None):
+    """Ask the running helper; the backfill lives there, not in this process."""
+    import urllib.error
+    import urllib.request
+    if ns.order and ns.action != "start":
+        raise UsageError("--order goes with start")
+    if running is None:
+        import uoink_agent_runtime as runtime
+        running = runtime.helper_running(server)
+    if not running:
+        return {"ok": False, "error": "The Uoink helper is not running. Open Uoink, then try again."}
+    path = BACKFILL_ROUTE if ns.action == "status" else f"{BACKFILL_ROUTE}/{ns.action}"
+    body = {"order": ns.order} if ns.order else {}
+    request = urllib.request.Request(
+        f"http://{server.HOST}:{server.PORT}{path}",
+        data=None if ns.action == "status" else json.dumps(body).encode("utf-8"),
+        headers={"X-Uoink-Token": server._current_token(),
+                 **({} if ns.action == "status" else {"Content-Type": "application/json"})},
+        method="GET" if ns.action == "status" else "POST")
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            raw = response.read()
+    except urllib.error.HTTPError as exc:
+        raw = exc.read()
+        try:
+            payload = json.loads(raw.decode("utf-8", errors="replace"))
+        except ValueError:
+            payload = None
+        if isinstance(payload, dict):
+            return payload
+        return {"ok": False, "error": f"The helper answered HTTP {exc.code}."}
+    except (OSError, urllib.error.URLError):
+        return {"ok": False, "error": "Could not reach the Uoink helper. Open Uoink, then try again."}
+    try:
+        payload = json.loads(raw.decode("utf-8", errors="replace"))
+    except ValueError:
+        return {"ok": False, "error": "The helper sent an answer this command could not read."}
+    return payload if isinstance(payload, dict) else {"ok": False, "error": "unexpected helper answer"}
+
+
+def text_duration(seconds):
+    seconds = int(seconds or 0)
+    if seconds < 90:
+        return "about a minute"
+    minutes = round(seconds / 60)
+    if minutes < 60:
+        return f"about {minutes} min"
+    hours, minutes = divmod(minutes, 60)
+    return f"about {hours} h {minutes} min" if minutes else f"about {hours} h"
+
+
+def backfill_text(payload):
+    def plural(n, one, many=None):
+        return f"{n} {one if n == 1 else (many or one + 's')}"
+    count, progress = int(payload.get("count") or 0), payload.get("progress") or {}
+    state = payload.get("state")
+    lines = []
+    if count:
+        lines.append(f"{plural(count, 'save has', 'saves have')} video but no transcript "
+                     f"({payload.get('on_disk', 0)} on this computer, "
+                     f"{payload.get('download', 0)} to fetch again).")
+    else:
+        lines.append("Every save with video has its words.")
+    if state == "running":
+        lines.append(f"Running: {progress.get('done', 0)} done, {progress.get('left', 0)} left, "
+                     f"{text_duration(progress.get('eta_seconds'))} to go.")
+    elif state == "paused":
+        lines.append("Paused" + (" while it finishes this save." if payload.get("pausing") else ".")
+                     + f" {progress.get('done', 0)} done, {progress.get('left', 0)} left. "
+                     "Run 'uoink backfill resume' to carry on.")
+    elif state == "done" and progress.get("done"):
+        lines.append(f"Last run: {progress.get('transcribed', 0)} transcribed, "
+                     f"{progress.get('no_words', 0)} had no speech, {progress.get('gone', 0)} gone, "
+                     f"{progress.get('failed', 0)} did not work.")
+    current = payload.get("current")
+    if isinstance(current, dict) and current.get("title"):
+        share = current.get("fraction")
+        lines.append(f"Now: {terminal_label(current['title'])[:120]}"
+                     + (f" ({int(share * 100)}%)" if isinstance(share, (int, float)) else ""))
+        if current.get("waiting_for_capture"):
+            lines.append("Waiting while your capture finishes.")
+    for host, wait in (payload.get("backoff") or {}).items():
+        site = {"youtube": "YouTube", "x": "X"}.get(host, "One site")
+        lines.append(f"{site} asked Uoink to slow down. Trying again in "
+                     f"{text_duration(wait.get('seconds_left')).replace('about ', '')}.")
+    if payload.get("message"):
+        lines.append(terminal_label(payload["message"]))
+    if payload.get("gone"):
+        lines.append(f"{plural(int(payload['gone']), 'save')} can't be transcribed because "
+                     "the video is gone and no copy is on this computer.")
+    if payload.get("half_capture_count"):
+        lines.append(f"{plural(int(payload['half_capture_count']), 'capture')} did not finish. "
+                     "Finish them in Uoink under Settings, Library health.")
+    if payload.get("model_ready") is False and payload.get("model_message"):
+        lines.append(terminal_label(payload["model_message"]))
+    if state in ("idle", "done") and count:
+        lines.append("Run 'uoink backfill start' to transcribe them. It uses this computer's CPU "
+                     "and may fetch videos again.")
+    return "\n".join(lines)
 
 
 def error_text(payload):
@@ -506,6 +618,8 @@ def human(payload, *, index=None):
         return "\n\n".join(lines)
     if payload.get("ok") is not True:
         return error_text(payload)
+    if "half_capture_count" in payload and "progress" in payload:
+        return backfill_text(payload)
     if "tools" in payload:
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
     if "data_dir" in payload:
@@ -752,6 +866,8 @@ def main(argv=None):
                     payload["capabilities"] = server._platform.platform_capabilities()
                 if sys.platform.startswith("linux"):
                     payload["reliability_model"] = server._reliability_model_status()
+            elif ns.command == "backfill":
+                payload = backfill_command(ns, server)
             else:
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)
                 existing_threads = set(threading.enumerate())

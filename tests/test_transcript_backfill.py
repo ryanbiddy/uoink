@@ -704,3 +704,82 @@ def test_http_routes_and_token_gate(lib):
     finally:
         httpd.shutdown()
         httpd.server_close()
+
+
+# ---- CLI: uoink backfill status|start|pause|resume --------------------------
+def test_cli_backfill_talks_to_the_running_helper(lib, capsys):
+    import argparse
+    from http.server import ThreadingHTTPServer
+    import uoink_cli as cli
+    lib.mp.setattr(server.urllib.request, "urlopen", REAL_URLOPEN)
+    lib.mp.setattr(server.socket, "create_connection", REAL_CREATE_CONNECTION)
+    lib.add_video("via-cli", url=_x(23), video_id="1800000000000000023", title="From the terminal",
+                  duration=90, saved_at="2026-07-01T00:00:00", media=True)
+    httpd = ThreadingHTTPServer(("127.0.0.1", server.PORT), server.Handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+
+    def run(action, order=None):
+        ns = argparse.Namespace(action=action, order=order)
+        return cli.backfill_command(ns, server, running=True)
+    try:
+        status = run("status")
+        assert status["ok"] is True and status["count"] == 1 and status["state"] == "idle"
+        text = cli.human(status)
+        assert text.startswith("1 save has video but no transcript (1 on this computer, 0 to fetch again).")
+        assert "uoink backfill start" in text and "CPU" in text
+        started = run("start", "newest")
+        assert started["ok"] is True and started["order"] == "newest"
+        _wait(lambda: lib.finished(), message="cli run")
+        done = run("status")
+        assert done["count"] == 0 and done["state"] == "done"
+        assert cli.human(done).startswith("Every save with video has its words.\nLast run: 1 transcribed")
+        assert run("pause")["ok"] is True
+        resumed = run("resume")
+        assert resumed["ok"] is True and resumed["state"] == "done", "resume after a finished run is a no-op"
+        assert lib.asr_calls == ["via-cli"]
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_cli_backfill_without_the_helper_says_what_to_do(monkeypatch, capsys):
+    import uoink_agent_runtime as runtime
+    import uoink_cli as cli
+    monkeypatch.setattr(runtime, "helper_running", lambda backend: False)
+    monkeypatch.setattr(server.urllib.request, "urlopen",
+                        Mock(side_effect=AssertionError("no HTTP when the helper is off")))
+    assert cli.main(["backfill", "status"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out == {"ok": False, "error": "The Uoink helper is not running. Open Uoink, then try again."}
+    assert cli.main(["backfill", "pause", "--order", "newest"]) == 2
+    assert "--order goes with start" in capsys.readouterr().err
+    assert cli.main(["backfill", "sideways"]) == 2
+    assert "backfill" in cli.parser().format_help()
+
+
+def test_cli_backfill_text_for_a_big_running_library():
+    import uoink_cli as cli
+    text = cli.human({
+        "ok": True, "state": "running", "count": 512, "on_disk": 140, "download": 372, "gone": 19,
+        "no_words": 4, "half_capture_count": 2, "pausing": False, "order": "longest", "message": None,
+        "progress": {"done": 12, "left": 500, "total": 512, "eta_seconds": 11400, "transcribed": 10,
+                     "no_words": 1, "gone": 1, "failed": 0},
+        "current": {"key": "a", "title": "A very long talk about making things", "fraction": 0.4,
+                    "waiting_for_capture": True},
+        "backoff": {"x": {"seconds_left": 1080, "reason": "rate_limited"}}, "model_ready": True,
+    })
+    assert text.splitlines() == [
+        "512 saves have video but no transcript (140 on this computer, 372 to fetch again).",
+        "Running: 12 done, 500 left, about 3 h 10 min to go.",
+        "Now: A very long talk about making things (40%)",
+        "Waiting while your capture finishes.",
+        "X asked Uoink to slow down. Trying again in 18 min.",
+        "19 saves can't be transcribed because the video is gone and no copy is on this computer.",
+        "2 captures did not finish. Finish them in Uoink under Settings, Library health.",
+    ]
+
+
+def test_repo_launchers_route_backfill_to_the_cli():
+    root = Path(__file__).resolve().parent.parent
+    assert "|status|backfill|" in (root / "uoink").read_text(encoding="utf-8")
+    assert " status backfill " in (root / "uoink.cmd").read_text(encoding="utf-8")
