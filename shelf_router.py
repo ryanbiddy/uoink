@@ -897,16 +897,26 @@ def move_log_path(data_root: Path) -> Path:
     return Path(data_root) / "shelf-moves.json"
 
 
-def record_batch(data_root: Path, moves: list[dict], *, label: str = "") -> dict:
+def record_batch(data_root: Path, moves: list[dict], *, label: str = "",
+                 append_to: str | None = None) -> dict | None:
     """Remember one batch of moves so it can be undone. ``moves`` are
-    {video_id, from, to}."""
-    batch = {"id": "mv_" + uuid.uuid4().hex[:12], "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-             "label": str(label or "")[:80], "moves": moves, "undone": False}
+    {video_id, from, to}. ``append_to`` adds them to the newest batch when
+    it has that id and is not undone (a big move sent in several requests
+    stays one undo); otherwise None comes back and nothing is written."""
     with _lock:
         path = move_log_path(data_root)
         data = _read_json(path, {})
         batches = [b for b in data.get("batches") or [] if isinstance(b, dict)]
-        batches.append(batch)
+        if append_to:
+            batch = batches[-1] if batches else None
+            if (not batch or batch.get("id") != append_to or batch.get("undone")
+                    or len(batch.get("moves") or []) + len(moves) > MAX_MOVES):
+                return None
+            batch["moves"] = list(batch.get("moves") or []) + list(moves)
+        else:
+            batch = {"id": "mv_" + uuid.uuid4().hex[:12], "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                     "label": str(label or "")[:80], "moves": moves, "undone": False}
+            batches.append(batch)
         _write_json(path, {"version": 1, "batches": batches[-MOVE_LOG_BATCHES:]})
     return batch
 

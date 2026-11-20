@@ -5117,14 +5117,22 @@ def _reroute_with_transcript(topic: str, metadata: dict, entries, *, url: str,
     return decision.shelf
 
 
-def _reshelve(moves, *, record: bool = True, label: str = "") -> dict:
+def _reshelve(moves, *, record: bool = True, label: str = "", append_to: str | None = None) -> dict:
     """Move saves to shelves the way a manual re-shelve does: the index row
     (and its search entry), the sidecar's topic and the note's Topic line all
-    change together. Folders stay where they are. Each batch can be undone."""
+    change together. Folders stay where they are. Each batch can be undone;
+    append_to joins the newest batch, for a big move sent in parts."""
     import shelf_router
     idx = _get_index()
     done, skipped = [], []
     with shelf_router._lock:
+        if append_to:
+            log_batches = shelf_router.batches(DATA_ROOT)
+            last = log_batches[-1] if log_batches else None
+            if (not last or last.get("id") != append_to or last.get("undone")
+                    or len(last.get("moves") or []) + len(moves) > shelf_router.MAX_MOVES):
+                return {"ok": False, "code": "stale_batch",
+                        "error": "That move changed since it started. Check the shelves and try again."}
         for video_id, shelf in moves:
             name = shelf_router.clean_shelf_name(shelf)
             row = idx.get_yoink(video_id) if isinstance(video_id, str) and video_id else None
@@ -5145,7 +5153,11 @@ def _reshelve(moves, *, record: bool = True, label: str = "") -> dict:
                 log.warning("reshelve %s: files not updated (%s)", video_id, exc)
             done.append({"video_id": video_id, "from": previous, "to": name})
         _shelf_generation[0] += 1
-        batch = shelf_router.record_batch(DATA_ROOT, done, label=label) if record and done else None
+        batch = None
+        if record and append_to:
+            batch = shelf_router.record_batch(DATA_ROOT, done, label=label, append_to=append_to)
+        elif record and done:
+            batch = shelf_router.record_batch(DATA_ROOT, done, label=label)
     return {"ok": True, "moved": len(done), "skipped": skipped, "moves": done,
             "batch_id": batch["id"] if batch else None, "undo": shelf_router.batch_summary(batch)}
 
@@ -18604,7 +18616,9 @@ class Handler(BaseHTTPRequestHandler):
         """POST /library/shelves/apply {moves: [{video_id, shelf}]},
         /library/shelves/move {video_ids: [...], shelf} and
         /library/shelves/undo {batch_id?}. Every apply or move is one undo
-        batch. Token gate cleared by do_POST."""
+        batch. A POST body is at most 64 KB (about 1,500 moves), so a bigger
+        move comes in parts: later parts pass append_to=<batch_id> and join
+        the same undo. Token gate cleared by do_POST."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False, "error": "json object required"})
         if bare == "/library/shelves/undo":
@@ -18635,12 +18649,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False,
                 "error": "shelf must be a name of 1 to 64 characters that also works as a folder name"})
+        append_to = body.get("append_to")
+        if append_to is not None and not (isinstance(append_to, str) and append_to):
+            return self._send_json(400, {"ok": False, "error": "append_to must be a batch id"})
         try:
-            result = _reshelve(moves, label=str(body.get("label") or label))
+            result = _reshelve(moves, label=str(body.get("label") or label), append_to=append_to)
         except Exception:
             log.exception("%s failed", bare)
             return self._send_json(500, {"ok": False, "error": "Couldn't move those saves."})
-        return self._send_json(200, result)
+        return self._send_json(200 if result.get("ok") else 409, result)
 
     def _handle_facets_classify(self, body: dict):
         """Persist an agent-classified facet set + tags for a video. Model-
@@ -18677,7 +18694,7 @@ class Handler(BaseHTTPRequestHandler):
                         meta.get("duration_seconds") or meta.get("duration"))
                     if lb:
                         clean["length_bucket"] = lb
-        if clean.get("topic"):
+        if clean.get("topic") and _clean_shelf(clean["topic"]) == clean["topic"]:
             # A topic is a shelf: keep the search row, sidecar and note in step.
             try:
                 _reshelve([(video_id, clean["topic"])], record=False)
