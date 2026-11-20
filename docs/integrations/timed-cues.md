@@ -200,9 +200,16 @@ as it is for any saved podcast episode.
 
 Episodes go one at a time through Uoink's normal download queue, after
 anything the user saves themselves. While YouTube's bot-check cooldown is on,
-or a queued episode is waiting out a bot check or a 429, the run waits. A run
-keeps going after the helper restarts, and an episode already in the library
-is skipped, never saved twice.
+or a queued episode is waiting out a bot check or a 429, the run waits. A
+podcast host that refuses (a 429, a 5xx, a timeout) makes the run wait 2
+minutes, then twice as long each time up to an hour, and five host failures
+in a row pause it with the reason. A run keeps going after the helper
+restarts. An episode already in the library is skipped, never saved twice
+and never replaced, and one the user removed is left out.
+
+Only public `http(s)` feed addresses are accepted: loopback, private and
+link-local hosts and credentials in the link are refused before anything is
+stored, and the fetch checks the resolved address again.
 
 ### Start a run
 
@@ -279,15 +286,16 @@ Then `POST /shows/show_625ad0293689/start` with `{"asr": false}`.
 ```
 
 Fields left out above are the same as in the `ready` example.
-`?episodes=1` adds every episode with its state and reason. A saved episode's
+`?episodes=1` adds every episode with its state and reason
+(`&episodes_limit=8` for only the first eight). A saved episode's
 `video_id` is its library id, so `GET /api/cues/v1/items/<video_id>` returns
 its cues once it is `done`.
 
-Run states: `listing`, `ready`, `running`, `waiting` (YouTube asked Uoink to
-slow down, with `reason` `bot_check` or `rate_limited` and `wait_until`),
-`paused` (by the user, or with a `reason` such as transcription not being set
-up), `done`, `cancelled`, `failed` (the source could not be listed, with
-`reason`).
+Run states: `listing`, `ready`, `running`, `waiting` (with `wait_until` and
+`reason` `bot_check` or `rate_limited` from YouTube, or `host_busy` from a
+podcast host), `paused` (by the user, or with a `reason` such as
+transcription not being set up or the host failing five in a row), `done`,
+`cancelled`, `failed` (the source could not be listed, with `reason`).
 
 Other actions, all `POST` with a JSON body (`{}` is fine):
 
@@ -295,7 +303,7 @@ Other actions, all `POST` with a JSON body (`{}` is fine):
 |---|---|
 | `/shows/<id>/pause` | starts no more episodes (the one in flight finishes) |
 | `/shows/<id>/resume` | carries on |
-| `/shows/<id>/cancel` | stops the run and removes its queued episode from the download queue |
+| `/shows/<id>/cancel` | stops the run: a queued episode leaves the download queue and a podcast download stops before transcription. An episode already publishing, or a podcast transcription already queued, finishes and is recorded (`current` shows it), and nothing starts after it |
 | `/shows/<id>/retry-failed` | queues the failed episodes again, optionally with `{"asr": true}` |
 | `/shows/<id>/dismiss` | removes a finished, cancelled or never-started run from the list |
 

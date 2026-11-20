@@ -18846,8 +18846,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_shows_get(self, bare: str):
         """GET /shows lists every whole-show run, newest first, with up to
-        50 failures each. GET /shows/<id> is one run; ?episodes=1 adds every
-        episode."""
+        50 failures each. GET /shows/<id> is one run; ?episodes=1 adds its
+        episodes, the first N with &episodes_limit=N."""
         try:
             if bare.rstrip("/") == "/shows":
                 runs = [show_capture.view(job, failures_limit=50)
@@ -18855,8 +18855,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(200, {"ok": True, "runs": runs})
             query = parse_qs(urlparse(self.path).query)
             every = (query.get("episodes") or [""])[0] in ("1", "true")
+            raw_limit = (query.get("episodes_limit") or [""])[0]
+            if raw_limit and not (raw_limit.isdigit() and 1 <= int(raw_limit) <= show_capture.MAX_EPISODES):
+                raise show_capture.ShowCaptureError(
+                    f"episodes_limit is 1 to {show_capture.MAX_EPISODES}.", "invalid")
             job = show_capture.load(DATA_ROOT, bare[len("/shows/"):].strip("/"))
-            return self._send_json(200, {"ok": True, "run": show_capture.view(job, episodes=every)})
+            return self._send_json(200, {"ok": True, "run": show_capture.view(
+                job, episodes=every, episodes_limit=int(raw_limit) if raw_limit else None)})
         except show_capture.ShowCaptureError as error:
             return self._send_show_error(error)
         except Exception:

@@ -13452,8 +13452,9 @@
     // Save a whole show (show_capture.py on the helper). The dialog lists a
     // source and shows the cost; the Sources card lists runs with progress,
     // pause, resume, cancel and the failures with their reasons.
-    const showCaptureState = { run: null, seq: 0, opener: null, runs: [], last: 0 };
+    const showCaptureState = { run: null, seq: 0, opener: null, runs: [], last: 0, loading: false, again: false, visible: false };
     const SHOW_ACTIVE_STATES = ["listing", "running", "waiting"];
+    const SHOW_PREVIEW_EPISODES = 8;
 
     function showHoursText(hours) {
       const h = Number(hours) || 0;
@@ -13511,7 +13512,13 @@
       const failed = Number(c.failed) || 0;
       const skipped = Number(c.skipped) || 0;
       const toSave = Math.max(0, total - skipped);
-      const left = run && run.estimate ? showHoursText(run.estimate.hours) : "";
+      const e = (run && run.estimate) || {};
+      const left = run && run.estimate ? showHoursText(e.hours) : "";
+      // A video run with local transcription on can take its ASR time too.
+      const asrLeft = run && run.asr && run.kind !== "podcast_feed" && Number(e.asr_hours_at_most) > 0
+        ? ` Up to ${showHoursText((Number(e.hours) || 0) + Number(e.asr_hours_at_most))} if videos need transcribing here.`
+        : "";
+      const finishing = run && run.current ? " The episode in progress finishes first." : "";
       switch (run && run.state) {
         case "listing":
           return { label: "Listing episodes", note: "Reading every episode. Nothing is saved yet." };
@@ -13522,15 +13529,19 @@
             label: `${done.toLocaleString()} of ${toSave.toLocaleString()} saved`,
             note: run.reason === "queue_busy"
               ? "Waiting for your other saves to finish first."
-              : `${left.charAt(0).toUpperCase()}${left.slice(1)} left.${failed ? ` ${showCount(failed, "episode")} failed.` : ""}`,
+              : `${left.charAt(0).toUpperCase()}${left.slice(1)} left.${asrLeft}${failed ? ` ${showCount(failed, "episode")} failed.` : ""}`,
           };
         case "waiting": {
           const when = run.wait_until ? fmtAge(run.wait_until) : "";
+          const again = when ? `Trying again ${when}.` : "Trying again soon.";
+          if (run.reason === "host_busy") {
+            return { label: "Waiting on the show's host", note: `The show's host is busy or not answering. ${again}` };
+          }
           const why = run.reason === "rate_limited" ? "YouTube is busy right now." : "YouTube asked Uoink to slow down.";
-          return { label: "Waiting on YouTube", note: `${why} ${when ? `Trying again ${when}.` : "Trying again soon."}` };
+          return { label: "Waiting on YouTube", note: `${why} ${again}` };
         }
         case "paused":
-          return { label: "Paused", note: run.reason || `${done.toLocaleString()} of ${toSave.toLocaleString()} saved. Resume to keep going.` };
+          return { label: "Paused", note: (run.reason || `${done.toLocaleString()} of ${toSave.toLocaleString()} saved. Resume to keep going.`) + finishing };
         case "done":
           return {
             label: "Done",
@@ -13539,7 +13550,7 @@
               (skipped ? ` ${Number(skipped).toLocaleString()} already in your library or left out.` : ""),
           };
         case "cancelled":
-          return { label: "Cancelled", note: `${showCount(done, "episode")} saved before you cancelled.` };
+          return { label: "Cancelled", note: `${showCount(done, "episode")} saved before you cancelled.${finishing}` };
         case "failed":
           return { label: "Couldn't list", note: (run && run.reason) || "Uoink couldn't list that source." };
         default:
@@ -13601,22 +13612,36 @@
     }
 
     async function loadShowRuns() {
+      // One request at a time: a slow helper never stacks up polls. A refresh
+      // asked for meanwhile (after an action) runs once when this one lands.
+      if (showCaptureState.loading) { showCaptureState.again = true; return; }
+      showCaptureState.loading = true;
       showCaptureState.last = Date.now();
       try {
         const data = await authFetch("/shows");
         renderShowRuns(data.runs);
       } catch (_) {
         // The Sources card keeps its last list. The next poll tries again.
+      } finally {
+        showCaptureState.loading = false;
+        if (showCaptureState.again) { showCaptureState.again = false; loadShowRuns(); }
       }
     }
 
-    function pollShowRuns() {
-      if (document.hidden) return;
+    function showCardVisible() {
       const card = document.getElementById("showCaptureCard");
-      if (!card || card.offsetParent === null) return;
-      const active = showCaptureState.runs.some((r) => SHOW_ACTIVE_STATES.includes(r.state));
-      if (!active && Date.now() - showCaptureState.last < 30000) return;
-      loadShowRuns();
+      return Boolean(card && card.offsetParent !== null) && !document.hidden;
+    }
+
+    // Polls only while a run is moving (or an episode is still finishing).
+    // Actions, closing the dialog and coming back to the tab refresh it.
+    function pollShowRuns() {
+      const visible = showCardVisible();
+      const cameBack = visible && !showCaptureState.visible;
+      showCaptureState.visible = visible;
+      if (!visible) return;
+      const active = showCaptureState.runs.some((r) => SHOW_ACTIVE_STATES.includes(r.state) || r.current);
+      if (active || cameBack) loadShowRuns();
     }
 
     async function showRunAction(id, action) {
@@ -13654,6 +13679,11 @@
       if (run && run.state === "ready") {
         showCaptureEl("showCaptureInput").value = run.url || "";
         loadShowPreview(run.id, ++showCaptureState.seq);
+      } else {
+        // A fresh form: never the last run's preview or its Start button.
+        ++showCaptureState.seq;
+        showCaptureEl("showCaptureInput").value = "";
+        resetShowCapture("Paste a link to list every episode. Nothing is saved yet.");
       }
       focusFirstIn(modal, showCaptureEl("showCaptureInput"));
     }
@@ -13677,9 +13707,10 @@
       const estimate = showCaptureEl("showCaptureEstimate");
       estimate.innerHTML = showEstimateLines(run).map((line) => `<p>${htmlEscape(line)}</p>`).join("");
       estimate.classList.remove("hidden");
-      const episodes = Array.isArray(run.episodes) ? run.episodes : [];
-      const shown = episodes.slice(0, 8).map((e) => `<li><span title="${htmlEscape(e.title || e.url || "")}">${htmlEscape(e.title || e.url || "Untitled")}</span>${e.state === "skipped" ? `<span class="list-import-chip">${htmlEscape(e.reason === "Already in your library." ? "in your library" : "left out")}</span>` : ""}</li>`);
-      if (episodes.length > 8) shown.push(`<li><span>and ${(episodes.length - 8).toLocaleString()} more</span></li>`);
+      const episodes = (Array.isArray(run.episodes) ? run.episodes : []).slice(0, SHOW_PREVIEW_EPISODES);
+      const shown = episodes.map((e) => `<li><span title="${htmlEscape(e.title || e.url || "")}">${htmlEscape(e.title || e.url || "Untitled")}</span>${e.state === "skipped" ? `<span class="list-import-chip">${htmlEscape(e.reason === "Already in your library." ? "in your library" : "left out")}</span>` : ""}</li>`);
+      const rest = (Number((run.counts || {}).total) || 0) - episodes.length;
+      if (rest > 0) shown.push(`<li><span>and ${rest.toLocaleString()} more</span></li>`);
       showCaptureEl("showCapturePreview").innerHTML = shown.join("");
       const podcast = run.kind === "podcast_feed";
       const asr = showCaptureEl("showCaptureAsr");
@@ -13697,7 +13728,7 @@
       while (seq === showCaptureState.seq) {
         let data;
         try {
-          data = await authFetch(`/shows/${encodeURIComponent(id)}?episodes=1`);
+          data = await authFetch(`/shows/${encodeURIComponent(id)}?episodes=1&episodes_limit=${SHOW_PREVIEW_EPISODES}`);
         } catch (err) {
           if (seq === showCaptureState.seq) resetShowCapture(err.message || "Uoink couldn't read that show.");
           return;
@@ -13772,6 +13803,7 @@
         const button = event.target.closest("[data-show-action]");
         if (button) showRunAction(button.dataset.showId, button.dataset.showAction);
       });
+      document.addEventListener("visibilitychange", () => { if (showCardVisible()) loadShowRuns(); });
       loadShowRuns();
     }
 

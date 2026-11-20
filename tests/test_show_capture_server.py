@@ -559,3 +559,14 @@ def test_routes(http, helper):
     assert http("POST", "/shows/preview", {"text": 5})[0] == 400
     assert http("GET", "/shows", token=False)[0] in (401, 403)
     assert http("POST", "/shows/preview", {"text": LINKS}, token=False)[0] in (401, 403)
+
+
+def test_the_preview_can_ask_for_only_the_first_episodes(http, helper):
+    run_id = http("POST", "/shows/preview", {"text": LINKS})[1]["run"]["id"]
+    status, body = http("GET", f"/shows/{run_id}?episodes=1&episodes_limit=2")
+    assert status == 200
+    assert [e["video_id"] for e in body["run"]["episodes"]] == [vid(0), vid(1)]
+    assert body["run"]["counts"]["total"] == 4                 # the dashboard's "and N more"
+    for bad in ("0", "-1", "two", str(sc.MAX_EPISODES + 1)):
+        status, body = http("GET", f"/shows/{run_id}?episodes=1&episodes_limit={bad}")
+        assert status == 400 and body["code"] == "invalid", bad

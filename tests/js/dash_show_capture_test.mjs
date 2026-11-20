@@ -133,5 +133,99 @@ check(/\.show-run-failures li span \+ span \{[^}]*overflow-wrap: anywhere/.test(
 check(PAGE.includes("wireShowCapture();"), "the dashboard wires the show card");
 check(PAGE.includes('authFetch("/shows/preview"') && PAGE.includes('authFetch("/shows")'), "the dialog talks to the helper routes");
 
+// What a run says while an episode finishes, a busy podcast host and ASR time.
+const finishing = { ...base, current: { key: "pod:1", title: "Tidepool 4", state: "running" } };
+check(ctx.showRunStatus({ ...finishing, state: "cancelled" }).note === "40 episodes saved before you cancelled. The episode in progress finishes first.",
+  "a cancelled run says the episode in progress finishes", ctx.showRunStatus({ ...finishing, state: "cancelled" }).note);
+check(ctx.showRunStatus({ ...finishing, state: "paused" }).note.endsWith("Resume to keep going. The episode in progress finishes first."),
+  "a paused run says the same", ctx.showRunStatus({ ...finishing, state: "paused" }).note);
+check(!ctx.showRunStatus({ ...base, state: "cancelled", current: null }).note.includes("in progress"), "nothing in flight, nothing to finish");
+const host = ctx.showRunStatus({ ...base, kind: "podcast_feed", state: "waiting", reason: "host_busy", wait_until: "2026-11-20T12:04:00Z" });
+check(host.label === "Waiting on the show's host" && host.note === "The show's host is busy or not answering. Trying again in 4 minutes.",
+  "a busy podcast host is named, not YouTube", host);
+const asrRun = ctx.showRunStatus({ ...base, state: "running", asr: true, counts: { ...base.counts, failed: 0 },
+  estimate: { ...base.estimate, hours: 3.4, asr_hours_at_most: 30 } });
+check(asrRun.note === "About 3.4 hours left. Up to about 33.4 hours if videos need transcribing here.",
+  "a run with local transcription on counts its ASR time", asrRun.note);
+check(!ctx.showRunStatus({ ...base, state: "running", kind: "podcast_feed", asr: true,
+  estimate: { ...base.estimate, asr_hours_at_most: 0 } }).note.includes("Up to"), "podcast time already includes transcription");
+check([host.note, asrRun.note].every((l) => !BANNED.test(l)), "the new copy is plain");
+
+// The dialog, the preview and polling, against a small fake page.
+function grabAny(name) {
+  const fn = grab(name);
+  return PAGE.slice(PAGE.indexOf(`function ${name}(`) - 6, PAGE.indexOf(`function ${name}(`)) === "async " ? `async ${fn}` : fn;
+}
+const els = {};
+function fakeEl(id) {
+  const classes = new Set();
+  return { id, value: "", textContent: "", innerHTML: "", disabled: false, checked: false, offsetParent: {},
+    classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c), contains: (c) => classes.has(c) },
+    setAttribute() {}, removeAttribute() {}, addEventListener() {}, querySelectorAll: () => [] };
+}
+const fakeDoc = { hidden: false, activeElement: null, getElementById: (id) => (els[id] ||= fakeEl(id)), addEventListener() {} };
+const fetched = [];
+let answer = null;
+const page = vm.createContext({ Date: FakeDate, Intl, Number, Math, Array, String, Set, JSON, Promise, Boolean,
+  document: fakeDoc, focusFirstIn() {}, restoreFocus() {}, showToast() {}, window: { setTimeout: (f) => f() },
+  authFetch: (url) => { fetched.push(url); return new Promise((resolve) => { answer = resolve; }); } });
+vm.runInContext([
+  "var SHOW_ACTIVE_STATES = [\"listing\", \"running\", \"waiting\"];",
+  "var SHOW_PREVIEW_EPISODES = 8;",
+  "var showCaptureState = { run: null, seq: 0, opener: null, runs: [], last: 0, loading: false, again: false, visible: false };",
+  ...["htmlEscape", "fmtAge", "showHoursText", "showDiskText", "showCount", "showEstimateLines", "showAsrText",
+    "showRunStatus", "showRunActions", "showRunHtml", "renderShowRuns", "loadShowRuns", "showCardVisible",
+    "pollShowRuns", "showCaptureEl", "resetShowCapture", "openShowCapture", "renderShowPreview",
+    "loadShowPreview"].map(grabAny),
+].join("\n"), page);
+const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+const readyRun = { ...youtube, episodes: Array.from({ length: 8 }, (_, i) => ({ title: `Episode ${i}`, state: "queued" })) };
+page.showCaptureState.seq = 1;
+const previewing = page.loadShowPreview(readyRun.id, 1);
+check(fetched.at(-1) === `/shows/${readyRun.id}?episodes=1&episodes_limit=8`, "the preview asks for eight episodes, not every one", fetched.at(-1));
+answer({ run: readyRun });
+await previewing;
+check(els.showCapturePreview.innerHTML.includes("Episode 7") && els.showCapturePreview.innerHTML.includes("and 309 more"),
+  "the sample counts the rest from the run's total", els.showCapturePreview.innerHTML.slice(-60));
+check(els.showCaptureStart.disabled === false && page.showCaptureState.run === readyRun, "Start is ready after a preview");
+fakeDoc.getElementById("showCaptureInput").value = "https://www.youtube.com/@tidepoolhour";
+page.openShowCapture(null);
+check(els.showCaptureInput.value === "" && els.showCapturePreview.innerHTML === "" && els.showCaptureStart.disabled === true
+  && page.showCaptureState.run === null, "Save a whole show opens a fresh form, never the last preview");
+
+fetched.length = 0;
+page.loadShowRuns();
+page.loadShowRuns();
+page.loadShowRuns();
+check(fetched.length === 1, "refreshes asked for while one is in flight send nothing yet", fetched);
+answer({ runs: [{ ...base, state: "ready", current: null }] });
+await settle();
+check(fetched.length === 2, "then one more runs, so an action never leaves an old answer on screen", fetched);
+answer({ runs: [{ ...base, state: "done", current: null }] });
+await settle();
+check(fetched.length === 2 && page.showCaptureState.loading === false && page.showCaptureState.runs[0].state === "done",
+  "and the list settles on the newest answer", page.showCaptureState.runs.map((r) => r.state));
+
+fetched.length = 0;
+page.showCaptureState.visible = true;
+page.pollShowRuns();
+page.pollShowRuns();
+check(fetched.length === 0, "no polling while every run is idle", fetched);
+page.showCaptureState.runs = [{ ...base, state: "cancelled", current: { key: "pod:1" } }];
+page.pollShowRuns();
+check(fetched.length === 1, "a cancelled run with an episode still finishing keeps polling", fetched);
+answer({ runs: [] });
+await settle();
+fakeDoc.hidden = true;
+page.pollShowRuns();
+fakeDoc.hidden = false;
+page.pollShowRuns();
+check(fetched.length === 2, "coming back to the page refreshes once", fetched);
+answer({ runs: [] });
+await settle();
+page.pollShowRuns();
+check(fetched.length === 2, "and then waits for something to change", fetched);
+
 console.log(`${checks} checks, ${failures} failures`);
 process.exit(failures ? 1 : 0);

@@ -330,9 +330,11 @@ def _public_episode(ep: dict) -> dict:
         "attempts", "video_id", "updated_at")}
 
 
-def view(job: dict, *, episodes: bool = False, failures_limit: int = 500) -> dict:
+def view(job: dict, *, episodes: bool = False, failures_limit: int = 500,
+         episodes_limit: int | None = None) -> dict:
     """What the dashboard and API see: no handles, at most ``failures_limit``
-    failures, and every episode only when asked."""
+    failures, and the episodes only when asked (the first
+    ``episodes_limit`` of them when given)."""
     eps = job.get("episodes") or []
     current = next((e for e in eps if e.get("state") == EP_RUNNING), None)
     failed = [e for e in eps if e.get("state") == EP_FAILED]
@@ -346,7 +348,7 @@ def view(job: dict, *, episodes: bool = False, failures_limit: int = 500) -> dic
     out["failures"] = [_public_episode(e) for e in failed[:failures_limit]]
     out["failures_total"] = len(failed)
     if episodes:
-        out["episodes"] = [_public_episode(e) for e in eps]
+        out["episodes"] = [_public_episode(e) for e in eps[:episodes_limit]]
     return out
 
 
