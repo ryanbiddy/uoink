@@ -18,9 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Windows: clicking Uoink in the Start menu or on the desktop while Uoink is still starting
   (just after you sign in, after an update, or after a restart) now opens the dashboard once
   it is ready. Before, that click did nothing.
-- First-run window: the close button and Escape now close the window even when you press them
-  the moment it appears. Before, an early click could hide the page and leave an empty window
-  on screen.
+- First-run window: the close button and Escape work even when you press them the moment the
+  window appears. The window dims and closes as soon as it is ready. Before, an early click hid
+  the page and left an empty window on top of everything.
 - Windows setup now checks that every Uoink program file arrived after an install, not only
   the ones that went missing in the past.
 - First-run copy names the button you actually see. The ready notice, the empty library and the
