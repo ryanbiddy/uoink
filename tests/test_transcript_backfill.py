@@ -633,9 +633,24 @@ def test_a_finish_request_that_lands_as_the_worker_exits_is_not_stranded(tmp_pat
     assert job.wait(5)
     assert done == ["folder:AI/late"], "the request was left in Queued"
     assert job._state["requested"] == []
-    job.resume()
-    job.pause()
-    assert job._relaunch is False, "a pause cancels a relaunch the resume asked for"
+
+    # Pause, resume while the old worker winds down, pause again: no stray worker.
+    inside, release = threading.Event(), threading.Event()
+
+    def slow(item, checkpoint, stop, network_ok):
+        inside.set()
+        release.wait(5)
+        return {"outcome": "transcribed"}
+    job2 = _job(tmp_path / "second", [{"key": "slow", "duration": 60, "media": "on_disk"}], slow)
+    job2.start()
+    assert inside.wait(5)
+    job2.pause()
+    job2.resume()
+    assert job2._relaunch is True, "resume asks for a new worker after the old one exits"
+    job2.pause()
+    assert job2._relaunch is False, "a pause cancels the relaunch the resume asked for"
+    release.set()
+    assert job2.wait(5) and job2._thread is None
 
 
 def test_strikes_reset_when_the_site_answers_and_fade_with_time(tmp_path):
