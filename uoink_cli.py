@@ -85,7 +85,10 @@ def parser():
     cues.add_argument("--from", dest="published_from", help="list: published on or after YYYY-MM-DD")
     cues.add_argument("--to", dest="published_to", help="list: published on or before YYYY-MM-DD")
     cues.add_argument("--words", dest="q", help="list: words to search for")
-    cues.add_argument("--limit", type=int, help="list: most items (1-200, default 50)")
+    cues.add_argument("--limit", type=int, help="most items (list: 1-200, default 50) or cues "
+                      "(item: 1-5000, default 1000)")
+    cues.add_argument("--offset", type=int,
+                      help="start position; use the printed next_offset for the next page")
     imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
                       "Reddit thread or YouTube playlist (50 per batch)")
     imports.add_argument("url", help="list, thread or playlist link")
@@ -246,15 +249,17 @@ def cues_command(ns, server):
     import timed_cues
     item_flags = {"start": ns.start, "end": ns.end}
     list_flags = {"channel": ns.channel, "published_from": ns.published_from,
-                  "published_to": ns.published_to, "q": ns.q, "limit": ns.limit}
+                  "published_to": ns.published_to, "q": ns.q}
+    page_flags = {"limit": ns.limit, "offset": ns.offset}
     if ns.id:
         if any(value is not None for value in list_flags.values()):
-            raise UsageError("--channel, --from, --to, --words and --limit list items; drop the id")
-        query, operation = {k: [str(v)] for k, v in item_flags.items() if v is not None}, "get"
+            raise UsageError("--channel, --from, --to and --words list items; drop the id")
+        flags, operation = {**item_flags, **page_flags}, "get"
     else:
         if any(value is not None for value in item_flags.values()):
             raise UsageError("--start and --end need an item id")
-        query, operation = {k: [str(v)] for k, v in list_flags.items() if v is not None}, "search"
+        flags, operation = {**list_flags, **page_flags}, "search"
+    query = {k: [str(v)] for k, v in flags.items() if v is not None}
     try:
         idx = server._get_index()
         data = (timed_cues.get_item(idx, ns.id, query) if operation == "get"
@@ -276,6 +281,8 @@ def cues_text(payload):
             lines.append(f"{date} | {terminal_label(item.get('title') or '')} | "
                          f"{terminal_label(item.get('channel') or 'source unknown')} "
                          f"[{terminal_label(item.get('id') or '')}]")
+        if data["page"].get("next_offset") is not None:
+            lines.append(f"More items: add --offset {data['page']['next_offset']}.")
         return "\n".join(lines)
     item, timing, cues = data["item"], data["timing"], data["cues"]
     source = {"captions": "uploaded captions", "auto_captions": "automatic captions",
@@ -287,6 +294,9 @@ def cues_text(payload):
             for c in cues[:40]]
     if len(cues) > 40:
         rows.append("More cues in JSON output.")
+    next_offset = (data.get("page") or {}).get("next_offset")
+    if next_offset is not None:
+        rows.append(f"More cues after these: add --offset {next_offset}.")
     return "\n".join(head + rows)
 
 

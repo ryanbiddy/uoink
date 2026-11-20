@@ -43,8 +43,16 @@ widens a query silently.
 
 `GET /api/cues/v1/items/tpcaptions1?start=0&end=10`
 
-`start` and `end` (seconds, optional) keep only cues that overlap that
-window. Without them, every cue comes back.
+| Parameter | Meaning |
+|---|---|
+| `start`, `end` | seconds, optional: only cues that overlap that window |
+| `limit` | most cues in one response, 1 to 5000, default 1000 |
+| `offset` | 0 or more, a position in the window. Use `page.next_offset` |
+| `include_words` | `0` leaves word timings out (default `1`) |
+
+`page.total` counts every cue in the window and `page.next_offset` is
+`null` on the last page. A multi-hour episode with word timings can run to
+several MB, so ask for pages, or `include_words=0` when cue timings are enough.
 
 ```json
 {
@@ -68,6 +76,7 @@ window. Without them, every cue comes back.
     "timing": {"source": "captions", "caption_kind_known": true, "word_timings": false},
     "range": {"start": 0.0, "end": 10.0},
     "cue_count": 2,
+    "page": {"limit": 1000, "offset": 0, "total": 2, "next_offset": null},
     "cues": [
       {"start": 0.0, "end": 4.25, "text": "Welcome back to the pool.",
        "deep_link": "https://www.youtube.com/watch?v=tpcaptions1&t=0s"},
@@ -84,10 +93,11 @@ Fields:
   `start`. `deep_link` is present when Uoink stored a link that opens the
   source at that cue. `speaker` is present only when the cue has an attributed
   speaker with provenance (podcast episodes with speaker labels).
-  `words` (`[{start, end, text}]`) is present only when word timings were
-  stored. Today Uoink stores word timings only where its transcriber kept
-  them, so expect cue-level timings in most items and check
-  `timing.word_timings` before relying on words.
+  `words` (`[{start, end, text}]`, sorted, `end` never before `start`) is
+  present only when valid word timings were stored. Today Uoink stores word
+  timings only where its transcriber kept them, so expect cue-level timings
+  in most items and check `timing.word_timings` (true only when a cue has
+  valid words) before relying on words.
 - `timing.source` is where the timings came from:
   - `captions`: the creator's uploaded captions.
   - `auto_captions`: the platform's automatic captions.
@@ -169,6 +179,8 @@ uoink cues tpcaptions1                    # one item, JSON envelope
 uoink cues tpcaptions1 --start 0 --end 10 --text
 uoink cues --channel "The Tidepool Hour" --from 2025-01-01 --to 2025-12-31
 uoink cues --words anemones --limit 20
+uoink cues --channel "The Tidepool Hour" --limit 50 --offset 50   # the next page
+uoink cues tpcaptions1 --limit 500 --offset 500                   # cues 501 to 1000
 ```
 
 `uoink cues` reads the local library in-process and prints the same

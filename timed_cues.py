@@ -23,6 +23,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 import index as index_mod
 
@@ -31,7 +32,10 @@ VERSION = 1
 ITEM_PREFIX = "/api/cues/v1/items"
 MAX_LIMIT = 200
 DEFAULT_LIMIT = 50
-ITEM_PARAMS = frozenset({"start", "end"})
+ITEM_PARAMS = frozenset({"start", "end", "limit", "offset", "include_words"})
+# Cues per item response: a multi-hour episode with word timings is several MB.
+CUE_DEFAULT_LIMIT = 1000
+CUE_MAX_LIMIT = 5000
 SEARCH_PARAMS = frozenset({"q", "channel", "published_from", "published_to",
                            "date_from", "date_to", "limit", "offset"})
 TIMING_SOURCES = ("captions", "auto_captions", "local_asr")
@@ -93,12 +97,13 @@ def _number(value) -> float | None:
     return number if math.isfinite(number) and number >= 0 else None
 
 
-def timing_of(sidecar: dict, row: dict) -> dict:
+def timing_of(sidecar: dict, row: dict, cues: list[dict] | None = None) -> dict:
     """Where the cue timings came from. ``source`` is captions (uploaded by
     the creator), auto_captions (the platform's automatic track), local_asr
     (Whisper on this computer) or None when the item has no transcript.
     ``caption_kind_known`` is false for captions saved before Uoink recorded
-    which kind they were."""
+    which kind they were. ``word_timings`` is true only when a cue that
+    comes back has valid words (``cues``: the item's cues_of)."""
     has_cues = bool(sidecar.get("transcript"))
     source_type = sidecar.get("source_type") or row.get("source_type")
     recorded = sidecar.get("transcript_source")
@@ -118,8 +123,7 @@ def timing_of(sidecar: dict, row: dict) -> dict:
         source = "local_asr"
     else:
         source, known = None, False
-    words = any(isinstance(seg, dict) and isinstance(seg.get("words"), list) and seg["words"]
-                for seg in (sidecar.get("transcript") or []))
+    words = any("words" in cue for cue in (cues if cues is not None else cues_of(sidecar)))
     return {"source": source, "caption_kind_known": known, "word_timings": words}
 
 
@@ -159,10 +163,10 @@ def cues_of(sidecar: dict, *, start: float | None = None,
             wt = word.get("word") if isinstance(word.get("word"), str) else word.get("text")
             if ws is None or not isinstance(wt, str) or not wt.strip():
                 continue
-            words.append({"start": round(ws, 3), "end": round(we if we is not None else ws, 3),
+            words.append({"start": round(ws, 3), "end": round(we if we is not None and we >= ws else ws, 3),
                           "text": wt.strip()})
         if words:
-            cue["words"] = words
+            cue["words"] = sorted(words, key=lambda w: (w["start"], w["end"]))
         out.append(cue)
     out.sort(key=lambda c: (c["start"], c["end"]))
     return out
@@ -170,7 +174,9 @@ def cues_of(sidecar: dict, *, start: float | None = None,
 
 def item_of(row: dict, sidecar: dict) -> dict:
     meta = _metadata(row)
-    duration = _number(sidecar.get("duration_seconds")) or _number(meta.get("duration_seconds"))
+    duration = _number(sidecar.get("duration_seconds"))
+    if duration is None:
+        duration = _number(meta.get("duration_seconds"))
     description = sidecar.get("description")
     return {
         "id": row.get("video_id"),
@@ -200,7 +206,7 @@ def ref_of(row: dict) -> dict:
         "published_at": published_value(meta.get("published_at"), meta.get("upload_date")),
         "duration_seconds": _number(meta.get("duration_seconds")),
         "captured_at": row.get("yoinked_at"),
-        "cues_url": f"{ITEM_PREFIX}/{row.get('video_id')}",
+        "cues_url": f"{ITEM_PREFIX}/{quote(str(row.get('video_id') or ''), safe='')}",
     }
 
 
@@ -243,11 +249,23 @@ def _seconds(params: dict, key: str) -> float | None:
 
 
 def get_item(idx, item_id: str, query: dict | None = None) -> dict:
-    """``data`` for GET /api/cues/v1/items/<id>. Raises CuesError."""
+    """``data`` for GET /api/cues/v1/items/<id>: at most ``limit`` cues of
+    the window from ``offset``, with a page block like the list call.
+    ``include_words=0`` leaves word timings out. Raises CuesError."""
     params = _single(query or {}, ITEM_PARAMS)
     start, end = _seconds(params, "start"), _seconds(params, "end")
     if start is not None and end is not None and start > end:
         raise CuesError("invalid_request", "start is after end", 400)
+    try:
+        limit = int(params.get("limit", CUE_DEFAULT_LIMIT))
+        offset = int(params.get("offset", 0))
+    except ValueError:
+        raise CuesError("invalid_request", "limit and offset must be whole numbers", 400) from None
+    if not 1 <= limit <= CUE_MAX_LIMIT or offset < 0:
+        raise CuesError("invalid_request", f"limit is 1 to {CUE_MAX_LIMIT} and offset 0 or more", 400)
+    include_words = params.get("include_words", "1").lower()
+    if include_words not in ("0", "1", "true", "false"):
+        raise CuesError("invalid_request", "include_words is 0 or 1", 400)
     item_id = (item_id or "").strip()
     if not item_id or "/" in item_id or len(item_id) > 200:
         raise CuesError("invalid_request", "item id is missing or malformed", 400)
@@ -262,12 +280,20 @@ def get_item(idx, item_id: str, query: dict | None = None) -> dict:
             sidecar = loaded if isinstance(loaded, dict) else {}
         except (OSError, ValueError):
             sidecar = {}
-    cues = cues_of(sidecar, start=start, end=end)
+    every = cues_of(sidecar)
+    window = [cue for cue in every
+              if (start is None or cue["end"] >= start) and (end is None or cue["start"] <= end)]
+    cues = window[offset:offset + limit]
+    if include_words in ("0", "false"):
+        cues = [{key: value for key, value in cue.items() if key != "words"} for cue in cues]
+    shown = offset + len(cues)
     return {
         "item": item_of(row, sidecar),
-        "timing": timing_of(sidecar, row),
+        "timing": timing_of(sidecar, row, every),
         "range": {"start": start, "end": end},
         "cue_count": len(cues),
+        "page": {"limit": limit, "offset": offset, "total": len(window),
+                 "next_offset": shown if shown < len(window) else None},
         "cues": cues,
     }
 
@@ -362,7 +388,8 @@ def openapi_paths() -> dict:
             "caption_kind_known": {"type": "boolean"},
             "word_timings": {"type": "boolean"}}},
         "range": {"type": "object"},
-        "cue_count": {"type": "integer"},
+        "cue_count": {"type": "integer", "description": "Cues in this response."},
+        "page": {"type": "object", "description": "limit, offset, total cues in the window, next_offset."},
         "cues": {"type": "array", "items": _CUE_SCHEMA},
     }}
     list_data = {"type": "object", "properties": {
@@ -402,6 +429,12 @@ def openapi_paths() -> dict:
                  "description": "Item id from search, recent or the list call."},
                 _query_param("start", "Only cues that overlap from this second.", {"type": "number", "minimum": 0}),
                 _query_param("end", "Only cues that overlap up to this second.", {"type": "number", "minimum": 0}),
+                _query_param("limit", f"Most cues, 1 to {CUE_MAX_LIMIT} (default {CUE_DEFAULT_LIMIT}).",
+                             {"type": "integer", "minimum": 1, "maximum": CUE_MAX_LIMIT}),
+                _query_param("offset", "Start position in the window. Use page.next_offset.",
+                             {"type": "integer", "minimum": 0}),
+                _query_param("include_words", "0 leaves word timings out (default 1).",
+                             {"type": "string", "enum": ["0", "1", "true", "false"]}),
             ],
             "responses": {"200": {"description": "uoink.cues.read v1 item envelope.",
                                   "content": {"application/json": {"schema": _envelope_schema(item_data)}}},

@@ -9,6 +9,7 @@ answers the same once these new sidecar fields exist.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import threading
 import urllib.error
@@ -199,6 +200,81 @@ def test_item_errors(idx, item_id, query, code, status):
     assert (raised.value.code, raised.value.status) == (code, status)
 
 
+def _sidecar_item(tmp_path, idx, video_id, sidecar, meta=None):
+    folder = tmp_path / "extra" / re.sub(r"[^A-Za-z0-9]", "_", video_id)
+    folder.mkdir(parents=True)
+    path = folder / "item.json"
+    path.write_text(json.dumps(sidecar), encoding="utf-8")
+    idx.upsert_yoink({"video_id": video_id, "slug": folder.name, "channel": SHOW, "title": video_id,
+                      "topic": "Tides", "yoinked_at": "2026-11-06T09:00:00", "corpus_path": str(folder / "item.md"),
+                      "sidecar_path": str(path), "metadata_json": json.dumps(meta or {}),
+                      "source_type": "youtube", "platform": "youtube"}, content="extra")
+
+
+def test_word_timings_are_never_backwards_and_only_count_when_valid(tmp_path, idx):
+    _sidecar_item(tmp_path, idx, "tpwordbad01", {"transcript_source": "asr", "transcript": [
+        {"start": 0.0, "end": 3.0, "text": "Tide pool",
+         "words": [{"word": "pool", "start": 1.0, "end": 0.4}, {"word": "Tide", "start": 0.2, "end": 0.9}]}]})
+    _sidecar_item(tmp_path, idx, "tpwordjunk1", {"transcript_source": "asr", "transcript": [
+        {"start": 0.0, "end": 3.0, "text": "Tide pool", "words": [{"start": "soon"}, "pool", {"word": " "}]}]})
+    data = timed_cues.get_item(idx, "tpwordbad01")
+    assert data["cues"][0]["words"] == [{"start": 0.2, "end": 0.9, "text": "Tide"},
+                                        {"start": 1.0, "end": 1.0, "text": "pool"}]
+    junk = timed_cues.get_item(idx, "tpwordjunk1")
+    assert "words" not in junk["cues"][0]
+    assert junk["timing"]["word_timings"] is False
+
+
+def test_item_cues_come_in_pages_and_words_can_be_left_out(tmp_path, idx):
+    transcript = [{"start": float(i), "end": i + 0.9, "text": f"Line {i}",
+                   "words": [{"word": "Line", "start": float(i), "end": i + 0.4}]} for i in range(12)]
+    _sidecar_item(tmp_path, idx, "tplongasr01", {"transcript_source": "asr", "transcript": transcript})
+    first = timed_cues.get_item(idx, "tplongasr01", {"limit": ["5"]})
+    assert [c["text"] for c in first["cues"]] == [f"Line {i}" for i in range(5)]
+    assert first["cue_count"] == 5
+    assert first["page"] == {"limit": 5, "offset": 0, "total": 12, "next_offset": 5}
+    last = timed_cues.get_item(idx, "tplongasr01", {"limit": ["5"], "offset": ["10"]})
+    assert [c["text"] for c in last["cues"]] == ["Line 10", "Line 11"]
+    assert last["page"]["next_offset"] is None
+    window = timed_cues.get_item(idx, "tplongasr01", {"start": ["3"], "end": ["6"], "limit": ["2"]})
+    assert [c["text"] for c in window["cues"]] == ["Line 3", "Line 4"]
+    assert window["page"]["total"] == 4                 # 3, 4, 5 and 6 overlap the window
+    bare = timed_cues.get_item(idx, "tplongasr01", {"include_words": ["0"]})
+    assert not any("words" in c for c in bare["cues"]) and bare["timing"]["word_timings"] is True
+    default = timed_cues.get_item(idx, "tplongasr01")
+    assert default["page"]["limit"] == timed_cues.CUE_DEFAULT_LIMIT and len(default["cues"]) == 12
+    for query in ({"limit": ["0"]}, {"limit": [str(timed_cues.CUE_MAX_LIMIT + 1)]}, {"offset": ["-1"]},
+                  {"limit": ["lots"]}, {"include_words": ["maybe"]}):
+        with pytest.raises(timed_cues.CuesError) as raised:
+            timed_cues.get_item(idx, "tplongasr01", query)
+        assert raised.value.status == 400
+
+
+def test_odd_ids_are_quoted_and_zero_durations_kept(tmp_path, idx):
+    _sidecar_item(tmp_path, idx, "tp odd/id?x", {"duration_seconds": 0, "transcript": []},
+                  meta={"duration_seconds": 0})
+    ref = next(i for i in timed_cues.search(idx, {"q": ["extra"]})["items"] if i["id"] == "tp odd/id?x")
+    assert ref["cues_url"] == "/api/cues/v1/items/tp%20odd%2Fid%3Fx"
+    assert ref["duration_seconds"] == 0.0
+    row = idx.get_yoink("tp odd/id?x")
+    assert timed_cues.item_of(row, {})["duration_seconds"] == 0.0
+    bare_row = {"video_id": "tpzerolen01", "metadata_json": "{}"}
+    assert timed_cues.item_of(bare_row, {"duration_seconds": 0})["duration_seconds"] == 0.0
+
+
+@pytest.mark.parametrize("path, status", [
+    ("/api/cues/v1/items/..", 404),
+    ("/api/cues/v1/items/..%2F..%2Fsecrets", 400),
+    ("/api/cues/v1/items/tpcaptions1%2F..", 400),
+    ("/api/cues/v1/items/..%5C..%5Cindex.db", 404),
+    ("/api/cues/v1/items/%00", 404),
+])
+def test_http_ids_never_reach_a_path(http, path, status):
+    got, raw = _get(http, path)
+    assert got == status
+    assert "sidecar_path" not in raw.decode() and "\\\\" not in raw.decode()
+
+
 # ---------------------------------------------------------------------------
 # Lists by show and publish date
 # ---------------------------------------------------------------------------
@@ -330,6 +406,22 @@ def test_cli_cues(idx, monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out)["error"]["code"] == "not_found"
     assert cli.main(["cues", "tpcaptions1", "--channel", SHOW]) == 2
     assert cli.main(["cues", "--start", "3"]) == 2
+
+
+def test_cli_cues_pages_with_offset(idx, monkeypatch, capsys):
+    monkeypatch.setattr(cli, "backend", lambda: SimpleNamespace(_get_index=lambda: idx))
+    assert cli.main(["cues", "--limit", "2"]) == 0
+    first = json.loads(capsys.readouterr().out)["data"]
+    assert first["page"]["next_offset"] == 2
+    assert cli.main(["cues", "--limit", "2", "--offset", "2"]) == 0
+    second = json.loads(capsys.readouterr().out)["data"]
+    assert second["page"]["offset"] == 2
+    assert not set(_ids(first)) & set(_ids(second))
+    assert cli.main(["cues", "--limit", "2", "--text"]) == 0
+    assert "More items: add --offset 2." in capsys.readouterr().out
+    assert cli.main(["cues", "tpcaptions1", "--limit", "1", "--offset", "1"]) == 0
+    one = json.loads(capsys.readouterr().out)["data"]
+    assert [c["text"] for c in one["cues"]] == ["Today: anemones."] and one["page"]["next_offset"] == 2
 
 
 # ---------------------------------------------------------------------------
