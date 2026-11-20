@@ -954,6 +954,7 @@ def test_saves_outside_the_library_and_unreadable_corpus_files_are_left_alone(li
     far = lib.add_video("moved-away", url=_x(36), video_id="1800000000000000036",
                         title="Row points outside", duration=60, saved_at="2026-07-01T00:00:00",
                         media=True, base=tmp_path / "old-library")
+    (far / "moved-away.md").unlink()  # only the sidecar path is left to judge by
     garbled = lib.add_video("garbled", url=_x(37), video_id="1800000000000000037",
                             title="Unreadable corpus", duration=60, saved_at="2026-07-01T00:00:00", media=True)
     (garbled / "garbled.md").write_bytes(b"# \xff\xfe not text\n")
