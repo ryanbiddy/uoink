@@ -10,6 +10,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Settings, Capture: a transcription model chooser. Each model shows its download size, a
+  rough speed on this computer (from its processor cores, no benchmark), its languages and a
+  one-line quality note, and one is marked "Best for English on this computer". Two new
+  English models: English, quick (distil-small.en, 336 MB) and English, best
+  (distil-large-v3.5, 1.5 GB). Downloads come from Hugging Face only when you click, show
+  progress, check every file against a pinned size and hash, resume after a stop, and can be
+  cancelled or deleted. Balanced still ships with Uoink and works offline.
+- An English-only model never runs on other languages: the bundled multilingual model checks
+  the language first and transcribes instead, and the transcript note says so.
+- The item's Re-transcribe button works (it posted to a route that did not exist) and names the
+  model: "Re-transcribe with <model>". It goes through the same queue as podcast transcription,
+  fetches the audio again and replaces the transcript only once the new one is complete. The old
+  details file is kept in `.media-inputs`. A failure, a cancel or an edited transcript leaves
+  everything as it was. New routes: `GET /asr/models`, `POST /asr/models/download|cancel|delete|use`
+  and `POST /transcription/retranscribe`. CLI: `uoink models [list|download|delete|use] <model>`.
+- Word timings are kept for local transcripts (video sidecar transcript rows and podcast
+  transcripts), about 0.5 MB per hour of speech. Older items without them read as before.
+
+### Changed
+
+- Speech models now run in a separate background process that exits after 2 minutes idle, so
+  the helper gets the memory back after transcribing (a 3.17.0 helper could hold several GB
+  after two podcast episodes). One model runs at a time, progress and cancel still work, and a
+  crash in that process fails the one job instead of taking the helper down. Settings,
+  Diagnostics and `/health` show the engine state ("Transcription engine: idle (not loaded)").
+- Podcasts without speaker labels are transcribed with faster-whisper instead of WhisperX, which
+  no longer loads PyTorch for them. WhisperX is used only when speaker labels are on.
+- Fewer repeated-phrase loops in local transcripts: Whisper no longer conditions on its previous
+  text, uses explicit compression, log-probability and no-speech limits with voice detection on,
+  and a small filter drops the loops that still get through.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

@@ -3404,6 +3404,26 @@
     .hook-correction-row { display: grid; justify-items: start; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
     .settings-tool-details summary { min-height: var(--target-primary); padding: 8px 0; cursor: pointer; }
     .settings-tool-button { min-height: var(--target-primary); }
+    /* 3.18 transcription model chooser */
+    .asr-chooser { display: grid; gap: 8px; min-width: 0; margin-top: 8px; }
+    .asr-chooser-title { margin: 0; font-size: 15px; }
+    .asr-model-list { display: grid; gap: 8px; min-width: 0; }
+    .asr-model { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: start;
+      padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); min-width: 0; }
+    .asr-model > * { min-width: 0; }
+    .asr-model[data-selected="true"] { border-color: var(--line-strong); box-shadow: inset 3px 0 0 var(--action); }
+    .asr-model-name { font-weight: 600; overflow-wrap: anywhere; }
+    .asr-model-badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: 12px;
+      font-weight: 500; border: 1px solid var(--line-strong); color: var(--text-2); white-space: nowrap; }
+    .asr-model-badge.is-pick { border-color: var(--ok); color: var(--ok); }
+    .asr-model-facts, .asr-model-note, .asr-model-status { grid-column: 1; margin: 0; font-size: 13px; color: var(--text-2); overflow-wrap: anywhere; }
+    .asr-model-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; align-items: center; grid-row: 1 / span 5; grid-column: 2; }
+    .asr-model-progress { grid-column: 1; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+    .asr-model-progress > span { display: block; height: 100%; background: var(--action); }
+    @media (max-width: 520px) {
+      .asr-model { grid-template-columns: minmax(0, 1fr); }
+      .asr-model-actions { grid-row: auto; grid-column: 1; justify-content: flex-start; }
+    }
     @media (max-width: 600px) {
       #tab-settings .page-head { align-items: flex-start; }
       #tab-settings .topic-row { grid-template-columns: minmax(0, 1fr); }
@@ -6500,6 +6520,12 @@
                 <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
               </div>
               <p class="setting-copy">Runs locally. When captions are missing, the selected model can take about 10–15 minutes per hour of video on a typical laptop; larger models may take longer. Uoink comes with one model ready to use; any other downloads only after you ask and stays in your Uoink data folder.</p>
+              <section class="asr-chooser" id="asrModelChooser" aria-labelledby="asrModelChooserTitle">
+                <h3 class="asr-chooser-title" id="asrModelChooserTitle">Choose a transcription model</h3>
+                <p class="setting-copy">Downloads come from Hugging Face (huggingface.co) and stay in your Uoink data folder. Uoink checks every file before using it. Balanced comes with Uoink and works offline.</p>
+                <p class="setting-copy" id="asrModelMachine"></p>
+                <div class="asr-model-list" id="asrModelList" aria-live="polite">Loading models...</div>
+              </section>
             </div>
           </div>
           </section>
@@ -9200,7 +9226,9 @@
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
       renderYoinkWriteFrom();
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
-      els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
+      els.yoinkRetranscribe.textContent = state.retranscribing
+        ? "Queuing..."
+        : `Re-transcribe with ${transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))}`;
       els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
       els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
       els.yoinkCopyMarkdown.disabled = !hasRow || !videoIdOf(row);
@@ -9583,7 +9611,7 @@
       if (!row || !videoId) return showToast("Select a uoink first.");
       const sidecar = state.selectedYoinkSidecar || {};
       const model = firstValue(state.settings && state.settings.whisper_model, "base");
-      if (!confirm(`Queue re-transcription with ${transcriptModelLabel(model)}?`)) return;
+      if (!confirm(`Transcribe this again with ${transcriptModelLabel(model)}? Uoink downloads the audio again and transcribes it on this computer. The current transcript stays until the new one is ready.`)) return;
       state.retranscribing = true;
       state.retranscribeStatus = "queueing transcript job";
       renderYoinkDetail();
@@ -9593,23 +9621,20 @@
           body: JSON.stringify({
             video_id: videoId,
             model,
-            diarize: true,
+            diarize: false,
             source_url: sourceUrlOf(row, sidecar) || null,
           }),
         });
         state.retranscribeStatus = data.job_id
           ? `queued ${data.job_id}`
           : "queued";
-        showToast("Re-transcription queued.");
+        showToast("Queued. The new transcript replaces the old one when it's done.");
         refreshActivity();
       } catch (err) {
-        const missing = err.message.includes("not found") || err.message.includes("404");
-        state.retranscribeStatus = missing
-          ? "re-transcription not ready in this build"
-          : "re-transcription couldn't be queued";
-        showToast(missing
-          ? "Re-transcription is not ready in this build."
-          : "Couldn't queue re-transcription.");
+        state.retranscribeStatus = "re-transcription couldn't be queued";
+        showToast(err && err.data && err.data.model_missing
+          ? `Download ${transcriptModelLabel(model)} in Settings first.`
+          : `Couldn't queue it: ${(err && err.message) || "try again"}`);
       } finally {
         state.retranscribing = false;
         renderYoinkDetail();
@@ -16317,6 +16342,8 @@
       medium: 1540,
       large: 3100,
       "large-v3-turbo": 1630,
+      "distil-small.en": 340,
+      "distil-large-v3.5": 1520,
     };
 
     function transcriptModelLabel(model) {
@@ -16327,6 +16354,8 @@
         medium: "Deep",
         large: "Max accuracy",
         "large-v3-turbo": "Turbo",
+        "distil-small.en": "English, quick",
+        "distil-large-v3.5": "English, best",
       };
       const key = String(model || "").toLowerCase();
       return labels[key] || humanLabel(key) || "Balanced";
@@ -16416,6 +16445,120 @@
       } finally {
         els.downloadReliabilityModel.disabled = false;
       }
+    }
+
+    // 3.18 transcription model chooser, drawn from /asr/models. Downloads
+    // start only from a click here and run in the helper; this page only
+    // polls while one is running.
+    let asrModelPollTimer = null;
+
+    function asrBytesCopy(bytes) {
+      const mb = Number(bytes) / 1e6;
+      if (!Number.isFinite(mb) || mb <= 0) return "0 MB";
+      return mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.max(1, Math.round(mb))} MB`;
+    }
+
+    function asrDownloadPercent(download) {
+      const dl = download || {};
+      return dl.total ? Math.min(100, Math.floor((Number(dl.done) / Number(dl.total)) * 100)) : 0;
+    }
+
+    function asrModelStatusCopy(row) {
+      const dl = row.download || {};
+      if (dl.state === "downloading") {
+        return `Downloading, ${asrDownloadPercent(dl)}% (${asrBytesCopy(dl.done)} of ${asrBytesCopy(dl.total)}). You can keep using Uoink.`;
+      }
+      if (dl.state === "failed" && row.state !== "ready") return `The download stopped: ${dl.error || "try again"}. Download again to resume.`;
+      if (row.state === "bundled") return "On this computer. Works offline.";
+      if (row.state === "ready") return "On this computer.";
+      if (row.state === "partial") return `${asrBytesCopy(row.bytes_on_disk)} of ${asrBytesCopy(row.download_bytes)} downloaded. Download again to resume.`;
+      return "Not on this computer yet.";
+    }
+
+    function asrMachineCopy(machine) {
+      const info = machine || {};
+      const cores = Number(info.cpu_cores) || 1;
+      const used = Number(info.threads_used) || 1;
+      const gpu = info.gpu ? " Transcribing runs on the processor, so the graphics card stays free." : "";
+      return `Speeds are rough guesses for this computer: ${cores} processor core${cores === 1 ? "" : "s"}, ${used} used for transcribing.${gpu}`;
+    }
+
+    function renderAsrModels(data) {
+      const list = document.getElementById("asrModelList");
+      if (!list) return;
+      const machine = document.getElementById("asrModelMachine");
+      const rows = Array.isArray(data && data.models) ? data.models : [];
+      if (machine) machine.textContent = rows.length ? asrMachineCopy(data.machine) : "";
+      clearTimeout(asrModelPollTimer);
+      if (!rows.length) {
+        list.textContent = "No models to show.";
+        return;
+      }
+      list.innerHTML = rows.map((row) => {
+        const id = htmlEscape(row.id);
+        const label = htmlEscape(transcriptModelLabel(row.id));
+        const dl = row.download || {};
+        const busy = dl.state === "downloading";
+        const onDisk = row.state === "ready" || row.state === "bundled";
+        const badges = (row.recommended ? '<span class="asr-model-badge is-pick">Best for English on this computer</span>' : "")
+          + (row.selected ? '<span class="asr-model-badge">In use</span>' : "");
+        const actions = [];
+        if (busy) actions.push(`<button class="button ghost" type="button" data-asr-action="cancel" data-asr-model="${id}">Cancel</button>`);
+        else if (!onDisk) actions.push(`<button class="button" type="button" data-asr-action="download" data-asr-model="${id}">${row.state === "partial" ? "Resume download" : "Download"}</button>`);
+        if (onDisk && !row.selected) actions.push(`<button class="button" type="button" data-asr-action="use" data-asr-model="${id}">Use</button>`);
+        if (!busy && (row.state === "ready" || row.state === "partial")) actions.push(`<button class="button ghost" type="button" data-asr-action="delete" data-asr-model="${id}">Delete</button>`);
+        const pct = asrDownloadPercent(dl);
+        const facts = [asrBytesCopy(row.download_bytes), row.speed, row.languages].filter(Boolean).join(" · ");
+        return `<article class="asr-model" data-asr-row="${id}" data-selected="${row.selected ? "true" : "false"}" data-state="${htmlEscape(row.state)}">
+          <div class="asr-model-name" title="${id}">${label}${badges}</div>
+          <div class="asr-model-actions">${actions.join("")}</div>
+          <p class="asr-model-facts">${htmlEscape(facts)}</p>
+          <p class="asr-model-note">${htmlEscape(row.note || "")}</p>
+          ${busy ? `<div class="asr-model-progress" role="progressbar" aria-label="${label} download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div>` : ""}
+          <p class="asr-model-status">${htmlEscape(asrModelStatusCopy(row))}</p>
+        </article>`;
+      }).join("");
+      if (rows.some((row) => row.download && row.download.state === "downloading")) {
+        asrModelPollTimer = setTimeout(loadAsrModels, 1000);
+      }
+    }
+
+    async function loadAsrModels() {
+      const list = document.getElementById("asrModelList");
+      if (!list) return;
+      try {
+        state.asrModels = await authFetch("/asr/models");
+        renderAsrModels(state.asrModels);
+      } catch (err) {
+        list.textContent = `Could not load the model list: ${(err && err.message) || "try Reload"}.`;
+      }
+    }
+
+    async function runAsrModelAction(action, model) {
+      const rows = (state.asrModels && state.asrModels.models) || [];
+      const row = rows.find((item) => item.id === model) || {};
+      const label = transcriptModelLabel(model);
+      if (action === "download") {
+        const left = Math.max(0, Number(row.download_bytes || 0) - Number(row.bytes_on_disk || 0));
+        if (!confirm(`Download ${label} from Hugging Face (huggingface.co)? It's ${asrBytesCopy(left)} and stays in your Uoink data folder. You can cancel it, and a stopped download resumes.`)) return;
+      }
+      if (action === "delete" && !confirm(`Delete ${label} from this computer? This frees about ${asrBytesCopy(row.bytes_on_disk)}. You can download it again later.`)) return;
+      try {
+        const data = await authFetch(`/asr/models/${action}`, { method: "POST", body: JSON.stringify({ model }) });
+        if (action === "use") showToast(`New transcripts use ${label}.`);
+        if (action === "delete") showToast(data.selected_reset_to ? `${label} deleted. New transcripts use Balanced again.` : `${label} deleted.`);
+        if (action === "use" || data.selected_reset_to) refreshSettings();
+      } catch (err) {
+        showToast(`${label}: ${(err && err.message) || "that didn't work"}`);
+      }
+      loadAsrModels();
+    }
+
+    function onAsrModelClick(event) {
+      const button = event.target && event.target.closest ? event.target.closest("[data-asr-action]") : null;
+      if (!button) return;
+      button.disabled = true;
+      runAsrModelAction(button.dataset.asrAction, button.dataset.asrModel);
     }
 
     async function refreshSettings() {
@@ -20291,6 +20434,7 @@
       if (tab === "sources") renderSources();
       if (tab === "activity") refreshActivity();
       const settingsRead = tab === "settings" ? refreshSettings() : null;
+      if (tab === "settings") loadAsrModels();
       const back = tab === "library" && previousTab === "yoink" ? state.libraryScroll : null;
       setPageScrollPosition(back || { content: 0, page: 0 });
       syncReaderCrumbs();
@@ -20739,6 +20883,8 @@
       if (els.libraryMirrorDisable) els.libraryMirrorDisable.addEventListener("click", disableLibraryMirror);
       if (els.libraryMirrorResync) els.libraryMirrorResync.addEventListener("click", resyncLibraryMirror);
       els.downloadReliabilityModel.addEventListener("click", downloadSelectedReliabilityModel);
+      const asrModelList = document.getElementById("asrModelList");
+      if (asrModelList) asrModelList.addEventListener("click", onAsrModelClick);
       els.pickOutputFolder.addEventListener("click", pickOutputFolder);
       document.getElementById("openOutput").addEventListener("click", () => {
         const path = els.outputFolder.value;
