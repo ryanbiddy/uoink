@@ -8874,9 +8874,24 @@
         .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
         .replace(/^\s*#\s+[^\n]*\n/, "")
         .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
-      const html = renderMarkdown(text)
+      const html = renderMarkdown(text, readerInline)
         .replace(/<(\/?)h([1-3])>/g, (_, slash, level) => `<${slash}h${Number(level) + 1}>`);
       return html ? `<div class="reader-prose markdown-rendered">${html}</div>` : "";
+    }
+
+    // Saved pages escape Markdown characters (\* or \[) and "<" (&lt;) so other
+    // apps read them as text. Show the characters, never the escapes. Output is
+    // still only what renderInlineMarkdown writes, plus entities.
+    function readerInline(value) {
+      const kept = [];
+      const text = String(value || "").replace(/[]/g, "").split(/(`[^`]+`)/)
+        .map((part, i) => (i % 2 ? part : part.replace(/\\([!-\/:-@[-`{-~])/g, (_m, c) => {
+          kept.push(c);
+          return `${kept.length - 1}`;
+        }))).join("");
+      return renderInlineMarkdown(text)
+        .replace(/&amp;(lt|gt|amp|quot|#39);/g, "&$1;")
+        .replace(/(\d+)/g, (_m, i) => htmlEscape(kept[Number(i)]));
     }
 
     // Why this capture's words came from Whisper, or why it has none

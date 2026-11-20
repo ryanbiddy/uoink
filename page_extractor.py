@@ -911,8 +911,10 @@ def persist_page_yoink(idx, extract_result: dict, *,
             first, _, rest = body_md.partition("\n")
             if first.strip() == "# " + article_extractor._escape(title):
                 body_md = rest.lstrip()
+        # A page title is page data: no "<" in it may open a tag in the file.
+        heading = re.sub(r"<(?=[A-Za-z/!?])", "&lt;", str(title).replace("\n", " "))
         corpus_path.write_text(
-            f"# {title}\n\n**Source:** {url}\n\n" + attribution + body_md,
+            f"# {heading}\n\n**Source:** {url}\n\n" + attribution + body_md,
             encoding="utf-8")
         import json as _json
         sidecar_path.write_text(_json.dumps({
