@@ -16,7 +16,7 @@ const CAPTURE = { url: PAGE, title: "Harbor lanterns are lit again", markdown: "
   engine: "defuddle", engine_version: "0.19.6", capture_version: 1 };
 const SAVED = { ok: true, video_id: "page_abc", title: "Harbor lanterns are lit again", url: PAGE };
 
-async function worker({ scripting, dom }) {
+async function worker({ scripting, dom, tabUrl = PAGE }) {
   const posts = [];
   const env = makeEnv({
     onSend: () => undefined,
@@ -42,10 +42,36 @@ async function worker({ scripting, dom }) {
       return scripting(spec, calls.length);
     },
   };
+  env.chrome.tabs.get = async (tabId) => (tabUrl === null ? { id: tabId } : { id: tabId, url: tabUrl });
   env.load("background.js");
   await settle();
   return { env, posts, calls };
 }
+
+test("the tab is checked before anything is injected: wrong page, other query, non-web tabs fall back", async () => {
+  const cases = [
+    ["https://news.example.org/2026/10/other-story", PAGE],
+    [`${PAGE}?id=2`, `${PAGE}?id=1`],
+    ["chrome://settings/", "chrome://settings/"],
+    ["https://chromewebstore.google.com/detail/x", "https://chromewebstore.google.com/detail/x"],
+    ["https://chrome.google.com/webstore/detail/x", "https://chrome.google.com/webstore/detail/x"],
+    ["chrome-extension://abc/popup.html", "chrome-extension://abc/popup.html"],
+    ["file:///C:/notes/page.html", "file:///C:/notes/page.html"],
+    ["https://news.example.org/report.pdf", "https://news.example.org/report.pdf"],
+    [null, PAGE],
+  ];
+  for (const [tabUrl, jobUrl] of cases) {
+    const w = await worker({ scripting: readsTab({ ...CAPTURE, url: jobUrl }), tabUrl });
+    await w.env.ctx.runExtractJob({ kind: "extract", url: jobUrl, usePage: true, tabId: 4 });
+    assert.equal(w.calls.length, 0, `injected into ${tabUrl}`);
+    assert.ok(!w.posts.some((p) => p.path === "/extract/page/dom"), `posted the tab for ${tabUrl}`);
+  }
+  // Tracking parameters and a trailing slash are the same page; the query is not.
+  const same = await worker({ scripting: readsTab({ ...CAPTURE, url: `${PAGE}/?id=1&utm_source=x` }),
+    tabUrl: `${PAGE}/?utm_source=x&id=1` });
+  await same.env.ctx.runExtractJob({ kind: "extract", url: `${PAGE}?id=1`, usePage: true, tabId: 4 });
+  assert.deepEqual(same.posts.map((p) => p.path), ["/extract/page/dom"]);
+});
 
 const readsTab = (payload) => async (spec) => (spec.files ? [{ result: undefined }]
   : [{ result: payload === null ? null : { ok: true, payload } }]);

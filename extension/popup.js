@@ -524,6 +524,10 @@ function offerAllowRetry(pageUrl, request) {
   }
   pendingAllowCapture = { url: pageUrl, title: (request && request.title) || "" };
   if (request && request.retryOf) pendingAllowCapture.retryOf = request.retryOf;
+  // Keep the tab, so the rerun still reads the page the user sees.
+  const tabId = request && Number.isInteger(request.tabId) ? request.tabId
+    : (currentSource && currentSource.canonical === pageUrl ? currentSource.tabId : undefined);
+  if (Number.isInteger(tabId)) pendingAllowCapture.tabId = tabId;
   setSourceNote(`Uoink hasn't been allowed on ${pendingAllowHost} yet.`);
   if (uoinkAllowRetryBtn) {
     uoinkAllowRetryBtn.classList.remove("hidden");

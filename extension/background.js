@@ -1643,16 +1643,40 @@ async function injectXArticleScripts(tabId) {
 // lib/page-capture.js, in the tab the user clicked (activeTab + scripting).
 // Null when the tab is gone, moved to another page, or can't be read; the
 // caller then falls back to the helper's own fetch of the URL.
+// The tab is checked before anything is injected: only an http(s) web page
+// (not the Web Store, an extension page, a local file or a PDF) that still
+// shows the asked-for page, query included, is read.
+const TRACKING_PARAM = /^(?:utm_\w+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|_ga)$/i;
+
+function pageKey(raw) {
+  const url = new URL(String(raw || ""));
+  const params = [...url.searchParams].filter(([key]) => !TRACKING_PARAM.test(key))
+    .sort((a, b) => (a[0] + "=" + a[1] < b[0] + "=" + b[1] ? -1 : 1));
+  return `${url.origin}${url.pathname.replace(/\/+$/, "")}?${new URLSearchParams(params)}`;
+}
+
 function samePage(a, b) {
   try {
-    const x = new URL(a);
-    const y = new URL(b);
-    return x.origin === y.origin && x.pathname.replace(/\/+$/, "") === y.pathname.replace(/\/+$/, "");
+    return pageKey(a) === pageKey(b);
   } catch { return false; }
 }
 
+function readableTabUrl(raw) {
+  let url;
+  try { url = new URL(String(raw || "")); } catch { return false; }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+  const host = url.hostname.toLowerCase();
+  if (host === "chromewebstore.google.com" || (host === "chrome.google.com" && /^\/webstore/i.test(url.pathname))) {
+    return false;
+  }
+  return !/\.pdf$/i.test(url.pathname);
+}
+
 async function readPageFromTab(job) {
-  if (!Number.isInteger(job.tabId) || !chrome.scripting) return null;
+  if (!Number.isInteger(job.tabId) || !chrome.scripting || !chrome.tabs || !chrome.tabs.get) return null;
+  let tab = null;
+  try { tab = await chrome.tabs.get(job.tabId); } catch { tab = null; }
+  if (!tab || !readableTabUrl(tab.url) || !readableTabUrl(job.url) || !samePage(tab.url, job.url)) return null;
   try {
     await chrome.scripting.executeScript({
       target: { tabId: job.tabId },
