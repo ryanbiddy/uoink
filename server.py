@@ -7081,15 +7081,22 @@ def _transcript_only_entries(url: str, asset_folder: Path, mode: str,
                                    CAPTIONS_RATE_LIMITED):
         # Never fall through to an audio download while YouTube is refusing.
         raise _transcript_block_error(captions_skipped_reason)
+    # Phase messages stay literal at each raise (the security tests render
+    # every ExtractionPhaseError message from source). They equal the
+    # TRANSCRIPT_*_MESSAGE constants, which the transcript tests pin.
+    if mode != LONG_VIDEO_MODE_TRANSCRIPT_ASR and captions_skipped_reason == CAPTIONS_FAILED:
+        raise ExtractionPhaseError(
+            "transcript", "Uoink couldn't download the captions for this video.")
     if mode != LONG_VIDEO_MODE_TRANSCRIPT_ASR:
         raise ExtractionPhaseError(
             "transcript",
-            TRANSCRIPT_CAPTIONS_FAILED_MESSAGE if captions_skipped_reason == CAPTIONS_FAILED
-            else TRANSCRIPT_NO_CAPTIONS_MESSAGE)
+            "No captions for this video, and local transcription is off for this save.")
     settings = dict(_read_settings() or {})
     settings["asr_fallback_enabled"] = True
     if not _reliability_model_status(_selected_reliability_model(settings)).get("cached"):
-        raise ExtractionPhaseError("transcript", TRANSCRIPT_NO_MODEL_MESSAGE)
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and the local transcription model is not downloaded yet.")
     # ".asr-" keeps the audio out of a refresh's published files; it is
     # removed on success, failure and cancellation.
     tmp_dir = Path(tempfile.mkdtemp(prefix=".asr-", dir=asset_folder))
@@ -7101,12 +7108,13 @@ def _transcript_only_entries(url: str, asset_folder: Path, mode: str,
             cancel_event=cancel_event, asr_titles=asr_titles)
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
-    if not entries:
-        status = (fallback or {}).get("status")
+    if not entries and (fallback or {}).get("status") == "model_not_downloaded":
         raise ExtractionPhaseError(
             "transcript",
-            TRANSCRIPT_NO_MODEL_MESSAGE if status == "model_not_downloaded"
-            else TRANSCRIPT_NO_SPEECH_MESSAGE)
+            "No captions for this video, and the local transcription model is not downloaded yet.")
+    if not entries:
+        raise ExtractionPhaseError(
+            "transcript", "No captions for this video, and local transcription found no words.")
     return entries, source, fallback
 
 
@@ -7657,7 +7665,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             or any(output_folder.glob("video.*"))):
         # A transcript-only save never replaces a saved capture or one that
         # has its video files or screenshots.
-        raise ExtractionPhaseError("metadata", TRANSCRIPT_ALREADY_SAVED_MESSAGE)
+        raise ExtractionPhaseError(
+            "metadata", "Already in your library, so this transcript-only save left it as it was.")
     video_slug = output_folder.name
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)

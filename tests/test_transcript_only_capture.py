@@ -279,3 +279,19 @@ def test_source_facts_shapes():
     assert server._source_facts({"release_timestamp": 0, "upload_date": "bad"})["published_at"] is None
     long = server._source_facts({"description": "a" * 9000})["description"]
     assert len(long) == server._SOURCE_DESCRIPTION_MAX_CHARS
+
+
+def test_transcript_messages_match_the_literal_phase_errors():
+    """The raise sites spell each message out (the security tests render every
+    ExtractionPhaseError message from source), so pin them to the constants
+    the show capture compares against."""
+    import ast
+    tree = ast.parse((ROOT / "server.py").read_text(encoding="utf-8"))
+    literals = {node.args[1].value for node in ast.walk(tree)
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "ExtractionPhaseError" and len(node.args) == 2
+                and isinstance(node.args[1], ast.Constant)}
+    for name in ("TRANSCRIPT_NO_CAPTIONS_MESSAGE", "TRANSCRIPT_NO_SPEECH_MESSAGE",
+                 "TRANSCRIPT_NO_MODEL_MESSAGE", "TRANSCRIPT_CAPTIONS_FAILED_MESSAGE",
+                 "TRANSCRIPT_ALREADY_SAVED_MESSAGE"):
+        assert getattr(server, name) in literals, name
