@@ -227,7 +227,10 @@ class Library:
             (folder / "screenshots" / f"shot_{n:04d}.jpg").write_bytes(b"jpg")
         (folder / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4" + b"1" * 256)
         if marker:
-            server._mark_capture_incomplete(folder, url)
+            # The note _run_extraction leaves until the sidecar is written.
+            (folder / server.CAPTURE_INCOMPLETE_NAME).write_text(
+                f"Uoink has not finished saving this capture yet.\n\nurl: {url}\n"
+                "started: 2026-11-01T09:00:00\n", encoding="utf-8")
         return folder
 
     def snapshot(self, folder: Path) -> dict:
@@ -482,6 +485,28 @@ def test_pause_stops_at_a_segment_and_resume_carries_on(lib):
     _wait(lambda: lib.finished(), message="resumed run")
     assert job._state["status"] == "done"
     assert lib.asr_calls == ["pausable", "pausable", "next-up"]
+
+
+def test_transcribe_media_checkpoint_runs_between_lazy_segments(tmp_path):
+    """The real ASR wrapper calls the checkpoint before decoding the next segment."""
+    media = tmp_path / "video.mp4"
+    media.write_bytes(b"\x00")
+    decoded, seen = [], []
+
+    def lazy(_path):
+        for n in range(4):
+            decoded.append(n)
+            yield types.SimpleNamespace(start=float(n), end=n + 1.0, text=f"line {n}")
+
+    def checkpoint(segment):
+        seen.append(segment.end)
+        if segment.end == 2.0:
+            raise tb.Paused()
+    with pytest.raises(tb.Paused):
+        reliability.transcribe_media(media, _transcribe=lazy, checkpoint=checkpoint)
+    assert seen == [1.0, 2.0] and decoded == [0, 1], "nothing past the pause point is decoded"
+    rows = reliability.transcribe_media(media, _transcribe=lazy)
+    assert [r[2] for r in rows] == ["line 0", "line 1", "line 2", "line 3"]
 
 
 def test_order_longest_or_newest():

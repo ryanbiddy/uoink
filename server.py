@@ -4662,6 +4662,8 @@ def _start_backfill_thread() -> None:
 # Markdown and folders a capture never finished) and transcribe one through
 # the capture's own caption fetch, audio download, local ASR, corpus renderer
 # and index publication. Nothing here deletes a user's file.
+# _run_extraction writes this file (by name) until a first capture's sidecar
+# is saved; one left behind means the capture stopped midway.
 CAPTURE_INCOMPLETE_NAME = "capture-not-finished.txt"
 _TRANSCRIPT_BACKFILL_MEDIA_SUFFIXES = (".mp4", ".webm", ".mkv", ".mov", ".m4a",
                                        ".mp3", ".aac", ".opus", ".ogg", ".wav")
@@ -4680,32 +4682,8 @@ _transcript_backfill_instance = None
 _transcript_backfill_instance_lock = threading.Lock()
 
 
-def _mark_capture_incomplete(folder: Path, url: str) -> None:
-    """Leave a plain note so a capture that stops midway never looks done."""
-    try:
-        key = _manual_capture_key(url)
-    except Exception:
-        key = ""
-    text = ("Uoink has not finished saving this capture yet.\n"
-            "If this file is still here after the capture is over, it stopped midway "
-            "and there is no transcript or library entry yet. Open Uoink, go to "
-            "Settings, then Library health, and press Finish. Uoink reuses the files "
-            "already in this folder.\n\n"
-            f"url: {url}\nkey: {key}\nstarted: {_now_iso()}\npid: {os.getpid()}\n")
-    try:
-        _atomic_write_text(folder / CAPTURE_INCOMPLETE_NAME, text)
-    except OSError as e:
-        log.warning("could not mark capture in progress in %s: %s", folder, e)
-
-
-def _clear_capture_incomplete(folder: Path) -> None:
-    try:
-        (folder / CAPTURE_INCOMPLETE_NAME).unlink(missing_ok=True)
-    except OSError as e:
-        log.warning("could not clear the capture-in-progress note in %s: %s", folder, e)
-
-
 def _capture_incomplete_record(folder: Path) -> dict:
+    """The url and start time _run_extraction wrote in capture-not-finished.txt."""
     try:
         text = (folder / CAPTURE_INCOMPLETE_NAME).read_text(encoding="utf-8")
     except (OSError, UnicodeError):
@@ -4713,7 +4691,7 @@ def _capture_incomplete_record(folder: Path) -> dict:
     record = {}
     for line in text.splitlines():
         name, sep, value = line.partition(": ")
-        if sep and name in ("url", "key", "started", "pid"):
+        if sep and name in ("url", "started"):
             record[name] = value.strip()
     return record
 
@@ -4903,7 +4881,8 @@ def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
                 if isinstance(u, str) and u.startswith(("http://", "https://"))), None)
     if url is None:
         return None
-    if _transcript_backfill_identity_busy(url, marker.get("key")):
+    # The note's url is the exact one the capture locked on (its identity key).
+    if _transcript_backfill_identity_busy(url):
         return None  # a capture is writing this folder right now
     media_path = _transcript_backfill_media_file(folder)
     try:
@@ -4920,7 +4899,6 @@ def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
         # Finishing needs the saved metadata as well as the media to stay offline.
         "media": "on_disk" if (media_path and metadata) else "download",
         "has_metadata": bool(metadata), "half": True, "repair": False,
-        "capture_key": marker.get("key"),
     }
 
 
@@ -5299,7 +5277,7 @@ def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) 
     url, host = item["url"], item.get("host") or "other"
     if item.get("media") == "download" and not network_ok(host):
         return {"outcome": "busy"}
-    held = _transcript_backfill_hold_identity(url, item.get("capture_key"))
+    held = _transcript_backfill_hold_identity(url)
     if held is None:
         return {"outcome": "busy"}
     try:
@@ -8118,7 +8096,6 @@ def _retry_publication_one() -> bool:
                 if _index_yoink(folder, current, corpus_path, sidecar_path) is False:
                     raise RuntimeError("library index did not publish the capture")
             _finish_publication_retry(folder, current, corpus_path, record)
-            _clear_capture_incomplete(folder)
             superseded = _publication_retry_superseded(url, receipt_id, record)
             if record.get("pending_id") is not None:
                 # The download handed off to this receipt. Complete its queue
@@ -8236,8 +8213,18 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             raise ExtractionPhaseError("save", "This capture already finished.")
         refreshing = False
     if not refreshing:
-        # Until the sidecar is written, the folder says it is not finished.
-        _mark_capture_incomplete(output_folder, url)
+        # 3.18: until the sidecar is written the folder says it is not
+        # finished, so a capture that stops midway never looks done. The name
+        # is spelled out (CAPTURE_INCOMPLETE_NAME) because tests load this
+        # function on its own.
+        try:
+            _atomic_write_text(output_folder / "capture-not-finished.txt", (
+                "Uoink has not finished saving this capture yet. If this file is still "
+                "here after the capture is over, it stopped midway. Open Uoink, go to "
+                "Settings, Library health, and press Finish to complete it from the "
+                f"files already here.\n\nurl: {url}\nstarted: {_now_iso()}\n"))
+        except OSError as e:
+            log.warning("could not mark the capture as in progress: %s", e)
     video_slug = output_folder.name
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
@@ -8871,7 +8858,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             sidecar_path = asset_folder / ("c.json" if refreshing else sidecar_name)
             _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
             if not refreshing:
-                _clear_capture_incomplete(output_folder)
+                try:
+                    (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+                except OSError as e:
+                    log.warning("could not clear the capture-in-progress note: %s", e)
         except (OSError, TypeError) as e:
             # Do not publish assets while the previous sidecar still references
             # the old set. A failed staged write leaves that capture intact.
