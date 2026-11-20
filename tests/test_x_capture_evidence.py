@@ -163,7 +163,10 @@ def test_supplement_transport_failure_keeps_text_and_marks_it(monkeypatch, failu
             return Response()
         raise failure("fixture failure")
     monkeypatch.setattr(x_extractor.urllib.request, "urlopen", urlopen)
-    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"])
+    # 3.18.0: deliberately changed. FxTwitter only runs when the user turns
+    # it on, so the test opts in (cache and cool-down start empty).
+    x_extractor.reset_fxtwitter_state()
+    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"], fxtwitter=True)
     evidence = payload["_uoink_x_evidence"]
     assert len(calls) == 2
     assert evidence["text"] == fixture["syndication"]["text"]

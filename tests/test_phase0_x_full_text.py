@@ -36,7 +36,10 @@ def test_fxtwitter_v2_fixture_restores_long_post_text(monkeypatch):
 
     monkeypatch.setattr(x_extractor.urllib.request, "urlopen", fake_urlopen)
 
-    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"], timeout=7)
+    # 3.18.0: deliberately changed. FxTwitter is the user's opt-in now, so
+    # the test turns it on. Its cache and cool-down start empty.
+    x_extractor.reset_fxtwitter_state()
+    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"], timeout=7, fxtwitter=True)
     result = x_extractor.extract_x_thread(
         f"https://x.com/example/status/{fixture['tweet_id']}",
         _fetch=lambda _tweet_id, **_kwargs: payload,
@@ -61,7 +64,8 @@ def test_fxtwitter_failure_falls_back_to_syndication(monkeypatch):
 
     monkeypatch.setattr(x_extractor.urllib.request, "urlopen", fake_urlopen)
 
-    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"])
+    x_extractor.reset_fxtwitter_state()
+    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"], fxtwitter=True)
 
     assert payload["text"] == fixture["syndication"]["text"]
     assert "_uoink_full_text_source" not in payload

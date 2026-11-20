@@ -2171,6 +2171,46 @@ class Index:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def x_text_rows(self) -> list[dict]:
+        """Live X saves (videos, posts) for the cut-off text repair
+        (x_text_repair). Read-only; the job decides what to touch."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, slug, title, source_type, platform, yoinked_at, "
+                "corpus_path, sidecar_path, metadata_json FROM yoinks "
+                "WHERE deleted_at IS NULL AND (platform IN ('x', 'twitter') "
+                "OR source_type IN ('x_thread'))"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def update_corpus_text(self, video_id: str, *, content: str,
+                           metadata_json: str | None = None) -> bool:
+        """Refresh one row's searchable corpus text (and, when given, its
+        metadata_json) after its corpus file was repaired in place. Every
+        other column and every table that hangs off the row (shelves, tags,
+        opens, clips) is left as it is. False when the row is gone."""
+        with self._lock, self._rollback_on_error():
+            row = self._conn.execute(
+                "SELECT slug, channel, title, topic, hook_type FROM yoinks "
+                "WHERE video_id=? AND deleted_at IS NULL", (video_id,)).fetchone()
+            if row is None:
+                return False
+            if metadata_json is not None:
+                self._conn.execute("UPDATE yoinks SET metadata_json=? WHERE video_id=?",
+                                   (metadata_json, video_id))
+            self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
+            self._conn.execute(
+                "INSERT INTO yoinks_fts "
+                "(video_id, slug, channel, title, topic, hook_type, content) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (video_id, row["slug"], row["channel"], row["title"], row["topic"],
+                 row["hook_type"], content or ""),
+            )
+            self._conn.commit()
+        self._invalidate_library_sources([video_id])
+        self._notify_source_changed(video_id)
+        return True
+
     def update_taxonomy(self, video_id: str, *, platform: str | None,
                         author: str | None, channel: str | None) -> None:
         """Set platform / author / channel on one row and refresh the FTS
