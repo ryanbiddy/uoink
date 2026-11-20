@@ -53,6 +53,8 @@ def select_mode(index, mode, *, filters=None):
         return "keyword", None
     if (filters or {}).get("availability"):
         return "keyword", "Availability filtering uses keyword search."
+    if (filters or {}).get("published_from") or (filters or {}).get("published_to"):
+        return "keyword", "Publish date filtering uses keyword search."
     engine = getattr(index, "_local_search", None)
     try:
         if engine is None or not engine.enabled:

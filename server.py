@@ -115,6 +115,8 @@ import source_availability  # noqa: E402  -- bounded source availability checks
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import suggestions  # noqa: E402  -- 3.17 podcast suggestions (opt-in, topic words only)
 import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
+import show_capture  # noqa: E402  -- Save a whole show (transcript-only, resumable)
+import timed_cues  # noqa: E402  -- Timed cues read contract v1 (uoink.cues.read)
 import research  # noqa: E402  -- Research run storage and source discovery
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
@@ -425,6 +427,32 @@ LONG_VIDEO_MODE_CHUNKED = "chunked"
 LONG_VIDEO_MODE_LITE = "lite"
 LONG_VIDEO_MODES = (LONG_VIDEO_MODE_FULL, LONG_VIDEO_MODE_CHUNKED,
                     LONG_VIDEO_MODE_LITE)
+# Whole-show capture (show_capture.py): transcript only. Captions first and no
+# media download, screenshots, comments or channel context. "transcript" saves
+# nothing for a video without captions; "transcript_asr" downloads the audio
+# alone and runs local Whisper for it (the user opts in per run). Queue-only
+# modes: the show job puts them on pending_yoinks rows, never the /extract API.
+LONG_VIDEO_MODE_TRANSCRIPT = "transcript"
+LONG_VIDEO_MODE_TRANSCRIPT_ASR = "transcript_asr"
+TRANSCRIPT_ONLY_MODES = (LONG_VIDEO_MODE_TRANSCRIPT, LONG_VIDEO_MODE_TRANSCRIPT_ASR)
+# The failure text a transcript-only capture leaves on its queue row when a
+# video has no captions and local transcription is off for the run.
+TRANSCRIPT_NO_CAPTIONS_MESSAGE = (
+    "No captions for this video, and local transcription is off for this save.")
+TRANSCRIPT_NO_SPEECH_MESSAGE = (
+    "No captions for this video, and local transcription found no words.")
+TRANSCRIPT_NO_MODEL_MESSAGE = (
+    "No captions for this video, and the local transcription model is not downloaded yet.")
+TRANSCRIPT_CAPTIONS_FAILED_MESSAGE = "Uoink couldn't download the captions for this video."
+TRANSCRIPT_ALREADY_SAVED_MESSAGE = (
+    "Already in your library, so this transcript-only save left it as it was.")
+TRANSCRIPT_REMOVED_MESSAGE = (
+    "You removed this one from your library, so this transcript-only save left it out.")
+TRANSCRIPT_UNFINISHED_MESSAGE = (
+    "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
+# What a transcript-only attempt itself leaves in a folder (captions, a
+# partial download); these never count as a saved capture.
+_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".part", ".ytdl", ".json", ".tmp")
 # Lite mode forces the screenshot interval to at least this (1 per 5 min), so
 # a 2-hour video yields a couple dozen frames instead of hundreds.
 LITE_SHOT_INTERVAL_SEC = 5 * 60
@@ -3256,6 +3284,9 @@ def compute_health(sidecar: dict) -> dict:
     if sidecar.get("extraction_mode") == "generic":
         # /extract/any saves a transcript only; no screenshots by design.
         skipped.add("screenshots")
+    if sidecar.get("long_video_mode") in TRANSCRIPT_ONLY_MODES:
+        # A transcript-only save (whole-show capture) has no screenshots by design.
+        skipped.add("screenshots")
     for key in skipped:
         health[key] = "skipped"
     return health
@@ -4452,6 +4483,9 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             "comment_count": sidecar.get("comment_count"),
             "channel_follower_count": sidecar.get("channel_follower_count"),
             "upload_date": sidecar.get("upload_date"),
+            # Original publish date (ISO 8601, or upload_date's YYYYMMDD on an
+            # older sidecar), separate from yoinked_at. Search reads either.
+            "published_at": sidecar.get("published_at") or sidecar.get("upload_date"),
         }, ensure_ascii=False),
     }
     idx = _get_index()
@@ -5787,7 +5821,9 @@ def _normalize_long_video_mode(value) -> str:
     if not isinstance(value, str):
         raise ValueError(f"long_video_mode must be {_valid}")
     mode = value.strip().lower()
-    if mode not in LONG_VIDEO_MODES:
+    # The transcript-only modes are internal: a whole-show save puts them on
+    # queue rows, and an Activity retry of one of its episodes sends one back.
+    if mode not in LONG_VIDEO_MODES and mode not in TRANSCRIPT_ONLY_MODES:
         raise ValueError(f"long_video_mode must be {_valid}")
     return mode
 
@@ -7839,6 +7875,144 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
     return None
 
 
+# ---------------------------------------------------------------------------
+# Transcript-only saves (whole-show capture, show_capture.py)
+# ---------------------------------------------------------------------------
+_SOURCE_DESCRIPTION_MAX_CHARS = 5000
+
+
+def _transcript_block_error(reason: str) -> subprocess.CalledProcessError:
+    """A caption refusal in a transcript-only save, shaped like the yt-dlp
+    failure the retry worker already classifies, so the queue row waits
+    with the existing bot-check or 429 back-off instead of failing."""
+    if reason == CAPTIONS_RATE_LIMITED:
+        line = "ERROR: HTTP Error 429: Too Many Requests"
+    else:
+        line = "ERROR: [youtube] Sign in to confirm you're not a bot"
+    return subprocess.CalledProcessError(
+        1, ["yt-dlp", "--skip-download"], output=b"", stderr=line.encode("utf-8"))
+
+
+def _transcript_only_entries(url: str, asset_folder: Path, mode: str,
+                             caption_entries: list, duration: float, *,
+                             captions_skipped_reason: str | None,
+                             cancel_event: threading.Event | None = None,
+                             asr_titles: tuple = ()) -> tuple[list, str | None, dict]:
+    """Captions first. Without them, ``transcript_asr`` downloads the audio
+    alone and runs local Whisper (the user opted in for this run), and
+    ``transcript`` fails with a plain reason so nothing empty is saved."""
+    if caption_entries:
+        return list(caption_entries), "captions", {"status": "not_needed"}
+    if captions_skipped_reason in (CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN,
+                                   CAPTIONS_RATE_LIMITED):
+        # Never fall through to an audio download while YouTube is refusing.
+        raise _transcript_block_error(captions_skipped_reason)
+    # Phase messages stay literal at each raise (the security tests render
+    # every ExtractionPhaseError message from source). They equal the
+    # TRANSCRIPT_*_MESSAGE constants, which the transcript tests pin.
+    if mode != LONG_VIDEO_MODE_TRANSCRIPT_ASR and captions_skipped_reason == CAPTIONS_FAILED:
+        raise ExtractionPhaseError(
+            "transcript", "Uoink couldn't download the captions for this video.")
+    if mode != LONG_VIDEO_MODE_TRANSCRIPT_ASR:
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and local transcription is off for this save.")
+    settings = dict(_read_settings() or {})
+    settings["asr_fallback_enabled"] = True
+    if not _reliability_model_status(_selected_reliability_model(settings)).get("cached"):
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and the local transcription model is not downloaded yet.")
+    # ".asr-" keeps the audio out of a refresh's published files; it is
+    # removed on success, failure and cancellation.
+    tmp_dir = Path(tempfile.mkdtemp(prefix=".asr-", dir=asset_folder))
+    try:
+        audio_path = _download_reliability_audio(url, tmp_dir, cancel_event)
+        _raise_if_cancelled(cancel_event)
+        entries, source, fallback = _resolve_video_transcript(
+            [], audio_path, duration, url=url, settings=settings,
+            cancel_event=cancel_event, asr_titles=asr_titles)
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+    if not entries and (fallback or {}).get("status") == "model_not_downloaded":
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and the local transcription model is not downloaded yet.")
+    if not entries:
+        raise ExtractionPhaseError(
+            "transcript", "No captions for this video, and local transcription found no words.")
+    return entries, source, fallback
+
+
+def _clear_transcript_leftovers(folder: Path) -> None:
+    """Before a transcript-only attempt: remove what an earlier attempt that
+    never finished left (its captions, metadata and thumbnail). The folder
+    and its ownership claim stay."""
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt"):
+        for path in folder.glob(pattern):
+            if path.is_file() and not path.is_symlink():
+                with contextlib.suppress(OSError):
+                    path.unlink()
+
+
+def _discard_transcript_attempt(folder: Path) -> None:
+    """Remove what a failed transcript-only attempt wrote into its own fresh
+    folder, so a show with many caption-less videos leaves no empty shells.
+    Only the attempt's known files go; anything else keeps the folder."""
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt",
+                    ".capture-source.json", "capture-not-finished.txt"):
+        for path in folder.glob(pattern):
+            if path.is_file() and not path.is_symlink():
+                with contextlib.suppress(OSError):
+                    path.unlink()
+    with contextlib.suppress(OSError):
+        folder.rmdir()
+
+
+def _caption_kind_for(metadata: dict, srt_path: Path) -> str | None:
+    """'captions' when the saved track was uploaded by the creator,
+    'auto_captions' when it is YouTube's automatic one, None when unknown.
+    yt-dlp writes the uploaded track for a language when both exist."""
+    name = srt_path.name
+    if not (name.startswith("video.") and name.endswith(".srt")):
+        return None
+    lang = name[len("video."):-len(".srt")]
+    uploaded = metadata.get("subtitles")
+    automatic = metadata.get("automatic_captions")
+    if isinstance(uploaded, dict) and lang in uploaded:
+        return "captions"
+    if isinstance(automatic, dict) and lang in automatic:
+        return "auto_captions"
+    return None
+
+
+def _source_published_at(metadata: dict) -> str | None:
+    """The source's own publish date as ISO 8601 (UTC): a full timestamp
+    when the source gives one, else the calendar day."""
+    for key in ("release_timestamp", "timestamp"):
+        value = metadata.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0:
+            try:
+                return datetime.fromtimestamp(float(value), timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ")
+            except (OverflowError, OSError, ValueError):
+                pass
+    for key in ("release_date", "upload_date"):
+        day = index.published_day(metadata.get(key))
+        if day:
+            return day
+    return None
+
+
+def _source_facts(metadata: dict) -> dict:
+    """{published_at, description} for a capture's sidecar, from the
+    source's own metadata. Either is None when the source does not give it."""
+    text = metadata.get("description")
+    description = (text.strip()[:_SOURCE_DESCRIPTION_MAX_CHARS]
+                   if isinstance(text, str) and text.strip() else None)
+    return {"published_at": _source_published_at(metadata), "description": description}
+
+
 def _video_capture_source(url: str) -> str:
     """Stable source identity, including known-platform URL aliases."""
     canonical, _platform = _normalize_video_url(url)
@@ -8059,8 +8233,9 @@ def _finish_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, re
             })
         except Exception as exc:
             log.warning("incremental index call site failed: %s", exc)
-    _start_entity_extraction_thread(folder, sidecar.get("video_id"), sidecar)
-    if sidecar.get("long_video_mode") != LONG_VIDEO_MODE_LITE:
+    if sidecar.get("long_video_mode") not in TRANSCRIPT_ONLY_MODES:
+        _start_entity_extraction_thread(folder, sidecar.get("video_id"), sidecar)
+    if sidecar.get("long_video_mode") not in (LONG_VIDEO_MODE_LITE, *TRANSCRIPT_ONLY_MODES):
         _start_comments_thread(sidecar["url"], folder, corpus_path, metadata, record.get("entries"))
     # A failed save preserves downloads. Only a successful publication may
     # remove the exact unretained inputs; never glob or touch changed files.
@@ -8324,11 +8499,42 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         topic = _classify_topic(metadata)
 
     title = metadata.get("title") or "Untitled"
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES:
+        # A transcript-only save never replaces or reduces a library item.
+        # Any indexed row for this video ends it here, before a folder is
+        # claimed, even when that item's folder has moved (the folder lookup
+        # below then finds nothing and would start a new one).
+        saved = _get_index().get_yoink(_video_capture_id(url, metadata))
+        if saved is not None and saved.get("deleted_at"):
+            raise ExtractionPhaseError(
+                "metadata",
+                "You removed this one from your library, so this transcript-only save left it out.")
+        if saved is not None:
+            raise ExtractionPhaseError(
+                "metadata", "Already in your library, so this transcript-only save left it as it was.")
     output_folder, existing = _prepare_video_capture_folder(
         output_folder, url, metadata, refresh_existing=refresh_existing)
     # A new capture has only its ownership claim. Refreshes keep previous
     # artifacts until generation and the file swap have succeeded.
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and existing is not None:
+        raise ExtractionPhaseError(
+            "metadata", "Already in your library, so this transcript-only save left it as it was.")
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and (
+            any(output_folder.glob("screenshots/*.jpg"))
+            or any(p.suffix.lower() not in _TRANSCRIPT_ATTEMPT_SUFFIXES
+                   for p in output_folder.glob("video.*"))):
+        # Video files or screenshots with no library item: a full save that
+        # is unfinished. Captions left by an earlier transcript attempt
+        # don't count, so a crashed attempt is simply tried again.
+        raise ExtractionPhaseError(
+            "metadata",
+            "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and refreshing:
+        # Only an earlier attempt's own files can be here (saved items and
+        # unfinished full saves ended above). Start clean, not as a refresh.
+        _clear_transcript_leftovers(output_folder)
+        refreshing = False
     if finish_on_disk:
         if (_resolve_corpus_path(output_folder)
                 or (output_folder / f"{output_folder.name}.json").exists()):
@@ -8367,6 +8573,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # comments are skipped below. Done before the estimate/cap math so the
     # capped-interval note reflects the real interval used.
     is_lite = requested_long_video_mode == LONG_VIDEO_MODE_LITE
+    # Whole-show capture: captions (or local ASR on the audio alone) and no
+    # media download, screenshots, comments or channel context.
+    transcript_only = requested_long_video_mode in TRANSCRIPT_ONLY_MODES
     if is_lite:
         interval = max(interval, LITE_SHOT_INTERVAL_SEC)
     long_video_chunks = (
@@ -8378,6 +8587,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         effective_long_video_mode = LONG_VIDEO_MODE_CHUNKED
     elif is_lite:
         effective_long_video_mode = LONG_VIDEO_MODE_LITE
+    elif transcript_only:
+        effective_long_video_mode = requested_long_video_mode
     else:
         effective_long_video_mode = LONG_VIDEO_MODE_FULL
     work_durations = (
@@ -8387,7 +8598,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     )
     processed_media_seconds = int(sum(work_durations))
     clamped_interval = _screenshot_interval_for(duration, interval)
-    if clamped_interval < interval:
+    if clamped_interval < interval and not transcript_only:
         notes.append(
             f"Screenshot interval lowered from {interval}s to "
             f"{clamped_interval}s so this source can yield about "
@@ -8411,9 +8622,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             f"about every {spacing}, and skipped the comments "
             "fetch. Re-yoink in full mode for dense screenshots and comments."
         )
+    if transcript_only:
+        notes.append("Transcript-only save: no video download, screenshots, "
+                     "comments or channel details.")
 
     estimate = _estimated_screenshot_count(work_durations, interval)
-    if estimate > MAX_SCREENSHOTS:
+    if estimate > MAX_SCREENSHOTS and not transcript_only:
         new_interval = interval
         while _estimated_screenshot_count(work_durations, new_interval) > MAX_SCREENSHOTS:
             new_interval += 1
@@ -8431,6 +8645,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     _raise_if_cancelled(cancel_event)
     keep_media = (
         source_type == SOURCE_TYPE_SHORT_VIDEO
+        and not transcript_only
         and bool(_read_settings().get("keep_media"))
     )
     stage_root = None
@@ -8591,7 +8806,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 phase_callback("download")
             media_before_download = set(asset_folder.glob(media_glob))
             try:
-                if not reused_media:
+                if not reused_media and not transcript_only:
                     _run_subprocess(
                         media_cmd,
                         cancel_event=cancel_event,
@@ -8650,7 +8865,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         srt_order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
         srt_files = sorted(asset_folder.glob("video*.srt"), key=lambda p: (
             srt_order.index(p.name) if p.name in srt_order else len(srt_order), p.name))
-        if not video_files:
+        if not video_files and not transcript_only:
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
                 raise ExtractionPhaseError(
                     "download",
@@ -8666,7 +8881,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             )
 
         shots_dir = asset_folder / "screenshots"
-        shots_dir.mkdir(exist_ok=True)
+        if not transcript_only:
+            shots_dir.mkdir(exist_ok=True)
 
         shot_times: list[int] = []
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
@@ -8709,7 +8925,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                         int(chunk["start_seconds"] + (local_i * interval))
                     )
                     shot_number += 1
-        else:
+        elif not transcript_only:
             video_file = video_files[0]
             try:
                 if phase_callback:
@@ -8747,24 +8963,41 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         platform_caption_count = len(entries)
         if not entries and phase_callback:
             phase_callback("transcript")
-        entries, transcript_source, asr_fallback = _resolve_video_transcript(
-            entries,
-            video_files[0],
-            duration,
-            url=url,
-            captions_refused=captions_refused,
-            media_chunks=[
-                (path, chunk["start_seconds"], chunk["duration_seconds"])
-                for path, chunk in zip(video_files, long_video_chunks)
-            ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
-            cancel_event=cancel_event,
-            asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
-            **({"asr_checkpoint": asr_checkpoint} if asr_checkpoint is not None else {}),
-            # The user pressed Finish (or started the backfill) to get words:
-            # local ASR runs for this one save. A copy, never saved.
-            **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
-               if finish_on_disk else {}),
-        )
+        if transcript_only:
+            try:
+                entries, transcript_source, asr_fallback = _transcript_only_entries(
+                    url, asset_folder, effective_long_video_mode, entries, duration,
+                    captions_skipped_reason=captions_skipped_reason,
+                    cancel_event=cancel_event,
+                    asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
+                )
+            except BaseException:
+                if not refreshing:
+                    _discard_transcript_attempt(output_folder)
+                raise
+        else:
+            entries, transcript_source, asr_fallback = _resolve_video_transcript(
+                entries,
+                video_files[0],
+                duration,
+                url=url,
+                captions_refused=captions_refused,
+                media_chunks=[
+                    (path, chunk["start_seconds"], chunk["duration_seconds"])
+                    for path, chunk in zip(video_files, long_video_chunks)
+                ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
+                cancel_event=cancel_event,
+                asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
+                **({"asr_checkpoint": asr_checkpoint} if asr_checkpoint is not None else {}),
+                # The user pressed Finish (or started the backfill) to get words:
+                # local ASR runs for this one save. A copy, never saved.
+                **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
+                   if finish_on_disk else {}),
+            )
+        # Uploaded captions or YouTube's automatic ones, when the source's
+        # caption tables say which track the saved file came from.
+        caption_kind = (_caption_kind_for(metadata, srt_files[0])
+                        if srt_files and transcript_source == "captions" else None)
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
                 " while retaining the full available subtitle track"
@@ -8810,6 +9043,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                        or "")
         if str(metadata.get("extractor") or "").lower().startswith("twitter"):
             channel_url = ""
+        if transcript_only:
+            # One fewer YouTube request per episode in a whole-show save.
+            channel_url = ""
         channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
         # Phase 6 (BC-2): the transcript rows persist their actual link values,
@@ -8849,6 +9085,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             media_sections=media_sections,
             transcript_note=transcript_note,
         )
+        if transcript_only:
+            # No comments worker runs for this save, so say so instead of
+            # promising comments that never arrive.
+            yoink_md = yoink_md.replace(
+                "*Fetching comments... they'll appear here when ready.*",
+                "*Skipped for a transcript-only save.*", 1)
         # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
         # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
         # outside its folder.
@@ -8906,6 +9148,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                             or metadata.get("creator")),
                 "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
                 "upload_date": metadata.get("upload_date"),
+                # The source's own publish (air) date, ISO 8601 in UTC, and its
+                # description: separate from yoinked_at, the capture time.
+                **_source_facts(metadata),
                 "view_count": metadata.get("view_count"),
                 "like_count": metadata.get("like_count"),
                 "comment_count": metadata.get("comment_count"),
@@ -8924,6 +9169,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # fetched): captions_bot_check, captions_rate_limited,
                 # captions_bot_check_cooldown or captions_failed.
                 "captions_skipped_reason": captions_skipped_reason,
+                # "captions" (uploaded) or "auto_captions" (YouTube's automatic
+                # track) when transcript_source is captions, else None.
+                "caption_kind": caption_kind,
                 "asr_fallback": asr_fallback,
                 "transcript_note": transcript_note,
                 # Structured shape: timestamp + relative path + bare filename so
@@ -8943,6 +9191,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "comments_status": (
                     "skipped"
                     if effective_long_video_mode == LONG_VIDEO_MODE_LITE
+                    or transcript_only
                     else "pending"
                 ),
                 # Hook Type runs inside the comments worker, so lite mode (which
@@ -8952,6 +9201,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     "pending"
                     if hook_type_pending
                     and effective_long_video_mode != LONG_VIDEO_MODE_LITE
+                    and not transcript_only
                     else "skipped"
                 ),
                 "hook_type": None,
@@ -8968,6 +9218,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "entity_extraction_status": (
                     "pending"
                     if _anthropic_key_for_feature("entity_extraction_enabled")
+                    and not transcript_only
                     else "skipped"
                 ),
                 "entity_extraction_error": None,
@@ -9251,10 +9502,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # background, in parallel with the comments / Comment Intelligence
     # pipeline (it does not wait on either). Started after _index_yoink so
     # the yoinks row exists for the entity_mentions foreign key. Best-effort
-    # -- a failure never fails an otherwise-successful extraction.
-    _start_entity_extraction_thread(
-        output_folder, sidecar.get("video_id"), sidecar
-    )
+    # -- a failure never fails an otherwise-successful extraction. A
+    # transcript-only save (whole-show capture) sends nothing to a model.
+    if not transcript_only:
+        _start_entity_extraction_thread(
+            output_folder, sidecar.get("video_id"), sidecar
+        )
 
     # Build the clipboard / paste version once we know the on-disk md is
     # final. Session adds skip this -- the session corpus is built at
@@ -9272,8 +9525,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # Type waits for this comments worker to finish so it can include the top
     # comment when one is available. Lite recovery (A-01) skips it: comments
     # are the fragile/expensive tail this mode exists to shed.
-    if effective_long_video_mode == LONG_VIDEO_MODE_LITE:
-        log.info("lite mode: skipping comments fetch for %s", url)
+    if effective_long_video_mode == LONG_VIDEO_MODE_LITE or transcript_only:
+        log.info("%s mode: skipping comments fetch for %s", effective_long_video_mode, url)
     else:
         if phase_callback:
             phase_callback("comments")
@@ -16475,6 +16728,11 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         nxt = (datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
         clauses.append(f"{captured} < ?")
         params.append(nxt)
+    # Original publish (air) date bounds, separate from the capture date.
+    published_clauses, published_params = index.published_filter_sql(
+        idx.published_day_sql("y"), filters.get("published_from"), filters.get("published_to"))
+    clauses.extend(published_clauses)
+    params.extend(published_params)
     where = " AND ".join(clauses)
     order = {
         "oldest": f"{captured} ASC, y.video_id ASC",
@@ -16495,6 +16753,8 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         tail = "FROM yoinks y WHERE " + where
         args = params
     with idx.search_read() as db:
+        if published_clauses:
+            index.use_published_day(db)
         try:
             rows = (idx._ranked_source_page(db, q, limit, offset, where, params)
                     if expression and match == "forgiving" and sort == "relevance" else None)
@@ -16749,6 +17009,10 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "captions_skipped_reason": captions_skipped if isinstance(captions_skipped, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
+            # Original publish (air) date as YYYY-MM-DD, separate from yoinked_at.
+            "published_at": (index.published_day(live.get("published_at"))
+                             or index.published_day(live.get("upload_date"))
+                             or index.published_day_from_metadata(metadata)),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return podcasts.repair_corpus_titles(idx, out, data_root=DATA_ROOT)
@@ -17146,6 +17410,430 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
             for q in queued
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Save a whole show (show_capture.py). Listing reuses the list import's
+# yt-dlp window and the podcast feed parser; each YouTube episode is one
+# transcript-only row on the download queue, and each podcast episode goes
+# through the podcast download and transcription job. Nothing starts until
+# the user presses Start; one episode is in flight at a time.
+# ---------------------------------------------------------------------------
+_SHOW_CAPTURE_POLL_SEC = 15
+_SHOW_QUEUE_INTERVAL_SEC = 30
+_show_capture_wake = threading.Event()
+# Podcast episodes a show run is downloading or has handed to transcription,
+# by episode id: {"state": downloading | queued | failed | retry | cancelled,
+# "cancel": Event, ...}. Entries go once the run has recorded the outcome.
+_show_podcast_runs: dict[int, dict] = {}
+_show_podcast_runs_lock = threading.Lock()
+# A download error that means "the host is busy or unreachable for now":
+# back off and try again. Anything else (a 404, a refused address) fails
+# the episode and still counts toward the run's failures in a row.
+_SHOW_HOST_BUSY = re.compile(
+    r"HTTP Error (?:429|5\d\d)|Too Many Requests|Service Unavailable|timed out|^timeout$"
+    r"|temporar|Connection (?:reset|refused|aborted)|getaddrinfo|Remote end closed",
+    re.IGNORECASE)
+
+
+def _show_spawn(target, *args) -> None:
+    threading.Thread(target=target, args=args, name="show-podcast", daemon=True).start()
+_SHOW_ERROR_STATUS = {"empty": 400, "invalid_url": 400, "unsupported": 400, "invalid": 400,
+                      "not_found": 404, "unreadable": 500, "invalid_state": 409,
+                      "needs_asr": 409, "asr_unavailable": 409}
+
+
+def _show_youtube_waiting() -> dict:
+    """Is YouTube asking Uoink to slow down? The bot-check cooldown, or a
+    queued capture that is waiting out a bot check or a 429."""
+    status = _youtube_bot_check_status()
+    if status.get("active"):
+        return {**status, "reason": "bot_check"}
+    now = _now_iso()
+    latest = None
+    reason = "bot_check"
+    for row in _get_index().list_pending(limit=200):
+        error = str(row.get("last_error") or "")
+        retry_after = str(row.get("retry_after") or "")
+        if (row.get("status") == "pending" and retry_after > now
+                and error.startswith(("youtube_bot_check", "youtube_rate_limit"))):
+            if latest is None or retry_after > latest:
+                latest = retry_after
+                reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
+    if latest is None:
+        return {"active": False}
+    until = show_capture._parse_iso(latest)
+    if until is None:
+        return {"active": False}
+    left = int((until - datetime.now(timezone.utc)).total_seconds())
+    return {"active": left > 0, "seconds_left": max(0, left), "reason": reason}
+
+
+def _show_reason_from_pending(row: dict) -> str:
+    """The user-facing line of a failed queue row's last error."""
+    error = str(row.get("last_error") or "").strip()
+    if not error:
+        return "Uoink couldn't save this one."
+    line = error.splitlines()[-1].strip()
+    if line.startswith(("youtube_bot_check", "youtube_rate_limit")):
+        return "YouTube kept refusing this one. Try it again later."
+    return line[:300]
+
+
+def _show_podcast_feed(idx, feed_url: str):
+    canonical = podcasts._validate_feed_url(feed_url)
+    if not canonical:
+        return None
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT * FROM podcast_feeds WHERE feed_url=?", (canonical,)).fetchone()
+    return dict(row) if row else None
+
+
+def _show_podcast_linked_id(idx, feed_url: str, episode: dict) -> str | None:
+    """The library id a feed episode is linked to (saved, or saved and then
+    removed by the user), or None."""
+    feed = _show_podcast_feed(idx, feed_url)
+    if feed is None:
+        return None
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT yoink_video_id FROM podcast_episodes WHERE feed_id=? AND guid=? "
+            "AND yoink_video_id IS NOT NULL", (int(feed["id"]), episode.get("guid") or "")).fetchone()
+    if row is None:
+        same = podcasts.find_feed_episode(
+            idx, int(feed["id"]), audio_url=episode.get("audio_url"),
+            title=episode.get("title"), published=episode.get("published_at"))
+        video_id = (same or {}).get("yoink_video_id")
+    else:
+        video_id = row["yoink_video_id"]
+    if not video_id:
+        return None
+    return video_id if idx.get_yoink(video_id) is not None else None
+
+
+def _register_show_episode(idx, feed_url: str, show_title, episode: dict) -> dict:
+    """Put one feed episode in the podcast tables under its real GUID
+    without following the show (the same rule as a suggestion save: a show
+    not already followed is added switched off, so nothing polls it)."""
+    existed = _show_podcast_feed(idx, feed_url) is not None
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed_id = int(feed["id"])
+    if not existed:
+        podcasts.set_feed_enabled(idx, feed_id, False)
+        podcasts.record_feed_meta(
+            idx, feed_id, title=show_title or None, description=None,
+            homepage=None, etag=None, last_modified=None, ok=True)
+    same = podcasts.find_feed_episode(
+        idx, feed_id, audio_url=episode.get("audio_url"), title=episode.get("title"),
+        published=episode.get("published_at"))
+    if same is not None:
+        return same
+    podcasts.upsert_episodes(idx, feed_id, [{
+        "guid": episode.get("guid"), "title": episode.get("title"),
+        "audio_url": episode.get("audio_url"),
+        "episode_page_url": episode.get("episode_page_url"),
+        "duration_seconds": episode.get("duration_seconds"),
+        "published_at": episode.get("published_at"),
+        "description": episode.get("description")}])
+    # One indexed lookup (feed_id, guid), not a scan of the feed's episodes.
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=? LIMIT 1",
+            (feed_id, episode.get("guid") or "")).fetchone()
+    found = podcasts.get_episode(idx, int(row["id"])) if row else None
+    if found is None:
+        raise show_capture.EpisodeError("Uoink couldn't add this episode.")
+    return found
+
+
+def _show_podcast_note(episode_id: int, **state) -> None:
+    """Record what the episode's thread is doing, keeping its cancel flag."""
+    with _show_podcast_runs_lock:
+        entry = _show_podcast_runs.setdefault(episode_id, {})
+        cancel = entry.get("cancel")
+        entry.clear()
+        entry.update(state)
+        if cancel is not None:
+            entry["cancel"] = cancel
+
+
+def _show_podcast_cancelled(episode_id: int) -> bool:
+    with _show_podcast_runs_lock:
+        event = (_show_podcast_runs.get(episode_id) or {}).get("cancel")
+    return bool(event is not None and event.is_set())
+
+
+def _show_podcast_run(episode_id: int) -> None:
+    """Download one episode, then queue the normal podcast transcription
+    that publishes it into the library. Runs on its own thread. Cancelling
+    the run stops it before transcription (a download already under way
+    finishes and its audio stays with the episode)."""
+    def note(**state):
+        _show_podcast_note(episode_id, **state)
+
+    try:
+        if _show_podcast_cancelled(episode_id):
+            return note(state="cancelled")
+        idx = _get_index()
+        downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+        if _show_podcast_cancelled(episode_id):
+            return note(state="cancelled")
+        if not downloaded.get("ok"):
+            error = str(downloaded.get("error") or "")
+            if _SHOW_HOST_BUSY.search(error):
+                return note(state="retry")
+            return note(state="failed", host_failure=True,
+                        reason="Couldn't download the audio from the show's host.")
+        settings = _read_settings() or {}
+        queued, status = _queue_podcast_transcription(
+            episode_id, model=whisper_runner.normalize_model(settings.get("whisper_model")),
+            diarize=bool(settings.get("diarization_default")),
+            consent_given=False, publish_to_corpus=True)
+        if not queued.get("ok"):
+            reason = (_SUGGESTION_SETUP_MESSAGE if status in (412, 503)
+                      else "Transcription is not available right now.")
+            return note(state="failed", reason=reason)
+        note(state="queued", job_id=queued.get("job_id"))
+    except Exception:
+        log.exception("show capture: podcast episode %s failed to start", episode_id)
+        note(state="failed", reason="Uoink couldn't save this episode.")
+
+
+class _ServerShowBackend:
+    """show_capture.Backend over the helper's real queue, index and tools."""
+
+    def list_youtube(self, url, start, end):
+        try:
+            return _list_import_ytdlp(url, start, end)
+        except list_imports.ImportListError as exc:
+            message = ("yt-dlp couldn't list that channel or playlist. Check that it is public."
+                       if exc.code == "fetch_failed" else str(exc))
+            raise show_capture.ShowCaptureError(message, exc.code) from None
+
+    def fetch_feed(self, url):
+        try:
+            body, _headers = podcasts.fetch_feed({"feed_url": url})
+        except Exception:
+            raise show_capture.ShowCaptureError(
+                "Uoink couldn't open that feed. Check the link.", "fetch_failed") from None
+        if not body:
+            raise show_capture.ShowCaptureError("That feed came back empty.", "fetch_failed")
+        return body
+
+    def in_library(self, job, episode):
+        if episode.get("video_id"):
+            row = _get_index().get_yoink(episode["video_id"])
+            if row is not None and row.get("deleted_at"):
+                return show_capture.REASON_REMOVED
+            return row is not None
+        if job.get("kind") == show_capture.KIND_PODCAST:
+            idx = _get_index()
+            linked = _show_podcast_linked_id(idx, job.get("url") or "", episode)
+            row = idx.get_yoink(linked) if linked else None
+            if row is not None and row.get("deleted_at"):
+                return show_capture.REASON_REMOVED
+            return row is not None
+        return False
+
+    def queue_busy(self):
+        if _extract_lock.locked():
+            return True
+        with _show_podcast_runs_lock:
+            # A cancelled run's download still finishing counts too.
+            if any(run.get("state") == "downloading" for run in _show_podcast_runs.values()):
+                return True
+        soon = (datetime.now() + timedelta(seconds=60)).strftime("%Y-%m-%dT%H:%M:%S")
+        for row in _get_index().list_pending(limit=200):
+            if row.get("status") in ("running", "publishing"):
+                return True
+            if row.get("status") == "pending" and str(row.get("retry_after") or "") <= soon:
+                return True
+        with _jobs_lock:
+            return any(job.get("kind") in ("playlist", "podcast_transcribe")
+                       and job.get("state") not in _JOB_TERMINAL_STATES
+                       for job in _jobs.values())
+
+    def bot_check(self):
+        return _show_youtube_waiting()
+
+    def asr_problem(self, kind):
+        if kind == show_capture.KIND_PODCAST:
+            return _podcast_suggestion_setup_problem()
+        try:
+            if not _platform.media_capability().get("available"):
+                return "Local transcription needs the media tools. Set them up in Settings first."
+            if not _reliability_model_status().get("cached"):
+                return TRANSCRIPT_NO_MODEL_MESSAGE
+        except Exception:
+            log.exception("show capture: ASR check failed")
+            return TRANSCRIPT_NO_MODEL_MESSAGE
+        return None
+
+    def start_episode(self, job, episode):
+        idx = _get_index()
+        if job.get("kind") == show_capture.KIND_PODCAST:
+            problem = _podcast_suggestion_setup_problem()
+            if problem:
+                raise show_capture.RunBlocked(problem)
+            row = _register_show_episode(idx, job.get("url") or "", job.get("title"), episode)
+            episode_id = int(row["id"])
+            with _show_podcast_runs_lock:
+                _show_podcast_runs[episode_id] = {"state": "downloading",
+                                                  "cancel": threading.Event()}
+            _show_spawn(_show_podcast_run, episode_id)
+            return {"episode_id": episode_id}
+        url = _normalize_youtube_url(episode["url"]) or episode["url"]
+        mode = LONG_VIDEO_MODE_TRANSCRIPT_ASR if job.get("asr") else LONG_VIDEO_MODE_TRANSCRIPT
+        pending_id, _inserted = idx.enqueue_pending_once(
+            url, _SHOW_QUEUE_INTERVAL_SEC, _now_iso(), mode)
+        return {"pending_id": pending_id}
+
+    def episode_status(self, job, episode):
+        idx = _get_index()
+        if job.get("kind") == show_capture.KIND_PODCAST:
+            return self._podcast_status(idx, episode)
+        pending_id = episode.get("pending_id")
+        row = idx.get_pending(int(pending_id)) if pending_id is not None else None
+        if row is None:
+            if episode.get("video_id") and _list_import_in_library(episode["video_id"]):
+                return {"state": "done", "video_id": episode["video_id"]}
+            return {"state": "lost"}
+        status = row.get("status")
+        if status == "succeeded":
+            return {"state": "done", "video_id": episode.get("video_id")}
+        if status == "cancelled":
+            return {"state": "failed", "reason": show_capture.REASON_CANCELLED_IN_QUEUE}
+        if status == "failed":
+            if TRANSCRIPT_ALREADY_SAVED_MESSAGE in str(row.get("last_error") or ""):
+                return {"state": "skipped", "reason": show_capture.REASON_ALREADY_SAVED}
+            if TRANSCRIPT_REMOVED_MESSAGE in str(row.get("last_error") or ""):
+                return {"state": "skipped", "reason": show_capture.REASON_REMOVED}
+            return {"state": "failed", "reason": _show_reason_from_pending(row)}
+        error = str(row.get("last_error") or "")
+        retry_after = str(row.get("retry_after") or "")
+        if (status == "pending" and retry_after > _now_iso()
+                and error.startswith(("youtube_bot_check", "youtube_rate_limit"))):
+            try:
+                until = datetime.fromisoformat(retry_after).astimezone(timezone.utc)
+                until_text = until.strftime("%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                until_text = None
+            reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
+            return {"state": "waiting", "reason": reason, "until": until_text}
+        later = (datetime.now() + timedelta(seconds=60)).strftime("%Y-%m-%dT%H:%M:%S")
+        if status == "pending" and not error and retry_after > later:
+            # The queue defers a live or upcoming stream every few minutes
+            # until it ends. A show save moves on instead of waiting on it.
+            idx.cancel_pending(int(pending_id))
+            return {"state": "failed", "reason": show_capture.REASON_LIVE}
+        return {"state": "running"}
+
+    def _podcast_status(self, idx, episode):
+        episode_id = episode.get("episode_id")
+        if episode_id is None:
+            return {"state": "lost"}
+        episode_id = int(episode_id)
+        row = podcasts.get_episode(idx, episode_id)
+        if row is None:
+            self._forget_podcast_run(episode_id)
+            return {"state": "lost"}
+        if row.get("yoink_video_id"):
+            saved = idx.get_yoink(row["yoink_video_id"])
+            if saved is not None and not saved.get("deleted_at"):
+                self._forget_podcast_run(episode_id)
+                return {"state": "done", "video_id": row["yoink_video_id"]}
+        with _show_podcast_runs_lock:
+            run = dict(_show_podcast_runs.get(episode_id) or {})
+        if run.get("state") == "failed":
+            self._forget_podcast_run(episode_id)
+            return {"state": "failed", "reason": run.get("reason"),
+                    "host_failure": bool(run.get("host_failure"))}
+        if run.get("state") == "retry":
+            self._forget_podcast_run(episode_id)
+            return {"state": "retry", "reason": "host_busy"}
+        if run.get("state") == "cancelled":
+            self._forget_podcast_run(episode_id)
+            return {"state": "failed", "reason": "Cancelled before it was transcribed."}
+        if run.get("state") == "downloading":
+            return {"state": "running"}
+        with _jobs_lock:
+            jobs = [dict(j) for j in _jobs.values()
+                    if j.get("kind") == "podcast_transcribe" and j.get("episode_id") == episode_id]
+        if run.get("job_id"):
+            jobs = [j for j in jobs if j.get("id") == run["job_id"]] or jobs
+        if not jobs:
+            self._forget_podcast_run(episode_id)
+            return {"state": "lost"}
+        job = max(jobs, key=lambda j: str(j.get("updated_at") or ""))
+        if job.get("state") not in _JOB_TERMINAL_STATES:
+            return {"state": "running"}
+        self._forget_podcast_run(episode_id)
+        if job.get("state") == "completed":
+            # Publishing links the episode to its library row before the job
+            # completes, so a completed job without that link means the
+            # transcript is on disk but publishing it failed.
+            return {"state": "failed",
+                    "reason": "Transcribed, but adding it to your library failed."}
+        if job.get("state") == "cancelled":
+            return {"state": "failed", "reason": "The transcription was cancelled."}
+        return {"state": "failed", "reason": str(job.get("error") or "Transcription failed.")[:300]}
+
+    @staticmethod
+    def _forget_podcast_run(episode_id: int) -> None:
+        with _show_podcast_runs_lock:
+            run = _show_podcast_runs.get(episode_id)
+            if run is not None and run.get("state") != "downloading":
+                _show_podcast_runs.pop(episode_id, None)
+
+    def cancel_episode(self, job, episode):
+        """Stop one in-flight episode. False when it can't be stopped and
+        will finish on its own (a row already publishing, a podcast
+        transcription already queued or running: those jobs have no cancel)."""
+        if episode.get("pending_id") is not None:
+            return _get_index().cancel_pending(int(episode["pending_id"]))
+        episode_id = episode.get("episode_id")
+        if episode_id is None:
+            return True
+        episode_id = int(episode_id)
+        with _show_podcast_runs_lock:
+            run = _show_podcast_runs.get(episode_id)
+            if run is not None and run.get("state") == "downloading":
+                # The download under way ends on its own; nothing after it runs.
+                event = run.get("cancel")
+                if isinstance(event, threading.Event):
+                    event.set()
+                return True
+        with _jobs_lock:
+            transcribing = any(
+                j.get("kind") == "podcast_transcribe" and j.get("episode_id") == episode_id
+                and j.get("state") not in _JOB_TERMINAL_STATES for j in _jobs.values())
+        return not transcribing
+
+
+_show_backend = _ServerShowBackend()
+
+
+def _show_capture_tick() -> None:
+    show_capture.tick(DATA_ROOT, _show_backend)
+
+
+def _start_show_capture_thread() -> None:
+    """Started only by helper startup. A pass never starts a run by itself:
+    it lists what the user pasted and feeds runs the user started."""
+    if "pytest" in sys.modules:
+        return
+
+    def _runner():
+        while True:
+            try:
+                _show_capture_tick()
+            except Exception:
+                log.exception("show capture pass crashed")
+            _show_capture_wake.wait(_SHOW_CAPTURE_POLL_SEC)
+            _show_capture_wake.clear()
+
+    threading.Thread(target=_runner, name="show-capture", daemon=True).start()
 
 
 _IMPORTS_FOR_YOU_POOL = 300
@@ -18453,6 +19141,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_resume()
         if bare.startswith("/api/suite/v1/capture/"):
             return self._handle_suite_capture_job(bare)
+        if bare == timed_cues.ITEM_PREFIX or bare.startswith(timed_cues.ITEM_PREFIX + "/"):
+            return self._handle_timed_cues(bare)
+        if bare == "/shows" or bare.startswith("/shows/"):
+            return self._handle_shows_get(bare)
         if bare == "/api/corpus/v1/search":
             return self._handle_corpus_v1_search()
         if bare == "/api/corpus/v1/facets":
@@ -19033,6 +19725,99 @@ class Handler(BaseHTTPRequestHandler):
             )
             return self._send_corpus_v1_error(operation, error)
         return self._send_json(200, payload)
+
+    # -- Timed cues read contract v1 (timed_cues.py) --------------------------
+    # Separate from corpus read v1: its own prefix, contract name and
+    # envelopes. Local reads only (index row + sidecar), never paths.
+    def _handle_timed_cues(self, bare: str):
+        from urllib.parse import unquote
+        query = parse_qs(urlparse(self.path).query, keep_blank_values=True)
+        tail = bare[len(timed_cues.ITEM_PREFIX):].strip("/")
+        operation = "get" if tail else "search"
+        try:
+            idx = _get_index()
+            data = (timed_cues.get_item(idx, unquote(tail), query) if tail
+                    else timed_cues.search(idx, query))
+        except timed_cues.CuesError as error:
+            return self._send_json(error.status, timed_cues.error_envelope(operation, error))
+        except Exception:
+            log.exception("timed cues %s failed", operation)
+            error = timed_cues.CuesError("unavailable", f"cues {operation} is unavailable", 503)
+            return self._send_json(503, timed_cues.error_envelope(operation, error))
+        return self._send_json(200, timed_cues.envelope(operation, data))
+
+    def _send_show_error(self, error: "show_capture.ShowCaptureError"):
+        return self._send_json(_SHOW_ERROR_STATUS.get(error.code, 400),
+                               {"ok": False, "code": error.code, "error": str(error)})
+
+    def _handle_shows_get(self, bare: str):
+        """GET /shows lists every whole-show run, newest first, with up to
+        50 failures each. GET /shows/<id> is one run; ?episodes=1 adds its
+        episodes, the first N with &episodes_limit=N."""
+        try:
+            if bare.rstrip("/") == "/shows":
+                runs = [show_capture.view(job, failures_limit=50)
+                        for job in reversed(show_capture.list_jobs(DATA_ROOT))]
+                return self._send_json(200, {"ok": True, "runs": runs})
+            query = parse_qs(urlparse(self.path).query)
+            every = (query.get("episodes") or [""])[0] in ("1", "true")
+            raw_limit = (query.get("episodes_limit") or [""])[0]
+            if raw_limit and not (raw_limit.isdigit() and 1 <= int(raw_limit) <= show_capture.MAX_EPISODES):
+                raise show_capture.ShowCaptureError(
+                    f"episodes_limit is 1 to {show_capture.MAX_EPISODES}.", "invalid")
+            job = show_capture.load(DATA_ROOT, bare[len("/shows/"):].strip("/"))
+            return self._send_json(200, {"ok": True, "run": show_capture.view(
+                job, episodes=every, episodes_limit=int(raw_limit) if raw_limit else None)})
+        except show_capture.ShowCaptureError as error:
+            return self._send_show_error(error)
+        except Exception:
+            log.exception("GET /shows failed")
+            return self._send_json(500, {"ok": False, "code": "internal",
+                                          "error": "Uoink couldn't read your show saves."})
+
+    def _handle_shows_post(self, bare: str, body):
+        """POST /shows/preview {text} lists a source in the background and
+        saves nothing. POST /shows/<id>/start {asr}, /pause, /resume,
+        /cancel, /retry-failed {asr?} and /dismiss act on one run."""
+        body = body if isinstance(body, dict) else {}
+        try:
+            if bare == "/shows/preview":
+                text = body.get("text")
+                if not isinstance(text, str):
+                    raise show_capture.ShowCaptureError("text must be a string.", "invalid")
+                job = show_capture.create(DATA_ROOT, text)
+                show_capture.ensure_listing(DATA_ROOT, job["id"], _show_backend)
+                return self._send_json(202, {"ok": True, "run": show_capture.view(job)})
+            parts = bare[len("/shows/"):].strip("/").split("/")
+            if len(parts) != 2:
+                raise show_capture.ShowCaptureError("That run doesn't exist.", "not_found")
+            job_id, action = parts
+            asr = body.get("asr")
+            if asr is not None and not isinstance(asr, bool):
+                raise show_capture.ShowCaptureError("asr must be true or false.", "invalid")
+            if action == "start":
+                job = show_capture.start(DATA_ROOT, job_id, _show_backend, asr=bool(asr))
+            elif action == "pause":
+                job = show_capture.pause(DATA_ROOT, job_id)
+            elif action == "resume":
+                job = show_capture.resume(DATA_ROOT, job_id)
+            elif action == "cancel":
+                job = show_capture.cancel(DATA_ROOT, job_id, _show_backend)
+            elif action == "retry-failed":
+                job = show_capture.retry_failed(DATA_ROOT, job_id, _show_backend, asr=asr)
+            elif action == "dismiss":
+                show_capture.dismiss(DATA_ROOT, job_id)
+                return self._send_json(200, {"ok": True})
+            else:
+                raise show_capture.ShowCaptureError("That action doesn't exist.", "not_found")
+        except show_capture.ShowCaptureError as error:
+            return self._send_show_error(error)
+        except Exception:
+            log.exception("POST %s failed", bare)
+            return self._send_json(500, {"ok": False, "code": "internal",
+                                          "error": "Uoink couldn't change that show save."})
+        _show_capture_wake.set()
+        return self._send_json(200, {"ok": True, "run": show_capture.view(job)})
 
     def _handle_corpus_v1_search(self):
         query = parse_qs(urlparse(self.path).query)
@@ -21877,6 +22662,19 @@ class Handler(BaseHTTPRequestHandler):
                 "error": "date_from is after date_to",
                 "state": "invalid_range",
             })
+        # Original publish (air) date bounds, separate from the capture date.
+        published_from = _one("published_from")
+        published_to = _one("published_to")
+        for label, value in (("published_from", published_from), ("published_to", published_to)):
+            if value and not _valid_iso_date(value):
+                return self._send_json(
+                    400, {"ok": False, "error": f"{label} must be YYYY-MM-DD"})
+        if published_from and published_to and published_from > published_to:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "published_from is after published_to",
+                "state": "invalid_range",
+            })
         try:
             limit = max(1, min(200, int(_one("limit") or "50")))
             offset = max(0, int(_one("offset") or "0"))
@@ -21918,6 +22716,7 @@ class Handler(BaseHTTPRequestHandler):
                         "source_type": _one("source_type"), "author": _one("author"),
                         "date_from": date_from, "date_to": date_to,
                         "availability": availability,
+                        "published_from": published_from, "published_to": published_to,
                     },
                     limit=limit, offset=offset,
                 )
@@ -21928,7 +22727,8 @@ class Handler(BaseHTTPRequestHandler):
                              "hook_type": hook_type, "platform": _one("platform"),
                              "source_type": _one("source_type"), "author": _one("author"),
                              "date_from": date_from, "date_to": date_to,
-                             "availability": availability},
+                             "availability": availability,
+                             "published_from": published_from, "published_to": published_to},
                 )
             corpus_total = idx.count_corpus()
         except Exception as e:
@@ -22358,7 +23158,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             tools = _mcp_tools_module()
             spec = openapi_bridge.build_spec(
-                base, tool_registry=tools.TOOL_REGISTRY, version=VERSION)
+                base, tool_registry=tools.TOOL_REGISTRY, version=VERSION,
+                extra_paths=timed_cues.openapi_paths())
         except Exception:
             log.exception("/openapi/v1/spec.json build failed")
             return self._send_json(
@@ -23631,6 +24432,8 @@ class Handler(BaseHTTPRequestHandler):
         if bare in ("/import-list/preview", "/import-list", "/import-list/stage"):
             return self._handle_import_list(body, start=bare == "/import-list",
                                             stage=bare == "/import-list/stage")
+        if bare.startswith("/shows/"):
+            return self._handle_shows_post(bare, body)
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:
@@ -25432,6 +26235,7 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         log.warning("retry worker: reset_running_pending failed: %s", e)
     _start_retry_pending_thread()
     _start_saves_thread()
+    _start_show_capture_thread()
     # Podcast watch mode: registration polls metadata automatically; the
     # per-feed auto_ingest flag separately controls media work.
     _start_podcast_feed_scheduler_thread()

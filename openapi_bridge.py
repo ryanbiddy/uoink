@@ -159,10 +159,15 @@ def _summary(description: str) -> str:
     return (head[:117] + "...") if len(head) > 120 else head
 
 
-def build_spec(base_url: str, *, tool_registry: dict, version: str) -> dict:
+def build_spec(base_url: str, *, tool_registry: dict, version: str,
+               extra_paths: dict | None = None) -> dict:
     """Walk the registry into an OpenAPI 3.1 document. Each tool becomes a
     POST /tools/<name> operation whose requestBody schema is the tool's
-    MCP input_schema (JSONSchema 3.1-compatible, so it maps 1:1)."""
+    MCP input_schema (JSONSchema 3.1-compatible, so it maps 1:1).
+
+    ``extra_paths`` adds separately versioned HTTP reads that are not
+    registry tools (the timed cues contract), after the tool paths. A key
+    that collides with a tool path is ignored, so tools always win."""
     paths: dict[str, Any] = {}
     for name in sorted(tool_registry):
         spec = tool_registry[name]
@@ -198,6 +203,9 @@ def build_spec(base_url: str, *, tool_registry: dict, version: str) -> dict:
                 "security": [{"UoinkToken": []}],
             }
         }
+    for path, operations in (extra_paths or {}).items():
+        if path not in paths:
+            paths[path] = operations
     return {
         "openapi": OPENAPI_VERSION,
         "info": {

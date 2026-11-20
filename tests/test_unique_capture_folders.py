@@ -132,6 +132,8 @@ def capture(tmp_path, monkeypatch):
         "log": logging.getLogger(__name__), "index": SimpleNamespace(sqlite3=sqlite3),
         "LONG_VIDEO_MODE_FULL": "full", "LONG_VIDEO_MODE_LITE": "lite",
         "LONG_VIDEO_MODE_CHUNKED": "chunked", "LONG_VIDEO_SECONDS": 1800,
+        "TRANSCRIPT_ONLY_MODES": ("transcript", "transcript_asr"),
+        "_source_facts": lambda m: {"published_at": None, "description": None},
         "LITE_SHOT_INTERVAL_SEC": 120, "MAX_SCREENSHOTS": 100,
         "YTDLP_CMD": ["yt-dlp"], "YTDLP_MAX_FILESIZE_BYTES": 1024,
         "CURRENT_SIDECAR_SCHEMA": 2, "DESKTOP_ROOT": tmp_path / "library",

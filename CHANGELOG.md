@@ -67,6 +67,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   lists such folders as "Capture did not finish" with a Finish button that reuses the video,
   captions, thumbnail and screenshots already there. Finish runs local transcription for that
   save even when the caption-less fallback is off in Settings, and keeps the topic folder.
+### Added
+
+- Save a whole show. In Sources, paste a YouTube channel, a playlist, a podcast's RSS feed
+  or a list of links, and Uoink lists every episode (up to 5,000) and says how many are new,
+  roughly how long it takes and how much disk it uses. Nothing is saved until you press
+  Start. Each episode is saved as a transcript only: captions first, with no video,
+  screenshots or comments. Turn on local transcription for that run if you want videos
+  without captions transcribed on your computer (the audio is downloaded, transcribed, then
+  deleted). Podcast episodes are always transcribed on your computer and keep their audio, as
+  they do today. One episode at a time goes through the download queue, after anything you
+  save yourself. When YouTube asks Uoink to slow down, the run waits and says when it tries
+  again. Pause, resume, cancel and retry the failed ones from the card, which lists each
+  failure with its reason. A run carries on after Uoink restarts and never saves an episode
+  twice.
+- Saves now keep the original publish date and description apart from the date you saved
+  them, and whether a video's captions were uploaded by the creator or made automatically.
+- Search by publish date: `/memory/search` takes `published_from` and `published_to`, and
+  library rows carry `published_at`.
+- Timed cues for clip tools: `GET /api/cues/v1/items/<id>` returns every transcript cue with
+  its start and end time, where the timings came from (uploaded captions, automatic
+  captions or local transcription), word timings when Uoink has them, the publish date, the
+  duration and the source link. `GET /api/cues/v1/items` lists items by show and publish
+  date. Both are in the OpenAPI document, and `uoink cues <id>` prints them from the command
+  line. See `docs/integrations/timed-cues.md`. The corpus read contract v1 is unchanged.
 
 ## [3.17.0] - 2026-11-12
 
