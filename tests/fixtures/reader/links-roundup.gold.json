@@ -1,0 +1,118 @@
+{
+ "name": "links-roundup",
+ "url": "https://weekly.example.dev/issues/88",
+ "layout": "weekly roundup where most content is annotated links",
+ "title": "Tooling weekly, issue 88",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "published": "2026-10-30",
+  "site_name": "Tooling Weekly"
+ },
+ "keep": [
+  "Releases",
+  "Why the build step was split: Each morning, the release team walk past the nightly build to refactor the log rotation and check the schema check.",
+  "The flaky schema check: Some of first-time contributors wanted to split the error budget at once, while others asked for ten more weekends of notes.",
+  "The brittle worker pool: Some of first-time contributors wanted to profile the worker pool at once, while others asked for six more days of notes.",
+  "What two reviewers learned at the main branch: By October, the triage rota had documented the retry queue twice, which left the log rotation strict but usable.",
+  "Reading",
+  "How to rename a retry queue: Two reviewers merged the lock file first, because the log rotation near the CLI looked too slow to trust.",
+  "What two reviewers learned at the nightly build: The schema check at the nightly build was merged by first-time contributors after the code sprint, and the work took twelve months.",
+  "After the last release: Records from May show that the release team renamed the optional plugin hook near version two at least eight times.",
+  "After a large migration: First-time contributors still argue about whether the cache layer should be pinned or left stable for another year.",
+  "Tools",
+  "How to document a test runner: Some of plugin authors wanted to benchmark the lock file at once, while others asked for five more days of notes.",
+  "The flaky test runner: Records from July show that two reviewers renamed the slow log rotation near the main branch at least six times.",
+  "How to patch a test runner: The test runner at version two was deprecated by the release team after the beta, and the work took eight evenings.",
+  "How to split a worker pool: The build step at the staging cluster was split by the release team after a large migration, and the work took three months.",
+  "Tooling weekly, issue 88",
+  "First-time contributors still argue about whether the config loader should be pinned or left brittle for another year. Old photographs of the staging cluster show a optional test runner, long before anyone benchmarked the release script. Costs rose after a security report, mostly because the release script at the CLI had to be benchmarked by hand.",
+  "That is all for this week. Reply to this email with links for the next issue."
+ ],
+ "junk": [
+  "Issues Sponsor About",
+  "Tooling Weekly is written by volunteers and sent every Friday."
+ ],
+ "structure": {
+  "headings": [
+   "Releases",
+   "Reading",
+   "Tools",
+   "Tooling weekly, issue 88"
+  ],
+  "list_items": [
+   "Why the build step was split: Each morning, the release team walk past the nightly build to refactor the log rotation and check the schema check.",
+   "The flaky schema check: Some of first-time contributors wanted to split the error budget at once, while others asked for ten more weekends of notes.",
+   "The brittle worker pool: Some of first-time contributors wanted to profile the worker pool at once, while others asked for six more days of notes.",
+   "What two reviewers learned at the main branch: By October, the triage rota had documented the retry queue twice, which left the log rotation strict but usable.",
+   "How to rename a retry queue: Two reviewers merged the lock file first, because the log rotation near the CLI looked too slow to trust.",
+   "What two reviewers learned at the nightly build: The schema check at the nightly build was merged by first-time contributors after the code sprint, and the work took twelve months.",
+   "After the last release: Records from May show that the release team renamed the optional plugin hook near version two at least eight times.",
+   "After a large migration: First-time contributors still argue about whether the cache layer should be pinned or left stable for another year.",
+   "How to document a test runner: Some of plugin authors wanted to benchmark the lock file at once, while others asked for five more days of notes.",
+   "The flaky test runner: Records from July show that two reviewers renamed the slow log rotation near the main branch at least six times.",
+   "How to patch a test runner: The test runner at version two was deprecated by the release team after the beta, and the work took eight evenings.",
+   "How to split a worker pool: The build step at the staging cluster was split by the release team after a large migration, and the work took three months."
+  ],
+  "code": [],
+  "tables": [],
+  "links": [
+   {
+    "text": "Why the build step was split",
+    "href": "https://blog0.example.org/post-0-0"
+   },
+   {
+    "text": "The flaky schema check",
+    "href": "https://blog0.example.org/post-0-1"
+   },
+   {
+    "text": "The brittle worker pool",
+    "href": "https://blog0.example.org/post-0-2"
+   },
+   {
+    "text": "What two reviewers learned at the main branch",
+    "href": "https://blog0.example.org/post-0-3"
+   },
+   {
+    "text": "How to rename a retry queue",
+    "href": "https://blog1.example.org/post-1-0"
+   },
+   {
+    "text": "What two reviewers learned at the nightly build",
+    "href": "https://blog1.example.org/post-1-1"
+   },
+   {
+    "text": "After the last release",
+    "href": "https://blog1.example.org/post-1-2"
+   },
+   {
+    "text": "After a large migration",
+    "href": "https://blog1.example.org/post-1-3"
+   },
+   {
+    "text": "How to document a test runner",
+    "href": "https://blog2.example.org/post-2-0"
+   },
+   {
+    "text": "The flaky test runner",
+    "href": "https://blog2.example.org/post-2-1"
+   },
+   {
+    "text": "How to patch a test runner",
+    "href": "https://blog2.example.org/post-2-2"
+   },
+   {
+    "text": "How to split a worker pool",
+    "href": "https://blog2.example.org/post-2-3"
+   }
+  ],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

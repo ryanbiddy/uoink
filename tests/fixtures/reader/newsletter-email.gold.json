@@ -1,0 +1,48 @@
+{
+ "name": "newsletter-email",
+ "url": "https://letters.example.com/p/crumb-dispatch-31",
+ "layout": "email newsletter web view, nested layout tables, inline styles",
+ "title": "Crumb Dispatch, issue 31",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Crumb Dispatch"
+ },
+ "keep": [
+  "A baking class still argue about whether the order book should be scored or left warm for another year. Nobody expected the long weekend to cool the bread stamp so quickly, yet the counter staff had to weigh it again. The night bakers baked the steam tray first, because the levain schedule near the cold room looked too sticky to trust. Old photographs of the back kitchen show a pale flour bin, long before anyone rotated the bench scraper.",
+  "This week at the bench",
+  "The plan was to shape the order book, bake the steam tray, and keep Wheatley Road open for the owners. The owners proofed the bread stamp first, because the proofing basket near Larkspur looked too airy to trust. Records from July show that a baking class weighed the slow proofing basket near the back kitchen at least eight times. When the holiday rush arrived, the proofing basket held, although the bread stamp beside it was shaped within ten weekends. When the heat wave arrived, the rye loaf held, although the levain schedule beside it was proofed within six months.",
+  "Rye loaves return on Thursday",
+  "Starter workshop has four places left",
+  "Holiday orders open next Monday",
+  "The plan was to proof the bench scraper, feed the order book, and keep Wheatley Road open for a baking class. A sticky levain schedule is easy to miss, so two apprentices now test it every month and write the result down. The owners still argue about whether the flour bin should be rotated or left sticky for another year.",
+  "Crumb Dispatch, issue 31",
+  "From the Larkspur Bakery night shift"
+ ],
+ "junk": [
+  "View this email in your browser",
+  "You are receiving this because you signed up at the counter. Unsubscribe or update your preferences."
+ ],
+ "structure": {
+  "headings": [
+   "This week at the bench",
+   "Crumb Dispatch, issue 31"
+  ],
+  "list_items": [
+   "Rye loaves return on Thursday",
+   "Starter workshop has four places left",
+   "Holiday orders open next Monday"
+  ],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

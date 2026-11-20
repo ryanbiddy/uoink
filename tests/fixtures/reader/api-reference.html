@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Create a job | Example API</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta property="og:title" content="Create a job"><meta property="og:site_name" content="Example API"><meta property="og:url" content="https://api.example.dev/reference/jobs-create"><link rel="stylesheet" href="/static/site.css"></head>
+<body>
+<header class="site-header"><a class="skip-link" href="#main">Skip to main content</a><a class="logo" href="/">Example API</a><nav class="site-nav" aria-label="Main"><ul><li><a href="/reference">Reference</a></li><li><a href="/guides">Guides</a></li><li><a href="/sdks">SDKs</a></li><li><a href="/status">Status</a></li></ul></nav><form class="search" role="search"><input type="search" placeholder="Search"><button>Go</button></form></header>
+<div class="api-page"><nav class="api-sidebar"><ul><li><a href="#">Jobs</a></li><li><a href="#">Workers</a></li><li><a href="#">Queues</a></li><li><a href="#">Webhooks</a></li></ul></nav><main class="api-main">
+<h1>Create a job</h1>
+<p>Some of the maintainers wanted to rename the retry queue at once, while others asked for eight more evenings of notes. The triage rota still argue about whether the error budget should be benchmarked or left stable for another year. When the code sprint arrived, the schema check held, although the release script beside it was refactored within eight days.</p>
+<pre><code>POST /v2/jobs</code></pre>
+<h2>Body parameters</h2>
+<table><thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td>queue</td><td>string</td><td>yes</td><td>Name of the queue that runs the job</td></tr><tr><td>payload</td><td>object</td><td>yes</td><td>Data passed to the task</td></tr><tr><td>retries</td><td>integer</td><td>no</td><td>Attempts before the job fails</td></tr><tr><td>run_at</td><td>timestamp</td><td>no</td><td>Earliest start time in UTC</td></tr></tbody></table>
+<h2>Example request</h2>
+<pre><code class="language-json">{
+  "queue": "emails",
+  "payload": {"to": "reader@example.com"},
+  "retries": 3
+}</code></pre>
+<h2>Errors</h2>
+<table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td>400</td><td>The body is not valid JSON</td></tr><tr><td>409</td><td>A job with this key exists</td></tr></tbody></table>
+<p>Two reviewers still argue about whether the error budget should be documented or left stable for another year. By September, first-time contributors had patched the cache layer twice, which left the release script stable but usable. A optional cache layer is easy to miss, so the triage rota now merge it every week and write the result down.</p>
+</main></div>
+<footer class="site-footer"><p>Example API reference. Status and uptime are listed on the status page.</p><ul class="footer-links"><li><a href="/privacy">Privacy policy</a></li><li><a href="/terms">Terms of use</a></li><li><a href="/contact">Contact us</a></li></ul></footer>
+<script src="/static/analytics.js" async></script>
+</body></html>

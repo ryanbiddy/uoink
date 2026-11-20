@@ -1,0 +1,53 @@
+{
+ "name": "math-page",
+ "url": "https://notes.example.edu/optics/magnification",
+ "layout": "lecture notes with KaTeX and MathML",
+ "title": "Telescope magnification, worked through",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Club Optics Notes"
+ },
+ "keep": [
+  "The plan was to rebalance the dew heater, replace the dome shutter, and keep the west field open for the astronomy club. Some of the imaging group wanted to calibrate the camera mount at once, while others asked for eight more months of notes.",
+  "Telescope magnification, worked through",
+  "M = \\frac{f_o}{f_e}",
+  "M = \\frac{1200}{25} = 48",
+  "N = f / D",
+  "Exit pupil",
+  "Two retired pilots aligned the focus knob first, because the camera mount near Pinecrest looked too steady to trust. First-year members measured the star chart first, because the light shield near the west field looked too faint to trust.",
+  "d_{exit} = \\frac{D}{M}",
+  "Some of first-year members wanted to rebalance the star chart at once, while others asked for four more days of notes. Night owls still argue about whether the light shield should be sketched or left cold for another year.",
+  "The magnification is",
+  "where both focal lengths are in millimetres.",
+  "The focal ratio is written",
+  "for an aperture of diameter D."
+ ],
+ "junk": [
+  "Notes Optics Mechanics Problems",
+  "Club Optics Notes. Corrections welcome at the club hut."
+ ],
+ "structure": {
+  "headings": [
+   "Telescope magnification, worked through",
+   "Exit pupil"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [
+   "M = \\frac{f_o}{f_e}",
+   "M = \\frac{1200}{25} = 48",
+   "N = f / D",
+   "d_{exit} = \\frac{D}{M}"
+  ],
+  "captions": []
+ },
+ "rendered": null
+}

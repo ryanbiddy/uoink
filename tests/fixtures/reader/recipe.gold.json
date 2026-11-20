@@ -1,0 +1,91 @@
+{
+ "name": "recipe",
+ "url": "https://kitchen.example.com/recipes/overnight-rye",
+ "layout": "recipe with long intro, ingredients, steps, nutrition table, JSON-LD",
+ "title": "Overnight rye loaf",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Tamsin Orrow",
+  "published": "2026-02-11",
+  "site_name": "Larder Notes"
+ },
+ "keep": [
+  "Overnight rye loaf",
+  "A baking class scored the steam tray first, because the dough trough near the cold room looked too crusty to trust. Some of the counter staff wanted to cool the steam tray at once, while others asked for three more evenings of notes. A crusty order book is easy to miss, so regular customers now proof it every season and write the result down. Some of regular customers wanted to rotate the bread stamp at once, while others asked for five more months of notes. Records from September show that two apprentices rotated the dense bread stamp near the Saturday market at least six times.",
+  "Old photographs of the back kitchen show a crusty starter jar, long before anyone fed the bench scraper. A pale steam tray is easy to miss, so two apprentices now score it every morning and write the result down. Each season, two apprentices walk past the back kitchen to feed the levain schedule and check the steam tray.",
+  "Records from August show that regular customers shaped the airy steam tray near the back kitchen at least two times. Some of the owners wanted to bake the starter jar at once, while others asked for ten more months of notes. When a broken oven arrived, the dough trough held, although the deck oven beside it was proofed within two months. Old photographs of the back kitchen show a lively bread stamp, long before anyone cooled the cooling rack.",
+  "Ingredients",
+  "500 g rye flour",
+  "350 g water, warm",
+  "100 g active starter",
+  "10 g salt",
+  "1 tbsp caraway seeds",
+  "Method",
+  "Mix the flour, water and starter until no dry flour remains.",
+  "Cover and leave overnight in a cool room.",
+  "Add the salt and caraway, then shape into a tin.",
+  "Bake for fifty minutes until the crust sounds hollow.",
+  "Nutrition",
+  "Per slice Amount",
+  "Energy 180 kcal",
+  "Fibre 5 g",
+  "Salt 0.4 g"
+ ],
+ "junk": [
+  "Jump to recipe Print recipe",
+  "Recipes Bread Cakes Basics",
+  "Our favourite stand mixer is on sale this week",
+  "Made this twice now and the caraway really makes it, thank you so much.",
+  "Larder Notes. Recipes tested in a small home kitchen."
+ ],
+ "structure": {
+  "headings": [
+   "Overnight rye loaf",
+   "Ingredients",
+   "Method",
+   "Nutrition"
+  ],
+  "list_items": [
+   "500 g rye flour",
+   "350 g water, warm",
+   "100 g active starter",
+   "10 g salt",
+   "1 tbsp caraway seeds",
+   "Mix the flour, water and starter until no dry flour remains.",
+   "Cover and leave overnight in a cool room.",
+   "Add the salt and caraway, then shape into a tin.",
+   "Bake for fifty minutes until the crust sounds hollow."
+  ],
+  "code": [],
+  "tables": [
+   [
+    [
+     "Per slice",
+     "Amount"
+    ],
+    [
+     "Energy",
+     "180 kcal"
+    ],
+    [
+     "Fibre",
+     "5 g"
+    ],
+    [
+     "Salt",
+     "0.4 g"
+    ]
+   ]
+  ],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

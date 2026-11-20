@@ -1,0 +1,40 @@
+{
+ "name": "short-post",
+ "url": "https://crumbs.example.net/2026/10/oven-is-back",
+ "layout": "short blog note with heavy sidebar, archive and tag cloud",
+ "title": "The oven is back",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "published": "2026-10-28",
+  "site_name": "Crumbs"
+ },
+ "keep": [
+  "The oven is back",
+  "The deck oven came back from the repair shop on Tuesday, a week earlier than promised. Rye returns on Thursday and the Saturday market stall opens again this weekend, so come early."
+ ],
+ "junk": [
+  "January 2026 February 2026 March 2026",
+  "rye starter ovens market flour holidays workshop",
+  "Home About Order",
+  "Crumbs bakery blog. Baked fresh, posted occasionally.",
+  "A small bakery blog about bread and the people who buy it."
+ ],
+ "structure": {
+  "headings": [
+   "The oven is back"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

@@ -1,0 +1,110 @@
+{
+ "name": "api-reference",
+ "url": "https://api.example.dev/reference/jobs-create",
+ "layout": "API reference, parameter tables with code cells",
+ "title": "Create a job",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Example API"
+ },
+ "keep": [
+  "Create a job",
+  "Some of the maintainers wanted to rename the retry queue at once, while others asked for eight more evenings of notes. The triage rota still argue about whether the error budget should be benchmarked or left stable for another year. When the code sprint arrived, the schema check held, although the release script beside it was refactored within eight days.",
+  "POST /v2/jobs",
+  "Body parameters",
+  "Name Type Required Description",
+  "queue string yes Name of the queue that runs the job",
+  "payload object yes Data passed to the task",
+  "retries integer no Attempts before the job fails",
+  "run_at timestamp no Earliest start time in UTC",
+  "Example request",
+  "{ \"queue\": \"emails\", \"payload\": {\"to\": \"reader@example.com\"}, \"retries\": 3 }",
+  "Errors",
+  "Code Meaning",
+  "400 The body is not valid JSON",
+  "409 A job with this key exists",
+  "Two reviewers still argue about whether the error budget should be documented or left stable for another year. By September, first-time contributors had patched the cache layer twice, which left the release script stable but usable. A optional cache layer is easy to miss, so the triage rota now merge it every week and write the result down."
+ ],
+ "junk": [
+  "Reference Guides SDKs Status",
+  "Example API reference. Status and uptime are listed on the status page.",
+  "Jobs Workers Queues Webhooks"
+ ],
+ "structure": {
+  "headings": [
+   "Create a job",
+   "Body parameters",
+   "Example request",
+   "Errors"
+  ],
+  "list_items": [],
+  "code": [
+   {
+    "text": "POST /v2/jobs",
+    "lang": null
+   },
+   {
+    "text": "{\n  \"queue\": \"emails\",\n  \"payload\": {\"to\": \"reader@example.com\"},\n  \"retries\": 3\n}",
+    "lang": "json"
+   }
+  ],
+  "tables": [
+   [
+    [
+     "Name",
+     "Type",
+     "Required",
+     "Description"
+    ],
+    [
+     "queue",
+     "string",
+     "yes",
+     "Name of the queue that runs the job"
+    ],
+    [
+     "payload",
+     "object",
+     "yes",
+     "Data passed to the task"
+    ],
+    [
+     "retries",
+     "integer",
+     "no",
+     "Attempts before the job fails"
+    ],
+    [
+     "run_at",
+     "timestamp",
+     "no",
+     "Earliest start time in UTC"
+    ]
+   ],
+   [
+    [
+     "Code",
+     "Meaning"
+    ],
+    [
+     "400",
+     "The body is not valid JSON"
+    ],
+    [
+     "409",
+     "A job with this key exists"
+    ]
+   ]
+  ],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

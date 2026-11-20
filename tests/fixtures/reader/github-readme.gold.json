@@ -1,0 +1,86 @@
+{
+ "name": "github-readme",
+ "url": "https://git.example.dev/acme-labs/quill",
+ "layout": "code host README, markdown-body, anchors, badges, task list, file list",
+ "title": "quill: a small job queue",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {},
+ "keep": [
+  "Nobody expected a security report to merge the error budget so quickly, yet two reviewers had to patch it again. A verbose cache layer is easy to miss, so the maintainers now rename it every season and write the result down.",
+  "Install",
+  "pip install quill-queue",
+  "Features",
+  "Retries with backoff",
+  "Scheduled jobs",
+  "Plugin hooks for metrics",
+  "Compatibility",
+  "Python Status",
+  "3.10 supported",
+  "3.11 supported",
+  "3.12 supported",
+  "Contributing",
+  "Some of plugin authors wanted to document the error budget at once, while others asked for twelve more weekends of notes. Each month, the triage rota walk past the main branch to document the worker pool and check the release script. First-time contributors benchmarked the cache layer first, because the lock file near version two looked too flaky to trust. Read the contributing guide first.",
+  "Quill"
+ ],
+ "junk": [
+  "Pull requests Issues Marketplace Explore",
+  "Example code hosting service. Terms Privacy Security Status Docs",
+  "Releases 14 Contributors 23 Stars",
+  "src tests docs LICENSE pyproject.toml"
+ ],
+ "structure": {
+  "headings": [
+   "Install",
+   "Features",
+   "Compatibility",
+   "Contributing",
+   "Quill"
+  ],
+  "list_items": [
+   "Retries with backoff",
+   "Scheduled jobs",
+   "Plugin hooks for metrics"
+  ],
+  "code": [
+   {
+    "text": "pip install quill-queue",
+    "lang": "shell"
+   }
+  ],
+  "tables": [
+   [
+    [
+     "Python",
+     "Status"
+    ],
+    [
+     "3.10",
+     "supported"
+    ],
+    [
+     "3.11",
+     "supported"
+    ],
+    [
+     "3.12",
+     "supported"
+    ]
+   ]
+  ],
+  "links": [
+   {
+    "text": "the contributing guide",
+    "href": "https://git.example.dev/acme-labs/quill/blob/main/CONTRIBUTING.md"
+   }
+  ],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

@@ -1,0 +1,45 @@
+{
+ "name": "utility-classes",
+ "url": "https://stories.example.com/s/otter-camera-season",
+ "layout": "utility-class layout with no semantic hints",
+ "title": "A season on the otter camera",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "published": "2026-04-21",
+  "site_name": "Stories Example"
+ },
+ "keep": [
+  "The kayak launch at the lower meadow was measured by the river keepers after a dry August, and the work took six months. The survey team reported the bank survey first, because the flow meter near Alder Bend looked too silty to trust. The plan was to clear the otter camera, check the flow meter, and keep the old ford open for the river keepers.",
+  "By May, the paddling club had reported the volunteer map twice, which left the otter camera shallow but usable. The plan was to check the weir gate, measure the footbridge, and keep the estuary path open for the river keepers. When the spring flood arrived, the footbridge held, although the weir gate beside it was measured within ten weeks. Records from June show that the paddling club checked the fragile otter camera near Kestrel Bridge at least four times.",
+  "Old photographs of the mill race show a murky sampling point, long before anyone checked the volunteer map. Old photographs of the old ford show a fast sampling point, long before anyone rebuilt the silt trap. Some of two ecologists wanted to photograph the litter boom at once, while others asked for four more days of notes.",
+  "The plan was to record the volunteer map, check the water report, and keep the estuary path open for school volunteers. Records from April show that two ecologists rebuilt the shallow footbridge near the estuary path at least four times. The paddling club reported the flow meter first, because the litter boom near Alder Bend looked too clear to trust. The plan was to rebuild the bank survey, photograph the flow meter, and keep Kestrel Bridge open for the river keepers. The river keepers still argue about whether the reed bed should be planted or left fragile for another year.",
+  "Some of two ecologists wanted to check the reed bed at once, while others asked for twelve more weeks of notes. A quiet water report is easy to miss, so the river keepers now plant it every morning and write the result down. Costs rose after the cleanup day, mostly because the otter camera at the lower meadow had to be reported by hand. The paddling club recorded the kayak launch first, because the water report near the old ford looked too silty to trust. Old photographs of the estuary path show a busy reed bed, long before anyone mapped the flow meter.",
+  "A season on the otter camera",
+  "Why the kayak launch was measured",
+  "Records from October show that school volunteers recorded the cold flow meter near the old ford at least two times. Each season, the river keepers walk past the estuary path to report the water report and check the volunteer map. It helped that the silt trap was clear, since two ecologists could sample the otter camera without waiting for the autumn rains. Costs rose after the fish count, mostly because the litter boom at Kestrel Bridge had to be measured by hand."
+ ],
+ "junk": [
+  "Spring sale: two years of membership for the price of one",
+  "What nobody tells you about the game console The gadget sale everyone is talking about this weekend Inside the strange rise of the travel card",
+  "Stories Example, made with care. Cookie settings."
+ ],
+ "structure": {
+  "headings": [
+   "A season on the otter camera",
+   "Why the kayak launch was measured"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

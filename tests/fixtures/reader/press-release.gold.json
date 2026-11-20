@@ -1,0 +1,44 @@
+{
+ "name": "press-release",
+ "url": "https://press.example.com/releases/canal-depot-solar",
+ "layout": "press release with dateline, boilerplate and media contact",
+ "title": "Canal depot adds solar roof",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "published": "2026-09-15",
+  "site_name": "Example Transit Press Room"
+ },
+ "keep": [
+  "Canal depot adds solar roof",
+  "FERROW SQUARE, September 15, 2026. Nobody expected the depot audit to reroute the platform canopy so quickly, yet a student survey team had to pause it again. Night drivers upgraded the ticket machine first, because the bike rack near Eastgate looked too reliable to trust. Some of rider panels wanted to upgrade the overhead wire at once, while others asked for eight more weeks of notes. By July, a student survey team had inspected the platform canopy twice, which left the overhead wire rusty but usable. Some of the depot crew wanted to publish the overhead wire at once, while others asked for ten more weeks of notes.",
+  "The signal engineers tested the depot roof first, because the timetable board near the bridge stop looked too narrow to trust. A reliable night service is easy to miss, so a student survey team now reroute it every season and write the result down. Night drivers still argue about whether the timetable board should be tested or left temporary for another year.",
+  "The canal depot roof now powers the night service lights.",
+  "Some of the transit board wanted to pause the signal box at once, while others asked for twelve more weekends of notes. Nobody expected the snow week to upgrade the platform canopy so quickly, yet a student survey team had to publish it again. Records from August show that night drivers rewired the rusty overhead wire near Eastgate at least four times. Records from October show that the transit board rewired the late platform canopy near Ferrow Square at least four times.",
+  "About Example Transit: Example Transit runs trams and night buses across the city and publishes its timetables and audits in the open.",
+  "Media contact: press office, press@example.com"
+ ],
+ "junk": [
+  "Releases Media kit Contacts",
+  "Example Transit Press Room. All releases are free to republish."
+ ],
+ "structure": {
+  "headings": [
+   "Canal depot adds solar roof"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [
+   "The canal depot roof now powers the night service lights."
+  ],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

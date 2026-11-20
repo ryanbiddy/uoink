@@ -1,0 +1,114 @@
+"""Reader benchmark floors: web pages must keep saving as clean, complete text.
+
+The fixtures, scorer and both capture paths live in tests/reader_bench.py and
+tests/fixtures/reader. These tests fail when recall, precision, structure,
+metadata or the honest outcome (article, wall, shell) drops below the floors in
+tests/fixtures/reader/thresholds.json. Raise the floors on purpose with
+`python tests/reader_bench.py --update-thresholds` after a real improvement.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import os
+import re
+import socket
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tests"))
+import reader_bench as bench  # noqa: E402
+
+THRESHOLDS = json.loads(bench.THRESHOLDS.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(autouse=True)
+def offline(monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("The reader benchmark must not touch the network")
+    monkeypatch.setattr(socket, "getaddrinfo", forbidden)
+    monkeypatch.setattr(socket.socket, "connect", forbidden)
+
+
+def _generator():
+    spec = importlib.util.spec_from_file_location("reader_make_fixtures", bench.FIXTURES / "make_fixtures.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_fixture_files_match_their_generator():
+    module = _generator()
+    built = module.build()
+    assert 25 <= len(module.FIXTURES) <= 40
+    for name, text in built.items():
+        path = bench.FIXTURES / name
+        assert path.is_file(), f"{name} missing: run python tests/fixtures/reader/make_fixtures.py"
+        assert path.read_text(encoding="utf-8") == text, f"{name} is stale: rerun make_fixtures.py"
+
+
+def test_fixtures_only_use_example_domains():
+    hosts = set()
+    for path in bench.FIXTURES.glob("*.html"):
+        hosts.update(re.findall(r"https?://([^/\"'\s)<>]+)", path.read_text(encoding="utf-8")))
+    # Vocabulary URLs (schema.org, the MathML namespace) are not links to real pages.
+    allowed = re.compile(r"(^|\.)example(\.[a-z]+)?$|\.test$|^www\.w3\.org$|^schema\.org$")
+    assert hosts and all(allowed.search(host.split(":")[0]) for host in hosts), sorted(hosts)
+    for path in bench.FIXTURES.glob("*.gold.json"):
+        gold = json.loads(path.read_text(encoding="utf-8"))
+        assert re.search(r"(^|\.)example(\.[a-z]+)?$", re.match(r"https?://([^/]+)", gold["url"]).group(1))
+
+
+def test_scorer_rewards_gold_and_punishes_loss_and_junk():
+    fixture = bench.load_fixtures(["docs-code"])[0]
+    gold = fixture["gold"]
+    perfect = "\n\n".join(gold["keep"])  # the title is already the first kept block
+    row = bench.score_fixture(gold, {"outcome": "article", "title": "", "markdown": perfect,
+                                     "metadata": {"title": gold["title"]}}, "article")
+    assert row["recall"] == pytest.approx(1.0) and row["precision"] == pytest.approx(1.0)
+    assert row["junk_leaks"] == 0
+    lossy = "\n\n".join(gold["keep"][: len(gold["keep"]) // 2] + gold["junk"][:2])
+    worse = bench.score_fixture(gold, {"outcome": "article", "title": gold["title"], "markdown": lossy,
+                                       "metadata": {}}, "article")
+    assert worse["recall"] < 0.8 and worse["precision"] < 1.0 and worse["junk_leaks"] == 2
+    missing = bench.score_fixture(gold, {"outcome": "wall", "markdown": ""}, "article")
+    assert missing["recall"] == 0.0 and not missing["outcome_ok"]
+
+
+def test_structure_checks_read_markdown_forms():
+    md = ("# Title\n\n## Part one\n\n- first item\n1. second item\n\n```python\nx = 1\n```\n\n"
+          "| a | b |\n| --- | --- |\n| 1 | 2 |\n\n[docs](https://x.example/d) ![a cat](https://x.example/c.jpg)\n\n"
+          "> quoted words\n\nText[^1] and $E = mc^2$.\n\n[^1]: The note text.\n")
+    structure = {"headings": ["Part one"], "list_items": ["first item", "second item"],
+                 "code": [{"text": "x = 1", "lang": "python"}], "tables": [[["a", "b"], ["1", "2"]]],
+                 "links": [{"text": "docs", "href": "https://x.example/d"}],
+                 "images": [{"alt": "a cat", "src": "https://x.example/c.jpg"}], "quotes": ["quoted words"],
+                 "footnotes": ["The note text."], "math": ["E = mc^2"], "captions": []}
+    scores = bench.structure_scores(structure, md)
+    assert all(found == total for found, total in scores.values()), scores
+    assert bench.structure_scores(structure, "plain words only")["code"] == (0, 1)
+
+
+def _assert_floors(path, rows, agg):
+    assert path in THRESHOLDS, f"no floors for {path}: run reader_bench.py --update-thresholds"
+    problems = bench.check_floors(rows, agg, THRESHOLDS[path])
+    assert not problems, f"{path} reader benchmark dropped:\n" + "\n".join(problems)
+
+
+def test_pasted_link_path_meets_its_floors(monkeypatch):
+    import page_extractor
+    monkeypatch.setattr(page_extractor, "_CRAWL4AI_AVAILABLE", False)
+    rows, agg = bench.run("helper", bench.load_fixtures())
+    _assert_floors("helper", rows, agg)
+
+
+def test_extension_path_meets_its_floors():
+    if not bench.extension_available():
+        if os.environ.get("UOINK_READER_BENCH_REQUIRED") == "1":
+            pytest.fail("jsdom missing: run npm ci --prefix tests/js/reader")
+        pytest.skip("jsdom not installed (npm ci --prefix tests/js/reader)")
+    rows, agg = bench.run("extension", bench.load_fixtures())
+    _assert_floors("extension", rows, agg)

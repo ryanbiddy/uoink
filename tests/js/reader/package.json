@@ -1,0 +1,9 @@
+{
+  "name": "uoink-reader-bench",
+  "private": true,
+  "description": "Dev-only DOM for the reader benchmark (tests/js/reader_capture_bench.mjs). Never shipped in the extension or the app.",
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "24.1.3"
+  }
+}

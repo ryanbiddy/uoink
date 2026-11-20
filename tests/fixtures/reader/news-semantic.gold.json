@@ -1,0 +1,74 @@
+{
+ "name": "news-semantic",
+ "url": "https://news.example.org/2026/10/harbor-lanterns-relit",
+ "layout": "news article, semantic tags, JSON-LD",
+ "title": "Harbor lanterns are lit again",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Odile Fenwright",
+  "published": "2026-10-12",
+  "site_name": "Gullhaven Gazette"
+ },
+ "keep": [
+  "Harbor lanterns are lit again",
+  "The restored lanterns along the north quay, photographed at dusk.",
+  "Each month, the harbor trust walk past Saltmarsh Lane to patch the net loft and check the fish market roof. Volunteer crews mapped the signal mast first, because the quay wall near the east breakwater looked too bright to trust. The plan was to inspect the mooring post, light the net loft, and keep Gullhaven open for the net menders. Each week, two apprentices walk past the east breakwater to inspect the net loft and check the mooring post. Old photographs of Gullhaven show a narrow harbor office, long before anyone repaired the boathouse.",
+  "Volunteer crews still argue about whether the harbor office should be logged or left fragile for another year. Each month, the harbor trust walk past the ferry slip to survey the breakwater and check the boathouse. When a long fog arrived, the ferry ramp held, although the quay wall beside it was repaired within eight evenings. By June, the ferry pilots had sorted the tide gauge twice, which left the rope store brass but usable. Each month, the harbor trust walk past the east breakwater to rig the quay wall and check the tide gauge.",
+  "We rebuilt every bracket by hand, and the salt still finds a way in.",
+  "Records from March show that the ferry pilots measured the weathered rope store near the north quay at least eight times. By October, volunteer crews had repainted the harbor office twice, which left the net loft fragile but usable. Each morning, two apprentices walk past Saltmarsh Lane to patch the rope store and check the net loft. Some of the ferry pilots wanted to sand the net loft at once, while others asked for eight more evenings of notes. The full survey is on the harbor trust site.",
+  "What the repairs cost",
+  "Old photographs of the north quay show a narrow fish market roof, long before anyone repaired the net loft. Old photographs of the old customs house show a heavy harbor office, long before anyone restored the rope store. When a spring tide arrived, the fish market roof held, although the quay wall beside it was logged within eight weeks. Costs rose after a spring tide, mostly because the net loft at the ferry slip had to be rebuilt by hand.",
+  "Costs rose after the autumn storm, mostly because the lantern at the ferry slip had to be sorted by hand. The plan was to rig the tide gauge, replace the mooring post, and keep the ferry slip open for the harbor trust. Some of volunteer crews wanted to survey the harbor office at once, while others asked for six more evenings of notes. By August, the lantern committee had sorted the net loft twice, which left the harbor office crooked but usable. The lantern at the east breakwater was measured by the ferry pilots after a long fog, and the work took eight evenings.",
+  "Brackets and glass: four weeks",
+  "Wiring and timers: two weeks",
+  "Paint and sealing: one week",
+  "The rope store at the old customs house was sorted by two apprentices after the regatta, and the work took two months. Old photographs of the north quay show a narrow lantern, long before anyone measured the mooring post. Some of volunteer crews wanted to document the rope store at once, while others asked for five more evenings of notes. The ferry pilots still argue about whether the fish market roof should be tested or left costly for another year."
+ ],
+ "junk": [
+  "Harbor Town hall Weather Sport Letters",
+  "Independent harbor news since the year the ferry first ran",
+  "We use cookies and similar tools to keep this site working, to remember your choices and to measure how pages are used. You can accept all of them, or pick which kinds we may store.",
+  "Share this story Copy link Email Print",
+  "Get the morning briefing in your inbox every weekday, free, with one tap to unsubscribe.",
+  "Inside the strange rise of the streaming series Inside the strange rise of the sneaker drop Inside the strange rise of the gadget sale Inside the strange rise of the phone plan",
+  "Save thirty percent on the spring planner bundle, today only",
+  "Copyright Gullhaven Gazette Media. All rights reserved. Registered in the harbor district."
+ ],
+ "structure": {
+  "headings": [
+   "Harbor lanterns are lit again",
+   "What the repairs cost"
+  ],
+  "list_items": [
+   "Brackets and glass: four weeks",
+   "Wiring and timers: two weeks",
+   "Paint and sealing: one week"
+  ],
+  "code": [],
+  "tables": [],
+  "links": [
+   {
+    "text": "the harbor trust site",
+    "href": "https://trust.example.org/survey"
+   }
+  ],
+  "images": [
+   {
+    "alt": "Lanterns along the north quay at dusk",
+    "src": "https://news.example.org/media/2026/lanterns-quay.jpg"
+   }
+  ],
+  "quotes": [
+   "We rebuilt every bracket by hand, and the salt still finds a way in."
+  ],
+  "footnotes": [],
+  "math": [],
+  "captions": [
+   "The restored lanterns along the north quay, photographed at dusk."
+  ]
+ },
+ "rendered": null
+}

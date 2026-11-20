@@ -1,0 +1,60 @@
+{
+ "name": "changelog",
+ "url": "https://quill.example.dev/changelog",
+ "layout": "release notes with version headings and lists",
+ "title": "Changelog",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Quill"
+ },
+ "keep": [
+  "Changelog",
+  "All notable changes to Quill are listed here, newest first.",
+  "2.4.0",
+  "The plan was to benchmark the plugin hook, refactor the retry queue, and keep the nightly build open for two reviewers. Nobody expected the freeze to pin the plugin hook so quickly, yet the maintainers had to merge it again.",
+  "Added jitter to retries",
+  "Faster worker start on large queues",
+  "Fixed a lock file race on Windows",
+  "2.3.1",
+  "The maintainers still argue about whether the plugin hook should be renamed or left noisy for another year. A stable lock file is easy to miss, so the triage rota now deprecate it every season and write the result down.",
+  "Fixed the schema check for nested payloads",
+  "Docs now cover plugin hooks",
+  "2.3.0",
+  "Some of the maintainers wanted to deprecate the config loader at once, while others asked for three more weekends of notes. Each month, the triage rota walk past the CLI to deprecate the lock file and check the log rotation.",
+  "New run_at scheduling option",
+  "Deprecated the old config loader"
+ ],
+ "junk": [
+  "Docs Changelog Roadmap",
+  "Quill changelog. Subscribe to release feeds for updates."
+ ],
+ "structure": {
+  "headings": [
+   "Changelog",
+   "2.4.0",
+   "2.3.1",
+   "2.3.0"
+  ],
+  "list_items": [
+   "Added jitter to retries",
+   "Faster worker start on large queues",
+   "Fixed a lock file race on Windows",
+   "Fixed the schema check for nested payloads",
+   "Docs now cover plugin hooks",
+   "New run_at scheduling option",
+   "Deprecated the old config loader"
+  ],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

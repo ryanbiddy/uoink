@@ -1,0 +1,56 @@
+{
+ "name": "qa-page",
+ "url": "https://ask.example.dev/questions/8812/why-does-my-worker-pool-stall",
+ "layout": "Q and A page with votes and related questions",
+ "title": "Why does my worker pool stall after a deploy?",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Ask Example"
+ },
+ "keep": [
+  "Why does my worker pool stall after a deploy?",
+  "The plan was to merge the lock file, profile the cache layer, and keep the CLI open for the triage rota. Each morning, two reviewers walk past the main branch to deprecate the config loader and check the plugin hook. Some of plugin authors wanted to deprecate the release script at once, while others asked for six more evenings of notes.",
+  "pool = WorkerPool(size=4) pool.start() # hangs here after deploy",
+  "Records from March show that the release team benchmarked the brittle log rotation near the staging cluster at least five times. When the beta arrived, the lock file held, although the schema check beside it was documented within twelve months.",
+  "pool = WorkerPool(size=4, drain_timeout=30)",
+  "When a large migration arrived, the test runner held, although the error budget beside it was deprecated within four weeks. The triage rota renamed the retry queue first, because the worker pool near version two looked too brittle to trust. By October, the release team had deprecated the retry queue twice, which left the cache layer slow but usable.",
+  "signal.signal(signal.SIGTERM, pool.drain)"
+ ],
+ "junk": [
+  "Questions Tags Users Unanswered",
+  "How to profile a flaky test? Lock file keeps changing Retry storms after outage",
+  "Which keyboard layout for coding? Best desk plant for low light",
+  "Ask Example. User contributions licensed for reuse with attribution."
+ ],
+ "structure": {
+  "headings": [
+   "Why does my worker pool stall after a deploy?"
+  ],
+  "list_items": [],
+  "code": [
+   {
+    "text": "pool = WorkerPool(size=4)\npool.start()\n# hangs here after deploy",
+    "lang": "python"
+   },
+   {
+    "text": "pool = WorkerPool(size=4, drain_timeout=30)",
+    "lang": "python"
+   },
+   {
+    "text": "signal.signal(signal.SIGTERM, pool.drain)",
+    "lang": "python"
+   }
+  ],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

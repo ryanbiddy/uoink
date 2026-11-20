@@ -1,0 +1,69 @@
+{
+ "name": "docs-code",
+ "url": "https://docs.example.dev/quill/guide/retries",
+ "layout": "docs page, sidebar nav, TOC, code blocks with languages, admonition",
+ "title": "Retries and backoff",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Quill Docs"
+ },
+ "keep": [
+  "Retries run in the same worker pool, so a slow retry can delay new jobs.",
+  "Retries and backoff",
+  "It helped that the error budget was stable, since the maintainers could merge the cache layer without waiting for the last release. The plan was to refactor the release script, document the build step, and keep the docs site open for plugin authors. Use retry_on to pick which errors retry.",
+  "Basic retries",
+  "The plugin hook at the main branch was refactored by plugin authors after the last release, and the work took four months. Old photographs of the main branch show a strict config loader, long before anyone refactored the release script. When a security report arrived, the worker pool held, although the plugin hook beside it was benchmarked within five weekends.",
+  "from quill import Queue queue = Queue(\"emails\", retries=3) @queue.task(retry_on=(TimeoutError,)) def send(message): return deliver(message)",
+  "Backoff",
+  "Nobody expected the beta to refactor the worker pool so quickly, yet the triage rota had to benchmark it again. The error budget at the CLI was profiled by the triage rota after the code sprint, and the work took two weekends.",
+  "quill worker --backoff exponential --max-delay 300",
+  "Choosing a delay",
+  "Nobody expected the last release to profile the cache layer so quickly, yet the maintainers had to deprecate it again. When a security report arrived, the build step held, although the retry queue beside it was renamed within three weeks.",
+  "Limits",
+  "retries caps the attempts per job",
+  "max_delay caps the wait in seconds",
+  "jitter spreads retries so workers do not wake together"
+ ],
+ "junk": [
+  "Installation Quick start Configuration Workers",
+  "On this page Basic retries Backoff Limits",
+  "Docs API Blog Community GitHub",
+  "Quill is released under the MIT license. Docs built with a static site generator.",
+  "Previous: Workers Next: Scheduling"
+ ],
+ "structure": {
+  "headings": [
+   "Retries and backoff",
+   "Basic retries",
+   "Backoff",
+   "Choosing a delay",
+   "Limits"
+  ],
+  "list_items": [
+   "retries caps the attempts per job",
+   "max_delay caps the wait in seconds",
+   "jitter spreads retries so workers do not wake together"
+  ],
+  "code": [
+   {
+    "text": "from quill import Queue\n\nqueue = Queue(\"emails\", retries=3)\n\n@queue.task(retry_on=(TimeoutError,))\ndef send(message):\n    return deliver(message)",
+    "lang": "python"
+   },
+   {
+    "text": "quill worker --backoff exponential --max-delay 300",
+    "lang": "bash"
+   }
+  ],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}
