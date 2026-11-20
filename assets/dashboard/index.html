@@ -1291,6 +1291,10 @@
 
 
     .card-title {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      text-align: inherit;
       display: -webkit-box;
       overflow: hidden;
       -webkit-box-orient: vertical;
@@ -6205,13 +6209,13 @@
               <button class="button" type="button" data-open-extension>Open extension folder</button>
             </div>
             <ol class="get-extension-steps">
-              <li>Open <code>chrome://extensions</code> in Chrome.</li>
-              <li>Turn on <strong>Developer mode</strong> in the top right.</li>
+              <li>Open <code id="extensionBrowserUrl">chrome://extensions/</code> in <span id="extensionBrowserName">your Chromium browser</span>.</li>
+              <li>Turn on <strong>Developer mode</strong>.</li>
               <li>Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.</li>
               <li id="extensionMacPickerHint" hidden>On a Mac that folder is inside the hidden Library. In the <strong>Load unpacked</strong> window press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd>, paste the path the button copied, press Return, then click <strong>Select</strong>.</li>
               <li>Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.</li>
             </ol>
-            <p class="get-extension-note">Uoink is built and tested for Chrome. Edge and Brave are Chromium-based and may work, but are not tested.</p>
+            <p class="get-extension-note">Uoink is tested in Chrome. Other Chromium browsers may work.</p>
             <p class="get-extension-note">Chrome Web Store review is still pending, so you load it unpacked for now.</p>
           </div>
           <div class="source-map-heading">
@@ -6712,6 +6716,19 @@
                 <input class="field" id="outputFolder" type="text" value="Loading..." aria-label="Output folder path" aria-describedby="outputFolderSaveStatus">
               </details>
               <div class="setting-feedback"><span class="setting-status" id="outputFolderSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="outputFolderSaveRetry" type="button" data-setting-retry="outputFolder">Retry save</button></div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Podcast audio</h2>
+              <p class="setting-copy" id="podcastAudioUsage" role="status">Checking disk use…</p>
+              <label class="inline-row"><input type="checkbox" id="keepPodcastAudio" checked aria-describedby="keepPodcastAudioSaveStatus"> Keep podcast audio after transcribing</label>
+              <p class="setting-copy">Keeping the download lets you transcribe the episode again offline. Turning this off removes audio after future transcriptions finish.</p>
+              <div class="setting-feedback"><span class="setting-status" id="keepPodcastAudioSaveStatus" role="status"></span><button class="button ghost setting-retry hidden" type="button" data-setting-retry="keepPodcastAudio" id="keepPodcastAudioSaveRetry">Retry save</button></div>
+              <div class="inline-row">
+                <button class="button" type="button" id="deletePodcastAudio" disabled>Delete podcast audio already transcribed</button>
+                <button class="button ghost hidden" type="button" id="stopPodcastCleanup">Stop</button>
+              </div>
+              <span class="setting-status" id="podcastCleanupStatus" role="status"></span>
             </div>
 
             <div class="setting-block" id="library-mirror">
@@ -7652,11 +7669,25 @@
 
     async function getToken() {
       if (state.token) return state.token;
-      const res = await fetch("/token", { headers: { "X-Uoink-Client": "uoink-extension" } });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "token unavailable");
-      state.token = data.token;
-      return state.token;
+      if (!state.tokenRequest) {
+        state.tokenRequest = requestDashboardToken().finally(() => { state.tokenRequest = null; });
+      }
+      return state.tokenRequest;
+    }
+
+    async function requestDashboardToken() {
+      for (const delay of [0, 250, 750]) {
+        if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+        try {
+          const res = await fetch("/token", { headers: { "X-Uoink-Client": "uoink-extension" } });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.ok && data.token) return (state.token = data.token);
+          }
+          if (res.status !== 429 && res.status < 500) break;
+        } catch (_) {}
+      }
+      throw new Error("Couldn’t connect to Uoink. Check that the helper is running, then try again.");
     }
 
     async function authFetch(path, opts = {}) {
@@ -7783,7 +7814,7 @@
       }
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (event.shiftKey && (document.activeElement === first || !focusables.includes(document.activeElement))) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -11784,6 +11815,8 @@
 
     function openConsentModal(source, targetConsent, displaySummary) {
       if (!els.sourceConsentModal) return;
+      state.consentFocusTarget = els.standingSubscriptionList?.querySelector(
+        `.toggle-consent-btn[data-source-id="${CSS.escape(source.source_id)}"]`) || document.activeElement;
       const title = source.display_name || source.canonical_url || "this source";
       const isEnabling = targetConsent === "on";
 
@@ -11833,6 +11866,8 @@
       if (!els.sourceConsentModal) return;
       els.sourceConsentModal.classList.add("hidden");
       state.standingPendingIntent = null;
+      restoreFocus(state.consentFocusTarget);
+      state.consentFocusTarget = null;
     }
 
     async function confirmConsentMutation() {
@@ -14175,7 +14210,7 @@
     function libraryMatchHtml(row) {
       if (!state.filters.q.trim()) return "";
       const passage = row.passage_verified === true && row.passage;
-      if (!passage || !passage.text) return '<div class="card-match">No matching quote available.</div>';
+      if (!passage || !passage.text) return `<div class="card-match">${row.snippet ? matchExcerptHtml(row.snippet, state.filters.q) : "No matching quote available."}</div>`;
       const seconds = storedTime(passage.timestamp_seconds, passage.start, row.timestamp_seconds);
       const label = readerClock(seconds);
       const id = videoIdOf(row);
@@ -14240,13 +14275,13 @@
       const current = state.activeTab === "yoink" && videoIdOf(state.selectedYoink) === String(row.video_id || row.slug || "")
         ? ' aria-current="true"' : "";
       return `
-        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}"${current}>
+        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}"${current}>
           <div class="row-thumb" aria-hidden="true">
             <img alt="" data-thumb-for="${id}" class="hidden">
             <span class="source-type-chip">${sourceType}</span>
           </div>
           <div class="row-body" title="${title}">
-            <div class="card-title" title="${title}">${title}</div>
+            <button class="card-title" type="button" title="${title}" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}">${title}</button>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
@@ -15131,8 +15166,8 @@
     function fallbackTopicItems() {
       const counts = new Map();
       (state.library || []).forEach((row) => {
-        const topic = String(row.topic || "").trim();
-        if (topic) counts.set(topic, (counts.get(topic) || 0) + 1);
+        const topic = String(row.topic || "").trim() || "Uncategorized";
+        counts.set(topic, (counts.get(topic) || 0) + 1);
       });
       return [...counts.entries()]
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -15240,9 +15275,12 @@
       return state.hookGuide;
     }
 
-    async function openHookExplainer(hookId) {
+    async function openHookExplainer(hookId, opener = document.activeElement) {
+      state.hookFocusTarget = opener;
       els.hookExplainer.classList.remove("hidden");
+      els.hookExplainerClose.focus();
       const hooks = await loadHookGuide();
+      if (state.hookFocusTarget !== opener) return;
       els.hookExplainerList.innerHTML = hooks.length
         ? hooks.map((h) => `
           <div class="hook-explainer-row ${h.id === hookId ? "active" : ""}">
@@ -15253,11 +15291,12 @@
         : `<div class="soft-note">The guide didn't load. It ships with the helper; close this and try again.</div>`;
       const active = els.hookExplainerList.querySelector(".hook-explainer-row.active");
       if (active) active.scrollIntoView({ block: "nearest" });
-      els.hookExplainerClose.focus();
     }
 
     function closeHookExplainer() {
       els.hookExplainer.classList.add("hidden");
+      restoreFocus(state.hookFocusTarget);
+      state.hookFocusTarget = null;
     }
 
     function channelInitial(label) {
@@ -16398,6 +16437,63 @@
       }
     }
 
+    let podcastStorageVersion = 0;
+    let podcastCleanupIds = [];
+    let podcastCleanupRunning = false;
+    let podcastCleanupStopped = false;
+
+    async function refreshPodcastStorage() {
+      const version = ++podcastStorageVersion;
+      const usage = document.getElementById("podcastAudioUsage");
+      const button = document.getElementById("deletePodcastAudio");
+      button.disabled = true;
+      try {
+        let result = await authFetch("/podcasts/audio-storage?refresh=1");
+        while (result.pending) {
+          if (version !== podcastStorageVersion) return;
+          await new Promise(resolve => setTimeout(resolve, 250));
+          result = await authFetch("/podcasts/audio-storage");
+        }
+        if (version !== podcastStorageVersion) return;
+        const {bytes, episodes} = result;
+        podcastCleanupIds = episodes;
+        usage.textContent = bytes < 1048576 ? `${bytes.toLocaleString()} bytes on disk` : `${(bytes / 1048576).toLocaleString(undefined, {maximumFractionDigits: 2})} MiB on disk`;
+        button.disabled = podcastCleanupRunning || !episodes.length;
+      } catch (_) {
+        if (version === podcastStorageVersion) usage.textContent = "Couldn’t check podcast storage. Reload Settings to try again.";
+      }
+    }
+
+    async function deletePodcastAudio() {
+      if (podcastCleanupRunning || !podcastCleanupIds.length ||
+          !window.confirm("Delete downloaded audio for episodes with a finished transcript? Your transcripts stay in your library.")) return;
+      const status = document.getElementById("podcastCleanupStatus");
+      const stop = document.getElementById("stopPodcastCleanup");
+      podcastCleanupRunning = true;
+      podcastCleanupStopped = false;
+      document.getElementById("deletePodcastAudio").disabled = true;
+      stop.classList.remove("hidden");
+      let count = 0, kept = 0;
+      try {
+        for (const episode_id of podcastCleanupIds) {
+          if (podcastCleanupStopped) break;
+          const result = await authFetch("/podcasts/audio-storage/delete", {
+            method: "POST", body: JSON.stringify({episode_id, confirmed: true}),
+          });
+          if (result.removed) count++;
+          else kept++;
+          status.textContent = `Removed ${count} audio files.`;
+        }
+        status.textContent = `${podcastCleanupStopped ? "Stopped. " : ""}Removed ${count} audio files.${kept ? ` Kept ${kept} that could not be safely removed.` : ""}`;
+      } catch (_) {
+        status.textContent = `Removed ${count} audio files before cleanup stopped. Try again to continue.`;
+      } finally {
+        stop.classList.add("hidden");
+        podcastCleanupRunning = false;
+        await refreshPodcastStorage();
+      }
+    }
+
     async function refreshSettings() {
       const request = ++settingsReadVersion;
       const versions = Object.fromEntries([...settingEdits].map(([id, edit]) => [id, edit.version]));
@@ -16411,6 +16507,7 @@
         const data = await settingsRequest("/settings");
         if (request !== settingsReadVersion) return;
         hydrateSettings(data, versions);
+        refreshPodcastStorage();
         status.textContent = "";
       } catch (err) {
         if (request !== settingsReadVersion) return;
@@ -17400,8 +17497,20 @@
           ? shots.map(handoffShotHtml).join("")
           : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
       }
-      els.writingHandoffPopup.classList.remove("hidden");
+      if (els.writingHandoffPopup.classList.contains("hidden")) {
+        state.handoffFocusTarget = document.activeElement;
+        els.writingHandoffPopup.classList.remove("hidden");
+        focusFirstIn(els.writingHandoffPopup);
+      } else if (!els.writingHandoffPopup.contains(document.activeElement)) {
+        focusFirstIn(els.writingHandoffPopup);
+      }
       loadDetailFileImages();
+    }
+
+    function closeWritingHandoff() {
+      els.writingHandoffPopup.classList.add("hidden");
+      restoreFocus(state.handoffFocusTarget);
+      state.handoffFocusTarget = null;
     }
 
     function handoffShotHtml(shot) {
@@ -18684,6 +18793,7 @@
       usageSharing: ["usage_sharing", false],
       autoUpdateCheck: ["auto_update_check", false],
       suggestPodcastsToggle: ["suggest_podcasts", false],
+      keepPodcastAudio: ["keep_podcast_audio", true],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -19516,6 +19626,8 @@
     }
 
     function bindSemanticSearch() {
+      const notice = document.getElementById("semanticNoticeDialog");
+      notice.addEventListener("keydown", event => trapModalFocus(event, notice, () => notice.close()));
       document.getElementById("semanticAccept").addEventListener("change", renderSemanticStatus);
       for (const [id, action] of [["semanticDownload", "download"], ["semanticPause", "pause"], ["semanticResume", "start"], ["semanticRemove", "remove"]]) {
         document.getElementById(id).addEventListener("click", () => semanticAction(action));
@@ -19884,6 +19996,8 @@
     }
 
     function wireSettingsAutosave() {
+      document.getElementById("deletePodcastAudio").addEventListener("click", deletePodcastAudio);
+      document.getElementById("stopPodcastCleanup").addEventListener("click", () => { podcastCleanupStopped = true; });
       wireRelaySettings();
       bindSemanticSearch();
       document.getElementById("reloadHookCorrections").addEventListener("click", loadHookCorrections);
@@ -20268,7 +20382,13 @@
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
-      if (tab === "sources") renderSources();
+      if (tab === "sources") {
+        renderSources();
+        authFetch("/extension/browser").then(browser => {
+          document.getElementById("extensionBrowserName").textContent = browser.name;
+          document.getElementById("extensionBrowserUrl").textContent = browser.url;
+        }).catch(() => {});
+      }
       if (tab === "activity") refreshActivity();
       const settingsRead = tab === "settings" ? refreshSettings() : null;
       const back = tab === "library" && previousTab === "yoink" ? state.libraryScroll : null;
@@ -20552,7 +20672,8 @@
           showToast(translateMachineMessage(err.message, { url }));
         }
       });
-      document.getElementById("closeWritingHandoff").addEventListener("click", () => els.writingHandoffPopup.classList.add("hidden"));
+      document.getElementById("closeWritingHandoff").addEventListener("click", closeWritingHandoff);
+      els.writingHandoffPopup.addEventListener("keydown", (event) => trapModalFocus(event, els.writingHandoffPopup, closeWritingHandoff));
       document.getElementById("previewStyleAnchor").addEventListener("click", previewStyleAnchor);
       document.getElementById("addStyleAnchor").addEventListener("click", addStyleAnchor);
       document.getElementById("browseDefaultAnchors").addEventListener("click", openDefaultAnchorsModal);
@@ -20693,7 +20814,7 @@
       });
       document.addEventListener("keydown", (event) => {
         if (!isCardActivationKey(event)) return;
-        const card = event.target.closest(".uoink-card[role='button'], .insight-card[role='button']");
+        const card = event.target.closest(".insight-card[role='button']");
         if (!card || event.target.closest("a, button, input, select, textarea, summary")) return;
         if (!card.dataset.videoId && !card.dataset.folder) return;
         event.preventDefault();
@@ -21022,7 +21143,7 @@
         if (hookExplain) {
           // Before the card branch: hook badges live inside cards and must
           // open the explainer, not the detail view.
-          openHookExplainer(hookExplain.dataset.hookExplain || "");
+          openHookExplainer(hookExplain.dataset.hookExplain || "", hookExplain);
           return;
         }
         const healthOpen = event.target.closest("[data-health-open]");
@@ -21139,7 +21260,9 @@
         if (item && event.dataTransfer) {
           event.dataTransfer.setData("text/plain", item.path);
           state.writingUsedScreenshots.add(item.id);
-          setTimeout(() => renderWritingHandoff(selectedWritingScreenshots()), 80);
+          setTimeout(() => {
+            if (!els.writingHandoffPopup.classList.contains("hidden")) renderWritingHandoff(selectedWritingScreenshots());
+          }, 80);
         }
       });
       // Phase 3: Standing subscriptions & consent modal events
@@ -21223,7 +21346,17 @@
 
     async function readJobsStream() {
       const token = await getToken();
-      const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
+      const headers = { "X-Uoink-Token": token };
+      try {
+        if (!state.jobsStreamClient) {
+          // A newly opened tab can inherit a copy of its opener's storage.
+          const reload = performance.getEntriesByType("navigation")[0]?.type === "reload";
+          state.jobsStreamClient = (reload && sessionStorage.getItem("uoink-jobs-stream")) || crypto.randomUUID();
+          sessionStorage.setItem("uoink-jobs-stream", state.jobsStreamClient);
+        }
+        headers["X-Uoink-Stream"] = state.jobsStreamClient;
+      } catch (_) {}
+      const res = await fetch("/jobs/stream", { headers });
       if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

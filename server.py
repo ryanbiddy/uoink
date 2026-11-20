@@ -16,6 +16,7 @@ Endpoints:
 """
 
 import contextlib
+from concurrent.futures import ThreadPoolExecutor
 import errno
 import hashlib
 import json
@@ -30,6 +31,7 @@ import re
 import secrets
 import shutil
 import socket
+import select
 import sqlite3
 import subprocess
 import sys
@@ -633,6 +635,7 @@ def _current_token() -> str:
 _TOKEN_RATE_LIMIT = 10
 _TOKEN_RATE_WINDOW_SEC = 60.0
 _token_request_times: list[float] = []
+_dashboard_token_times: list[float] = []
 _token_rate_lock = threading.Lock()
 # Canonical client-identification header value. The legacy "yoink-extension"
 # value is still accepted through the v2.x alias window so a not-yet-updated
@@ -641,18 +644,19 @@ _UOINK_CLIENT_HEADER_VALUE = "uoink-extension"
 _YOINK_CLIENT_HEADER_VALUE = "yoink-extension"
 
 
-def _check_token_rate_limit() -> bool:
+def _check_token_rate_limit(*, dashboard=False) -> bool:
     import time
     now = time.monotonic()
     with _token_rate_lock:
         # Drop stale entries (older than the window) and decide.
         cutoff = now - _TOKEN_RATE_WINDOW_SEC
-        kept = [t for t in _token_request_times if t > cutoff]
-        if len(kept) >= _TOKEN_RATE_LIMIT:
-            _token_request_times[:] = kept
+        times = _dashboard_token_times if dashboard else _token_request_times
+        kept = [t for t in times if t > cutoff]
+        if len(kept) >= (120 if dashboard else _TOKEN_RATE_LIMIT):
+            times[:] = kept
             return False
         kept.append(now)
-        _token_request_times[:] = kept
+        times[:] = kept
     return True
 
 
@@ -1084,6 +1088,7 @@ def _default_settings() -> dict:
         # source_type='short_video' ONLY; long-form captures always delete
         # their media regardless of this flag.
         "keep_media": False,
+        "keep_podcast_audio": True,
         # Dashboard appearance: "system" follows the OS (prefers-color-scheme);
         # "light" or "dark" forces it. Stored here, not per browser, so the
         # Uoink window and a browser tab show the same theme.
@@ -1290,6 +1295,7 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("x_text_capture_enabled", True)
     )
     clean["keep_media"] = bool(clean.get("keep_media"))
+    clean["keep_podcast_audio"] = bool(clean.get("keep_podcast_audio", True))
     theme = str(clean.get("dashboard_theme") or "system").strip().lower()
     clean["dashboard_theme"] = theme if theme in _DASHBOARD_THEMES else "system"
     card_image = str(clean.get("card_image") or CARD_IMAGE_MIDDLE).strip().lower()
@@ -2094,6 +2100,7 @@ def _public_settings(data: dict | None = None) -> dict:
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
+        "keep_podcast_audio": bool(data.get("keep_podcast_audio", True)),
         # Settings > App > Appearance: system, light or dark.
         "dashboard_theme": (data.get("dashboard_theme")
                             if data.get("dashboard_theme") in _DASHBOARD_THEMES else "system"),
@@ -2951,6 +2958,9 @@ _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 # at a time, on a below-normal-priority worker thread. Queue state is mirrored
 # into the durable jobs table through the ordinary job helpers below.
 _podcast_transcription_queue: queue.Queue[str] = queue.Queue()
+_podcast_storage_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="podcast-storage")
+_podcast_storage_lock = threading.Lock()
+_podcast_storage_scan = None
 _podcast_transcription_worker_lock = threading.Lock()
 _podcast_transcription_worker_thread: threading.Thread | None = None
 # Feed HTTP polls are short compared with media work, but a manual refresh can
@@ -2970,7 +2980,7 @@ _SSE_MAX_STREAMS = 8          # cap concurrent streams (local single-user helper
 _SSE_TICK_SEC = 1.0           # poll job/queue state this often
 _SSE_HEARTBEAT_SEC = 15.0     # keepalive comment cadence
 _sse_count_lock = threading.Lock()
-_sse_active = [0]
+_sse_active = {}
 
 _settings_lock = threading.RLock()
 _corpus_update_lock = threading.Lock()
@@ -6753,7 +6763,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
                     cap_warning: str | None = None,
                     shot_times: list[int] | None = None,
                     media_sections: str | None = None,
-                    transcript_note: str | None = None) -> str:
+                    transcript_note: str | None = None, skip_comments: bool = False) -> str:
     """Produce the v1 corpus markdown. Comments section is a placeholder
     that the background worker rewrites once the fetch completes.
     ``media_sections`` (Phase 6 BC-2) is the shared media renderer's
@@ -6869,7 +6879,8 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("## Top Comments")
     parts.append("")
     parts.append(COMMENTS_START_MARK)
-    parts.append("*Fetching comments... they'll appear here when ready.*")
+    parts.append("*Lite captures skip comments.*" if skip_comments else
+                 "*Fetching comments... they'll appear here when ready.*")
     parts.append(COMMENTS_END_MARK)
     parts.append("")
     parts.append("---")
@@ -7985,6 +7996,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             shot_times=shot_times,
             media_sections=media_sections,
             transcript_note=transcript_note,
+            skip_comments=effective_long_video_mode == LONG_VIDEO_MODE_LITE,
         )
         # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
         # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
@@ -11291,6 +11303,12 @@ def _podcast_transcription_worker() -> None:
                     log.warning(
                         "podcast watch: deferred corpus publish for episode "
                         "%d after error: %s", episode_id, corpus_error)
+            try:
+                if not _read_settings().get("keep_podcast_audio", True):
+                    podcasts.delete_transcribed_audio(_get_index(), DATA_ROOT, episode_id)
+            except Exception:
+                # Storage cleanup cannot undo a completed transcription.
+                log.warning("Could not remove podcast audio for episode %s", episode_id)
             now = _now_iso()
             _update_job(
                 job_id, state="completed", current_video_phase=None,
@@ -11312,7 +11330,7 @@ def _podcast_transcription_worker() -> None:
                     "Podcast transcription complete; corpus publish will retry."
                     if corpus_error else
                     "Podcast transcription complete."))
-            # Phase 3: a standing capture completes its ledger row only after
+            # A standing capture completes its ledger row only after
             # publication committed; a deferred publish is a failed attempt
             # (the charge stays; the item may retry under its counters).
             _settle_source_capture(
@@ -15581,7 +15599,7 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
     for column in ("channel", "platform", "source_type", "author", "topic", "hook_type"):
         value = filters.get(column)
         if value:
-            clauses.append(f"y.{column} = ?")
+            clauses.append(f"{index.facet_column(column)} = ?")
             params.append(value)
     types = _LIBRARY_KINDS.get(kind or "", ())
     if types:
@@ -15874,6 +15892,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "captions_skipped_reason": captions_skipped if isinstance(captions_skipped, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
+            **({"snippet": r["_snippet"]} if r.get("_snippet") else {}),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return podcasts.repair_corpus_titles(idx, out, data_root=DATA_ROOT)
@@ -17088,7 +17107,7 @@ class Handler(BaseHTTPRequestHandler):
             # stay in the allow-list through the v2.x alias window so a
             # not-yet-updated extension build keeps working.
             self.send_header("Access-Control-Allow-Headers",
-                             "Content-Type, X-Uoink-Token, X-Uoink-Client, "
+                             "Content-Type, X-Uoink-Token, X-Uoink-Client, X-Uoink-Stream, "
                              "X-Yoink-Token, X-Yoink-Client")
             self.send_header("Access-Control-Max-Age", "600")
             # Private Network Access: Chrome requires this header when a public
@@ -17502,6 +17521,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/extension/browser":
+            from uoink_splash import _preferred_browser
+            browser = _preferred_browser()
+            return self._send_json(200, {"ok": True, "name": browser["name"], "url": browser["url"]})
         if bare == "/research" or bare.startswith("/research/"):
             return self._handle_research_get(bare)
         if bare == "/relay/status":
@@ -17527,6 +17550,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/podcasts/audio-storage":
+            return self._handle_podcast_storage()
         if bare == "/suggestions/podcasts":
             return self._handle_podcast_suggestions_list()
         if bare == "/sources":
@@ -17723,7 +17748,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(413, {"ok": False, "error": "Body too large"})
             if length:
                 return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
-        if not _check_token_rate_limit():
+        # The origin gate above only admits an originless GET from the
+        # loopback dashboard with same-origin fetch metadata.
+        dashboard = self.command == "GET" and self.headers.get("Origin") is None
+        if not _check_token_rate_limit(dashboard=dashboard):
             log.info("%s /token rate-limited", self.command)
             return self._send_json(429, {"ok": False, "error": "too many requests"})
         self._send_json(200, {"ok": True, "token": TOKEN})
@@ -19156,6 +19184,21 @@ class Handler(BaseHTTPRequestHandler):
         status = 200 if result.get("ok") else 400
         return self._send_json(status, result)
 
+    def _handle_podcast_storage(self):
+        global _podcast_storage_scan
+        refresh = parse_qs(urlparse(self.path).query).get("refresh") == ["1"]
+        with _podcast_storage_lock:
+            if _podcast_storage_scan is None or (refresh and _podcast_storage_scan.done()):
+                _podcast_storage_scan = _podcast_storage_pool.submit(podcasts.audio_storage, _get_index(), DATA_ROOT)
+            scan = _podcast_storage_scan
+        if not scan.done():
+            return self._send_json(202, {"ok": True, "pending": True})
+        try:
+            result = scan.result()
+        except (OSError, sqlite3.Error):
+            return self._send_json(503, {"ok": False, "error": "Couldn’t check podcast storage."})
+        return self._send_json(200, {"ok": True, **result})
+
     def _handle_podcasts_episodes_list(self):
         if not self._require_token():
             return
@@ -20443,6 +20486,7 @@ class Handler(BaseHTTPRequestHandler):
             "usage_sharing_prompt_seen",
             "auto_update_check",            # daily GitHub release check (default OFF)
             "suggest_podcasts",             # 3.17 podcast suggestions (default OFF)
+            "keep_podcast_audio",
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -22827,6 +22871,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_set_status(body)
         if bare == "/podcasts/episodes/download":
             return self._handle_podcasts_episode_download(body)
+        if bare == "/podcasts/audio-storage/delete":
+            episode_id = body.get("episode_id")
+            if body.get("confirmed") is not True or type(episode_id) is not int or not 0 < episode_id < 2**63:
+                return self._send_json(400, {"ok": False, "error": "Confirm an episode to delete its audio."})
+            removed = podcasts.delete_transcribed_audio(_get_index(), DATA_ROOT, episode_id)
+            return self._send_json(200, {"ok": True, "removed": removed})
         if bare == "/podcasts/episodes/transcribe":
             return self._handle_podcasts_episode_transcribe(body)
         if bare == "/podcasts/episodes/to-corpus":
@@ -23086,14 +23136,25 @@ class Handler(BaseHTTPRequestHandler):
         X-Uoink-Token header rather than a URL (see _request_token). Emits one
         `snapshot`, then `job`/`queue` deltas on a 1s poll, plus a `: heartbeat`
         comment every 15s. One thread per connection (ThreadingHTTPServer);
-        exits when the client disconnects (write raises) -- and dies with the
+        exits when the peer closes its socket, and dies with the
         process on shutdown, since worker threads are daemonic."""
         if not self._require_token():
             return
+        client = self.headers.get("X-Uoink-Stream", "")
+        key = ((self.headers.get("Origin", ""), client) if re.fullmatch(r"[\w-]{1,64}", client)
+               else self.connection)
         with _sse_count_lock:
-            if _sse_active[0] >= _SSE_MAX_STREAMS:
-                return self._send_json(503, {"ok": False, "error": "too many streams"})
-            _sse_active[0] += 1
+            previous = _sse_active.get(key)
+            admitted = previous is not None or len(_sse_active) < _SSE_MAX_STREAMS
+            if admitted:
+                _sse_active[key] = self.connection
+        if not admitted:
+            return self._send_json(503, {"ok": False, "error": "too many streams"})
+        if previous is not None:
+            try:
+                previous.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
         try:
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream; charset=utf-8")
@@ -23109,8 +23170,12 @@ class Handler(BaseHTTPRequestHandler):
             last_jobs = self._jobs_map()
             last_queue = self._queue_snapshot()
             last_beat = time.monotonic()
-            while True:
-                time.sleep(_SSE_TICK_SEC)
+            # A streaming GET has no more request bytes. Readability signals
+            # EOF (or unsolicited input), including during a quiet queue.
+            while not select.select([self.connection], [], [], _SSE_TICK_SEC)[0]:
+                with _sse_count_lock:
+                    if _sse_active.get(key) is not self.connection:
+                        break
                 cur = self._jobs_map()
                 for jid, jobj in cur.items():
                     if last_jobs.get(jid) != jobj:
@@ -23129,7 +23194,8 @@ class Handler(BaseHTTPRequestHandler):
             pass  # client went away -- reap this stream
         finally:
             with _sse_count_lock:
-                _sse_active[0] -= 1
+                if _sse_active.get(key) is self.connection:
+                    del _sse_active[key]
 
     # ---- /taxonomy ----
     def _handle_taxonomy(self):

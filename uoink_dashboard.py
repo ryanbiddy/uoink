@@ -17,6 +17,7 @@ pywebview/WebView2 isn't available.
 from __future__ import annotations
 
 import logging
+import hashlib
 import os
 import sys
 import threading
@@ -154,6 +155,77 @@ def _brand_windows_icon_when_ready() -> None:
         time.sleep(0.25)
 
 
+def _focus_event_api():
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateEventW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.BOOL, wintypes.LPCWSTR]
+    kernel.CreateEventW.restype = wintypes.HANDLE
+    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel.WaitForSingleObject.restype = wintypes.DWORD
+    for fn in (kernel.SetEvent, kernel.CloseHandle):
+        fn.argtypes = [wintypes.HANDLE]
+        fn.restype = wintypes.BOOL
+    return kernel, ctypes.get_last_error
+
+
+def _focus_dashboard(window):
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32
+    user32.IsIconic.argtypes = [wintypes.HWND]
+    user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+    hwnd = window.native.Handle.ToInt64()
+    if user32.IsIconic(hwnd):
+        window.restore()
+    window.show()
+    user32.SetForegroundWindow(hwnd)
+
+
+def _windows_dashboard(webview, target_url):
+    kernel, last_error = _focus_event_api()
+    # Local to this logon session and helper binding. The OS drops the
+    # event if the window process crashes, including during startup.
+    identity = hashlib.sha256(_dashboard_url().encode()).hexdigest()[:24]
+    handle = kernel.CreateEventW(None, False, False, "Local\\UoinkDashboard-" + identity)
+    error = last_error()
+    if not handle:
+        raise OSError(error, "Could not open the dashboard focus event")
+    stopped = threading.Event()
+    waiting = threading.Lock()
+
+    def listen(window):
+        while True:
+            with waiting:
+                if stopped.is_set():
+                    return
+                result = kernel.WaitForSingleObject(handle, 250)
+            if result == 0:
+                try:
+                    _focus_dashboard(window)
+                except Exception as exc:
+                    log.debug("dashboard focus unavailable: %s", exc)
+            elif result != 258:  # WAIT_TIMEOUT
+                return
+
+    try:
+        if error == 183:  # ERROR_ALREADY_EXISTS
+            if not kernel.SetEvent(handle):
+                raise OSError(last_error(), "Could not signal the dashboard window")
+            return 0
+        window = webview.create_window("Uoink", target_url, width=WIDTH, height=HEIGHT,
+                                       resizable=True, js_api=JsApi())
+        threading.Thread(target=_brand_windows_icon_when_ready, name="uoink-dashboard-icon", daemon=True).start()
+        webview.start(listen, (window,))
+        return 0
+    finally:
+        stopped.set()
+        with waiting:
+            kernel.CloseHandle(handle)
+
+
 def main() -> int:
     target_url = _target_url()
     if sys.platform == "darwin":
@@ -177,6 +249,8 @@ def main() -> int:
         log.debug("pywebview unavailable; opening dashboard in default browser: %s", e)
         webbrowser.open(target_url)
         return 0
+    if sys.platform == "win32":
+        return _windows_dashboard(webview, target_url)
     webview.create_window(
         "Uoink",
         target_url,
@@ -185,12 +259,6 @@ def main() -> int:
         resizable=True,
         js_api=JsApi(),
     )
-    if sys.platform == "win32":
-        threading.Thread(
-            target=_brand_windows_icon_when_ready,
-            name="uoink-dashboard-icon",
-            daemon=True,
-        ).start()
     webview.start()
     return 0
 

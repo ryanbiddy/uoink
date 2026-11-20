@@ -276,16 +276,26 @@ class Source:
 
 def word_passages(text):
     """230 words / 40 overlap, with exact half-open character and word spans."""
-    words = list(re.finditer(r"\S+", text))
+    from uoink_core.search_service import corpus_body_ranges
+    ranges = corpus_body_ranges(text)
+    pattern = re.compile(r"\S+")
     result = []
-    for start in range(0, len(words), 190):
-        end = min(start + 230, len(words))
-        lo, hi = words[start].start(), words[end - 1].end()
-        result.append(Passage(f"text:{start}", text[lo:hi],
-                              {"kind": "text", "char_start": lo, "char_end": hi,
-                               "word_start": start, "word_end": end}))
-        if end == len(words):
-            break
+    offset = previous = 0
+    if ranges is None:
+        ranges = [(0, len(text))]
+    for lo, hi in ranges:
+        offset += sum(1 for _ in pattern.finditer(text, previous, lo))
+        words = list(pattern.finditer(text, lo, hi))
+        for start in range(0, len(words), 190):
+            end = min(start + 230, len(words))
+            first, last = words[start].start(), words[end - 1].end()
+            result.append(Passage(f"text:{offset + start}", text[first:last],
+                                  {"kind": "text", "char_start": first, "char_end": last,
+                                   "word_start": offset + start, "word_end": offset + end}))
+            if end == len(words):
+                break
+        previous = hi
+        offset += len(words)
     return tuple(result)
 
 
@@ -350,12 +360,12 @@ class IndexSources:
             clauses.append("COALESCE(NULLIF(y.source_type, ''), 'video') IN ("
                            + ",".join("?" for _ in source_types) + ")")
             params.extend(source_types)
+        from index import capture_time_sql, facet_column
         for key in sorted(FILTERS - {"date_from", "date_to"}):
             if filters.get(key):
-                clauses.append(f"y.{key} = ?")
+                clauses.append(f"{facet_column(key)} = ?")
                 params.append(filters[key])
         # Same local-day bounds as the keyword search.
-        from index import capture_time_sql
         if filters.get("date_from"):
             datetime.strptime(filters["date_from"], "%Y-%m-%d")
             clauses.append(f"{capture_time_sql('y.yoinked_at')} >= ?")

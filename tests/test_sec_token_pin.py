@@ -45,7 +45,7 @@ def handler_code():
     names = {
         "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "_TOKEN_RATE_LIMIT", "_TOKEN_RATE_WINDOW_SEC",
-        "_token_request_times", "_token_rate_lock", "_UOINK_CLIENT_HEADER_VALUE",
+        "_token_request_times", "_dashboard_token_times", "_token_rate_lock", "_UOINK_CLIENT_HEADER_VALUE",
         "_YOINK_CLIENT_HEADER_VALUE", "_allowed_extension_ids",
         "_check_token_rate_limit", "_reports_live_extract", "Handler",
     }
@@ -115,6 +115,13 @@ def test_manifest_public_key_derives_pinned_id():
 
 def test_default_allowlist_is_pinned(helper):
     assert helper["_allowed_extension_ids"]() == {PINNED_ID}
+
+
+def test_dashboard_reloads_have_a_separate_bootstrap_budget(helper):
+    headers = {**token_headers(None), "Sec-Fetch-Site": "same-origin"}
+    for _ in range(20):
+        assert request(helper, headers=headers)[0] == 200
+    assert request(helper, method="POST", headers=token_headers())[0] == 200
 
 
 def test_store_id_adds_exact_origin_without_unpinning_dev(helper, tmp_path, monkeypatch):

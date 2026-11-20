@@ -43,15 +43,17 @@ def test_controls_have_real_names() -> None:
 def test_cards_keyboard_activate_detail() -> None:
     for marker in (
         'class="uoink-card ${htmlEscape(variant)}"',
-        'tabindex="0" role="button" aria-label="Open ${title}${availabilityLabel ?',
+        '<button class="card-title" type="button" title="${title}" aria-label="Open ${title}${availabilityLabel ?',
         'class="insight-card"',
         'tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}"',
         'document.addEventListener("keydown", (event) => {',
         "isCardActivationKey(event)",
-        ".uoink-card[role='button'], .insight-card[role='button']",
+        ".insight-card[role='button']",
         "openYoinkDetail(rowFromCard(card));",
     ):
         require(marker in DASHBOARD, f"missing keyboard card marker: {marker}")
+    article = DASHBOARD.split('<article class="uoink-card ', 1)[1].split(">", 1)[0]
+    assert 'role="button"' not in article and "tabindex" not in article
     print("ok  Library and For You cards open from keyboard")
 
 

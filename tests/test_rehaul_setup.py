@@ -11,20 +11,19 @@ JS = (ROOT / "extension/setup.js").read_text(encoding="utf-8-sig")
 DASHBOARD = (ROOT / "assets/dashboard/index.html").read_text(encoding="utf-8-sig")
 
 
-def test_dashboard_extension_steps_use_chrome_and_finish_with_pin():
+def test_dashboard_extension_steps_use_first_run_browser_and_finish_with_pin():
     card = DASHBOARD.split('id="getExtensionCard"', 1)[1].split('<div class="source-map-heading">', 1)[0]
     steps = card.split('<ol class="get-extension-steps">', 1)[1].split('</ol>', 1)[0]
     assert re.findall(r'<li>(.*?)</li>', steps, re.S) == [
-        'Open <code>chrome://extensions</code> in Chrome.',
-        'Turn on <strong>Developer mode</strong> in the top right.',
+        'Open <code id="extensionBrowserUrl">chrome://extensions/</code> in <span id="extensionBrowserName">your Chromium browser</span>.',
+        'Turn on <strong>Developer mode</strong>.',
         'Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.',
         'Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.',
     ]
-    assert (
-        '<p class="get-extension-note">Uoink is built and tested for Chrome. '
-        'Edge and Brave are Chromium-based and may work, but are not tested.</p>'
-    ) in card
-    assert 'edge://extensions' not in card and 'brave://extensions' not in card
+    support = "Uoink is tested in Chrome. Other Chromium browsers may work."
+    assert support in card
+    assert support in (ROOT / "assets/splash/index.html").read_text(encoding="utf-8")
+    assert 'authFetch("/extension/browser")' in DASHBOARD
 
 
 def test_dashboard_empty_state_adds_the_uoink_button_to_chrome():

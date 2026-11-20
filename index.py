@@ -739,6 +739,11 @@ _MATCH_START = "\x01" + uuid.uuid4().hex + "\x01"
 _MATCH_END = "\x02" + uuid.uuid4().hex + "\x02"
 
 
+def facet_column(name: str) -> str:
+    """SQL for an internal library facet, including the shelf shown on cards."""
+    return "COALESCE(NULLIF(y.topic, ''), 'Uncategorized')" if name == "topic" else f"y.{name}"
+
+
 def _plain_snippet(text: str) -> str:
     return (text or "").replace(_MATCH_START, "").replace(_MATCH_END, "")
 
@@ -1765,23 +1770,42 @@ class Index:
         # A source can match metadata or text outside its stored clips.
         # Never substitute the first clip or the opening of the content.
         clip = row.pop("_matched_clip", None)
+        from uoink_core.search_service import citation_fields, corpus_body_ranges, is_video_corpus
+        body = corpus_body_ranges(content) if not clip else None
+        if body is not None:
+            row["_snippet"] = (content[body[0][0]:min(body[0][1], body[0][0] + 240)]
+                               if body else row.get("title") or "")
         if clip:
+            if is_video_corpus(content):
+                row["_snippet"] = (clip.get("text") or row["_snippet"])[:240]
             row["passage"] = {key: clip.get(key) for key in
                               ("video_id", "clip_id", "text", "start", "end", "timing")}
         elif content:
             for chunk in sorted(marked_snippet.split("…"), key=len, reverse=True):
                 if _MATCH_START not in chunk or _MATCH_END not in chunk:
                     continue
-                excerpt = _plain_snippet(chunk).strip()
+                chunk = chunk.strip()
+                excerpt = _plain_snippet(chunk)
                 start = content.find(excerpt) if excerpt else -1
                 if start < 0:
                     continue
+                if body is not None:
+                    # Only the FTS-marked positions can verify a citation.
+                    # A header-only match can still display the description.
+                    positions = [start + len(_plain_snippet(chunk[:m.start()]))
+                                 for m in re.finditer(_MATCH_START, chunk)]
+                    hit = next(((lo, hi, p) for lo, hi in body for p in positions if lo <= p < hi), None)
+                    if hit is None:
+                        continue
+                    lo, hi, position = hit
+                    start = max(lo, position - 80)
+                    excerpt = content[start:min(hi, start + 240)]
+                    row["_snippet"] = excerpt
                 row["passage"] = {"video_id": row["video_id"], "text": excerpt,
                                   "char_start": start, "char_end": start + len(excerpt),
                                   "field": "content", "timing": "not_timed"}
                 break
         row["passage_verified"] = bool(row.get("passage"))
-        from uoink_core.search_service import citation_fields
         return citation_fields(row)
 
     # ---- clips (living library phase 1; see clips.py) --------------------
@@ -2635,7 +2659,7 @@ class Index:
                          ("topic", topic),
                          ("length_bucket", length_bucket)):
             if val:
-                wheres.append(f"y.{col}=?")
+                wheres.append(f"{facet_column(col)}=?")
                 params.append(val)
         if tag:
             wheres.append("EXISTS (SELECT 1 FROM yoink_tags t "
@@ -2673,10 +2697,8 @@ class Index:
         with self._lock:
             for col in facet_cols:
                 rows = self._conn.execute(
-                    f"SELECT {col} AS v, COUNT(*) AS n FROM yoinks "
-                    f"WHERE deleted_at IS NULL AND {col} IS NOT NULL "
-                    f"AND {col} != '' "
-                    f"GROUP BY {col} ORDER BY n DESC, v ASC",
+                    f"SELECT {facet_column(col)} AS v, COUNT(*) AS n FROM yoinks y "
+                    "WHERE deleted_at IS NULL AND v != '' GROUP BY v ORDER BY n DESC, v ASC",
                 ).fetchall()
                 out[col] = [{"value": r["v"], "count": int(r["n"])}
                             for r in rows]
@@ -2804,7 +2826,7 @@ class Index:
             clauses.append("y.author = ?")
             params.append(author)
         if topic:
-            clauses.append("y.topic = ?")
+            clauses.append(f"{facet_column('topic')} = ?")
             params.append(topic)
         if hook_type:
             clauses.append("y.hook_type = ?")

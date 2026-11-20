@@ -1306,6 +1306,65 @@ def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
     return {"path": path, "transcript": normalized}
 
 
+def _owned_audio(data_root, value):
+    if not value:
+        return None
+    path = Path(value)
+    root = Path(data_root).resolve() / "Podcasts"
+    if (path.parent.parent != root or path.suffix.lower() not in (".mp3", ".wav")
+            or path.resolve() != path):
+        return None
+    return path
+
+
+def audio_storage(idx, data_root):
+    """Measure actual downloads, including files left by a removed feed."""
+    root = Path(data_root).resolve() / "Podcasts"
+    files = set()
+    size = 0
+    if root.is_dir() and root.resolve() == root:
+        for folder in root.iterdir():
+            if not folder.is_dir() or folder.resolve() != folder:
+                continue
+            for path in folder.iterdir():
+                if path.suffix.lower() not in (".mp3", ".wav") or not path.is_file() or path.resolve() != path:
+                    continue
+                try:
+                    size += path.stat().st_size
+                except FileNotFoundError:
+                    continue
+                files.add(path)
+    with idx.read_snapshot() as db:
+        rows = db.execute(
+            "SELECT id, audio_local_path FROM podcast_episodes "
+            "WHERE transcript_status='done' AND audio_local_path IS NOT NULL").fetchall()
+    return {"bytes": size, "episodes": [r["id"] for r in rows if Path(r["audio_local_path"]) in files]}
+
+
+def delete_transcribed_audio(idx, data_root, episode_id):
+    """Recheck ownership and the finished transcript at the point of removal."""
+    with idx.write_transaction() as db:
+        row = get_episode(idx, episode_id)
+        if not row or row["transcript_status"] != "done":
+            return False
+        path = _owned_audio(data_root, row["audio_local_path"])
+        transcript = Path(row["transcript_local_path"] or "")
+        if (not path or transcript != path.with_suffix(".transcript.json")
+                or transcript.resolve() != transcript):
+            return False
+        if db.execute("SELECT 1 FROM podcast_episodes WHERE audio_local_path = ? COLLATE NOCASE AND id != ?",
+                      (str(path), episode_id)).fetchone():
+            return False
+        try:
+            _load_transcript(transcript)
+            path.unlink(missing_ok=True)
+        except (OSError, ValueError):
+            return False
+        db.execute("UPDATE podcast_episodes SET audio_local_path=NULL, audio_size_bytes=NULL, "
+                   "audio_downloaded_at=NULL WHERE id=?", (episode_id,))
+        return True
+
+
 def _atomic_write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_name = None

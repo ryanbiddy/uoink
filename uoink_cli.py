@@ -571,6 +571,10 @@ def human(payload, *, index=None):
                 quote = text_quote(row)
                 if quote:
                     lines.append(f'  "{quote}"')
+                elif row.get("evidence_kind") == "discovery_hint":
+                    preview = row.get("preview") or {}
+                    if preview.get("text") and preview["text"] != row.get("title"):
+                        lines.append("  " + text_excerpt(preview["text"], truncated=preview.get("truncated")))
         if len(rows) > 10:
             lines.append("More results in JSON output.")
         return "\n".join(lines)

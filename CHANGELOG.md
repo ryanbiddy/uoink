@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Library search shows a description or matching passage when a video has no captions. Short notes now count toward the Uncategorized shelf and appear when you filter by it.
+- Each library card has a keyboard-accessible Open button on its title. Closing the hook guide, source consent dialog, or screenshot handoff returns focus to its opener.
+- Reloading the dashboard replaces its previous activity stream and retries a busy helper quietly. Opening Uoink again from the Windows Start menu brings its dashboard forward.
+- Lite captures explain that they skip comments. Settings shows the disk space used by podcast downloads and lets you remove audio after transcription or clean up existing downloads with a finished transcript.
+- The dashboard and first-run window use the same browser instructions for loading the extension.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

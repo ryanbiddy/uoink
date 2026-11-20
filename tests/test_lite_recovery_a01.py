@@ -141,6 +141,8 @@ def test_lite_extraction_path(tmp: Path):
             f"lite does not enter the comments phase: {phases}")
 
     sidecar = json.loads((tmp / f"{tmp.name}.json").read_text(encoding="utf-8"))
+    corpus = (tmp / f"{tmp.name}.md").read_text(encoding="utf-8")
+    assert "Fetching comments" not in corpus and "Lite captures skip comments" in corpus
     _assert(sidecar["comments_status"] == "skipped",
             f"comments marked skipped, not pending: {sidecar['comments_status']}")
     _assert(sidecar["hook_type_status"] == "skipped",

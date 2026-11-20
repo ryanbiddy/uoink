@@ -507,14 +507,14 @@
         eyebrow: "One-time setup",
         pill: status?.manifest_exists ? "Extension folder ready" : "Extension folder missing",
         headline: `Load the Uoink button in ${escapeHtml(browserName)} (60 sec)`,
-        copy: `${browserName} needs one manual approval for unpacked extensions.`,
+        copy: "Uoink is tested in Chrome. Other Chromium browsers may work.",
         primary: { text: `Open ${browserName} extensions`, action: "extension-open" },
         secondary: { text: "Copy path", action: "copy-path" },
         tertiary: { text: "I've loaded it - done", action: "extension-done" },
       });
       els.steps.innerHTML = `
         <li>Open ${escapeHtml(browserName)} extensions (or paste ${escapeHtml(extensionUrl)} in its address bar)</li>
-        <li>Turn ON "Developer mode" (top-right toggle)</li>
+        <li>Turn on "Developer mode"</li>
         <li>Click "Load unpacked", then select this folder:</li>
       `;
       els.steps.hidden = false;

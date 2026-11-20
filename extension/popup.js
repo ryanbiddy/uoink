@@ -804,7 +804,9 @@ function handleSseEvent(event, data) {
   renderCaptures();
 }
 const captureStream = PopupCaptures.stream({
-  connect: async signal => (await UoinkUI.authedFetch("/jobs/stream", { signal })).res,
+  connect: async signal => (await UoinkUI.authedFetch("/jobs/stream", {
+    signal, headers: { "X-Uoink-Stream": "popup" },
+  })).res,
   onEvent: handleSseEvent,
   onState: state => {
     document.getElementById("capture-sync").textContent = state === "live" ? "" : "Reconnecting. Showing the last known status.";
