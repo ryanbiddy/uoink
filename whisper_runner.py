@@ -438,9 +438,12 @@ def transcribe_audio(audio_path: Path, *,
     global _WHISPERX_AVAILABLE
     engine = transcription_engine()
     if engine == "whisperx":
+        if not consent_given:
+            _prepare_model_snapshot(data_root, model_size, consent_given=False)
         try:
             import whisperx  # type: ignore
         except Exception as exc:
+            log.warning("WhisperX import failed: %s: %s", type(exc).__name__, exc)
             _WHISPERX_AVAILABLE = False
             engine = transcription_engine()
             if engine != "faster-whisper":

@@ -202,11 +202,29 @@ def test_restart_resumes_only_persisted_opt_in(db, monkeypatch):
     calls = []
     monkeypatch.setattr(engine, "_launch", lambda: calls.append("launch"))
     server._resume_local_search()
-    assert engine._full and not calls
-    engine._full = False
+    # The first query opens the saved vectors. Startup launches no worker.
+    assert not calls and engine._full and engine._warm
+    engine._full = engine._warm = False
     engine.manager.terms_path.unlink()
     server._resume_local_search()
-    assert not engine._full and not calls
+    assert not calls and not engine._full
+
+
+def test_first_public_semantic_request_uses_persisted_vectors(db, monkeypatch):
+    idx, original, _ = db
+    seed(idx, "mars", "Mars has rusty red soil")
+    ready(db)
+    # Replace the engine just as a new helper process would.
+    replacement = ls.LocalSearch(original.root, idx, model_factory=FakeModel)
+    monkeypatch.setattr(idx, "_local_search", replacement)
+    monkeypatch.setattr(server, "_local_search_singleton", replacement)
+    try:
+        server._resume_local_search()
+        assert replacement._model is None
+        result = idx.search_mode("rusty", mode="semantic")
+        assert result["search_mode"] == "semantic" and result["results"][0]["video_id"] == "mars"
+    finally:
+        replacement.pause(timeout=5)
 
 
 @pytest.mark.parametrize("state,paused,expected", [("not_installed", False, "keyword"),

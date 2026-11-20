@@ -251,6 +251,7 @@ def test_original_auto_captions_report_clean_language(transcript):
     cmd, _kwargs = transcript.calls[0]
     assert "--write-auto-subs" in cmd
     assert "--write-subs" not in cmd
+    assert cmd[cmd.index("--sub-format") + 1] == "json3/vtt/srt"
     transcript.asr.assert_not_called()
 
 

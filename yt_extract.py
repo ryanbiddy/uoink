@@ -18,6 +18,7 @@ Requirements:
 """
 
 import argparse
+import json
 import logging
 import re
 import subprocess
@@ -58,79 +59,168 @@ def fmt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def _dedupe_srt_entries(entries: list[tuple[float, float, str]]):
-    """Emit only words newly visible in each adjacent display window."""
-    out = []
-    previous = []
-    prev_start = prev_end = -1.0
-    for start, end, text in entries:
-        words = text.split()
-        if not words:
-            continue
-        current = [word.casefold() for word in words]
-        overlap = 0
-        if prev_start <= start <= prev_end + 0.15:
-            for size in range(min(len(previous), len(current)), 0, -1):
-                if size == 1 and start >= prev_end and len(previous) > 1:
-                    break  # A single shared word across sentences is ambiguous.
-                if current[:size] == previous[-size:]:
-                    overlap = size
-                    break
-        if overlap < len(words):
-            out.append((start, end, " ".join(words[overlap:])))
-        elif out:
-            first, last, line = out[-1]
-            out[-1] = (first, max(last, end), line)
-        previous, prev_start, prev_end = current, start, end
-    return out
+_CUE_TIME = r"(?:\d+:)?\d{2}:\d{2}[,.]\d{3}"
+_CUE_RANGE = re.compile(rf"^({_CUE_TIME})\s+-->\s+({_CUE_TIME})(?:\s|$)")
+_WORD_TIME = re.compile(rf"<({_CUE_TIME})>")
+
+
+def _seconds(stamp):
+    parts = stamp.replace(",", ".").split(":")
+    return sum(float(value) * 60 ** i for i, value in enumerate(reversed(parts)))
 
 
 def _clean_caption_text(text: str) -> str:
-    # YouTube writes the ASS hard space (\h), and censors a word as [\h__\h].
     text = re.sub(r"<[^>]+>", "", text).replace("\\h", " ")
     text = re.sub(r"\[\s*__\s*\]", "[__]", text)
-    return re.sub(r"[ \t]{2,}", " ", text).strip()
+    return " ".join(text.split())
 
 
-def parse_srt(srt_path: Path, duration: float | None = None):
-    """Yield (start_sec, end_sec, text) from an SRT file.
-
-    With a known ``duration``, cues that start at or after it are dropped and
-    end times are clamped: uploaders sometimes attach captions for a longer cut.
-    """
-    content = srt_path.read_text(encoding="utf-8", errors="ignore")
-    pattern = re.compile(
-        r"(\d+):(\d+):(\d+)[,.](\d+)\s+-->\s+(\d+):(\d+):(\d+)[,.](\d+)"
-    )
-    blocks = re.split(r"\n\s*\n", content.strip())
-    entries: list[tuple[float, float, str]] = []
-    for block in blocks:
-        lines = [ln for ln in block.splitlines() if ln.strip()]
-        if len(lines) < 2:
+def caption_window_text(entries, *, automatic, stored=False):
+    """Yield the original row number and its newly spoken text."""
+    previous = None
+    for i, (start, end, raw) in enumerate(entries):
+        lines = raw.splitlines() if stored else [_clean_caption_text(line) for line in raw.splitlines()]
+        lines = [line for line in lines if line]
+        if not lines:
+            if stored:
+                yield i, raw
             continue
-        m = pattern.search(lines[1] if pattern.search(lines[1] or "") else " ".join(lines[:2]))
-        if not m:
-            for ln in lines:
-                m = pattern.search(ln)
-                if m:
+        words = " ".join(lines).split()
+        skip = 0
+        tags = set(_WORD_TIME.findall(raw))
+        if automatic and previous:
+            pstart, pend, plines, pwords, ptags, rolled = previous
+            # A roll-up moves the last displayed line to the top as a new
+            # line appears below it. A tiny bridge cue can repeat that line.
+            adjacent = pstart <= start <= pend + 0.001
+            ghost = 0 < end - start <= 0.015
+            if adjacent and lines[0] == plines[-1] and (
+                    (len(lines) >= 2 and lines != plines) or ghost):
+                skip = len(lines[0].split())
+            elif adjacent and (start < pend or ptags & tags):
+                for size in range(min(len(pwords), len(words)), 0, -1):
+                    if pwords[-size:] != words[:size]:
+                        continue
+                    # A whole line can be sung again even when the cues overlap.
+                    # A shared start or word clock identifies the same utterance.
+                    if start == pstart or ptags & tags or (size < len(pwords) and words != pwords):
+                        skip = size
+                    elif len(words) > size:
+                        # A single extended opening can be anaphora. Look for
+                        # another overlapping shift before treating it as a roll.
+                        continuing = False
+                        if i + 1 < len(entries):
+                            ns, _, next_raw = entries[i + 1]
+                            next_words = (next_raw if stored else _clean_caption_text(next_raw)).split()
+                            continuing = (start < ns < end and next_words != words and any(
+                                words[-n:] == next_words[:n] for n in range(2, min(len(words), len(next_words)) + 1)))
+                        if rolled or continuing:
+                            skip = size
                     break
-        if not m:
-            continue
-        h1, m1, s1, ms1, h2, m2, s2, ms2 = (int(x) for x in m.groups())
-        start = h1 * 3600 + m1 * 60 + s1 + ms1 / 1000
-        end = h2 * 3600 + m2 * 60 + s2 + ms2 / 1000
-        text_lines = [ln for ln in lines if not pattern.search(ln) and not ln.isdigit()]
-        text = _clean_caption_text(" ".join(text_lines))
-        if text:
-            entries.append((start, end, text))
+        if skip < len(words):
+            yield i, raw if stored and not skip else " ".join(words[skip:])
+        previous = start, end, lines, words, tags, bool(skip)
 
+
+def _json3_entries(content, *, automatic):
+    """JSON3 timestamps identify displayed segments even when a window is replayed."""
+    from collections import Counter
+    seen = set()
+    timed = []
+    for event in json.loads(content).get("events", []):
+        if "tStartMs" not in event or not event.get("segs"):
+            continue
+        base = event["tStartMs"]
+        end = base + event.get("dDurationMs", 0)
+        occurrences = Counter()
+        for seg in event["segs"]:
+            text = seg.get("utf8", "").strip()
+            if not text:
+                continue
+            start = base + seg.get("tOffsetMs", 0)
+            key = (start, text)
+            occurrences[key] += 1
+            identity = (*key, occurrences[key])
+            if automatic and identity in seen:
+                continue
+            seen.add(identity)
+            timed.append((start, max(start, end), text))
+    timed.sort(key=lambda row: row[0])
+    for i, (start, end, text) in enumerate(timed):
+        if i + 1 < len(timed) and timed[i + 1][0] > start:
+            end = min(end, timed[i + 1][0])
+        yield start / 1000, end / 1000, text
+
+
+def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False):
+    """Read native JSON3, VTT or SRT. Unknown and manual tracks retain every cue."""
+    content = srt_path.read_text(encoding="utf-8-sig", errors="replace")
+    if srt_path.suffix == ".json3":
+        entries = list(_json3_entries(content, automatic=automatic))
+    else:
+        raw = []
+        for block in re.split(r"\n\s*\n", content.strip()):
+            lines = block.splitlines()
+            for i, line in enumerate(lines[:2]):
+                match = _CUE_RANGE.match(line.strip())
+                if match:
+                    start, end = map(_seconds, match.groups())
+                    raw.append((start, end, "\n".join(lines[i+1:])))
+                    break
+        entries = [(raw[i][0], raw[i][1], text)
+                   for i, text in caption_window_text(raw, automatic=automatic)]
     if duration and duration > 0:
-        kept = [(start, min(end, duration), text) for start, end, text in entries if start < duration]
+        kept = [(s, min(e, duration), t) for s, e, t in entries if s < duration]
         if len(kept) < len(entries):
             logging.getLogger(__name__).info(
                 "dropped %d caption cue(s) past the %.0fs video", len(entries) - len(kept), duration)
         entries = kept
-    yield from _dedupe_srt_entries(entries)
+    yield from entries
+
+
+_ENGLISH_KEYS = ("en", "en-US", "en-GB", "en-orig")
+
+
+def english_caption_track(metadata, youtube):
+    """Choose one known track so yt-dlp cannot silently substitute a manual one."""
+    if youtube:
+        for table, kind in (("subtitles", "captions"), ("automatic_captions", "auto_captions")):
+            keys = ("en-orig", "en", "en-US", "en-GB") if kind == "auto_captions" else _ENGLISH_KEYS
+            for key in keys:
+                if (metadata.get(table) or {}).get(key):
+                    return {"key": key, "kind": kind}
+    return None
+
+
+def video_caption_prefix(track):
+    # An older capture may still have video.en.srt of unknown origin.
+    return "video.auto" if track and track["kind"] == "auto_captions" else "video"
+
+
+def caption_args(track):
+    if track is None:
+        return ["--write-auto-subs", "--write-subs", "--sub-lang", ",".join(_ENGLISH_KEYS),
+                "--convert-subs", "srt"]
+    auto = track["kind"] == "auto_captions"
+    return ["--write-auto-subs" if auto else "--write-subs", "--sub-lang", track["key"],
+            "--sub-format", "json3/vtt/srt" if auto else "vtt/srt/best",
+            *([] if auto else ["--convert-subs", "srt"])]
+
+
+def caption_file(folder, prefix, track):
+    if track:
+        formats = ("json3", "vtt", "srt") if track["kind"] == "auto_captions" else ("srt", "vtt")
+        for ext in formats:
+            file = folder / f"{prefix}.{track['key']}.{ext}"
+            if file.is_file():
+                return file
+        return None
+    files = sorted(folder.glob(f"{prefix}*.srt"))
+    for key in _ENGLISH_KEYS:
+        file = folder / f"{prefix}.{key}.srt"
+        if file in files:
+            return file
+    return files[0] if files else None
 
 
 def chapters_from_metadata(info) -> list[dict]:
@@ -177,7 +267,10 @@ def main():
     print("Fetching title...")
     ytdlp = ([sys.executable, "-m", "yt_dlp", *_platform.ytdlp_media_args()]
              if sys.platform == "darwin" else ["yt-dlp"])
-    title = subprocess.check_output([*ytdlp, "--get-title", args.url], text=True).strip()
+    metadata = json.loads(subprocess.check_output(
+        [*ytdlp, "--dump-single-json", "--skip-download", args.url], text=True, encoding="utf-8"))
+    title = metadata["title"]
+    track = english_caption_track(metadata, metadata.get("extractor_key") == "Youtube")
     folder = out_root / slugify(title)
     folder.mkdir(exist_ok=True)
     print(f"-> {folder}")
@@ -186,20 +279,18 @@ def main():
     subprocess.run(
         [
             *ytdlp,
-            "--write-auto-subs",
-            "--write-subs",
-            "--sub-lang", "en,en-US,en-GB,en-orig",  # named tracks, not auto-translations
-            "--convert-subs", "srt",
+            *caption_args(track),
             "-f", (_platform.video_format("worst[height>=360]/worst")
                    if sys.platform == "darwin" else "worst[height>=360]/worst"),
             "-o", str(folder / "video.%(ext)s"),
+            "-o", "subtitle:" + str(folder / (video_caption_prefix(track) + ".%(ext)s")),
             args.url,
         ],
         check=True,
     )
 
     video_files = [f for f in folder.glob("video.*") if f.suffix in (".mp4", ".webm", ".mkv")]
-    srt_files = list(folder.glob("video*.srt"))
+    subtitle = caption_file(folder, video_caption_prefix(track), track)
     if not video_files:
         sys.exit("No video file found.")
     video_file = video_files[0]
@@ -220,7 +311,7 @@ def main():
     )
     shots = sorted(shots_dir.glob("shot_*.jpg"))
 
-    entries = list(parse_srt(srt_files[0])) if srt_files else []
+    entries = list(parse_srt(subtitle, automatic=bool(track and track["kind"] == "auto_captions"))) if subtitle else []
 
     print("Writing transcript.txt and combined.md...")
     if entries:

@@ -441,6 +441,46 @@ def test_follow_from_card_has_title_and_reports_actual_first_poll(monkeypatch, i
     assert len(podcasts.list_feeds(idx)) == 1
 
 
+def test_upgrade_restores_untitled_unpolled_follow_in_place(tmp_path, monkeypatch):
+    path = tmp_path / "upgrade.db"
+    migrations = index_mod._discover_migrations()
+    with monkeypatch.context() as old:
+        old.setattr(index_mod, "_discover_migrations", lambda: [(n, p) for n, p in migrations if n <= 34])
+        with index_mod.Index.open(path) as previous:
+            feed = podcasts.add_feed(previous, "https://shows.test/feed.xml")
+            saved = podcasts.add_feed(previous, "https://saved.test/feed.xml", enabled=False)
+            with previous.write_transaction() as db:
+                db.execute("UPDATE podcast_feeds SET last_polled_at=?, error_count=1 WHERE id=?",
+                           ("2026-01-01T00:00:00Z", saved["id"]))
+            assert "follow_feed" not in [r[1] for r in previous._conn.execute("pragma table_info(source_subscriptions)")]
+    with index_mod.Index.open(path) as idx:
+        assert podcasts.get_feed(idx, saved["id"])["last_polled_at"] is None
+        adapter = FakeAdapter([ss.AdapterResult("snapshot", coverage="complete", observations=[], feed_title="Moon Radio")])
+        service = make_service(idx, clock=Clock(int(time.time() * 1000) + 1000), adapter=adapter)
+        assert service.due_poll_ids() == [feed["source_id"]]
+        assert service.run_claimed_poll(service.claim_poll(feed["source_id"]))["ok"]
+        repaired = podcasts.get_feed(idx, feed["id"])
+        assert repaired["title"] == "Moon Radio" and not repaired["auto_ingest"]
+        assert idx._conn.execute("SELECT consent_state FROM source_subscriptions WHERE source_id=?",
+                                 (feed["source_id"],)).fetchone()[0] == "off"
+
+
+def test_last_polled_at_only_advances_on_success(idx):
+    feed = podcasts.add_feed(idx, "https://shows.test/feed.xml")
+    with idx.write_transaction() as db:
+        db.execute("UPDATE source_detection_cursors SET last_poll_attempt_ms=2000")
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] is None
+    podcasts.record_feed_meta(idx, feed["id"], ok=False, error="offline", title=None,
+                              description=None, homepage=None, etag=None, last_modified=None)
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] is None
+    with idx.write_transaction() as db:
+        db.execute("UPDATE source_detection_cursors SET last_poll_success_ms=1000")
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] == "1970-01-01T00:00:01Z"
+    with idx.write_transaction() as db:
+        db.execute("UPDATE podcast_feeds SET last_polled_at='2026-01-02T00:00:00Z'")
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] == "2026-01-02T00:00:00Z"
+
+
 # ---- 3.17.0 review fixes -------------------------------------------------------
 
 RSS_DATE = "Sun, 01 Nov 2026 07:00:00 -0000"   # the feed's copy of Apple's 2026-11-01

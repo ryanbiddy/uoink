@@ -550,7 +550,10 @@ def human(payload, *, index=None):
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
     if "removed_words" in payload:
         action = "Found" if payload["preview"] else "Removed"
-        return f"{action} {payload['removed_words']} repeated caption words."
+        message = f"{action} {payload['removed_words']} repeated caption words."
+        if not payload["preview"] and payload.get("original_sidecar"):
+            message += "\nOriginal transcript saved in " + terminal_label(payload["original_sidecar"])
+        return message
     if "data_dir" in payload:
         return (f"Uoink {payload['version']}\nData: {payload['data_dir']}\n"
                 f"Helper: {'running' if payload['helper_running'] else 'not running (open Uoink to start it)'}\n"

@@ -93,7 +93,7 @@ _BIN_DIR = HERE / "bin"
 if _BIN_DIR.is_dir():
     os.environ["PATH"] = str(_BIN_DIR) + os.pathsep + os.environ.get("PATH", "")
 
-from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
+from yt_extract import caption_args, caption_file, english_caption_track, video_caption_prefix, parse_srt, slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
@@ -3746,6 +3746,8 @@ def _is_youtube_bot_check(e: BaseException) -> bool:
     if not isinstance(e, subprocess.CalledProcessError):
         return False
     text = _subprocess_output(e).lower()
+    if _source_name_from_error(text + "\n" + str(e.cmd)) == "X":
+        return False
     return "not a bot" in text or "confirm you" in text
 
 
@@ -3776,19 +3778,15 @@ def _download_caption_track(url: str, track: dict, tmp_dir: Path,
     cmd = [
             *YTDLP_CMD,
             "--skip-download",
-            "--write-auto-subs" if track["kind"] == "auto_captions" else "--write-subs",
-            # One exact key, never a pattern: "en.*" also matches YouTube's
-            # rate-limited auto-translated tracks (see _fetch_video_subtitles).
-            "--sub-lang", track["key"],
-            "--convert-subs", "srt",
+            *caption_args(track),
             "-o", str(tmp_dir / "captions.%(ext)s"),
             url,
     ]
     done = _run_subprocess(
         cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         timeout=COMMENTS_TIMEOUT_SEC)
-    files = sorted(tmp_dir.glob("captions*.srt"))
-    if not files:
+    subtitle = caption_file(tmp_dir, "captions", track)
+    if subtitle is None:
         stderr = getattr(done, "stderr", None) or b""
         # yt-dlp can log a subtitle 429 as a warning and still exit 0.
         if re.search(rb"\b429\b" if isinstance(stderr, bytes) else r"\b429\b", stderr):
@@ -3798,7 +3796,7 @@ def _download_caption_track(url: str, track: dict, tmp_dir: Path,
         length = float(duration) if duration else None
     except (TypeError, ValueError):
         length = None
-    return list(parse_srt(files[0], duration=length))
+    return list(parse_srt(subtitle, duration=length, automatic=track["kind"] == "auto_captions"))
 
 
 def _transcript_cache_path(video_id: str, lang: str | None) -> Path:
@@ -3885,42 +3883,49 @@ def repair_rolling_captions(video_id: str, *, preview=False) -> dict:
     result = {"ok": True, "removed_words": 0, "preview": preview}
     if (not side or side.get("video_id") != video_id or item.get("platform") != "youtube"
             or side.get("transcript_source") != "captions"):
-        return result
+        raise ValueError("This item has no saved YouTube caption track.")
+    if side.get("caption_track_kind") != "auto_captions":
+        raise ValueError("Repair requires a track identified as automatic. The saved captions were kept.")
     rows = side.get("transcript") or []
     if any(not isinstance(r, dict) or not isinstance(r.get("text"), str)
            or any(type(r.get(k)) not in (int, float) for k in ("start", "end"))
            or r.get("speaker") for r in rows):
-        return result
+        raise ValueError("The saved cues contain unsupported timing or speaker data.")
     entries = [(r["start"], r["end"], r["text"]) for r in rows]
-    cleaned = yt_extract._dedupe_srt_entries(entries)
-    words = sum(len(t.split()) for _, _, t in entries)
-    removed = words - sum(len(t.split()) for _, _, t in cleaned)
-    # A substantial pattern across multiple cues, never one repeated phrase.
-    from collections import Counter
-    changed = Counter((s, t) for s, _, t in entries) - Counter((s, t) for s, _, t in cleaned)
-    if removed < 4 or removed * 4 < words or sum(changed.values()) < 2:
-        # The sidecar is the last file replaced, just before the SQLite commit.
-        # Settle a repair interrupted there using those same sealed bytes.
-        block = side.get("media_depth") or {}
-        marker = side.get("caption_repair_revision")
-        if not preview and marker and marker == block.get("media_revision"):
-            with idx.detached_snapshot() as conn:
-                saved = conn.execute("SELECT media_revision FROM media_depth WHERE video_id=?", (video_id,)).fetchone()
-            if not saved or saved[0] != marker:
-                ticket = idx.begin_media_publication(video_id, capture_binding=media.capture_sidecar_inputs(side))
-                if ticket.base_media_revision != marker:
-                    raise ValueError("A newer capture replaced this repair.")
-                plan = _capture_media_plan(side, folder, item=item)
-                corpus_path = Path(item["corpus_path"])
+    block = side.get("media_depth") or {}
+    marker = side.get("caption_repair_revision")
+    # Re-running the window algorithm on its own output could erase a spoken
+    # repetition exposed by the first pass. Only settle an interrupted write.
+    if marker and marker == block.get("media_revision"):
+        with idx.detached_snapshot() as conn:
+            saved = conn.execute("SELECT media_revision FROM media_depth WHERE video_id=?", (video_id,)).fetchone()
+        if not saved or saved[0] != marker:
+            ticket = idx.begin_media_publication(video_id, capture_binding=media.capture_sidecar_inputs(side))
+            if ticket.base_media_revision != marker:
+                raise ValueError("A newer capture replaced this repair.")
+            plan = _capture_media_plan(side, folder, item=item)
+            corpus_path = Path(item["corpus_path"])
+            corpus = corpus_path.read_bytes()
+            if (not plan or block["cue_revision"] != plan["block"]["cue_revision"]
+                    or block["chapters"] != plan["block"]["chapters"]
+                    or hashlib.sha256(corpus).hexdigest() != block["provenance"]["corpus_revision"]):
+                raise ValueError("The saved captions or chapters have changed. Your edits were kept.")
+            if not preview:
                 idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block, ticket=ticket,
-                                           artifacts={corpus_path: corpus_path.read_bytes(),
+                                           artifacts={corpus_path: corpus,
                                                       side_path: json.dumps(side, ensure_ascii=False).encode()})
         return result
-    result["removed_words"] = removed
-    if preview:
+    if side.get("caption_windows_cleaned") is True:
         return result
+    clean_rows = [dict(rows[i], text=text) for i, text in
+                  yt_extract.caption_window_text(entries, automatic=True, stored=True)]
+    words = sum(len(t.split()) for _, _, t in entries)
+    removed = words - sum(len(row["text"].split()) for row in clean_rows)
+    if not removed:
+        raise ValueError("The saved cues contain no identifiable rolling caption window.")
+    result["removed_words"] = removed
     binding = media.capture_sidecar_inputs(side)
-    new_side = dict(side, transcript=_transcript_entries_with_links(side, cleaned))
+    new_side = dict(side, transcript=clean_rows, caption_windows_cleaned=True)
     old_plan = _capture_media_plan(side, folder, item=item)
     plan = _capture_media_plan(new_side, folder, item=item)
     if not old_plan or not plan or not side.get("media_depth"):
@@ -3953,19 +3958,33 @@ def repair_rolling_captions(video_id: str, *, preview=False) -> dict:
                  side_path: json.dumps(dict(new_side, media_depth=block,
                                             caption_repair_revision=block["media_revision"]), ensure_ascii=False).encode()}
     plain = folder / "transcript.txt"
-    if plain.exists():
+    if plain.exists() or plain.is_symlink():
         if plain.is_symlink() or plain.resolve().parent != folder.resolve():
             raise ValueError("The transcript file has moved.")
         old_plain = "\n".join(t for _, _, t in entries)
-        new_plain = "\n".join(t for _, _, t in cleaned)
+        new_plain = "\n".join(r["text"] for r in clean_rows)
         inputs[plain] = plain.read_bytes()
         if inputs[plain].decode("utf-8").replace("\r\n", "\n") not in (old_plain, new_plain):
             raise ValueError("The saved transcript has changed. Your edits were kept.")
         artifacts[plain] = new_plain.encode()
+    # Save the exact original sidecar, including all cue text, times and links.
+    # The media writer publishes input artifacts before replacing the transcript.
+    original = side_path.read_bytes()
+    if json.loads(original) != side:
+        raise ValueError("The saved captions changed during repair.")
+    backup = folder / media.MEDIA_INPUTS_DIR / ("caption-original-" + hashlib.sha256(original).hexdigest() + ".json")
+    if backup.is_symlink() or backup.resolve().parent != folder.resolve() / media.MEDIA_INPUTS_DIR:
+        raise ValueError("The caption backup folder has moved.")
+    if backup.exists() and backup.read_bytes() != original:
+        raise ValueError("The saved caption backup has changed.")
+    artifacts[backup] = original
+    result["original_sidecar"] = str(backup)
     try:
         ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding, input_files=inputs)
         if ticket.base_media_revision not in (old_block["media_revision"], block["media_revision"]):
             raise ValueError("A newer capture replaced these captions.")
+        if preview:
+            return result
         idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,
                                    artifacts=artifacts, ticket=ticket)
     except media.MediaError as exc:
@@ -7068,7 +7087,7 @@ def _youtube_bot_check_cooldown_active() -> bool:
     return bool(_youtube_bot_check_status()["active"])
 
 
-def _fetch_video_subtitles(url: str, output_folder: Path, *,
+def _fetch_video_subtitles(url: str, output_folder: Path, *, track=None,
                            long_video_mode: str,
                            cancel_event: threading.Event | None = None) -> str | None:
     """Fetch optional captions; return None, or why they were not fetched.
@@ -7086,15 +7105,8 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
             [
                 *YTDLP_CMD,
                 "--skip-download",
-                "--write-auto-subs",
-                "--write-subs",
-                # Named tracks only. "en.*" also matched YouTube's
-                # auto-translated tracks (en-de, en-de-DE...), which are
-                # rate-limited separately; one 429 there made yt-dlp exit
-                # before --convert-subs, so no transcript was saved.
-                "--sub-lang", "en,en-US,en-GB,en-orig",
-                "--convert-subs", "srt",
-                "-o", str(output_folder / "video.%(ext)s"),
+                *caption_args(track),
+                "-o", str(output_folder / (video_caption_prefix(track) + ".%(ext)s")),
                 url,
             ],
             cancel_event=cancel_event,
@@ -7879,8 +7891,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if phase_callback:
             phase_callback("transcript")
+        track = english_caption_track(metadata, _detect_platform_from_url(url) == PLATFORM_YOUTUBE)
         captions_skipped_reason = _fetch_video_subtitles(
-            url, asset_folder,
+            url, asset_folder, track=track,
             long_video_mode=effective_long_video_mode,
             cancel_event=cancel_event,
         )
@@ -7890,11 +7903,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         video_files = [f for f in sorted(asset_folder.glob(media_glob))
                        if f.suffix in (".mp4", ".webm", ".mkv")]
-        # Uploaded English captions first, then auto-captions. glob order
-        # differs between filesystems.
-        srt_order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
-        srt_files = sorted(asset_folder.glob("video*.srt"), key=lambda p: (
-            srt_order.index(p.name) if p.name in srt_order else len(srt_order), p.name))
+        subtitle = (caption_file(asset_folder, video_caption_prefix(track), track)
+                    if track is None or captions_skipped_reason is None else None)
         if not video_files:
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
                 raise ExtractionPhaseError(
@@ -7987,7 +7997,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if not shot_times:
             shot_times = [i * interval for i in range(len(shots))]
 
-        entries = list(parse_srt(srt_files[0], duration=duration)) if srt_files else []
+        entries = list(parse_srt(subtitle, duration=duration,
+                                 automatic=bool(track and track["kind"] == "auto_captions"))) if subtitle else []
         platform_caption_count = len(entries)
         if not entries and phase_callback:
             phase_callback("transcript")
@@ -8061,6 +8072,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "video_id": video_id, "url": url, "source_type": source_type,
             "transcript": [], "source_chapters": held_chapters,
             "transcript_source": transcript_source,
+            "caption_track_kind": track["kind"] if track and transcript_source == "captions" else None,
             "asr_fallback": asr_fallback,
             "transcript_note": transcript_note,
             "duration_seconds": duration, "yoinked_at": yoinked_at,
@@ -8159,6 +8171,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # A null source means the capture honestly remains caption-less;
                 # asr_fallback carries the caption reason and local ASR status.
                 "transcript_source": transcript_source,
+                "caption_track_kind": capture_seed["caption_track_kind"],
+                "caption_windows_cleaned": capture_seed["caption_track_kind"] == "auto_captions",
                 # Why platform captions were skipped (None when they were
                 # fetched): captions_bot_check, captions_rate_limited,
                 # captions_bot_check_cooldown or captions_failed.
@@ -8556,7 +8570,7 @@ def _youtube_429_endpoints(e: BaseException) -> set[str]:
         return set()
     stderr = (e.stderr.decode("utf-8", errors="ignore")
               if isinstance(e.stderr, bytes) else (e.stderr or ""))
-    if re.search(r"\[twitter\]|https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/",
+    if re.search(r"\[twitter(?:\]|:)|https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/",
                  stderr + "\n" + str(e.cmd), re.IGNORECASE):
         return set()
     endpoints = set()
@@ -8737,7 +8751,7 @@ def _error_summary(e: BaseException) -> str:
 
 def _source_name_from_error(text: str) -> str:
     lower = text.lower()
-    if any(marker in lower for marker in ("[twitter]", "//x.com/", "//www.x.com/",
+    if any(marker in lower for marker in ("[twitter]", "[twitter:", "//x.com/", "//www.x.com/", "//mobile.x.com/",
                                           "//twitter.com/", "//www.twitter.com/", "//mobile.twitter.com/")):
         return "X"
     if "youtube" in lower or "youtu.be" in lower:
@@ -8759,7 +8773,7 @@ def _plain_error_from_text(text: str) -> str:
     source = _source_name_from_error(text)
     if source == "X":
         for signals, message in (
-            (("tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"),
+            (("tweet was deleted", "post was deleted", "tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"),
              "X says this post was deleted."),
             (("protected tweet", "protected post", "protected account"),
              "The post is from a protected X account."),
@@ -24844,7 +24858,9 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
             close_children()
         _remove_suite_lease()
         if _local_search_singleton is not None:
-            _local_search_singleton.pause()
+            # close(), not pause(): a pause here was saved and kept semantic
+            # search paused after every orderly restart.
+            _local_search_singleton.close()
         server.server_close()
 
 

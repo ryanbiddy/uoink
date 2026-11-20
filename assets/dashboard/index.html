@@ -8039,6 +8039,7 @@
 
     function sourceNameFromUrl(value) {
       const raw = String(value || "");
+      if (/\[twitter(?:\]|:)|https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\//i.test(raw)) return "X";
       const named = raw.match(/(?:\[|^)(youtube|twitter|x|tiktok|instagram|vimeo)(?:[:\]\s]|$)/i);
       if (named) return { youtube: "YouTube", twitter: "X", x: "X", tiktok: "TikTok", instagram: "Instagram", vimeo: "Vimeo" }[named[1].toLowerCase()];
       try {
@@ -8059,7 +8060,7 @@
       if (!raw) return "";
       if (source === "X") {
         const reasons = [
-          [["tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"],
+          [["tweet was deleted", "post was deleted", "tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"],
             "X says this post was deleted."],
           [["protected tweet", "protected post", "protected account"],
             "The post is from a protected X account."],

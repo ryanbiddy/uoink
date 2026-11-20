@@ -107,6 +107,33 @@ class ProductGuardContracts(unittest.TestCase):
                     self.transcribe()
                 self.assertEqual(self.events, [])
 
+    def test_missing_consent_precedes_runtime_import(self):
+        import builtins
+        original_import = builtins.__import__
+        attempts = []
+
+        def broken(name, *args, **kwargs):
+            if name == "whisperx":
+                attempts.append(name)
+                raise ImportError("fixture runtime unavailable")
+            return original_import(name, *args, **kwargs)
+
+        with patch.object(builtins, "__import__", broken):
+            with self.assertRaises(PermissionError):
+                self.transcribe()
+            self.assertEqual(attempts, [])
+
+    def test_broken_import_is_logged(self):
+        import logging
+        self.scope["log"] = logging.getLogger("uoink.whisper_runner")
+        self.cached()
+        with patch.dict(sys.modules, {"whisperx": None}):
+            with self.assertLogs("uoink.whisper_runner", level="WARNING") as logs:
+                with self.assertRaises(RuntimeError):
+                    self.scope["transcribe_audio"](self.audio, data_root=self.root)
+        self.assertIn("ModuleNotFoundError", logs.output[0])
+        self.assertIn("whisperx", logs.output[0])
+
     def test_empty_tokenizer_is_not_ready(self):
         (self.cached() / "tokenizer.json").write_bytes(b"")
         self.assertFalse(self.scope["is_model_downloaded"](self.root))

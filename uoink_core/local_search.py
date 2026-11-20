@@ -564,8 +564,11 @@ class LocalSearch:
 
     start() scans for changes without downloading. download() explicitly fetches
     the model, then indexes. pause() stops at a batch boundary; start() resumes.
-    update_source(id) queues an incremental upsert or deletion. remove() waits
-    for work to stop, unloads the model, and deletes model, consent and vectors.
+    restore() makes saved vectors searchable after a restart without loading the
+    model. update_source(id) queues an incremental upsert or deletion. remove()
+    waits for work to stop, unloads the model, and deletes model, consent and
+    vectors. close() stops work at shutdown without saving a pause. The model
+    loads on first use and is released after UOINK_MODEL_IDLE_SECONDS idle.
     """
 
     def __init__(self, data_root, index, *, model_factory=EmbeddingGemma):
@@ -587,8 +590,20 @@ class LocalSearch:
             self._idle_seconds = max(1, min(86400, int(os.environ.get("UOINK_MODEL_IDLE_SECONDS", 300))))
         except ValueError:
             self._idle_seconds = 300
+        # _model, _users, _last_use and the idle timer belong to _model_lock.
+        # It is held only to swap references and adjust the timer, never through
+        # inference, so an idle release cannot make a search look busy.
+        self._model_lock = threading.Lock()
+        self._users = 0
         self._idle_timer = None
+        self._idle_generation = 0
         self._last_use = 0.0
+        # _verified, _owed and _closed belong to _state_lock. _verified is set
+        # only after manager.verify() and cleared before any download or
+        # removal. Inference requires it, checked while _activity is held.
+        self._verified = False
+        self._owed = False
+        self._closed = False
         self._state_lock = threading.RLock()
         self._control = threading.RLock()
         self._activity = threading.RLock()
@@ -596,7 +611,7 @@ class LocalSearch:
         self._stop = threading.Event()
         self._worker = None
         self._pending = set()
-        self._full = self._download = False
+        self._full = self._download = self._warm = False
         self._paused = self.settings_at(self.root).get("paused") is True
         self._state = "not_installed"
         self._error = ""
@@ -622,11 +637,14 @@ class LocalSearch:
         if path.is_symlink() or path.with_name(path.name + ".part").is_symlink():
             raise ValueError("Search settings must not be a symlink")
         _atomic_json(path, {"enabled": enabled, "paused": self._paused if enabled else False})
-        self.enabled = enabled
+        with self._state_lock:
+            self.enabled = enabled
 
     def _set(self, phase, **values):
         with self._state_lock:
             self._state = phase
+            if phase == "error":
+                self._verified = False
             for name, value in values.items():
                 setattr(self, "_" + name, value)
 
@@ -674,14 +692,17 @@ class LocalSearch:
     def _launch(self):
         # Caller owns _state_lock. Publishing None on exit uses the same lock,
         # so a capture arriving as a worker exits cannot be lost.
-        if self._worker is None:
+        if self._worker is None and not self._closed:
             self._worker = threading.Thread(target=self._run, name="embeddinggemma-index", daemon=True)
             self._worker.start()
 
     def start(self, *, download=False):
         with self._control:
             self._require_terms()
-            self._paused = False
+            with self._state_lock:
+                if self._closed:
+                    return False
+                self._paused = False
             self._enable(True)
             if not download and not self.manager.present():
                 self._set("not_installed")
@@ -690,6 +711,7 @@ class LocalSearch:
                 self._stop.clear()
                 self._paused = False
                 self._full = True
+                self._warm = self._owed = False
                 self._download = self._download or download
                 self._error = ""
                 self._retry_at = 0.0
@@ -702,20 +724,32 @@ class LocalSearch:
         return self.start(download=True)
 
     def restore(self):
-        """Arm a saved index for its first search or library change after restart."""
+        """Make saved vectors searchable after a restart without loading the model.
+
+        The first query verifies the files and opens the saved vectors.
+        Sources that still need embedding wait for the first search or library
+        change, so startup never runs inference.
+        """
         with self._state_lock:
-            if self.enabled and not self._paused and self.manager.acceptance() and self.manager.present():
-                self._full = True
-                self._state = "ready"
+            if (not self.enabled or self._paused or self._closed or self._worker is not None
+                    or not self.manager.acceptance() or not self.manager.present()):
+                return False
+            self._stop.clear()
+            self._full = self._warm = True
+            self._state = "ready"
+            return True
 
     def update_source(self, source_id):
         # Capture callbacks must not wait for pause/remove to join an inference
         # worker. They only enqueue; the worker verifies model and consent.
         with self._state_lock:
-            if not self.enabled:
+            if not self.enabled or self._closed:
                 return False
             self._pending.add(str(source_id))
-            if not self._paused and not self._stop.is_set() and self.manager.present():
+            if not self._paused and not self._stop.is_set() and self._state != "error" and self.manager.present():
+                if self._owed:
+                    # Sources skipped at startup are indexed on first use.
+                    self._full, self._owed = True, False
                 self._state = "indexing"
                 self._launch()
             return True
@@ -734,7 +768,35 @@ class LocalSearch:
                 self._paused = True
                 self._stop.set()
             self._enable(self.enabled)
-            return self.wait(timeout)
+            return self._quiesce(timeout)
+
+    def close(self, *, timeout=5):
+        """Stop work for helper shutdown. The saved pause choice stays as the user left it."""
+        with self._control:
+            with self._state_lock:
+                self._closed = True
+                self._stop.set()
+            return self._quiesce(timeout)
+
+    def _quiesce(self, timeout):
+        # Caller set _stop. Once the worker is gone, wait out any search that
+        # passed its checks, then drop the model and its idle timer.
+        with self._model_lock:
+            if self._idle_timer is not None:
+                self._idle_timer.cancel()
+                self._idle_timer = None
+                self._idle_generation += 1
+        deadline = time.monotonic() + timeout if timeout is not None else None
+        if not self.wait(timeout):
+            return False
+        remaining = max(0, deadline - time.monotonic()) if deadline is not None else -1
+        if not self._activity.acquire(timeout=remaining):
+            return False
+        try:
+            self._drop_model()
+        finally:
+            self._activity.release()
+        return True
 
     def rebuild(self):
         with self._control:
@@ -750,12 +812,14 @@ class LocalSearch:
             if not self.pause():
                 raise SearchUnavailable("Wait for the model operation to stop, then remove again")
             with self._activity:
-                self._model = None
+                with self._state_lock:
+                    self._verified = False
+                self._drop_model()
                 self.manager.remove()
                 self.store.remove()
             with self._state_lock:
                 self._pending.clear()
-                self._full = self._download = self._paused = False
+                self._full = self._download = self._paused = self._warm = self._owed = False
                 self._set("not_installed", error="", done=0, total=0, received=0)
 
     def _checkpoint(self):
@@ -765,33 +829,65 @@ class LocalSearch:
     def _download_progress(self, phase, received):
         self._set(phase, received=received)
 
-    def _schedule_release(self, delay):
-        self._idle_timer = threading.Timer(delay, self._release_idle_model)
-        self._idle_timer.daemon = True
-        self._idle_timer.start()
+    def _schedule_release_locked(self, delay):
+        # Caller holds _model_lock. A generation number retires older timers.
+        self._idle_generation += 1
+        timer = threading.Timer(delay, self._release_idle_model, args=(self._idle_generation,))
+        timer.daemon = True
+        self._idle_timer = timer
+        timer.start()
 
-    def _release_idle_model(self):
-        with self._activity:
-            remaining = self._last_use + self._idle_seconds - time.monotonic()
+    def _release_idle_model(self, generation):
+        with self._model_lock:
+            if generation != self._idle_generation or self._idle_timer is None:
+                return  # Cancelled or replaced.
             self._idle_timer = None
-            if self._model is not None and remaining > 0:
-                self._schedule_release(remaining)
-            else:
-                self._model = None
+            if self._model is None or self._users:
+                return  # The current user schedules a new timer when it finishes.
+            remaining = self._last_use + self._idle_seconds - time.monotonic()
+            if remaining > 0:
+                self._schedule_release_locked(remaining)
+                return
+            model, self._model = self._model, None
+        del model  # Free the session outside the lock.
+
+    def _drop_model(self):
+        """Release the model now and cancel its idle timer (pause, remove, close, download)."""
+        with self._model_lock:
+            timer, self._idle_timer = self._idle_timer, None
+            self._idle_generation += 1
+            model, self._model = self._model, None
+        if timer is not None:
+            timer.cancel()
+        del model
 
     def _embed(self, texts, *, wait=True):
-        # All callers hold _activity through inference. An idle timer cannot
-        # drop a session during a long batch or while a query loads it again.
-        if self._model is None:
-            self._model = self.model_factory(self.manager)
+        # All callers own _activity, so only one can construct a session.
+        # Keep the timer lock free while the constructor loads from disk.
+        with self._model_lock:
+            model = self._model
+            self._users += 1
         try:
-            return self._model.embed(texts, wait=wait)
+            if model is None:
+                model = self.model_factory(self.manager)
+                with self._model_lock:
+                    self._model = model
+            with self._state_lock:
+                if self._worker is threading.current_thread():
+                    self._checkpoint()
+                if not self._verified or self._paused or self._closed or self._state == "error":
+                    raise SearchUnavailable("Semantic search is unavailable")
+            return model.embed(texts, wait=wait)
         finally:
-            self._last_use = time.monotonic()
-            if self._idle_timer is None:
-                self._schedule_release(self._idle_seconds)
+            with self._model_lock:
+                self._users -= 1
+                self._last_use = time.monotonic()
+                if self._stop.is_set():
+                    self._model = None  # Last use after a timed-out pause or shutdown.
+                elif model is not None and self._idle_timer is None:
+                    self._schedule_release_locked(self._idle_seconds)
 
-    def _sync(self, identities):
+    def _sync(self, identities, *, embed=True):
         documents = self.sources.snapshot() if identities is None else self.sources.snapshot(source_ids=sorted(identities))
         live = {doc.source_id: doc.fingerprint for doc in documents}
         if identities is None:
@@ -802,6 +898,13 @@ class LocalSearch:
         existing = self.store.fingerprints()
         with self.sources.index.detached_snapshot() as db:
             total = db.execute("SELECT COUNT(*) FROM yoinks WHERE deleted_at IS NULL").fetchone()[0]
+        if not embed:
+            # Open persisted vectors first. Missing documents can be indexed
+            # after the worker has served the first query.
+            current = sum(existing.get(doc.source_id) == doc.fingerprint for doc in documents)
+            self._set("indexing", done=min(current, total), total=total)
+            self.store.refresh()
+            return current < len(documents)
         completed = len(existing) if identities is not None else 0
         self._set("indexing", done=min(completed, total), total=total)
         for done, doc in enumerate(documents, 1):
@@ -813,6 +916,7 @@ class LocalSearch:
                     texts = [f"title: {doc.title or 'none'} | text: {p.text}"
                              for p in doc.passages[offset:offset + BATCH_SIZE]]
                     with self._activity:
+                        self._checkpoint()
                         vectors.extend(self._embed(texts))
                 self._checkpoint()
                 # A capture can change while inference runs. Never publish it
@@ -834,24 +938,35 @@ class LocalSearch:
         # Also load persisted vectors at startup and publish deletions when
         # this batch had no replacement to trigger a rebuild.
         self.store.refresh()
+        return False
 
     def _run(self):
         try:
             while True:
                 with self._state_lock:
                     full, download, identities = self._full, self._download, self._pending
-                    self._full = self._download = False
+                    warm = self._warm and not identities
+                    self._full = self._download = self._warm = False
                     self._pending = set()
+                    if download:
+                        # Before any file changes: no search may start inference.
+                        self._verified = False
+                    verified = self._verified
                 self._checkpoint()
                 if download:
                     with self._activity:
-                        self._model = None
+                        # Waits for a search that passed its checks earlier.
+                        self._drop_model()
                     self.manager.download(progress=self._download_progress, checkpoint=self._checkpoint)
-                if self._model is None:
+                if not verified:
                     self._set("verifying")
                     self.manager.verify()
-                self._sync(None if full else identities)
+                    with self._state_lock:
+                        self._verified = True
+                owed = self._sync(None if full else identities, embed=not warm)
                 with self._state_lock:
+                    if owed:
+                        self._owed = True
                     if not (self._pending or self._full or self._download):
                         self._set("ready")
                         self._worker = None
@@ -911,17 +1026,26 @@ class LocalSearch:
             return []
         self._require_terms()
         with self._state_lock:
-            if self._paused:
-                raise SearchUnavailable("Semantic search is paused")
-            if self._full and self._worker is None:
-                self._state = "indexing"
+            warm_worker = None
+            if self._warm and self._state == "ready" and not self._paused and not self._closed:
+                self._state = "verifying"
                 self._launch()
-                raise SearchUnavailable("Preparing local search. Keyword search is available.")
+                warm_worker = self._worker
+        if warm_worker is not None:
+            warm_worker.join()  # Public queries retain their caller-side timeout.
         if not self._activity.acquire(blocking=False):
             raise SearchUnavailable("The search model is busy; use keyword search")
         try:
-            if not self.enabled or self._state in ("not_installed", "terms_needed", "downloading", "verifying"):
-                raise SearchUnavailable("Start local search before querying")
+            # Decide under the state lock while holding _activity: pause, remove,
+            # close and a download all wait for _activity before the model or
+            # its files change, so a search that passes here stays valid.
+            with self._state_lock:
+                if self._paused or self._closed:
+                    raise SearchUnavailable("Semantic search is paused")
+                if (not self.enabled or not self._verified or self._download
+                        or self._state not in ("ready", "indexing", "retrying")):
+                    raise SearchUnavailable("Start local search before querying")
+                owed = self._owed
             # Cache rebuilds and database invalidation belong to the worker.
             self.store.cached()
             live = {doc.source_id: doc.fingerprint for doc in self.sources.snapshot(wait=False)}
@@ -938,6 +1062,12 @@ class LocalSearch:
                 self._retry_delay = 1.0
                 if self._state == "retrying":
                     self._set("ready", error="")
+                if (owed and self._owed and self._worker is None and not self._paused
+                        and not self._closed and not self._stop.is_set()):
+                    # Sources skipped at startup are indexed after this first use.
+                    self._owed, self._full = False, True
+                    self._state = "indexing"
+                    self._launch()
             return [hit for hit in hits if current.get(hit.source_id) == eligible.get(hit.source_id)]
         except SearchUnavailable:
             raise

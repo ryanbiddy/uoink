@@ -275,6 +275,8 @@ def plain_error_from_text():
 
 
 @pytest.mark.parametrize(("diagnostic", "expected"), [
+    ("Tweet was deleted by the Tweet author", "X says this post was deleted."),
+    ("Post was deleted", "X says this post was deleted."),
     ("The author deleted this post", "X says this post was deleted."),
     ("You are not authorized to view this protected tweet", "The post is from a protected X account."),
     ("NSFW tweet requires authentication", "X restricts this video by age."),
@@ -288,6 +290,18 @@ def test_x_media_reason_reaches_library(diagnostic, expected, plain_error_from_t
     assert plain_error_from_text(raw) == expected
     data = {"source_url": url, "error_detail": raw}
     assert run_js(f"libraryFailureCopy({json.dumps(data)})")["reason"] == expected
+
+
+@pytest.mark.parametrize("origin", ["https://mobile.x.com/i/status/123", "[twitter:broadcast]", "[twitter:spaces]", "[twitter:card]"])
+def test_x_diagnostics_override_youtube_command_flags(origin, plain_error_from_text):
+    raw = f"yt-dlp --extractor-args youtube:player_client=web {origin}\nERROR: {origin} This Post was deleted"
+    assert plain_error_from_text(raw) == "X says this post was deleted."
+    assert run_js(f"translateMachineMessage({json.dumps(raw)})") == "X says this post was deleted."
+    import server
+    assert not server._is_youtube_bot_check(subprocess.CalledProcessError(
+        1, ["yt-dlp", origin], stderr=f"ERROR: {origin} confirm you are not a bot"))
+    assert not server._youtube_429_endpoints(subprocess.CalledProcessError(
+        1, ["yt-dlp", origin], stderr=raw.replace("This Post was deleted", "HTTP Error 429")))
 
 
 @pytest.mark.parametrize("message", [

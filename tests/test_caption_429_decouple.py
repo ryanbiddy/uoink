@@ -34,7 +34,7 @@ def extraction(monkeypatch, tmp_path):
         caption_error=None, media_error=None, captions_available=True,
         settings=server._default_settings(), model_cached=True, calls=[],
         media_has_audio=True, audio_error=None, source_has_audio=True,
-        probe_error=None, cut_error=None, extra_srt={},
+        probe_error=None, cut_error=None, extra_srt={}, native_captions={},
     )
     metadata = {
         "id": "abcdef12345", "title": "Caption test", "duration": 60,
@@ -67,6 +67,8 @@ def extraction(monkeypatch, tmp_path):
                     "1\n00:00:00,000 --> 00:00:02,000\nPlatform captions.\n",
                     encoding="utf-8",
                 )
+                for name, content in state.native_captions.items():
+                    (folder / name).write_text(content, encoding="utf-8")
                 for name, text in state.extra_srt.items():
                     (folder / name).write_text(
                         f"1\n00:00:00,000 --> 00:00:02,000\n{text}\n", encoding="utf-8")
@@ -664,6 +666,22 @@ def test_uploaded_english_captions_win_over_auto_captions(extraction, extract_ha
     assert "Platform captions." in result["yoink_md"]
     assert "Auto captions." not in result["yoink_md"]
     assert "Other track." not in result["yoink_md"]
+
+
+def test_auto_capture_selects_json3_and_records_track_kind(extraction):
+    extraction.metadata["automatic_captions"] = {"en-orig": [{"ext": "json3"}]}
+    extraction.native_captions["video.auto.en-orig.json3"] = json.dumps({"events": [
+        {"tStartMs": 0, "dDurationMs": 3000, "segs": [{"utf8": "hello"}, {"utf8": "again", "tOffsetMs": 1000}]},
+        {"tStartMs": 1000, "dDurationMs": 2000, "segs": [{"utf8": "again"}, {"utf8": "again", "tOffsetMs": 1000}]},
+    ]})
+    result = extraction.run()
+    assert result["caption_count"] == 3
+    assert (extraction.folder / "transcript.txt").read_text() == "hello\nagain\nagain"
+    cmd = extraction.calls[1][0]
+    assert cmd[cmd.index("--sub-format") + 1] == "json3/vtt/srt"
+    assert "--write-subs" not in cmd
+    side = json.loads((extraction.folder / f"{extraction.folder.name}.json").read_text(encoding="utf-8"))
+    assert side["caption_track_kind"] == "auto_captions" and side["caption_windows_cleaned"]
 
 
 def test_media_failure_still_propagates(extraction):

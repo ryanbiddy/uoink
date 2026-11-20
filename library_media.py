@@ -1977,6 +1977,8 @@ def capture_sidecar_inputs(sidecar: dict) -> tuple:
         sidecar.get("yoinked_at"),
         sidecar.get("duration_seconds"),
         sidecar.get("transcript_source"),
+        sidecar.get("caption_track_kind"),
+        sidecar.get("caption_windows_cleaned"),
         entries,
         chapters,
     )

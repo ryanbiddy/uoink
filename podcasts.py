@@ -191,14 +191,16 @@ def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
     rows = idx._conn.execute(sql, params).fetchall()
     feeds = [dict(r) for r in rows]
     if feeds and _subscriptions().tables_present(idx._conn):
-        attempts = dict(idx._conn.execute(
-            "SELECT s.legacy_feed_id, c.last_poll_attempt_ms FROM source_subscriptions s "
+        successes = dict(idx._conn.execute(
+            "SELECT s.legacy_feed_id, c.last_poll_success_ms FROM source_subscriptions s "
             "JOIN source_detection_cursors c USING(source_id) WHERE s.legacy_feed_id IS NOT NULL"))
         for feed in feeds:
-            ms = attempts.get(feed["id"])
+            ms = successes.get(feed["id"])
             if ms is not None:
-                feed["last_polled_at"] = (datetime.fromtimestamp(ms / 1000, timezone.utc)
-                                          .isoformat().replace("+00:00", "Z"))
+                success = datetime.fromtimestamp(ms / 1000, timezone.utc)
+                legacy = _parse_poll_timestamp(feed.get("last_polled_at"))
+                if legacy is None or success > legacy:
+                    feed["last_polled_at"] = success.isoformat().replace("+00:00", "Z")
     return feeds
 
 
@@ -572,11 +574,10 @@ def record_feed_meta(idx, feed_id: int, *, title: str | None,
         else:
             conn.execute(
                 "UPDATE podcast_feeds SET "
-                "  last_polled_at = ?, "
                 "  error_count = error_count + 1, "
                 "  last_error = ? "
                 "WHERE id = ?",
-                (_now_iso(), (error or "")[:512], feed_id))
+                ((error or "")[:512], feed_id))
 
 
 def poll_feed(idx, feed_id: int, *, refresh=None) -> dict:

@@ -1578,8 +1578,8 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
         # yt-dlp runs as `yt-dlp` on Windows/Linux and as the bundle's
         # `python -m yt_dlp` on macOS; both are the same downloader here.
         is_ytdlp = command[0] == "yt-dlp" or list(command[1:3]) == ["-m", "yt_dlp"]
-        if is_ytdlp and "--get-title" in command:
-            return "Synthetic Video"
+        if is_ytdlp and "--dump-single-json" in command:
+            return json.dumps({"title": "Synthetic Video", "extractor_key": "Youtube"})
         if is_ytdlp:
             folder = output / "Synthetic_Video"
             folder.mkdir(parents=True, exist_ok=True)

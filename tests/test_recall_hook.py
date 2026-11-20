@@ -337,7 +337,8 @@ def test_locked_index_lock_wait_is_budgeted_against_the_deadline(monkeypatch, tw
 
     monkeypatch.setattr(hook, "time", SimpleNamespace(monotonic=lambda: now, sleep=advance))
     with _held_exclusive(two_items):
-        code, out, err = _run(monkeypatch, two_items, "alpha beta gamma delta", hook=hook)
+        elapsed, (code, out, err) = _timed_run(monkeypatch, hook, two_items, "alpha beta gamma delta")
+    assert elapsed < 5, f"SQLite held recall for {elapsed:.2f}s"
     assert code == 0 and out == "" and err == ""
     assert sum(waits) == pytest.approx(hook.TIME_BUDGET_SEC)
 

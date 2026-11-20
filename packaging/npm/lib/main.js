@@ -50,16 +50,19 @@ function assetFor(platform, arch, version) {
   return null;
 }
 
+const VERSION_PATTERN = String.raw`(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+const VERSION_RE = new RegExp(`^${VERSION_PATTERN}$`);
+
 // Find the asset for this platform in a parsed SHA256SUMS map. Returns
 // { name, kind, version, sha } or null.
 function pickAsset(platform, arch, sums) {
   let re;
   let kind;
   if (platform === 'win32' && arch === 'x64') {
-    re = /^Uoink-Setup-(\d+\.\d+\.\d+)\.exe$/;
+    re = new RegExp(`^Uoink-Setup-(${VERSION_PATTERN})\\.exe$`);
     kind = 'exe';
   } else if (platform === 'darwin' && arch === 'arm64') {
-    re = /^Uoink-(\d+\.\d+\.\d+)-macos-arm64\.dmg$/;
+    re = new RegExp(`^Uoink-(${VERSION_PATTERN})-macos-arm64\\.dmg$`);
     kind = 'dmg';
   } else {
     return null;
@@ -85,13 +88,28 @@ function unsupportedMessage(platform, arch) {
 }
 
 function cmpVersion(a, b) {
-  const pa = a.split('.').map(Number);
-  const pb = b.split('.').map(Number);
-  for (let i = 0; i < 3; i++) {
-    const d = (pa[i] || 0) - (pb[i] || 0);
-    if (d) return d < 0 ? -1 : 1;
+  const left = VERSION_RE.exec(a.replace(/^v/, ''));
+  const right = VERSION_RE.exec(b.replace(/^v/, ''));
+  if (!left || !right) return null;
+  function compare(x, y) {
+    return x < y ? -1 : x > y ? 1 : 0;
   }
-  return 0;
+  for (let i = 1; i <= 3; i++) {
+    const order = compare(BigInt(left[i]), BigInt(right[i]));
+    if (order) return order;
+  }
+  if (!left[4] || !right[4]) return compare(!left[4], !right[4]);
+  const pa = left[4].split('.');
+  const pb = right[4].split('.');
+  for (let i = 0; i < Math.min(pa.length, pb.length); i++) {
+    if (pa[i] === pb[i]) continue;
+    const na = /^\d+$/.test(pa[i]);
+    const nb = /^\d+$/.test(pb[i]);
+    if (na && nb) return compare(BigInt(pa[i]), BigInt(pb[i]));
+    if (na !== nb) return na ? -1 : 1;
+    return compare(pa[i], pb[i]);
+  }
+  return compare(pa.length, pb.length);
 }
 
 // ---------- finding an installed Uoink ----------
@@ -324,7 +342,7 @@ function parseOwnArgs(argv) {
   }
   if (o.version !== null) {
     const v = o.version.replace(/^v/, '');
-    if (!/^\d+\.\d+\.\d+$/.test(v)) throw new UserError(`"${o.version}" is not a version like 3.16.3.`);
+    if (!VERSION_RE.test(v)) throw new UserError(`"${o.version}" is not a version like 3.16.3.`);
     o.version = v;
   }
   return o;
@@ -671,7 +689,7 @@ async function installFlow(opts, deps, ui, ctx = {}) {
   const plan = await resolvePlan(opts, deps);
   const installed = ctx.installed || null;
   const order = ctx.installedVersion ? cmpVersion(plan.version, ctx.installedVersion) : null;
-  if (order === -1) {
+  if (order !== null && order < 0) {
     ui.say(`Your installed Uoink ${ctx.installedVersion} is newer than the offered version ${plan.version}. Keeping your copy.`);
     return 0;
   }

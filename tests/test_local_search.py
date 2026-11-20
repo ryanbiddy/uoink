@@ -236,27 +236,301 @@ def test_edit_soft_delete_hard_delete_restore_and_restart(engine, index):
 
 
 def test_model_released_after_idle_and_reloaded_for_query(engine, index, monkeypatch):
-    monkeypatch.setattr(engine, "_idle_seconds", 0.02, raising=False)
+    released = threading.Event()
+
+    class ObservedModel(FakeModel):
+        def __del__(self):
+            released.set()
+
+    monkeypatch.setattr(engine, "_idle_seconds", 0.02)
+    engine.model_factory = ObservedModel
     index.seed()
     ready(engine)
-    import time
-    deadline = time.monotonic() + 5
-    while engine._model is not None and time.monotonic() < deadline:
-        time.sleep(0.01)
-    assert engine._model is None
+    assert released.wait(5) and engine._model is None
     assert engine.embedding_search("mars")[0].source_id == "mars"
 
 
-def test_opted_in_restart_with_unindexed_changes_waits_for_use(engine, index):
-    ready(engine)
+class CountingFactory:
+    """Records model loads and verification order. It does not verify by
+    itself, so only LocalSearch can guarantee that verification came first."""
+
+    def __init__(self, manager, events):
+        self.events = events
+        original = manager.verify
+
+        def verify():
+            original()
+            events.append("verify")
+
+        manager.verify = verify
+
+    def __call__(self, manager):
+        self.events.append("load")
+        model = FakeModel.__new__(FakeModel)
+        model.calls = []
+        return model
+
+
+def restarted(engine, index, events):
+    other = ls.LocalSearch(engine.root, index)
+    other.model_factory = CountingFactory(other.manager, events)
+    return other
+
+
+def test_restart_with_saved_vectors_answers_the_first_search_without_a_startup_model(engine, index):
     index.seed()
-    other = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
+    index.seed("bread", "Knead sourdough bread", topic="food")
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)
     other.restore()
-    assert other._worker is None and other._model is None
-    with pytest.raises(ls.SearchUnavailable, match="Preparing"):
-        other.embedding_search("mars")
+    assert other._worker is None and other._model is None and events == []
+    assert [hit.source_id for hit in other.embedding_search("rust")] == ["mars", "bread"]
+    assert events == ["verify", "load"]
+    assert other._worker is None  # nothing was owed, so the search started no indexing
+    assert other.pause(timeout=5)
+
+
+def test_restart_with_unindexed_changes_answers_from_saved_vectors_then_indexes(engine, index):
+    index.seed()
+    ready(engine)
+    index.seed("rusty", "A rusty gate", topic="home")  # saved while search was not running
+    events = []
+    other = restarted(engine, index, events)
+    assert other.restore()
     assert other.wait(5)
-    assert other.embedding_search("mars")[0].source_id == "mars"
+    assert other.status()["state"] == "ready" and other._model is None and events == []
+    assert set(other.store.fingerprints()) == {"mars"}
+    assert [hit.source_id for hit in other.embedding_search("rust")] == ["mars"]
+    # First use indexes what startup skipped.
+    assert other.wait(5)
+    assert set(other.store.fingerprints()) == {"mars", "rusty"}
+    assert {hit.source_id for hit in other.embedding_search("rust")} == {"mars", "rusty"}
+    assert events.index("verify") < events.index("load")
+    assert other.pause(timeout=5)
+
+
+def test_restore_does_nothing_when_paused_off_or_without_terms(engine, index):
+    index.seed()
+    ready(engine)
+    assert engine.pause(timeout=5)
+    paused = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
+    assert not paused.restore() and paused._worker is None
+    engine.start()
+    assert engine.wait(5)
+    engine.manager.terms_path.unlink()
+    unaccepted = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
+    assert not unaccepted.restore() and unaccepted._worker is None
+
+
+def test_no_search_runs_inference_before_verification(engine, index):
+    """The window between a worker launch and manager.verify() admits no search."""
+    index.seed()
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)
+    before_verify, release = threading.Event(), threading.Event()
+    original_checkpoint = other._checkpoint
+
+    def held_checkpoint():
+        if not before_verify.is_set():
+            before_verify.set()
+            assert release.wait(5)
+        original_checkpoint()
+
+    # A published snapshot is available to a second search while the worker
+    # is starting; a cold cache would conceal the verification race.
+    other.store.refresh()
+    other.sources.snapshot()
+    other._checkpoint = held_checkpoint
+    try:
+        assert other.start()
+        assert before_verify.wait(5)  # worker launched, verification not started
+        other.update_source("mars")  # state can now say indexing
+        with pytest.raises(ls.SearchUnavailable):
+            other.embedding_search("rust")
+        assert "load" not in events
+    finally:
+        release.set()
+    assert other.wait(5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert events.index("verify") < events.index("load")
+    assert other.pause(timeout=5)
+
+
+def test_search_during_verification_is_refused(engine, index):
+    index.seed()
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)
+    verifying, release = threading.Event(), threading.Event()
+    counted = other.manager.verify
+
+    def slow_verify():
+        verifying.set()
+        assert release.wait(5)
+        counted()
+
+    other.manager.verify = slow_verify
+    try:
+        assert other.start()
+        assert verifying.wait(5)
+        with pytest.raises(ls.SearchUnavailable):
+            other.embedding_search("rust")
+        assert events == []
+    finally:
+        release.set()
+    assert other.wait(5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert other.pause(timeout=5)
+
+
+def test_error_state_blocks_inference(engine, index):
+    index.seed()
+    ready(engine)
+    engine._model.calls.clear()
+    engine._set("error", error="Local search failed. Retry setup or rebuild the derived index.")
+    engine.update_source("mars")
+    assert engine.status()["state"] == "error"
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    assert engine._model.calls == []
+
+
+def test_pause_waits_for_a_search_in_flight_and_no_inference_follows(engine, index):
+    index.seed()
+    ready(engine)
+    order, checked, release = [], threading.Event(), threading.Event()
+    model = engine._model
+    original_embed = model.embed
+
+    def recording_embed(texts, **kwargs):
+        checked.set()  # inference is already using the model
+        assert release.wait(5)
+        order.append("inference")
+        return original_embed(texts, **kwargs)
+
+    model.embed = recording_embed
+    errors = []
+
+    def search():
+        try:
+            engine.embedding_search("rust")
+        except ls.SearchUnavailable as exc:
+            errors.append(exc)
+
+    searcher = threading.Thread(target=search)
+    searcher.start()
+    assert checked.wait(5)
+    paused = []
+    pauser = threading.Thread(target=lambda: (paused.append(engine.pause(timeout=5)), order.append("paused")))
+    pauser.start()
+    try:
+        # pause() cannot finish while the search that passed its checks runs.
+        assert engine._stop.wait(5)  # the pauser has reached its stop barrier
+    finally:
+        release.set()
+    searcher.join(5)
+    pauser.join(5)
+    assert not errors and paused == [True]
+    assert order == ["inference", "paused"]
+    assert engine._model is None and engine._idle_timer is None
+    with pytest.raises(ls.SearchUnavailable, match="paused"):
+        engine.embedding_search("rust")
+    assert order == ["inference", "paused"]
+
+
+@pytest.mark.parametrize("action", ["pause", "remove", "close"])
+def test_pause_remove_and_close_cancel_the_idle_timer(engine, index, action):
+    index.seed()
+    ready(engine)
+    timer = engine._idle_timer
+    assert timer is not None and timer.is_alive() and engine._model is not None
+    getattr(engine, action)()
+    timer.join(5)
+    assert not timer.is_alive()
+    assert engine._idle_timer is None and engine._model is None
+
+
+def test_close_keeps_the_saved_pause_choice_and_the_next_start_restores(engine, index):
+    index.seed()
+    ready(engine)
+    assert engine.close()
+    assert ls.LocalSearch.settings_at(engine.root).get("paused") is not True
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    assert not engine.update_source("mars") or engine._worker is None
+    events = []
+    other = restarted(engine, index, events)
+    assert not other._paused and other.restore() and other.wait(5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert other.pause(timeout=5)
+
+
+def test_helper_shutdown_closes_search_without_saving_a_pause():
+    source = (Path(__file__).resolve().parents[1] / "server.py").read_text(encoding="utf-8")
+    assert "_local_search_singleton.close()" in source
+    assert "_local_search_singleton.pause()" not in source
+
+
+def test_idle_release_does_not_make_a_search_busy(engine, index, monkeypatch):
+    """Freeing the old session can be slow. A search arriving meanwhile proceeds."""
+    releasing, finish = threading.Event(), threading.Event()
+
+    class SlowToFree(FakeModel):
+        slow = True
+
+        def __del__(self):
+            if SlowToFree.slow:
+                SlowToFree.slow = False
+                releasing.set()
+                finish.wait(5)
+
+    engine.model_factory = SlowToFree
+    engine._idle_seconds = 0.05
+    index.seed()
+    try:
+        ready(engine)
+        assert releasing.wait(5)  # the idle timer is freeing the first session
+        assert engine.embedding_search("rust")[0].source_id == "mars"
+    finally:
+        finish.set()
+
+
+def test_idle_release_leaves_a_model_in_use_and_rearms(engine, index):
+    index.seed()
+    ready(engine)
+    model = engine._model
+    inside, release = threading.Event(), threading.Event()
+    original = model.embed
+
+    def held(texts, **kwargs):
+        inside.set()
+        assert release.wait(5)
+        return original(texts, **kwargs)
+
+    model.embed = held
+
+    def fire_idle_timer():
+        # Run the current timer's callback now, as if the idle wait had passed.
+        with engine._model_lock:
+            timer, generation = engine._idle_timer, engine._idle_generation
+            engine._last_use = 0.0
+        timer.cancel()
+        engine._release_idle_model(generation)
+
+    searcher = threading.Thread(target=lambda: engine.embedding_search("rust"))
+    searcher.start()
+    try:
+        assert inside.wait(5)
+        fire_idle_timer()  # returns at once: it neither waits for nor drops the model
+        assert engine._model is model
+    finally:
+        release.set()
+    searcher.join(5)
+    assert engine._model is model and engine._idle_timer is not None  # re-armed after use
+    fire_idle_timer()
+    assert engine._model is None and engine._idle_timer is None
 
 
 def test_clip_spans_timestamps_max_per_source_and_metadata_changes(engine, index):
