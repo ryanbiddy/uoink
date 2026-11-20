@@ -369,7 +369,10 @@ class UoinkTray:
             prev_recent = self._recent_signature()
             self._refresh_status()
             now = time.monotonic()
-            if not idle and (now - last_recent) >= _POLL_RECENT_SEC:
+            # Not gated on idle: saves come from the browser, the CLI and MCP,
+            # never from a tray click, so Recent items keeps up at the idle
+            # pace (every 30 s) too. Both reads are local and cheap.
+            if (now - last_recent) >= _POLL_RECENT_SEC:
                 self._refresh_recent()
                 self._refresh_update()
                 last_recent = now

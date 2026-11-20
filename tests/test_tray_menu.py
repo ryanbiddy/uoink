@@ -174,6 +174,10 @@ def test_every_menu_item_does_something(fake_pystray, tmp_path, monkeypatch):
     assert len(spawned) == 1 and spawned[0][-1].endswith("uoink_dashboard.py")
     by_text["Open folder"](icon)
     assert opened_paths == [tmp_path / "library"]
+    # Each recent item opens its own folder (a closure made in the loop would
+    # bind every item to the last folder).
+    by_text["Talk one"](icon)
+    assert opened_paths[-1] == Path("C:/library/youtube/talk-one")
     by_text[uoink_tray.menu_label("Q&A two")](icon)
     assert opened_paths[-1] == Path("C:/library/x/qa-two")
     by_text["Settings"](icon)
@@ -195,7 +199,10 @@ class _Icon:
         self.menus.append(_walk(self.tray._build_menu()))
 
 
-def test_poll_rebuilds_the_menu_when_a_new_save_lands(fake_pystray, tmp_path, monkeypatch):
+@pytest.mark.parametrize("clicked", [True, False], ids=["tray-in-use", "tray-idle"])
+def test_poll_rebuilds_the_menu_when_a_new_save_lands(fake_pystray, tmp_path, monkeypatch, clicked):
+    # Idle is the normal case: nobody clicks the tray for a minute, and saves
+    # arrive from the browser, the CLI or MCP.
     tray = _tray(tmp_path)
     tray._icon = _Icon(tray)
     monkeypatch.setattr(tray, "_image", lambda: "image")
@@ -211,9 +218,10 @@ def test_poll_rebuilds_the_menu_when_a_new_save_lands(fake_pystray, tmp_path, mo
 
     sleeps = []
 
-    def sleep(_seconds):
-        sleeps.append(1)
-        tray._last_interaction = uoink_tray.time.monotonic()
+    def sleep(seconds):
+        sleeps.append(seconds)
+        if clicked:
+            tray._last_interaction = uoink_tray.time.monotonic()
         if len(sleeps) == 3:
             tray._stopping.set()
 
@@ -222,8 +230,10 @@ def test_poll_rebuilds_the_menu_when_a_new_save_lands(fake_pystray, tmp_path, mo
     monkeypatch.setattr(tray, "_refresh_recent", recent)
     monkeypatch.setattr(uoink_tray.time, "sleep", sleep)
     monkeypatch.setattr(uoink_tray.time, "monotonic", lambda: float(next(ticks)))
+    tray._last_interaction = 0.0 if clicked else -3600.0  # Last click an hour ago.
     tray._poll_loop()
 
+    assert sleeps == ([uoink_tray._POLL_STATUS_SEC] * 3 if clicked else [30] * 3)
     shown = [menu[5] for menu in tray._icon.menus]
     # First paint, then one rebuild for the new save. The unchanged second page
     # (only a health field moved) does not rebuild the menu.
