@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - First-run window: the close button and Escape now close the window even when you press them
   the moment it appears. Before, an early click could hide the page and leave an empty window
   on screen.
+- Windows setup now checks that every Uoink program file arrived after an install, not only
+  the ones that went missing in the past.
 
 ## [3.17.0] - 2026-11-12
 
