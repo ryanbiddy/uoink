@@ -121,6 +121,10 @@ check(card.includes('id="openShowCapture"') && !card.includes('class="button pri
 const modal = PAGE.slice(PAGE.indexOf('id="showCaptureModal"'), PAGE.indexOf('id="listImportModal"'));
 check(modal.includes('role="dialog"') && modal.includes('aria-modal="true"') && modal.includes('aria-labelledby="showCaptureTitle"'), "the dialog is labelled");
 check((modal.match(/class="button primary"/g) || []).length === 1, "the dialog has one primary action");
+check(modal.indexOf('id="showCaptureStart"') < modal.indexOf('id="showCapturePreview"'),
+  "Start sits above the episode sample, so a phone sees it without scrolling past the list");
+check(!/window\.setInterval\(pollShowRuns/.test(PAGE) && /setInterval\(pollShowRuns, 5000\)/.test(PAGE),
+  "the run list polls from the boot timers, not from wireShowCapture");
 check(!BANNED.test(card.replace(/<[^>]+>/g, "")) && !BANNED.test(modal.replace(/<[^>]+>/g, "")), "card and dialog copy is plain");
 check(/\.show-run-title \{[^}]*min-width: 0;[^}]*text-overflow: ellipsis/.test(PAGE), "long show titles end in an ellipsis");
 check(/\.show-run-note,\s*\.show-capture-estimate p \{[^}]*overflow-wrap: anywhere/.test(PAGE), "notes and estimates break long words");

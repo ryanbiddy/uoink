@@ -7060,11 +7060,11 @@
       <div class="inline-row"><button class="button" type="button" id="showCaptureList">List episodes</button></div>
       <p class="list-import-status" id="showCaptureStatus" role="status" aria-live="polite">Paste a link to list every episode. Nothing is saved yet.</p>
       <div class="show-capture-estimate hidden" id="showCaptureEstimate"></div>
-      <ul class="list-import-preview" id="showCapturePreview" aria-label="Episodes in this show"></ul>
       <label class="inline-row setting-copy hidden" id="showCaptureAsrRow" for="showCaptureAsr"><input type="checkbox" id="showCaptureAsr"><span id="showCaptureAsrText">Transcribe on this computer when a video has no captions.</span></label>
       <div class="inline-row list-import-actions">
         <button class="button primary" type="button" id="showCaptureStart" disabled>Start saving</button>
       </div>
+      <ul class="list-import-preview" id="showCapturePreview" aria-label="Episodes in this show"></ul>
       <p class="setting-copy" id="showCaptureHelp">Saves transcripts only, with no video, screenshots or comments. One episode at a time, after anything you save yourself. Pause, resume or cancel from Sources, and it carries on after Uoink restarts.</p>
     </div>
   </div>
@@ -13452,7 +13452,7 @@
     // Save a whole show (show_capture.py on the helper). The dialog lists a
     // source and shows the cost; the Sources card lists runs with progress,
     // pause, resume, cancel and the failures with their reasons.
-    const showCaptureState = { run: null, seq: 0, opener: null, runs: [], last: 0, timer: null };
+    const showCaptureState = { run: null, seq: 0, opener: null, runs: [], last: 0 };
     const SHOW_ACTIVE_STATES = ["listing", "running", "waiting"];
 
     function showHoursText(hours) {
@@ -13498,7 +13498,7 @@
     function showAsrText(run) {
       const e = (run && run.estimate) || {};
       if (run && run.kind === "podcast_feed") {
-        return "Podcasts are transcribed on this computer with your Whisper model.";
+        return "Podcast episodes are always transcribed on this computer.";
       }
       return `Transcribe on this computer when a video has no captions. Uoink downloads that video's audio, then deletes it. Adds up to ${showHoursText(e.asr_hours_if_all)} if none had captions.`;
     }
@@ -13773,7 +13773,6 @@
         if (button) showRunAction(button.dataset.showId, button.dataset.showAction);
       });
       loadShowRuns();
-      showCaptureState.timer = window.setInterval(pollShowRuns, 5000);
     }
 
     // V-4: the "Fresh from your sources" strip -- V-3 auto-uoinked items.
@@ -22011,6 +22010,7 @@
       connectJobsStream();
       setInterval(refreshHealth, 10000);
       setInterval(loadZingStatus, 300000);
+      setInterval(pollShowRuns, 5000);
       autoCheckUpdatesOnLoad();
       // A dashboard left open still rechecks; the 24h server cache keeps this
       // to one GitHub request a day.
