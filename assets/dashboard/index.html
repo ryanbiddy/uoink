@@ -19862,12 +19862,14 @@
         new IntersectionObserver(entries => {
           if (entries.some(entry => entry.isIntersecting)) loadTranscriptBackfill();
         }).observe(block);
-      } else if (block) {
-        loadTranscriptBackfill();  // no observer here: read once now
       }
-      document.addEventListener("visibilitychange", () => {
-        if (!document.hidden && backfillStale && state.activeTab === "settings") loadTranscriptBackfill();
-      });
+      // No observer (only bare test pages): no read at bind, by design. The
+      // settings tests pin that opening Settings asks the helper for nothing.
+      if (typeof document.addEventListener === "function") {
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden && backfillStale && state.activeTab === "settings") loadTranscriptBackfill();
+        });
+      }
     }
 
     // ---- Phone inbox (Uoink Relay) ---------------------------------------
