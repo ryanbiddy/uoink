@@ -334,7 +334,8 @@ def backfill_text(payload):
     if payload.get("half_capture_count"):
         lines.append(f"{plural(int(payload['half_capture_count']), 'capture')} did not finish. "
                      "Finish them in Uoink under Settings, Library health.")
-    if payload.get("model_ready") is False and payload.get("model_message"):
+    if (payload.get("model_ready") is False and payload.get("model_message")
+            and (count or payload.get("half_capture_count"))):
         lines.append(terminal_label(payload["model_message"]))
     if state in ("idle", "done") and count:
         lines.append("Run 'uoink backfill start' to transcribe them. It uses this computer's CPU "
