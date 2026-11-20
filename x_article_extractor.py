@@ -183,8 +183,11 @@ def build_full_text_result(payload: dict, *, provider: str) -> dict:
         "author": {"name": author_name or None, "screen_name": author_handle},
     }, provider)
     post_url = x_evidence.safe_url(payload.get("post_url"))
-    header = [f"**Author:** {author}" if author else "",
-              f"**Published:** {payload['published']}" if isinstance(payload.get("published"), str) else "",
+    published = payload.get("published")
+    published = " ".join(published.split())[:64] if isinstance(published, str) else ""
+    import x_fulltext  # lazy: x_fulltext stays free of extractor imports
+    header = [f"**Author:** {x_fulltext.md_text(' '.join(author.split()))}" if author else "",
+              f"**Published:** {x_fulltext.md_text(published)}" if published else "",
               f"**Shared in:** {post_url}" if post_url else ""]
     header = "\n\n".join(line for line in header if line)
     return {

@@ -59,6 +59,39 @@ def _app_version() -> str:
 # FxTwitter's docs ask callers to name themselves.
 FXTWITTER_USER_AGENT = f"Uoink/{_app_version()} (+https://uoink.app)"
 MAX_THREAD_HOPS = 25  # ancestor cap so a hostile chain can't loop us
+# Most a single answer may be. One post's JSON is a few KB; an Article body
+# from FxTwitter can be a few hundred KB.
+SYNDICATION_MAX_BYTES = 1024 * 1024
+FXTWITTER_MAX_BYTES = 2 * 1024 * 1024
+
+
+def is_post_id(value) -> bool:
+    """An X post or Article id: ASCII digits only (``"²".isdigit()`` is True)."""
+    text = str(value or "")
+    return 0 < len(text) <= 25 and text.isascii() and text.isdigit()
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """X and FxTwitter answer in place. A redirect is refused, so a request
+    never lands on another host; the 3xx surfaces as an HTTPError."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
+def _urlopen(request, timeout):
+    """Every HTTP request this module sends goes through here."""
+    return _OPENER.open(request, timeout=timeout)
+
+
+def _read_body(resp, limit: int, service: str) -> str:
+    raw = resp.read(limit + 1)
+    if len(raw) > limit:
+        raise XFetchError(f"{service} sent a bigger answer than one post needs.", "unavailable")
+    return raw.decode("utf-8", errors="replace")
 
 _STATUS_RE = re.compile(
     r"^https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/[^/]+/status(?:es)?/(\d+)",
@@ -150,6 +183,8 @@ def fetch_syndication_json(tweet_id: str, *, timeout: int = 20) -> dict:
     actionable message on the ways X refuses: the endpoint 404s deleted,
     protected, AND blocked requests alike, so the copy says so instead of
     guessing."""
+    if not is_post_id(tweet_id):
+        raise XFetchError("That isn't an X post id.", "unavailable")
     query = urllib.parse.urlencode({
         "id": str(int(tweet_id)),
         "token": syndication_token(tweet_id),
@@ -160,8 +195,8 @@ def fetch_syndication_json(tweet_id: str, *, timeout: int = 20) -> dict:
         "Accept": "application/json",
     })
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
+        with _urlopen(req, timeout) as resp:
+            raw = _read_body(resp, SYNDICATION_MAX_BYTES, "X")
     except urllib.error.HTTPError as e:
         if e.code == 404:
             raise XFetchError(
@@ -234,7 +269,8 @@ def merge_dom_post(data: dict, dom_post: dict) -> dict:
     unless the page still showed a "Show more" control."""
     evidence = data.get("_uoink_x_evidence") or x_evidence.shape(data)
     text = dom_post.get("text") if isinstance(dom_post, dict) else None
-    same_post = str(dom_post.get("id") or "") == str(evidence.get("id") or "") if isinstance(dom_post, dict) else False
+    same_post = (isinstance(dom_post, dict) and is_post_id(dom_post.get("id"))
+                 and str(dom_post.get("id")) == str(evidence.get("id") or ""))
     if not isinstance(text, str) or not same_post or not x_fulltext.extends(evidence["text"], text[:100000]):
         evidence = x_evidence.sanitize_urls(evidence)
         evidence["provider_status"][DOM_PROVIDER] = "not used (text didn't match the post)"
@@ -266,21 +302,28 @@ def post_text_record(tweet_id: str, *, timeout: int = 15, fxtwitter: bool = Fals
     data = (_fetch_syndication or fetch_syndication_json)(tweet_id, timeout=timeout)
     first = x_evidence.shape(data)
     long_post = first["text_completeness"] == "truncated"
+    quote_long = ((first.get("quote") or {}).get("text_completeness") == "truncated")
     data = (_complete or complete_payload)(dict(data, _uoink_x_evidence=first), tweet_id,
                                            timeout=timeout, fxtwitter=fxtwitter, dom_post=dom_post)
     evidence = x_evidence.sanitize_urls(data["_uoink_x_evidence"])
     quote = evidence.get("quote") or {}
+    fx_status = (evidence.get("provider_status") or {}).get("FxTwitter")
     return {
         "id": str(tweet_id),
         "long_post": long_post,
         "complete": evidence["text_completeness"] == "complete" or (
             not long_post and evidence["text_completeness"] != "truncated"),
+        "quote_long": quote_long,
         "quote_complete": not quote or quote.get("text_completeness") != "truncated",
+        "quote_text": x_evidence.expanded_text(quote) if quote.get("text") else "",
         "text": evidence["text"],
         "provider": evidence["capture_provider"],
         "text_completeness": evidence["text_completeness"],
         "description": description_text(evidence),
         "evidence": evidence,
+        # Why FxTwitter didn't help, for callers that pace themselves.
+        "fxtwitter_status": fx_status,
+        "fxtwitter_retry_after": fxtwitter_cooldown_left() if fx_status == "rate limited" else None,
     }
 
 
@@ -306,8 +349,35 @@ def description_text(evidence: dict) -> str:
 FXTWITTER_CACHE_SEC = 30 * 60
 FXTWITTER_CACHE_MAX = 256
 FXTWITTER_COOLDOWN_SEC = (60, 120, 300, 900)
+FXTWITTER_SWITCHED_OFF = "FxTwitter is switched off in Settings, Capture."
 _fx_lock = threading.Lock()
 _fx_state = {"cache": {}, "cooldown_until": 0.0, "strikes": 0}
+_fx_clock = time.monotonic  # tests move it forward instead of waiting
+# The user's switch, read fresh before every FxTwitter request. The helper
+# registers a reader of fxtwitter_enrichment_enabled at import. Unset (or a
+# reader that fails) means off, so nothing reaches FxTwitter by accident.
+_fxtwitter_gate = None
+
+
+def set_fxtwitter_gate(gate) -> None:
+    global _fxtwitter_gate
+    _fxtwitter_gate = gate
+
+
+def fxtwitter_allowed() -> bool:
+    gate = _fxtwitter_gate
+    if gate is None:
+        return False
+    try:
+        return gate() is True
+    except Exception:  # a settings read that fails is "off"
+        return False
+
+
+def fxtwitter_cooldown_left() -> float:
+    """Seconds until FxTwitter may be asked again (0 when it may now)."""
+    with _fx_lock:
+        return max(0.0, _fx_state["cooldown_until"] - _fx_clock())
 
 
 def reset_fxtwitter_state() -> None:
@@ -321,15 +391,22 @@ def _fx_backoff(retry_after: float | None = None) -> float:
         _fx_state["strikes"] += 1
         step = FXTWITTER_COOLDOWN_SEC[min(_fx_state["strikes"], len(FXTWITTER_COOLDOWN_SEC)) - 1]
         wait = min(max(float(retry_after or 0), step), FXTWITTER_COOLDOWN_SEC[-1])
-        _fx_state["cooldown_until"] = time.monotonic() + wait
+        _fx_state["cooldown_until"] = _fx_clock() + wait
         return wait
 
 
 def fetch_fxtwitter_status(tweet_id: str, *, timeout: int = 20) -> dict:
-    """The FxTwitter v2 ``status`` object for one post. Raises XFetchError:
+    """The FxTwitter v2 ``status`` object for one post. The one place Uoink
+    contacts FxTwitter: it reads the user's switch first, every time, so a
+    caller that passed ``fxtwitter=True`` a while ago still stops the moment
+    the switch goes off. Raises XFetchError: disabled (switch off),
     rate_limited (also while cooling down), gone, unavailable, network."""
+    if not fxtwitter_allowed():
+        raise XFetchError(FXTWITTER_SWITCHED_OFF, "disabled")
+    if not is_post_id(tweet_id):
+        raise XFetchError("That isn't an X post id.", "unavailable")
     tweet_id = str(int(tweet_id))
-    now = time.monotonic()
+    now = _fx_clock()
     with _fx_lock:
         cached = _fx_state["cache"].get(tweet_id)
         if cached and now - cached[0] < FXTWITTER_CACHE_SEC:
@@ -340,8 +417,8 @@ def fetch_fxtwitter_status(tweet_id: str, *, timeout: int = 20) -> dict:
     req = urllib.request.Request(FXTWITTER_STATUS_URL.format(tweet_id=tweet_id), headers={
         "User-Agent": FXTWITTER_USER_AGENT, "Accept": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
+        with _urlopen(req, timeout) as resp:
+            raw = _read_body(resp, FXTWITTER_MAX_BYTES, "FxTwitter")
     except urllib.error.HTTPError as e:
         if e.code == 404:
             raise XFetchError("FxTwitter couldn't find this post.", "gone")
@@ -368,7 +445,7 @@ def fetch_fxtwitter_status(tweet_id: str, *, timeout: int = 20) -> dict:
     with _fx_lock:
         _fx_state["strikes"] = 0
         cache = _fx_state["cache"]
-        cache[tweet_id] = (time.monotonic(), copy.deepcopy(status))
+        cache[tweet_id] = (_fx_clock(), copy.deepcopy(status))
         while len(cache) > FXTWITTER_CACHE_MAX:
             cache.pop(next(iter(cache)))
     return status
@@ -384,7 +461,8 @@ def fetch_fxtwitter_status_json(tweet_id: str, *, timeout: int = 20) -> dict | N
 
 def _fxtwitter_failure(exc: XFetchError) -> str:
     return {"gone": "post unavailable", "rate_limited": "rate limited",
-            "network": "request failed"}.get(exc.kind, "unavailable or invalid response")
+            "network": "request failed", "disabled": "switched off"}.get(
+                exc.kind, "unavailable or invalid response")
 
 
 def _merge_fxtwitter_full_text(syndication: dict,
@@ -407,7 +485,7 @@ def _merge_full_text(syndication: dict, status: dict | None, provider: str, *,
     evidence = syndication.get("_uoink_x_evidence") or x_evidence.shape(syndication)
     expected_id = str(syndication.get("id_str") or syndication.get("id") or "")
     status_id = str((status or {}).get("id_str") or (status or {}).get("id") or "")
-    if isinstance(status, dict) and status_id == expected_id:
+    if isinstance(status, dict) and is_post_id(expected_id) and status_id == expected_id:
         evidence = x_evidence.merge(evidence, x_evidence.shape(status, provider))
     else:
         evidence = x_evidence.sanitize_urls(evidence)
@@ -562,7 +640,7 @@ def linked_article(post: dict) -> dict | None:
         match = _ARTICLE_LINK_RE.match(str(link.get("expanded_url") or ""))
         if match and not article_id:
             article_id = match.group(1)
-    if not article_id.isdigit():
+    if not is_post_id(article_id):
         return None
     words = re.sub(r"https?://\S+", " ", post.get("text") or "").strip()
     if words:
@@ -580,7 +658,14 @@ def _article_from_fxtwitter(post: dict, article: dict, fetch) -> dict | None:
     except (ValueError, OSError):
         payload = None
     status = payload.get("status") if isinstance(payload, dict) else None
-    if not isinstance(status, dict) or str(status.get("id") or "") != post["id"]:
+    return article_from_status(post, article, status)
+
+
+def article_from_status(post: dict, article: dict, status) -> dict | None:
+    """An x_article extract_result from FxTwitter's record of the post that
+    links to the Article. None when it has no body for it."""
+    if (not isinstance(status, dict) or not is_post_id(post.get("id"))
+            or str(status.get("id") or "") != post["id"]):
         return None
     body = status.get("article") if isinstance(status.get("article"), dict) else None
     if not body:
@@ -607,6 +692,21 @@ def cut_off_help(tweets: list[dict], article: dict | None, canonical: str) -> di
         if evidence.get("text_completeness") == "truncated" or quote.get("text_completeness") == "truncated":
             return {"reason": "long_post", "open_url": canonical}
     return None
+
+
+def article_capture(tweet_id: str, *, timeout: int = 15) -> dict | None:
+    """For the cut-off repair: the x_article result for a saved post that
+    only links to an X Article, or None when FxTwitter has no body for it.
+    Unlike extract_x_thread this raises XFetchError with its ``kind``
+    (gone, also for a tombstone; rate_limited; disabled; unavailable;
+    network), so the job can pace itself and keep a gone post as it is."""
+    data = fetch_syndication_json(tweet_id, timeout=timeout)
+    evidence = x_evidence.sanitize_urls(x_evidence.shape(data))
+    article = linked_article(evidence)
+    if not article:
+        raise XFetchError("The post no longer links only to an X Article.", "not_article")
+    status = fetch_fxtwitter_status(tweet_id, timeout=timeout)
+    return article_from_status(evidence, article, status)
 
 
 def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None, _supplement=None,

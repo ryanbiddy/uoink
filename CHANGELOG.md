@@ -15,13 +15,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Long X posts no longer save cut off near 280 characters. X's public endpoint sends only the
   start of a long post, so Uoink now marks those saves as cut off instead of treating them as
   whole. Saving from an open X tab with the extension reads the full post from the page (it
-  presses "Show more" first), including the text of an X video's post. Quoted posts and full
-  link addresses are kept.
+  presses "Show more" first), including the text of an X video's post, and hands it to Uoink on
+  this computer. Quoted posts and full link addresses are kept.
 
 ### Added
 
 - Settings, Capture: "Get full long posts and Articles through FxTwitter", off by default.
-  FxTwitter is a free community service that sees only the post's link. When it is off and a
+  FxTwitter is a free community service. It sees the post's ID and your computer's internet
+  address, never your library. Turning the switch off stops it at once, even mid-run. When it is off and a
   save comes back cut off, or only links to an X Article, the reader shows one prompt with two
   choices: turn the switch on, or open the post on X and save it with the extension. X Article
   bodies come through FxTwitter or the extension's "Uoink this article", with headings, lists,

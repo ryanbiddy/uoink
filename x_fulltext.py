@@ -16,10 +16,12 @@ anything that touches a network beyond the source is opt-in):
    post and the t.co link expansions.
 2. The open X tab, through the extension. When a person saves the post they
    are looking at, the extension reads the post text from the page and sends
-   it along (``dom_post``). Nothing leaves the computer for this.
+   it to the local helper (``dom_post``). The helper still asks X's public
+   endpoint for the post by its ID, as for any X save.
 3. FxTwitter API v2, a free community service, only when the person turns
-   on ``fxtwitter_enrichment_enabled``. It sees the link of the post being
-   saved. Owned by x_extractor (cache, back-off, named User-Agent).
+   on ``fxtwitter_enrichment_enabled``. It sees the post's ID and the
+   computer's IP address. Owned by x_extractor (switch, cache, back-off,
+   named User-Agent).
 
 Nothing here forges X client headers or uses X's internal web API.
 
@@ -90,16 +92,22 @@ CUT_OFF_MIN_WEIGHT = 240
 CUT_OFF_MAX_WEIGHT = 300
 
 
+_LEADING_MENTIONS_RE = re.compile(r"^(?:@\w{1,15}\s+)+")
+
+
 def looks_cut_off(text: str) -> bool:
     """Cheap offline screen for a save that may hold X's cut-off copy. A
     hit is only a reason to ask X (the note_tweet marker decides), so this
-    errs on the side of asking."""
-    body = strip_trailing_links(text)
+    errs on the side of asking. A reply's leading @handles don't count
+    toward X's limit, so they are left out of the length. Text longer than
+    X's cut-off copy is whole, even when it ends in an ellipsis."""
+    body = _LEADING_MENTIONS_RE.sub("", strip_trailing_links(text).lstrip())
     if not body:
         return False
+    weight = weighted_length(body)
     if re.search(r"(?:…|\.\.\.)$", body):
-        return weighted_length(body) >= 100
-    return CUT_OFF_MIN_WEIGHT <= weighted_length(body) <= CUT_OFF_MAX_WEIGHT
+        return 100 <= weight <= CUT_OFF_MAX_WEIGHT
+    return CUT_OFF_MIN_WEIGHT <= weight <= CUT_OFF_MAX_WEIGHT
 
 
 def normalize(text: str) -> str:
@@ -126,8 +134,61 @@ def extends(saved: str, full: str) -> bool:
 
 
 # ---- X Article body (Draft.js content_state) -------------------------------
+# The body is someone else's words, so the Markdown is built to say only
+# what they wrote: their characters are escaped, links are plain http(s)
+# with their brackets and spaces encoded, images are links (never embeds),
+# and no HTML passes through.
 _HEADINGS = {"header-one": "# ", "header-two": "## ", "header-three": "### ",
              "header-four": "#### ", "header-five": "##### ", "header-six": "###### "}
+# Enough to stop links, images, HTML and code spans. Underscores stay as
+# they are: handles and file names keep reading (and searching) normally.
+_MD_INLINE_RE = re.compile(r"([\\`*\[\]<>])")
+_MD_LINE_START_RE = re.compile(r"^(\s*)(?:([#>+=-])|(\d+)([.)]))", re.MULTILINE)
+
+
+def _md_inline(text: str) -> str:
+    return _MD_INLINE_RE.sub(r"\\\1", text or "")
+
+
+def _line_start(match) -> str:
+    lead, mark, number, dot = match.groups()
+    # Only punctuation can be escaped in Markdown, so a list number keeps
+    # its digits and its dot is escaped ("1\. ").
+    return lead + ("\\" + mark if mark else number + "\\" + dot)
+
+
+def _md_line_starts(text: str) -> str:
+    return _MD_LINE_START_RE.sub(_line_start, text or "")
+
+
+def md_text(text: str) -> str:
+    """Article text as literal Markdown: no link, image, HTML, heading or
+    emphasis can come out of the author's own characters."""
+    return _md_line_starts(_md_inline(text))
+
+
+def md_url(url) -> str | None:
+    """An http(s) address safe inside ``[label](...)``, or None."""
+    try:
+        from uoink_core.x_evidence import safe_url
+    except ImportError:  # pragma: no cover - uoink_core ships with the helper
+        return None
+    clean = safe_url(url)
+    if not clean:
+        return None
+    from urllib.parse import quote
+    return quote(clean, safe=":/?#@!$&*+,;=%~-._")
+
+
+def _utf16_offsets(text: str) -> list[int]:
+    """offsets[i] is the UTF-16 position of text[i] (and of the end, at
+    len(text)). Draft.js counts in UTF-16 units, Python in code points."""
+    out, unit = [], 0
+    for ch in text:
+        out.append(unit)
+        unit += 2 if ord(ch) > 0xFFFF else 1
+    out.append(unit)
+    return out
 
 
 def _media_urls(article: dict) -> dict:
@@ -144,8 +205,9 @@ def _media_urls(article: dict) -> dict:
             url = best.get("url") or url
         if not url:
             url = _dict(info.get("preview_image")).get("original_img_url")
-        if isinstance(url, str) and url.startswith("https://"):
-            out[str(item.get("media_id") or "")] = (url, info.get("__typename") == "ApiVideo")
+        clean = md_url(url) if isinstance(url, str) and url.startswith("https://") else None
+        if clean:
+            out[str(item.get("media_id") or "")] = (clean, info.get("__typename") == "ApiVideo")
     return out
 
 
@@ -161,22 +223,40 @@ def _entity_map(content: dict) -> dict:
 
 
 def _linked_text(block: dict, entities: dict) -> str:
+    """The block's text as escaped Markdown, its LINK ranges as links.
+    Ranges are in UTF-16 units; one that is out of bounds, splits an emoji
+    or overlaps an earlier one is dropped (its text stays, unlinked)."""
     text = block.get("text") if isinstance(block.get("text"), str) else ""
+    offsets = _utf16_offsets(text)
+    index_of = {unit: i for i, unit in enumerate(offsets)}
     ranges = []
     for item in block.get("entityRanges") or []:
         entity = entities.get(str(_dict(item).get("key")), {})
-        url = _dict(entity.get("data")).get("url")
-        if entity.get("type") == "LINK" and isinstance(url, str) and url.startswith(("https://", "http://")):
-            try:
-                start, length = int(item["offset"]), int(item["length"])
-            except (KeyError, TypeError, ValueError):
-                continue
-            ranges.append((start, length, url))
-    for start, length, url in sorted(ranges, reverse=True):
-        label = text[start:start + length]
-        if label.strip():
-            text = f"{text[:start]}[{label}]({url}){text[start + length:]}"
-    return text
+        url = md_url(_dict(entity.get("data")).get("url"))
+        if entity.get("type") != "LINK" or not url:
+            continue
+        try:
+            start, length = int(_dict(item)["offset"]), int(_dict(item)["length"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if start < 0 or length <= 0 or start not in index_of or start + length not in index_of:
+            continue
+        ranges.append((index_of[start], index_of[start + length], url))
+    out, cursor = [], 0
+    for start, end, url in sorted(ranges):
+        if start < cursor:
+            continue  # overlaps the link before it
+        label = " ".join(text[start:end].split())
+        out.append(_md_inline(text[cursor:start]))
+        out.append(f"[{_md_inline(label)}]({url})" if label else _md_inline(text[start:end]))
+        cursor = end
+    out.append(_md_inline(text[cursor:]))
+    return _md_line_starts("".join(out))
+
+
+def _code_fence(text: str) -> str:
+    longest = max((len(run) for run in re.findall(r"`+", text or "")), default=0)
+    return "`" * max(3, longest + 1)
 
 
 def article_markdown(article: dict) -> tuple[str, list[dict]]:
@@ -210,9 +290,16 @@ def article_markdown(article: dict) -> tuple[str, list[dict]]:
                                 images.append({"src": url, "alt": ""})
                 elif entity.get("type") == "DIVIDER":
                     parts.append("---")
-                elif entity.get("type") == "TWEET" and str(data.get("tweetId") or "").isdigit():
+                elif entity.get("type") == "TWEET" and _ascii_digits(data.get("tweetId")):
                     parts.append(f"[Embedded post](https://x.com/i/status/{data['tweetId']})")
             list_run = False
+            continue
+        if kind == "code-block":
+            raw = (block.get("text") if isinstance(block.get("text"), str) else "").rstrip()
+            list_run = False
+            if raw.strip():
+                fence = _code_fence(raw)
+                parts.append(f"{fence}\n{raw}\n{fence}")
             continue
         text = _linked_text(block, entities).rstrip()
         if not text.strip():
@@ -231,8 +318,11 @@ def article_markdown(article: dict) -> tuple[str, list[dict]]:
             parts.append(_HEADINGS[kind] + " ".join(text.split()))
         elif kind == "blockquote":
             parts.append("\n".join("> " + line for line in text.splitlines()))
-        elif kind == "code-block":
-            parts.append("```\n" + text + "\n```")
         else:
             parts.append(text)
     return "\n\n".join(parts).strip(), images
+
+
+def _ascii_digits(value) -> bool:
+    text = str(value or "")
+    return 0 < len(text) <= 25 and text.isascii() and text.isdigit()

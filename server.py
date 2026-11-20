@@ -15926,13 +15926,26 @@ def _x_fxtwitter_kwargs(settings: dict) -> dict:
     return {"fxtwitter": True} if settings.get("fxtwitter_enrichment_enabled") is True else {}
 
 
+def _fxtwitter_switch_on() -> bool:
+    """The user's FxTwitter switch, read fresh from settings."""
+    try:
+        return (_read_settings() or {}).get("fxtwitter_enrichment_enabled") is True
+    except Exception:
+        return False
+
+
+# x_extractor reads this before every FxTwitter request, whatever its
+# caller asked for, so turning the switch off stops requests at once.
+x_extractor.set_fxtwitter_gate(_fxtwitter_switch_on)
+
+
 def _clean_dom_post(value) -> dict | None:
     """The extension's read of the open X tab: {id, text, show_more}. Kept
     small and typed; anything else is dropped."""
     if not isinstance(value, dict):
         return None
     post_id, text = str(value.get("id") or ""), value.get("text")
-    if not post_id.isdigit() or not isinstance(text, str) or not text.strip():
+    if not x_extractor.is_post_id(post_id) or not isinstance(text, str) or not text.strip():
         return None
     return {"id": post_id, "text": text[:100000], "show_more": value.get("show_more") is True}
 
@@ -16018,7 +16031,9 @@ def _x_cut_off_detail(sidecar: dict) -> dict | None:
             out["title"] = title.strip()[:200]
         return out
     marker = sidecar.get("x_text")
-    if isinstance(marker, dict) and marker.get("long_post") and marker.get("text_completeness") != "complete":
+    if isinstance(marker, dict) and (
+            (marker.get("long_post") and marker.get("text_completeness") != "complete")
+            or marker.get("quote_complete") is False):
         tweet_id = x_extractor.tweet_id_from_url(str(sidecar.get("url") or ""))
         if tweet_id:
             return {"reason": "long_post", "open_url": f"https://x.com/i/status/{tweet_id}"}
@@ -16034,8 +16049,7 @@ def _get_x_text_repair_job():
     with _x_text_repair_job_lock:
         if _x_text_repair_job is None:
             _x_text_repair_job = x_text_repair.RepairJob(
-                data_root=DATA_ROOT, index_getter=_get_index,
-                fxtwitter_getter=lambda: bool(_x_fxtwitter_kwargs(_read_settings() or {})),
+                data_root=DATA_ROOT, index_getter=_get_index, fxtwitter_getter=_fxtwitter_switch_on,
                 corpus_lock=_corpus_update_lock, persist_article=_persist_x_article)
         return _x_text_repair_job
 
@@ -17658,7 +17672,13 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/relay/status":
             return self._send_json(200, _relay_status_payload())
         if bare == "/library/x-text-repair":
-            return self._send_json(200, _get_x_text_repair_job().status())
+            # ?video_id= adds where the reader's one-save fix stands.
+            job = _get_x_text_repair_job()
+            reply = job.status()
+            video_id = (parse_qs(urlparse(self.path).query).get("video_id") or [""])[0].strip()
+            if video_id:
+                reply["item"] = job.item_status(video_id[:200])
+            return self._send_json(200, reply)
         if bare == "/search/status":
             return self._handle_search_control("status")
         if bare.startswith("/search/notices/"):

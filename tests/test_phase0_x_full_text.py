@@ -17,8 +17,15 @@ class _Response:
     def __exit__(self, *_args):
         return False
 
-    def read(self):
-        return self._body
+    def read(self, amount=-1):
+        return self._body if amount is None or amount < 0 else self._body[:amount]
+
+
+def _route(monkeypatch, fake_urlopen):
+    # 3.18.0: x_extractor sends every request through its own no-redirect
+    # opener (_urlopen), and FxTwitter only when the user's switch says on.
+    monkeypatch.setattr(x_extractor, "_urlopen", fake_urlopen)
+    monkeypatch.setattr(x_extractor, "_fxtwitter_gate", lambda: True)
 
 
 def test_fxtwitter_v2_fixture_restores_long_post_text(monkeypatch):
@@ -34,7 +41,7 @@ def test_fxtwitter_v2_fixture_restores_long_post_text(monkeypatch):
         assert request.get_header("User-agent") == x_extractor.FXTWITTER_USER_AGENT
         return _Response(fixture["fxtwitter"])
 
-    monkeypatch.setattr(x_extractor.urllib.request, "urlopen", fake_urlopen)
+    _route(monkeypatch, fake_urlopen)
 
     # 3.18.0: deliberately changed. FxTwitter is the user's opt-in now, so
     # the test turns it on. Its cache and cool-down start empty.
@@ -62,7 +69,7 @@ def test_fxtwitter_failure_falls_back_to_syndication(monkeypatch):
             return _Response(fixture["syndication"])
         raise x_extractor.urllib.error.URLError("offline")
 
-    monkeypatch.setattr(x_extractor.urllib.request, "urlopen", fake_urlopen)
+    _route(monkeypatch, fake_urlopen)
 
     x_extractor.reset_fxtwitter_state()
     payload = x_extractor.fetch_tweet_json(fixture["tweet_id"], fxtwitter=True)

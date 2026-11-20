@@ -20,6 +20,7 @@ from uoink_core import x_evidence
 CASES = json.loads((Path(__file__).parent / "fixtures" / "x_fulltext_cases.json")
                    .read_text(encoding="utf-8"))["cases"]
 FXTWITTER_HOST = "https://api.fxtwitter.com/"
+REAL_URLOPEN = x_extractor._urlopen  # before the autouse fixture swaps it out
 
 
 class _Resp:
@@ -32,8 +33,8 @@ class _Resp:
     def __exit__(self, *_args):
         return False
 
-    def read(self):
-        return self._body
+    def read(self, amount=-1):
+        return self._body if amount is None or amount < 0 else self._body[:amount]
 
 
 def _http_error(url, code, headers=None):
@@ -47,7 +48,11 @@ def offline(monkeypatch):
     def forbidden(*_args, **_kwargs):
         pytest.fail("tests must not reach the network")
     monkeypatch.setattr(x_extractor.urllib.request, "urlopen", forbidden)
-    yield
+    monkeypatch.setattr(x_extractor, "_urlopen", forbidden)
+    # The user's switch as x_extractor reads it: on, unless a test says otherwise.
+    switch = {"on": True}
+    monkeypatch.setattr(x_extractor, "_fxtwitter_gate", lambda: switch["on"])
+    yield switch
     x_extractor.reset_fxtwitter_state()
 
 
@@ -67,7 +72,7 @@ def route(monkeypatch, *, syndication=None, fxtwitter=None):
                     raise answer
                 return _Resp(answer)
         pytest.fail(f"unexpected request {url}")
-    monkeypatch.setattr(x_extractor.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(x_extractor, "_urlopen", urlopen)
     return calls
 
 
@@ -407,6 +412,250 @@ def test_non_x_video_and_failures_keep_the_description(monkeypatch):
     route(monkeypatch, syndication=_http_error(x_extractor.SYNDICATION_URL, 404))
     x_meta = {"extractor_key": "Twitter", "description": "keep"}
     assert server._enrich_x_video_metadata("https://x.com/a/status/1900000000000000001", x_meta) is x_meta
+
+
+# ---- review fixes: fetch limits --------------------------------------------------
+def test_a_redirect_is_refused_and_never_followed():
+    """Answers come from X or FxTwitter in place. A 3xx is an error, so a
+    request never lands on another host (here, a loopback stand-in)."""
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    hits = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            hits.append(self.path)
+            if self.path == "/start":
+                self.send_response(302)
+                self.send_header("Location", "/elsewhere")
+                self.end_headers()
+                return
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"{}")
+
+        def log_message(self, *_args):
+            pass
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}/start"
+        with pytest.raises(urllib.error.HTTPError) as caught:
+            REAL_URLOPEN(x_extractor.urllib.request.Request(url), 5)
+        assert caught.value.code == 302
+        assert hits == ["/start"]
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_redirects_become_typed_failures(monkeypatch):
+    case = CASES["long_post"]
+    route(monkeypatch, syndication=_http_error(x_extractor.SYNDICATION_URL, 302))
+    with pytest.raises(x_extractor.XFetchError) as caught:
+        x_extractor.fetch_syndication_json(case["tweet_id"])
+    assert caught.value.kind == "unavailable"
+    route(monkeypatch, syndication=case["syndication"], fxtwitter=_http_error(FXTWITTER_HOST, 301))
+    record = x_extractor.post_text_record(case["tweet_id"], fxtwitter=True)
+    assert record["text"] == case["syndication"]["text"] and not record["complete"]
+
+
+class _Endless:
+    """A body that never ends: only a capped read gets an answer."""
+    def __init__(self):
+        self.asked = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def read(self, amount=-1):
+        self.asked.append(amount)
+        if amount is None or amount < 0:
+            pytest.fail("an uncapped read")
+        return b" " * amount
+
+
+@pytest.mark.parametrize("service", ["syndication", "fxtwitter"])
+def test_an_oversized_answer_is_refused_without_reading_it_all(monkeypatch, service):
+    case = CASES["long_post"]
+    body = _Endless()
+
+    def urlopen(request, timeout=None):
+        assert timeout  # every request has a time limit
+        if service == "fxtwitter" and request.full_url.startswith(x_extractor.SYNDICATION_URL):
+            return _Resp(case["syndication"])
+        return body
+    monkeypatch.setattr(x_extractor, "_urlopen", urlopen)
+    with pytest.raises(x_extractor.XFetchError) as caught:
+        if service == "syndication":
+            x_extractor.fetch_syndication_json(case["tweet_id"])
+        else:
+            x_extractor.fetch_fxtwitter_status(case["tweet_id"])
+    assert caught.value.kind == "unavailable"
+    limit = x_extractor.SYNDICATION_MAX_BYTES if service == "syndication" else x_extractor.FXTWITTER_MAX_BYTES
+    assert body.asked == [limit + 1]
+
+
+def test_post_ids_are_ascii_digits_and_never_empty(monkeypatch):
+    for bad in ("", "²", "١٢٣", "12a", "1" * 26, None):
+        assert not x_extractor.is_post_id(bad)
+    assert x_extractor.is_post_id("1900000000000000002")
+    calls = route(monkeypatch)
+    with pytest.raises(x_extractor.XFetchError):
+        x_extractor.fetch_syndication_json("²")
+    with pytest.raises(x_extractor.XFetchError):
+        x_extractor.fetch_fxtwitter_status("")
+    assert calls == []
+    case = CASES["long_post"]
+    data = dict(case["syndication"], id_str="", id="")
+    evidence = x_evidence.shape(data)
+    assert str(evidence.get("id") or "") == ""
+    # The open tab's text is a longer copy, but two missing ids are not a match.
+    merged = x_extractor.merge_dom_post(dict(data, _uoink_x_evidence=evidence),
+                                        {"id": "", "text": case["dom_post"]["text"]})
+    assert merged["_uoink_x_evidence"]["text"] == evidence["text"]
+
+
+def test_the_open_tab_text_needs_a_real_post_id():
+    import server
+    assert server._clean_dom_post({"id": "²", "text": "hi"}) is None
+    assert server._clean_dom_post({"id": "", "text": "hi"}) is None
+
+
+# ---- review fixes: X Article Markdown --------------------------------------------
+def _article(blocks, entities=None, media=None):
+    return {"content": {"blocks": blocks, "entityMap": [
+        {"key": str(k), "value": v} for k, v in enumerate(entities or [])]},
+            "media_entities": media or []}
+
+
+def _link(url):
+    return {"type": "LINK", "data": {"url": url}}
+
+
+def _live_links(md):
+    """Markdown links that would render: "](" not escaped by a backslash."""
+    import re
+    return re.findall(r"(?<!\\)\]\(([^)\s]*)\)", md)
+
+
+def test_article_text_cannot_make_links_embeds_html_or_headings():
+    md, images = x_fulltext.article_markdown(_article([
+        {"type": "unstyled", "text": "See ![x](https://evil.test/p.png) and [click](javascript:alert(1))",
+         "entityRanges": []},
+        {"type": "unstyled", "text": "<img src=x onerror=alert(1)> and <script>alert(1)</script>",
+         "entityRanges": []},
+        {"type": "unstyled", "text": "# Not a heading\n> not a quote\n1. not a list", "entityRanges": []},
+        {"type": "unstyled", "text": "`code span` and **not bold**", "entityRanges": []},
+    ]))
+    import re
+    assert "![" not in md and _live_links(md) == []
+    assert re.search(r"(?<!\\)<", md) is None  # no tag can open: every < is escaped
+    assert "\\# Not a heading" in md and "\\> not a quote" in md and "1\\. not a list" in md
+    assert "\\`code span\\`" in md and "\\*\\*not bold\\*\\*" in md
+    assert images == []
+
+
+def test_article_links_cannot_break_out_of_their_brackets():
+    md, _ = x_fulltext.article_markdown(_article([
+        {"type": "unstyled", "text": "read our notes and the [other] page and this one",
+         "entityRanges": [{"key": 0, "offset": 5, "length": 9},
+                          {"key": 1, "offset": 23, "length": 12},
+                          {"key": 2, "offset": 40, "length": 8},
+                          {"key": 3, "offset": 15, "length": 3}]},
+    ], [_link("https://a.test/x)![px](https://evil.test/t.png"),
+        _link("https://a.test/y[1]"),
+        _link("javascript:alert(1)"),
+        _link("https://a.test/z) [z](javascript:alert(1)")]))
+    assert "![" not in md and "javascript:" not in md
+    assert _live_links(md) == ["https://a.test/x%29!%5Bpx%5D%28https://evil.test/t.png",
+                               "https://a.test/y%5B1%5D"]
+    assert "[\\[other\\] page](https://a.test/y%5B1%5D)" in md
+    assert md.endswith(" and this one")  # the unsafe links' words stay, unlinked
+
+
+def test_article_images_are_links_and_only_https():
+    md, images = x_fulltext.article_markdown(_article(
+        [{"type": "atomic", "text": " ", "entityRanges": [{"key": 0, "offset": 0, "length": 1}]}],
+        [{"type": "MEDIA", "data": {"mediaItems": [{"mediaId": "1"}, {"mediaId": "2"}]}}],
+        [{"media_id": "1", "media_info": {"__typename": "ApiImage",
+                                          "original_img_url": "https://pbs.example.test/a).png"}},
+         {"media_id": "2", "media_info": {"__typename": "ApiImage",
+                                          "original_img_url": "http://pbs.example.test/b.png"}}]))
+    assert md == "[Image](https://pbs.example.test/a%29.png)"
+    assert images == [{"src": "https://pbs.example.test/a%29.png", "alt": ""}]
+
+
+def test_article_link_ranges_count_utf16_like_draft_js():
+    text = "🎉🎉 read our notes now"
+    md, _ = x_fulltext.article_markdown(_article([
+        {"type": "unstyled", "text": text,
+         # Draft.js counts each emoji as two units: "our notes" starts at 10.
+         "entityRanges": [{"key": 0, "offset": 10, "length": 9}]}], [_link("https://example.com/notes")]))
+    assert md == "🎉🎉 read [our notes](https://example.com/notes) now"
+
+
+@pytest.mark.parametrize("ranges", [
+    [{"key": 0, "offset": -1, "length": 4}],
+    [{"key": 0, "offset": 0, "length": 0}],
+    [{"key": 0, "offset": 50, "length": 4}],
+    [{"key": 0, "offset": 1, "length": 1}],   # half an emoji
+    [{"key": 0, "offset": "x", "length": 3}],
+    [{"key": 0, "offset": 10, "length": 50}],  # runs past the end
+])
+def test_bad_link_ranges_keep_the_text_unlinked(ranges):
+    md, _ = x_fulltext.article_markdown(_article(
+        [{"type": "unstyled", "text": "🎉 keep every word", "entityRanges": ranges}],
+        [_link("https://example.com/notes")]))
+    assert md == "🎉 keep every word"
+
+
+def test_overlapping_link_ranges_keep_the_first():
+    md, _ = x_fulltext.article_markdown(_article(
+        [{"type": "unstyled", "text": "one two three",
+          "entityRanges": [{"key": 0, "offset": 0, "length": 7}, {"key": 1, "offset": 4, "length": 9}]}],
+        [_link("https://example.com/a"), _link("https://example.com/b")]))
+    assert md == "[one two](https://example.com/a) three"
+
+
+def test_code_blocks_with_backticks_stay_inside_their_fence():
+    code = "echo ```\nnot markdown [x](https://evil.test)"
+    md, _ = x_fulltext.article_markdown(_article([{"type": "code-block", "text": code, "entityRanges": []}]))
+    assert md == "````\n" + code + "\n````"
+
+
+def test_embedded_post_needs_an_ascii_id():
+    md, _ = x_fulltext.article_markdown(_article(
+        [{"type": "atomic", "text": " ", "entityRanges": [{"key": 0, "offset": 0, "length": 1},
+                                                          {"key": 1, "offset": 0, "length": 1}]}],
+        [{"type": "TWEET", "data": {"tweetId": "²"}}, {"type": "TWEET", "data": {"tweetId": "190000"}}]))
+    assert md == "[Embedded post](https://x.com/i/status/190000)"
+
+
+def test_article_header_skips_a_blank_date_and_escapes_names():
+    result = x_article_extractor.build_full_text_result({
+        "url": "https://x.com/i/article/1900000000000000777", "title": "T",
+        "markdown": "Body words long enough to count as an article body here.",
+        "author_name": "[Example](javascript:alert(1))", "author_handle": "example_author",
+        "published": "   "}, provider="FxTwitter")
+    assert "**Published:**" not in result["markdown"]
+    assert _live_links(result["markdown"]) == [] and "\\[Example\\]" in result["markdown"]
+
+
+# ---- review fixes: the cut-off screen --------------------------------------------
+def test_a_whole_post_ending_in_an_ellipsis_is_not_cut_off():
+    assert not x_fulltext.looks_cut_off("I kept going and going. " * 25 + "and then...")
+    assert not x_fulltext.looks_cut_off("word " * 2000 + "…")
+
+
+def test_a_cut_reply_with_leading_handles_is_caught():
+    handles = "@example_one @example_two @example_three @example_four "
+    body = ("word " * 55).strip()
+    assert x_fulltext.weighted_length(handles + body) > x_fulltext.CUT_OFF_MAX_WEIGHT
+    assert x_fulltext.looks_cut_off(handles + body)
 
 
 def test_no_guest_web_client_ships():
