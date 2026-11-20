@@ -284,18 +284,36 @@ class UoinkTray:
         except Exception as e:
             log.debug("tray: open path failed (%s): %s", path, e)
 
+    def _recent_action(self, folder):
+        """The click handler for one recent item.
+
+        pystray accepts an action with at most two positional parameters
+        (icon, item) and raises ValueError for more. The old handler carried
+        the folder as a third, defaulted parameter, so the whole menu failed to
+        build once the library had one saved item, and on Windows right-click
+        then showed nothing. Bind the folder in a closure instead.
+        """
+        def _open(_icon, _item):
+            self._touch()
+            if folder:
+                self._open_path(Path(folder))
+        return _open
+
+    def _recent_signature(self) -> list:
+        """What the Recent items submenu shows, so a poll rebuilds the menu
+        only when a line would change, not on every health or status field."""
+        return [(row.get("title") or row.get("slug"), row.get("folder") or row.get("path"))
+                for row in self._recent if isinstance(row, dict)]
+
     def _recent_items(self):
         from pystray import MenuItem  # lazy
         items = []
         for row in self._recent:
+            if not isinstance(row, dict):
+                continue
             title = menu_label(row.get("title") or row.get("slug") or "untitled")
             folder = row.get("folder") or row.get("path")
-
-            def _open(_icon, _item, folder=folder):
-                self._touch()
-                if folder:
-                    self._open_path(Path(folder))
-            items.append(MenuItem(title, _open))
+            items.append(MenuItem(title, self._recent_action(folder)))
         if not items:
             items.append(MenuItem("No recent items yet", None, enabled=False))
         return items
@@ -348,13 +366,17 @@ class UoinkTray:
                 break
             prev = self._state
             prev_update = self._update_latest
+            prev_recent = self._recent_signature()
             self._refresh_status()
             now = time.monotonic()
             if not idle and (now - last_recent) >= _POLL_RECENT_SEC:
                 self._refresh_recent()
                 self._refresh_update()
                 last_recent = now
-            if self._state != prev or self._update_latest != prev_update:
+            # Windows builds the native menu when update_menu() runs, not when
+            # it opens, so a new save must rebuild it to show in Recent items.
+            if (self._state != prev or self._update_latest != prev_update
+                    or self._recent_signature() != prev_recent):
                 self._apply()
 
     def _apply(self) -> None:
@@ -365,7 +387,9 @@ class UoinkTray:
             self._icon.title = f"Uoink v{self.version} — {self._status_text()}"
             self._icon.update_menu()
         except Exception as e:
-            log.debug("tray: apply failed: %s", e)
+            # A menu that fails to build leaves right-click doing nothing, so
+            # say so in server.log instead of hiding it at debug level.
+            log.warning("tray: menu update failed: %s", e)
 
     # ---- lifecycle ---------------------------------------------------------
     def _run(self) -> None:

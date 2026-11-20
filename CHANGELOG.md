@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Windows tray: right-click shows the menu again once you have saved something. A bug in the
+  Recent items list stopped the whole menu from building, so right-click did nothing. Recent
+  items now also picks up a new save without waiting for the status to change.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added
