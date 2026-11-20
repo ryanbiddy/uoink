@@ -470,8 +470,10 @@ def _transcribe_audio_plain(audio_path: Path, *, data_root: Path, model_size: st
         "model": model_size,
         "language": info.get("language") or language or "en",
         "diarization_ran": False,
-        "segments": [{"start": start, "end": end, "text": text}
-                     for start, end, text in entries],
+        # Word timings ride along when the model gave them (3.18).
+        "segments": [{"start": entry[0], "end": entry[1], "text": entry[2],
+                      **({"words": entry.words} if getattr(entry, "words", None) else {})}
+                     for entry in entries],
         "generated_at": _now_iso(),
         "engine": "faster-whisper",
     }

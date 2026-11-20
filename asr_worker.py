@@ -690,8 +690,7 @@ def _run_op(op: str, args: dict, progress: Callable[[Any, Any], None],
             args["media_path"], model_name=args.get("model_name") or rel.DEFAULT_MODEL,
             model_root=args.get("model_root"), info=info, language=args.get("language"),
             initial_prompt=args.get("initial_prompt"), progress=progress,
-            cancel_event=stop, **({"checkpoint": checkpoint} if checkpoint else {}),
-            **{key: args[key] for key in ("english_guard", "word_timestamps") if key in args})
+            cancel_event=stop, **({"checkpoint": checkpoint} if checkpoint else {}))
         return {"entries": [rel.entry_to_json(entry) for entry in entries], "info": info}
     if op == "detect_unreliable_spans":
         import uoink_reliability as rel

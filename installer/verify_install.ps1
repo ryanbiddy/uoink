@@ -59,6 +59,7 @@ $requiredFiles = @(
     'taste_scoring.py',
     'suggestions.py',
     'asr_worker.py',
+    'asr_models.py',
     'uoink_store.py',
     'extension\store-config.json',
     'defaults\style_anchors.json',

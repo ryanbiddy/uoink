@@ -157,7 +157,9 @@ def test_faster_whisper_transcript_uses_resolved_snapshot(
 
         def transcribe(self, path, **kwargs):
             assert path == str(audio)
+            # 3.18 (deliberate): the loop-breaking decode options are explicit.
             assert kwargs == {"beam_size": 1, "best_of": 1, "vad_filter": True,
+                              **uoink_reliability.DECODE_OPTIONS,
                               **({"language": language} if language else {})}
             return iter([SimpleNamespace(start=0.0, end=1.5, text=" Bonjour. ")]), SimpleNamespace(
                 language="fr", language_probability=0.99)

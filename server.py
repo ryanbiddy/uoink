@@ -942,6 +942,8 @@ CARD_IMAGE_THUMBNAIL = "thumbnail"
 _CARD_IMAGES = (CARD_IMAGE_MIDDLE, CARD_IMAGE_THUMBNAIL)
 _WHISPER_MODELS = (
     "tiny", "base", "small", "medium", "large", "large-v3-turbo",
+    # 3.18: distilled English models (asr_models.CATALOG has the pins).
+    "distil-small.en", "distil-large-v3.5",
 )
 
 # How long to wait between live-stream retry attempts. Conservative -- a
@@ -3371,6 +3373,10 @@ def _resolve_video_transcript(
             **expectation,
         }
 
+    # 3.18: an English-only model reports when the audio wasn't English and
+    # the multilingual model ran instead (other models leave the call as is).
+    asr_info: dict = {}
+    guard_kw = {"info": asr_info} if uoink_reliability.is_english_only(model_name) else {}
     try:
         with contextlib.ExitStack() as cleanup:
             entries = []
@@ -3389,6 +3395,7 @@ def _resolve_video_transcript(
                             model_root=RELIABILITY_MODEL_ROOT,
                             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                             **({"cancel_event": cancel_event} if cancel_event is not None else {}),
+                            **guard_kw,
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3445,6 +3452,7 @@ def _resolve_video_transcript(
                         model_root=RELIABILITY_MODEL_ROOT,
                         **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                         **({"cancel_event": cancel_event} if cancel_event is not None else {}),
+                        **guard_kw,
                     )
                 _raise_if_cancelled(cancel_event)
                 if media_chunks:
@@ -3492,6 +3500,13 @@ def _resolve_video_transcript(
     }
     if media_chunks:
         completed["coverage"] = "sampled_sections"
+    fallback = asr_info.get("english_fallback")
+    if isinstance(fallback, dict):
+        completed["model"] = fallback.get("used_model") or completed["model"]
+        completed["requested_model"] = model_name
+        completed["detected_language"] = fallback.get("detected_language")
+    if any(getattr(entry, "words", None) for entry in entries):
+        completed["word_timings"] = True
     if not entries:
         # Whisper ran, and its voice filter kept nothing: music or silence.
         completed["status"] = "no_speech"
@@ -4199,10 +4214,17 @@ def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
     ``youtube_deep_link``, null when the source is not YouTube)."""
     links = _sidecar_link_builder(sidecar)
     out = []
-    for s, e, t in entries:
+    for entry in entries:
+        s, e, t = entry
         youtube_link, citation_source, deep_link = links(s)
-        out.append({"start": s, "end": e, "text": t, "source_url": citation_source,
-                    "source_deep_link": deep_link, "youtube_deep_link": youtube_link})
+        row = {"start": s, "end": e, "text": t, "source_url": citation_source,
+               "source_deep_link": deep_link, "youtube_deep_link": youtube_link}
+        # 3.18: local Whisper's word timings ({word, start, end}), for tools
+        # that cut on a word. Captions and older items have none.
+        words = getattr(entry, "words", None)
+        if words:
+            row["words"] = words
+        out.append(row)
     return out
 
 
@@ -7931,6 +7953,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 coverage = (" of sampled sections"
                             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
                 transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+                if asr_fallback and asr_fallback.get("requested_model"):
+                    transcript_note += (
+                        f" (the audio is not English, so the multilingual "
+                        f"{asr_fallback.get('model')} model ran instead of "
+                        f"{asr_fallback['requested_model']})")
             elif asr_fallback and asr_fallback.get("status") == "no_audio":
                 transcript_note = f"No transcript: {asr_fallback['reason']}"
             elif asr_fallback and asr_fallback.get("status") == "no_speech":

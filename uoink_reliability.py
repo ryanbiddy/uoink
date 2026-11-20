@@ -69,8 +69,17 @@ _MODEL_REPOSITORIES = {
     "medium": "Systran/faster-whisper-medium",
     "large": "Systran/faster-whisper-large-v3",
     "large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+    # 3.18: distilled English models, the same names faster-whisper 1.2.1
+    # maps (utils._MODELS). English only: see ENGLISH_ONLY_MODELS.
+    "distil-small.en": "Systran/faster-distil-whisper-small.en",
+    "distil-large-v3.5": "distil-whisper/distil-large-v3.5-ct2",
 }
 _RELIABILITY_CACHE_FILES = ("model.bin", "config.json", "tokenizer.json")
+# Models trained on English only. They never run on other languages: the
+# multilingual model detects the language first and takes over if needed.
+ENGLISH_ONLY_MODELS = frozenset({"distil-small.en", "distil-large-v3.5"})
+LANGUAGE_CHECK_MODEL = "base"   # bundled, multilingual, works offline
+ENGLISH_MIN_PROBABILITY = 0.5
 
 # Conservative rounded decimal MB estimates of advertised Hub file totals
 # captured 2026-09-13. These are advertised logical bytes of the current
@@ -83,7 +92,30 @@ _ESTIMATED_DOWNLOAD_MB = {
     "medium": 1540,
     "large": 3100,
     "large-v3-turbo": 1630,
+    "distil-small.en": 340,      # 335,542,354 bytes at the pinned revision
+    "distil-large-v3.5": 1520,   # 1,516,479,656 bytes at the pinned revision
 }
+
+# Decode settings for every local transcription (3.18). Whisper can loop on
+# silence or music, repeating one phrase. Not feeding the previous text back
+# breaks the loop; the thresholds are Whisper's own retry/skip limits made
+# explicit; voice detection stays on. Word timings are kept, and they let
+# faster-whisper skip hallucinated stretches inside long silences.
+DECODE_OPTIONS = {
+    "condition_on_previous_text": False,
+    "compression_ratio_threshold": 2.4,
+    "log_prob_threshold": -1.0,
+    "no_speech_threshold": 0.6,
+    "vad_parameters": {"min_silence_duration_ms": 500},
+    "word_timestamps": True,
+    "hallucination_silence_threshold": 2.0,
+}
+LOOP_MAX_REPEATS = 2      # identical back-to-back segments kept, then dropped
+LOOP_PHRASE_REPEATS = 4   # a phrase repeated this often inside a segment is a loop
+
+
+def is_english_only(model_name: object) -> bool:
+    return str(model_name or "").strip().lower() in ENGLISH_ONLY_MODELS
 
 
 def _offload_active() -> bool:
@@ -452,28 +484,114 @@ def reliability_model_status(model_name: object,
 
 
 def _transcript_entries_from_segments(
-        segments) -> list[tuple[float, float, str]]:
-    """Normalize faster-whisper segments into Uoink transcript entries."""
+        segments, scores: list | None = None) -> list[tuple[float, float, str]]:
+    """Normalize faster-whisper segments into Uoink transcript entries.
+
+    Pass a list as ``scores`` to collect (compression_ratio, no_speech_prob)
+    for each kept entry, for ``drop_repetition_loops``.
+    """
     entries: list[tuple[float, float, str]] = []
     for segment in segments:
-        if isinstance(segment, dict):
-            start = segment.get("start")
-            end = segment.get("end")
-            text = segment.get("text")
-        else:
-            start = getattr(segment, "start", None)
-            end = getattr(segment, "end", None)
-            text = getattr(segment, "text", None)
-        clean_text = str(text or "").strip()
+        get = segment.get if isinstance(segment, dict) else (
+            lambda key, s=segment: getattr(s, key, None))
+        clean_text = str(get("text") or "").strip()
         if not clean_text:
             continue
         try:
-            start_value = max(0.0, float(start or 0.0))
-            end_value = max(start_value, float(end or start_value))
+            start_value = max(0.0, float(get("start") or 0.0))
+            end_value = max(start_value, float(get("end") or start_value))
         except (TypeError, ValueError):
             continue
-        entries.append((start_value, end_value, clean_text))
+        words = _segment_words(segment)
+        entries.append(TranscriptEntry(start_value, end_value, clean_text, words)
+                       if words else (start_value, end_value, clean_text))
+        if scores is not None:
+            scores.append((get("compression_ratio"), get("no_speech_prob")))
     return entries
+
+
+def _segment_words(segment) -> list[dict] | None:
+    """Word timings from one segment, when the model gave them."""
+    raw = segment.get("words") if isinstance(segment, dict) else getattr(segment, "words", None)
+    if not raw:
+        return None
+    words = []
+    for word in raw:
+        get = word.get if isinstance(word, dict) else (lambda key, w=word: getattr(w, key, None))
+        text = str(get("word") or "").strip()
+        try:
+            start, end = float(get("start")), float(get("end"))
+        except (TypeError, ValueError):
+            continue
+        if text:
+            # Stored as is in the sidecar: centisecond times, no scores,
+            # about 40 bytes a word (roughly 0.4 MB per hour of speech).
+            words.append({"word": text, "start": round(start, 2), "end": round(end, 2)})
+    return words or None
+
+
+def _loop_key(text: str) -> str:
+    return " ".join(re.sub(r"[^\w\s']", " ", text.casefold()).split())
+
+
+def _collapse_phrase_loop(text: str) -> str:
+    """'thank you thank you thank you thank you' -> 'thank you'."""
+    words = text.split()
+    keys = [_loop_key(word) for word in words]
+    out: list[str] = []
+    i = 0
+    while i < len(words):
+        step = 0
+        for size in range(1, 9):
+            phrase = keys[i:i + size]
+            if len(phrase) < size:
+                break
+            if not all(phrase):
+                continue
+            repeats = 1
+            while keys[i + repeats * size:i + (repeats + 1) * size] == phrase:
+                repeats += 1
+            if repeats >= LOOP_PHRASE_REPEATS:
+                out.extend(words[i:i + size])
+                step = repeats * size
+                break
+        if step:
+            i += step
+        else:
+            out.append(words[i])
+            i += 1
+    return " ".join(out)
+
+
+def drop_repetition_loops(entries: list, scores: list | None = None) -> list:
+    """Cheap post-filter for Whisper's repeating-phrase loop.
+
+    Collapses a phrase repeated LOOP_PHRASE_REPEATS+ times inside one segment,
+    drops identical segments after LOOP_MAX_REPEATS in a row, and drops a
+    highly repetitive segment (compression ratio over the decode limit) the
+    model itself rated as probably not speech. ``scores`` holds
+    (compression_ratio, no_speech_prob) per entry, when known.
+    """
+    kept: list = []
+    last_key, run = None, 0
+    for index, entry in enumerate(entries):
+        ratio, no_speech = scores[index] if scores and index < len(scores) else (None, None)
+        if (isinstance(ratio, (int, float)) and ratio > DECODE_OPTIONS["compression_ratio_threshold"]
+                and isinstance(no_speech, (int, float)) and no_speech > 0.5):
+            continue
+        start, end, text = entry
+        clean = _collapse_phrase_loop(text)
+        key = _loop_key(clean)
+        if not key:
+            continue
+        run = run + 1 if key == last_key else 1
+        last_key = key
+        if run > LOOP_MAX_REPEATS:
+            continue
+        words = getattr(entry, "words", None) if clean == text else None
+        kept.append(TranscriptEntry(start, end, clean, words) if words
+                    else (start, end, clean))
+    return kept
 
 
 INITIAL_PROMPT_MAX_CHARS = 200
@@ -562,8 +680,9 @@ def transcribe_media(media_path: str | Path, *,
     if _transcribe is not None:
         segments = _transcribe(str(media))
     else:
+        run_model, language, fallback = _english_guard(media, model_name, model_root, language)
         model = _load_model(
-            model_name,
+            run_model,
             model_root,
             local_files_only=True,
         )
@@ -572,6 +691,7 @@ def transcribe_media(media_path: str | Path, *,
             beam_size=1,
             best_of=1,
             vad_filter=True,
+            **DECODE_OPTIONS,
             **({"language": language} if language is not None else {}),
             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
         )
@@ -579,11 +699,48 @@ def transcribe_media(media_path: str | Path, *,
             info["language"] = getattr(detected, "language", None)
             info["language_probability"] = getattr(
                 detected, "language_probability", None)
+            if fallback:
+                info["model"] = run_model
+                info["english_fallback"] = fallback
         segments = _watched_segments(
             segments, cancel_event, progress, getattr(detected, "duration", None))
     if checkpoint is not None:
         segments = _with_checkpoint(segments, checkpoint)
-    return _transcript_entries_from_segments(segments)
+    scores: list = []
+    return drop_repetition_loops(_transcript_entries_from_segments(segments, scores), scores)
+
+
+def _english_guard(media: Path, model_name: str, model_root, language):
+    """Never run an English-only model on other languages.
+
+    Returns (model to run, language to pass, fallback note or None). The
+    bundled multilingual model detects the language first: transcribe()
+    detects before it decodes anything, and its segments are never read.
+    Anything but confident English runs on that multilingual model instead.
+    """
+    if not is_english_only(model_name):
+        return model_name, language, None
+    if language is not None and str(language).lower() == "en":
+        return model_name, "en", None
+    probability = None
+    if language is not None:
+        detected = str(language).lower()
+    else:
+        checker = _load_model(LANGUAGE_CHECK_MODEL, model_root, local_files_only=True)
+        _unread, found = checker.transcribe(str(media), beam_size=1, best_of=1, vad_filter=True)
+        detected = str(getattr(found, "language", "") or "").lower()
+        probability = getattr(found, "language_probability", None)
+        if detected == "en" and isinstance(probability, (int, float)) \
+                and probability >= ENGLISH_MIN_PROBABILITY:
+            return model_name, "en", None
+    sure = probability is None or (isinstance(probability, (int, float))
+                                   and probability >= ENGLISH_MIN_PROBABILITY)
+    return LANGUAGE_CHECK_MODEL, (detected if sure and detected else None), {
+        "requested_model": str(model_name), "used_model": LANGUAGE_CHECK_MODEL,
+        "detected_language": detected or None,
+        "language_probability": (round(float(probability), 3)
+                                 if isinstance(probability, (int, float)) else None),
+    }
 
 
 def _with_checkpoint(segments, checkpoint):
