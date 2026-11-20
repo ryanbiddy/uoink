@@ -154,3 +154,22 @@ def test_a_full_article_with_a_subscribe_box_is_still_saved():
             "<p>Subscribe to continue reading stories like this. Already a subscriber? Sign in.</p>")
     result = pages.extract_page(None, URL, enforce_allowlist=False, http_open=lambda *a, **k: response(page(body)))
     assert result["ok"], result
+
+
+def test_review_round_pixels_math_footnotes_and_inline_names():
+    out = md(f"<p>{PROSE} As <span class=\"author-name\">Mira Holt</span> wrote, the ramp held."
+             '<sup><a href="#user-content-fn-100" id="user-content-fnref-100">[100]</a></sup></p>'
+             f"<p>{PROSE}</p>"
+             '<p><img src="https://cdn.example.org/a.png" width="1px" alt="a">'
+             '<img src="https://www.facebook.com/tr?id=1&amp;ev=PageView" alt="b">'
+             '<img src="https://stats.example.org/pixel.gif" alt="c">'
+             '<img src="https://news.example.org/blank.gif" data-src="/img/real.jpg" alt="Real"></p>'
+             '<p>Then <math alttext="a &lt; b"><mi>a</mi></math> holds.</p>'
+             r'<math display="block" alttext="a = 1 \\&#10;b = 2"><mi>a</mi></math>'
+             '<section class="footnotes"><ol><li id="user-content-fn-100"><p>Low tide.</p></li></ol></section>')
+    assert "Mira Holt wrote" in out
+    assert "[^100]" in out and out.endswith("[^100]: Low tide.")
+    assert "a.png" not in out and "facebook.com/tr" not in out and "pixel.gif" not in out
+    assert "![Real](https://news.example.org/img/real.jpg)" in out and "blank.gif" not in out
+    assert r"$a \lt b$" in out and "<" not in out
+    assert "$$\na = 1 " + "\\\\" + "\nb = 2\n$$" in out

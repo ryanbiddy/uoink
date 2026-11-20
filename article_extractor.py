@@ -53,9 +53,9 @@ _TEASER = re.compile(r"(?:subscribe|sign in|log in|register)(?: now)? to (?:cont
 MAX_TEASER = 2000
 _LANG = re.compile(r"(?:^|\s)(?:language|lang|highlight-source)-([A-Za-z0-9_+#.-]{1,24})(?=\s|$)")
 _GUTTER = re.compile(r"(?:^|\s)(?:linenos|linenodiv|lineno|rouge-gutter|line-numbers-rows|hljs-ln-numbers)(?:\s|$)")
-_FN_REF = re.compile(r"^#(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
-_FN_ITEM = re.compile(r"^(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
-_FN_BACK = re.compile(r"^#(?:fnref|footnote-?ref)", re.I)
+_FN_REF = re.compile(r"^#(?:user-content-)?(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
+_FN_ITEM = re.compile(r"^(?:user-content-)?(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
+_FN_BACK = re.compile(r"^#(?:user-content-)?(?:fnref|footnote-?ref)", re.I)
 _BYLINE = re.compile(r"(?:^|[\s_-])(?:byline|author|writtenby)(?:$|[\s_-])", re.I)
 _TITLE_SEPARATOR = re.compile(r" [|\-–—\\/>»] ")
 # Lead image sources in preference order. Relative URLs resolve like links.
@@ -433,19 +433,33 @@ def _code_language(pre):
     return ""
 
 
+# Tracking pixels and beacons: never saved as images (a viewer that loads them
+# tells a third party the page was opened).
+_PIXEL_SIZE = re.compile(r"^\s*[01](?:\.0*)?\s*(?:px)?\s*$", re.I)
+_BEACON = re.compile(
+    r"^https?://(?:[^/?#]*\.)?(?:google-analytics\.com|doubleclick\.net|googletagmanager\.com|"
+    r"scorecardresearch\.com|quantserve\.com|bat\.bing\.com)(?:[/?#:]|$)"
+    r"|^https?://(?:[^/?#]*\.)?facebook\.com/tr(?:[/?#]|$)"
+    r"|/(?:pixel|beacon|1x1|spacer|blank|clear|transparent|track|tracking|open)"
+    r"(?:\.(?:gif|png|jpe?g|webp))?(?:[?#]|$)", re.I)
+
+
+def is_pixel(attrs, src):
+    return bool(_PIXEL_SIZE.match(attrs.get("width", "x")) or _PIXEL_SIZE.match(attrs.get("height", "x"))
+                or _BEACON.search(src or ""))
+
+
 def _image_source(attrs, url):
     # Lazy loaders keep the real image in data-src (or a srcset) and a 1px
     # placeholder in src.
-    if attrs.get("width") == "1" or attrs.get("height") == "1":
-        return None
     for key in ("data-src", "data-lazy-src", "data-original", "src", "data-srcset", "srcset"):
         value = attrs.get(key, "").strip()
         if key.endswith("srcset"):
-            value = value.split(",")[0].strip().split(" ")[0]
+            value = re.split(r",\s+", value)[0].strip().split(" ")[0]
         if value and not value.lower().startswith("data:"):
             link = safe_link(value, url)
             if link:
-                return link
+                return None if is_pixel(attrs, link) else link
     return None
 
 
@@ -465,7 +479,8 @@ class Markdown:
         # Inside the chosen content, as in Readability's conditional cleaning:
         # a box that is mostly one link ("Read next: ...") and a short byline
         # (already in the metadata) are not the article.
-        if node in self.roots or node.tag not in {"div", "section", "aside", "span", "p"}:
+        # A span is inline: a name inside a sentence stays in the sentence.
+        if node in self.roots or node.tag not in {"div", "section", "aside", "p"}:
             return False
         if node.tag in {"div", "section", "aside"} and node.length and node.density > .6 and node.length < 300 and not any(
                 n.tag in {"img", "pre", "table", "ul", "ol"} for n in _descendants(node)):
@@ -497,10 +512,17 @@ class Markdown:
             # MathML: keep the TeX source when the page carries it.
             note = next((n for n in _descendants(node) if n.tag == "annotation"
                          and "tex" in n.attrs.get("encoding", "").lower()), None)
-            tex = _SPACE.sub(" ", _text(note, raw=True) if note else node.attrs.get("alttext", "") or _text(node)).strip()
+            tex = (_text(note, raw=True) if note else node.attrs.get("alttext", "") or _text(node)).strip()
+            # "<" in TeX is \lt: a bare "<" could open an HTML tag in a Markdown app.
+            tex = tex.replace("<", "\\lt ")
             if not tex:
                 return ""
-            return f"\n\n$${tex}$$\n\n" if node.attrs.get("display") == "block" else f"${tex}$"
+            if node.attrs.get("display") == "block":
+                # Display math keeps its line breaks (aligned equations), never a blank line.
+                lines = [re.sub(r"[ \t]+", " ", line).strip() for line in tex.splitlines()]
+                body = "\n".join(line for line in lines if line)
+                return f"\n\n$${body}$$\n\n" if "\n" not in body else f"\n\n$$\n{body}\n$$\n\n"
+            return f"${_SPACE.sub(' ', tex)}$"
         if tag == "table":
             inside = [n for n in _descendants(node) if not n.excluded]
             pres = [n for n in inside if n.tag == "pre" and not any(_contains(p, n) for p in inside if p.tag == "pre" and p is not n)]
@@ -551,7 +573,7 @@ class Markdown:
         if tag == "a":
             raw_href = node.attrs.get("href", "").strip()
             ref = _FN_REF.match(raw_href)
-            if ref and len(inner.strip()) <= 6:
+            if ref and len(_text(node).strip()) <= 6:  # the words shown ("[100]"), not escaped Markdown
                 return f"[^{ref[1]}]"
             if _FN_BACK.match(raw_href) or "backref" in node.attrs.get("class", "") or inner.strip() in {"↩", "↩︎", "^"}:
                 return ""
