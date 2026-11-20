@@ -3338,6 +3338,7 @@ def _resolve_video_transcript(
         media_chunks: list[tuple[Path, float, float]] | None = None,
         cancel_event: threading.Event | None = None,
         asr_titles: tuple = (),
+        asr_checkpoint=None,
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
@@ -3346,8 +3347,11 @@ def _resolve_video_transcript(
     caption-less capture still succeeds without pretending it has words.
     Chunk inputs carry source offsets and durations; ASR covers only those
     downloaded sections, including when separate source audio is needed.
+    ``asr_checkpoint`` (the transcript backfill) runs between ASR segments;
+    it pauses or yields by raising PlaylistJobCancelled.
     """
     _raise_if_cancelled(cancel_event)
+    checkpoint_kw = {"checkpoint": asr_checkpoint} if asr_checkpoint is not None else {}
     if caption_entries:
         return list(caption_entries), "captions", {"status": "not_needed"}
 
@@ -3387,6 +3391,7 @@ def _resolve_video_transcript(
                             model_name=model_name,
                             model_root=RELIABILITY_MODEL_ROOT,
                             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
+                            **checkpoint_kw,
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3442,6 +3447,7 @@ def _resolve_video_transcript(
                         model_name=model_name,
                         model_root=RELIABILITY_MODEL_ROOT,
                         **({"initial_prompt": initial_prompt} if initial_prompt else {}),
+                        **checkpoint_kw,
                     )
                 _raise_if_cancelled(cancel_event)
                 if media_chunks:
@@ -4648,6 +4654,815 @@ def _start_backfill_thread() -> None:
     threading.Thread(target=_runner, name="index-backfill", daemon=True).start()
 
 
+# ---------------------------------------------------------------------------
+# 3.18 transcript backfill: "Transcribe saves that have no words"
+# ---------------------------------------------------------------------------
+# transcript_backfill.py owns the order, progress file, pause/resume and
+# back-off. These helpers find the saves (index rows, sidecars, corpus
+# Markdown and folders a capture never finished) and transcribe one through
+# the capture's own caption fetch, audio download, local ASR, corpus renderer
+# and index publication. Nothing here deletes a user's file.
+# _run_extraction writes this file (by name) when a first capture claims its
+# folder and removes it once the sidecar and the index row are both written;
+# one left behind means the capture stopped midway.
+CAPTURE_INCOMPLETE_NAME = "capture-not-finished.txt"
+_TRANSCRIPT_BACKFILL_MEDIA_SUFFIXES = (".mp4", ".webm", ".mkv", ".mov", ".m4a",
+                                       ".mp3", ".aac", ".opus", ".ogg", ".wav")
+_TRANSCRIPT_WORDS_LINE = re.compile(r"(?m)^(?:\[\d{1,2}:\d{2}(?::\d{2})?\]|### \[)")
+_TRANSCRIPT_SECTION_HEADING = re.compile(r"(?m)^## (?:Chapters|Transcript)\n")
+_TRANSCRIPT_BACKFILL_SKIP_TYPES = {"episode", "note", "image", "page", "x_article"}
+_TRANSCRIPT_BACKFILL_GONE_TEXT = (
+    "video unavailable", "video is unavailable", "video is not available",
+    "video has been removed", "no longer available", "this video is private",
+    "private video", "account has been terminated", "this post is unavailable",
+    "post was deleted", "has been deleted", "http error 404", "http error 410",
+    "not all metadata or media", "unable to download json metadata",
+    "account is suspended", "does not exist",
+)
+_transcript_backfill_instance = None
+_transcript_backfill_instance_lock = threading.Lock()
+
+
+def _capture_incomplete_record(folder: Path) -> dict:
+    """The url and start time _run_extraction wrote in capture-not-finished.txt."""
+    try:
+        text = (folder / CAPTURE_INCOMPLETE_NAME).read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return {}
+    record = {}
+    for line in text.splitlines():
+        name, sep, value = line.partition(": ")
+        if sep and name in ("url", "started"):
+            record[name] = value.strip()
+    return record
+
+
+def _transcript_backfill_host(url: str | None) -> str:
+    platform = _detect_platform_from_url(url or "") if url else ""
+    return {PLATFORM_YOUTUBE: "youtube", PLATFORM_TWITTER: "x"}.get(platform, "other")
+
+
+def _transcript_backfill_media_file(folder: Path, sidecar: dict | None = None) -> Path | None:
+    """A full media file the capture kept (or left behind), never a .part."""
+    candidates = []
+    named = (sidecar or {}).get("media_file")
+    if isinstance(named, str) and named and Path(named).name == named:
+        candidates.append(folder / named)
+    try:
+        candidates.extend(sorted(p for p in folder.iterdir()
+                                 if p.name.startswith(("video.", "audio."))))
+    except OSError:
+        return None
+    for path in candidates:
+        try:
+            if (path.suffix.lower() in _TRANSCRIPT_BACKFILL_MEDIA_SUFFIXES
+                    and not path.is_symlink() and path.is_file() and path.stat().st_size > 0):
+                return path
+        except OSError:
+            continue
+    return None
+
+
+def _sidecar_has_words(sidecar: dict) -> bool:
+    return any(isinstance(e, dict) and str(e.get("text") or "").strip()
+               for e in (sidecar.get("transcript") or []))
+
+
+def _corpus_transcript_bounds(md: str) -> tuple[int, int] | None:
+    """Start and end of the corpus transcript section(s), up to its rule."""
+    tags = md.find("\n## Tags\n")
+    heading = _TRANSCRIPT_SECTION_HEADING.search(md, max(tags, 0))
+    if heading is None:
+        return None
+    start = heading.start()
+    end = md.find("\n---\n\n## Screenshots", start)
+    if end < 0:
+        end = md.find("\n---\n", start)
+    return start, (end + 1 if end >= 0 else len(md))
+
+
+def _corpus_has_words(md: str) -> bool:
+    bounds = _corpus_transcript_bounds(md)
+    return bool(bounds and _TRANSCRIPT_WORDS_LINE.search(md, bounds[0], bounds[1]))
+
+
+def _transcript_backfill_scan() -> dict:
+    """Every save with (or able to fetch again) media but no transcript.
+
+    Signals, cheapest first: the index health snapshot ("ok" has words,
+    "skipped" is a text save), then the sidecar the capture wrote (video-path
+    keys, transcript rows, asr_fallback), then the corpus transcript section
+    for old saves that kept words only in Markdown. Folders a capture never
+    finished are found on disk; they have no sidecar and no index row.
+    """
+    idx = _get_index()
+    with idx.read_snapshot() as db:
+        rows = [dict(r) for r in db.execute(
+            "SELECT video_id, slug, title, source_type, platform, yoinked_at, corpus_path, "
+            "sidecar_path, health_score_json, metadata_json FROM yoinks WHERE deleted_at IS NULL")]
+    items: list[dict] = []
+    no_words = 0
+    indexed_folders = set()
+    for row in rows:
+        for column in ("sidecar_path", "corpus_path"):
+            if row.get(column):
+                indexed_folders.add(os.path.normcase(str(Path(row[column]).parent)))
+        if str(row.get("source_type") or "") in _TRANSCRIPT_BACKFILL_SKIP_TYPES:
+            continue
+        try:
+            health = json.loads(row.get("health_score_json") or "null")
+        except (TypeError, ValueError):
+            health = None
+        state = health.get("transcript") if isinstance(health, dict) else None
+        if state in ("ok", "skipped"):
+            continue
+        if state == "no speech":
+            no_words += 1
+            continue
+        sidecar_path = Path(row.get("sidecar_path") or "")
+        if not (row.get("sidecar_path") and _transcript_backfill_inside_library(sidecar_path)):
+            continue  # a stale or outside path is never written to
+        try:
+            sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(sidecar, dict):
+            continue
+        marker = sidecar.get("transcript_backfill")
+        repair = isinstance(marker, dict) and marker.get("status") == "saving"
+        if not repair:
+            if not ("transcript_source" in sidecar or "interval_seconds" in sidecar
+                    or row.get("source_type") in ("video", "short_video")):
+                continue
+            if _sidecar_has_words(sidecar):
+                continue
+            asr = sidecar.get("asr_fallback") if isinstance(sidecar.get("asr_fallback"), dict) else {}
+            if asr.get("status") == "no_speech" or (
+                    asr.get("status") == "no_audio" and not asr.get("error")):
+                no_words += 1
+                continue
+            corpus_path = Path(row.get("corpus_path") or "")
+            if row.get("corpus_path") and corpus_path.exists():
+                if not _transcript_backfill_inside_library(corpus_path):
+                    continue
+                try:
+                    if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+                        continue
+                except (OSError, UnicodeError):
+                    continue  # unreadable is "do not touch", never "no words"
+        folder = sidecar_path.parent
+        url = sidecar.get("source_url") or sidecar.get("url")
+        url = url if isinstance(url, str) and url.startswith(("http://", "https://")) else None
+        media_path = _transcript_backfill_media_file(folder, sidecar)
+        try:
+            meta = json.loads(row.get("metadata_json") or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        duration = sidecar.get("duration_seconds") or (
+            meta.get("duration_seconds") if isinstance(meta, dict) else None)
+        items.append({
+            "key": row["video_id"], "title": row.get("title") or sidecar.get("title") or row["slug"],
+            "duration": duration, "saved_at": row.get("yoinked_at"), "url": url,
+            "host": _transcript_backfill_host(url), "folder": str(folder),
+            "sidecar_path": str(sidecar_path), "corpus_path": row.get("corpus_path") or "",
+            "media_path": str(media_path) if media_path else None,
+            "media": "on_disk" if (media_path or repair) else ("download" if url else "gone"),
+            "repair": repair, "half": False,
+        })
+    try:
+        gone = {vid for vid, rec in idx.availability_for(
+            [i["key"] for i in items if i["media"] == "download"]).items()
+            if rec.get("status") in source_availability.GONE}
+    except Exception:
+        gone = set()
+    for item in items:
+        if item["key"] in gone:
+            item["media"] = "gone"
+    items.extend(_transcript_backfill_half_captures(indexed_folders))
+    return {"items": items, "no_words": no_words}
+
+
+def _transcript_backfill_half_captures(indexed_folders: set) -> list[dict]:
+    """Capture folders that never got a sidecar: the capture stopped midway."""
+    root = DESKTOP_ROOT
+    out: list[dict] = []
+    if not root.is_dir():
+        return out
+    trash = os.path.normcase(str(_trash_root()))
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.normcase(dirpath) == trash:
+            dirnames[:] = []
+            continue
+        folder = Path(dirpath)
+        names = set(filenames)
+        claimed = ".capture-source.json" in names or CAPTURE_INCOMPLETE_NAME in names
+        legacy = "metadata.json" in names and (
+            "screenshots" in dirnames or any(n.startswith(("video.", "thumbnail.")) for n in names))
+        if not (claimed or legacy):
+            dirnames[:] = [d for d in dirnames if not d.startswith(".") and d != "screenshots"]
+            continue
+        dirnames[:] = []
+        if (f"{folder.name}.json" in names or f"{folder.name}.md" in names or "yoink.md" in names
+                or os.path.normcase(str(folder)) in indexed_folders):
+            continue
+        item = _transcript_backfill_half_item(folder, names)
+        if item is not None:
+            out.append(item)
+    return out
+
+
+def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
+    def read(name):
+        if name not in names:
+            return {}
+        try:
+            value = json.loads((folder / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        return value if isinstance(value, dict) else {}
+    claim, metadata = read(".capture-source.json"), read("metadata.json")
+    marker = _capture_incomplete_record(folder)
+    url = next((u for u in (marker.get("url"), claim.get("url"), metadata.get("webpage_url"),
+                            metadata.get("original_url"))
+                if isinstance(u, str) and u.startswith(("http://", "https://"))), None)
+    if url is None:
+        return None
+    # The note's url is the exact one the capture locked on (its identity key).
+    if _transcript_backfill_identity_busy(url):
+        return None  # a capture is writing this folder right now
+    media_path = _transcript_backfill_media_file(folder)
+    # Finish reuses only a full video file (what _run_extraction reuses);
+    # anything else is fetched again, so it is listed as a download.
+    try:
+        reusable = any(
+            p.name.lower().startswith("video.") and p.suffix.lower() in (".mp4", ".webm", ".mkv")
+            and not p.is_symlink() and p.is_file() and p.stat().st_size > 0
+            for p in folder.iterdir())
+    except OSError:
+        reusable = False
+    try:
+        saved_at = marker.get("started") or datetime.fromtimestamp(
+            folder.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
+        rel = folder.relative_to(DESKTOP_ROOT).as_posix()
+    except (OSError, ValueError):
+        return None
+    return {
+        "key": "folder:" + rel, "title": metadata.get("title") or folder.name,
+        "duration": metadata.get("duration"), "saved_at": saved_at, "url": url,
+        "host": _transcript_backfill_host(url), "folder": str(folder),
+        "folder_name": folder.name, "media_path": str(media_path) if media_path else None,
+        # Finishing needs the saved metadata as well as the media to stay offline.
+        "media": "on_disk" if (reusable and metadata) else "download",
+        "has_metadata": bool(metadata), "half": True, "repair": False,
+    }
+
+
+def _transcript_backfill_keys(url: str | None, extra=()) -> list[str]:
+    keys = {k for k in extra if k}
+    try:
+        canonical = _normalize_video_url(url)[0] if url else None
+    except Exception:
+        canonical = None  # one odd link never breaks the whole scan
+    for value in (url, canonical):
+        if value:
+            try:
+                keys.add(_manual_capture_key(value))
+            except Exception:
+                continue
+    return sorted(keys)
+
+
+# Capture identity keys the backfill itself holds right now (a Finish or an
+# apply). Guarded by _ServerCaptureBackend._identity_condition.
+_transcript_backfill_held_keys: set = set()
+
+
+def _transcript_backfill_identity_busy(url: str | None) -> bool:
+    """Read-only: is a capture (not the backfill itself) writing this save?
+
+    Never registers the identity, so a capture starting now does not wait on
+    a status read, and the save the backfill is finishing stays listed."""
+    for key in _transcript_backfill_keys(url):
+        with _ServerCaptureBackend._identity_condition:
+            if key in _ServerCaptureBackend._local_identities:
+                if key in _transcript_backfill_held_keys:
+                    continue
+                return True
+        # Another process (a CLI capture): peek at its file lock and let go.
+        try:
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+        except OSError:
+            return True
+        if lock is None:
+            return True
+        lock.release()
+    return False
+
+
+def _transcript_backfill_hold_identity(url: str | None):
+    """Take the capture identity lock without waiting, or None when a capture holds it.
+
+    Lock order (one order everywhere): a capture registers itself, then waits
+    for this identity, then the extraction slot. So the backfill takes this
+    only while no capture runs, and while it holds it never waits for one:
+    its ASR checkpoint lets go instead (_transcript_backfill_checkpoint)."""
+    held = []
+    try:
+        for key in _transcript_backfill_keys(url):
+            with _ServerCaptureBackend._identity_condition:
+                if key in _ServerCaptureBackend._local_identities:
+                    _transcript_backfill_release_identity(held)
+                    return None
+                lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+                if lock is None:
+                    _transcript_backfill_release_identity(held)
+                    return None
+                _ServerCaptureBackend._local_identities[key] = lock
+                _transcript_backfill_held_keys.add(key)
+            held.append((key, lock))
+    except OSError:
+        _transcript_backfill_release_identity(held)
+        return None
+    return held
+
+
+def _transcript_backfill_release_identity(held) -> None:
+    for key, lock in held or ():
+        with _ServerCaptureBackend._identity_condition:
+            _transcript_backfill_held_keys.discard(key)
+        _ServerCaptureBackend.release_identity(key, lock)
+
+
+def _transcript_backfill_inside_library(path) -> bool:
+    """True for a real folder or file inside the library (not its trash)."""
+    try:
+        candidate = Path(path)
+        if candidate.is_symlink():
+            return False
+        root = DESKTOP_ROOT.resolve()
+        resolved = candidate.resolve()
+        trash = _trash_root().resolve()
+    except (OSError, ValueError, TypeError):
+        return False
+    return (resolved != root and resolved.is_relative_to(root)
+            and not resolved.is_relative_to(trash))
+
+
+def _transcript_backfill_capture_busy() -> bool:
+    """True while the user captures something: the backfill waits its turn."""
+    if _extract_lock.locked():
+        return True
+    with _live_extracts_lock:
+        if _live_extracts:
+            return True
+    with _jobs_lock:
+        return any(job.get("state") == "running"
+                   and job.get("kind") in ("playlist", "single", "podcast_transcribe")
+                   for job in _jobs.values())
+
+
+def _transcript_backfill_wanted_elsewhere(url: str | None) -> bool:
+    """A capture of this same source is waiting: give it the save."""
+    if not url:
+        return False
+    try:
+        source = _video_capture_source(url)
+    except ValueError:
+        return False
+    with _live_extracts_lock:
+        others = [entry.get("source_url") for entry in _live_extracts.values()]
+    for other in others:
+        try:
+            if other and _video_capture_source(other) == source:
+                return True
+        except ValueError:
+            continue
+    return False
+
+
+def _transcript_backfill_model_ready() -> tuple[bool, str]:
+    model = _selected_reliability_model()
+    if _reliability_model_status(model).get("cached"):
+        return True, ""
+    return False, ("The transcription model is not on this computer yet. "
+                   "Download it in Settings, then start again.")
+
+
+def _transcript_backfill_failure(error) -> tuple[str, str]:
+    """(kind, plain reason) for a failed fetch: rate_limited, bot_check, gone or failed."""
+    if isinstance(error, subprocess.CalledProcessError):
+        text = _subprocess_output(error)
+    elif isinstance(error, subprocess.TimeoutExpired):
+        return "failed", "The download timed out."
+    else:
+        text = str(error or "")
+    lower = text.lower()
+    if (re.search(r"\b429\b", text) or "too many requests" in lower
+            or "rate limit" in lower or "rate-limit" in lower):
+        return "rate_limited", "The site is limiting requests right now."
+    if "not a bot" in lower or "confirm you" in lower or "captcha" in lower or "bot check" in lower:
+        return "bot_check", "The site asked for a bot check."
+    if any(phrase in lower for phrase in _TRANSCRIPT_BACKFILL_GONE_TEXT):
+        return "gone", "The video is no longer at the link it was saved from."
+    return "failed", _plain_error_from_text(text) if text else "The media could not be fetched."
+
+
+def _transcript_backfill_note(sidecar: dict, source, asr: dict, url, captions_reason=None):
+    """The same transcript note a fresh capture writes."""
+    if source == "captions":
+        return None
+    skipped = captions_reason or sidecar.get("captions_skipped_reason")
+    if skipped == CAPTIONS_RATE_LIMITED:
+        caption_note = "YouTube refused captions"
+    elif skipped in (CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
+        caption_note = "YouTube asked for a bot check"
+    elif _detect_platform_from_url(url or "") == PLATFORM_YOUTUBE:
+        caption_note = "YouTube captions unavailable"
+    else:
+        caption_note = "captions unavailable"
+    status = (asr or {}).get("status")
+    if source == "asr":
+        return f"Local Whisper transcript: {caption_note}"
+    if status == "no_audio":
+        return f"No transcript: {asr.get('reason')}"
+    if status == "no_speech":
+        return f"No transcript: {caption_note}, and Whisper found no speech"
+    return f"No transcript: {caption_note}"
+
+
+def _transcript_backfill_render(folder: Path, sidecar: dict) -> tuple[str, str | None]:
+    """The transcript section and header line, from the capture's own renderer."""
+    entries = []
+    for entry in sidecar.get("transcript") or []:
+        if isinstance(entry, dict) and str(entry.get("text") or "").strip():
+            entries.append((_as_float(entry.get("start")) or 0.0,
+                            _as_float(entry.get("end")) or 0.0, str(entry["text"])))
+    media_sections = None
+    try:
+        plan = _capture_media_plan(sidecar, folder, item={"metadata_json": json.dumps(
+            {"duration_seconds": sidecar.get("duration_seconds")})})
+        if plan is not None:
+            media_sections = plan["markdown"]
+    except Exception as e:
+        log.warning("transcript backfill: media sections skipped for %s: %s", folder, e)
+    chapters = sidecar.get("source_chapters") if isinstance(sidecar.get("source_chapters"), list) else []
+    rendered = _build_yoink_md(
+        metadata={"title": sidecar.get("title") or "", "chapters": chapters}, url="",
+        entries=entries, shots=[], interval=30, channel_ctx={}, yoinked_at="", topic="",
+        media_sections=media_sections, transcript_note=sidecar.get("transcript_note"))
+    start, end = _corpus_transcript_bounds(rendered)
+    header = next((line for line in rendered.split("\n---\n", 1)[0].splitlines()
+                   if line.startswith("**Transcript:** ")), None)
+    return rendered[start:end], header
+
+
+def _splice_transcript_markdown(md: str, block: str, header: str | None) -> str:
+    """Replace only the transcript section and its header line."""
+    bounds = _corpus_transcript_bounds(md)
+    if bounds is None:
+        anchor = md.find("\n## Screenshots")
+        if anchor >= 0:
+            md = md[:anchor + 1] + block + "---\n\n" + md[anchor + 1:]
+        else:
+            md = md.rstrip("\n") + "\n\n" + block
+    else:
+        md = md[:bounds[0]] + block + md[bounds[1]:]
+    head, sep, rest = md.partition("\n---\n")
+    if not sep:
+        return md
+    lines = [line for line in head.split("\n") if not line.startswith("**Transcript:** ")]
+    if header:
+        at = max((i for i, line in enumerate(lines) if line.startswith("**")), default=len(lines) - 1)
+        lines.insert(at + 1, header)
+    return "\n".join(lines) + sep + rest
+
+
+def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
+                               captions_reason=None) -> str:
+    """Save new words into the sidecar, transcript.txt, corpus and index.
+
+    The sidecar is written first with a "saving" mark and cleared last, so a
+    helper stopped in between is found and finished by the next scan. With
+    ``entries`` None this only finishes such an interrupted save. Returns
+    "applied", "skipped" (it has words now, or changed) or "busy".
+    """
+    folder = Path(item["folder"])
+    sidecar_path = Path(item["sidecar_path"])
+    corpus_path = Path(item["corpus_path"]) if item.get("corpus_path") else _resolve_corpus_path(folder)
+    if not (_transcript_backfill_inside_library(folder) and sidecar_path.parent == folder
+            and _transcript_backfill_inside_library(sidecar_path)
+            and (corpus_path is None or not corpus_path.exists()
+                 or _transcript_backfill_inside_library(corpus_path))):
+        return "skipped"  # only files inside the library are ever written
+    held = _transcript_backfill_hold_identity(item.get("url"))
+    if held is None:
+        return "busy"
+    try:
+        with _sidecar_update_lock:
+            try:
+                sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return "skipped"
+            if not isinstance(sidecar, dict):
+                return "skipped"
+            marker = sidecar.get("transcript_backfill")
+            saving = isinstance(marker, dict) and marker.get("status") == "saving"
+            if entries is None:
+                if not saving:
+                    return "skipped"
+            else:
+                if _sidecar_has_words(sidecar) and not saving:
+                    return "skipped"  # never touch a save that has words
+                if not saving and corpus_path is not None and corpus_path.exists():
+                    try:
+                        if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+                            return "skipped"  # words only in the Markdown still count
+                    except (OSError, UnicodeError):
+                        return "skipped"  # unreadable: do not touch
+                if "source_chapters" not in sidecar:
+                    try:
+                        held_meta = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+                        chapters = held_meta.get("chapters") if isinstance(held_meta, dict) else None
+                    except (OSError, ValueError):
+                        chapters = None
+                    if isinstance(chapters, list) and chapters:
+                        sidecar["source_chapters"] = chapters
+                sidecar["transcript"] = _transcript_entries_with_links(sidecar, entries)
+                sidecar["transcript_source"] = source
+                sidecar["asr_fallback"] = asr or {"status": "not_needed"}
+                if captions_reason:
+                    sidecar["captions_skipped_reason"] = captions_reason
+                sidecar["transcript_note"] = _transcript_backfill_note(
+                    sidecar, source, asr or {}, sidecar.get("source_url") or sidecar.get("url"),
+                    captions_reason)
+                sidecar["transcript_backfill"] = {
+                    "status": "saving", "at": _now_iso(), "version": VERSION,
+                    "result": source or (asr or {}).get("status")}
+                # The file keeps its old health until the save is done: if
+                # anything reindexes it meanwhile (a tag edit, a rebuild), the
+                # index still says "no words" and the next scan finishes it.
+                _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
+        text = _transcript_text_from_sidecar(sidecar)
+        if text:
+            _atomic_write_text(folder / "transcript.txt", text)
+        if corpus_path is not None and corpus_path.is_file():
+            with _corpus_update_lock:
+                md = corpus_path.read_text(encoding="utf-8")
+                block, header = _transcript_backfill_render(folder, sidecar)
+                updated = _splice_transcript_markdown(md, block, header)
+                if updated != md:
+                    _atomic_write_text(corpus_path, updated)
+        with _sidecar_update_lock:
+            # Index what is on disk now, with any edit made meanwhile.
+            try:
+                latest = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                latest = None
+        latest = latest if isinstance(latest, dict) else sidecar
+        if _index_yoink(folder, dict(latest, health=compute_health(latest)),
+                        corpus_path, sidecar_path) is False:
+            raise RuntimeError("the library index did not take the new transcript")
+        with _sidecar_update_lock:
+            try:
+                current = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                current = None
+            marker = current.get("transcript_backfill") if isinstance(current, dict) else None
+            if isinstance(marker, dict) and marker.get("status") == "saving":
+                marker["status"] = "done"
+                current["health"] = compute_health(current)
+                _atomic_write_text(sidecar_path, json.dumps(current, ensure_ascii=False, indent=2))
+        return "applied"
+    finally:
+        _transcript_backfill_release_identity(held)
+
+
+def _transcript_backfill_checkpoint(checkpoint, url, *, holding: bool = False):
+    """ASR checkpoint: hand the save to a capture that wants it, else yield or pause.
+
+    ``holding``: the caller holds this save's capture lock (Finish). Then it
+    never waits for a capture, which may be waiting for that lock: it lets
+    go and the item is tried again once the capture is done."""
+    import transcript_backfill as backfill_mod
+
+    def check(segment=None):
+        if _transcript_backfill_wanted_elsewhere(url):
+            raise _TranscriptBackfillYield("a capture of this save is waiting")
+        position = (segment.get("end") if isinstance(segment, dict)
+                    else getattr(segment, "end", None))
+        try:
+            checkpoint(position, wait=not holding)
+        except backfill_mod.Paused:
+            raise PlaylistJobCancelled("transcript backfill paused") from None
+        except backfill_mod.YieldToCapture:
+            raise _TranscriptBackfillYield("a capture started") from None
+    return check
+
+
+def _transcript_backfill_work(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    """Transcribe one save. Outcomes are documented in transcript_backfill."""
+    import transcript_backfill as backfill_mod
+    ready, why = _transcript_backfill_model_ready()
+    if not ready:
+        return {"outcome": "blocked", "reason": why}
+    try:
+        if item.get("half"):
+            return _transcript_backfill_finish(item, checkpoint, stop_event, network_ok)
+        return _transcript_backfill_item(item, checkpoint, stop_event, network_ok)
+    except PlaylistJobCancelled as exc:
+        if stop_event.is_set():
+            raise backfill_mod.Paused() from None
+        return {"outcome": "yielded" if isinstance(exc, _TranscriptBackfillYield) else "busy"}
+
+
+def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    folder = Path(item["folder"])
+    if not _transcript_backfill_inside_library(folder):
+        return {"outcome": "skipped", "reason": "The save is not inside the library folder."}
+    if item.get("repair"):
+        result = _transcript_backfill_apply(item)
+        if result != "applied":
+            return {"outcome": result}
+        try:
+            saved = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+            stored = (saved.get("transcript_backfill") or {}).get("result")
+        except (OSError, ValueError, AttributeError):
+            stored = None
+        # The interrupted save finished with what it had found: words, or none.
+        return {"outcome": stored if stored in ("no_speech", "no_audio") else "transcribed"}
+    url, host, duration = item.get("url"), item.get("host") or "other", item.get("duration")
+    network_hosts = []
+    try:
+        sidecar = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"outcome": "skipped", "reason": "The save was moved or removed."}
+    if not isinstance(sidecar, dict) or _sidecar_has_words(sidecar):
+        return {"outcome": "skipped"}
+    settings = dict(_read_settings(), asr_fallback_enabled=True)
+    asr_check = _transcript_backfill_checkpoint(checkpoint, url)
+    asr_check()
+    refused = None
+    captions_reason = None
+    entries, source, asr = [], None, None
+    for stale in folder.glob(".asr-*"):
+        # Audio a stopped run left behind (Uoink's own temporary files only).
+        try:
+            if stale.is_dir() and not stale.is_symlink() and time.time() - stale.stat().st_mtime > 3600:
+                shutil.rmtree(stale)
+        except OSError:
+            pass
+    with tempfile.TemporaryDirectory(prefix=".asr-", dir=folder, ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        if host == "youtube" and url and network_ok("youtube"):
+            # Captions first: no CPU, and the best words when they exist.
+            reason = _fetch_video_subtitles(url, tmp, long_video_mode=LONG_VIDEO_MODE_FULL,
+                                            cancel_event=stop_event)
+            if reason is None:
+                network_hosts.append("youtube")
+                order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
+                srts = sorted(tmp.glob("video*.srt"), key=lambda p: (
+                    order.index(p.name) if p.name in order else len(order), p.name))
+                if srts:
+                    entries = list(parse_srt(srts[0], duration=duration))
+            elif reason in (CAPTIONS_RATE_LIMITED, CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
+                captions_reason = reason
+                refused = {"host": "youtube",
+                           "kind": "rate_limited" if reason == CAPTIONS_RATE_LIMITED else "bot_check"}
+                if item.get("media") != "on_disk":
+                    return {"outcome": "backoff", **refused}
+        if entries:
+            source, asr = "captions", {"status": "not_needed"}
+        else:
+            media = Path(item["media_path"]) if item.get("media_path") else None
+            if media is None or not media.is_file():
+                if not url:
+                    return {"outcome": "gone", "reason": "No copy on this computer and no link to fetch."}
+                if not network_ok(host):
+                    return {"outcome": "wait_network", "host": host}
+                try:
+                    media = _download_reliability_audio(url, tmp, cancel_event=stop_event)
+                except PlaylistJobCancelled:
+                    raise
+                except Exception as e:
+                    kind, why = _transcript_backfill_failure(e)
+                    if kind in ("rate_limited", "bot_check"):
+                        return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
+                    return {"outcome": "gone" if kind == "gone" else "failed", "reason": why}
+                network_hosts.append(host)
+            # The ASR fetches source audio only when the file on disk has no
+            # audio track. While the site rests it gets no link to fetch.
+            online = bool(url) and network_ok(host) and refused is None
+            entries, source, asr = _resolve_video_transcript(
+                [], media, duration, url=url if online else None, settings=settings,
+                captions_refused=captions_reason == CAPTIONS_RATE_LIMITED,
+                cancel_event=stop_event,
+                asr_titles=(sidecar.get("channel"), sidecar.get("title")),
+                asr_checkpoint=asr_check)
+            if (url and not online and source is None
+                    and (asr or {}).get("status") == "no_audio" and not asr.get("error")):
+                return {"outcome": "wait_network", "host": host}
+    status = (asr or {}).get("status")
+    if source is None and status == "no_audio" and asr.get("error"):
+        kind, why = _transcript_backfill_failure(asr.get("error"))
+        if kind in ("rate_limited", "bot_check"):
+            return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
+        return {"outcome": "gone" if kind == "gone" else "failed", "reason": why}
+    if status == "model_not_downloaded":
+        return {"outcome": "blocked", "reason": _transcript_backfill_model_ready()[1]}
+    if source is None and status not in ("no_speech", "no_audio"):
+        return {"outcome": "failed",
+                "reason": (asr or {}).get("error") or "The transcript step did not work."}
+    applied = _transcript_backfill_apply(item, entries, source, asr, captions_reason)
+    if applied != "applied":
+        return {"outcome": applied}
+    outcome = "transcribed" if source else status
+    return {"outcome": outcome, "media_seconds": duration if source != "captions" else None,
+            "network_ok": network_hosts, **({"refused": refused} if refused else {})}
+
+
+def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    """Finish a capture that stopped midway, reusing what it left on disk."""
+    folder = Path(item["folder"])
+    url, host = item["url"], item.get("host") or "other"
+    if not _transcript_backfill_inside_library(folder):
+        return {"outcome": "skipped", "reason": "The capture is not inside the library folder."}
+    if not network_ok(host):
+        # Finishing still asks the site for small things (captions, the
+        # channel), so it waits out a back-off like a download does.
+        return {"outcome": "wait_network", "host": host}
+    held = _transcript_backfill_hold_identity(url)
+    if held is None:
+        return {"outcome": "busy"}
+    try:
+        if (folder / f"{folder.name}.json").exists() or _resolve_corpus_path(folder):
+            return {"outcome": "skipped", "reason": "This capture already finished."}
+        try:
+            metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            metadata = None
+        if not isinstance(metadata, dict) or not metadata.get("title"):
+            metadata = _fetch_metadata(url, cancel_event=stop_event)
+        # Keep the topic folder the capture already lives in.
+        topic = (folder.parent.name if folder.parent.resolve() != DESKTOP_ROOT.resolve()
+                 else _classify_topic(metadata))
+        result = _run_extraction(
+            url, 30, folder, notify=False, metadata=metadata,
+            topic=topic, generate_paste=False,
+            cancel_event=stop_event, refresh_existing=False, finish_on_disk=True,
+            asr_checkpoint=_transcript_backfill_checkpoint(checkpoint, url, holding=True))
+    except PlaylistJobCancelled:
+        raise
+    except Exception as e:
+        kind, why = _transcript_backfill_failure(e)
+        if kind in ("rate_limited", "bot_check"):
+            return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
+        if kind == "gone" and not _transcript_backfill_media_file(folder):
+            return {"outcome": "gone", "reason": why}
+        return {"outcome": "failed", "reason": friendly_error(e)}
+    finally:
+        _transcript_backfill_release_identity(held)
+    status = (result.get("asr_fallback") or {}).get("status")
+    answered = [host] if item.get("media") == "download" else []
+    if result.get("transcript_source"):
+        return {"outcome": "transcribed", "media_seconds": item.get("duration"),
+                "network_ok": answered}
+    if status in ("no_speech", "no_audio"):
+        return {"outcome": status, "network_ok": answered}
+    return {"outcome": "failed",
+            "reason": "The capture finished, but its transcript step did not work."}
+
+
+def _transcript_backfill():
+    """The one backfill for this library (its state lives next to index.db)."""
+    global _transcript_backfill_instance
+    import transcript_backfill as backfill_mod
+    with _transcript_backfill_instance_lock:
+        instance = _transcript_backfill_instance
+        if instance is None or instance.path.parent != Path(DATA_ROOT):
+            instance = backfill_mod.TranscriptBackfill(
+                DATA_ROOT, scan=_transcript_backfill_scan, work=_transcript_backfill_work,
+                capture_busy=_transcript_backfill_capture_busy,
+                model_ready=_transcript_backfill_model_ready,
+                lower_priority=whisper_runner.set_current_thread_below_normal)
+            _transcript_backfill_instance = instance
+        return instance
+
+
+def _transcript_backfill_status() -> dict:
+    status = _transcript_backfill().status()
+    ready, why = _transcript_backfill_model_ready()
+    return {"ok": True, "model_ready": ready, **({"model_message": why} if why else {}), **status}
+
+
+def _resume_transcript_backfill_at_boot() -> None:
+    """Carry on a backfill the user started before the helper stopped."""
+    try:
+        if _transcript_backfill().resume_after_restart():
+            log.info("transcript backfill: resumed the run started before restart")
+    except Exception:
+        log.exception("transcript backfill: could not resume")
+
+
 _PHASE2_BACKFILL_KEY = "phase2_author_backfill_done"
 
 _ENGAGEMENT_BACKFILL_MAX_BYTES = 32 * 1024 * 1024
@@ -4908,6 +5723,10 @@ def _classify_topic(metadata: dict) -> str:
 # ---------------------------------------------------------------------------
 class PlaylistJobCancelled(Exception):
     """Raised inside a playlist worker when the user cancels the job."""
+
+
+class _TranscriptBackfillYield(PlaylistJobCancelled):
+    """3.18: the transcript backfill lets go of a save so a capture can run."""
 
 
 class ExtractionPhaseError(RuntimeError):
@@ -7470,8 +8289,15 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None,
                     pending_id: int | None = None,
-                    refresh_existing: bool = True) -> dict:
+                    refresh_existing: bool = True,
+                    finish_on_disk: bool = False,
+                    asr_checkpoint=None) -> dict:
     """Yoink a single video into output_folder.
+
+    ``finish_on_disk`` (3.18) finishes a capture that stopped midway: the
+    folder has no corpus or sidecar yet, so this runs as a first capture
+    that reuses the media, captions, thumbnail and screenshots already
+    there, and keeps that media. ``asr_checkpoint`` goes to the local ASR.
 
     Steps:
       1. Fetch metadata (cached without format/caption tables) — already done if the
@@ -7503,6 +8329,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # A new capture has only its ownership claim. Refreshes keep previous
     # artifacts until generation and the file swap have succeeded.
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
+    if finish_on_disk:
+        if (_resolve_corpus_path(output_folder)
+                or (output_folder / f"{output_folder.name}.json").exists()):
+            raise ExtractionPhaseError("save", "This capture already finished.")
+        refreshing = False
+    if not refreshing:
+        # 3.18: until the sidecar and the index row are written the folder
+        # says it is not finished, so a capture that stops midway never looks
+        # done. A refresh of a folder an earlier capture left like that keeps
+        # its note and clears it once indexed. The name
+        # is spelled out (CAPTURE_INCOMPLETE_NAME) because tests load this
+        # function on its own.
+        try:
+            _atomic_write_text(output_folder / "capture-not-finished.txt", (
+                "Uoink has not finished saving this capture yet. If this file is still "
+                "here after the capture is over, it stopped midway. Open Uoink, go to "
+                "Settings, Library health, and press Finish to complete it from the "
+                f"files already here.\n\nurl: {url}\nstarted: {_now_iso()}\n"))
+        except OSError as e:
+            log.warning("could not mark the capture as in progress: %s", e)
     video_slug = output_folder.name
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
@@ -7694,7 +8540,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 raise
 
         # Thumbnail (best-effort; absence shouldn't fail the extraction).
-        _download_thumbnail(metadata, asset_folder, cancel_event=cancel_event)
+        if not (finish_on_disk and any(asset_folder.glob("thumbnail.*"))):
+            _download_thumbnail(metadata, asset_folder, cancel_event=cancel_event)
 
         # Full mode downloads one low-res media file; chunked mode downloads
         # representative sections. Both fetch optional subtitles separately so
@@ -7733,19 +8580,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
             else "video.*"
         )
+        # Finishing a stopped capture reuses the full video it already has.
+        reused_media = [
+            p for p in sorted(asset_folder.glob(media_glob))
+            if p.suffix.lower() in (".mp4", ".webm", ".mkv") and not p.is_symlink()
+            and p.is_file() and p.stat().st_size > 0
+        ] if finish_on_disk and effective_long_video_mode == LONG_VIDEO_MODE_FULL else []
         try:
             if phase_callback:
                 phase_callback("download")
             media_before_download = set(asset_folder.glob(media_glob))
             try:
-                _run_subprocess(
-                    media_cmd,
-                    cancel_event=cancel_event,
-                    check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    timeout=download_timeout,
-                )
+                if not reused_media:
+                    _run_subprocess(
+                        media_cmd,
+                        cancel_event=cancel_event,
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        timeout=download_timeout,
+                    )
             finally:
                 if not refreshing:
                     # Record only new, regular download outputs. Remember their
@@ -7777,11 +8631,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if phase_callback:
             phase_callback("transcript")
-        captions_skipped_reason = _fetch_video_subtitles(
-            url, asset_folder,
-            long_video_mode=effective_long_video_mode,
-            cancel_event=cancel_event,
-        )
+        if reused_media and any(asset_folder.glob("video*.srt")):
+            captions_skipped_reason = None
+        else:
+            captions_skipped_reason = _fetch_video_subtitles(
+                url, asset_folder,
+                long_video_mode=effective_long_video_mode,
+                cancel_event=cancel_event,
+            )
         # Only a captions 429 counts as "refused" for the ASR fallback and the
         # retry pacing; a bot check or cooldown is recorded by its own reason.
         captions_refused = captions_skipped_reason == CAPTIONS_RATE_LIMITED
@@ -7857,18 +8714,19 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             try:
                 if phase_callback:
                     phase_callback("screenshots")
-                _run_subprocess(
-                    _screenshot_ffmpeg_command(
-                        video_file,
-                        interval,
-                        shots_dir / "shot_%04d.jpg",
-                    ),
-                    cancel_event=cancel_event,
-                    check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    timeout=_ffmpeg_timeout_for(duration),
-                )
+                if not (reused_media and any(shots_dir.glob("shot_*.jpg"))):
+                    _run_subprocess(
+                        _screenshot_ffmpeg_command(
+                            video_file,
+                            interval,
+                            shots_dir / "shot_%04d.jpg",
+                        ),
+                        cancel_event=cancel_event,
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        timeout=_ffmpeg_timeout_for(duration),
+                    )
             except subprocess.TimeoutExpired:
                 log.error(
                     "ffmpeg screenshot extraction timed out after %ds "
@@ -7901,6 +8759,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
             cancel_event=cancel_event,
             asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
+            **({"asr_checkpoint": asr_checkpoint} if asr_checkpoint is not None else {}),
+            # The user pressed Finish (or started the backfill) to get words:
+            # local ASR runs for this one save. A copy, never saved.
+            **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
+               if finish_on_disk else {}),
         )
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
@@ -8210,6 +9073,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             except Exception as e:
                 publication_failed(e)
                 raise
+            # 3.18: saved and indexed. A note an earlier stopped capture left
+            # in this folder is now out of date.
+            try:
+                (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+            except OSError as e:
+                log.warning("could not clear the capture-in-progress note: %s", e)
 
         # v2.5 A1: optional local transcript reliability detection. It runs only
         # when the user has opted in and the Whisper model is already cached; the
@@ -8234,7 +9103,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         # Refresh downloads stay in staging until cleanup. Preserve the
         # first-capture cleanup and partial-artifact recovery behavior.
-        if not refreshing and not keep_media:
+        if not refreshing and not keep_media and not reused_media:
             for video_file in video_files:
                 video_file.unlink(missing_ok=True)
 
@@ -8371,6 +9240,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         except Exception as e:
             publication_failed(e)
             raise
+        # 3.18: the sidecar and the index row are both written, so the
+        # capture is finished (the note lives from the claim until here).
+        try:
+            (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+        except OSError as e:
+            log.warning("could not clear the capture-in-progress note: %s", e)
 
     # Sprint 16 (A2): extract named entities off the transcript in the
     # background, in parallel with the comments / Comment Intelligence
@@ -17537,6 +18412,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {"ok": True, **source_subscriptions.tool_manifest()})
         if bare == "/transcribe/status":
             return self._handle_transcribe_status_get()
+        if bare == "/library/transcript-backfill":
+            return self._handle_transcript_backfill("status")
         if bare == "/playlists/monitored":
             return self._handle_monitored_playlists_list()
         if bare == "/playlists/monitored/events":
@@ -17820,6 +18697,36 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False, "error": "Accept the current Gemma terms with accepted: true first."})
         except Exception:
             return self._send_json(503, {"ok": False, "error": "Semantic search is unavailable. Keyword search still works. Try again in Settings."})
+
+    def _handle_transcript_backfill(self, action, body=None):
+        """GET status; POST start (order longest|newest), pause, resume, finish (key)."""
+        body = body if isinstance(body, dict) else {}
+        try:
+            job = _transcript_backfill()
+            if action == "status":
+                return self._send_json(200, _transcript_backfill_status())
+            if action == "start":
+                order = body.get("order")
+                if order is not None and order not in ("longest", "newest"):
+                    return self._send_json(400, {"ok": False, "error": "order must be longest or newest"})
+                result = job.start(order)
+            elif action == "pause":
+                result = job.pause()
+            elif action == "resume":
+                result = job.resume()
+            elif action == "finish":
+                key = body.get("key")
+                if not isinstance(key, str) or not key.strip():
+                    return self._send_json(400, {"ok": False, "error": "key is required"})
+                result = job.finish(key.strip())
+            else:
+                return self._send_json(404, {"ok": False, "error": "unknown transcript backfill action"})
+        except Exception:
+            log.exception("transcript backfill %s failed", action)
+            return self._send_json(503, {"ok": False, "error": "The transcript backfill is unavailable right now. Try again in a moment."})
+        ready, why = _transcript_backfill_model_ready()
+        payload = {**result, "model_ready": ready, **({"model_message": why} if why else {})}
+        return self._send_json(200 if payload.get("ok") else 409, payload)
 
     def _handle_settings_get(self):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
@@ -22714,6 +23621,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_any(body)
         if bare.startswith("/yoinks/") and bare.endswith("/reyoink"):
             return self._handle_reyoink(bare)
+        if bare.startswith("/library/transcript-backfill/"):
+            action = bare[len("/library/transcript-backfill/"):]
+            return self._handle_transcript_backfill(action if "/" not in action else "", body)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
         if bare == "/notes":
@@ -24505,6 +25415,8 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # Backfill the index from disk in the background so a missing index
     # never delays the bind or /health.
     _start_backfill_thread()
+    # 3.18: a transcript backfill the user started carries on after a restart.
+    _resume_transcript_backfill_at_boot()
     # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
     # once at startup and every 24h after.
     _start_trash_purge_thread()

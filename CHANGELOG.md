@@ -44,6 +44,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   sizes in light and dark, saves a page with the extension, checks the API, MCP and CLI, and
   prints a pass/fail table with a page of screenshots. Nothing from it ships in the app or the
   extension. See `docs/qa-smoke.md`.
+### Added
+
+- Library health: "Transcribe saves that have no words" in Settings, Library and export. It
+  counts saves that have video but no transcript (for example X videos saved with "No captions
+  available"), split into ones with the video still on this computer, ones that can be
+  downloaded again, and ones whose source is gone. Start transcribes them one at a time with
+  the same local model and caption fetch a capture uses, longest first or newest first, and
+  shows done, left, the current title and a rough time left. Pause and Resume work at any
+  point, a run carries on after the helper restarts, and it waits while you capture something
+  new. When a site refuses requests it backs off (5, 20, then 60 minutes, longer after a bot
+  check) and keeps going with saves already on this computer. A save another capture keeps
+  busy is retried with longer waits and then set aside, and a file that stops Uoink twice is
+  skipped instead of stopping it on every start. Nothing is deleted and nothing
+  starts by itself. New transcripts update keyword search, meaning search, the corpus Markdown
+  and `get_transcript` without a reindex. Also from a terminal: `uoink backfill
+  status|start|pause|resume` (`--order longest|newest`), backed by token-gated helper routes
+  `GET /library/transcript-backfill` and `POST /library/transcript-backfill/{start,pause,resume,finish}`.
+- Captures that stop midway no longer look finished. A first capture writes
+  `capture-not-finished.txt` in its folder until its sidecar and its library index row are
+  both saved (a later good capture of the same folder clears it too), and Library health
+  lists such folders as "Capture did not finish" with a Finish button that reuses the video,
+  captions, thumbnail and screenshots already there. Finish runs local transcription for that
+  save even when the caption-less fallback is off in Settings, and keeps the topic folder.
 
 ## [3.17.0] - 2026-11-12
 

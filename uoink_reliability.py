@@ -457,7 +457,8 @@ def transcribe_media(media_path: str | Path, *,
                      _transcribe=None,
                      info: dict | None = None,
                      language: str | None = None,
-                     initial_prompt: str | None = None) -> list[tuple[float, float, str]]:
+                     initial_prompt: str | None = None,
+                     checkpoint=None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
 
     Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
@@ -472,6 +473,10 @@ def transcribe_media(media_path: str | Path, *,
 
     ``initial_prompt`` is a short plain-text vocabulary hint (titles) that
     steers Whisper toward niche spellings; it is never written to the output.
+
+    ``checkpoint(segment)`` runs after each decoded segment, before the next
+    one is decoded. The transcript backfill uses it to pause, or to wait
+    while the user captures something; an exception it raises stops here.
     """
     media = Path(media_path)
     if not media.is_file():
@@ -497,7 +502,16 @@ def transcribe_media(media_path: str | Path, *,
             info["language"] = getattr(detected, "language", None)
             info["language_probability"] = getattr(
                 detected, "language_probability", None)
+    if checkpoint is not None:
+        segments = _with_checkpoint(segments, checkpoint)
     return _transcript_entries_from_segments(segments)
+
+
+def _with_checkpoint(segments, checkpoint):
+    # faster-whisper decodes lazily, so blocking here holds the next segment.
+    for segment in segments:
+        checkpoint(segment)
+        yield segment
 
 
 def _words_from_segments(segments) -> list[dict[str, Any]]:

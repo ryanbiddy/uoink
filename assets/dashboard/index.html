@@ -3404,6 +3404,30 @@
     .hook-correction-row { display: grid; justify-items: start; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
     .settings-tool-details summary { min-height: var(--target-primary); padding: 8px 0; cursor: pointer; }
     .settings-tool-button { min-height: var(--target-primary); }
+    /* Library health (3.18): self-contained repair cards. */
+    .library-health .health-repair { display: grid; gap: 10px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .library-health .health-repair h3 { margin: 0; font-size: 15px; color: var(--text); overflow-wrap: anywhere; }
+    .library-health .health-repair > * { min-width: 0; }
+    .backfill-count { margin: 0; color: var(--text); font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
+    .backfill-count[data-empty="true"] { font-size: 15px; font-weight: 500; }
+    .backfill-progress { display: grid; gap: 6px; min-width: 0; }
+    .backfill-progress progress { width: 100%; height: 8px; accent-color: var(--action); }
+    .backfill-current { margin: 0; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .backfill-notes { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--text-2); overflow-wrap: anywhere; }
+    .backfill-notes:empty { display: none; }
+    .backfill-notes a { color: var(--text); }
+    .backfill-order { display: inline-flex; align-items: center; gap: 8px; color: var(--text-2); }
+    .backfill-order select.field { width: auto; }
+    .half-capture-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; max-height: 420px; overflow-y: auto; }
+    .half-capture-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); min-width: 0; }
+    .half-capture-text { display: grid; gap: 2px; min-width: 0; }
+    .half-capture-label { color: var(--vermillion); font-size: 12px; font-weight: 600; }
+    .half-capture-title { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .half-capture-meta { color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
+    @media (max-width: 600px) {
+      .half-capture-row { grid-template-columns: minmax(0, 1fr); }
+      .half-capture-row .button { justify-self: start; }
+    }
     @media (max-width: 600px) {
       #tab-settings .page-head { align-items: flex-start; }
       #tab-settings .topic-row { grid-template-columns: minmax(0, 1fr); }
@@ -6666,6 +6690,39 @@
           <section class="settings-section" id="settings-library" aria-labelledby="settingsLibraryTitle">
           <h2 class="settings-section-title" id="settingsLibraryTitle" tabindex="-1">Library and export</h2>
           <div class="settings-grid">
+            <div class="setting-block library-health" id="settings-library-health">
+              <h2>Library health</h2>
+              <p class="setting-copy">Repairs for saves that came in without everything. Each one starts only when you start it.</p>
+              <div class="health-repair" id="transcriptBackfill" aria-labelledby="backfillTitle">
+                <h3 id="backfillTitle">Transcribe saves that have no words</h3>
+                <p class="backfill-count" id="backfillCount" role="status" aria-live="polite">Checking your library…</p>
+                <p class="setting-copy" id="backfillBreakdown"></p>
+                <div class="backfill-progress hidden" id="backfillProgressWrap">
+                  <progress id="backfillProgress" max="1" value="0" aria-label="Transcription progress"></progress>
+                  <p class="setting-copy" id="backfillProgressText"></p>
+                  <p class="backfill-current hidden" id="backfillCurrent"></p>
+                </div>
+                <ul class="backfill-notes" id="backfillNotes" aria-live="polite"></ul>
+                <div class="inline-row backfill-controls" id="backfillControls">
+                  <label class="backfill-order" for="backfillOrder">Order
+                    <select class="field" id="backfillOrder">
+                      <option value="longest">Longest first</option>
+                      <option value="newest">Newest first</option>
+                    </select>
+                  </label>
+                  <button class="button primary" id="backfillStart" type="button">Start</button>
+                  <button class="button ghost hidden" id="backfillPause" type="button">Pause</button>
+                  <button class="button ghost hidden" id="backfillResume" type="button">Resume</button>
+                </div>
+                <p class="setting-copy" id="backfillCost">It uses this computer's CPU, roughly 10 to 15 minutes for each hour of video. Saves with no copy here are downloaded again from where you saved them. Nothing else leaves this computer. It waits while you capture, and you can pause any time.</p>
+              </div>
+              <div class="health-repair hidden" id="halfCaptures" aria-labelledby="halfCapturesTitle">
+                <h3 id="halfCapturesTitle">Captures that did not finish</h3>
+                <p class="setting-copy">These stopped partway, so they have no transcript and are not in your library yet. Finish reuses the files already saved.</p>
+                <ul class="half-capture-list" id="halfCaptureList"></ul>
+              </div>
+            </div>
+
             <div class="setting-block" id="settings-card-image">
               <h2>Card image</h2>
               <label for="cardImage">For saved videos, show</label>
@@ -19531,6 +19588,290 @@
       }));
     }
 
+    // ---- Library health: transcribe saves that have no words (3.18) -------
+    // The helper owns the run (it survives restarts and waits while you
+    // capture). This block reads its status, sends Start, Pause, Resume and
+    // Finish, and polls only while something is running.
+    const BACKFILL_ROUTE = "/library/transcript-backfill";
+    let backfillData = null;
+    let backfillTimer = null;
+    let backfillBusy = false;
+    let backfillVersion = 0;
+    let backfillRetries = 0;          // failed reads in a row (capped, see loadTranscriptBackfill)
+    let backfillStale = false;        // a retry was skipped while the page was hidden
+
+    function backfillCount(n, one, many) {
+      const value = Number(n) || 0;
+      return `${value.toLocaleString("en-US")} ${value === 1 ? one : many}`;
+    }
+
+    function backfillDuration(seconds) {
+      const s = Math.max(0, Number(seconds) || 0);
+      if (s < 90) return "about a minute";
+      const minutes = Math.round(s / 60);
+      if (minutes < 60) return `about ${minutes} min`;
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m ? `about ${h} h ${m} min` : `about ${h} h`;
+    }
+
+    // Pure: the helper's status in, the words and switches the block shows out.
+    function backfillView(data) {
+      const d = data || {};
+      const count = Number(d.count) || 0;
+      const p = d.progress || {};
+      const running = d.state === "running";
+      const paused = d.state === "paused";
+      const done = Number(p.done) || 0;
+      const left = Number(p.left) || 0;
+      const view = {
+        empty: count === 0 && !running && !paused,
+        headline: count > 0
+          ? `${backfillCount(count, "save has", "saves have")} video but no transcript`
+          : "Every save with video has its words.",
+        breakdown: "",
+        progress: null,
+        progressText: "",
+        current: "",
+        currentTitle: "",
+        notes: [],
+        showStart: !running && !paused && count > 0,
+        showPause: running,
+        showResume: paused && !d.pausing,
+        startDisabled: d.model_ready === false,
+      };
+      const parts = [];
+      if (count > 0) {
+        parts.push(`${Number(d.on_disk || 0).toLocaleString("en-US")} on this computer, ${Number(d.download || 0).toLocaleString("en-US")} to download again.`);
+      } else {
+        parts.push("Nothing to transcribe right now.");
+      }
+      if (Number(d.no_words) > 0) parts.push(`${backfillCount(d.no_words, "save has", "saves have")} no speech to transcribe.`);
+      view.breakdown = parts.join(" ");
+      if (running || paused || (d.state === "done" && done > 0)) {
+        view.progress = { value: done, max: Math.max(1, done + left) };
+      }
+      if (running) {
+        view.progressText = `${done.toLocaleString("en-US")} done, ${left.toLocaleString("en-US")} left, ${backfillDuration(p.eta_seconds)} to go.`;
+      } else if (paused) {
+        view.progressText = d.pausing
+          ? "Pausing at the next safe point."
+          : `Paused. ${done.toLocaleString("en-US")} done, ${left.toLocaleString("en-US")} left.`;
+      } else if (d.state === "done" && done > 0) {
+        const bits = [`${Number(p.transcribed || 0).toLocaleString("en-US")} transcribed`];
+        if (Number(p.no_words) > 0) bits.push(`${Number(p.no_words).toLocaleString("en-US")} had no speech`);
+        if (Number(p.gone) > 0) bits.push(`${Number(p.gone).toLocaleString("en-US")} gone`);
+        if (Number(p.failed) > 0) bits.push(`${Number(p.failed).toLocaleString("en-US")} did not work`);
+        view.progressText = `Last run: ${bits.join(", ")}.`;
+      }
+      const current = d.current;
+      if (current && current.title) {
+        const share = Number(current.fraction);
+        view.currentTitle = String(current.title);
+        view.current = `Now: ${view.currentTitle}${Number.isFinite(share) && current.fraction !== null ? ` (${Math.round(share * 100)}%)` : ""}`;
+        if (current.waiting_for_capture) view.notes.push({ text: "Waiting while your capture finishes." });
+      }
+      for (const [host, wait] of Object.entries(d.backoff || {})) {
+        const site = ({ youtube: "YouTube", x: "X" })[host] || "One site";
+        view.notes.push({ text: `${site} asked Uoink to slow down. Trying again in ${backfillDuration(wait && wait.seconds_left).replace("about ", "")}. Saves already on this computer keep going.` });
+      }
+      if (d.message) view.notes.push({ text: String(d.message) });
+      if (d.model_ready === false && (count > 0 || Number(d.half_capture_count) > 0)) {
+        view.notes.push({ text: d.model_message || "The transcription model is not on this computer yet.", link: "#settings/transcription-model", linkText: "Get the model" });
+      }
+      if (Number(d.gone) > 0) {
+        view.notes.push({ text: `${backfillCount(d.gone, "save", "saves")} can't be transcribed because the video is gone and no copy is on this computer.` });
+      }
+      const failed = Number(p.failed) || 0;
+      if (failed > 0 && running) view.notes.push({ text: `${backfillCount(failed, "save", "saves")} did not work this time. They stay on the list.` });
+      return view;
+    }
+
+    // Pure: one row per capture that stopped midway.
+    function halfCaptureRows(data) {
+      const d = data || {};
+      const requested = new Set(d.requested || []);
+      const current = d.current && d.current.key;
+      return (Array.isArray(d.half_captures) ? d.half_captures : []).map(item => {
+        const gone = item.settled === "gone";
+        let button = "Finish";
+        if (current === item.key) button = "Finishing…";
+        else if (requested.has(item.key)) button = "Queued";
+        return {
+          key: item.key,
+          title: String(item.title || item.folder_name || "Untitled capture"),
+          meta: gone ? "The video is gone and no copy is here."
+            : item.media === "on_disk" ? `${item.folder_name || ""} · video on this computer`.replace(/^ · /, "")
+              : `${item.folder_name || ""} · video downloads again`.replace(/^ · /, ""),
+          button,
+          disabled: gone || button !== "Finish" || d.model_ready === false,
+        };
+      });
+    }
+
+    function renderTranscriptBackfill() {
+      const view = backfillView(backfillData);
+      const count = document.getElementById("backfillCount");
+      count.textContent = backfillData ? view.headline : "Checking your library…";
+      count.dataset.empty = String(Boolean(backfillData) && view.empty);
+      document.getElementById("backfillBreakdown").textContent = backfillData ? view.breakdown : "";
+      // A Finish outside a run has no bar but still shows what it is on.
+      const wrap = document.getElementById("backfillProgressWrap");
+      wrap.classList.toggle("hidden", !view.progress && !view.current);
+      const bar = document.getElementById("backfillProgress");
+      bar.classList.toggle("hidden", !view.progress);
+      if (view.progress) {
+        bar.max = view.progress.max;
+        bar.value = view.progress.value;
+      }
+      document.getElementById("backfillProgressText").textContent = view.progressText;
+      const current = document.getElementById("backfillCurrent");
+      current.textContent = view.current;
+      current.title = view.currentTitle;
+      current.classList.toggle("hidden", !view.current);
+      const notes = document.getElementById("backfillNotes");
+      notes.replaceChildren(...view.notes.map(note => {
+        const li = document.createElement("li");
+        li.textContent = note.text;
+        if (note.link) {
+          const a = document.createElement("a");
+          a.href = note.link;
+          a.textContent = note.linkText;
+          li.append(" ", a);
+        }
+        return li;
+      }));
+      const order = document.getElementById("backfillOrder");
+      if (backfillData && backfillData.order && document.activeElement !== order) order.value = backfillData.order;
+      order.closest("label").classList.toggle("hidden", !view.showStart);
+      const start = document.getElementById("backfillStart");
+      start.classList.toggle("hidden", !view.showStart);
+      start.disabled = backfillBusy || view.startDisabled;
+      for (const [id, show] of [["backfillPause", view.showPause], ["backfillResume", view.showResume]]) {
+        const button = document.getElementById(id);
+        button.classList.toggle("hidden", !show);
+        button.disabled = backfillBusy;
+      }
+      document.getElementById("backfillControls").classList.toggle("hidden", !(view.showStart || view.showPause || view.showResume));
+      document.getElementById("backfillCost").classList.toggle("hidden", Boolean(backfillData) && view.empty);
+      const rows = halfCaptureRows(backfillData);
+      document.getElementById("halfCaptures").classList.toggle("hidden", rows.length === 0);
+      document.getElementById("halfCaptureList").replaceChildren(...rows.map(row => {
+        const li = document.createElement("li");
+        li.className = "half-capture-row";
+        const text = document.createElement("div");
+        text.className = "half-capture-text";
+        const label = document.createElement("span");
+        label.className = "half-capture-label";
+        label.textContent = "Capture did not finish";
+        const title = document.createElement("strong");
+        title.className = "half-capture-title";
+        title.textContent = row.title;
+        title.title = row.title;
+        const meta = document.createElement("span");
+        meta.className = "half-capture-meta";
+        meta.textContent = row.meta;
+        text.append(label, title, meta);
+        const button = document.createElement("button");
+        button.className = "button";
+        button.type = "button";
+        button.textContent = row.button;
+        button.disabled = backfillBusy || row.disabled;
+        button.setAttribute("aria-label", `Finish ${row.title}`);
+        button.addEventListener("click", () => transcriptBackfillAction("finish", { key: row.key }));
+        li.append(text, button);
+        return li;
+      }));
+    }
+
+    function backfillActive(data) {
+      return Boolean(data && (data.state === "running" || data.pausing || (data.requested || []).length || data.current));
+    }
+
+    async function loadTranscriptBackfill() {
+      const version = ++backfillVersion;
+      window.clearTimeout(backfillTimer);
+      try {
+        const data = await readSettingsResource(BACKFILL_ROUTE);
+        if (version !== backfillVersion) return;
+        backfillData = data;
+        backfillRetries = 0;
+        backfillStale = false;
+        renderTranscriptBackfill();
+        if (state.activeTab === "settings" && backfillActive(data)) {
+          backfillTimer = window.setTimeout(loadTranscriptBackfill, 3000);
+        }
+      } catch (err) {
+        if (version !== backfillVersion) return;
+        if (backfillData) {
+          // Keep the last good numbers and say this read did not work.
+          renderTranscriptBackfill();
+          const li = document.createElement("li");
+          li.textContent = `Could not refresh this just now. ${settingError(err)}`;
+          document.getElementById("backfillNotes").prepend(li);
+        } else {
+          document.getElementById("backfillCount").textContent = `Could not check your library. ${settingError(err)}`;
+        }
+        // Try again only for a busy or unreachable helper, only while there is
+        // something to follow (a run, or no numbers yet), a few times, slower
+        // each time, and not while the page is hidden.
+        backfillRetries += 1;
+        const worthIt = !backfillData || backfillActive(backfillData);
+        if (state.activeTab === "settings" && (err.status === 429 || !err.status) && worthIt && backfillRetries <= 5) {
+          if (document.hidden) {
+            backfillStale = true;
+          } else {
+            const seconds = Math.min(120, Math.max(Number(err.retryAfter) || 0, 5 * 2 ** (backfillRetries - 1)));
+            backfillTimer = window.setTimeout(loadTranscriptBackfill, seconds * 1000);
+          }
+        }
+      }
+    }
+
+    async function transcriptBackfillAction(action, body = {}) {
+      if (backfillBusy) return;
+      backfillBusy = true;
+      ++backfillVersion;
+      window.clearTimeout(backfillTimer);
+      renderTranscriptBackfill();
+      try {
+        if (action === "start") body = { order: document.getElementById("backfillOrder").value };
+        backfillData = await settingsRequest(`${BACKFILL_ROUTE}/${action}`, { method: "POST", body: JSON.stringify(body), timeoutMs: 35000 });
+        backfillBusy = false;
+        await loadTranscriptBackfill();
+      } catch (err) {
+        backfillBusy = false;
+        if (err.data && err.data.state) backfillData = err.data;
+        renderTranscriptBackfill();
+        const notes = document.getElementById("backfillNotes");
+        const li = document.createElement("li");
+        li.textContent = settingError(err);
+        notes.prepend(li);
+      }
+    }
+
+    function bindTranscriptBackfill() {
+      for (const [id, action] of [["backfillStart", "start"], ["backfillPause", "pause"], ["backfillResume", "resume"]]) {
+        document.getElementById(id).addEventListener("click", () => transcriptBackfillAction(action));
+      }
+      // Read the count when the block comes into view (opening Settings, a
+      // #settings/library-health link, or scrolling to it), not on every
+      // Settings load. The scan reads sidecars, so it waits until it is seen.
+      const block = document.getElementById("settings-library-health");
+      if (block && typeof IntersectionObserver === "function") {
+        new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) loadTranscriptBackfill();
+        }).observe(block);
+      }
+      // No observer (only bare test pages): no read at bind, by design. The
+      // settings tests pin that opening Settings asks the helper for nothing.
+      if (typeof document.addEventListener === "function") {
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden && backfillStale && state.activeTab === "settings") loadTranscriptBackfill();
+        });
+      }
+    }
+
     // ---- Phone inbox (Uoink Relay) ---------------------------------------
     // One Save sends the whole card. The pull token is write-only: the
     // field is never filled in, and "Saved" only says one is stored.
@@ -19886,6 +20227,7 @@
     function wireSettingsAutosave() {
       wireRelaySettings();
       bindSemanticSearch();
+      bindTranscriptBackfill();
       document.getElementById("reloadHookCorrections").addEventListener("click", loadHookCorrections);
       document.getElementById("reloadSkillPrompt").addEventListener("click", loadSkillSystemPrompt);
       document.getElementById("copySkillPrompt").addEventListener("click", copySkillSystemPrompt);
