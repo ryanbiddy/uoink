@@ -310,7 +310,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       notify("Queue full", "Wait a few minutes");
       return;
     }
-    await enqueue({ kind: "extract", url: pageUrl, usePage: true, addedAt: Date.now() });
+    await enqueue({ kind: "extract", url: pageUrl, usePage: true, tabId: tab && tab.id, addedAt: Date.now() });
     return;
   }
 
@@ -1172,6 +1172,7 @@ function enqueuePopupCapture(req) {
       title: typeof req.title === "string" ? req.title.slice(0, 300) : "",
     };
     if (req.route === "page") job.usePage = true;
+    if (req.route === "page" && Number.isInteger(req.tabId)) job.tabId = req.tabId;
     if (req.route === "reddit") job.useReddit = true;
     if (req.route === "playlist") job.usePlaylist = true;
     if (req.route === "podcast") job.usePodcast = true;
@@ -1386,7 +1387,7 @@ async function runExtractJob(job) {
         data = await STC.postExtract(job.url, job.interval);
       } else savedXPosts = !!data.ok;
     } else if (job.usePage) {
-      data = await STC.postExtractPage(job.url);
+      data = await capturePage(job);
     } else if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
     } else if (job.useReddit) {
@@ -1635,6 +1636,50 @@ async function injectXArticleScripts(tabId) {
     console.warn("[stc] x-article script injection failed", e);
     return false;
   }
+}
+
+// 3.18 Uoink this page: read the page the way the user's tab shows it (after
+// it rendered, with their own sign-in) with lib/defuddle.js and
+// lib/page-capture.js, in the tab the user clicked (activeTab + scripting).
+// Null when the tab is gone, moved to another page, or can't be read; the
+// caller then falls back to the helper's own fetch of the URL.
+function samePage(a, b) {
+  try {
+    const x = new URL(a);
+    const y = new URL(b);
+    return x.origin === y.origin && x.pathname.replace(/\/+$/, "") === y.pathname.replace(/\/+$/, "");
+  } catch { return false; }
+}
+
+async function readPageFromTab(job) {
+  if (!Number.isInteger(job.tabId) || !chrome.scripting) return null;
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId: job.tabId },
+      files: ["lib/defuddle.js", "lib/page-capture.js"],
+    });
+    const rows = await chrome.scripting.executeScript({
+      target: { tabId: job.tabId },
+      func: () => (globalThis.UoinkPageCapture ? globalThis.UoinkPageCapture.capture(document) : null),
+    });
+    const result = rows && rows[0] && rows[0].result;
+    if (!result || !result.ok || !result.payload || !samePage(result.payload.url, job.url)) return null;
+    return result.payload;
+  } catch (e) {
+    console.warn("[stc] page read in the tab failed", e);
+    return null;
+  }
+}
+
+// The tab's text goes to the helper (POST /extract/page/dom, local only). An
+// older helper without that route answers 404: use the URL path instead.
+async function capturePage(job) {
+  const capture = await readPageFromTab(job);
+  if (capture) {
+    const data = await STC.postExtractPageDom(capture);
+    if (!(data && data.http_status === 404)) return data;
+  }
+  return STC.postExtractPage(job.url);
 }
 
 // A1: capture an X Article from the context menu the same way the in-page

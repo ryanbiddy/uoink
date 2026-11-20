@@ -39,6 +39,16 @@ def test_defuddle_notice_ships_everywhere_the_extension_does():
     assert {"lib/defuddle.js", "lib/defuddle-LICENSE.txt", "lib/page-capture.js"} <= build_cws.ALLOWLIST
 
 
+def test_extension_page_capture_node_tests():
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    assert node, "Node.js is required for the extension page capture tests"
+    proc = subprocess.run([node, "--test", str(ROOT / "tests/js/page_capture_test.mjs")], cwd=ROOT,
+                          capture_output=True, text=True, encoding="utf-8", timeout=300)
+    assert proc.returncode == 0, proc.stdout[-4000:] + proc.stderr[-4000:]
+
+
 def test_page_dom_capture_ships_with_the_helper():
     for rel in ("build.ps1", "installer/uoink.iss", "installer/verify_install.ps1", "scripts/mac/payload.json"):
         assert "page_dom_capture.py" in (ROOT / rel).read_text(encoding="utf-8"), rel
@@ -136,6 +146,9 @@ def _route(settings_allow=("news.example.org",)):
                         return r.status, json.loads(r.read().decode())
                 except urllib.error.HTTPError as e:
                     return e.code, json.loads(e.read().decode() or "{}")
+                except (ConnectionError, urllib.error.URLError):
+                    # The helper answered 413 and closed before the client finished sending.
+                    return "closed", {}
             try:
                 yield post, idx, Path(out_root).resolve()
             finally:
@@ -166,9 +179,9 @@ def test_route_keeps_the_site_allowlist_and_body_cap():
         assert status == 403 and res["code"] == "host_not_allowed"
     with _route() as (post, _idx, _root):
         status, res = post("/extract/page/dom", payload(markdown="x" * (dom.MAX_BODY_BYTES + 10)))
-        assert status == 413
+        assert status in (413, "closed")
         status, res = post("/extract/page/dom", payload(markdown="Subscribe to continue reading. "
                                                                  "Already a subscriber? Sign in to continue."))
         assert status == 400 and res["page_state"] == "wall"
         status, _res = post("/extract/page", {"url": "https://news.example.org/a", "pad": "x" * 70000})
-        assert status == 413  # every other route keeps the 64 KB cap
+        assert status in (413, "closed")  # every other route keeps the 64 KB cap
