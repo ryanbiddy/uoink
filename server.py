@@ -16555,6 +16555,14 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
         pending_id, inserted = idx.enqueue_pending_once(url, interval, _now_iso())
         queued.append({**item, "pending_id": pending_id, "already_queued": not inserted})
     receipt = list_imports.record_import(DATA_ROOT, preview, queued) if queued else {}
+    hints = [(q["url"], q["folder"]) for q in queued if q.get("folder") and q.get("kind") != "post"]
+    if hints:
+        # Videos go through the normal queue; the folder rides along as a hint.
+        import shelf_router
+        try:
+            shelf_router.remember_hints(DATA_ROOT, hints)
+        except OSError as exc:
+            log.warning("import folders not remembered: %s", exc)
     skipped += sum(bool(q.get("in_library")) for q in queued)
     queued = [q for q in queued if not q.get("in_library")]
     fresh = sum(1 for q in queued if not q["already_queued"])
@@ -16578,7 +16586,7 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
         "message": message,
         "videos": [
             {k: q.get(k) for k in ("video_id", "kind", "item_key", "url", "title", "channel", "pending_id",
-                                   "already_queued")}
+                                   "already_queued", "folder")}
             for q in queued
         ],
     }
@@ -19896,12 +19904,15 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     if not isinstance(body["items"], list):
                         raise list_imports.ImportListError("items must be an array.", "invalid_items")
+                    folder = body.get("folder")
+                    if folder is not None and not (isinstance(folder, str) and folder.strip()):
+                        raise list_imports.ImportListError("folder must be a name.", "invalid_items")
                     if "append_to" in body:
                         staged = list_imports.append_stage_items(
-                            DATA_ROOT, body["append_to"], body.get("source"), body["items"])
+                            DATA_ROOT, body["append_to"], body.get("source"), body["items"], folder=folder)
                     else:
                         staged = list_imports.stage_saves(
-                            DATA_ROOT, body.get("source"), body["items"], filename=filename)
+                            DATA_ROOT, body.get("source"), body["items"], filename=filename, folder=folder)
                 result = {"ok": True, **staged, "label": list_imports.SOURCE_LABELS[staged["source"]]}
             elif start:
                 result = _list_import_start(url, body.get("offset"), body.get("limit"))

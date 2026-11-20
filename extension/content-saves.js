@@ -35,9 +35,20 @@
       + (match[4] ? `${match[4]}/` : "");
   }
 
+  // A bookmark folder's name, as the page header shows it. Bookmarks itself
+  // is not a folder. The helper uses it as the shelf for these saves.
+  function cleanFolderName(value) {
+    if (typeof value !== "string") return null;
+    const text = value.replace(/\s+/g, " ").trim();
+    return text && text.length <= 64 && !/[\u0000-\u001f]/.test(text)
+      && text.toLowerCase() !== "bookmarks" ? text : null;
+  }
+
   // Tests can exercise parsing without a DOM, extension APIs, or networking.
   if (globalThis.__UOINK_SAVES_TEST__ === true) {
-    globalThis.__UOINK_SAVES_HELPERS__ = { parseYouTubeId, normalizeXStatus, normalizeRedditPermalink };
+    globalThis.__UOINK_SAVES_HELPERS__ = {
+      parseYouTubeId, normalizeXStatus, normalizeRedditPermalink, cleanFolderName,
+    };
     return;
   }
 
@@ -69,8 +80,11 @@
         && new URLSearchParams(search).get("list") === "WL") {
       return { source: "watch_later", label: "Watch Later videos", key: "watch_later" };
     }
-    if (["x.com", "twitter.com"].includes(hostname) && /^\/i\/bookmarks\/?$/.test(pathname)) {
-      return { source: "x_bookmarks", label: "bookmarks", key: "x_bookmarks" };
+    const bookmarks = ["x.com", "twitter.com"].includes(hostname)
+      && pathname.match(/^\/i\/bookmarks(?:\/([0-9]{1,25}))?\/?$/);
+    if (bookmarks) {
+      return { source: "x_bookmarks", label: "bookmarks", folderPage: !!bookmarks[1],
+        key: bookmarks[1] ? `x_bookmarks:${bookmarks[1]}` : "x_bookmarks" };
     }
     if (["www.reddit.com", "old.reddit.com"].includes(hostname)
         && /^\/user\/[A-Za-z0-9_-]+\/saved\/?$/i.test(pathname)) {
@@ -215,9 +229,11 @@
     const page = active;
     const offset = next ? batch.nextOffset : 0;
     const size = items.size;
+    const heading = page.folderPage && document.querySelector('[data-testid="primaryColumn"] h2');
+    const folder = heading ? cleanFolderName(heading.textContent) : null;
     const message = next || retry ? { type: "stcImportNext", url: batch.url, offset }
       : { type: "stcStageSaves", source: page.source,
-        items: Array.from(items.values()).slice(0, MAX_ITEMS) };
+        items: Array.from(items.values()).slice(0, MAX_ITEMS), ...(folder ? { folder } : {}) };
     busy = true;
     setText(controls.status, "Sending to Uoink...");
     render();
