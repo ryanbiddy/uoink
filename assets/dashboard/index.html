@@ -6390,10 +6390,10 @@
 
             <div class="setting-block" id="x-full-text">
               <h2>Long X posts and Articles</h2>
-              <p class="setting-copy">From a pasted link, X gives Uoink only the first 280 or so characters of a long post and none of an X Article. Saving from the open post with the extension gets the whole text from your own page, and nothing is sent anywhere.</p>
+              <p class="setting-copy">From a pasted link, X gives Uoink only the first 280 or so characters of a long post and none of an X Article. Saving from the open post with the extension reads the whole text from your own page and hands it to Uoink on this computer. Like any X save, Uoink still asks X for the post by its ID to get its links and media.</p>
               <label class="inline-row"><input id="fxtwitterToggle" type="checkbox" data-reveal-focus aria-describedby="fxtwitterToggleSaveStatus fxtwitterCopy"> Get full long posts and Articles through FxTwitter</label>
               <div class="setting-feedback"><span class="setting-status" id="fxtwitterToggleSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="fxtwitterToggleSaveRetry" type="button" data-setting-retry="fxtwitterToggle">Retry save</button></div>
-              <p class="setting-copy" id="fxtwitterCopy">Off by default. FxTwitter is a free community service at api.fxtwitter.com. When this is on and X cuts a post short, Uoink asks FxTwitter for that one post. It sees only the link of the post, never your library or your X account.</p>
+              <p class="setting-copy" id="fxtwitterCopy">Off by default. FxTwitter is a free community service at api.fxtwitter.com. When this is on and X cuts a post short, Uoink asks FxTwitter for that one post. FxTwitter sees the post's ID and your computer's internet address, never your library or your X account.</p>
             </div>
 
             <div class="setting-block" id="rediscover-shelves">
@@ -9315,10 +9315,17 @@
     // X cut a long post short, or the post only links to an X Article. Two
     // ways to get the rest: the FxTwitter switch (then Uoink fetches it), or
     // open it on X and save it with the extension from the open tab.
-    const xCutOff = { busy: false, videoId: "", message: "" };
+    const xCutOff = { busy: false, videoId: "", message: "", done: false };
+    // Only X's own pages are ever rendered as links from post data.
+    const X_POST_URL_RE = /^https:\/\/(?:x|twitter)\.com\/(?:i|[A-Za-z0-9_]{1,15})\/status\/\d{1,25}$/;
+    const X_OPEN_URL_RE = /^https:\/\/(?:x|twitter)\.com\/(?:i|[A-Za-z0-9_]{1,15})\/(?:status|article)\/[A-Za-z0-9]{1,40}$/;
 
     function xTextFxOn() {
       return Boolean((state.settings || {}).fxtwitter_enrichment_enabled);
+    }
+
+    function xTextPause(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
     }
 
     function renderXCutOff(row, sidecar) {
@@ -9326,22 +9333,47 @@
       if (!box) return;
       const cut = row && sidecar ? sidecar.x_text_cut_off : null;
       const videoId = row ? videoIdOf(row) : "";
-      if (videoId !== xCutOff.videoId) Object.assign(xCutOff, { videoId, message: "" });
-      box.classList.toggle("hidden", !cut || !cut.open_url);
-      if (!cut || !cut.open_url) return;
+      if (videoId !== xCutOff.videoId) Object.assign(xCutOff, { videoId, message: "", done: false });
+      const openUrl = cut && typeof cut.open_url === "string" && X_OPEN_URL_RE.test(cut.open_url) ? cut.open_url : "";
+      const fix = document.getElementById("yoinkXCutOffFix");
+      const open = document.getElementById("yoinkXCutOffOpen");
+      if (xCutOff.done) {
+        // Finished (an Article saved as its own item): only the confirmation.
+        box.classList.remove("hidden");
+        document.getElementById("yoinkXCutOffText").textContent = xCutOff.message;
+        fix.classList.add("hidden");
+        open.classList.add("hidden");
+        document.getElementById("yoinkXCutOffStatus").textContent = "";
+        return;
+      }
+      fix.classList.remove("hidden");
+      open.classList.remove("hidden");
+      box.classList.toggle("hidden", !openUrl);
+      if (!openUrl) return;
       const article = cut.reason === "article";
       const fxOn = xTextFxOn();
       document.getElementById("yoinkXCutOffText").textContent = article
         ? `This post links to an X Article${cut.title ? `, "${cut.title}"` : ""}, so Uoink saved the post and a preview. To save the Article, open it on X and click Uoink this article in the extension, or let Uoink get it through FxTwitter.`
         : "X cut this post short, so Uoink saved only the start. To save all of it, open it on X and click Uoink this post in the extension, or let Uoink get it through FxTwitter.";
-      const fix = document.getElementById("yoinkXCutOffFix");
       fix.textContent = xCutOff.busy ? "Getting it..." : fxOn ? "Get it through FxTwitter" : "Turn on FxTwitter and get it";
       fix.disabled = xCutOff.busy;
-      const open = document.getElementById("yoinkXCutOffOpen");
-      open.href = cut.open_url;
+      open.href = openUrl;
       open.textContent = article ? "Open the Article on X" : "Open the post on X";
       document.getElementById("yoinkXCutOffStatus").textContent = xCutOff.message
-        || (fxOn ? "" : "FxTwitter is a free community service. Turning it on lets Uoink send it the link of a post X cut short.");
+        || (fxOn ? "" : "FxTwitter is a free community service. Turning it on lets Uoink send it the ID of a post X cut short.");
+    }
+
+    // The fix runs in the helper's background worker. Ask how it went
+    // every couple of seconds, for up to about five minutes.
+    async function xCutOffOutcome(videoId, row) {
+      for (let i = 0; i < 150; i++) {
+        await xTextPause(2000);
+        if (state.selectedYoink !== row) return null;
+        const reply = await authFetch(`/library/x-text-repair?video_id=${encodeURIComponent(videoId)}`);
+        const item = reply && reply.item;
+        if (item && item.status !== "working" && item.status !== "writing" && item.status !== "none") return item;
+      }
+      return { status: "failed", note: "This is taking longer than usual. Check back in a few minutes." };
     }
 
     async function fixXCutOff() {
@@ -9360,18 +9392,24 @@
         try {
           reply = await authFetch("/library/x-text-repair", { method: "POST", body: JSON.stringify({ action: "fix", video_id: videoId }) });
         } catch (err) {
-          reply = (err && err.data && err.data.outcome) ? err.data : null;
+          reply = (err && err.data) ? err.data : null;
           if (!reply) throw err;
         }
         if (state.selectedYoink !== row) return;
-        if (reply.saved_as) {
-          xCutOff.message = "Saved the Article as its own item in your library.";
-        } else if (reply.ok) {
+        if (!reply.ok) {
+          xCutOff.message = reply.error || reply.note || "Couldn't get the full text this time.";
+          return;
+        }
+        const item = reply.queued ? await xCutOffOutcome(videoId, row) : reply;
+        if (!item || state.selectedYoink !== row) return;
+        if (item.saved_as) {
+          if (state.selectedYoinkSidecar) state.selectedYoinkSidecar.x_text_cut_off = null;
+          Object.assign(xCutOff, { done: true, message: "Saved the Article as its own item in your library." });
+        } else if (item.status === "fixed" || item.status === "already_full") {
           xCutOff.message = "";
           await openYoinkDetail(row, { fromRoute: true });
-          return;
         } else {
-          xCutOff.message = reply.error || reply.note || "Couldn't get the full text this time.";
+          xCutOff.message = item.note || item.error || "Couldn't get the full text this time.";
         }
       } catch (err) {
         xCutOff.message = (err && err.message) || "Couldn't get the full text this time.";
@@ -9406,8 +9444,8 @@
       renderXTextRepair();
       window.clearTimeout(xRepair.timer);
       const s = xRepair.status;
-      if (s && s.ok && (s.running || s.counting) && state.activeTab === "settings") {
-        xRepair.timer = window.setTimeout(loadXTextRepair, s.running ? 3000 : 1500);
+      if (s && s.ok && (s.running || s.counting || s.status === "interrupted") && state.activeTab === "settings") {
+        xRepair.timer = window.setTimeout(loadXTextRepair, s.running || s.status === "interrupted" ? 3000 : 1500);
       }
     }
 
@@ -9442,7 +9480,7 @@
       if (showHow) {
         how.innerHTML = fxOn
           ? `Start asks X which saves are long posts, then gets each one's full text from FxTwitter, one post every few seconds (${htmlEscape(xRepairRoughTime(n))} for these). Only the post's text changes. Notes, tags, shelves and transcripts stay, and a post that is gone keeps what you saved. Pause any time, it picks up where it left off, even after a restart.`
-          : `Two ways to fix them. Turn on <a href="#settings/x-full-text">Get full long posts and Articles through FxTwitter</a>, then press Start here. Or open each post on X and click Uoink this post in the extension, which saves the whole text from your own page and sends nothing anywhere.`;
+          : `Two ways to fix them. Turn on <a href="#settings/x-full-text">Get full long posts and Articles through FxTwitter</a>, then press Start here. Or open each post on X and click Uoink this post in the extension. It reads the whole text from your own page, so FxTwitter is never asked.`;
       }
       const controls = el("xTextRepairControls");
       controls.classList.toggle("hidden", s.ok === false || s.counting || (!n && !live));
@@ -9463,7 +9501,9 @@
       } else if (s.status === "paused") {
         line = `Paused after ${Number(run.checked || 0).toLocaleString()} of ${Number(s.total || 0).toLocaleString()}.${s.reason ? ` ${s.reason}` : ""}`;
       } else if (s.status === "interrupted") {
-        line = "The helper restarted mid-run. It picks up again on its own in a moment.";
+        line = fxOn
+          ? "The helper restarted mid-run. It picks up again on its own in a moment."
+          : "The helper restarted mid-run. Turn FxTwitter back on in Capture, then press Resume.";
       } else if (s.status === "done" || s.status === "stopped") {
         const bits = [`Fixed ${Number(run.fixed || 0).toLocaleString()}`];
         if (run.already_full) bits.push(`${Number(run.already_full).toLocaleString()} were already whole`);
@@ -9479,10 +9519,28 @@
       el("xTextRepairListLabel").textContent = sample.length < n
         ? `Posts to open and save (first ${sample.length} of ${n.toLocaleString()})`
         : "Posts to open and save";
-      el("xTextRepairList").innerHTML = sample.map((item) => {
-        const label = item.title || item.url;
-        return `<li><a href="${htmlEscape(item.url)}" target="_blank" rel="noreferrer" title="${htmlEscape(label)}">${htmlEscape(label)}</a>${item.kind === "article" ? "<span>Article</span>" : ""}</li>`;
-      }).join("");
+      // Built node by node: post titles are text, and a link is only ever an
+      // x.com or twitter.com post address.
+      el("xTextRepairList").replaceChildren(...sample.map((item) => {
+        const href = typeof item.url === "string" && X_POST_URL_RE.test(item.url) ? item.url : "";
+        const label = String(item.title || href || "X post");
+        const li = document.createElement("li");
+        const link = document.createElement(href ? "a" : "span");
+        if (href) {
+          link.href = href;
+          link.target = "_blank";
+          link.rel = "noreferrer";
+        }
+        link.title = label;
+        link.textContent = label;
+        li.append(link);
+        if (item.kind === "article") {
+          const tag = document.createElement("span");
+          tag.textContent = "Article";
+          li.append(tag);
+        }
+        return li;
+      }));
     }
 
     async function xTextRepairAction(action) {

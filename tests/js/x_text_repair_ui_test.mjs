@@ -19,16 +19,24 @@ function check(cond, msg, extra) {
   else console.log(`ok: ${msg}`);
 }
 
-function el() {
+function el(tag = "div") {
   const classes = new Set();
-  return {
-    textContent: "", innerHTML: "", disabled: false, title: "", href: "", dataset: {},
+  const node = {
+    tagName: tag.toUpperCase(), textContent: "", innerHTML: "", disabled: false, title: "", href: "", dataset: {},
+    target: "", rel: "", children: [],
     classList: {
       toggle(name, on) { if (on === undefined ? !classes.has(name) : on) classes.add(name); else classes.delete(name); },
       add(name) { classes.add(name); }, remove(name) { classes.delete(name); },
       contains(name) { return classes.has(name); },
     },
+    append(...kids) { node.children.push(...kids); },
+    replaceChildren(...kids) { node.children = kids; node.innerHTML = ""; },
   };
+  return node;
+}
+// Everything a list node holds, as plain records, to check what the page would show.
+function flat(node) {
+  return node.children.flatMap((child) => [child, ...flat(child)]);
 }
 const IDS = ["x-text-repair", "xTextRepairCount", "xTextRepairHow", "xTextRepairControls", "xTextRepairStart",
   "xTextRepairPause", "xTextRepairStop", "xTextRepairProgress", "xTextRepairListBox", "xTextRepairListLabel",
@@ -40,14 +48,16 @@ function page({ settings = {}, replies = {} } = {}) {
   const calls = [];
   const ctx = {
     state: { settings, activeTab: "settings", selectedYoink: null, selectedYoinkSidecar: null },
-    document: { getElementById: (id) => nodes[id] || null },
+    document: { getElementById: (id) => nodes[id] || null, createElement: (tag) => el(tag) },
     window: { setTimeout: () => 0, clearTimeout: () => {} },
-    Date, Number, Math, Boolean, String, Object, JSON, Array,
+    Date, Number, Math, Boolean, String, Object, JSON, Array, Promise, encodeURIComponent,
     htmlEscape: (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"),
     videoIdOf: (row) => (row && row.video_id) || "",
     authFetch: async (path, opts = {}) => {
       calls.push([path, opts.body ? JSON.parse(opts.body) : null]);
-      const reply = replies[opts.body ? JSON.parse(opts.body).action : "get"];
+      const key = opts.body ? JSON.parse(opts.body).action : (path.includes("?video_id=") ? "item" : "get");
+      let reply = replies[key];
+      if (Array.isArray(reply)) reply = reply.length > 1 ? reply.shift() : reply[0];
       if (reply instanceof Error) throw reply;
       return reply;
     },
@@ -56,6 +66,7 @@ function page({ settings = {}, replies = {} } = {}) {
   };
   vm.createContext(ctx);
   vm.runInContext(html.slice(start, end), ctx);
+  ctx.xTextPause = async () => {};  // no real waiting between status checks
   return { ctx, nodes, calls };
 }
 const hidden = (node) => node.classList.contains("hidden");
@@ -83,10 +94,29 @@ const hidden = (node) => node.classList.contains("hidden");
   check(p.nodes.xTextRepairStart.disabled === true && /FxTwitter/.test(p.nodes.xTextRepairStart.title),
     "Start is off until the switch is on");
   check(p.nodes.xTextRepairListLabel.textContent === "Posts to open and save (first 20 of 1,065)", "the list says it is a sample");
-  check(p.nodes.xTextRepairList.innerHTML.includes("&lt;b&gt;odd&lt;/b&gt; title") && !p.nodes.xTextRepairList.innerHTML.includes("<b>"),
-    "titles are escaped");
-  check((p.nodes.xTextRepairList.innerHTML.match(/<span>Article<\/span>/g) || []).length === 1, "Article links are labelled");
+  const items = flat(p.nodes.xTextRepairList);
+  check(p.nodes.xTextRepairList.children.length === 20 && p.nodes.xTextRepairList.innerHTML === "",
+    "the list is built node by node, never from HTML");
+  check(items.some((n) => n.textContent === "<b>odd</b> title" && n.tagName === "A"), "titles are text, not markup");
+  check(items.filter((n) => n.tagName === "SPAN" && n.textContent === "Article").length === 1, "Article links are labelled");
   check(!/—|;/.test(how.replace(/&[a-z]+;/g, "")), "no em dash or semicolon in the copy");
+  check(/FxTwitter is never asked/.test(how) && !/sends nothing anywhere/.test(how), "the copy says only what is true");
+}
+
+// ---- review fix: a stored link is never rendered unless it is an X post ----------------
+{
+  const bad = ["javascript:alert(1)", "https://evil.test/i/status/1", "data:text/html,hi", "JAVASCRIPT:alert(1)",
+    "https://x.com/i/status/1\" onmouseover=\"alert(1)", "https://x.com.evil.test/i/status/1", 7, null];
+  const sample = bad.map((url, i) => ({ video_id: `x_${i}`, title: `Post ${i}`, url, kind: "thread" }))
+    .concat([{ video_id: "x_ok", title: "Fine", url: "https://x.com/i/status/1900000000000000002", kind: "thread" }]);
+  const p = page({ replies: { get: { ok: true, status: "idle", candidates: 9, articles: 0, sample, fxtwitter: false } } });
+  await p.ctx.loadXTextRepair();
+  const links = flat(p.nodes.xTextRepairList).filter((n) => n.tagName === "A");
+  check(links.length === 1 && links[0].href === "https://x.com/i/status/1900000000000000002"
+    && links[0].rel === "noreferrer" && links[0].target === "_blank", "only the real X post becomes a link",
+    links.map((n) => n.href));
+  check(flat(p.nodes.xTextRepairList).filter((n) => n.tagName === "SPAN").length === 8,
+    "the others are listed as plain text");
 }
 
 // ---- switch on: start, progress, back-off ------------------------------------------
@@ -122,7 +152,10 @@ const hidden = (node) => node.classList.contains("hidden");
 
 // ---- the reader's prompt -------------------------------------------------------------
 {
-  const p = page({ replies: { fix: { ok: true, outcome: "fixed" } } });
+  // Deliberately changed in review: the fix answers "queued" and the reader
+  // asks how it went until the helper's worker is done.
+  const p = page({ replies: { fix: { ok: true, queued: true, status: "working" },
+    item: [{ ok: true, item: { status: "working" } }, { ok: true, item: { status: "fixed", note: "" } }] } });
   const row = { video_id: "x_one" };
   const sidecar = { x_text_cut_off: { reason: "long_post", open_url: "https://x.com/i/status/1900000000000000002" } };
   p.ctx.state.selectedYoink = row;
@@ -142,6 +175,50 @@ const hidden = (node) => node.classList.contains("hidden");
     && p.nodes.yoinkXCutOffOpen.textContent === "Open the Article on X", "an Article link post says so");
   p.ctx.renderXCutOff(row, {});
   check(hidden(p.nodes.yoinkXCutOff), "a whole save shows no prompt");
+  check(p.calls.filter(([path]) => path === "/library/x-text-repair?video_id=x_one").length === 2,
+    "it asked about this save until it was done", p.calls);
+  p.ctx.renderXCutOff(row, { x_text_cut_off: { reason: "long_post", open_url: "javascript:alert(1)" } });
+  check(hidden(p.nodes.yoinkXCutOff), "a prompt with a link that isn't X is not shown");
+}
+
+// ---- review fix: saving an Article leaves only the confirmation -------------------------
+{
+  const p = page({ settings: { fxtwitter_enrichment_enabled: true }, replies: { fix: { ok: true, queued: true },
+    item: { ok: true, item: { status: "fixed", saved_as: "x-article_abc", note: "" } } } });
+  const row = { video_id: "x_art" };
+  const sidecar = { x_text_cut_off: { reason: "article", open_url: "https://x.com/i/article/1900000000000000777", title: "Notes" } };
+  p.ctx.state.selectedYoink = row;
+  p.ctx.state.selectedYoinkSidecar = sidecar;
+  p.ctx.renderXCutOff(row, sidecar);
+  await p.ctx.fixXCutOff();
+  check(!hidden(p.nodes.yoinkXCutOff) && /Saved the Article as its own item/.test(p.nodes.yoinkXCutOffText.textContent),
+    "the confirmation shows", p.nodes.yoinkXCutOffText.textContent);
+  check(hidden(p.nodes.yoinkXCutOffFix) && hidden(p.nodes.yoinkXCutOffOpen) && sidecar.x_text_cut_off === null,
+    "and the stale prompt and its button are gone");
+}
+
+// ---- review fix: a fix that FxTwitter can't finish says why ------------------------------
+{
+  const p = page({ settings: { fxtwitter_enrichment_enabled: true }, replies: { fix: { ok: true, queued: true },
+    item: { ok: true, item: { status: "failed", code: "rate_limited", note: "FxTwitter asked Uoink to slow down. Try again in a few minutes." } } } });
+  const row = { video_id: "x_slow" };
+  const sidecar = { x_text_cut_off: { reason: "long_post", open_url: "https://x.com/i/status/1900000000000000002" } };
+  p.ctx.state.selectedYoink = row;
+  p.ctx.state.selectedYoinkSidecar = sidecar;
+  await p.ctx.fixXCutOff();
+  check(/slow down/.test(p.nodes.yoinkXCutOffStatus.textContent) && !p.nodes.yoinkXCutOffFix.disabled,
+    "the reason shows and the button works again", p.nodes.yoinkXCutOffStatus.textContent);
+}
+
+// ---- review fix: an interrupted run keeps being checked ----------------------------------
+{
+  let timers = 0;
+  const p = page({ replies: { get: { ok: true, status: "interrupted", candidates: 4, articles: 0, sample: [], fxtwitter: false } } });
+  p.ctx.window.setTimeout = () => { timers++; return 1; };
+  await p.ctx.loadXTextRepair();
+  check(timers === 1, "an interrupted run is checked again");
+  check(/Turn FxTwitter back on/.test(p.nodes.xTextRepairProgress.textContent),
+    "with the switch off it says what to do", p.nodes.xTextRepairProgress.textContent);
 }
 
 if (failures) {
