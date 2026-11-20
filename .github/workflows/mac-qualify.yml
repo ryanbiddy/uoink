@@ -215,7 +215,7 @@ jobs:
         run: |
           echo "recipe=$(python -B scripts/mac/build_ffmpeg.py --cache-key)" >> "$GITHUB_OUTPUT"
           echo "toolchain=$( { xcrun --show-sdk-version; clang --version; } | shasum -a 256 | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/mac-ffmpeg
           key: ffmpeg-macos15-arm64-floor15-${{ steps.ffmpeg-key.outputs.recipe }}-${{ steps.ffmpeg-key.outputs.toolchain }}
@@ -223,7 +223,7 @@ jobs:
         run: python -B scripts/mac/build_ffmpeg.py --output "$RUNNER_TEMP/mac-ffmpeg"
       # The bundled Whisper model download. The stager re-verifies every
       # cached file's size and SHA-256 against the pin before it ships.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/whisper-model
           key: whisper-model-${{ hashFiles('scripts/whisper_model_pin.json') }}
