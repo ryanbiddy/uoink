@@ -106,6 +106,13 @@ def parser():
     note = command("note", help="save a note to your library")
     note.add_argument("text", help="the note text")
     note.add_argument("--title", help="a title for the note")
+    models = command("models", help="list, download, delete or choose local transcription models",
+                     description="Speech models for videos with no captions. Downloads come from "
+                                 "Hugging Face, are checked file by file and resume after a stop. "
+                                 "Ctrl+C stops a download here; run it again to resume.")
+    models.add_argument("action", nargs="?", default="list", choices=("list", "download", "delete", "use"),
+                        help="list (default), download, delete or use")
+    models.add_argument("model", nargs="?", help="model id from 'uoink models', for example distil-small.en")
     command("status", help="show the version, data folder and whether the helper is running")
     connect = command("connect", help="print local connection recipes; never writes client files")
     connect.add_argument("client", nargs="?", help="client name; use --list to see them")
@@ -648,6 +655,44 @@ def serve_mcp():
     return 0
 
 
+def models_command(ns, server):
+    """`uoink models`: the same catalog, checks and files as Settings and
+    the helper's /asr/models routes. A download here runs in this terminal."""
+    if ns.action == "list":
+        return server.asr_models_payload()
+    if not ns.model:
+        raise UsageError(f"name a model: uoink models {ns.action} <model>")
+    if ns.action == "delete":
+        return server.delete_asr_model(ns.model)[0]
+    if ns.action == "use":
+        return server.use_asr_model(ns.model)[0]
+    asr_models = server.asr_models
+    try:
+        entry = asr_models.get(ns.model)
+    except ValueError as exc:
+        raise UsageError(str(exc)) from exc
+    shown = [0]
+
+    def progress(done, total):
+        step = max(1, total // 50)
+        if done - shown[0] >= step or done == total:
+            shown[0] = done
+            print(f"Downloaded {done // 1_000_000} MB of {total // 1_000_000} MB", file=sys.stderr)
+
+    print(f"Downloading {entry['id']} from huggingface.co ({asr_models.total_bytes(entry['id']) // 1_000_000} MB). "
+          "Ctrl+C stops it; run the same command to resume.", file=sys.stderr)
+    cancel = threading.Event()
+    try:
+        return asr_models.download(entry["id"], server.RELIABILITY_MODEL_ROOT, cancel_event=cancel,
+                                   progress=progress)
+    except KeyboardInterrupt:
+        cancel.set()
+        return {"ok": False, "model": entry["id"],
+                "error": "Download stopped. Run the same command to resume it."}
+    except (asr_models.DownloadBusy, asr_models.DownloadCancelled, ConnectionError) as exc:
+        return {"ok": False, "model": entry["id"], "error": str(exc)}
+
+
 def finish_call_work(server, name, payload, existing_threads):
     if name == "transcribe_podcast_episode" and payload.get("ok") is True:
         server._podcast_transcription_queue.join()
@@ -743,6 +788,8 @@ def main(argv=None):
             import uoink_agent_runtime as runtime
             if ns.command == "research":
                 payload = research_command(ns, server)
+            elif ns.command == "models":
+                payload = models_command(ns, server)
             elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,
                            "data_dir": str(server.DATA_ROOT.resolve()),
