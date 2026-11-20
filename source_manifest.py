@@ -35,7 +35,7 @@ _SOURCES: list[dict] = [
     },
     {
         "slug": "youtube", "name": "YouTube", "category": "video", "status": SHIPPED,
-        "capture": "Click the rust U under any video, or right-click a link.",
+        "capture": "Click the Uoink button under any video, or right-click a link.",
         "lands": "Transcript, screenshots on an interval, comments, channel context.",
         "best_for": "Studying a channel, grounding a script or thread.",
     },
@@ -47,7 +47,7 @@ _SOURCES: list[dict] = [
     },
     {
         "slug": "tiktok", "name": "TikTok", "category": "video", "status": SHIPPED,
-        "capture": "Paste a TikTok link, or open one and click the rust U.",
+        "capture": "Paste a TikTok link, or open one and click Uoink in your browser toolbar.",
         "lands": "The clip, its caption, the creator, and a transcript when TikTok exposes captions.",
         "best_for": "Saving a short you want to study or write from.",
     },
@@ -59,7 +59,7 @@ _SOURCES: list[dict] = [
     },
     {
         "slug": "youtube-shorts", "name": "YouTube Shorts", "category": "video", "status": SHIPPED,
-        "capture": "Paste a Shorts link, or click the rust U on the Short.",
+        "capture": "Paste a Shorts link, or click the Uoink button on the Short.",
         "lands": "The same as a YouTube video, tagged as a short so it filters with the others.",
         "best_for": "Treating a Short as a first-class source, not a second-class video.",
     },

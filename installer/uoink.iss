@@ -112,8 +112,8 @@ InstallingLabel=This only takes a minute.
 StatusExtractFiles=Copying Uoink files...
 ClickFinish=
 FinishedHeadingLabel=Uoink is installed
-FinishedLabelNoIcons=Uoink opens next and walks you through adding the browser button. Your first save opens the dashboard with the source ready to read.
-FinishedLabel=Uoink opens next and walks you through adding the browser button. Your first save opens the dashboard with the source ready to read.
+FinishedLabelNoIcons=Uoink opens next and walks you through adding the browser button. Then click Uoink under any YouTube video to save it to your library.
+FinishedLabel=Uoink opens next and walks you through adding the browser button. Then click Uoink under any YouTube video to save it to your library.
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

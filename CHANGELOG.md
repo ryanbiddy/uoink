@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   on screen.
 - Windows setup now checks that every Uoink program file arrived after an install, not only
   the ones that went missing in the past.
+- First-run copy names the button you actually see. The ready notice, the empty library and the
+  Sources page now say "the Uoink button" instead of the old "rust U", and the TikTok tip points
+  at the Uoink icon in your browser toolbar. The last install screen no longer says your first
+  save opens the dashboard. It keeps you on the page and shows a notice instead.
 
 ## [3.17.0] - 2026-11-12
 
