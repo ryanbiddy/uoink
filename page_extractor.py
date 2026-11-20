@@ -503,7 +503,33 @@ def extract_page(idx, url: str, *,
                       "logged-in page. X posts and threads capture fully from "
                       "a /status/ link."),
         }
+    if result.get("code") == "article_body_not_found":
+        # 3.18: say what the fetch got, and offer the page the way the user's
+        # browser shows it (the extension's Uoink this page reads that tab).
+        state = page_state(result.get("diagnostic") or "")
+        result.update(page_state=state, open_url=canonical, error=PAGE_STATE_COPY[state])
     return result
+
+
+PAGE_STATE_COPY = {
+    "wall": ("This page showed Uoink a sign-in, paywall or robot check instead of the article, so "
+             "nothing was saved. Open it in your browser and click Uoink this page in the extension "
+             "to save what you can see."),
+    "shell": ("This page builds its text in the browser, so Uoink's fetch got an empty page and "
+              "nothing was saved. Open it in your browser and click Uoink this page in the extension "
+              "to save what you can see."),
+    "thin": ("Uoink found too little text on this page, so nothing was saved. If it shows more in "
+             "your browser, open it there and click Uoink this page in the extension."),
+}
+
+
+def page_state(diagnostic: str) -> str:
+    """wall | shell | thin, from an article_body_not_found diagnostic."""
+    if "login or paywall" in diagnostic or "robot check" in diagnostic:
+        return "wall"
+    if "JavaScript" in diagnostic:
+        return "shell"
+    return "thin"
 
 
 def _fetch_page_html(url: str, http_open=None):

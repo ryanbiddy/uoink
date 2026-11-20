@@ -10,6 +10,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Uoink this page (extension) now saves the page the way your tab shows it: after it loaded,
+  with your own sign-in, including pages that build their text with JavaScript. The extension
+  reads the tab with Defuddle 0.19.6 (MIT, bundled, no remote code) and sends only the text and
+  its title, author and date to the helper on your computer, which saves it like any page.
+  If the tab moved to another page or can't be read, Uoink fetches the link as before. No new
+  extension permissions. The extension package grows by about 100 KB zipped.
+
+### Changed
+
+- Pasted links save cleaner pages: code blocks keep their language, images keep their alt text
+  (lazy-loaded ones too), and figure and table captions, footnotes and math come through. Email
+  newsletters laid out in tables read as text, Q&A pages keep the question and every answer,
+  wiki contents boxes and category bars stay out, and titles drop the site name.
+- A page that shows Uoink a sign-in, paywall preview or robot check, an empty app shell, or too
+  little text now says so on its row, saves nothing, and offers Open page so you can save it
+  from your browser with Uoink this page.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

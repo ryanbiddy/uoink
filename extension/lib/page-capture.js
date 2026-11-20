@@ -61,10 +61,10 @@
   function visibleCopy(doc) {
     const copy = doc.cloneNode(true);
     const view = doc.defaultView;
-    if (!view || !doc.body || !copy.body) return copy;
+    if (!view || !doc.body || !copy.body) return annotateCopy(copy);
     const live = doc.body.getElementsByTagName("*");
     const mirror = copy.body.getElementsByTagName("*");
-    if (live.length !== mirror.length || live.length > MAX_SCAN) return copy;
+    if (live.length !== mirror.length || live.length > MAX_SCAN) return annotateCopy(copy);
     const drop = [];
     let hidden = null;
     for (let i = 0; i < live.length; i++) {
@@ -78,6 +78,49 @@
       }
     }
     for (const el of drop) el.remove();
+    return annotateCopy(copy);
+  }
+
+  // On the copy only: give Defuddle a lazy image's real source, and a code
+  // block the language its highlighter wrapper names (cleaning drops the
+  // wrapper before page-capture sees it).
+  function annotateCopy(copy) {
+    const root = copy.body;
+    if (!root) return copy;
+    for (const img of root.querySelectorAll("img")) {
+      const src = (img.getAttribute("src") || "").trim();
+      const real = img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+      if (real && (!src || /^data:/i.test(src))) img.setAttribute("src", real);
+    }
+    for (const pre of root.querySelectorAll("pre")) {
+      const code = pre.querySelector("code") || pre;
+      const own = `${code.getAttribute("class") || ""} ${pre.getAttribute("class") || ""}`;
+      if (/(?:^|\s)(?:language|lang)-/.test(own) || code.getAttribute("data-lang") || pre.getAttribute("data-lang")) continue;
+      let el = pre.parentElement;
+      for (let i = 0; el && i < 5; i++, el = el.parentElement) {
+        const m = /(?:^|\s)(?:highlight-source|language|lang)-([\w+#.-]{1,24})(?=\s|$)/.exec(el.getAttribute("class") || "");
+        const lang = String(el.getAttribute("data-lang") || (m && m[1]) || "").replace(/[^\w+#.-]/g, "").slice(0, 24);
+        if (lang) {
+          // Defuddle reads the wrapper when there is one, the block otherwise.
+          el.setAttribute("data-lang", lang);
+          pre.setAttribute("data-lang", lang);
+          code.setAttribute("class", `${code.getAttribute("class") || ""} language-${lang}`.trim());
+          break;
+        }
+      }
+    }
+    // MathML's alttext is the author's own TeX: keep it over a rebuilt one.
+    for (const math of root.getElementsByTagName("math")) {
+      const alt = (math.getAttribute("alttext") || "").trim();
+      if (alt && !math.getAttribute("data-latex") && !math.querySelector("annotation")) {
+        math.setAttribute("data-latex", alt.slice(0, 2000));
+      }
+    }
+    // Line numbers beside highlighted code are not part of the code.
+    for (const gutter of root.querySelectorAll(
+      "td.linenos, .linenodiv, td.gutter, .rouge-gutter, .line-numbers-rows, .hljs-ln-numbers")) {
+      gutter.remove();
+    }
     return copy;
   }
 

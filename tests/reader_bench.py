@@ -91,14 +91,15 @@ _FENCE = re.compile(r"^\s{0,3}(`{3,}|~{3,})\s*([\w+#.-]*)")
 
 
 def md_plain(md):
-    """Markdown to the words a reader sees (code kept, syntax dropped)."""
+    """Markdown to the words a reader sees (code kept, syntax dropped). Image alt
+    text is not prose a reader sees on the page; images are scored on their own."""
     out = []
     for line in (md or "").splitlines():
         if _FENCE.match(line):
             continue
         if re.fullmatch(r"\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*", line):
             continue
-        s = _IMG.sub(lambda m: f" {m.group(1)} ", line)
+        s = _IMG.sub(" ", line)
         s = re.sub(r"\[\^[^\]]+\]:?", " ", s)
         s = _LINK.sub(lambda m: f" {m.group(1)} ", s)
         s = re.sub(r"^\s{0,3}#{1,6}\s+", "", s)

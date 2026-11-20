@@ -14469,6 +14469,12 @@
         run.reason = allowlistWallCopy(run.allowHost);
       } else if (data.code === "x_login_wall") {
         run.reason = failure.detail ? failure.reason : "X login-walls this one. Paste a /status/ link to capture X posts and threads.";
+      } else if (data.page_state && typeof data.error === "string" && data.error.trim()) {
+        // 3.18: the helper names what its fetch got (a wall, an empty app
+        // page, too little text). The row offers the page in the browser,
+        // where the extension's Uoink this page saves what the tab shows.
+        run.reason = data.error.trim().slice(0, 400);
+        run.openUrl = /^https?:\/\//i.test(String(data.open_url || "")) ? String(data.open_url) : "";
       } else {
         run.reason = failure.reason;
       }
@@ -14888,7 +14894,7 @@
           errorDetail: failed ? run.errorDetail : "",
           strip: failed ? captureStripHtml(index, { failed }) : captureStripHtml(index, { advanced: captureAdvanced(run.id, index) }),
           actions: failed
-            ? `${run.allowHost
+            ? `${run.openUrl ? `<a class="button" data-source-link href="${htmlEscape(run.openUrl)}" target="_blank" rel="noreferrer">Open page</a>` : ""}${run.allowHost
               ? `<button class="button" type="button" data-library-allow-site="${htmlEscape(run.id)}">Allow ${htmlEscape(run.allowHost)}</button>`
               : `<button class="button" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button>`}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
             : "",

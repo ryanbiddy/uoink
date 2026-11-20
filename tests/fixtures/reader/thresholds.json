@@ -4,8 +4,8 @@
    "block_recall": 0.97,
    "metadata": 0.99,
    "outcome_accuracy": 0.99,
-   "precision": 0.971,
-   "recall": 0.988
+   "precision": 0.975,
+   "recall": 0.989
   },
   "fixtures": {
    "api-reference": {
@@ -82,7 +82,7 @@
    },
    "math-page": {
     "outcome": "article",
-    "recall": 0.944
+    "recall": 0.95
    },
    "news-divsoup": {
     "outcome": "article",
@@ -157,24 +157,24 @@
   "structure": {
    "captions": 0.99,
    "code": 0.99,
-   "code_lang": 0.79,
+   "code_lang": 0.99,
    "footnotes": 0.99,
    "headings": 0.99,
    "images": 0.899,
    "links": 0.99,
    "list_items": 0.99,
-   "math": 0.74,
+   "math": 0.99,
    "quotes": 0.99,
    "tables": 0.99
   }
  },
  "helper": {
   "aggregate": {
-   "block_recall": 0.931,
-   "metadata": 0.923,
-   "outcome_accuracy": 0.934,
-   "precision": 0.957,
-   "recall": 0.962
+   "block_recall": 0.965,
+   "metadata": 0.99,
+   "outcome_accuracy": 0.99,
+   "precision": 0.963,
+   "recall": 0.985
   },
   "fixtures": {
    "api-reference": {
@@ -184,6 +184,9 @@
    "blog-footnotes": {
     "outcome": "article",
     "recall": 0.95
+   },
+   "bot-check": {
+    "outcome": "wall"
    },
    "callouts-guide": {
     "outcome": "article",
@@ -246,7 +249,7 @@
    },
    "math-page": {
     "outcome": "article",
-    "recall": 0.914
+    "recall": 0.95
    },
    "news-divsoup": {
     "outcome": "article",
@@ -258,7 +261,7 @@
    },
    "news-semantic": {
     "outcome": "article",
-    "recall": 0.933
+    "recall": 0.95
    },
    "newsletter-email": {
     "outcome": "article",
@@ -271,13 +274,16 @@
     "outcome": "article",
     "recall": 0.95
    },
+   "paywall-teaser": {
+    "outcome": "wall"
+   },
    "press-release": {
     "outcome": "article",
     "recall": 0.95
    },
    "qa-page": {
     "outcome": "article",
-    "recall": 0.337
+    "recall": 0.95
    },
    "recipe": {
     "outcome": "article",
@@ -300,28 +306,28 @@
    },
    "tables-report": {
     "outcome": "article",
-    "recall": 0.898
+    "recall": 0.95
    },
    "utility-classes": {
     "outcome": "article",
-    "recall": 0.938
+    "recall": 0.95
    },
    "wiki-style": {
     "outcome": "article",
     "recall": 0.95
    }
   },
-  "junk_leaks_max": 12,
+  "junk_leaks_max": 7,
   "structure": {
-   "captions": 0.49,
-   "code": 0.717,
-   "code_lang": 0.0,
-   "footnotes": 0.0,
-   "headings": 0.92,
-   "images": 0.0,
+   "captions": 0.99,
+   "code": 0.99,
+   "code_lang": 0.99,
+   "footnotes": 0.99,
+   "headings": 0.99,
+   "images": 0.99,
    "links": 0.99,
-   "list_items": 0.915,
-   "math": 0.0,
+   "list_items": 0.99,
+   "math": 0.99,
    "quotes": 0.99,
    "tables": 0.95
   }

@@ -63,12 +63,7 @@ def _plain(markdown: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[#>*`|_~-]+", " ", text)).strip()
 
 
-def page_state(diagnostic: str) -> str:
-    if "login or paywall" in diagnostic:
-        return "wall"
-    if "JavaScript" in diagnostic:
-        return "shell"
-    return "thin"
+page_state = page_extractor.page_state
 
 
 def build_extract_result(payload) -> dict:
