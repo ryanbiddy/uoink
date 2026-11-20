@@ -5,6 +5,7 @@
   "basis": "Reviewed build.ps1 source payload; Windows launch/watchdog scripts excluded. VERSION and license notices added.",
   "paths": [
     "_platform.py",
+    "asr_worker.py",
     "assets/brand",
     "assets/dashboard",
     "assets/logo-mark-color.png",

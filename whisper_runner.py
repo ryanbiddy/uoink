@@ -424,6 +424,59 @@ def _shape_segments(segments) -> list[dict]:
     return out
 
 
+def _asr_offload_active() -> bool:
+    try:
+        import asr_worker
+    except ImportError:  # pragma: no cover - the module always ships
+        return False
+    return asr_worker.offload_active()
+
+
+def plain_engine_for(diarize: bool) -> bool:
+    """True when a job should skip WhisperX and run on faster-whisper alone.
+
+    WhisperX adds exactly one thing Uoink keeps: speaker labels (forced
+    alignment plus pyannote diarization). Without them its output is the same
+    faster-whisper text, but loading it pulls in torch, Lightning and a
+    pyannote voice-detection checkpoint (gigabytes of memory). faster-whisper
+    has its own Silero voice detection, so a transcript-only job uses it.
+    The gate is unchanged: some engine must be available, as before.
+    """
+    if diarize or transcription_engine() is None:
+        return False
+    try:
+        return importlib.util.find_spec("faster_whisper") is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def _transcribe_audio_plain(audio_path: Path, *, data_root: Path, model_size: str,
+                            language: str | None, consent_given: bool,
+                            initial_prompt: str | None) -> dict:
+    """Transcript-only faster-whisper run on this cache/consent/bundle policy."""
+    import _platform
+    import uoink_reliability
+    _platform.require_media()
+    model_path = _prepare_model_snapshot(
+        data_root, model_size, consent_given=consent_given)
+    if (model_path != _bundled_snapshot(model_size)
+            and _checked_model_snapshot(data_root, model_size, model_path) is None):
+        raise RuntimeError("Local ASR snapshot changed before model construction")
+    info: dict[str, Any] = {}
+    entries = uoink_reliability.transcribe_media(
+        audio_path, model_name=str(model_path), language=language, info=info,
+        initial_prompt=initial_prompt)
+    return {
+        "model": model_size,
+        "language": info.get("language") or language or "en",
+        "diarization_ran": False,
+        "segments": [{"start": start, "end": end, "text": text}
+                     for start, end, text in entries],
+        "generated_at": _now_iso(),
+        "engine": "faster-whisper",
+    }
+
+
 def transcribe_audio(audio_path: Path, *,
                       data_root: Path,
                       model_size: str = MODEL_BASE,
@@ -445,6 +498,18 @@ def transcribe_audio(audio_path: Path, *,
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")
+    if _asr_offload_active():
+        # The helper never loads a model: the transcription child does, and
+        # exits when idle so the OS gets the memory back (asr_worker).
+        import asr_worker
+        return asr_worker.call("transcribe_audio", {
+            "audio_path": str(audio_path), "data_root": str(Path(data_root)),
+            "model_size": model_size, "language": language, "diarize": bool(diarize),
+            "consent_given": bool(consent_given), "initial_prompt": initial_prompt})
+    if plain_engine_for(diarize):
+        return _transcribe_audio_plain(
+            audio_path, data_root=data_root, model_size=normalize_model(model_size),
+            language=language, consent_given=consent_given, initial_prompt=initial_prompt)
     model_size = normalize_model(model_size)
     _platform.require_media()
     if sys.platform == "darwin":

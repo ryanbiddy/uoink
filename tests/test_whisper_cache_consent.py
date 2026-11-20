@@ -48,6 +48,10 @@ def runner_functions(source):
         "_bundled_snapshot": lambda model_size: None,
         "_compute_type": lambda device: "int8", "_now_iso": lambda: "synthetic-time",
         "transcription_engine": lambda: "whisperx" if scope["_WHISPERX_AVAILABLE"] else None,
+        # 3.18 seams: no child-process offload here, and these contracts cover
+        # the WhisperX engine (speaker labels), not the faster-whisper route.
+        "_asr_offload_active": lambda: False,
+        "plain_engine_for": lambda diarize: False,
     }
     future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
     module = ast.fix_missing_locations(ast.Module(body=[future, *nodes], type_ignores=[]))

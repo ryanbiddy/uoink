@@ -99,6 +99,7 @@ import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
+import asr_worker  # noqa: E402  -- 3.18 models run in a child process that exits when idle
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
@@ -3387,6 +3388,7 @@ def _resolve_video_transcript(
                             model_name=model_name,
                             model_root=RELIABILITY_MODEL_ROOT,
                             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
+                            **({"cancel_event": cancel_event} if cancel_event is not None else {}),
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3442,6 +3444,7 @@ def _resolve_video_transcript(
                         model_name=model_name,
                         model_root=RELIABILITY_MODEL_ROOT,
                         **({"initial_prompt": initial_prompt} if initial_prompt else {}),
+                        **({"cancel_event": cancel_event} if cancel_event is not None else {}),
                     )
                 _raise_if_cancelled(cancel_event)
                 if media_chunks:
@@ -3457,6 +3460,7 @@ def _resolve_video_transcript(
     except PlaylistJobCancelled:
         raise
     except Exception as e:
+        _raise_if_cancelled(cancel_event)  # a cancel that stopped the model is a cancel
         log.warning("local ASR fallback failed: %s", e)
         return [], None, {
             "status": "failed",
@@ -15339,6 +15343,9 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 
     # 1. helper_responsive -- we are answering this request.
     add("helper_responsive", "ok", None)
+    # 1b. transcription_engine (3.18): models run in a child process that
+    # exits when idle; this says whether one holds memory right now.
+    add("transcription_engine", "ok", asr_worker.status_line())
 
     # 2. platform (Sprint 19.5 Stage 1). The popup uses this to surface
     # platform-appropriate install / recovery hints rather than the
@@ -17393,6 +17400,10 @@ class Handler(BaseHTTPRequestHandler):
                 "whisper_model": whisper_model,
                 "whisperx_model_loaded": whisper_runner.is_model_downloaded(
                     DATA_ROOT, whisper_model),
+                # 3.18: whether a transcription process holds model memory now
+                # (state not_loaded / loaded / running) and when it frees it.
+                "transcription_worker": {**asr_worker.status(),
+                                         "line": asr_worker.status_line()},
                 # True while a corrupt index.db is being rebuilt from disk.
                 "index_recovering": _index_recovering,
                 # True when the active output root has been swapped from
@@ -24464,6 +24475,10 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # This process owns the port, so its token is the one clients must read.
     _persist_token(TOKEN)
     _TOKEN_OWNED = True
+    # 3.18: the helper never loads a speech model itself. Each transcription
+    # runs in one child process that exits after a short idle period, so the
+    # memory torch / CTranslate2 / pyannote take always goes back to the OS.
+    asr_worker.enable_offload(log_dir=DATA_ROOT)
 
     _migrate_plaintext_anthropic_key()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt

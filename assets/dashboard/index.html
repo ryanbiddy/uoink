@@ -6881,6 +6881,7 @@
               <p class="setting-copy">Local-first. Open source. Your machine does the work. No cloud account, no sync layer.</p>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
               <p class="setting-copy" id="librarianStatus" data-library-status="unknown">Librarian: checking...</p>
+              <p class="setting-copy" id="transcriptionEngineStatus" data-engine-state="unknown">Transcription engine: checking...</p>
               <details>
                 <summary>Advanced: local address</summary>
                 <p class="setting-copy" id="aboutPort">Local address loading...</p>
@@ -15629,6 +15630,24 @@
       }
     }
 
+    // 3.18: speech models run in a separate process that exits when idle.
+    // The helper says whether one holds memory now and when it frees it.
+    function transcriptionEngineText(worker) {
+      const info = worker && typeof worker === "object" ? worker : null;
+      if (!info) return "Transcription engine: checking...";
+      if (typeof info.line === "string" && info.line) return info.line;
+      if (info.state === "running") return "Transcription engine: working now.";
+      if (info.state === "loaded") return "Transcription engine: loaded, frees its memory when idle.";
+      return "Transcription engine: idle (not loaded).";
+    }
+
+    function renderTranscriptionEngineStatus(worker) {
+      const node = document.getElementById("transcriptionEngineStatus");
+      if (!node) return;
+      node.textContent = transcriptionEngineText(worker);
+      node.dataset.engineState = (worker && worker.state) || "unknown";
+    }
+
     function renderLibrarianStatus(library) {
       if (!els.librarianStatus) return;
       els.librarianStatus.textContent = librarianStatusText(library);
@@ -15752,6 +15771,7 @@
         els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
         els.aboutPort.textContent = `http://127.0.0.1:${data.port || 5179}`;
         renderLibrarianStatus(data.library);
+        renderTranscriptionEngineStatus(data.transcription_worker);
       } catch (_) {
         let recovery = null;
         try {

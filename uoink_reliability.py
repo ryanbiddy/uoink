@@ -86,6 +86,45 @@ _ESTIMATED_DOWNLOAD_MB = {
 }
 
 
+def _offload_active() -> bool:
+    """True in long-lived processes that send model work to a child process
+    (asr_worker.enable_offload). Never true inside that child or in tests."""
+    try:
+        import asr_worker
+    except ImportError:  # pragma: no cover - the module always ships
+        return False
+    return asr_worker.offload_active()
+
+
+def _cancelled_error():
+    import asr_worker
+    return asr_worker.TranscriptionCancelled("transcription cancelled")
+
+
+class TranscriptEntry(tuple):
+    """One transcript row, ``(start, end, text)``, that may also carry the
+    model's word timings in ``words``. It unpacks as three values and equals
+    the plain tuple, so every caller that reads rows is unchanged."""
+
+    def __new__(cls, start: float, end: float, text: str, words: list | None = None):
+        entry = super().__new__(cls, (start, end, text))
+        entry.words = words or None
+        return entry
+
+
+def entry_to_json(entry) -> list:
+    row = [entry[0], entry[1], entry[2]]
+    words = getattr(entry, "words", None)
+    if words:
+        row.append(words)
+    return row
+
+
+def entry_from_json(row) -> TranscriptEntry:
+    words = row[3] if len(row) > 3 and isinstance(row[3], list) else None
+    return TranscriptEntry(float(row[0]), float(row[1]), str(row[2]), words)
+
+
 def _import_faster_whisper():
     try:
         from faster_whisper import WhisperModel  # type: ignore
@@ -133,6 +172,11 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
 def ensure_model(model_name: str = DEFAULT_MODEL,
                  model_root: str | Path | None = None) -> dict[str, Any]:
     """Load the model once so faster-whisper downloads it if missing."""
+    if _offload_active():
+        import asr_worker
+        return asr_worker.call("ensure_model", {
+            "model_name": model_name,
+            "model_root": str(model_root) if model_root is not None else None})
     _load_model(model_name, model_root, local_files_only=False)
     ready_marker: Path | None = None
     if model_root:
@@ -451,13 +495,29 @@ def build_initial_prompt(*titles) -> str | None:
     return prompt or None
 
 
+def _watched_segments(segments, cancel_event=None, progress=None, total=None):
+    """Yield segments; stop between them on cancel and report how far along."""
+    for segment in segments:
+        if cancel_event is not None and cancel_event.is_set():
+            raise _cancelled_error()
+        yield segment
+        if progress is not None:
+            end = segment.get("end") if isinstance(segment, dict) else getattr(segment, "end", None)
+            try:
+                progress(end, total)
+            except Exception:  # noqa: BLE001 - a progress display never fails a job
+                pass
+
+
 def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
                      _transcribe=None,
                      info: dict | None = None,
                      language: str | None = None,
-                     initial_prompt: str | None = None) -> list[tuple[float, float, str]]:
+                     initial_prompt: str | None = None,
+                     cancel_event=None,
+                     progress=None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
 
     Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
@@ -472,10 +532,26 @@ def transcribe_media(media_path: str | Path, *,
 
     ``initial_prompt`` is a short plain-text vocabulary hint (titles) that
     steers Whisper toward niche spellings; it is never written to the output.
+
+    In the helper (``asr_worker.enable_offload``) the work runs in the
+    transcription child process; the return value and errors are the same.
+    ``cancel_event`` stops the job (``asr_worker.TranscriptionCancelled``);
+    ``progress(done_seconds, total_seconds)`` reports how far along it is.
     """
     media = Path(media_path)
     if not media.is_file():
         raise FileNotFoundError(f"media file not found: {media}")
+
+    if _transcribe is None and _offload_active():
+        import asr_worker
+        result = asr_worker.call("transcribe_media", {
+            "media_path": str(media), "model_name": str(model_name),
+            "model_root": str(model_root) if model_root is not None else None,
+            "language": language, "initial_prompt": initial_prompt,
+        }, cancel_event=cancel_event, progress=progress)
+        if info is not None:
+            info.update(result.get("info") or {})
+        return [entry_from_json(row) for row in result.get("entries") or []]
 
     if _transcribe is not None:
         segments = _transcribe(str(media))
@@ -497,6 +573,8 @@ def transcribe_media(media_path: str | Path, *,
             info["language"] = getattr(detected, "language", None)
             info["language_probability"] = getattr(
                 detected, "language_probability", None)
+        segments = _watched_segments(
+            segments, cancel_event, progress, getattr(detected, "duration", None))
     return _transcript_entries_from_segments(segments)
 
 
@@ -611,6 +689,14 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
     audio = Path(audio_path)
     if not audio.is_file():
         raise FileNotFoundError(f"audio file not found: {audio}")
+
+    if _transcribe is None and _offload_active():
+        import asr_worker
+        rows = asr_worker.call("detect_unreliable_spans", {
+            "transcript_text": transcript_text, "audio_path": str(audio),
+            "threshold": threshold, "model_name": str(model_name),
+            "model_root": str(model_root) if model_root is not None else None})
+        return [Span(**row) for row in rows or []]
 
     if _transcribe is not None:
         segments = _transcribe(str(audio))
