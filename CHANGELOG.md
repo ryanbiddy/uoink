@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- For contributors: one command, `python scripts/qa_smoke.py`, checks the main paths before a
+  release. It builds a made-up library with no network, starts the helper hidden on a test
+  port (never your own library or port 5179), clicks through the dashboard at phone and desktop
+  sizes in light and dark, saves a page with the extension, checks the API, MCP and CLI, and
+  prints a pass/fail table with a page of screenshots. Nothing from it ships in the app or the
+  extension. See `docs/qa-smoke.md`.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

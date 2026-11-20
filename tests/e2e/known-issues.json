@@ -10,5 +10,35 @@
     "check": "a11y-dialog",
     "match": "hook-explainer: focus does not return",
     "note": "closeHookExplainer() hides the dialog but never moves focus back to the button that opened it, so keyboard focus is lost on a hidden element."
+  },
+  {
+    "id": "KI-03",
+    "check": "console-error",
+    "match": "status of 503 \\(Service Unavailable\\)",
+    "note": "/jobs/stream allows 8 streams and frees a closed one only when its next heartbeat write fails (up to 15 s). Reloading or opening the dashboard about 8 times inside 15 s gets 503 'too many streams'. The dashboard retries with backoff, so it recovers, but the console shows the error."
+  },
+  {
+    "id": "KI-03",
+    "check": "server-error",
+    "match": "^503 /jobs/stream$",
+    "note": "Same as the console-error entry above."
+  },
+  {
+    "id": "KI-04",
+    "check": "search-snippet",
+    "match": "search quote shows raw Markdown",
+    "note": "When a search matches an item with no transcript, the Library card quotes the saved file's Markdown header (# Title **Channel:** ... **Duration:** ... **URL:**) instead of plain words."
+  },
+  {
+    "id": "KI-05",
+    "check": "a11y-nested",
+    "match": "controls sit inside library cards that are buttons",
+    "note": "Library cards are role=button and hold their own buttons and links (hook chip, Write from this, match timestamp). Screen readers announce nested controls poorly."
+  },
+  {
+    "id": "ENV-01",
+    "check": "console-error",
+    "match": "net::ERR_NO_BUFFER_SPACE",
+    "note": "Windows ran out of socket buffers for a moment while the suite opened many connections. Seen twice in one run on this PC. Not traced to the product (unverified)."
   }
 ]

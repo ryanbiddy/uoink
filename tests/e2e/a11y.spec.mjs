@@ -115,6 +115,12 @@ test.describe("accessibility", { tag: "@seeded" }, () => {
     await gotoDashboard(page);
     await waitForLibrary(page);
     await checkNames(page, testInfo, "library");
+    // A control inside another control is announced badly and is hard to reach.
+    const nested = await page.locator("#libraryGrid [role=button]").evaluateAll((cards) => cards.flatMap((card) =>
+      Array.from(card.querySelectorAll("button, a[href], input, select, [role=button], [role=link]"))
+        .filter((el) => el.getClientRects().length)
+        .map((el) => `${card.getAttribute("aria-label") || "card"} contains ${el.tagName.toLowerCase()} "${(el.getAttribute("aria-label") || el.textContent || "").trim().slice(0, 30)}"`)));
+    expectNoNewProblems("a11y-nested", nested.length ? [`${nested.length} controls sit inside library cards that are buttons, e.g. ${nested[0]}`] : [], testInfo);
     await checkFocusVisible(page, testInfo, "library");
     await gotoDashboard(page, `#item/${info.search_item_id}`);
     await expect(page.locator("#yoinkHeading")).toHaveText(info.search_item_title, { timeout: 20_000 });
