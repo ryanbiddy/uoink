@@ -150,6 +150,97 @@ def capture_time_sql(column: str = "yoinked_at") -> str:
             f"ELSE {column} END)")
 
 
+# Original publish (air) date, separate from the capture time. Sources write it
+# in different shapes: yt-dlp's upload_date is YYYYMMDD, RSS pubDate is RFC
+# 2822, newer captures store an ISO published_at. published_day() reads any of
+# them as one calendar day (YYYY-MM-DD) or None, in Python and in SQL (the
+# connection function uoink_published_day over metadata_json).
+_PUBLISHED_KEYS = ("published_at", "published", "upload_date", "release_date")
+_DAY_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})(?![\d])|^(\d{4})(\d{2})(\d{2})$")
+
+
+def published_day(value) -> str | None:
+    """One stored publish date (any common shape) as YYYY-MM-DD, or None."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        from datetime import timezone as _tz
+        try:
+            return datetime.fromtimestamp(float(value), _tz.utc).strftime("%Y-%m-%d")
+        except (OverflowError, OSError, ValueError):
+            return None
+    text = str(value).strip()
+    if not text:
+        return None
+    match = _DAY_RE.match(text)
+    if match:
+        year, month, day = (int(part) for part in match.groups() if part is not None)
+        try:
+            return datetime(year, month, day).strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    try:
+        from email.utils import parsedate_to_datetime
+        moment = parsedate_to_datetime(text)
+    except (TypeError, ValueError, IndexError):
+        return None
+    if moment is None:
+        return None
+    if moment.tzinfo is not None:
+        from datetime import timezone as _tz
+        moment = moment.astimezone(_tz.utc)
+    return moment.strftime("%Y-%m-%d")
+
+
+def published_day_from_metadata(metadata_json) -> str | None:
+    """The publish day stored in a row's metadata_json, or None."""
+    if not metadata_json:
+        return None
+    try:
+        data = json.loads(metadata_json) if isinstance(metadata_json, str) else metadata_json
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    for key in _PUBLISHED_KEYS:
+        day = published_day(data.get(key))
+        if day:
+            return day
+    return None
+
+
+def published_filter_sql(column: str, published_from: str | None,
+                         published_to: str | None) -> tuple[list[str], list[str]]:
+    """WHERE clauses for inclusive YYYY-MM-DD publish-date bounds. A bound
+    that is not a real date is ignored with a log line, like date_to."""
+    clauses: list[str] = []
+    params: list[str] = []
+    for value, op in ((published_from, ">="), (published_to, "<=")):
+        if not value:
+            continue
+        try:
+            day = datetime.strptime(str(value), "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError:
+            log.warning("search: bad publish date %r ignored", value)
+            continue
+        clauses.append(f"uoink_published_day({column}) {op} ?")
+        params.append(day)
+    return clauses, params
+
+
+_published_day_cached = None
+
+
+def use_published_day(conn) -> None:
+    """Register uoink_published_day() on ``conn`` before a query that filters
+    by publish date. Idempotent; only searches with that filter pay for it."""
+    global _published_day_cached
+    if _published_day_cached is None:
+        from functools import lru_cache
+        _published_day_cached = lru_cache(maxsize=16384)(published_day_from_metadata)
+    conn.create_function("uoink_published_day", 1, _published_day_cached, deterministic=True)
+
+
 class PublicationRetryQueue:
     """File-backed publication receipts, independent of a failing SQLite DB.
 
@@ -1317,6 +1408,11 @@ class Index:
         # allowlist; a set filter is routed to keyword by search_service.
         if clips_only or not filters.get("availability"):
             filters.pop("availability", None)
+        # Publish-date bounds are whole-item filters; clips and an unset bound
+        # never reach the clip or semantic engines.
+        for bound in ("published_from", "published_to"):
+            if clips_only or not filters.get(bound):
+                filters.pop(bound, None)
         if keyword is None:
             def keyword(count, start, override):
                 if clips_only:
@@ -2772,7 +2868,9 @@ class Index:
                                  availability: str | None = None,
                                  limit: int = 50,
                                  offset: int = 0,
-                                 match: str = "forgiving", passages: bool = True) -> dict:
+                                 match: str = "forgiving", passages: bool = True,
+                                 published_from: str | None = None,
+                                 published_to: str | None = None) -> dict:
         """Filtered query backing the memory page. All filters are optional
         and combinable. Returns ``{total, results}`` where ``total`` is the
         match count before limit/offset (for pagination). Soft-deleted rows
@@ -2780,7 +2878,9 @@ class Index:
 
         With ``q`` the rows are ranked by FTS5 bm25; without it they are
         ordered newest-first. ``date_from`` / ``date_to`` are inclusive
-        YYYY-MM-DD bounds on yoinked_at."""
+        YYYY-MM-DD bounds on yoinked_at. ``published_from`` /
+        ``published_to`` are inclusive YYYY-MM-DD bounds on the original
+        publish date; items with no known publish date never match them."""
         limit = max(1, min(200, int(limit)))
         offset = max(0, int(offset))
 
@@ -2825,10 +2925,16 @@ class Index:
                 params.append(nxt)
             except ValueError:
                 log.warning("memory search: bad date_to %r ignored", date_to)
+        published_clauses, published_params = published_filter_sql(
+            "y.metadata_json", published_from, published_to)
+        clauses.extend(published_clauses)
+        params.extend(published_params)
         where = " AND ".join(clauses)
 
         expression = _fts_query(q, match)
         with self.search_read() as db:
+            if published_clauses:
+                use_published_day(db)
             try:
                 if expression:
                     prefix, search_params = _fts_hits(

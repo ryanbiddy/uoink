@@ -51,6 +51,8 @@ $requiredFiles = @(
     'x_extractor.py',
     'x_article_extractor.py',
     'list_imports.py',
+    'show_capture.py',
+    'timed_cues.py',
     'research.py',
     'research_verify.py',
     'research_report.py',

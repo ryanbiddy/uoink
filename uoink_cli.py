@@ -76,6 +76,16 @@ def parser():
     get = command("get", help="get a bounded library card by item id")
     get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
+    cues = command("cues", help="timed transcript cues for one item, or list items by show "
+                   "and publish date")
+    cues.add_argument("id", nargs="?", help="item id from search or recent; omit to list items")
+    cues.add_argument("--start", type=float, help="only cues from this second")
+    cues.add_argument("--end", type=float, help="only cues up to this second")
+    cues.add_argument("--channel", help="list: only this show or channel (exact name)")
+    cues.add_argument("--from", dest="published_from", help="list: published on or after YYYY-MM-DD")
+    cues.add_argument("--to", dest="published_to", help="list: published on or before YYYY-MM-DD")
+    cues.add_argument("--words", dest="q", help="list: words to search for")
+    cues.add_argument("--limit", type=int, help="list: most items (1-200, default 50)")
     imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
                       "Reddit thread or YouTube playlist (50 per batch)")
     imports.add_argument("url", help="list, thread or playlist link")
@@ -228,6 +238,56 @@ def friendly_call(ns, server):
         raise UsageError(route.get("note") or "unsupported capture URL")
     name, key = CAPTURE_TOOLS[route["source"]]
     return name, {key: route["canonical"]}
+
+
+def cues_command(ns, server):
+    """`uoink cues`: the timed cues read contract (timed_cues.py) in-process,
+    the same envelopes GET /api/cues/v1/items returns. Local reads only."""
+    import timed_cues
+    item_flags = {"start": ns.start, "end": ns.end}
+    list_flags = {"channel": ns.channel, "published_from": ns.published_from,
+                  "published_to": ns.published_to, "q": ns.q, "limit": ns.limit}
+    if ns.id:
+        if any(value is not None for value in list_flags.values()):
+            raise UsageError("--channel, --from, --to, --words and --limit list items; drop the id")
+        query, operation = {k: [str(v)] for k, v in item_flags.items() if v is not None}, "get"
+    else:
+        if any(value is not None for value in item_flags.values()):
+            raise UsageError("--start and --end need an item id")
+        query, operation = {k: [str(v)] for k, v in list_flags.items() if v is not None}, "search"
+    try:
+        idx = server._get_index()
+        data = (timed_cues.get_item(idx, ns.id, query) if operation == "get"
+                else timed_cues.search(idx, query))
+    except timed_cues.CuesError as error:
+        return timed_cues.error_envelope(operation, error)
+    return timed_cues.envelope(operation, data)
+
+
+def cues_text(payload):
+    data = payload["data"]
+    if payload.get("operation") == "search":
+        items = data.get("items") or []
+        if not items:
+            return "No saved items match. Try a wider date range or another show name."
+        lines = [f"{data['page']['total']} {'item' if data['page']['total'] == 1 else 'items'}"]
+        for item in items:
+            date = terminal_label(str(item.get("published_at") or "")[:10]) or "date unknown"
+            lines.append(f"{date} | {terminal_label(item.get('title') or '')} | "
+                         f"{terminal_label(item.get('channel') or 'source unknown')} "
+                         f"[{terminal_label(item.get('id') or '')}]")
+        return "\n".join(lines)
+    item, timing, cues = data["item"], data["timing"], data["cues"]
+    source = {"captions": "uploaded captions", "auto_captions": "automatic captions",
+              "local_asr": "local transcription"}.get(timing.get("source"), "no transcript")
+    head = [terminal_label(item.get("title") or item.get("id") or "Item"),
+            f"Published: {terminal_label(item.get('published_at') or 'unknown')} | "
+            f"Timing: {source} | {len(cues)} cues"]
+    rows = [f"{text_timestamp(c['start'])}–{text_timestamp(c['end'])}  {text_excerpt(c['text'])}"
+            for c in cues[:40]]
+    if len(cues) > 40:
+        rows.append("More cues in JSON output.")
+    return "\n".join(head + rows)
 
 
 def error_text(payload):
@@ -506,6 +566,8 @@ def human(payload, *, index=None):
         return "\n\n".join(lines)
     if payload.get("ok") is not True:
         return error_text(payload)
+    if payload.get("contract") == "uoink.cues.read":
+        return cues_text(payload)
     if "tools" in payload:
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
     if "data_dir" in payload:
@@ -743,6 +805,8 @@ def main(argv=None):
             import uoink_agent_runtime as runtime
             if ns.command == "research":
                 payload = research_command(ns, server)
+            elif ns.command == "cues":
+                payload = cues_command(ns, server)
             elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,
                            "data_dir": str(server.DATA_ROOT.resolve()),

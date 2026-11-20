@@ -342,8 +342,11 @@ def _parse_duration(s: str | None) -> int | None:
     return None
 
 
-def parse_feed_body(body: bytes | str) -> dict:
+def parse_feed_body(body: bytes | str, *, limit: int | None = None) -> dict:
     """Pure parse: bytes/string of RSS or Atom XML -> structured dict.
+
+    ``limit`` raises the per-poll episode cap for a one-off whole-show
+    listing (show_capture.py); feed polls keep the default cap.
 
     Returns:
         {
@@ -437,7 +440,7 @@ def parse_feed_body(body: bytes | str) -> dict:
             f"unrecognised feed root element: {root_name!r}")
 
     return {"feed": feed_meta,
-            "episodes": episodes[:_EPISODES_PER_POLL_CAP]}
+            "episodes": episodes[:limit or _EPISODES_PER_POLL_CAP]}
 
 
 # ---- HTTP fetch with conditional GET -----------------------------------
