@@ -19597,6 +19597,8 @@
     let backfillTimer = null;
     let backfillBusy = false;
     let backfillVersion = 0;
+    let backfillRetries = 0;          // failed reads in a row (capped, see loadTranscriptBackfill)
+    let backfillStale = false;        // a retry was skipped while the page was hidden
 
     function backfillCount(n, one, many) {
       const value = Number(n) || 0;
@@ -19713,10 +19715,12 @@
       count.textContent = backfillData ? view.headline : "Checking your library…";
       count.dataset.empty = String(Boolean(backfillData) && view.empty);
       document.getElementById("backfillBreakdown").textContent = backfillData ? view.breakdown : "";
+      // A Finish outside a run has no bar but still shows what it is on.
       const wrap = document.getElementById("backfillProgressWrap");
-      wrap.classList.toggle("hidden", !view.progress);
+      wrap.classList.toggle("hidden", !view.progress && !view.current);
+      const bar = document.getElementById("backfillProgress");
+      bar.classList.toggle("hidden", !view.progress);
       if (view.progress) {
-        const bar = document.getElementById("backfillProgress");
         bar.max = view.progress.max;
         bar.value = view.progress.value;
       }
@@ -19791,6 +19795,8 @@
         const data = await readSettingsResource(BACKFILL_ROUTE);
         if (version !== backfillVersion) return;
         backfillData = data;
+        backfillRetries = 0;
+        backfillStale = false;
         renderTranscriptBackfill();
         if (state.activeTab === "settings" && backfillActive(data)) {
           backfillTimer = window.setTimeout(loadTranscriptBackfill, 3000);
@@ -19806,8 +19812,18 @@
         } else {
           document.getElementById("backfillCount").textContent = `Could not check your library. ${settingError(err)}`;
         }
-        if (state.activeTab === "settings" && (err.status === 429 || !err.status)) {
-          backfillTimer = window.setTimeout(loadTranscriptBackfill, Math.max(5, Number(err.retryAfter) || 10) * 1000);
+        // Try again only for a busy or unreachable helper, only while there is
+        // something to follow (a run, or no numbers yet), a few times, slower
+        // each time, and not while the page is hidden.
+        backfillRetries += 1;
+        const worthIt = !backfillData || backfillActive(backfillData);
+        if (state.activeTab === "settings" && (err.status === 429 || !err.status) && worthIt && backfillRetries <= 5) {
+          if (document.hidden) {
+            backfillStale = true;
+          } else {
+            const seconds = Math.min(120, Math.max(Number(err.retryAfter) || 0, 5 * 2 ** (backfillRetries - 1)));
+            backfillTimer = window.setTimeout(loadTranscriptBackfill, seconds * 1000);
+          }
         }
       }
     }
@@ -19846,7 +19862,12 @@
         new IntersectionObserver(entries => {
           if (entries.some(entry => entry.isIntersecting)) loadTranscriptBackfill();
         }).observe(block);
+      } else if (block) {
+        loadTranscriptBackfill();  // no observer here: read once now
       }
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && backfillStale && state.activeTab === "settings") loadTranscriptBackfill();
+      });
     }
 
     // ---- Phone inbox (Uoink Relay) ---------------------------------------

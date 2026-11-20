@@ -152,5 +152,96 @@ check(ctx.backfillActive({ state: "running" }) && ctx.backfillActive({ state: "p
   && ctx.backfillActive({ state: "idle", requested: ["k"] }) && !ctx.backfillActive({ state: "done", requested: [] })
   && !ctx.backfillActive(null), "active means running, pausing or a Finish in flight");
 
+// Behaviour, with a tiny fake DOM: the real load, render and bind functions.
+function fakeEl(id) {
+  const classes = new Set(id === "backfillProgressWrap" || id === "backfillCurrent" ? ["hidden"] : []);
+  const el = {
+    id, textContent: "", title: "", value: "", disabled: false, dataset: {}, children: [],
+    classList: { toggle(name, on) { if (on) classes.add(name); else classes.delete(name); }, contains: n => classes.has(n) },
+    replaceChildren(...kids) { el.children = kids; }, prepend(kid) { el.children.unshift(kid); },
+    append(...kids) { el.children.push(...kids); }, addEventListener() {}, setAttribute() {},
+    closest() { return label; },
+  };
+  return el;
+}
+const label = fakeEl("label");
+function fakePage({ hidden = false, observer = false } = {}) {
+  const els = new Map();
+  const timers = [];
+  const listeners = {};
+  const reads = [];
+  const doc = {
+    hidden, activeElement: null,
+    getElementById: id => { if (!els.has(id)) els.set(id, fakeEl(id)); return els.get(id); },
+    createElement: tag => fakeEl(tag),
+    addEventListener: (name, fn) => { listeners[name] = fn; },
+  };
+  const page = vm.createContext({
+    Number, Math, Set, Array, String, Object, Boolean, Promise, Error,
+    document: doc, state: { activeTab: "settings" }, BACKFILL_ROUTE: "/library/transcript-backfill",
+    backfillData: null, backfillTimer: null, backfillBusy: false, backfillVersion: 0, backfillRetries: 0, backfillStale: false,
+    window: { setTimeout: (fn, ms) => { timers.push(ms); return timers.length; }, clearTimeout() {} },
+    settingError: err => String(err.message || "error"),
+    readSettingsResource: async () => { reads.push(1); if (page.answer instanceof Error) throw page.answer; return page.answer; },
+    transcriptBackfillAction() {},
+    ...(observer ? { IntersectionObserver: class { observe() {} } } : {}),
+  });
+  vm.runInContext(["backfillCount", "backfillDuration", "backfillView", "halfCaptureRows", "renderTranscriptBackfill",
+    "backfillActive", "loadTranscriptBackfill", "bindTranscriptBackfill"]
+    .map(name => (PAGE.includes(`async function ${name}(`) ? "async " : "") + grab(name)).join("\n"), page);
+  return { page, timers, listeners, reads, el: id => doc.getElementById(id) };
+}
+const offline = () => Object.assign(new Error("offline"), { status: 0 });
+const busy = () => Object.assign(new Error("slow down"), { status: 429 });
+const idle = { state: "idle", count: 3, on_disk: 3, progress: progress(), model_ready: true, requested: [] };
+
+let p = fakePage();
+p.page.answer = idle;
+await p.page.loadTranscriptBackfill();
+p.page.answer = busy();
+await p.page.loadTranscriptBackfill();
+check(p.timers.length === 0, "an idle block does not poll after a 429", p.timers);
+p.page.answer = offline();
+await p.page.loadTranscriptBackfill();
+check(p.timers.length === 0, "an idle block does not poll while the helper is down", p.timers);
+
+p = fakePage();
+p.page.answer = offline();
+for (let i = 0; i < 8; i++) await p.page.loadTranscriptBackfill();
+check(p.timers.length === 5, "a first read that keeps failing retries five times, then stops", p.timers);
+check(p.timers.every((ms, i) => i === 0 || ms > p.timers[i - 1]) && p.timers[4] <= 120000, "each retry waits longer", p.timers);
+
+p = fakePage();
+p.page.answer = { ...idle, state: "running", progress: progress({ done: 1, left: 2 }) };
+await p.page.loadTranscriptBackfill();
+check(p.timers.length === 1 && p.timers[0] === 3000, "a run polls every 3 s", p.timers);
+p.page.answer = busy();
+await p.page.loadTranscriptBackfill();
+check(p.timers.length === 2, "a run keeps trying after a 429", p.timers);
+
+p = fakePage({ hidden: true });
+p.page.answer = offline();
+await p.page.loadTranscriptBackfill();
+check(p.timers.length === 0, "no retries while the page is hidden", p.timers);
+p.page.bindTranscriptBackfill();
+check(p.reads.length === 2, "without IntersectionObserver the block still reads once", p.reads.length);
+p.page.document.hidden = false;
+p.page.answer = idle;
+p.listeners.visibilitychange();
+await new Promise(resolve => setTimeout(resolve, 0));
+check(p.reads.length === 3 && p.el("backfillCount").textContent.startsWith("3 saves"), "coming back to the page reads again");
+p = fakePage({ observer: true });
+p.page.bindTranscriptBackfill();
+check(p.reads.length === 0, "with IntersectionObserver it waits until the block is seen");
+
+// A Finish outside a run: no bar, but the item it is on shows.
+p = fakePage();
+p.page.answer = { ...idle, requested: ["folder:AI/x"], current: { key: "folder:AI/x", title: "Stopped capture", fraction: 0.5 } };
+await p.page.loadTranscriptBackfill();
+check(!p.el("backfillProgressWrap").classList.contains("hidden"), "the progress area shows during a Finish");
+check(p.el("backfillProgress").classList.contains("hidden"), "the bar stays hidden without a run");
+check(p.el("backfillCurrent").textContent === "Now: Stopped capture (50%)" && !p.el("backfillCurrent").classList.contains("hidden"),
+  "Finish shows its progress", p.el("backfillCurrent").textContent);
+
 console.log(`\n${checks - failures}/${checks} checks passed`);
 if (failures) process.exit(1);
