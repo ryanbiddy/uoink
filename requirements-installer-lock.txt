@@ -80,7 +80,7 @@ nltk==3.10.4 --hash=sha256:769ba5413f265b7d3e87cd163cc28efa01e29eeef8bb6080bc907
 numpy==2.4.6
 omegaconf==2.3.1
 onnxruntime==1.27.0
-opentelemetry-api==1.45.1
+opentelemetry-api==1.45.2
 opentelemetry-exporter-http-transport==0.66b1
 opentelemetry-exporter-otlp-common==0.66b1
 opentelemetry-exporter-otlp-proto-common==1.45.1
