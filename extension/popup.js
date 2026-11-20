@@ -239,6 +239,26 @@ function messageActiveTab(tabId, payload) {
   });
 }
 
+// 3.18.0: X's link copy of a long post stops near 280 characters. Ask the
+// open tab (content-x-article.js) for the post's own text. It goes only to
+// the local helper, which keeps it when it matches the post. Null when the
+// tab can't answer within a couple of seconds.
+async function readOpenXPost(url) {
+  let tab = null;
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    tab = tabs && tabs[0];
+  } catch { tab = null; }
+  if (!tab || !tab.id) return null;
+  const answer = await Promise.race([
+    messageActiveTab(tab.id, { type: "uoinkReadXPost", url }),
+    new Promise((resolve) => setTimeout(() => resolve(null), 2500)),
+  ]);
+  const post = answer && answer.ok && answer.post;
+  if (!post || !post.ok || typeof post.text !== "string" || !/^\d+$/.test(String(post.id))) return null;
+  return { id: String(post.id), text: post.text.slice(0, 30000), show_more: !!post.show_more };
+}
+
 async function captureXArticle(url) {
   let tab = null;
   try {
@@ -476,7 +496,10 @@ async function runPopupUoinkCurrent() {
     // The worker owns the text and optional video, including deduplication
     // against pasted links, after this popup closes.
     if (src.action === "x_video") {
-      await queueCapture({ route: "x_post", url: src.canonical, interval });
+      // 3.18.0: the open tab's own text, so a long post saves whole.
+      const domPost = await readOpenXPost(src.canonical);
+      await queueCapture(Object.assign({ route: "x_post", url: src.canonical, interval },
+        domPost ? { domPost } : {}));
       return;
     }
     // X article: content-script DOM parse first, /extract/page as fallback.

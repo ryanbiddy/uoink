@@ -416,8 +416,30 @@
   // Popup-driven parse. The popup messages this script; we parse the live DOM
   // and hand back the payload so the popup can POST it (or fall back to
   // /extract/page when we return ok:false or aren't present at all).
+  // 3.18.0: "Uoink this post" asks for the open post's own text, because
+  // X's link copy of a long post stops near 280 characters. A "Show more"
+  // button that expands the post in place is pressed first.
+  async function readOpenPost(url) {
+    const X = globalThis.XArticle;
+    if (!X || typeof X.readXPost !== "function") return null;
+    const more = X.showMoreButton(document, url);
+    if (more) {
+      try { more.click(); } catch { /* read what is shown */ }
+      for (let waited = 0; waited < 1500 && X.showMoreButton(document, url); waited += 100) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+    return X.readXPost(document, url);
+  }
+
   try {
     chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+      if (msg && msg.type === "uoinkReadXPost") {
+        readOpenPost(typeof msg.url === "string" ? msg.url : window.location.href)
+          .then((post) => sendResponse({ ok: !!(post && post.ok), post }))
+          .catch(() => sendResponse({ ok: false, post: null }));
+        return true;
+      }
       if (!msg || msg.type !== "uoinkParseXArticle") return;
       const parsed = parseArticle();
       sendResponse({ ok: !!(parsed && parsed.ok), article: parsed });

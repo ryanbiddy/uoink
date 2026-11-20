@@ -372,6 +372,33 @@ def test_x_video_description_gets_text_links_and_quote(monkeypatch):
     assert enriched["x_text"]["long_post"] is False
 
 
+def test_x_video_description_uses_the_open_tab_text_from_the_same_save(monkeypatch):
+    import server
+    case = CASES["long_post"]
+    calls = route(monkeypatch, syndication=case["syndication"])
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    monkeypatch.setattr(server, "_X_DOM_POSTS", {})
+    # "Uoink this post" saved the text first; the video half follows.
+    server._remember_dom_post(server._clean_dom_post(case["dom_post"]))
+    metadata = {"extractor": "twitter", "id": case["tweet_id"], "description": case["syndication"]["text"]}
+    enriched = server._enrich_x_video_metadata(
+        f"https://x.com/example_writer/status/{case['tweet_id']}", metadata)
+    assert enriched["description"].endswith("FULL-TEXT-END")
+    assert enriched["x_text"]["text_completeness"] == "complete" and enriched["x_text"]["provider"] == "X page"
+    assert hosts(calls) == ["syndication"]
+
+
+def test_open_post_reader_js():
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not available")
+    script = Path(__file__).parent / "js" / "x_post_reader_test.mjs"
+    proc = subprocess.run([node, str(script)], capture_output=True, text=True, encoding="utf-8", timeout=120)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+
 def test_non_x_video_and_failures_keep_the_description(monkeypatch):
     import server
     monkeypatch.setattr(server, "_read_settings", lambda: {})

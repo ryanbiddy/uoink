@@ -425,6 +425,57 @@ async function handoff() {
       "and the SW captures it once the status answers", base.worker.fetches);
   });
 
+  await scenario("X post from the open tab sends the tab's own text (3.18.0)", async () => {
+    const bodies = [];
+    const base = await makeWorker({
+      routes: {
+        "/extract/x": (_u, init) => {
+          bodies.push(JSON.parse(init.body));
+          return jsonResponse({ ok: true, tweets_captured: 1, metadata: {} });
+        },
+      },
+    });
+    const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
+    const asked = [];
+    popup.ctx.chrome.tabs.query = async () => [{ id: 7 }];
+    popup.ctx.chrome.tabs.sendMessage = (tabId, msg, cb) => {
+      asked.push([tabId, msg]);
+      Promise.resolve().then(() => cb({ ok: true, post: {
+        ok: true, id: "1720000000000000000", text: "The whole long post. FULL-TEXT-END", show_more: false } }));
+    };
+    await popup.ctx.runPopupUoinkCurrent();
+    await settle();
+    check(asked.length === 1 && asked[0][0] === 7 && asked[0][1].type === "uoinkReadXPost"
+      && asked[0][1].url === X_POST_URL, "the popup asks the open tab for the post once", asked);
+    check(bodies.length === 1 && bodies[0].url === X_POST_URL && bodies[0].dom_post
+      && bodies[0].dom_post.id === "1720000000000000000"
+      && bodies[0].dom_post.text === "The whole long post. FULL-TEXT-END",
+      "and the SW sends that text to the helper with the link", bodies);
+  });
+
+  await scenario("X post the tab can't read is saved from the link alone (3.18.0)", async () => {
+    const bodies = [];
+    const base = await makeWorker({
+      routes: {
+        "/extract/x": (_u, init) => {
+          bodies.push(JSON.parse(init.body));
+          return jsonResponse({ ok: true, tweets_captured: 1, metadata: {},
+            text_cut_off: { reason: "article", open_url: "https://x.com/i/article/1720000000000000001" } });
+        },
+      },
+    });
+    const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
+    popup.ctx.chrome.tabs.query = async () => [{ id: 7 }];
+    popup.ctx.chrome.tabs.sendMessage = (_tabId, _msg, cb) => {
+      Promise.resolve().then(() => cb({ ok: false, post: { ok: false, code: "no_text" } }));
+    };
+    await popup.ctx.runPopupUoinkCurrent();
+    await settle();
+    check(bodies.length === 1 && !("dom_post" in bodies[0]), "no tab text, no dom_post", bodies);
+    check(base.worker.notifications.some((n) => /links to an X Article/.test(n.message || "")),
+      "a post that only links to an Article says how to save the Article", base.worker.notifications);
+  });
+
   await scenario("X Article fallback", async () => {
     const answer = deferred();
     const base = await makeWorker({ routes: { "/extract/page": () => answer.promise } });

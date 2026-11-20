@@ -1175,7 +1175,15 @@ function enqueuePopupCapture(req) {
     if (req.route === "reddit") job.useReddit = true;
     if (req.route === "playlist") job.usePlaylist = true;
     if (req.route === "podcast") job.usePodcast = true;
-    if (req.route === "x_post") job.useXPost = true;
+    if (req.route === "x_post") {
+      job.useXPost = true;
+      // 3.18.0: the open tab's text of this post, for the helper to check.
+      const dom = req.domPost;
+      if (dom && typeof dom === "object" && /^\d{5,25}$/.test(String(dom.id))
+          && typeof dom.text === "string" && dom.text) {
+        job.domPost = { id: String(dom.id), text: dom.text.slice(0, 30000), show_more: !!dom.show_more };
+      }
+    }
     // The popup used to check the helper's queue before a video; that
     // check now runs in runExtractJob so the popup never waits on it.
     if (req.route === "video") job.checkRoom = true;
@@ -1374,7 +1382,7 @@ async function runExtractJob(job) {
       // The helper validates the feed; URL hints only classify pasted links.
       data = await STC.postPodcastFeed(job.url);
     } else if (job.useXPost) {
-      data = await STC.postExtractX(job.url);
+      data = await STC.postExtractX(job.url, job.domPost);
       if (!data || data.code === "disabled" || data.code === "empty") {
         // A video-only post keeps the same queue-room guard as a video.
         if (!(await serverQueueHasRoomWithin(QUEUE_ROOM_WAIT_MS))) {
@@ -1458,6 +1466,13 @@ async function runExtractJob(job) {
     const count = Number(data.tweets_captured) || 1;
     const saved = `Saved ${count} post${count === 1 ? "" : "s"}`;
     let message = `${saved} to your library.`;
+    // 3.18.0: X gave only part of the text. Say how to get the rest.
+    const cut = data.text_cut_off;
+    if (cut && cut.reason === "article") {
+      message = `${saved}. It links to an X Article. Open the Article and click Uoink this article to save its text.`;
+    } else if (cut) {
+      message = `${saved}, but X cut the text short. Open the post on X and Uoink it from the page to save all of it.`;
+    }
     let followUp = null;
     if (data.metadata && data.metadata.has_video) {
       try {

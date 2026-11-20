@@ -8056,6 +8056,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "like_count": metadata.get("like_count"),
                 "comment_count": metadata.get("comment_count"),
                 "channel_follower_count": metadata.get("channel_follower_count"),
+                # 3.18.0: whether an X video's post text is whole (x_text_repair).
+                "x_text": metadata.get("x_text"),
                 "video_id": video_id,
                 # Phase 6 (BC-2): every transcript row carries its actual stored
                 # link values, and the held chapter metadata travels with the
@@ -15933,6 +15935,33 @@ def _clean_dom_post(value) -> dict | None:
     return {"id": post_id, "text": text[:100000], "show_more": value.get("show_more") is True}
 
 
+# The open tab's text of a post, in memory for half an hour, so the video
+# half of the same "Uoink this post" (queued right after) gets it too.
+_X_DOM_POSTS: dict = {}
+_X_DOM_POSTS_LOCK = threading.Lock()
+_X_DOM_POST_TTL_SEC = 1800
+
+
+def _remember_dom_post(dom_post: dict | None) -> None:
+    if not dom_post:
+        return
+    now = time.monotonic()
+    with _X_DOM_POSTS_LOCK:
+        for key in [k for k, (at, _post) in _X_DOM_POSTS.items() if now - at > _X_DOM_POST_TTL_SEC]:
+            _X_DOM_POSTS.pop(key, None)
+        _X_DOM_POSTS[dom_post["id"]] = (now, dom_post)
+        while len(_X_DOM_POSTS) > 64:
+            _X_DOM_POSTS.pop(next(iter(_X_DOM_POSTS)))
+
+
+def _recent_dom_post(tweet_id: str) -> dict | None:
+    with _X_DOM_POSTS_LOCK:
+        hit = _X_DOM_POSTS.get(str(tweet_id))
+    if hit and time.monotonic() - hit[0] <= _X_DOM_POST_TTL_SEC:
+        return hit[1]
+    return None
+
+
 def _enrich_x_video_metadata(url: str, metadata: dict) -> dict:
     """An X video's Description gets the post's text with its links
     expanded and the quoted post, and the whole long post when the user's
@@ -15952,7 +15981,8 @@ def _enrich_x_video_metadata(url: str, metadata: dict) -> dict:
         return metadata  # a retry or refresh reusing this capture's metadata
     try:
         record = x_extractor.post_text_record(
-            tweet_id, timeout=10, **_x_fxtwitter_kwargs(_read_settings() or {}))
+            tweet_id, timeout=10, dom_post=_recent_dom_post(tweet_id),
+            **_x_fxtwitter_kwargs(_read_settings() or {}))
     except Exception as exc:  # the video capture never waits on this
         log.info("X post text lookup skipped for %s: %s", tweet_id, type(exc).__name__)
         return metadata
@@ -21304,6 +21334,7 @@ class Handler(BaseHTTPRequestHandler):
         dom_post = _clean_dom_post(body.get("dom_post"))
         if dom_post:
             options["dom_post"] = dom_post
+            _remember_dom_post(dom_post)
         result = x_extractor.extract_x_thread(url, **options)
         if not result.get("ok"):
             log.info("POST /extract/x -> %s", result.get("code"))
