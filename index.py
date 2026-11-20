@@ -153,18 +153,23 @@ def capture_time_sql(column: str = "yoinked_at") -> str:
 # Original publish (air) date, separate from the capture time. Sources write it
 # in different shapes: yt-dlp's upload_date is YYYYMMDD, RSS pubDate is RFC
 # 2822, newer captures store an ISO published_at. published_day() reads any of
-# them as one calendar day (YYYY-MM-DD) or None, in Python and in SQL (the
-# connection function uoink_published_day over metadata_json).
+# them as one UTC calendar day (YYYY-MM-DD) or None. Migration 0038 stores it
+# in yoinks.published_day (indexed) for the search filters.
 _PUBLISHED_KEYS = ("published_at", "published", "upload_date", "release_date")
-_DAY_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})(?![\d])|^(\d{4})(\d{2})(\d{2})$")
+_DAY_RE = re.compile(r"(\d{4})-(\d{2})-(\d{2})|(\d{4})(\d{2})(\d{2})")
+_ISO_TIME_RE = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]")
+PUBLISHED_DAY_MIGRATION = 38
 
 
 def published_day(value) -> str | None:
-    """One stored publish date (any common shape) as YYYY-MM-DD, or None."""
+    """One stored publish date (any common shape) as YYYY-MM-DD, or None.
+    A time with an offset counts in UTC, the same as an RSS pubDate, so
+    23:30 at -08:00 is the next day. Trailing text that isn't part of the
+    date or time makes it unreadable, not truncated."""
+    from datetime import timezone as _tz
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
-        from datetime import timezone as _tz
         try:
             return datetime.fromtimestamp(float(value), _tz.utc).strftime("%Y-%m-%d")
         except (OverflowError, OSError, ValueError):
@@ -172,13 +177,21 @@ def published_day(value) -> str | None:
     text = str(value).strip()
     if not text:
         return None
-    match = _DAY_RE.match(text)
+    match = _DAY_RE.fullmatch(text)
     if match:
         year, month, day = (int(part) for part in match.groups() if part is not None)
         try:
             return datetime(year, month, day).strftime("%Y-%m-%d")
         except ValueError:
             return None
+    if _ISO_TIME_RE.match(text):
+        try:
+            moment = datetime.fromisoformat(text[:-1] + "+00:00" if text[-1] in "Zz" else text)
+        except ValueError:
+            return None
+        if moment.tzinfo is not None:
+            moment = moment.astimezone(_tz.utc)
+        return moment.strftime("%Y-%m-%d")
     try:
         from email.utils import parsedate_to_datetime
         moment = parsedate_to_datetime(text)
@@ -187,7 +200,6 @@ def published_day(value) -> str | None:
     if moment is None:
         return None
     if moment.tzinfo is not None:
-        from datetime import timezone as _tz
         moment = moment.astimezone(_tz.utc)
     return moment.strftime("%Y-%m-%d")
 
@@ -211,8 +223,9 @@ def published_day_from_metadata(metadata_json) -> str | None:
 
 def published_filter_sql(column: str, published_from: str | None,
                          published_to: str | None) -> tuple[list[str], list[str]]:
-    """WHERE clauses for inclusive YYYY-MM-DD publish-date bounds. A bound
-    that is not a real date is ignored with a log line, like date_to."""
+    """WHERE clauses for inclusive YYYY-MM-DD publish-date bounds on
+    ``column`` (from Index.published_day_sql). A bound that is not a real
+    date is ignored with a log line, like date_to."""
     clauses: list[str] = []
     params: list[str] = []
     for value, op in ((published_from, ">="), (published_to, "<=")):
@@ -223,22 +236,33 @@ def published_filter_sql(column: str, published_from: str | None,
         except ValueError:
             log.warning("search: bad publish date %r ignored", value)
             continue
-        clauses.append(f"uoink_published_day({column}) {op} ?")
+        clauses.append(f"{column} {op} ?")
         params.append(day)
     return clauses, params
 
 
-_published_day_cached = None
-
-
 def use_published_day(conn) -> None:
     """Register uoink_published_day() on ``conn`` before a query that filters
-    by publish date. Idempotent; only searches with that filter pay for it."""
-    global _published_day_cached
-    if _published_day_cached is None:
-        from functools import lru_cache
-        _published_day_cached = lru_cache(maxsize=16384)(published_day_from_metadata)
-    conn.create_function("uoink_published_day", 1, _published_day_cached, deterministic=True)
+    by publish date. Only an index opened read-only before migration 0038
+    ran uses it; everything else reads the indexed column."""
+    conn.create_function("uoink_published_day", 1, published_day_from_metadata, deterministic=True)
+
+
+def _backfill_published_day(conn: sqlite3.Connection) -> int:
+    """Fill yoinks.published_day for every row (migration 0038), a page of
+    rows at a time so a large library is never held in memory at once."""
+    filled, last = 0, 0
+    while True:
+        rows = conn.execute(
+            "SELECT rowid, video_id, metadata_json FROM yoinks WHERE rowid > ? "
+            "ORDER BY rowid LIMIT 500", (last,)).fetchall()
+        if not rows:
+            return filled
+        last = rows[-1][0]
+        updates = [(day, row[1]) for row in rows
+                   if (day := published_day_from_metadata(row[2]))]
+        conn.executemany("UPDATE yoinks SET published_day=? WHERE video_id=?", updates)
+        filled += len(updates)
 
 
 class PublicationRetryQueue:
@@ -676,6 +700,9 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
                             m.group("column"), m.group("type"))
                     else:
                         conn.execute(stmt)
+                if version == PUBLISHED_DAY_MIGRATION:
+                    # Parsing every shape of date needs Python, not SQL.
+                    _backfill_published_day(conn)
                 conn.execute(
                     "INSERT INTO schema_version (version, applied_at) "
                     "VALUES (?, ?)", (version, _now_iso()),
@@ -1470,6 +1497,16 @@ class Index:
                 f"ON CONFLICT(video_id) DO UPDATE SET {update_set}",
                 values,
             )
+            # Migration 0038's indexed publish day, from the metadata. Checked,
+            # not assumed: an index on an older schema has no such column.
+            ready = getattr(self, "_published_day_ready", None)
+            if ready is None or ready[0] is not self._conn:
+                ready = self._published_day_ready = (self._conn, "published_day" in {
+                    row[1] for row in self._conn.execute("PRAGMA table_xinfo(yoinks)")})
+            if ready[1]:
+                self._conn.execute(
+                    "UPDATE yoinks SET published_day=? WHERE video_id=?",
+                    (published_day_from_metadata(record.get("metadata_json")), video_id))
             # FTS5 has no UPSERT; delete-then-insert keeps it in sync.
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.execute(
@@ -1496,6 +1533,17 @@ class Index:
             self._conn.commit()
         self._invalidate_library_sources([video_id])
         self._notify_source_changed(video_id)
+
+    def published_day_sql(self, alias: str = "y") -> str:
+        """SQL for a row's publish day: migration 0038's indexed column, or
+        the metadata function (use_published_day) on an index opened
+        read-only before that migration ran."""
+        with self._lock:
+            ready = getattr(self, "_published_day_ready", None)
+            if ready is None or ready[0] is not self._conn:
+                ready = self._published_day_ready = (self._conn, "published_day" in {
+                    row[1] for row in self._conn.execute("PRAGMA table_xinfo(yoinks)")})
+        return f"{alias}.published_day" if ready[1] else f"uoink_published_day({alias}.metadata_json)"
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
@@ -2926,7 +2974,7 @@ class Index:
             except ValueError:
                 log.warning("memory search: bad date_to %r ignored", date_to)
         published_clauses, published_params = published_filter_sql(
-            "y.metadata_json", published_from, published_to)
+            self.published_day_sql("y"), published_from, published_to)
         clauses.extend(published_clauses)
         params.extend(published_params)
         where = " AND ".join(clauses)

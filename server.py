@@ -15856,7 +15856,7 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         params.append(nxt)
     # Original publish (air) date bounds, separate from the capture date.
     published_clauses, published_params = index.published_filter_sql(
-        "y.metadata_json", filters.get("published_from"), filters.get("published_to"))
+        idx.published_day_sql("y"), filters.get("published_from"), filters.get("published_to"))
     clauses.extend(published_clauses)
     params.extend(published_params)
     where = " AND ".join(clauses)

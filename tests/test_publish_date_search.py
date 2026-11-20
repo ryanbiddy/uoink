@@ -44,6 +44,91 @@ def test_published_day_shapes(value, day):
     assert index_mod.published_day(value) == day
 
 
+@pytest.mark.parametrize("value, day", [
+    ("2025-03-03T23:30:00-08:00", "2025-03-04"),     # the same instant as the RSS case
+    ("2025-03-04T01:30:00+09:00", "2025-03-03"),
+    ("2025-03-04T15:00:00.250Z", "2025-03-04"),
+    ("2025-03-04 15:00:00", "2025-03-04"),           # no zone: the day as written
+    ("2025-03-04T99:99:99Z", None),
+    ("2025-03-04 bogus", None),
+    ("2025-03-04x", None),
+    ("20250304 extra", None),
+])
+def test_published_day_reads_iso_offsets_and_refuses_junk(value, day):
+    assert index_mod.published_day(value) == day
+
+
+def test_cues_never_pass_on_a_junk_date():
+    import timed_cues
+    assert timed_cues.published_value("2025-03-04 bogus", "20240101") == "2024-01-01"
+    assert timed_cues.published_value("2025-03-03T23:30:00-08:00") == "2025-03-03T23:30:00-08:00"
+
+
+_RFC_ROW = {"published_at": "Mon, 03 Mar 2025 23:30:00 -0800"}       # how podcast saves store it
+
+
+def _row(video_id, meta):
+    return {"video_id": video_id, "slug": video_id, "channel": SHOW, "title": video_id, "topic": "Tides",
+            "yoinked_at": "2026-11-01T09:00:00", "corpus_path": "", "sidecar_path": "",
+            "metadata_json": json.dumps(meta), "source_type": "episode", "platform": "podcast"}
+
+
+def test_the_publish_day_is_stored_indexed_and_kept_current(tmp_path, monkeypatch):
+    with index_mod.Index.open(tmp_path / "day.db") as index:
+        index.upsert_yoink(_row("tppod000001", _RFC_ROW))
+        index.upsert_yoink(_row("tppod000002", {"upload_date": "20240101"}))
+        index.upsert_yoink(_row("tppod000003", {}))
+        days = dict(index._conn.execute("SELECT video_id, published_day FROM yoinks").fetchall())
+        assert days == {"tppod000001": "2025-03-04", "tppod000002": "2024-01-01", "tppod000003": None}
+        index.upsert_yoink(_row("tppod000002", {"upload_date": "20230101"}))
+        assert index.get_yoink("tppod000002")["published_day"] == "2023-01-01"
+        plan = " ".join(str(tuple(r)) for r in index._conn.execute(
+            "EXPLAIN QUERY PLAN SELECT video_id FROM yoinks y WHERE y.published_day >= ?", ("2025-01-01",)))
+        assert "idx_yoinks_published_day" in plan
+        # The filter reads the column: the metadata is never parsed per row.
+        monkeypatch.setattr(index_mod, "published_day_from_metadata",
+                            lambda _m: (_ for _ in ()).throw(AssertionError("parsed per row")))
+        got = index.search_yoinks_for_memory(published_from="2025-01-01")
+        assert _ids(got) == {"tppod000001"}
+
+
+def _old_index(tmp_path, monkeypatch, upto=34):
+    old = tmp_path / "old-migrations"
+    old.mkdir()
+    for path in index_mod._MIGRATIONS_DIR.glob("*.sql"):
+        if int(path.name.split("_", 1)[0]) <= upto:
+            (old / path.name).write_bytes(path.read_bytes())
+    real = index_mod._MIGRATIONS_DIR
+    monkeypatch.setattr(index_mod, "_MIGRATIONS_DIR", old)
+    db = tmp_path / "old.db"
+    with index_mod.Index.open(db) as index:
+        index.upsert_yoink(_row("tppod000001", _RFC_ROW))
+        index.upsert_yoink(_row("tpvideo0001", {"upload_date": "20240101",
+                                                "published_at": "2024-01-01T23:30:00-08:00"}))
+        index.upsert_yoink(_row("tpnote00001", {"title": "no date"}))
+    monkeypatch.setattr(index_mod, "_MIGRATIONS_DIR", real)
+    return db
+
+
+def test_migration_0038_backfills_existing_rows(tmp_path, monkeypatch):
+    db = _old_index(tmp_path, monkeypatch)
+    with index_mod.Index.open(db) as index:
+        assert index_mod._current_schema_version(index._conn) == index_mod.PUBLISHED_DAY_MIGRATION
+        days = dict(index._conn.execute("SELECT video_id, published_day FROM yoinks").fetchall())
+    assert days == {"tppod000001": "2025-03-04", "tpvideo0001": "2024-01-02", "tpnote00001": None}
+
+
+def test_an_index_read_before_the_migration_still_filters(tmp_path, monkeypatch):
+    db = _old_index(tmp_path, monkeypatch)
+    index = index_mod.Index.open_existing(db)
+    try:
+        assert index.published_day_sql("y") == "uoink_published_day(y.metadata_json)"
+        got = index.search_yoinks_for_memory(published_from="2025-01-01")
+        assert _ids(got) == {"tppod000001"}
+    finally:
+        index.close()
+
+
 def test_published_day_from_metadata_prefers_published_at():
     meta = {"upload_date": "20240101", "published_at": "2025-03-04T15:00:00Z"}
     assert index_mod.published_day_from_metadata(json.dumps(meta)) == "2025-03-04"
