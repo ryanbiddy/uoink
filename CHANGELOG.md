@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security and maintenance
+
+- Video capture now uses yt-dlp 2026.10.26 on Windows, macOS and Linux.
+- The installer updates cryptography to 50.0.2 and refreshes the libraries
+  that handle MCP connections, including Starlette and python-multipart.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

@@ -665,6 +665,21 @@ dismissed, so they close when the pins move.
 
 Both move in the first WhisperX release that allows them.
 
+### Other dependency updates held for 3.18
+
+- **Transcription and speaker labels.** Keep torchaudio with torch 2.8 and
+  tokenizers with transformers 4.57.6. Changes to CTranslate2, ONNX Runtime,
+  PyAV, NumPy, SciPy, pandas, scikit-learn, the pyannote packages and
+  pytorch-metric-learning need a transcription and speaker-labeling test on
+  the packaged app. The same test covers the model configuration readers,
+  OmegaConf and the ANTLR runtime.
+- **Desktop window.** pywebview 6, pythonnet and clr-loader need a Windows
+  desktop check that opens and closes the dashboard from the tray.
+- **Other transitive packages.** SQLAlchemy 2.1, Alembic and Optuna need a
+  separate compatibility check together. The python-dateutil 4 and multidict
+  7 upgrades also wait for a review of their callers. The release keeps the
+  qualified versions of Matplotlib, contourpy, fonttools and kiwisolver.
+
 ## macOS status
 
 Uoink 3.11.2 ships a Mac preview for Apple Silicon. The app and DMG are signed
