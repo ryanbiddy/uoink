@@ -670,7 +670,12 @@ function linkMacCli(appDir, deps, ui) {
 async function installFlow(opts, deps, ui, ctx = {}) {
   const plan = await resolvePlan(opts, deps);
   const installed = ctx.installed || null;
-  if (ctx.onlyIfNewer && ctx.installedVersion && cmpVersion(plan.version, ctx.installedVersion) <= 0) {
+  const order = ctx.installedVersion ? cmpVersion(plan.version, ctx.installedVersion) : null;
+  if (order === -1) {
+    ui.say(`Your installed Uoink ${ctx.installedVersion} is newer than the offered version ${plan.version}. Keeping your copy.`);
+    return 0;
+  }
+  if (ctx.onlyIfNewer && order === 0) {
     ui.say(`Uoink ${ctx.installedVersion} is installed and up to date (latest is ${plan.version}).`);
     return 0;
   }

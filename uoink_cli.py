@@ -7,6 +7,7 @@ pin sys.path for Python's embedded ._pth mode.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from contextlib import redirect_stdout
 import json
 import math
@@ -29,7 +30,7 @@ import uoink_install_isolation as isolation  # noqa: E402
 # Mirrors uoink_mcp_tools.STDIO_TOOLSETS without importing the registry at parse time.
 HELP_DESCRIPTION = (
     "Search your Uoink library, capture links and connect AI agents.\n"
-    "Every command prints JSON. Add --text for a short readable version.\n"
+    "Add --text to read command results in your terminal.\n"
     "Run 'uoink <command> --help' for one command."
 )
 
@@ -51,31 +52,34 @@ class Parser(argparse.ArgumentParser):
 def parser():
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--text", dest="text_output", action="store_true", default=argparse.SUPPRESS,
-                        help="short human rendering instead of JSON")
+                        help="print results as readable text")
     root = Parser(prog="uoink", parents=[common], description=HELP_DESCRIPTION,
                   formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = root.add_subparsers(dest="command", metavar="<command>")
     def command(name, **kw):
         return sub.add_parser(name, parents=[common], **kw)
-    listing = command("tools", help="list registry tools")
+    listing = command("tools", help="list available tools")
     listing.add_argument("--toolset", choices=TOOLSETS, default="full", help="which tools to list (default full)")
     listing.add_argument("--json", action="store_true", help="include client input schemas")
-    call = command("call", help="call any registry tool")
+    call = command("call", help="run a tool by name")
     call.add_argument("tool", help="tool name; run 'uoink tools --text' to list them")
     source = call.add_mutually_exclusive_group()
     source.add_argument("--args", help="tool arguments as one JSON object")
     source.add_argument("--args-file", type=Path, help="read the JSON arguments from a file")
     call.add_argument("pairs", nargs="*", metavar="key=value", help="one argument, repeatable")
-    search = command("search", help="bounded library search with stored timing")
+    search = command("search", help="search saved items and show matching timestamps")
     search.add_argument("query", help="words to look for in your library")
     search.add_argument("--limit", type=int, default=5, help="most results to show (default 5)")
-    capture = command("capture", help="route a URL through existing capture tools")
+    capture = command("capture", help="save a video, playlist, post or page")
     capture.add_argument("url", help="video, playlist, post or page link")
     recent = command("recent", help="list the newest items in your library")
     recent.add_argument("--limit", type=int, default=20, help="most items to show (default 20)")
-    get = command("get", help="get a bounded library card by item id")
+    get = command("get", help="look up a saved item by ID, or read it in full with --text")
     get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
+    repair = command("repair-captions", help="remove rolling caption repeats from one saved YouTube video")
+    repair.add_argument("id", help="saved video id")
+    repair.add_argument("--preview", action="store_true", help="count repeated words without changing the video")
     imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
                       "Reddit thread or YouTube playlist (50 per batch)")
     imports.add_argument("url", help="list, thread or playlist link")
@@ -119,7 +123,7 @@ def parser():
     install = skill_sub.add_parser("install", help="copy the skill into an agent's skills folder")
     install.add_argument("--to", type=Path, required=True, help="parent skills directory; copies into <dir>/uoink")
     install.add_argument("--force", action="store_true", help="replace an existing copy")
-    serve = command("serve", help="run the original helper CLI; remaining args pass through",
+    serve = command("serve", help="run a helper command in this terminal",
                     description="Run the Uoink helper in this terminal. Other words and flags go to "
                                 "the helper, for example: uoink serve doctor")
     serve.add_argument("server_args", nargs=argparse.REMAINDER)
@@ -493,6 +497,42 @@ def research_command(ns, server, *, call_tool=None, sleep=None, clock=None,
         sleep(min(10, remaining))
 
 
+def text_item(payload, index):
+    card = payload["card"]
+    identity = payload["item_id"]
+    lines = [terminal_label(card.get("title") or identity), "ID: " + terminal_label(identity)]
+    for name, value in (("Source", card.get("channel")), ("URL", card.get("url")),
+                        ("Saved", card.get("yoinked_at")), ("Topic", card.get("topic"))):
+        if value:
+            lines.append(f"{name}: {terminal_label(value)}")
+    row = index.get_yoink(identity) if index is not None else None
+    if row and not row.get("deleted_at"):
+        with index.detached_snapshot() as db:
+            shelves = db.execute(
+                "SELECT n.name FROM item_shelves s JOIN shelf_nodes n USING(version_id,shelf_id) "
+                "WHERE s.video_id=? AND n.retired=0 ORDER BY s.is_primary DESC, n.name", (identity,))
+            lines.append("Shelf: " + (", ".join(terminal_label(r[0]) for r in shelves) or "Unshelved"))
+        admission = payload.get("corpus_admission") or {}
+        if admission.get("ok") and row.get("corpus_path"):
+            import library_resources
+            size = admission["total_bytes"]
+            try:
+                with Path(row["corpus_path"]).open("rb") as handle:
+                    raw = handle.read(size + 1)
+                if len(raw) == size and hashlib.sha256(raw).hexdigest() == admission["corpus_revision"]:
+                    reader = library_resources.LibraryReader(index, data_root=index._path.parent)
+                    body, _ = reader._redact(raw.decode("utf-8-sig"), row)
+                    lines.extend(["", *(terminal_label(line) for line in body.splitlines())])
+                    return "\n".join(lines)
+            except (OSError, UnicodeError):
+                pass
+    lines.append("Full saved text unavailable.")
+    for excerpt in card.get("excerpts") or []:
+        timecode = text_timestamp(excerpt.get("start"))
+        lines.append((timecode + " " if timecode else "") + terminal_label(excerpt.get("text") or ""))
+    return "\n".join(lines)
+
+
 def human(payload, *, index=None):
     if "prompt" in payload and "run_id" in payload:
         lines = [f"Research run: {payload['run_id']}"]
@@ -508,6 +548,9 @@ def human(payload, *, index=None):
         return error_text(payload)
     if "tools" in payload:
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
+    if "removed_words" in payload:
+        action = "Found" if payload["preview"] else "Removed"
+        return f"{action} {payload['removed_words']} repeated caption words."
     if "data_dir" in payload:
         return (f"Uoink {payload['version']}\nData: {payload['data_dir']}\n"
                 f"Helper: {'running' if payload['helper_running'] else 'not running (open Uoink to start it)'}\n"
@@ -574,11 +617,10 @@ def human(payload, *, index=None):
         if len(rows) > 10:
             lines.append("More results in JSON output.")
         return "\n".join(lines)
-    if "card" in payload:
-        card = payload["card"]
-        return (f"{label(card.get('title') or payload.get('item_id', 'Item'))}\n"
-                f"ID: {label(payload.get('item_id', ''))}\nUse JSON output for excerpts and source revisions."
-                + capture_limits(card))
+    if isinstance(payload.get("card"), dict) and payload.get("item_id"):
+        return text_item(payload, index) + capture_limits(payload["card"])
+    if "corpus_md" in payload:
+        return "\n".join(terminal_label(line) for line in payload["corpus_md"].splitlines())
     if "video_id" in payload and "title" in payload:
         return (f"Saved: {label(payload['title'])} [{label(payload['video_id'])}]"
                 + capture_limits(payload.get("metadata") or payload))
@@ -586,8 +628,9 @@ def human(payload, *, index=None):
         return label(payload["path"])
     if "job_id" in payload:
         return f"Job: {label(payload['job_id'])}. Use get_job_status to check completion."
-    fields = ", ".join(key for key in payload if key != "ok")
-    return f"OK ({fields}). Use JSON output for the full result." if fields else "OK"
+    return "\n".join(f"{terminal_label(k.replace('_', ' ').capitalize())}: "
+                     + (terminal_label(v) if isinstance(v, str) else json.dumps(v, ensure_ascii=True))
+                     for k, v in payload.items() if k != "ok") or "OK"
 
 
 def emit(payload, text=False, *, index=None):
@@ -666,6 +709,7 @@ def finish_call_work(server, name, payload, existing_threads):
 def main(argv=None):
     raw = list(sys.argv[1:] if argv is None else argv)
     mcp_session = False
+    text_mode = False
     try:
         isolation.apply_from_process(raw)
         clean = isolation.strip_cli(raw)
@@ -741,7 +785,13 @@ def main(argv=None):
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
-            if ns.command == "research":
+            if ns.command == "repair-captions":
+                import library_media
+                try:
+                    payload = server.repair_rolling_captions(ns.id, preview=ns.preview)
+                except library_media.MediaError as exc:
+                    raise ValueError(str(exc)) from exc
+            elif ns.command == "research":
                 payload = research_command(ns, server)
             elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,
@@ -758,7 +808,7 @@ def main(argv=None):
                 payload = runtime.call_tool(name, args, server)
                 finish_call_work(server, name, payload, existing_threads)
         return emit(payload, text_mode, index=(server._get_index() if text_mode
-                    and ("hits" in payload or "yoinks" in payload) else None))
+                    and ("hits" in payload or "yoinks" in payload or "card" in payload) else None))
     except UsageError as exc:
         print(f"uoink: {exc}", file=sys.stderr)
         return 2
@@ -766,7 +816,7 @@ def main(argv=None):
         if mcp_session:
             # Stdout is the JSON-RPC transport. Fail on stderr, as uoink_mcp.py does.
             raise
-        return emit({"ok": False, "error": str(exc)})
+        return emit({"ok": False, "error": str(exc)}, text_mode)
 
 
 if __name__ == "__main__":

@@ -330,6 +330,26 @@ test('arguments with nothing installed explain how to install', async (t) => {
   assert.match(s.err.text(), /npx uoink/);
 });
 
+for (const args of [['update'], ['update', '--version', '9.9.9'], ['install', '--version', '9.9.9']]) {
+  test(`newer installed version stays in place for ${args.join(' ')}`, async (t) => {
+    const rel = await fakeRelease(exeFiles());
+    t.after(rel.close);
+    const s = setup(t, { base: rel.base, capture: async () => ({
+      code: 0, stdout: JSON.stringify({ version: '9.10.0' }),
+    }) });
+    for (const file of ['cli/uoink.cmd', 'python/python.exe', 'uoink_cli.py']) {
+      const p = path.join(s.deps.env.LOCALAPPDATA, 'Uoink', file);
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.writeFileSync(p, '');
+    }
+    assert.equal(await main([...args, '--yes'], s.deps), 0);
+    assert.match(s.out.text(), /9\.10\.0.*newer.*9\.9\.9/);
+    assert.doesNotMatch(s.out.text(), /Update Uoink to/);
+    assert.equal(s.calls.run.length, 0);
+    assert.ok(rel.hits.every(hit => hit.url.endsWith('SHA256SUMS.txt')));
+  });
+}
+
 test('--help works and unknown options are rejected', async (t) => {
   const s = setup(t);
   assert.equal(await main(['--help'], s.deps), 0);

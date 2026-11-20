@@ -14,6 +14,7 @@ import io
 import json
 import sqlite3
 import time
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -320,18 +321,25 @@ def test_locked_index_returns_within_budget_real_clock(monkeypatch, two_items):
 
 
 def test_locked_index_lock_wait_is_budgeted_against_the_deadline(monkeypatch, two_items):
-    """The lock wait is bounded by whichever comes first: SQLITE_TIMEOUT_SEC
-    or the total deadline. With a lock timeout larger than the budget, the
-    budget wins, on a real clock."""
+    """Measure the requested retry waits against the budget under a real SQLite lock."""
     hook = _load()
     monkeypatch.setattr(hook, "SQLITE_TIMEOUT_SEC", 10.0)
     monkeypatch.setattr(hook, "TIME_BUDGET_SEC", 0.4)
+    now = 10.0
+    deadline = now + hook.TIME_BUDGET_SEC
+    waits = []
+
+    def advance(seconds):
+        nonlocal now
+        assert 0 < seconds <= min(hook.LOCK_POLL_SEC, deadline - now)
+        waits.append(seconds)
+        now += seconds
+
+    monkeypatch.setattr(hook, "time", SimpleNamespace(monotonic=lambda: now, sleep=advance))
     with _held_exclusive(two_items):
-        elapsed, (code, out, err) = _timed_run(
-            monkeypatch, hook, two_items, "alpha beta gamma delta")
+        code, out, err = _run(monkeypatch, two_items, "alpha beta gamma delta", hook=hook)
     assert code == 0 and out == "" and err == ""
-    assert elapsed < 0.4 + 0.15, f"{elapsed:.3f}s over budget"
-    assert elapsed >= 0.35, f"{elapsed:.3f}s: gave up before the deadline"
+    assert sum(waits) == pytest.approx(hook.TIME_BUDGET_SEC)
 
 
 def test_locked_index_debug_names_sqlite_not_the_path(monkeypatch, two_items, tmp_path):

@@ -113,18 +113,7 @@ def _now_iso() -> str:
 
 
 # ---- runtime probe -----------------------------------------------------
-# v3.2 (CC's own v3.1.3 FLAG-1 fix): cache the import attempt at module-top
-# instead of re-running `import whisperx` on every /health and /ping call.
-#
-# Symptom: splash perpetually paints the failure variant on slow cold boots.
-# Root cause: the per-call `import whisperx` paid a multi-second torch CUDA
-# probe on first run, exceeding the splash's 1.5s retry budget. A broken
-# bundle (e.g., torch DLL load failure) raises OSError -- not ImportError --
-# which crashed the helper with HTTP 500 on every health poll. The `except
-# ImportError` clause was too narrow.
-# Fix: probe ONCE at module import, store the result, broaden the exception
-# catch so even a DLL load failure leaves the helper booting cleanly and the
-# transcribe endpoints return a clean 503 instead of a 500.
+# Check package presence without initializing torch or its native libraries.
 def _probe_whisperx() -> bool:
     import _platform
     if not _platform.media_capability()["available"]:
@@ -132,9 +121,8 @@ def _probe_whisperx() -> bool:
     if sys.platform == "darwin" and not _platform.alignment_capability()["available"]:
         return False
     try:
-        import whisperx  # noqa: F401
-        return True
-    except BaseException as e:  # noqa: BLE001 -- intentional: see comment above
+        return importlib.util.find_spec("whisperx") is not None
+    except (ImportError, ValueError, OSError) as e:
         log.warning("whisperx unavailable: %s: %s", type(e).__name__, e)
         return False
 
@@ -143,12 +131,7 @@ _WHISPERX_AVAILABLE = _probe_whisperx()
 
 
 def is_whisperx_available() -> bool:
-    """O(1) lookup of the cached cold-boot probe result. Used by /diagnose
-    + the transcribe endpoints' 503 path + /health + /ping. Re-importing
-    whisperx every call cost up to several seconds on the first cold boot
-    (torch CUDA probe), which was enough to blow the splash retry budget
-    in v3.1.2. This is now a single import at module load time -- the
-    per-call cost is a Python dict lookup."""
+    """Return the cached package-presence check used by health and settings."""
     return _WHISPERX_AVAILABLE
 
 
@@ -452,7 +435,17 @@ def transcribe_audio(audio_path: Path, *,
         if not alignment["available"]:
             raise RuntimeError(f"{alignment['code']}: {alignment['reason']}")
 
-    if transcription_engine() == "faster-whisper":
+    global _WHISPERX_AVAILABLE
+    engine = transcription_engine()
+    if engine == "whisperx":
+        try:
+            import whisperx  # type: ignore
+        except Exception as exc:
+            _WHISPERX_AVAILABLE = False
+            engine = transcription_engine()
+            if engine != "faster-whisper":
+                raise RuntimeError(f"whisperx import failed at transcribe time: {exc}") from exc
+    if engine == "faster-whisper":
         import uoink_reliability
         model_path = _prepare_model_snapshot(
             data_root, model_size, consent_given=consent_given)
@@ -479,23 +472,13 @@ def transcribe_audio(audio_path: Path, *,
             "engine": "faster-whisper",
         }
 
-    # Short-circuit on the cached cold-boot probe result. If whisperx
-    # failed to import at module-top, re-trying here would pay the same
-    # multi-second cost + raise the same exception. Just fail fast.
-    if not _WHISPERX_AVAILABLE:
+    if engine is None:
         raise RuntimeError(
             "whisperx is not installed or its runtime is broken. "
             "Reinstall Uoink so the bundled WhisperX runtime is restored. "
             "See the helper log for the underlying import error.")
     model_path = _prepare_model_snapshot(
         data_root, model_size, consent_given=consent_given)
-    try:
-        import whisperx  # type: ignore
-    except BaseException as e:  # noqa: BLE001 -- matches _probe_whisperx
-        raise RuntimeError(
-            f"whisperx import failed at transcribe time: "
-            f"{type(e).__name__}: {e}"
-        ) from e
 
     # whisperx exposes a load_model + transcribe + align + diarize chain.
     # Keep the call site narrow so a future WhisperX API rev doesn't

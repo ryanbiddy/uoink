@@ -2055,7 +2055,7 @@ def _freeze_input_files(files) -> tuple:
 
 
 def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
-                                     disk_raw=_REREAD_SIDECAR) -> None:
+                                     disk_raw=_REREAD_SIDECAR, written=None) -> None:
     """Refuse changed, removed, or conflicting consumed inputs inside publication.
 
     Disk may still match the frozen mint binding (intentional replacement of
@@ -2063,8 +2063,8 @@ def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
     after that carrier was already replaced). ``published_binding`` is the
     pre-merge artifact binding; non-owned disk keys must not be adopted into
     it. Any other consumed-input state is a conflict: do not replace the
-    current sidecar or adopt the new dependency. Extra bound input files
-    must still be the exact bytes consumed at mint.
+    current sidecar or adopt the new dependency. Extra bound files must
+    match the original bytes before replacement and the published bytes afterward.
     """
     if disk_raw is _REREAD_SIDECAR:
         disk_raw, owned = _sidecar_from_disk(Path(sidecar_path))
@@ -2089,7 +2089,7 @@ def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
         if Path(sidecar_path).resolve() != Path(ticket.sidecar_path).resolve():
             raise _stale("publication_input_changed")
     for path, expected in ticket.input_bindings:
-        require_unchanged_input_bytes(path, expected)
+        require_unchanged_input_bytes(path, (written or {}).get(Path(path), expected))
 
 
 def _plan_cue_binding(cue: dict) -> tuple:
@@ -2366,7 +2366,10 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         if disk_corpus is not None and disk_corpus != corpus_bytes:
             recorded = (current_block.get("provenance") or {}).get("corpus_revision") \
                 if current_block is not None and isinstance(current_block.get("provenance"), dict) else None
-            if recorded != _sha256(disk_corpus):
+            # A caption repair binds the exact edited document it retained
+            # around the transcript. Refuse any later change under this lock.
+            expected = dict(ticket.input_bindings).get(str(corpus_path)) if ticket else None
+            if recorded != _sha256(disk_corpus) and expected != disk_corpus:
                 raise _stale("corpus_edited")
         generation, current, ledger = _publication_state(conn, video_id, folder)
         history = list(ledger["history"]) if ledger is not None else []
@@ -2419,9 +2422,12 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         ordered = ([p for p in owned if p.parent.name == MEDIA_INPUTS_DIR]
                    + ([corpus_path] if corpus_path in owned else [])
                    + [p for p in owned if p.parent.name != MEDIA_INPUTS_DIR and p not in (corpus_path, sidecar_path)])
+        bound_files = dict(ticket.input_bindings)
         for path in ordered:
             data = owned[path]
             existing = _read_bytes(path, required=False)
+            if str(path) in bound_files and existing != bound_files[str(path)]:
+                raise _stale("publication_input_changed")
             if existing == data:
                 continue
             _atomic_replace(path, data)
@@ -2434,11 +2440,14 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         sidecar_data = owned[sidecar_path]
         existing_sidecar = _read_bytes(sidecar_path, required=False)
         require_bound_publication_inputs(
-            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar)
+            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar, written=owned)
         if existing_sidecar != sidecar_data:
             _atomic_replace(sidecar_path, sidecar_data)
 
         _insert_citations(conn, video_id, cues, block)
+        if corpus_path in owned and _has_column(conn, "yoinks_fts", "content"):
+            conn.execute("UPDATE yoinks_fts SET content=? WHERE video_id=?",
+                         (corpus_bytes.decode("utf-8", "replace"), video_id))
         _write_media_rows(conn, block)
         _write_clips(conn, video_id, projected)
         conn.commit()

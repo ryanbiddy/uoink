@@ -3072,9 +3072,7 @@ def _resume_local_search():
     from uoink_core.local_search import LocalSearch
     if LocalSearch.enabled_at(DATA_ROOT):
         try:
-            engine = _get_local_search()
-            if engine.manager.acceptance() and not engine.status()["paused"]:
-                engine.start()
+            _get_local_search().restore()
         except Exception:
             log.warning("Semantic search could not resume; keyword search is available")
 
@@ -3869,6 +3867,110 @@ def _library_transcript(video_id: str) -> dict | None:
         "duration_seconds": sidecar.get("duration_seconds"),
         "note": note,
     }
+
+
+def repair_rolling_captions(video_id: str, *, preview=False) -> dict:
+    """Repair one published YouTube caption track using the media writer's ownership checks."""
+    import clips
+    import library_cards
+    import library_media as media
+    import yt_extract
+
+    idx = _get_index()
+    folder, item = _folder_for_video_id(video_id)
+    if folder is None:
+        raise ValueError("Saved item not found.")
+    side_path = Path(item["sidecar_path"])
+    side = media.read_owned_sidecar(side_path)
+    result = {"ok": True, "removed_words": 0, "preview": preview}
+    if (not side or side.get("video_id") != video_id or item.get("platform") != "youtube"
+            or side.get("transcript_source") != "captions"):
+        return result
+    rows = side.get("transcript") or []
+    if any(not isinstance(r, dict) or not isinstance(r.get("text"), str)
+           or any(type(r.get(k)) not in (int, float) for k in ("start", "end"))
+           or r.get("speaker") for r in rows):
+        return result
+    entries = [(r["start"], r["end"], r["text"]) for r in rows]
+    cleaned = yt_extract._dedupe_srt_entries(entries)
+    words = sum(len(t.split()) for _, _, t in entries)
+    removed = words - sum(len(t.split()) for _, _, t in cleaned)
+    # A substantial pattern across multiple cues, never one repeated phrase.
+    from collections import Counter
+    changed = Counter((s, t) for s, _, t in entries) - Counter((s, t) for s, _, t in cleaned)
+    if removed < 4 or removed * 4 < words or sum(changed.values()) < 2:
+        # The sidecar is the last file replaced, just before the SQLite commit.
+        # Settle a repair interrupted there using those same sealed bytes.
+        block = side.get("media_depth") or {}
+        marker = side.get("caption_repair_revision")
+        if not preview and marker and marker == block.get("media_revision"):
+            with idx.detached_snapshot() as conn:
+                saved = conn.execute("SELECT media_revision FROM media_depth WHERE video_id=?", (video_id,)).fetchone()
+            if not saved or saved[0] != marker:
+                ticket = idx.begin_media_publication(video_id, capture_binding=media.capture_sidecar_inputs(side))
+                if ticket.base_media_revision != marker:
+                    raise ValueError("A newer capture replaced this repair.")
+                plan = _capture_media_plan(side, folder, item=item)
+                corpus_path = Path(item["corpus_path"])
+                idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block, ticket=ticket,
+                                           artifacts={corpus_path: corpus_path.read_bytes(),
+                                                      side_path: json.dumps(side, ensure_ascii=False).encode()})
+        return result
+    result["removed_words"] = removed
+    if preview:
+        return result
+    binding = media.capture_sidecar_inputs(side)
+    new_side = dict(side, transcript=_transcript_entries_with_links(side, cleaned))
+    old_plan = _capture_media_plan(side, folder, item=item)
+    plan = _capture_media_plan(new_side, folder, item=item)
+    if not old_plan or not plan or not side.get("media_depth"):
+        raise ValueError("This capture predates the saved caption history needed for repair.")
+    old_block = side["media_depth"]
+    if (old_block.get("diarization_state") != "not_requested"
+            or old_block.get("cue_revision") != old_plan["block"]["cue_revision"]
+            or old_block.get("chapters") != old_plan["block"]["chapters"]):
+        raise ValueError("The saved captions or chapters have changed. Your edits were kept.")
+    corpus_path = Path(item["corpus_path"])
+    corpus = corpus_path.read_bytes()
+    inputs = {corpus_path: corpus}
+    newline = b"\r\n" if b"\r\n" in corpus else b"\n"
+    old = old_plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
+    new = plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
+    if corpus.count(old) == 1:
+        corpus = corpus.replace(old, new, 1)
+    elif corpus.count(new) != 1:
+        raise ValueError("The saved caption section has changed. Your edits were kept.")
+    head = corpus[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
+    row = media._merge_item(item)
+    revision = library_cards.build_card(row, clips.merge_cues(plan["cues"], row),
+                                        corpus_text=head)["source_revision"]
+    block, digest = media.capture_snapshot(
+        video_id=video_id, source_revision=revision, cues=plan["cues"], artifact_bytes=plan["artifact"],
+        corpus_revision=hashlib.sha256(corpus).hexdigest(), playback=plan["playback"],
+        transcript_kind=plan["transcript_kind"], transcript_provider=plan["transcript_provider"],
+        chapter_rows=plan["chapter_rows"], recorded_at=side.get("yoinked_at"), item=item)
+    artifacts = {corpus_path: corpus, folder / media.MEDIA_INPUTS_DIR / (digest + ".json"): plan["artifact"],
+                 side_path: json.dumps(dict(new_side, media_depth=block,
+                                            caption_repair_revision=block["media_revision"]), ensure_ascii=False).encode()}
+    plain = folder / "transcript.txt"
+    if plain.exists():
+        if plain.is_symlink() or plain.resolve().parent != folder.resolve():
+            raise ValueError("The transcript file has moved.")
+        old_plain = "\n".join(t for _, _, t in entries)
+        new_plain = "\n".join(t for _, _, t in cleaned)
+        inputs[plain] = plain.read_bytes()
+        if inputs[plain].decode("utf-8").replace("\r\n", "\n") not in (old_plain, new_plain):
+            raise ValueError("The saved transcript has changed. Your edits were kept.")
+        artifacts[plain] = new_plain.encode()
+    try:
+        ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding, input_files=inputs)
+        if ticket.base_media_revision not in (old_block["media_revision"], block["media_revision"]):
+            raise ValueError("A newer capture replaced these captions.")
+        idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,
+                                   artifacts=artifacts, ticket=ticket)
+    except media.MediaError as exc:
+        raise ValueError("Caption repair could not finish. " + str(exc)) from exc
+    return result
 
 
 def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
@@ -8454,6 +8556,9 @@ def _youtube_429_endpoints(e: BaseException) -> set[str]:
         return set()
     stderr = (e.stderr.decode("utf-8", errors="ignore")
               if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    if re.search(r"\[twitter\]|https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/",
+                 stderr + "\n" + str(e.cmd), re.IGNORECASE):
+        return set()
     endpoints = set()
     for line in stderr.splitlines():
         if not re.search(r"\b429\b", line):
@@ -8632,10 +8737,11 @@ def _error_summary(e: BaseException) -> str:
 
 def _source_name_from_error(text: str) -> str:
     lower = text.lower()
+    if any(marker in lower for marker in ("[twitter]", "//x.com/", "//www.x.com/",
+                                          "//twitter.com/", "//www.twitter.com/", "//mobile.twitter.com/")):
+        return "X"
     if "youtube" in lower or "youtu.be" in lower:
         return "YouTube"
-    if "x.com" in lower or "twitter" in lower:
-        return "X"
     if "tiktok" in lower:
         return "TikTok"
     if "instagram" in lower:
@@ -8651,6 +8757,23 @@ def _plain_error_from_text(text: str) -> str:
               if line.strip().upper().startswith("ERROR:")]
     lower = (errors[-1] if errors else text).lower()
     source = _source_name_from_error(text)
+    if source == "X":
+        for signals, message in (
+            (("tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"),
+             "X says this post was deleted."),
+            (("protected tweet", "protected post", "protected account"),
+             "The post is from a protected X account."),
+            (("nsfw tweet requires authentication", "age-restricted", "age restricted", "age verification", "age-gated"),
+             "X restricts this video by age."),
+            (("not available in your country", "unavailable in your country", "not available in your region", "withheld in", "geo-restricted", "geoblocked"),
+             "X restricts this video in your region."),
+            (("no video could be found in this tweet", "no video in this post", "does not contain a video"),
+             "This X post has no video to save."),
+            (("too many requests", "http error 429", "rate-limit", "rate limit"),
+             "X is limiting requests. Wait a few minutes and try again."),
+        ):
+            if any(signal in lower for signal in signals):
+                return message
     if ("too many requests" in lower or "http error 429" in lower
             or "rate-limit" in lower or "rate limit" in lower):
         # Terminal contexts store this string, so it can't promise a retry
@@ -12726,14 +12849,8 @@ def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
     under its real GUID. Otherwise the row gets a marked stand-in GUID that a
     later poll of the feed swaps for the real one (podcasts.upsert_episodes,
     source_subscriptions.project_podcast_episode)."""
-    existed = any(f.get("feed_url") == feed_url for f in podcasts.list_feeds(idx))
-    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False, enabled=False, title=item.get("show"))
     feed_id = int(feed["id"])
-    if not existed:
-        podcasts.set_feed_enabled(idx, feed_id, False)
-        podcasts.record_feed_meta(
-            idx, feed_id, title=item.get("show") or None, description=None,
-            homepage=None, etag=None, last_modified=None, ok=True)
     same = podcasts.find_feed_episode(
         idx, feed_id, audio_url=item.get("episode_url"), title=item.get("title"),
         published=item.get("released") or None)
@@ -19357,9 +19474,23 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
         try:
             feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
-            row = podcasts.add_feed(_get_index(), feed_url)
-            if not row.get("enabled", 1):
-                podcasts.set_feed_enabled(_get_index(), int(row["id"]), True)
+            item = suggestions.get_item(DATA_ROOT, sid) or {}
+            title = (str(item.get("show") or "").strip() or urlparse(feed_url).hostname or "")[:200]
+            register = _source_service().register_source(_source_operator_context(), {
+                "kind": "podcast_rss", "url": feed_url, "display_name": title})
+            if not register.get("ok"):
+                raise ValueError("This feed could not be scheduled for checks.")
+            source = register["source"]
+            feed_id = source["legacy"]["feed_id"]
+            with _get_index().write_transaction() as conn:
+                if not feed_id or not conn.execute(
+                        "UPDATE source_subscriptions SET detection_enabled=1, follow_feed=1, "
+                        "display_name=coalesce(nullif(trim(display_name),''), ?) "
+                        "WHERE source_id=? AND archived=0 AND legacy_feed_id=?",
+                        (title, source["source_id"], feed_id)).rowcount:
+                    raise ValueError("This feed could not be scheduled for checks.")
+                conn.execute("UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''), ?) "
+                             "WHERE id=?", (title, feed_id))
         except suggestions.SuggestionError as exc:
             status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
             return self._send_json(status, {"ok": False, "error": str(exc)})
@@ -19368,7 +19499,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             log.exception("/suggestions/podcasts/follow failed")
             return self._send_json(500, {"ok": False, "error": "Couldn't follow this show."})
-        return self._send_json(200, {"ok": True, "id": sid, "feed_id": row.get("id"),
+        return self._send_json(200, {"ok": True, "id": sid, "feed_id": feed_id,
                                      "message": "Following. New episodes show up under Podcasts."})
 
     def _handle_podcasts_episode_to_corpus(self, body):

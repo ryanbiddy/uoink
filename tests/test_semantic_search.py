@@ -200,12 +200,13 @@ def test_restart_resumes_only_persisted_opt_in(db, monkeypatch):
     idx, engine = ready(db)
     assert ls.LocalSearch.enabled_at(idx._path.parent)
     calls = []
-    monkeypatch.setattr(engine, "start", lambda: calls.append("start"))
+    monkeypatch.setattr(engine, "_launch", lambda: calls.append("launch"))
     server._resume_local_search()
-    assert calls == ["start"]
+    assert engine._full and not calls
+    engine._full = False
     engine.manager.terms_path.unlink()
     server._resume_local_search()
-    assert calls == ["start"]
+    assert not engine._full and not calls
 
 
 @pytest.mark.parametrize("state,paused,expected", [("not_installed", False, "keyword"),

@@ -127,7 +127,7 @@ def _validate_feed_url(raw: str) -> str | None:
 
 # ---- feed CRUD ----------------------------------------------------------
 def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
-             auto_ingest: bool = False) -> dict:
+             auto_ingest: bool = False, title: str | None = None, enabled: bool = True) -> dict:
     """Insert + return a fresh feed row. UNIQUE constraint on feed_url
     prevents duplicate registration. Returns an existing row's dict
     when the URL is already in the table -- idempotent add."""
@@ -143,9 +143,9 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
         stored_auto_ingest = 0 if managed else (1 if auto_ingest else 0)
         cur = conn.execute(
             "INSERT OR IGNORE INTO podcast_feeds "
-            "(feed_url, poll_interval_min, auto_ingest, added_at) "
-            "VALUES (?, ?, ?, ?)",
-            (canonical, interval, stored_auto_ingest, _now_iso()))
+            "(feed_url, poll_interval_min, auto_ingest, added_at, title, enabled) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (canonical, interval, stored_auto_ingest, _now_iso(), title, int(enabled)))
         if cur.rowcount == 0:
             # Already present; return that row.
             row = conn.execute(
@@ -159,7 +159,7 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
         if result and managed:
             result["source_id"] = _subscriptions().legacy_register(
                 conn, kind="podcast_rss", url=result["feed_url"],
-                feed_id=int(result["id"]), interval=interval,
+                feed_id=int(result["id"]), interval=interval, display_name=result.get("title"),
                 detection_enabled=bool(result.get("enabled", 1)))
             if auto_ingest:
                 result["consent_required"] = True
@@ -189,7 +189,17 @@ def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
         sql += " WHERE f.enabled = 1"
     sql += " GROUP BY f.id ORDER BY f.added_at DESC"
     rows = idx._conn.execute(sql, params).fetchall()
-    return [dict(r) for r in rows]
+    feeds = [dict(r) for r in rows]
+    if feeds and _subscriptions().tables_present(idx._conn):
+        attempts = dict(idx._conn.execute(
+            "SELECT s.legacy_feed_id, c.last_poll_attempt_ms FROM source_subscriptions s "
+            "JOIN source_detection_cursors c USING(source_id) WHERE s.legacy_feed_id IS NOT NULL"))
+        for feed in feeds:
+            ms = attempts.get(feed["id"])
+            if ms is not None:
+                feed["last_polled_at"] = (datetime.fromtimestamp(ms / 1000, timezone.utc)
+                                          .isoformat().replace("+00:00", "Z"))
+    return feeds
 
 
 class ManagedBySubscription(ValueError):

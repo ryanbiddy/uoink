@@ -42,6 +42,10 @@ Promise.resolve(vm.runInContext(fs.readFileSync(0, 'utf8'), ctx)).then(
 """
 
 
+def test_planned_source_has_no_release_promise():
+    assert run_js('sourceStatusLabel("planned")') == "Planned"
+
+
 def run_js(code):
     result = subprocess.run(["node", "-e", HARNESS], input=code, cwd=ROOT,
                             text=True, encoding="utf-8", capture_output=True, timeout=30)
@@ -268,6 +272,22 @@ def plain_error_from_text():
     exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n, ast.FunctionDef)
                                   and n.name in names], type_ignores=[]), "server.py", "exec"), scope)
     return scope["_plain_error_from_text"]
+
+
+@pytest.mark.parametrize(("diagnostic", "expected"), [
+    ("The author deleted this post", "X says this post was deleted."),
+    ("You are not authorized to view this protected tweet", "The post is from a protected X account."),
+    ("NSFW tweet requires authentication", "X restricts this video by age."),
+    ("This content is not available in your country", "X restricts this video in your region."),
+    ("No video could be found in this tweet", "This X post has no video to save."),
+    ("HTTP Error 429: Too Many Requests", "X is limiting requests. Wait a few minutes and try again."),
+])
+def test_x_media_reason_reaches_library(diagnostic, expected, plain_error_from_text):
+    url = "https://x.com/i/status/1790000000000000000"
+    raw = f"Command: yt-dlp --extractor-args youtube:player_client=web {url}\nERROR: [twitter] 1790000000000000000: {diagnostic}"
+    assert plain_error_from_text(raw) == expected
+    data = {"source_url": url, "error_detail": raw}
+    assert run_js(f"libraryFailureCopy({json.dumps(data)})")["reason"] == expected
 
 
 @pytest.mark.parametrize("message", [

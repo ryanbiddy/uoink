@@ -583,6 +583,12 @@ class LocalSearch:
             raise ValueError("Vector database must be separate from the main index")
         self.model_factory = model_factory
         self._model = None
+        try:
+            self._idle_seconds = max(1, min(86400, int(os.environ.get("UOINK_MODEL_IDLE_SECONDS", 300))))
+        except ValueError:
+            self._idle_seconds = 300
+        self._idle_timer = None
+        self._last_use = 0.0
         self._state_lock = threading.RLock()
         self._control = threading.RLock()
         self._activity = threading.RLock()
@@ -695,6 +701,13 @@ class LocalSearch:
     def download(self):
         return self.start(download=True)
 
+    def restore(self):
+        """Arm a saved index for its first search or library change after restart."""
+        with self._state_lock:
+            if self.enabled and not self._paused and self.manager.acceptance() and self.manager.present():
+                self._full = True
+                self._state = "ready"
+
     def update_source(self, source_id):
         # Capture callbacks must not wait for pause/remove to join an inference
         # worker. They only enqueue; the worker verifies model and consent.
@@ -752,6 +765,32 @@ class LocalSearch:
     def _download_progress(self, phase, received):
         self._set(phase, received=received)
 
+    def _schedule_release(self, delay):
+        self._idle_timer = threading.Timer(delay, self._release_idle_model)
+        self._idle_timer.daemon = True
+        self._idle_timer.start()
+
+    def _release_idle_model(self):
+        with self._activity:
+            remaining = self._last_use + self._idle_seconds - time.monotonic()
+            self._idle_timer = None
+            if self._model is not None and remaining > 0:
+                self._schedule_release(remaining)
+            else:
+                self._model = None
+
+    def _embed(self, texts, *, wait=True):
+        # All callers hold _activity through inference. An idle timer cannot
+        # drop a session during a long batch or while a query loads it again.
+        if self._model is None:
+            self._model = self.model_factory(self.manager)
+        try:
+            return self._model.embed(texts, wait=wait)
+        finally:
+            self._last_use = time.monotonic()
+            if self._idle_timer is None:
+                self._schedule_release(self._idle_seconds)
+
     def _sync(self, identities):
         documents = self.sources.snapshot() if identities is None else self.sources.snapshot(source_ids=sorted(identities))
         live = {doc.source_id: doc.fingerprint for doc in documents}
@@ -774,7 +813,7 @@ class LocalSearch:
                     texts = [f"title: {doc.title or 'none'} | text: {p.text}"
                              for p in doc.passages[offset:offset + BATCH_SIZE]]
                     with self._activity:
-                        vectors.extend(self._model.embed(texts))
+                        vectors.extend(self._embed(texts))
                 self._checkpoint()
                 # A capture can change while inference runs. Never publish it
                 # under an obsolete fingerprint or resurrect a deleted source.
@@ -811,8 +850,6 @@ class LocalSearch:
                 if self._model is None:
                     self._set("verifying")
                     self.manager.verify()
-                    with self._activity:
-                        self._model = self.model_factory(self.manager)
                 self._sync(None if full else identities)
                 with self._state_lock:
                     if not (self._pending or self._full or self._download):
@@ -873,10 +910,17 @@ class LocalSearch:
         if not query.strip() or not limit:
             return []
         self._require_terms()
+        with self._state_lock:
+            if self._paused:
+                raise SearchUnavailable("Semantic search is paused")
+            if self._full and self._worker is None:
+                self._state = "indexing"
+                self._launch()
+                raise SearchUnavailable("Preparing local search. Keyword search is available.")
         if not self._activity.acquire(blocking=False):
             raise SearchUnavailable("The search model is busy; use keyword search")
         try:
-            if self._model is None:
+            if not self.enabled or self._state in ("not_installed", "terms_needed", "downloading", "verifying"):
                 raise SearchUnavailable("Start local search before querying")
             # Cache rebuilds and database invalidation belong to the worker.
             self.store.cached()
@@ -884,7 +928,7 @@ class LocalSearch:
             eligible = ({doc.source_id: doc.fingerprint for doc in self.sources.snapshot(
                 filters=filters, source_id=source_id, source_types=source_types, wait=False)}
                 if any(filters.values()) or source_id or source_types else live)
-            vector = self._model.embed([QUERY_PREFIX + query], wait=False)[0]
+            vector = self._embed([QUERY_PREFIX + query], wait=False)[0]
             hits = self.store.search(vector, eligible, limit, clips_only=clips_only)
             # Recheck after inference so edits/deletes during the query cannot
             # escape through a vector read from the earlier snapshot.

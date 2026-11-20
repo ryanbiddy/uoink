@@ -3416,13 +3416,15 @@ class SourceSubscriptionService:
         sql = ("SELECT s.source_id FROM source_subscriptions s "
                "JOIN source_detection_cursors c ON c.source_id=s.source_id "
                "WHERE s.archived=0 AND s.detection_enabled=1 AND c.poll_owner_token IS NULL "
-               "AND (s.kind!='podcast_rss' OR s.consent_epoch>0) "
-               "AND c.next_poll_at_ms<=? ORDER BY c.next_poll_at_ms, s.source_id")
+               "AND c.next_poll_at_ms<=? ")
         params: list[Any] = [now]
-        if limit is not None:
-            sql += " LIMIT ?"
-            params.append(int(limit))
         with self.store.read() as conn:
+            follows = any(r[1] == "follow_feed" for r in conn.execute("PRAGMA table_info(source_subscriptions)"))
+            sql += "AND (s.kind!='podcast_rss' OR s.consent_epoch>0" + (" OR s.follow_feed=1" if follows else "") + ") "
+            sql += "ORDER BY c.next_poll_at_ms, s.source_id"
+            if limit is not None:
+                sql += " LIMIT ?"
+                params.append(int(limit))
             return [r[0] for r in conn.execute(sql, params).fetchall()]
 
     def claim_due_polls(self, now: int | None = None, *, limit: int | None = None) -> list[dict]:
@@ -3446,8 +3448,9 @@ class SourceSubscriptionService:
             cursor = self._cursor(conn, source_id)
             if source["archived"] or not source["detection_enabled"]:
                 return None
-            # Only a user's own refresh may read a podcast feed before consent.
-            if source["kind"] == "podcast_rss" and not source["consent_epoch"] and not manual:
+            # A follow permits scheduled RSS checks without approving audio capture.
+            if (source["kind"] == "podcast_rss" and not source["consent_epoch"]
+                    and not source.get("follow_feed") and not manual):
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None

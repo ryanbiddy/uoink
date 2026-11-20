@@ -231,8 +231,32 @@ def test_edit_soft_delete_hard_delete_restore_and_restart(engine, index):
     assert set(engine.store.fingerprints()) == {"bread"}
     other = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
     ready(other)
-    assert other._model.calls == []  # unchanged sources reuse persisted vectors
+    assert other._model is None  # unchanged sources reuse vectors without loading ONNX
     assert other.embedding_search("bread")[0].source_id == "bread"
+
+
+def test_model_released_after_idle_and_reloaded_for_query(engine, index, monkeypatch):
+    monkeypatch.setattr(engine, "_idle_seconds", 0.02, raising=False)
+    index.seed()
+    ready(engine)
+    import time
+    deadline = time.monotonic() + 5
+    while engine._model is not None and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert engine._model is None
+    assert engine.embedding_search("mars")[0].source_id == "mars"
+
+
+def test_opted_in_restart_with_unindexed_changes_waits_for_use(engine, index):
+    ready(engine)
+    index.seed()
+    other = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
+    other.restore()
+    assert other._worker is None and other._model is None
+    with pytest.raises(ls.SearchUnavailable, match="Preparing"):
+        other.embedding_search("mars")
+    assert other.wait(5)
+    assert other.embedding_search("mars")[0].source_id == "mars"
 
 
 def test_clip_spans_timestamps_max_per_source_and_metadata_changes(engine, index):

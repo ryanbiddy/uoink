@@ -58,71 +58,30 @@ def fmt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-def _caption_norm(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def _caption_key(text: str) -> str:
-    return _caption_norm(text).casefold()
-
-
-def _suffix_prefix_overlap(prev: str, cur: str, *, min_chars: int = 12) -> int:
-    """Length of prev suffix that matches cur prefix, for rolling captions."""
-    max_len = min(len(prev), len(cur))
-    for n in range(max_len, min_chars - 1, -1):
-        if prev[-n:] == cur[:n]:
-            return n
-    return 0
-
-
 def _dedupe_srt_entries(entries: list[tuple[float, float, str]]):
-    """Collapse YouTube rolling auto-caption fragments conservatively.
-
-    Human captions usually arrive as distinct, non-overlapping sentences; they
-    pass through unchanged. Auto captions often emit a partial line, then a
-    more complete line a second later, and finally a trailing fragment. We keep
-    the latest complete wording rather than tripling the transcript.
-    """
-    out: list[tuple[float, float, str]] = []
+    """Emit only words newly visible in each adjacent display window."""
+    out = []
+    previous = []
+    prev_start = prev_end = -1.0
     for start, end, text in entries:
-        text = _caption_norm(text)
-        if not text:
+        words = text.split()
+        if not words:
             continue
-        if not out:
-            out.append((start, end, text))
-            continue
-
-        prev_start, prev_end, prev_text = out[-1]
-        prev_key = _caption_key(prev_text)
-        cur_key = _caption_key(text)
-        starts_near_prev = start - prev_start <= 5.0 or start - prev_end <= 2.0
-
-        # Fully duplicated caption blocks within two seconds are common in
-        # both auto-caption exports and occasionally in translated captions.
-        if cur_key == prev_key and start - prev_start <= 2.0:
-            continue
-
-        if starts_near_prev:
-            if cur_key in prev_key:
-                # New line is just a trailing fragment already contained in
-                # the previous complete line. Exact repeats are only dropped
-                # inside the tighter duplicate window above.
-                if cur_key != prev_key:
-                    continue
-            if cur_key != prev_key and cur_key.startswith(prev_key):
-                # New line is a more complete rewrite of the previous line.
-                out[-1] = (prev_start, end, text)
-                continue
-            overlap = (
-                _suffix_prefix_overlap(prev_key, cur_key)
-                if cur_key != prev_key else 0
-            )
-            if overlap:
-                # Rolling continuation: "hello world" then "world today".
-                out[-1] = (prev_start, end, prev_text.rstrip() + text[overlap:])
-                continue
-
-        out.append((start, end, text))
+        current = [word.casefold() for word in words]
+        overlap = 0
+        if prev_start <= start <= prev_end + 0.15:
+            for size in range(min(len(previous), len(current)), 0, -1):
+                if size == 1 and start >= prev_end and len(previous) > 1:
+                    break  # A single shared word across sentences is ambiguous.
+                if current[:size] == previous[-size:]:
+                    overlap = size
+                    break
+        if overlap < len(words):
+            out.append((start, end, " ".join(words[overlap:])))
+        elif out:
+            first, last, line = out[-1]
+            out[-1] = (first, max(last, end), line)
+        previous, prev_start, prev_end = current, start, end
     return out
 
 

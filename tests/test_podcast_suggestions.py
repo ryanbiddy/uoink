@@ -279,6 +279,7 @@ def _handler(monkeypatch, idx, tmp_path, *, enabled=True, token=True):
     handler._check_token = lambda: token
     handler.command, handler.path = "GET", "/suggestions/podcasts"
     monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "_source_service_instance", None)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     monkeypatch.setattr(server, "_read_settings", lambda: {"suggest_podcasts": enabled})
     monkeypatch.setattr(server, "_podcast_suggestions_refresh_async", lambda **kw: False)
@@ -416,6 +417,28 @@ def test_follow_turns_a_saved_show_on(monkeypatch, idx, tmp_path):
     handler._handle_podcast_suggestions_follow({"id": item["id"]})
     assert resp.sent[-1][0] == 200
     assert podcasts.list_feeds(idx)[0]["enabled"] == 1
+
+
+def test_follow_from_card_has_title_and_reports_actual_first_poll(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    handler, resp = _handler(monkeypatch, idx, tmp_path)
+    adapter = FakeAdapter([ss.AdapterResult("snapshot", coverage="complete", observations=[])])
+    service = make_service(idx, clock=Clock(int(time.time() * 1000) + 1000), adapter=adapter)
+    monkeypatch.setattr(server, "_source_service", lambda: service)
+    handler._handle_podcast_suggestions_follow({"id": item["id"]})
+    assert resp.sent[-1][0] == 200
+    [feed] = podcasts.list_feeds(idx)
+    assert feed["title"] == item["show"] and feed["last_polled_at"] is None
+    [source] = service.due_poll_ids()
+    assert service.run_claimed_poll(service.claim_poll(source))["ok"]
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"]
+    assert not podcasts.get_feed(idx, feed["id"])["auto_ingest"]
+    assert service.archive_source(server._source_operator_context(), {"source_id": source})["ok"]
+    assert idx._conn.execute("SELECT follow_feed FROM source_subscriptions WHERE source_id=?",
+                             (source,)).fetchone()[0] == 0
+    handler._handle_podcast_suggestions_follow({"id": item["id"]})
+    assert resp.sent[-1][1]["feed_id"] == feed["id"]
+    assert len(podcasts.list_feeds(idx)) == 1
 
 
 # ---- 3.17.0 review fixes -------------------------------------------------------
