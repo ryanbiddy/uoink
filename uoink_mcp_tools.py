@@ -265,7 +265,7 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
             else:
                 metadata = b._fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
-                topic = b._classify_topic(metadata)
+                topic = b._route_topic(metadata, url=url)
                 # Same source-derived folder as /extract, so two videos with
                 # the same title never share (or fight over) one folder.
                 folder = b._video_capture_folder(
@@ -988,7 +988,8 @@ def episode_to_corpus(args: dict[str, Any]) -> dict[str, Any]:
         return _err("episode_id (integer) is required")
     try:
         result = _pod.episode_to_corpus(
-            server._get_index(), episode_id, data_root=server.DATA_ROOT)
+            server._get_index(), episode_id, data_root=server.DATA_ROOT,
+            topic_classifier=server._route_topic)
         episode = _pod.get_episode(server._get_index(), episode_id) or {}
         server.maybe_toast(
             "Podcast added to Uoink",
@@ -1736,7 +1737,7 @@ def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
             server._get_index(),
             note,
             data_root=server.DESKTOP_ROOT,
-            topic_classifier=server._classify_topic,
+            topic_classifier=server._route_topic,
         )
     except Exception as exc:
         return _err(f"uoink_note failed: {exc}")
@@ -1784,7 +1785,7 @@ def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
             built,
             image_bytes,
             data_root=server.DESKTOP_ROOT,
-            topic_classifier=server._classify_topic,
+            topic_classifier=server._route_topic,
         )
     except Exception as exc:
         return _err(f"uoink_image failed: {exc}")
@@ -1831,7 +1832,7 @@ def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
             source_type=_x.SOURCE_TYPE,
             subfolder="X",
             slug_prefix="x",
-            topic_classifier=server._classify_topic,
+            topic_classifier=server._route_topic,
         )
     except Exception as exc:
         return _err(f"uoink_x failed: {exc}")

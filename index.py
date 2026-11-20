@@ -2590,6 +2590,18 @@ class Index:
             self._conn.commit()  # C-03: facets must survive a kill
         return len(pairs)
 
+    def set_shelf(self, video_id: str, topic: str | None) -> bool:
+        """Move one save to a shelf (its topic), keeping the full-text row's
+        topic column in step. None clears it. Returns True when a row changed."""
+        with self._lock, self._rollback_on_error():
+            changed = self._conn.execute(
+                "UPDATE yoinks SET topic=? WHERE video_id=?", (topic, video_id)).rowcount
+            if changed:
+                self._conn.execute(
+                    "UPDATE yoinks_fts SET topic=? WHERE video_id=?", (topic, video_id))
+            self._conn.commit()
+        return bool(changed)
+
     def add_tags(self, video_id: str, tags, *, source: str = "agent") -> int:
         """Append free-form tags to a yoink (idempotent via the (video_id, tag)
         PK). Empty/whitespace tags are dropped; tags are lower-cased on store

@@ -842,10 +842,16 @@ def persist_page_yoink(idx, extract_result: dict, *,
     # caller didn't already pass a topic.
     if topic is None and topic_classifier is not None:
         try:
+            # url, source_type and the extractor metadata (an X post's own
+            # text, its quoted post and video length) let the shelf router
+            # use more than the title; the classic classifier ignores them.
             topic = topic_classifier({
                 "title": title or "",
                 "description": (md or "")[:2000],
                 "channel": author or "",
+                "url": url,
+                "source_type": source_type,
+                "metadata": metadata,
             }) or None
         except Exception as e:  # defensive: never block a save on classify
             log.warning("persist_page_yoink topic classify failed: %s", e)

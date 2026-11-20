@@ -232,6 +232,7 @@ Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\shelf_router.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_verify.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_report.py"; DestDir: "{app}"; Flags: ignoreversion

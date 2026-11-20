@@ -4904,6 +4904,306 @@ def _classify_topic(metadata: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Shelf routing (3.18): a save's own words, the user's folders and the
+# shelves already in the library. The logic lives in shelf_router.py; these
+# helpers feed it from this helper's index, data folder and local model.
+# ---------------------------------------------------------------------------
+_shelf_library_lock = threading.Lock()
+_shelf_library_cache: dict = {"key": None, "at": 0.0, "library": None}
+_shelf_generation = [0]
+SHELF_LIBRARY_ROWS = 5000
+SHELF_LIBRARY_TTL = 600.0
+
+
+def _shelf_fallback() -> str:
+    return (_load_topics().get("fallback") or "Uncategorized").strip() or "Uncategorized"
+
+
+def _shelf_rows(idx, *, only_fallback: bool = False, limit: int = SHELF_LIBRARY_ROWS) -> list[dict]:
+    """Saves as shelf evidence: title, author, topic, tags, length and a
+    short excerpt of the saved text (metadata lines removed)."""
+    import shelf_router
+    fallback = _shelf_fallback()
+    where = ""
+    params: list = []
+    if only_fallback:
+        where = " AND (y.topic IS NULL OR TRIM(y.topic) = '' OR LOWER(TRIM(y.topic)) = LOWER(?))"
+        params.append(fallback)
+    captured = index.capture_time_sql("y.yoinked_at")
+    with idx.detached_snapshot() as db:
+        rows = db.execute(
+            "SELECT y.video_id, y.title, y.topic, y.author, y.channel, y.platform, y.source_type, "
+            "y.metadata_json, y.corpus_path, y.sidecar_path FROM yoinks y WHERE y.deleted_at IS NULL"
+            + where + f" ORDER BY {captured} DESC LIMIT ?", (*params, int(limit))).fetchall()
+        ids = {row["video_id"] for row in rows}
+        excerpts = {r[0]: r[1] or "" for r in db.execute(
+            "SELECT video_id, substr(content, 1, 2400) FROM yoinks_fts") if r[0] in ids}
+        tags: dict = {}
+        for r in db.execute("SELECT video_id, tag FROM yoink_tags WHERE source != 'list_import'"):
+            if r[0] in ids:
+                tags.setdefault(r[0], []).append(r[1])
+    out = []
+    for row in rows:
+        try:
+            meta = json.loads(row["metadata_json"] or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        meta = meta if isinstance(meta, dict) else {}
+        text = "\n".join(line for line in excerpts.get(row["video_id"], "").splitlines()
+                         if not re.match(r"^\s*(?:\*\*[^*]{1,40}:\*\*|#\s|!\[|>)", line))
+        out.append({"video_id": row["video_id"], "title": row["title"] or "", "topic": row["topic"],
+                    "author": row["author"] or row["channel"] or "", "platform": row["platform"] or "",
+                    "source_type": row["source_type"] or "", "text": text[:1500],
+                    "tags": tags.get(row["video_id"], [])[:20],
+                    "duration_seconds": meta.get("duration_seconds"),
+                    "is_fallback": shelf_router.is_fallback(row["topic"], fallback),
+                    "corpus_path": row["corpus_path"], "sidecar_path": row["sidecar_path"]})
+    return out
+
+
+def _shelf_vectors(ids=None) -> dict:
+    """Stored meaning vectors per save, when local search is on and ready."""
+    engine = _local_search_singleton
+    if engine is None:
+        return {}
+    try:
+        return engine.source_vectors(ids)
+    except Exception:
+        log.debug("shelf routing: vectors unavailable", exc_info=True)
+        return {}
+
+
+def _shelf_library():
+    """The user's shelves as routing evidence, cached until the library
+    changes (or ten minutes pass, for edits made elsewhere)."""
+    import shelf_router
+    idx = _get_index()
+    with idx.detached_snapshot() as db:
+        count, last = db.execute("SELECT COUNT(*), MAX(rowid) FROM yoinks WHERE deleted_at IS NULL").fetchone()
+    key = (str(INDEX_PATH), count, last, _shelf_generation[0], _local_search_singleton is not None)
+    now = time.monotonic()
+    with _shelf_library_lock:
+        cached = _shelf_library_cache
+        if cached["key"] == key and now - cached["at"] < SHELF_LIBRARY_TTL and cached["library"] is not None:
+            return cached["library"]
+    rows = _shelf_rows(idx)
+    vectors = _shelf_vectors([r["video_id"] for r in rows if not r["is_fallback"]])
+    library = shelf_router.Library(rows, fallback=_shelf_fallback(), vectors=vectors)
+    with _shelf_library_lock:
+        _shelf_library_cache.update(key=key, at=now, library=library)
+    return library
+
+
+def _shelf_hint(metadata: dict, url: str | None = None) -> str | None:
+    """A shelf the user or an agent picked for this URL before it was captured."""
+    import shelf_router
+    urls = [url, metadata.get("url"), metadata.get("webpage_url"), metadata.get("original_url")]
+    if str(metadata.get("extractor_key") or "").lower() == "youtube" and metadata.get("id"):
+        urls.append(str(metadata["id"]))
+    try:
+        return shelf_router.hint_for(DATA_ROOT, *[u for u in urls if u])
+    except Exception:
+        log.debug("shelf hint lookup failed", exc_info=True)
+        return None
+
+
+def _shelf_decision(metadata: dict, *, url: str | None = None, hint: str | None = None,
+                    source_type: str | None = None, transcript: str | None = None):
+    """The full routing decision for a new save (see shelf_router.route)."""
+    import shelf_router
+    metadata = metadata if isinstance(metadata, dict) else {}
+    url = url or metadata.get("url") or metadata.get("webpage_url")
+    source_type = source_type or metadata.get("source_type")
+    keyword = _classify_topic(metadata)
+    hint = hint or _shelf_hint(metadata, url)
+    library = vector = None
+    if not hint:
+        try:
+            library = _shelf_library()
+        except Exception:
+            log.warning("shelf routing: library evidence unavailable", exc_info=True)
+        if library is not None and library.has_vectors() and _local_search_singleton is not None:
+            try:
+                vector = _local_search_singleton.document_vector(
+                    metadata.get("title") or "", " ".join([metadata.get("description") or "", transcript or ""]))
+            except Exception:
+                vector = None
+    return shelf_router.route(metadata, topics=_load_topics(), library=library, keyword_topic=keyword,
+                              hint=hint, transcript=transcript, vector=vector,
+                              source_type=source_type, url=url)
+
+
+def _route_topic(metadata: dict, *, url: str | None = None, hint: str | None = None,
+                 source_type: str | None = None, transcript: str | None = None) -> str:
+    """Shelf for a new save. Same contract as _classify_topic (a dict in, a
+    shelf name out), so it also works as persist_page_yoink's classifier.
+    Never fails a capture: any routing error falls back to the keywords."""
+    try:
+        return _shelf_decision(metadata, url=url, hint=hint, source_type=source_type,
+                               transcript=transcript).shelf
+    except Exception:
+        log.warning("shelf routing failed; using topic words only", exc_info=True)
+        return _classify_topic(metadata)
+
+
+def _clean_shelf(value) -> str | None:
+    import shelf_router
+    return shelf_router.clean_shelf_name(value)
+
+
+def _shelf_from_body(body, *, remember_url: str | None = None) -> tuple[str | None, str | None]:
+    """The optional shelf a capture request names ("shelf", or "folder" for
+    imports). Returns (name, None), (None, None) or (None, error). With
+    remember_url the choice is also kept for a capture that waits in a queue."""
+    import shelf_router
+    if not isinstance(body, dict):
+        return None, None
+    raw = body.get("shelf")
+    if raw is None:
+        raw = body.get("folder")
+    if raw is None or (isinstance(raw, str) and not raw.strip()):
+        return None, None
+    name = shelf_router.clean_shelf_name(raw)
+    if not name:
+        return None, "shelf must be a name of 1 to 64 characters that also works as a folder name"
+    if remember_url:
+        try:
+            shelf_router.remember_hints(DATA_ROOT, [(remember_url, name)])
+        except OSError as exc:
+            log.warning("shelf hint not saved: %s", exc)
+    return name, None
+
+
+def _shelf_is_default(topic) -> bool:
+    import shelf_router
+    return (shelf_router.is_fallback(topic, _shelf_fallback())
+            or str(topic or "").strip() == shelf_router.CLIPS_SHELF)
+
+
+def _keep_placed_shelf(topic: str, existing: dict | None, *, explicit: str | None = None) -> str:
+    """Saving a link again keeps the shelf the save already sits on (the
+    user may have moved it), unless the caller named a shelf this time."""
+    if explicit or not existing:
+        return explicit or topic
+    try:
+        row = _get_index().get_yoink(existing["video_id"])
+    except Exception:
+        return topic
+    current = (row or {}).get("topic")
+    return current if current and not _shelf_is_default(current) else topic
+
+
+def _reroute_with_transcript(topic: str, metadata: dict, entries, *, url: str,
+                             existing: dict | None = None) -> str:
+    """One more routing pass once the transcript exists. Only a save still on
+    a default shelf (Uncategorized or Clips) that nobody placed by hand moves."""
+    if not _shelf_is_default(topic):
+        return topic
+    if existing and not _shelf_is_default(existing.get("topic")):
+        return existing.get("topic")
+    if _shelf_hint(metadata, url):
+        return topic
+    text = " ".join(str(e.get("text") or "") for e in (entries or []) if isinstance(e, dict))
+    if len(text.split()) < 20:
+        return topic
+    try:
+        decision = _shelf_decision(metadata, url=url, transcript=text)
+    except Exception:
+        log.warning("transcript re-route failed", exc_info=True)
+        return topic
+    if decision.source in ("fallback", "clip"):
+        return topic
+    log.info("shelf: the transcript moved %s from %s to %s (%s)", url, topic, decision.shelf, decision.source)
+    return decision.shelf
+
+
+def _reshelve(moves, *, record: bool = True, label: str = "") -> dict:
+    """Move saves to shelves the way a manual re-shelve does: the index row
+    (and its search entry), the sidecar's topic and the note's Topic line all
+    change together. Folders stay where they are. Each batch can be undone."""
+    import shelf_router
+    idx = _get_index()
+    done, skipped = [], []
+    with shelf_router._lock:
+        for video_id, shelf in moves:
+            name = shelf_router.clean_shelf_name(shelf)
+            row = idx.get_yoink(video_id) if isinstance(video_id, str) and video_id else None
+            if not name:
+                skipped.append({"video_id": video_id, "reason": "That shelf name can't be used."})
+                continue
+            if not row or row.get("deleted_at"):
+                skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
+                continue
+            previous = row.get("topic")
+            if previous == name:
+                skipped.append({"video_id": video_id, "reason": "Already on that shelf."})
+                continue
+            idx.set_shelf(video_id, name)
+            try:
+                shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"), name)
+            except OSError as exc:
+                log.warning("reshelve %s: files not updated (%s)", video_id, exc)
+            done.append({"video_id": video_id, "from": previous, "to": name})
+        _shelf_generation[0] += 1
+        batch = shelf_router.record_batch(DATA_ROOT, done, label=label) if record and done else None
+    return {"ok": True, "moved": len(done), "skipped": skipped, "moves": done,
+            "batch_id": batch["id"] if batch else None, "undo": shelf_router.batch_summary(batch)}
+
+
+def _shelf_undo(batch_id: str | None = None) -> dict:
+    """Put a batch of moves back, unless a save was moved again since."""
+    import shelf_router
+    idx = _get_index()
+    with shelf_router._lock:
+        batch = shelf_router.find_batch(DATA_ROOT, batch_id)
+        if not batch:
+            return {"ok": False, "error": "Nothing to undo.", "code": "not_found"}
+        if batch.get("undone"):
+            return {"ok": False, "error": "That move was already undone.", "code": "already_undone"}
+        restored, skipped = 0, []
+        for move in batch.get("moves") or []:
+            video_id = move.get("video_id") or ""
+            row = idx.get_yoink(video_id)
+            if not row or row.get("deleted_at"):
+                skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
+                continue
+            if row.get("topic") != move.get("to"):
+                skipped.append({"video_id": video_id, "reason": "Moved again since, so it stays."})
+                continue
+            previous = move.get("from")
+            idx.set_shelf(video_id, previous)
+            try:
+                shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"),
+                                        previous or _shelf_fallback())
+            except OSError as exc:
+                log.warning("undo %s: files not updated (%s)", video_id, exc)
+            restored += 1
+        shelf_router.mark_undone(DATA_ROOT, batch["id"])
+        _shelf_generation[0] += 1
+    return {"ok": True, "batch_id": batch["id"], "restored": restored, "skipped": skipped}
+
+
+def _shelf_proposals(*, limit: int = 2000) -> dict:
+    """Tidy Uncategorized: a proposed shelf and a reason for each save there.
+    Reads only; nothing moves until the user accepts."""
+    import shelf_router
+    idx = _get_index()
+    candidates = _shelf_rows(idx, only_fallback=True, limit=limit + 1)
+    more = len(candidates) > limit
+    candidates = candidates[:limit]
+    library = _shelf_library()
+    vectors = _shelf_vectors([c["video_id"] for c in candidates]) if library.has_vectors() else {}
+    shelves = [f["value"] for f in (idx.corpus_facets().get("topic") or [])
+               if not shelf_router.is_fallback(f.get("value"), library.fallback)]
+    result = shelf_router.propose(candidates, topics=_load_topics(), library=library,
+                                  vectors=vectors, existing_shelves=shelves)
+    return {"ok": True, **result, "more": more,
+            "shelves": sorted(set(shelves) | set(library.shelves), key=str.lower),
+            "meaning": "on" if library.has_vectors() else "off",
+            "undo": shelf_router.batch_summary(shelf_router.find_batch(DATA_ROOT, None))}
+
+
+# ---------------------------------------------------------------------------
 # Metadata, thumbnail, channel context, comments
 # ---------------------------------------------------------------------------
 class PlaylistJobCancelled(Exception):
@@ -7470,7 +7770,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None,
                     pending_id: int | None = None,
-                    refresh_existing: bool = True) -> dict:
+                    refresh_existing: bool = True,
+                    shelf_hint: str | None = None) -> dict:
     """Yoink a single video into output_folder.
 
     Steps:
@@ -7494,8 +7795,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if phase_callback:
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
+    if shelf_hint:
+        topic = shelf_hint
     if topic is None:
-        topic = _classify_topic(metadata)
+        topic = _route_topic(metadata, url=url, source_type=source_type)
 
     title = metadata.get("title") or "Untitled"
     output_folder, existing = _prepare_video_capture_folder(
@@ -7505,6 +7808,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
     video_slug = output_folder.name
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
+    topic = _keep_placed_shelf(topic, existing, explicit=shelf_hint)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
@@ -7902,6 +8206,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             cancel_event=cancel_event,
             asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
         )
+        if not shelf_hint:
+            # One more routing pass now that the words spoken are known.
+            topic = _reroute_with_transcript(topic, metadata, entries, url=url)
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
                 " while retaining the full available subtitle track"
@@ -11273,7 +11580,7 @@ def _podcast_transcription_worker() -> None:
                                 "standing start no longer executed by this process")
                     usage_publish_attempted = True
                     corpus_result = podcasts.episode_to_corpus(
-                        _get_index(), episode_id, data_root=DATA_ROOT)
+                        _get_index(), episode_id, data_root=DATA_ROOT, topic_classifier=_route_topic)
                     _heartbeat_note_ingest()
                     maybe_toast(
                         "Podcast added to Uoink",
@@ -12269,7 +12576,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 with source_subscriptions.capture_context(start_id, incarnation):
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
+                    topic = _route_topic(metadata, url=url)
                     folder = _video_capture_folder(
                         DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
                     if not self.holds_execution(start):
@@ -12512,7 +12819,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 or not episode.get("transcript_local_path"):
             return False
         try:
-            podcasts.episode_to_corpus(_get_index(), episode_id, data_root=DATA_ROOT)
+            podcasts.episode_to_corpus(_get_index(), episode_id, data_root=DATA_ROOT,
+                                      topic_classifier=_route_topic)
         except podcasts.CorpusIdentityConflict as exc:
             log.warning("standing capture %s: publication identity conflict: %s",
                         start["start_id"], exc)
@@ -15055,7 +15363,7 @@ def _retry_pending_one() -> bool:
                                 log.exception("retry worker: deferring live broadcast failed")
                             return True
                     title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
+                    topic = _route_topic(metadata, url=url)
                     folder = _video_capture_folder(
                         DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
@@ -15892,18 +16200,18 @@ _SAVES_BACKOFF = (60, 300, 900)
 _saves_capture_lock = threading.Lock()
 
 
-def _persist_x_thread(result: dict):
+def _persist_x_thread(result: dict, *, topic: str | None = None):
     return page_extractor.persist_page_yoink(
-        _get_index(), result, data_root=DESKTOP_ROOT,
+        _get_index(), result, topic=topic, data_root=DESKTOP_ROOT,
         source_type=x_extractor.SOURCE_TYPE, subfolder="X", slug_prefix="x",
-        topic_classifier=_classify_topic)
+        topic_classifier=_route_topic)
 
 
-def _persist_reddit_thread(result: dict):
+def _persist_reddit_thread(result: dict, *, topic: str | None = None):
     return page_extractor.persist_page_yoink(
-        _get_index(), result, data_root=DESKTOP_ROOT,
+        _get_index(), result, topic=topic, data_root=DESKTOP_ROOT,
         source_type=reddit_extractor.SOURCE_TYPE, subfolder="Reddit", slug_prefix="reddit",
-        topic_classifier=_classify_topic)
+        topic_classifier=_route_topic)
 
 
 def _saves_capture_one(now=None) -> bool:
@@ -15932,10 +16240,13 @@ def _saves_capture_one(now=None) -> bool:
         error = None
         video_id = None
         try:
+            # The user's own folder (an X bookmark folder, a Reddit or
+            # Watch Later list name) is the shelf when the import kept one.
+            folder = _clean_shelf(item.get("folder"))
             if item["source"] == list_imports.SOURCE_X_BOOKMARKS:
                 result = x_extractor.extract_x_thread(item["url"])
                 if result.get("ok"):
-                    video_id = _persist_x_thread(result)
+                    video_id = _persist_x_thread(result, topic=folder)
                     if video_id:
                         _save_x_video_poster(video_id, result)
                 else:
@@ -15943,7 +16254,7 @@ def _saves_capture_one(now=None) -> bool:
             elif item["source"] == list_imports.SOURCE_REDDIT_SAVED:
                 result = reddit_extractor.extract_reddit_thread(item["url"])
                 if result.get("ok"):
-                    video_id = _persist_reddit_thread(result)
+                    video_id = _persist_reddit_thread(result, topic=folder)
                 else:
                     error = result.get("code") or "capture_failed"
             else:
@@ -17592,6 +17903,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_corpus_v1_get(bare)
         if bare == "/library/facets":
             return self._handle_library_facets()
+        if bare == "/library/shelves/tidy":
+            return self._handle_shelves_tidy()
         if bare == "/library/availability":
             return self._handle_library_availability()
         if bare == "/corpus/channels":
@@ -18262,6 +18575,65 @@ class Handler(BaseHTTPRequestHandler):
             "date_bounds": facets.get("date_bounds", {"min": None, "max": None}),
         })
 
+    def _handle_shelves_tidy(self):
+        """GET /library/shelves/tidy[?limit=N] -- Tidy Uncategorized: a
+        proposed shelf and a short reason for each save on Uncategorized,
+        grouped by shelf. Reads only; nothing moves until apply."""
+        if not self._require_token():
+            return
+        query = parse_qs(urlparse(self.path).query)
+        try:
+            limit = max(1, min(5000, int((query.get("limit") or ["2000"])[0])))
+        except ValueError:
+            return self._send_json(400, {"ok": False, "error": "limit must be a number"})
+        try:
+            return self._send_json(200, _shelf_proposals(limit=limit))
+        except Exception:
+            log.exception("/library/shelves/tidy failed")
+            return self._send_json(503, {"ok": False, "error": "Couldn't read the library just now."})
+
+    def _handle_shelves_post(self, bare: str, body):
+        """POST /library/shelves/apply {moves: [{video_id, shelf}]},
+        /library/shelves/move {video_ids: [...], shelf} and
+        /library/shelves/undo {batch_id?}. Every apply or move is one undo
+        batch. Token gate cleared by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        if bare == "/library/shelves/undo":
+            batch_id = body.get("batch_id")
+            if batch_id is not None and not isinstance(batch_id, str):
+                return self._send_json(400, {"ok": False, "error": "batch_id must be text"})
+            result = _shelf_undo(batch_id or None)
+            return self._send_json(200 if result.get("ok") else 404 if result.get("code") == "not_found"
+                                   else 409, result)
+        if bare == "/library/shelves/move":
+            ids, shelf = body.get("video_ids"), body.get("shelf")
+            if not isinstance(ids, list) or not ids or not all(isinstance(v, str) and v for v in ids):
+                return self._send_json(400, {"ok": False, "error": "video_ids must be a list of ids"})
+            moves = [(video_id, shelf) for video_id in dict.fromkeys(ids)]
+            label = "Move"
+        else:
+            raw = body.get("moves")
+            if not isinstance(raw, list) or not raw or not all(
+                    isinstance(m, dict) and isinstance(m.get("video_id"), str) for m in raw):
+                return self._send_json(400, {"ok": False, "error": "moves must be a list of {video_id, shelf}"})
+            moves = [(m["video_id"], m.get("shelf")) for m in raw]
+            label = "Tidy"
+        import shelf_router
+        if len(moves) > shelf_router.MAX_MOVES:
+            return self._send_json(400, {"ok": False,
+                                         "error": f"Move at most {shelf_router.MAX_MOVES} saves at a time."})
+        if any(not shelf_router.clean_shelf_name(shelf) for _, shelf in moves):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "shelf must be a name of 1 to 64 characters that also works as a folder name"})
+        try:
+            result = _reshelve(moves, label=str(body.get("label") or label))
+        except Exception:
+            log.exception("%s failed", bare)
+            return self._send_json(500, {"ok": False, "error": "Couldn't move those saves."})
+        return self._send_json(200, result)
+
     def _handle_facets_classify(self, body: dict):
         """Persist an agent-classified facet set + tags for a video. Model-
         agnostic: the calling agent does the LLM work; this just validates +
@@ -18297,6 +18669,12 @@ class Handler(BaseHTTPRequestHandler):
                         meta.get("duration_seconds") or meta.get("duration"))
                     if lb:
                         clean["length_bucket"] = lb
+        if clean.get("topic"):
+            # A topic is a shelf: keep the search row, sidecar and note in step.
+            try:
+                _reshelve([(video_id, clean["topic"])], record=False)
+            except Exception as exc:
+                log.warning("/facets/classify: shelf files not updated: %s", exc)
         facets_set = idx.set_facets(video_id, **clean)
         tags_added = idx.add_tags(video_id, tags or [], source="agent") if tags else 0
         self._send_json(200, {
@@ -19383,7 +19761,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": "episode_id (integer) required"})
         try:
             result = podcasts.episode_to_corpus(
-                _get_index(), episode_id, data_root=DATA_ROOT)
+                _get_index(), episode_id, data_root=DATA_ROOT, topic_classifier=_route_topic)
         except LookupError as exc:
             return self._send_json(404, {"ok": False, "error": str(exc)})
         except FileNotFoundError as exc:
@@ -20228,6 +20606,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False,
                 "error": "follow_links_depth must be an integer"})
+        if _shelf_from_body(body)[1]:
+            return self._send_json(400, {"ok": False, "error": _shelf_from_body(body)[1]})
 
         try:
             result = page_extractor.extract_page(
@@ -20262,8 +20642,8 @@ class Handler(BaseHTTPRequestHandler):
         # of a split with %LOCALAPPDATA%.
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT,
-                topic_classifier=_classify_topic)
+                _get_index(), result, topic=_shelf_from_body(body)[0], data_root=DESKTOP_ROOT,
+                topic_classifier=_route_topic)
             result["video_id"] = video_id
         except Exception as e:
             log.warning("/extract/page persist failed: %s", e)
@@ -21205,6 +21585,9 @@ class Handler(BaseHTTPRequestHandler):
         url = (body.get("url") or "").strip()
         if not url:
             return self._send_json(400, {"ok": False, "error": "url required"})
+        shelf, shelf_error = _shelf_from_body(body)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
         result = x_extractor.extract_x_thread(url)
         if not result.get("ok"):
             log.info("POST /extract/x -> %s", result.get("code"))
@@ -21212,7 +21595,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
         try:
-            video_id = _persist_x_thread(result)
+            video_id = _persist_x_thread(result, topic=shelf)
         except Exception:
             log.exception("/extract/x persist failed")
             return self._send_json(500, {
@@ -21252,10 +21635,10 @@ class Handler(BaseHTTPRequestHandler):
                 "code": result.get("code")})
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT,
+                _get_index(), result, topic=_shelf_from_body(body)[0], data_root=DESKTOP_ROOT,
                 source_type=x_article_extractor.SOURCE_TYPE,
                 subfolder="X", slug_prefix="x-article",
-                topic_classifier=_classify_topic)
+                topic_classifier=_route_topic)
         except Exception:
             log.exception("/extract/x-article persist failed")
             return self._send_json(500, {
@@ -21297,7 +21680,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             video_id = notes.persist_note(
                 _get_index(), note, data_root=DESKTOP_ROOT,
-                topic_classifier=_classify_topic)
+                topic_classifier=_route_topic)
         except Exception:
             log.exception("/notes persist failed")
             return self._send_json(500, {
@@ -21376,7 +21759,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             video_id = images.persist_image(
                 _get_index(), built, image_bytes, data_root=DESKTOP_ROOT,
-                topic_classifier=_classify_topic)
+                topic_classifier=_route_topic)
         except Exception:
             log.exception("/images persist failed")
             return self._send_json(500, {
@@ -21419,6 +21802,9 @@ class Handler(BaseHTTPRequestHandler):
                          reddit_extractor.DEFAULT_DEPTH_LIMIT, 0, 10)
         score = _bounded(body.get("score_threshold"),
                          reddit_extractor.DEFAULT_SCORE_THRESHOLD, -100, 100000)
+        shelf, shelf_error = _shelf_from_body(body)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
         result = reddit_extractor.extract_reddit_thread(
             url, depth_limit=depth, score_threshold=score)
         if not result.get("ok"):
@@ -21427,7 +21813,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
         try:
-            video_id = _persist_reddit_thread(result)
+            video_id = _persist_reddit_thread(result, topic=shelf)
         except Exception:
             log.exception("/extract/reddit persist failed")
             return self._send_json(500, {
@@ -22750,6 +23136,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_memory_delete(body)
         if bare == "/library/opened":
             return self._handle_library_opened(body)
+        if bare in ("/library/shelves/apply", "/library/shelves/move", "/library/shelves/undo"):
+            return self._handle_shelves_post(bare, body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
         if bare == "/reliability/model/download":
@@ -23493,6 +23881,8 @@ class Handler(BaseHTTPRequestHandler):
                 "error": ("URL must be http(s) with a valid hostname "
                           "(yt-dlp accepts 1,800+ sites; the helper "
                           "filters attacker-shaped inputs)")})
+        if _shelf_from_body(body)[1]:
+            return self._send_json(400, {"ok": False, "error": _shelf_from_body(body)[1]})
         # If it's a known platform we already have a full pipeline for,
         # delegate. The downstream handler runs its own validation; we
         # pass the canonical so we don't double-normalise. Short-form
@@ -23539,7 +23929,8 @@ class Handler(BaseHTTPRequestHandler):
                 "url": canonical, "platform": platform})
 
         title = metadata.get("title") or "Untitled"
-        topic = _classify_topic(metadata)
+        shelf = _shelf_from_body(body)[0]
+        topic = shelf or _route_topic(metadata, url=canonical)
         folder = _video_capture_folder(
             DESKTOP_ROOT / _topic_folder_name(topic), canonical, metadata)
         try:
@@ -23547,10 +23938,13 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.exception("/extract/any (generic) destination unavailable")
             return self._send_json(500, {"ok": False, "error": str(e)})
+        topic = _keep_placed_shelf(topic, existing, explicit=shelf)
 
         # Best-effort transcript reconstruction from yt-dlp's
         # subtitles/automatic_captions map (when present).
         transcript_entries = _extract_generic_transcript(metadata)
+        if not shelf:
+            topic = _reroute_with_transcript(topic, metadata, transcript_entries, url=canonical)
 
         # Slim sidecar -- structurally compatible with the v2.5 reader,
         # all v3-only fields tagged.
@@ -23787,6 +24181,9 @@ class Handler(BaseHTTPRequestHandler):
                 body.get("long_video_mode"))
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
 
         # Waiting for the capture lock until the `with` below takes it.
         refusal = _platform.capability_refusal(_platform.media_capability())
@@ -23832,7 +24229,7 @@ class Handler(BaseHTTPRequestHandler):
                             url, interval, live_state, metadata, long_video_mode):
                         return
                 title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
+                topic = shelf or _route_topic(metadata, url=url)
                 folder = _video_capture_folder(
                     DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
@@ -23845,7 +24242,8 @@ class Handler(BaseHTTPRequestHandler):
                                           metadata=metadata, topic=topic,
                                           source_type=body.get("__source_type"),
                                           long_video_mode=long_video_mode,
-                                          phase_callback=phase_cb)
+                                          phase_callback=phase_cb,
+                                          shelf_hint=shelf)
             except BaseException as e:
                 # Sprint 19 / C4: YouTube 429 or bot check -> queue for retry
                 # instead of surfacing an error. The retry worker takes over.
@@ -24009,7 +24407,7 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
+                    topic = _route_topic(metadata, url=url)
                     target = _video_capture_folder(sess_folder, url, metadata)
                     target = _create_video_entry_folder(target, url, metadata)
 
