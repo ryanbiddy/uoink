@@ -231,6 +231,8 @@ Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
 ; crashed on launch with ModuleNotFoundError: No module named 'x_extractor'.
 Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\x_fulltext.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\x_text_repair.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_verify.py"; DestDir: "{app}"; Flags: ignoreversion
