@@ -79,9 +79,11 @@ class Library:
         mp.setattr(server, "DATA_ROOT", self.data)
         mp.setattr(server, "_get_index", lambda: self.idx)
         mp.setattr(server, "_transcript_backfill_instance", None)
-        mp.setattr(server, "_read_settings", lambda: {
-            "asr_fallback_enabled": True, "whisper_model": "base",
-            "transcript_reliability_auto_check": False, "keep_media": False})
+        self.settings = {"asr_fallback_enabled": True, "whisper_model": "base",
+                         "transcript_reliability_auto_check": False, "keep_media": False}
+        self.silent: set[str] = set()  # slugs whose media has no audio track
+        mp.setattr(server, "_read_settings", lambda: self.settings)
+        mp.setattr(server, "_write_settings", Mock(side_effect=AssertionError("settings written")))
         mp.setattr(server, "_reliability_model_status",
                    lambda _m=None: {"model": "base", "cached": self.model_cached})
         mp.setattr(server, "_fetch_channel_context", lambda *a, **k: {})
@@ -128,7 +130,8 @@ class Library:
     def fake_run(self, cmd, **kwargs):
         name = Path(str(cmd[0])).stem.lower()
         if name == "ffprobe":
-            return subprocess.CompletedProcess(cmd, 0, json.dumps({"streams": [{"index": 1}]}), b"")
+            streams = [] if self.slug_for(Path(cmd[-1])) in self.silent else [{"index": 1}]
+            return subprocess.CompletedProcess(cmd, 0, json.dumps({"streams": streams}), b"")
         if name == "ffmpeg":
             self.ffmpeg_calls.append(list(cmd))
             out = Path(cmd[-1])
@@ -166,8 +169,8 @@ class Library:
 
     # ---- fixture saves ---------------------------------------------------
     def add_video(self, slug, *, url, video_id, title, duration, saved_at,
-                  words=None, media=False, topic="AI"):
-        folder = self.root / topic / slug
+                  words=None, media=False, topic="AI", base=None):
+        folder = (base or self.root) / topic / slug
         (folder / "screenshots").mkdir(parents=True)
         (folder / "screenshots" / "shot_0001.jpg").write_bytes(b"jpg")
         entries = list(words or [])
@@ -213,9 +216,10 @@ class Library:
         assert server._index_yoink(folder, sidecar, corpus, sidecar_path)
         return folder
 
-    def add_half_capture(self, slug, *, url, video_id, title, duration, marker=True):
+    def add_half_capture(self, slug, *, url, video_id, title, duration, marker=True,
+                         topic="AI", media_name="video.mp4", media_bytes=None):
         """What a capture killed during transcription leaves behind."""
-        folder = self.root / "AI" / slug
+        folder = self.root / topic / slug
         (folder / "screenshots").mkdir(parents=True)
         (folder / ".capture-source.json").write_text(
             json.dumps({"url": server._video_capture_source(url), "video_id": video_id}), encoding="utf-8")
@@ -225,7 +229,8 @@ class Library:
         (folder / "thumbnail.jpg").write_bytes(b"jpg")
         for n in (1, 2):
             (folder / "screenshots" / f"shot_{n:04d}.jpg").write_bytes(b"jpg")
-        (folder / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4" + b"1" * 256)
+        (folder / media_name).write_bytes(
+            b"\x00\x00\x00\x18ftypmp4" + b"1" * 256 if media_bytes is None else media_bytes)
         if marker:
             # The note _run_extraction leaves until the sidecar is written.
             (folder / server.CAPTURE_INCOMPLETE_NAME).write_text(
@@ -834,14 +839,239 @@ def test_successful_capture_leaves_no_note(lib):
 def test_capture_in_progress_is_not_listed_as_half(lib):
     folder = lib.add_half_capture("in-flight", url=_x(21), video_id="1800000000000000021",
                                   title="Still capturing", duration=60)
-    held = server._transcript_backfill_hold_identity(_x(21))
+    key = server._manual_capture_key(_x(21))
+    lock = server._ServerCaptureBackend.acquire_identity(key)  # what a running capture holds
     try:
-        assert held, "test holds the identity like a running capture"
+        assert lock, "test holds the identity like a running capture"
         assert server._transcript_backfill_scan()["items"] == []
     finally:
-        server._transcript_backfill_release_identity(held)
+        server._ServerCaptureBackend.release_identity(key, lock)
     assert [i["title"] for i in server._transcript_backfill_scan()["items"]] == ["Still capturing"]
     assert folder.exists()
+
+
+def _meta(n: int, title: str, duration: int = 60) -> dict:
+    return {"id": f"18000000000000000{n:02d}", "title": title, "duration": duration,
+            "uploader": "samplebuilder", "webpage_url": _x(n), "thumbnails": []}
+
+
+@pytest.mark.parametrize("other", ["capture", "playlist"])
+def test_finish_and_a_capture_of_the_same_save_never_deadlock(lib, other):
+    """P1: one lock order. Finish holds the save's lock, so it never waits for a capture."""
+    url = _x(30)
+    folder = lib.add_half_capture("same-save", url=url, video_id="1800000000000000030",
+                                  title="Wanted twice", duration=600)
+    slug, key = folder.name, "folder:AI/" + folder.name
+    lib.segments[slug] = [(i, i + 1.0, f"line {i}") for i in range(400)]
+    asr_started = threading.Event()
+
+    def hook(name, number):
+        if name == slug:
+            asr_started.set()
+            time.sleep(0.01)
+    lib.segment_hook = hook
+    job = lib.backfill()
+    assert job.finish(key)["ok"]
+    assert asr_started.wait(10)
+    assert key in [i["key"] for i in server._transcript_backfill_scan()["items"]], \
+        "the save being finished stays listed (the row says Finishing)"
+
+    other_started, other_done, got_lock = threading.Event(), threading.Event(), threading.Event()
+
+    def another_capture():  # W: a different capture that runs for a while
+        server._live_extract_begin(_x(31))
+        other_started.set()
+        other_done.wait(15)
+        server._live_extract_end()
+    if other == "capture":
+        threading.Thread(target=another_capture, daemon=True).start()
+        assert other_started.wait(5)
+    else:
+        lib.mp.setitem(server._jobs, "fixture-playlist", {"state": "running", "kind": "playlist"})
+    time.sleep(0.3)  # the backfill reaches its next segment while W runs
+
+    def same_save():  # U: a capture of the very save Finish is working on
+        if other == "capture":
+            server._live_extract_begin(url)
+        try:
+            with server._manual_extraction_ownership(url) as ownership:
+                if ownership.ok:
+                    got_lock.set()
+        finally:
+            if other == "capture":
+                server._live_extract_end()
+    threading.Thread(target=same_save, daemon=True).start()
+    time.sleep(0.2)
+    other_done.set()  # W ends while U still waits for the save's lock
+    acquired = got_lock.wait(5)
+    server._jobs.pop("fixture-playlist", None)
+    assert acquired, "deadlock: the capture never got the save while Finish held it"
+    _wait(lambda: lib.finished() and not job._state["requested"], timeout=30, message="Finish after the capture")
+    assert job._state["results"][key]["outcome"] == "transcribed"
+    assert (folder / f"{slug}.json").exists() and not (folder / server.CAPTURE_INCOMPLETE_NAME).exists()
+
+
+def test_capture_note_lives_until_the_sidecar_and_the_index_are_written(lib):
+    """P1: a good re-capture clears an old note, and a failed index write keeps it."""
+    folder = lib.add_half_capture("recaptured", url=_x(32), video_id="1800000000000000032",
+                                  title="Captured again", duration=60)
+    result = server._run_extraction(_x(32), 30, folder, notify=False,
+                                    metadata=_meta(32, "Captured again"), generate_paste=False)
+    assert result["ok"] is True and Path(result["folder"]) == folder
+    assert lib.idx.get_yoink("1800000000000000032") is not None
+    assert not (folder / server.CAPTURE_INCOMPLETE_NAME).exists(), "a good re-capture leaves no stale note"
+
+    def index_down(*args, **kwargs):
+        raise RuntimeError("the index is not answering")
+    lib.mp.setattr(server, "_index_yoink", index_down)
+    second = server.DESKTOP_ROOT / "AI" / "index-fails"
+    with pytest.raises(Exception):
+        server._run_extraction(_x(33), 30, second, notify=False,
+                               metadata=_meta(33, "Index fails"), generate_paste=False)
+    assert (second / server.CAPTURE_INCOMPLETE_NAME).exists(), "not finished until the index has it"
+
+
+def test_finish_and_the_backfill_work_with_local_asr_turned_off(lib):
+    """P2: the user's own Start or Finish runs ASR without changing the setting."""
+    lib.settings["asr_fallback_enabled"] = False
+    before = dict(lib.settings)
+    lib.add_half_capture("asr-off-half", url=_x(34), video_id="1800000000000000034",
+                         title="Finish with ASR off", duration=60)
+    lib.add_video("asr-off-save", url=_x(35), video_id="1800000000000000035", title="ASR off",
+                  duration=30, saved_at="2026-07-01T00:00:00", media=True)
+    job = lib.backfill()
+    job.start()
+    _wait(lambda: lib.finished(), timeout=20, message="run with ASR off")
+    results = job._state["results"]
+    assert results["folder:AI/asr-off-half"]["outcome"] == "transcribed", results
+    assert results["1800000000000000035"]["outcome"] == "transcribed", results
+    assert lib.settings == before, "the user's settings are never changed"
+    server._write_settings.assert_not_called()
+
+
+def test_saves_outside_the_library_and_unreadable_corpus_files_are_left_alone(lib, tmp_path):
+    """P2: only files inside the library are written, and unreadable means do not touch."""
+    far = lib.add_video("moved-away", url=_x(36), video_id="1800000000000000036",
+                        title="Row points outside", duration=60, saved_at="2026-07-01T00:00:00",
+                        media=True, base=tmp_path / "old-library")
+    garbled = lib.add_video("garbled", url=_x(37), video_id="1800000000000000037",
+                            title="Unreadable corpus", duration=60, saved_at="2026-07-01T00:00:00", media=True)
+    (garbled / "garbled.md").write_bytes(b"# \xff\xfe not text\n")
+    md_only = lib.add_video("md-only", url=_x(38), video_id="1800000000000000038",
+                            title="Words only in the Markdown", duration=60,
+                            saved_at="2026-07-01T00:00:00", media=True)
+    (md_only / "md-only.md").write_text(
+        "# Words only in the Markdown\n\n---\n\n## Transcript\n\n[0:01] words from an older save\n",
+        encoding="utf-8")
+    keys = {i["key"] for i in server._transcript_backfill_scan()["items"]}
+    assert "1800000000000000036" not in keys, "a row pointing outside the library is never listed"
+    assert "1800000000000000037" not in keys, "an unreadable corpus is not 'no words'"
+    for folder, slug, n in ((far, "moved-away", 36), (md_only, "md-only", 38), (garbled, "garbled", 37)):
+        before = lib.snapshot(folder)
+        item = {"key": f"18000000000000000{n}", "folder": str(folder), "url": _x(n),
+                "sidecar_path": str(folder / f"{slug}.json"), "corpus_path": str(folder / f"{slug}.md")}
+        assert server._transcript_backfill_apply(item, [(0.0, 1.0, "new words")], "asr",
+                                                 {"status": "completed"}) == "skipped", slug
+        assert lib.snapshot(folder) == before, f"{slug} must not be touched"
+
+
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
+def test_a_reindex_during_an_interrupted_save_does_not_strand_it(lib):
+    """P2: stopped after the sidecar, reindexed by a tag edit, still finished later."""
+    folder = lib.add_video("reindexed", url=_x(39), video_id="1800000000000000039",
+                           title="Tagged mid-save", duration=120, saved_at="2026-07-01T00:00:00", media=True)
+    real = server._transcript_text_from_sidecar
+    calls = {"n": 0}
+
+    def die_once(sidecar):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise SystemExit  # killed after the sidecar write, before the Markdown
+        return real(sidecar)
+    lib.mp.setattr(server, "_transcript_text_from_sidecar", die_once)
+    first = lib.backfill()
+    first.start()
+    first.wait(10)
+    sidecar_path = folder / "reindexed.json"
+    on_disk = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    assert on_disk["transcript_backfill"]["status"] == "saving"
+    # Something else reindexes the save from the file meanwhile (a tag edit does).
+    assert server._index_yoink(folder, on_disk, folder / "reindexed.md", sidecar_path)
+    server._transcript_backfill_instance = None
+    server._resume_transcript_backfill_at_boot()
+    second = server._transcript_backfill_instance
+    _wait(lambda: second._state["status"] == "done" and not second._alive(), message="repair after a reindex")
+    assert "reindexed closing words" in (folder / "reindexed.md").read_text(encoding="utf-8")
+    saved = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    assert saved["transcript_backfill"]["status"] == "done" and saved["health"]["transcript"] == "ok"
+    assert lib.asr_calls == ["reindexed"], "the saved words are reused"
+
+
+def test_finish_reuses_only_a_real_video_and_keeps_the_topic_folder(lib):
+    """P2/P3: a 0-byte or audio-only leftover is fetched again; the topic folder stays."""
+    empty = lib.add_half_capture("empty-video", url=_x(40), video_id="1800000000000000040",
+                                 title="Download stopped at zero bytes", duration=60,
+                                 topic="Cooking", media_bytes=b"")
+    lib.add_half_capture("audio-only", url=_x(41), video_id="1800000000000000041",
+                         title="Only audio left", duration=60, media_name="audio.m4a")
+    items = {i["key"]: i for i in server._transcript_backfill_scan()["items"]}
+    assert items["folder:Cooking/empty-video"]["media"] == "download"
+    assert items["folder:AI/audio-only"]["media"] == "download", "Finish needs a video, so it fetches one"
+    job = lib.backfill()
+    assert job.finish("folder:Cooking/empty-video")["ok"]
+    _wait(lambda: lib.finished() and not job._state["requested"], timeout=20, message="finish")
+    assert job._state["results"]["folder:Cooking/empty-video"]["outcome"] == "transcribed"
+    assert _x(40) in lib.downloads, "a 0-byte video is fetched again, not reused"
+    assert json.loads((empty / "empty-video.json").read_text(encoding="utf-8"))["topic"] == "Cooking"
+    assert lib.idx.get_yoink("1800000000000000040")["topic"] == "Cooking"
+
+
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
+def test_a_repaired_no_speech_save_counts_as_no_speech(lib):
+    """P3: finishing an interrupted save keeps what it found (no speech is not words)."""
+    lib.add_video("quiet-cut", url=_x(43), video_id="1800000000000000043", title="Only music",
+                  duration=120, saved_at="2026-07-01T00:00:00", media=True)
+    lib.segments["quiet-cut"] = []
+    real_index = server._index_yoink
+    calls = {"n": 0}
+
+    def flaky(*args, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise SystemExit
+        return real_index(*args, **kwargs)
+    lib.mp.setattr(server, "_index_yoink", flaky)
+    first = lib.backfill()
+    first.start()
+    first.wait(10)
+    server._transcript_backfill_instance = None
+    server._resume_transcript_backfill_at_boot()
+    second = server._transcript_backfill_instance
+    _wait(lambda: second._state["status"] == "done" and not second._alive(), message="repair")
+    progress = second.status()["progress"]
+    assert progress["no_words"] == 1 and progress["transcribed"] == 0, progress
+
+
+def test_media_without_audio_waits_for_a_resting_site_instead_of_asking_it(lib):
+    """P1: ASR's source-audio fetch gets no link while that site is backed off."""
+    lib.add_video("silent-clip", url=_x(42), video_id="1800000000000000042", title="No audio track",
+                  duration=60, saved_at="2026-07-01T00:00:00", media=True)
+    lib.silent.add("silent-clip")
+    job = lib.backfill()
+    with job._lock:
+        job._strike("x", "rate_limited")
+    item = next(i for i in server._transcript_backfill_scan()["items"] if i["key"] == "1800000000000000042")
+    result = server._transcript_backfill_work(item, job._checkpoint, job._stop, job.network_ok)
+    assert result == {"outcome": "wait_network", "host": "x"}
+    assert lib.downloads == [], "no request to a site that is resting"
+    # Finishing a stopped capture also asks the site for things: it waits too.
+    lib.add_half_capture("resting-half", url=_x(44), video_id="1800000000000000044",
+                         title="Waits for X", duration=60)
+    half = next(i for i in server._transcript_backfill_scan()["items"] if i.get("half"))
+    assert half["media"] == "on_disk"
+    result = server._transcript_backfill_work(half, job._checkpoint, job._stop, job.network_ok)
+    assert result == {"outcome": "wait_network", "host": "x"}
+    assert lib.asr_calls == [] and lib.downloads == []
 
 
 def test_http_routes_and_token_gate(lib):
@@ -885,6 +1115,16 @@ def test_http_routes_and_token_gate(lib):
         assert status == 200
         status, body = call("POST", "/library/transcript-backfill/finish", {"key": "folder:nope"})
         assert status == 409 and body["ok"] is False
+        for action in ("start", "pause", "resume", "finish"):
+            status, _ = call("POST", f"/library/transcript-backfill/{action}", {"key": "k"}, token=False)
+            assert status in (401, 403), f"POST {action} without the token"
+        status, body = call("POST", "/library/transcript-backfill/finish", {})
+        assert status == 400 and body["ok"] is False
+        status, body = call("POST", "/library/transcript-backfill/sideways", {})
+        assert status == 404
+        status, body = call("POST", "/library/transcript-backfill/extra/start", {})
+        assert status == 404, "only one action segment is accepted"
+        assert lib.backfill()._state["status"] == "done", "nothing above started a run"
     finally:
         httpd.shutdown()
         httpd.server_close()
@@ -921,6 +1161,16 @@ def test_cli_backfill_talks_to_the_running_helper(lib, capsys):
         resumed = run("resume")
         assert resumed["ok"] is True and resumed["state"] == "done", "resume after a finished run is a no-op"
         assert lib.asr_calls == ["via-cli"]
+        # The real entry point: exit 0 on success, 1 when the helper refuses.
+        import uoink_agent_runtime as runtime
+        lib.mp.setattr(runtime, "helper_running", lambda backend: True)
+        capsys.readouterr()
+        assert cli.main(["backfill", "status"]) == 0
+        assert json.loads(capsys.readouterr().out)["state"] == "done"
+        lib.model_cached = False
+        assert cli.main(["backfill", "start"]) == 1
+        refused = json.loads(capsys.readouterr().out)
+        assert refused["ok"] is False and "transcription model" in refused["error"]
     finally:
         httpd.shutdown()
         httpd.server_close()
@@ -961,6 +1211,9 @@ def test_cli_backfill_text_for_a_big_running_library():
         "19 saves can't be transcribed because the video is gone and no copy is on this computer.",
         "2 captures did not finish. Finish them in Uoink under Settings, Library health.",
     ]
+    pausing = cli.backfill_text({"state": "paused", "pausing": True, "count": 3, "on_disk": 3,
+                                 "download": 0, "progress": {"done": 1, "left": 2}})
+    assert "Pausing at the next safe point. The save in hand starts over on resume." in pausing
 
 
 def test_repo_launchers_route_backfill_to_the_cli():

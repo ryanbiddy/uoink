@@ -308,7 +308,8 @@ def backfill_text(payload):
         lines.append(f"Running: {progress.get('done', 0)} done, {progress.get('left', 0)} left, "
                      f"{text_duration(progress.get('eta_seconds'))} to go.")
     elif state == "paused":
-        lines.append("Paused" + (" while it finishes this save." if payload.get("pausing") else ".")
+        lines.append(("Pausing at the next safe point. The save in hand starts over on resume."
+                      if payload.get("pausing") else "Paused.")
                      + f" {progress.get('done', 0)} done, {progress.get('left', 0)} left. "
                      "Run 'uoink backfill resume' to carry on.")
     elif state == "done" and progress.get("done"):

@@ -4662,8 +4662,9 @@ def _start_backfill_thread() -> None:
 # Markdown and folders a capture never finished) and transcribe one through
 # the capture's own caption fetch, audio download, local ASR, corpus renderer
 # and index publication. Nothing here deletes a user's file.
-# _run_extraction writes this file (by name) until a first capture's sidecar
-# is saved; one left behind means the capture stopped midway.
+# _run_extraction writes this file (by name) when a first capture claims its
+# folder and removes it once the sidecar and the index row are both written;
+# one left behind means the capture stopped midway.
 CAPTURE_INCOMPLETE_NAME = "capture-not-finished.txt"
 _TRANSCRIPT_BACKFILL_MEDIA_SUFFIXES = (".mp4", ".webm", ".mkv", ".mov", ".m4a",
                                        ".mp3", ".aac", ".opus", ".ogg", ".wav")
@@ -4779,6 +4780,8 @@ def _transcript_backfill_scan() -> dict:
             no_words += 1
             continue
         sidecar_path = Path(row.get("sidecar_path") or "")
+        if not (row.get("sidecar_path") and _transcript_backfill_inside_library(sidecar_path)):
+            continue  # a stale or outside path is never written to
         try:
             sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -4799,11 +4802,14 @@ def _transcript_backfill_scan() -> dict:
                 no_words += 1
                 continue
             corpus_path = Path(row.get("corpus_path") or "")
-            try:
-                if corpus_path.is_file() and _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+            if row.get("corpus_path") and corpus_path.exists():
+                if not _transcript_backfill_inside_library(corpus_path):
                     continue
-            except (OSError, UnicodeError):
-                pass
+                try:
+                    if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+                        continue
+                except (OSError, UnicodeError):
+                    continue  # unreadable is "do not touch", never "no words"
         folder = sidecar_path.parent
         url = sidecar.get("source_url") or sidecar.get("url")
         url = url if isinstance(url, str) and url.startswith(("http://", "https://")) else None
@@ -4885,6 +4891,15 @@ def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
     if _transcript_backfill_identity_busy(url):
         return None  # a capture is writing this folder right now
     media_path = _transcript_backfill_media_file(folder)
+    # Finish reuses only a full video file (what _run_extraction reuses);
+    # anything else is fetched again, so it is listed as a download.
+    try:
+        reusable = any(
+            p.name.lower().startswith("video.") and p.suffix.lower() in (".mp4", ".webm", ".mkv")
+            and not p.is_symlink() and p.is_file() and p.stat().st_size > 0
+            for p in folder.iterdir())
+    except OSError:
+        reusable = False
     try:
         saved_at = marker.get("started") or datetime.fromtimestamp(
             folder.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
@@ -4897,14 +4912,18 @@ def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
         "host": _transcript_backfill_host(url), "folder": str(folder),
         "folder_name": folder.name, "media_path": str(media_path) if media_path else None,
         # Finishing needs the saved metadata as well as the media to stay offline.
-        "media": "on_disk" if (media_path and metadata) else "download",
+        "media": "on_disk" if (reusable and metadata) else "download",
         "has_metadata": bool(metadata), "half": True, "repair": False,
     }
 
 
 def _transcript_backfill_keys(url: str | None, extra=()) -> list[str]:
     keys = {k for k in extra if k}
-    for value in (url, _normalize_video_url(url)[0] if url else None):
+    try:
+        canonical = _normalize_video_url(url)[0] if url else None
+    except Exception:
+        canonical = None  # one odd link never breaks the whole scan
+    for value in (url, canonical):
         if value:
             try:
                 keys.add(_manual_capture_key(value))
@@ -4913,19 +4932,43 @@ def _transcript_backfill_keys(url: str | None, extra=()) -> list[str]:
     return sorted(keys)
 
 
-def _transcript_backfill_identity_busy(url: str | None, marker_key: str | None = None) -> bool:
-    held = _transcript_backfill_hold_identity(url, marker_key)
-    if held is None:
-        return True
-    _transcript_backfill_release_identity(held)
+# Capture identity keys the backfill itself holds right now (a Finish or an
+# apply). Guarded by _ServerCaptureBackend._identity_condition.
+_transcript_backfill_held_keys: set = set()
+
+
+def _transcript_backfill_identity_busy(url: str | None) -> bool:
+    """Read-only: is a capture (not the backfill itself) writing this save?
+
+    Never registers the identity, so a capture starting now does not wait on
+    a status read, and the save the backfill is finishing stays listed."""
+    for key in _transcript_backfill_keys(url):
+        with _ServerCaptureBackend._identity_condition:
+            if key in _ServerCaptureBackend._local_identities:
+                if key in _transcript_backfill_held_keys:
+                    continue
+                return True
+        # Another process (a CLI capture): peek at its file lock and let go.
+        try:
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+        except OSError:
+            return True
+        if lock is None:
+            return True
+        lock.release()
     return False
 
 
-def _transcript_backfill_hold_identity(url: str | None, marker_key: str | None = None):
-    """Take the capture identity lock without waiting, or None when a capture holds it."""
+def _transcript_backfill_hold_identity(url: str | None):
+    """Take the capture identity lock without waiting, or None when a capture holds it.
+
+    Lock order (one order everywhere): a capture registers itself, then waits
+    for this identity, then the extraction slot. So the backfill takes this
+    only while no capture runs, and while it holds it never waits for one:
+    its ASR checkpoint lets go instead (_transcript_backfill_checkpoint)."""
     held = []
     try:
-        for key in _transcript_backfill_keys(url, (marker_key,)):
+        for key in _transcript_backfill_keys(url):
             with _ServerCaptureBackend._identity_condition:
                 if key in _ServerCaptureBackend._local_identities:
                     _transcript_backfill_release_identity(held)
@@ -4935,6 +4978,7 @@ def _transcript_backfill_hold_identity(url: str | None, marker_key: str | None =
                     _transcript_backfill_release_identity(held)
                     return None
                 _ServerCaptureBackend._local_identities[key] = lock
+                _transcript_backfill_held_keys.add(key)
             held.append((key, lock))
     except OSError:
         _transcript_backfill_release_identity(held)
@@ -4944,7 +4988,24 @@ def _transcript_backfill_hold_identity(url: str | None, marker_key: str | None =
 
 def _transcript_backfill_release_identity(held) -> None:
     for key, lock in held or ():
+        with _ServerCaptureBackend._identity_condition:
+            _transcript_backfill_held_keys.discard(key)
         _ServerCaptureBackend.release_identity(key, lock)
+
+
+def _transcript_backfill_inside_library(path) -> bool:
+    """True for a real folder or file inside the library (not its trash)."""
+    try:
+        candidate = Path(path)
+        if candidate.is_symlink():
+            return False
+        root = DESKTOP_ROOT.resolve()
+        resolved = candidate.resolve()
+        trash = _trash_root().resolve()
+    except (OSError, ValueError, TypeError):
+        return False
+    return (resolved != root and resolved.is_relative_to(root)
+            and not resolved.is_relative_to(trash))
 
 
 def _transcript_backfill_capture_busy() -> bool:
@@ -5088,6 +5149,11 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
     folder = Path(item["folder"])
     sidecar_path = Path(item["sidecar_path"])
     corpus_path = Path(item["corpus_path"]) if item.get("corpus_path") else _resolve_corpus_path(folder)
+    if not (_transcript_backfill_inside_library(folder) and sidecar_path.parent == folder
+            and _transcript_backfill_inside_library(sidecar_path)
+            and (corpus_path is None or not corpus_path.exists()
+                 or _transcript_backfill_inside_library(corpus_path))):
+        return "skipped"  # only files inside the library are ever written
     held = _transcript_backfill_hold_identity(item.get("url"))
     if held is None:
         return "busy"
@@ -5107,6 +5173,12 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
             else:
                 if _sidecar_has_words(sidecar) and not saving:
                     return "skipped"  # never touch a save that has words
+                if not saving and corpus_path is not None and corpus_path.exists():
+                    try:
+                        if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+                            return "skipped"  # words only in the Markdown still count
+                    except (OSError, UnicodeError):
+                        return "skipped"  # unreadable: do not touch
                 if "source_chapters" not in sidecar:
                     try:
                         held_meta = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
@@ -5121,11 +5193,14 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                 if captions_reason:
                     sidecar["captions_skipped_reason"] = captions_reason
                 sidecar["transcript_note"] = _transcript_backfill_note(
-                    sidecar, source, asr or {}, sidecar.get("url"), captions_reason)
+                    sidecar, source, asr or {}, sidecar.get("source_url") or sidecar.get("url"),
+                    captions_reason)
                 sidecar["transcript_backfill"] = {
                     "status": "saving", "at": _now_iso(), "version": VERSION,
                     "result": source or (asr or {}).get("status")}
-                sidecar["health"] = compute_health(sidecar)
+                # The file keeps its old health until the save is done: if
+                # anything reindexes it meanwhile (a tag edit, a rebuild), the
+                # index still says "no words" and the next scan finishes it.
                 _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
         text = _transcript_text_from_sidecar(sidecar)
         if text:
@@ -5137,7 +5212,15 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                 updated = _splice_transcript_markdown(md, block, header)
                 if updated != md:
                     _atomic_write_text(corpus_path, updated)
-        if _index_yoink(folder, sidecar, corpus_path, sidecar_path) is False:
+        with _sidecar_update_lock:
+            # Index what is on disk now, with any edit made meanwhile.
+            try:
+                latest = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                latest = None
+        latest = latest if isinstance(latest, dict) else sidecar
+        if _index_yoink(folder, dict(latest, health=compute_health(latest)),
+                        corpus_path, sidecar_path) is False:
             raise RuntimeError("the library index did not take the new transcript")
         with _sidecar_update_lock:
             try:
@@ -5147,25 +5230,32 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
             marker = current.get("transcript_backfill") if isinstance(current, dict) else None
             if isinstance(marker, dict) and marker.get("status") == "saving":
                 marker["status"] = "done"
+                current["health"] = compute_health(current)
                 _atomic_write_text(sidecar_path, json.dumps(current, ensure_ascii=False, indent=2))
         return "applied"
     finally:
         _transcript_backfill_release_identity(held)
 
 
-def _transcript_backfill_checkpoint(checkpoint, url):
-    """ASR checkpoint: hand the save to a capture that wants it, else yield or pause."""
+def _transcript_backfill_checkpoint(checkpoint, url, *, holding: bool = False):
+    """ASR checkpoint: hand the save to a capture that wants it, else yield or pause.
+
+    ``holding``: the caller holds this save's capture lock (Finish). Then it
+    never waits for a capture, which may be waiting for that lock: it lets
+    go and the item is tried again once the capture is done."""
     import transcript_backfill as backfill_mod
 
     def check(segment=None):
         if _transcript_backfill_wanted_elsewhere(url):
-            raise PlaylistJobCancelled("a capture of this save is waiting")
+            raise _TranscriptBackfillYield("a capture of this save is waiting")
         position = (segment.get("end") if isinstance(segment, dict)
                     else getattr(segment, "end", None))
         try:
-            checkpoint(position)
+            checkpoint(position, wait=not holding)
         except backfill_mod.Paused:
             raise PlaylistJobCancelled("transcript backfill paused") from None
+        except backfill_mod.YieldToCapture:
+            raise _TranscriptBackfillYield("a capture started") from None
     return check
 
 
@@ -5179,18 +5269,29 @@ def _transcript_backfill_work(item: dict, checkpoint, stop_event, network_ok) ->
         if item.get("half"):
             return _transcript_backfill_finish(item, checkpoint, stop_event, network_ok)
         return _transcript_backfill_item(item, checkpoint, stop_event, network_ok)
-    except PlaylistJobCancelled:
+    except PlaylistJobCancelled as exc:
         if stop_event.is_set():
             raise backfill_mod.Paused() from None
-        return {"outcome": "busy"}
+        return {"outcome": "yielded" if isinstance(exc, _TranscriptBackfillYield) else "busy"}
 
 
 def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    folder = Path(item["folder"])
+    if not _transcript_backfill_inside_library(folder):
+        return {"outcome": "skipped", "reason": "The save is not inside the library folder."}
     if item.get("repair"):
         result = _transcript_backfill_apply(item)
-        return {"outcome": {"applied": "transcribed"}.get(result, result)}
-    folder = Path(item["folder"])
+        if result != "applied":
+            return {"outcome": result}
+        try:
+            saved = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+            stored = (saved.get("transcript_backfill") or {}).get("result")
+        except (OSError, ValueError, AttributeError):
+            stored = None
+        # The interrupted save finished with what it had found: words, or none.
+        return {"outcome": stored if stored in ("no_speech", "no_audio") else "transcribed"}
     url, host, duration = item.get("url"), item.get("host") or "other", item.get("duration")
+    network_hosts = []
     try:
         sidecar = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
     except (OSError, ValueError):
@@ -5217,6 +5318,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
             reason = _fetch_video_subtitles(url, tmp, long_video_mode=LONG_VIDEO_MODE_FULL,
                                             cancel_event=stop_event)
             if reason is None:
+                network_hosts.append("youtube")
                 order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
                 srts = sorted(tmp.glob("video*.srt"), key=lambda p: (
                     order.index(p.name) if p.name in order else len(order), p.name))
@@ -5236,7 +5338,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
                 if not url:
                     return {"outcome": "gone", "reason": "No copy on this computer and no link to fetch."}
                 if not network_ok(host):
-                    return {"outcome": "busy"}
+                    return {"outcome": "wait_network", "host": host}
                 try:
                     media = _download_reliability_audio(url, tmp, cancel_event=stop_event)
                 except PlaylistJobCancelled:
@@ -5246,12 +5348,19 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
                     if kind in ("rate_limited", "bot_check"):
                         return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
                     return {"outcome": "gone" if kind == "gone" else "failed", "reason": why}
+                network_hosts.append(host)
+            # The ASR fetches source audio only when the file on disk has no
+            # audio track. While the site rests it gets no link to fetch.
+            online = bool(url) and network_ok(host) and refused is None
             entries, source, asr = _resolve_video_transcript(
-                [], media, duration, url=url, settings=settings,
+                [], media, duration, url=url if online else None, settings=settings,
                 captions_refused=captions_reason == CAPTIONS_RATE_LIMITED,
                 cancel_event=stop_event,
                 asr_titles=(sidecar.get("channel"), sidecar.get("title")),
                 asr_checkpoint=asr_check)
+            if (url and not online and source is None
+                    and (asr or {}).get("status") == "no_audio" and not asr.get("error")):
+                return {"outcome": "wait_network", "host": host}
     status = (asr or {}).get("status")
     if source is None and status == "no_audio" and asr.get("error"):
         kind, why = _transcript_backfill_failure(asr.get("error"))
@@ -5268,15 +5377,19 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
         return {"outcome": applied}
     outcome = "transcribed" if source else status
     return {"outcome": outcome, "media_seconds": duration if source != "captions" else None,
-            **({"refused": refused} if refused else {})}
+            "network_ok": network_hosts, **({"refused": refused} if refused else {})}
 
 
 def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) -> dict:
     """Finish a capture that stopped midway, reusing what it left on disk."""
     folder = Path(item["folder"])
     url, host = item["url"], item.get("host") or "other"
-    if item.get("media") == "download" and not network_ok(host):
-        return {"outcome": "busy"}
+    if not _transcript_backfill_inside_library(folder):
+        return {"outcome": "skipped", "reason": "The capture is not inside the library folder."}
+    if not network_ok(host):
+        # Finishing still asks the site for small things (captions, the
+        # channel), so it waits out a back-off like a download does.
+        return {"outcome": "wait_network", "host": host}
     held = _transcript_backfill_hold_identity(url)
     if held is None:
         return {"outcome": "busy"}
@@ -5289,11 +5402,14 @@ def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) 
             metadata = None
         if not isinstance(metadata, dict) or not metadata.get("title"):
             metadata = _fetch_metadata(url, cancel_event=stop_event)
+        # Keep the topic folder the capture already lives in.
+        topic = (folder.parent.name if folder.parent.resolve() != DESKTOP_ROOT.resolve()
+                 else _classify_topic(metadata))
         result = _run_extraction(
             url, 30, folder, notify=False, metadata=metadata,
-            topic=_classify_topic(metadata), generate_paste=False,
+            topic=topic, generate_paste=False,
             cancel_event=stop_event, refresh_existing=False, finish_on_disk=True,
-            asr_checkpoint=_transcript_backfill_checkpoint(checkpoint, url))
+            asr_checkpoint=_transcript_backfill_checkpoint(checkpoint, url, holding=True))
     except PlaylistJobCancelled:
         raise
     except Exception as e:
@@ -5306,10 +5422,12 @@ def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) 
     finally:
         _transcript_backfill_release_identity(held)
     status = (result.get("asr_fallback") or {}).get("status")
+    answered = [host] if item.get("media") == "download" else []
     if result.get("transcript_source"):
-        return {"outcome": "transcribed", "media_seconds": item.get("duration")}
+        return {"outcome": "transcribed", "media_seconds": item.get("duration"),
+                "network_ok": answered}
     if status in ("no_speech", "no_audio"):
-        return {"outcome": status}
+        return {"outcome": status, "network_ok": answered}
     return {"outcome": "failed",
             "reason": "The capture finished, but its transcript step did not work."}
 
@@ -5605,6 +5723,10 @@ def _classify_topic(metadata: dict) -> str:
 # ---------------------------------------------------------------------------
 class PlaylistJobCancelled(Exception):
     """Raised inside a playlist worker when the user cancels the job."""
+
+
+class _TranscriptBackfillYield(PlaylistJobCancelled):
+    """3.18: the transcript backfill lets go of a save so a capture can run."""
 
 
 class ExtractionPhaseError(RuntimeError):
@@ -8213,8 +8335,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             raise ExtractionPhaseError("save", "This capture already finished.")
         refreshing = False
     if not refreshing:
-        # 3.18: until the sidecar is written the folder says it is not
-        # finished, so a capture that stops midway never looks done. The name
+        # 3.18: until the sidecar and the index row are written the folder
+        # says it is not finished, so a capture that stops midway never looks
+        # done. A refresh of a folder an earlier capture left like that keeps
+        # its note and clears it once indexed. The name
         # is spelled out (CAPTURE_INCOMPLETE_NAME) because tests load this
         # function on its own.
         try:
@@ -8459,7 +8583,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         # Finishing a stopped capture reuses the full video it already has.
         reused_media = [
             p for p in sorted(asset_folder.glob(media_glob))
-            if p.suffix in (".mp4", ".webm", ".mkv") and p.is_file() and not p.is_symlink()
+            if p.suffix.lower() in (".mp4", ".webm", ".mkv") and not p.is_symlink()
+            and p.is_file() and p.stat().st_size > 0
         ] if finish_on_disk and effective_long_video_mode == LONG_VIDEO_MODE_FULL else []
         try:
             if phase_callback:
@@ -8635,6 +8760,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             cancel_event=cancel_event,
             asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
             **({"asr_checkpoint": asr_checkpoint} if asr_checkpoint is not None else {}),
+            # The user pressed Finish (or started the backfill) to get words:
+            # local ASR runs for this one save. A copy, never saved.
+            **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
+               if finish_on_disk else {}),
         )
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
@@ -8857,11 +8986,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             sidecar["schema_version"] = CURRENT_SIDECAR_SCHEMA
             sidecar_path = asset_folder / ("c.json" if refreshing else sidecar_name)
             _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
-            if not refreshing:
-                try:
-                    (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
-                except OSError as e:
-                    log.warning("could not clear the capture-in-progress note: %s", e)
         except (OSError, TypeError) as e:
             # Do not publish assets while the previous sidecar still references
             # the old set. A failed staged write leaves that capture intact.
@@ -8949,6 +9073,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             except Exception as e:
                 publication_failed(e)
                 raise
+            # 3.18: saved and indexed. A note an earlier stopped capture left
+            # in this folder is now out of date.
+            try:
+                (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+            except OSError as e:
+                log.warning("could not clear the capture-in-progress note: %s", e)
 
         # v2.5 A1: optional local transcript reliability detection. It runs only
         # when the user has opted in and the Whisper model is already cached; the
@@ -9110,6 +9240,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         except Exception as e:
             publication_failed(e)
             raise
+        # 3.18: the sidecar and the index row are both written, so the
+        # capture is finished (the note lives from the claim until here).
+        try:
+            (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+        except OSError as e:
+            log.warning("could not clear the capture-in-progress note: %s", e)
 
     # Sprint 16 (A2): extract named entities off the transcript in the
     # background, in parallel with the comments / Comment Intelligence
@@ -23486,7 +23622,8 @@ class Handler(BaseHTTPRequestHandler):
         if bare.startswith("/yoinks/") and bare.endswith("/reyoink"):
             return self._handle_reyoink(bare)
         if bare.startswith("/library/transcript-backfill/"):
-            return self._handle_transcript_backfill(bare.rsplit("/", 1)[1], body)
+            action = bare[len("/library/transcript-backfill/"):]
+            return self._handle_transcript_backfill(action if "/" not in action else "", body)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
         if bare == "/notes":
