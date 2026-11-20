@@ -321,7 +321,10 @@ Before updating the extension's download button for a new release:
    exact installer hash and has `signature_verified=true`. The separate security,
    acceptance and owner release gates still apply. Plain `.\build.ps1` produces
    an unsigned review artifact.
-2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
+2. **Smoke-test on a clean Windows VM** (see Testing matrix below). Before that,
+   run the one-command QA smoke from the source tree,
+   `python scripts/qa_smoke.py` (see [qa-smoke.md](qa-smoke.md)), and require
+   `RESULT: PASS`.
 3. **Set the approved version from the repository:** in PowerShell, run
    `$version = (Get-Content VERSION -Raw).Trim()` and confirm the approved
    release tag will be `v$version`. Tagging and pushing happen only after the

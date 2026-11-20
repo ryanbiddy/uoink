@@ -1,0 +1,17 @@
+{
+  "name": "uoink-qa-smoke",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Dev-only smoke suite for the Uoink dashboard and extension. Never shipped in the installer or the extension zip.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}
