@@ -517,7 +517,8 @@ def transcribe_media(media_path: str | Path, *,
                      language: str | None = None,
                      initial_prompt: str | None = None,
                      cancel_event=None,
-                     progress=None) -> list[tuple[float, float, str]]:
+                     progress=None,
+                     checkpoint=None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
 
     Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
@@ -537,6 +538,11 @@ def transcribe_media(media_path: str | Path, *,
     transcription child process; the return value and errors are the same.
     ``cancel_event`` stops the job (``asr_worker.TranscriptionCancelled``);
     ``progress(done_seconds, total_seconds)`` reports how far along it is.
+
+    ``checkpoint(segment)`` runs after each decoded segment, before the next
+    one is decoded. The transcript backfill uses it to pause, or to wait
+    while the user captures something; an exception it raises stops here.
+    In the helper the child pauses there and the slot is free meanwhile.
     """
     media = Path(media_path)
     if not media.is_file():
@@ -548,7 +554,7 @@ def transcribe_media(media_path: str | Path, *,
             "media_path": str(media), "model_name": str(model_name),
             "model_root": str(model_root) if model_root is not None else None,
             "language": language, "initial_prompt": initial_prompt,
-        }, cancel_event=cancel_event, progress=progress)
+        }, cancel_event=cancel_event, progress=progress, checkpoint=checkpoint)
         if info is not None:
             info.update(result.get("info") or {})
         return [entry_from_json(row) for row in result.get("entries") or []]
@@ -575,7 +581,16 @@ def transcribe_media(media_path: str | Path, *,
                 detected, "language_probability", None)
         segments = _watched_segments(
             segments, cancel_event, progress, getattr(detected, "duration", None))
+    if checkpoint is not None:
+        segments = _with_checkpoint(segments, checkpoint)
     return _transcript_entries_from_segments(segments)
+
+
+def _with_checkpoint(segments, checkpoint):
+    # faster-whisper decodes lazily, so blocking here holds the next segment.
+    for segment in segments:
+        checkpoint(segment)
+        yield segment
 
 
 def _words_from_segments(segments) -> list[dict[str, Any]]:

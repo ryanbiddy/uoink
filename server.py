@@ -15345,7 +15345,8 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
     add("helper_responsive", "ok", None)
     # 1b. transcription_engine (3.18): models run in a child process that
     # exits when idle; this says whether one holds memory right now.
-    add("transcription_engine", "ok", asr_worker.status_line())
+    import asr_worker as _asr  # local: works in any caller scope, already cached
+    add("transcription_engine", "ok", _asr.status_line())
 
     # 2. platform (Sprint 19.5 Stage 1). The popup uses this to surface
     # platform-appropriate install / recovery hints rather than the
@@ -17373,6 +17374,7 @@ class Handler(BaseHTTPRequestHandler):
         bare = self.path.split("?", 1)[0]
         if bare == "/ping" or bare == "/health":
             import uoink_supervisor
+            import asr_worker as _asr
             # Public liveness probe -- intentionally unauthenticated.
             log.debug("GET %s from %s -> ok", bare, self.client_address[0])
             settings = _read_settings() or {}
@@ -17402,8 +17404,7 @@ class Handler(BaseHTTPRequestHandler):
                     DATA_ROOT, whisper_model),
                 # 3.18: whether a transcription process holds model memory now
                 # (state not_loaded / loaded / running) and when it frees it.
-                "transcription_worker": {**asr_worker.status(),
-                                         "line": asr_worker.status_line()},
+                "transcription_worker": {**_asr.status(), "line": _asr.status_line()},
                 # True while a corrupt index.db is being rebuilt from disk.
                 "index_recovering": _index_recovering,
                 # True when the active output root has been swapped from

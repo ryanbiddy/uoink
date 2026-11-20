@@ -64,10 +64,6 @@ def http(tmp_path):
             transcription_engine=lambda: None,
             is_model_downloaded=lambda *args: False),
         "images": SimpleNamespace(MAX_IMAGE_BYTES=1024 * 1024),
-        # 3.18: /health reports whether the transcription process holds memory.
-        "asr_worker": SimpleNamespace(
-            status=lambda: {"offloaded": True, "state": "not_loaded"},
-            status_line=lambda: "Transcription engine: idle (not loaded)."),
     }
     _load(ROOT / "server.py", {"_reports_live_extract", "_strict_json_route",
                               "_reject_json_constant", "_reject_duplicate_json_keys"}, scope, constants={

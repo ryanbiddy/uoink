@@ -52,6 +52,14 @@ FAKE_FASTER_WHISPER = textwrap.dedent('''
                         time.sleep(0.25)
                         yield _Segment(float(i), float(i) + 1, "still talking")
                 return slow(), _Info()
+            if "stuck" in name:
+                def stuck():
+                    time.sleep(60)
+                    yield _Segment(0.0, 1.0, "never")
+                return stuck(), _Info()
+            if "steps" in name:
+                return iter([_Segment(float(i), float(i) + 1, "step %d" % i)
+                             for i in range(5)]), _Info()
             return iter([_Segment(0.0, 2.0, "hello from the child"),
                          _Segment(2.0, 4.0, "pid %d" % os.getpid())]), _Info()
 ''')
@@ -109,9 +117,57 @@ HARNESS = textwrap.dedent('''
     except asr_worker.TranscriptionCancelled:
         out["cancelled"] = True
     out["cancel_seconds"] = time.monotonic() - began
-    out["last_exit_after_cancel"] = asr_worker.status()["last_exit"]
+    out["pid_after_cancel"] = asr_worker.status()["pid"]
     rel.transcribe_media(media, model_name="tiny")
     out["pid3"] = asr_worker.status()["pid"]
+
+    # Checkpoint (transcript backfill): the job pauses after each segment.
+    # At segment 2 a "capture" transcribes in the same child while the
+    # backfill job is paused; at segment 4 the backfill is told to stop.
+    class Paused(Exception):
+        pass
+
+    seen, nested, states = [], {}, []
+
+    def capture():
+        nested["entries"] = [list(e) for e in rel.transcribe_media(media, model_name="tiny")]
+
+    def checkpoint(segment):
+        seen.append(segment["end"])
+        if len(seen) == 2:
+            states.append(asr_worker.status()["paused_jobs"])
+            worker = threading.Thread(target=capture)
+            worker.start()
+            worker.join(30)
+        if len(seen) == 4:
+            raise Paused("backfill paused")
+
+    try:
+        rel.transcribe_media(os.path.join(work, "steps.wav"), model_name="tiny",
+                             checkpoint=checkpoint)
+        out["checkpoint_stop"] = None
+    except Paused as exc:
+        out["checkpoint_stop"] = str(exc)
+    out["checkpoint_seen"] = seen
+    out["checkpoint_nested"] = nested.get("entries")
+    out["checkpoint_paused_jobs"] = states
+    out["pid_after_checkpoint"] = asr_worker.status()["pid"]
+    full = rel.transcribe_media(os.path.join(work, "steps.wav"), model_name="tiny",
+                                checkpoint=lambda seg: None)
+    out["checkpoint_full"] = [row[2] for row in full]
+
+    # A child that cannot answer a stop in time is killed.
+    asr_worker.STOP_GRACE_SECONDS = 1.0
+    stuck = threading.Event()
+    threading.Timer(1.0, stuck.set).start()
+    try:
+        rel.transcribe_media(os.path.join(work, "stuck.wav"), model_name="tiny",
+                             cancel_event=stuck)
+        out["stuck_cancelled"] = False
+    except asr_worker.TranscriptionCancelled:
+        out["stuck_cancelled"] = True
+    out["stuck_exit"] = asr_worker.status()["last_exit"]
+    rel.transcribe_media(media, model_name="tiny")
     out["line_loaded"] = asr_worker.status_line()
     time.sleep(3.0)
     final = asr_worker.status()
@@ -145,7 +201,7 @@ def harness_result(tmp_path_factory):
     (fakes / "whisperx" / "__init__.py").write_text(FAKE_WHISPERX, encoding="utf-8")
     work = tmp_path / "work"
     work.mkdir()
-    for name in ("clip.wav", "crash.wav", "slow.wav"):
+    for name in ("clip.wav", "crash.wav", "slow.wav", "stuck.wav", "steps.wav"):
         (work / name).write_bytes(b"RIFF fake audio")
     _make_snapshot(work / "data" / "whisper_models" / "base", "Systran/faster-whisper-base")
     script = tmp_path / "helper_harness.py"
@@ -196,12 +252,29 @@ def test_a_child_crash_is_a_failed_job(harness_result):
     assert out["state_after_crash"] == "not_loaded"
 
 
-def test_cancel_stops_the_child(harness_result):
+def test_cancel_stops_the_job_and_keeps_the_warm_child(harness_result):
     out, _log = harness_result
     assert out["cancelled"] is True
     assert out["cancel_seconds"] < 6
-    assert out["last_exit_after_cancel"]["reason"] == "cancelled"
-    assert out["pid3"] and out["pid3"] != out["pid1"]  # a fresh child after the kill
+    assert out["pid_after_cancel"] and out["pid_after_cancel"] == out["pid3"]
+
+
+def test_a_child_that_ignores_a_stop_is_killed(harness_result):
+    out, _log = harness_result
+    assert out["stuck_cancelled"] is True
+    assert out["stuck_exit"]["reason"] == "cancelled"
+
+
+def test_checkpoint_pauses_between_segments_and_frees_the_engine(harness_result):
+    out, _log = harness_result
+    # The caller saw segments in order, and its exception stopped the job.
+    assert out["checkpoint_seen"] == [1.0, 2.0, 3.0, 4.0]
+    assert out["checkpoint_stop"] == "backfill paused"
+    # While the backfill job was paused, a capture used the same child.
+    assert out["checkpoint_paused_jobs"] == [1]
+    assert out["checkpoint_nested"][0] == [0.0, 2.0, "hello from the child"]
+    assert out["pid_after_checkpoint"] == out["pid3"]  # no kill for a pause
+    assert out["checkpoint_full"] == [f"step {i}" for i in range(5)]
 
 
 def test_child_exits_after_the_idle_period(harness_result):
