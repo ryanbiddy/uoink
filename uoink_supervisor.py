@@ -372,7 +372,9 @@ class Supervisor:
         while not self.stopped():
             run_id = uuid.uuid4().hex
             command = self.command + self.first_args if first else self.command
-            shown = first and "--show-dashboard" in self.first_args
+            # True when this start's helper opens the dashboard itself: the
+            # first Darwin start (first_args), every Windows start (command).
+            shown = "--show-dashboard" in command
             first = False
             self.save(status="starting", last_start_at=stamp(), ready_at=None,
                       reason="Waiting for helper readiness.", action="")
@@ -469,6 +471,8 @@ def main(argv=None) -> int:
     parser.add_argument("--resident", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--opened-at", type=float, help=argparse.SUPPRESS)
     args = parser.parse_args(isolation.strip_cli(sys.argv[1:] if argv is None else argv))
+    # When the user asked, so a helper that became ready meanwhile absorbs it.
+    opened_at = time.monotonic()
     if args.stop:
         request_stop()
         return 0
@@ -482,10 +486,11 @@ def main(argv=None) -> int:
         (first_args if sys.platform == "darwin" else command).append("--show-dashboard")
     root = data_root()
     on_ready = None
-    if sys.platform == "darwin":
-        if args.show_dashboard and not args.resident:
-            return open_app(root)
-
+    if sys.platform == "darwin" and args.show_dashboard and not args.resident:
+        return open_app(root)
+    if sys.platform in ("darwin", "win32"):
+        # The resident supervisor answers opens queued while its helper was
+        # still starting (Darwin since 3.11.2, Windows since 3.18.0).
         shown_at = [0.0]
 
         def on_ready(shown):
@@ -520,6 +525,14 @@ def main(argv=None) -> int:
         if args.show_dashboard and not supervisor.owned:
             # Another supervisor won admission; it consumes the request.
             request_dashboard_later(root, args.opened_at)
+    elif sys.platform == "win32" and args.show_dashboard and not supervisor.owned:
+        # A Start menu or desktop click while Uoink runs. A ready helper gets
+        # its dashboard now. One still starting (login, an upgrade, a crash
+        # restart) used to drop the click; the resident opens it once ready.
+        if status(root).get("status") == "running":
+            show_running_dashboard(root)
+        else:
+            request_dashboard_later(root, opened_at)
     elif args.show_dashboard and status(root).get("status") == "running":
         show_running_dashboard(root)
     return result

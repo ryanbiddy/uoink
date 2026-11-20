@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Windows tray: right-click shows the menu again once you have saved something. A bug in the
   Recent items list stopped the whole menu from building, so right-click did nothing. Recent
   items now also picks up a new save without waiting for the status to change.
+- Windows: clicking Uoink in the Start menu or on the desktop while Uoink is still starting
+  (just after you sign in, after an update, or after a restart) now opens the dashboard once
+  it is ready. Before, that click did nothing.
 
 ## [3.17.0] - 2026-11-12
 
