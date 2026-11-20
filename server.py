@@ -4980,18 +4980,84 @@ def _shelf_library():
     idx = _get_index()
     with idx.detached_snapshot() as db:
         count, last = db.execute("SELECT COUNT(*), MAX(rowid) FROM yoinks WHERE deleted_at IS NULL").fetchone()
-    key = (str(INDEX_PATH), count, last, _shelf_generation[0], _local_search_singleton is not None)
+    key = (str(INDEX_PATH), count, last, _shelf_generation[0], _local_search_singleton is not None,
+           _static_embed_available())
     now = time.monotonic()
     with _shelf_library_lock:
         cached = _shelf_library_cache
         if cached["key"] == key and now - cached["at"] < SHELF_LIBRARY_TTL and cached["library"] is not None:
             return cached["library"]
-    rows = _shelf_rows(idx)
-    vectors = _shelf_vectors([r["video_id"] for r in rows if not r["is_fallback"]])
-    library = shelf_router.Library(rows, fallback=_shelf_fallback(), vectors=vectors)
+    library = _shelf_build_library(_shelf_rows(idx))
     with _shelf_library_lock:
         _shelf_library_cache.update(key=key, at=now, library=library)
     return library
+
+
+def _static_embed_available() -> bool:
+    try:
+        import local_embed
+        return local_embed.is_available()
+    except Exception:
+        return False
+
+
+def _static_embed(texts: list) -> list:
+    """Unit vectors from the bundled static model (local_embed), or [] when
+    it is not installed. A row of zeros becomes None."""
+    if not texts or not _static_embed_available():
+        return []
+    try:
+        import local_embed
+        return [row if row.any() else None for row in local_embed.embed(texts)]
+    except Exception:
+        log.debug("shelf routing: static embeddings unavailable", exc_info=True)
+        return []
+
+
+def _shelf_build_library(rows: list):
+    """Library evidence for routing. Meaning comes from the optional search
+    model when it has vectors, else from the bundled static model, else
+    only words, authors and neighbours count."""
+    import shelf_router
+    fallback = _shelf_fallback()
+    placed = [r for r in rows if not shelf_router.is_fallback(r.get("topic"), fallback)]
+    vectors = _shelf_vectors([r["video_id"] for r in placed])
+    if vectors:
+        return shelf_router.Library(rows, fallback=fallback, vectors=vectors, tier="gemma")
+    names = shelf_router.shelf_name_texts(sorted({r.get("topic") for r in placed if r.get("topic")}),
+                                          _load_topics())
+    if not _static_embed_available():
+        return shelf_router.Library(rows, fallback=fallback)
+    # Each capture changes the library, so keep vectors for texts already
+    # seen: a rebuild then embeds only what is new or edited.
+    import hashlib
+    import local_embed
+    texts = [shelf_router.row_meaning_text(r) for r in placed] + list(names.values())
+    model = str(local_embed.model_dir())
+    keys = [(model, hashlib.blake2b(t.encode("utf-8", "replace"), digest_size=16).digest()) for t in texts]
+    cache = _static_vector_cache
+    if len(cache) > 50000:
+        cache.clear()
+    missing = [i for i, k in enumerate(keys) if k not in cache]
+    found = _static_embed([texts[i] for i in missing])
+    if missing and not found:
+        return shelf_router.Library(rows, fallback=fallback)
+    for i, vec in zip(missing, found):
+        cache[keys[i]] = vec
+    embedded = [cache.get(k) for k in keys]
+    static = {r["video_id"]: vec for r, vec in zip(placed, embedded) if vec is not None}
+    name_vectors = {name: vec for name, vec in zip(names, embedded[len(placed):]) if vec is not None}
+    return shelf_router.Library(rows, fallback=fallback, vectors=static, names=name_vectors, tier="static")
+
+
+_static_vector_cache: dict = {}
+
+
+def _static_query_vectors(sigs: list) -> list:
+    """One static-model vector (or None) per save (shelf_router.Signals)."""
+    import shelf_router
+    found = _static_embed([shelf_router.meaning_text(s) for s in sigs])
+    return found or [None] * len(sigs)
 
 
 def _shelf_hint(metadata: dict, url: str | None = None) -> str | None:
@@ -5022,12 +5088,17 @@ def _shelf_decision(metadata: dict, *, url: str | None = None, hint: str | None 
             library = _shelf_library()
         except Exception:
             log.warning("shelf routing: library evidence unavailable", exc_info=True)
-        if library is not None and library.has_vectors() and _local_search_singleton is not None:
-            try:
-                vector = _local_search_singleton.document_vector(
-                    metadata.get("title") or "", " ".join([metadata.get("description") or "", transcript or ""]))
-            except Exception:
-                vector = None
+        if library is not None and library.has_vectors():
+            if library.tier == "static":
+                sig = shelf_router.signals_from_metadata(metadata, transcript=transcript,
+                                                         source_type=source_type, url=url)
+                vector = _static_query_vectors([sig])[0]
+            elif _local_search_singleton is not None:
+                try:
+                    vector = _local_search_singleton.document_vector(
+                        metadata.get("title") or "", " ".join([metadata.get("description") or "", transcript or ""]))
+                except Exception:
+                    vector = None
     return shelf_router.route(metadata, topics=_load_topics(), library=library, keyword_topic=keyword,
                               hint=hint, transcript=transcript, vector=vector,
                               source_type=source_type, url=url)
@@ -5204,7 +5275,12 @@ def _shelf_proposals(*, limit: int = 2000) -> dict:
     more = len(candidates) > limit
     candidates = candidates[:limit]
     library = _shelf_library()
-    vectors = _shelf_vectors([c["video_id"] for c in candidates]) if library.has_vectors() else {}
+    vectors = {}
+    if library.has_vectors() and library.tier == "static":
+        found = _static_query_vectors([shelf_router._doc_text(c) for c in candidates])
+        vectors = {c["video_id"]: vec for c, vec in zip(candidates, found) if vec is not None}
+    elif library.has_vectors():
+        vectors = _shelf_vectors([c["video_id"] for c in candidates])
     shelves = [f["value"] for f in (idx.corpus_facets().get("topic") or [])
                if not shelf_router.is_fallback(f.get("value"), library.fallback)]
     result = shelf_router.propose(candidates, topics=_load_topics(), library=library,
@@ -5212,6 +5288,7 @@ def _shelf_proposals(*, limit: int = 2000) -> dict:
     return {"ok": True, **result, "more": more,
             "shelves": sorted(set(shelves) | set(library.shelves), key=str.lower),
             "meaning": "on" if library.has_vectors() else "off",
+            "meaning_model": library.tier if library.has_vectors() else None,
             "undo": shelf_router.batch_summary(shelf_router.find_batch(DATA_ROOT, None))}
 
 

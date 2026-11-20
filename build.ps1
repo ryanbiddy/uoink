@@ -20,6 +20,8 @@
 #        models\whisper-bundled\<size>\  the pinned faster-whisper model
 #                  (scripts\whisper_model_pin.json; cached in
 #                  build\cache\whisper-model, hash-checked every build)
+#        models\embed-bundled\potion-base-8m\  the pinned static embedding
+#                  model (scripts\embed_model_pin.json; build\cache\embed-model)
 #   3. Run ISCC.exe against installer\uoink.iss to produce
 #      build\Uoink-Setup-<version>.exe
 #
@@ -371,6 +373,7 @@ foreach ($f in @(
     'x_article_extractor.py',
     'list_imports.py',
     'shelf_router.py',
+    'local_embed.py',
     'research.py',
     'research_verify.py',
     'research_report.py',
@@ -661,7 +664,8 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
         'third-party-notices\EmbeddingGemma-NOTICE.md',
         'third-party-notices\Gemma-Terms-of-Use.txt',
         'third-party-notices\Gemma-Prohibited-Use-Policy.txt',
-        'third-party-notices\faster-whisper-base-NOTICE.md')) {
+        'third-party-notices\faster-whisper-base-NOTICE.md',
+        'third-party-notices\potion-base-8m-NOTICE.md')) {
     $noticeSource = Join-Path $RepoRoot $noticeRelative
     $noticeTarget = Join-Path $StagingDir $noticeRelative
     $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
@@ -753,6 +757,8 @@ Copy-Item (Join-Path $RepoRoot 'x_article_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'list_imports.py') $StagingDir -Force
 # Shelf routing and Tidy Uncategorized. server.py imports shelf_router lazily on every capture.
 Copy-Item (Join-Path $RepoRoot 'shelf_router.py') $StagingDir -Force
+# 3.18: small local text embeddings from the bundled static model (shelving).
+Copy-Item (Join-Path $RepoRoot 'local_embed.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research_verify.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research_report.py') $StagingDir -Force
@@ -838,6 +844,18 @@ Write-Step 'Staging bundled Whisper model'
     --dest (Join-Path $StagingDir 'models\whisper-bundled')
 if ($LASTEXITCODE -ne 0) { throw 'Bundled Whisper model staging failed; see the hash or download error above' }
 
+# ---- 2g-ter. Bundled text-embedding model (3.18) --------------------------
+# A 30 MB static embedding table (minishlab/potion-base-8M, MIT) that
+# local_embed.py reads to suggest shelves. Same stager, pin discipline and
+# cache rules as the Whisper model (scripts\embed_model_pin.json). It lands
+# in {app}\models\embed-bundled\potion-base-8m\. Without it the app still
+# shelves, from words alone.
+Write-Step 'Staging bundled embedding model'
+& $embedPython (Join-Path $RepoRoot 'scripts\stage_embed_model.py') `
+    --cache (Join-Path $CacheDir 'embed-model') `
+    --dest (Join-Path $StagingDir 'models\embed-bundled')
+if ($LASTEXITCODE -ne 0) { throw 'Bundled embedding model staging failed; see the hash or download error above' }
+
 # ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
 # Verifies the staged tree is actually runnable BEFORE ISCC packages it,
 # so the works-in-repo-breaks-in-installer drift class is caught here
@@ -846,7 +864,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py shelf_router.py research.py research_verify.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py shelf_router.py local_embed.py research.py research_verify.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
@@ -908,6 +926,14 @@ after = sorted((p.name, p.stat().st_size) for p in pathlib.Path(info["path"]).it
 if before != after or user_cache.exists():
     raise SystemExit("smoke: loading the bundled model wrote files: %r -> %r" % (before, after))
 print("smoke: bundled Whisper %s @ %s loads read-only" % (info["model"], info["revision"][:12]))
+import local_embed
+embed_dir = local_embed.model_dir()
+if embed_dir is None or embed_dir.parent != pathlib.Path(__file__).resolve().parent / "models" / "embed-bundled":
+    raise SystemExit("smoke: bundled embedding model missing (got %r)" % (embed_dir,))
+vectors = local_embed.embed(["bread recipe", "sourdough loaf", ""])
+if vectors.shape[0] != 3 or not float(vectors[0] @ vectors[1]) > 0.2 or vectors[2].any():
+    raise SystemExit("smoke: bundled embedding model gives odd vectors")
+print("smoke: bundled embedding model %s loads, dim=%d" % (embed_dir.name, vectors.shape[1]))
 '@
     try {
         & '.\python\python.exe' $smokePy

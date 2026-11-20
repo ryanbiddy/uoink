@@ -27,6 +27,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   source and the saves already on your shelves, all on this computer. When the evidence is thin
   the save stays on Uncategorized. A transcript that arrives later can move a save off
   Uncategorized, and a shelf you picked is never changed.
+- Shelving also compares saves by meaning, with a small model that now ships with the app
+  (potion-base-8M, about 30 MB, MIT). It is a table of word vectors that runs on this computer
+  in milliseconds, with no network or GPU. When the optional EmbeddingGemma search is ready its
+  vectors are used instead. If neither is there, words, authors and neighbours still decide.
 - Imports keep your folders. X bookmark folders, YouTube playlists, CSV "folder" or "playlist"
   columns and Takeout playlist files become shelves.
 - A shelf you set by hand now survives an index rebuild (it is written to the save's files too).

@@ -142,7 +142,7 @@ def test_mac_bundle_stages_the_same_pin_under_resources(tmp_path, monkeypatch):
     sys.path.insert(0, str(ROOT / "scripts" / "mac"))
     import build_bundle
     assert build_bundle.EMBED_BUNDLE == Path("Contents/Resources/models/embed-bundled")
-    assert "local_embed.py" in json.loads((ROOT / "scripts/mac/payload.json").read_text(encoding="utf-8"))["files"]
+    assert "local_embed.py" in json.loads((ROOT / "scripts/mac/payload.json").read_text(encoding="utf-8"))["paths"]
     pin = make_pin()
     monkeypatch.setattr(build_bundle.stage_embed_model, "load_pin", lambda: pin)
     cache = tmp_path / "cache"

@@ -1,7 +1,10 @@
 """Before/after shelf routing on the made-up fixture.
 
 Run (through the isolation wrapper, from the repo root):
-  python tests/fixtures/shelves/evaluate.py
+  python tests/fixtures/shelves/evaluate.py [--holdout] [--static] [-v]
+
+--static adds the bundled static embedding tier; it needs
+UOINK_EMBED_MODEL_DIR set to a folder with the potion-base-8M files.
 
 "Before" is 3.17.0: the topic-word classifier on what each capture path
 passes it today (podcasts were always Uncategorized, import folders were
@@ -74,7 +77,10 @@ def score(pairs):
     n = len(pairs)
     routed = [(t, g) for t, g in pairs if g != FALLBACK]
     right_routed = sum(1 for t, g in routed if t == g)
+    # Recall: of the saves that belong on a real shelf, how many got there.
+    belong = [(t, g) for t, g in pairs if t != FALLBACK]
     return {
+        "recall": round(sum(1 for t, g in belong if t == g) / len(belong), 3) if belong else 1.0,
         "items": n,
         "on_uncategorized": sum(1 for _, g in pairs if g == FALLBACK),
         "correct": sum(1 for t, g in pairs if t == g),
@@ -124,10 +130,17 @@ def evaluate(before, after, items):
     }
 
 
-def server_functions(server, library):
-    """before/after callables wired to the real helper functions."""
+def server_functions(server, library, tier="lexical"):
+    """before/after callables wired to the real helper functions. ``tier``
+    "static" builds the library the way the helper does when the bundled
+    static model is installed (set UOINK_EMBED_MODEL_DIR to its folder)."""
     import shelf_router
-    lib = shelf_router.Library(library_rows(library))
+    if tier == "static":
+        lib = server._shelf_build_library(library_rows(library))
+        if lib.tier != "static" or not lib.has_vectors():
+            raise SystemExit("static tier asked for, but the embedding model is not available")
+    else:
+        lib = shelf_router.Library(library_rows(library))
 
     def before(row):
         meta = before_metadata(row)
@@ -150,7 +163,9 @@ def main():
     sys.path.insert(0, str(HERE.parents[2]))
     import server
     library, items = load(holdout="--holdout" in sys.argv)
-    before, after = server_functions(server, library)
+    tier = "static" if "--static" in sys.argv else "lexical"
+    before, after = server_functions(server, library, tier=tier)
+    print("tier:", tier)
     report = evaluate(before, after, items)
     for key in ("before", "after", "before_without_folders", "after_without_folders"):
         print(f"{key:24} {report[key]}")

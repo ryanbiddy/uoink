@@ -21,6 +21,8 @@
 ;   models\whisper-bundled\<size>\  Pinned faster-whisper model (3.12+),
 ;                     read-only. Capture ASR and podcast jobs load it when no
 ;                     downloaded copy of the selected size exists.
+;   models\embed-bundled\potion-base-8m\  Pinned static text-embedding model
+;                     (3.18+), read-only. Shelf suggestions read it.
 ;   stop-server.bat  Stops the server via the PID file written at startup.
 ;   uoink.ico         Used for shortcuts and the uninstaller.
 
@@ -139,6 +141,7 @@ Source: "staging\third-party-notices\scrapecreators-social-media-research-skills
 Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\faster-whisper-base-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\potion-base-8m-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
@@ -233,6 +236,7 @@ Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\shelf_router.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\local_embed.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_verify.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_report.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -293,6 +297,9 @@ Source: "staging\defaults\*"; DestDir: "{app}\defaults"; Flags: recursesubdirs i
 ; from scripts\whisper_model_pin.json (pinned revision, SHA-256 per file).
 ; [InstallDelete] below clears the previous version's copy first.
 Source: "staging\models\whisper-bundled\*"; DestDir: "{app}\models\whisper-bundled"; Flags: recursesubdirs ignoreversion createallsubdirs
+; 3.18: the static text-embedding model for shelf suggestions, staged from
+; scripts\embed_model_pin.json the same way. [InstallDelete] clears it first.
+Source: "staging\models\embed-bundled\*"; DestDir: "{app}\models\embed-bundled"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\stop-server.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\stop-server.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\verify_install.ps1"; DestDir: "{app}"; Flags: ignoreversion
@@ -422,6 +429,7 @@ Filename: "{app}\python\python.exe"; \
 ; Replace, never merge, the bundled model: a release that pins another
 ; revision or size must not leave the old files beside the new ones.
 Type: filesandordirs; Name: "{app}\models\whisper-bundled"
+Type: filesandordirs; Name: "{app}\models\embed-bundled"
 
 [UninstallDelete]
 ; Pip and the running Python create files we didn't ship (.pyc caches, the

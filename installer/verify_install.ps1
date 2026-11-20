@@ -52,6 +52,7 @@ $requiredFiles = @(
     'x_article_extractor.py',
     'list_imports.py',
     'shelf_router.py',
+    'local_embed.py',
     'research.py',
     'research_verify.py',
     'research_report.py',
@@ -66,7 +67,11 @@ $requiredFiles = @(
     'bin\deno.exe',
     # 3.12: the bundled transcription model (scripts\whisper_model_pin.json).
     'models\whisper-bundled\base\model.bin',
-    'models\whisper-bundled\base\uoink-model.json'
+    'models\whisper-bundled\base\uoink-model.json',
+    # 3.18: the bundled text-embedding model (scripts\embed_model_pin.json).
+    'models\embed-bundled\potion-base-8m\model.safetensors',
+    'models\embed-bundled\potion-base-8m\tokenizer.json',
+    'models\embed-bundled\potion-base-8m\uoink-model.json'
 )
 foreach ($rf in $requiredFiles) {
     $rfPath = Join-Path $appDir $rf

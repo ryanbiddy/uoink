@@ -41,6 +41,15 @@ CTranslate2 conversion (model card: MIT), pinned to revision
 [model notice](faster-whisper-base-NOTICE.md) lists each file's size and
 SHA-256 and carries the full MIT license text.
 
+## Bundled potion-base-8M text-embedding model
+
+Since 3.18 the Windows installer and the macOS app ship a small static
+text-embedding model for shelf suggestions, read-only: MinishLab's
+potion-base-8M (model card: MIT), pinned to revision
+`bf8b056651a2c21b8d2565580b8569da283cab23`. The bundled
+[model notice](potion-base-8m-NOTICE.md) lists each file's size and SHA-256
+and carries the full MIT license text.
+
 ## Adapted documentation text
 
 **ScrapeCreators social media research skills.** Five of Uoink's six local research

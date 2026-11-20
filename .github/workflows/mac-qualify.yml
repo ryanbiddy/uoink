@@ -227,8 +227,12 @@ jobs:
         with:
           path: ${{ runner.temp }}/whisper-model
           key: whisper-model-${{ hashFiles('scripts/whisper_model_pin.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/embed-model
+          key: embed-model-${{ hashFiles('scripts/embed_model_pin.json') }}
       - name: Assemble pinned payload and inventory native loaders
-        run: bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app" --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg" --whisper-cache "$RUNNER_TEMP/whisper-model"
+        run: bash build-mac.sh --wheels "$RUNNER_TEMP/mac-wheels" --output "$RUNNER_TEMP/mac-app" --ffmpeg-output "$RUNNER_TEMP/mac-ffmpeg" --whisper-cache "$RUNNER_TEMP/whisper-model" --embed-cache "$RUNNER_TEMP/embed-model"
       - name: Smoke relocated bundle and verify immutable tree
         run: python -B scripts/mac/bundle_smoke.py --app "$RUNNER_TEMP/mac-app/Uoink.app" --output "$RUNNER_TEMP/mac-evidence/bundle-smoke"
       - name: Build and validate the Darwin MCPB

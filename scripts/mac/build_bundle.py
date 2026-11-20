@@ -27,10 +27,14 @@ import mac_look
 # The Windows build shares this stager: one pin, one hash check, one layout.
 sys.path.append(str(ROOT / "scripts"))
 import stage_whisper_model  # noqa: E402
+import stage_embed_model  # noqa: E402
 
 MAC = Path(__file__).parent
 # Rebuilds in the same checkout reuse the verified download (as on Windows).
 WHISPER_CACHE = ROOT / "build/cache/whisper-model"
+EMBED_CACHE = ROOT / "build/cache/embed-model"
+# 3.18: the static embedding model for shelf suggestions (local_embed.py).
+EMBED_BUNDLE = Path("Contents/Resources/models/embed-bundled")
 DENO_CACHE = ROOT / "build/cache/deno"
 # Read-only app data beside the Python sources; codesign seals it with the
 # other resources. uoink_reliability.bundled_model_root() finds it here.
@@ -418,6 +422,17 @@ def stage_whisper(app: Path, cache: Path = WHISPER_CACHE) -> dict:
     """Stage the pinned model under Resources; data only, never Mach-O."""
     pin = stage_whisper_model.load_pin()
     staged = stage_whisper_model.stage(pin, cache, app / WHISPER_BUNDLE)
+    return _model_evidence(app, pin, staged)
+
+
+def stage_embed(app: Path, cache: Path = EMBED_CACHE) -> dict:
+    """Stage the pinned embedding model under Resources, checked the same way."""
+    pin = stage_embed_model.load_pin()
+    staged = stage_embed_model.stage(pin, cache, app / EMBED_BUNDLE)
+    return _model_evidence(app, pin, staged)
+
+
+def _model_evidence(app: Path, pin: dict, staged: Path) -> dict:
     for path in staged.iterdir():
         if not path.is_file() or path.is_symlink():
             raise ValueError(f"Unexpected bundled model entry: {path}")
@@ -430,7 +445,7 @@ def stage_whisper(app: Path, cache: Path = WHISPER_CACHE) -> dict:
 
 
 def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None,
-          whisper_cache: Path = WHISPER_CACHE) -> Path:
+          whisper_cache: Path = WHISPER_CACHE, embed_cache: Path = EMBED_CACHE) -> Path:
     if sys.platform != "darwin" or platform.machine() != "arm64":
         raise RuntimeError("Build requires native macOS arm64")
     if ffmpeg_output is None:
@@ -494,6 +509,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None,
     # 3.12: the default transcription model ships in the app, so a fresh
     # install transcribes caption-less videos with no download step.
     whisper = stage_whisper(app, whisper_cache)
+    embed = stage_embed(app, embed_cache)
     launcher = contents / "MacOS/Uoink"
     run(["xcrun", "clang", "-arch", "arm64", f"-mmacosx-version-min={MINIMUM_MACOS}", "-Wall", "-Wextra", "-Werror",
          ROOT / "installer/mac/launcher.c", "-o", launcher])
@@ -529,7 +545,7 @@ def build(wheels: Path, output: Path, ffmpeg_output: Path | None = None,
     rewrite_rpaths(app, output / "native-rpath-removals.json")
     write_json(notices / "build.json", {"version": version, "python": pin, "python_url": url,
                                        "platform": platform.platform(), "ffmpeg": ffmpeg, "deno": deno,
-                                       "whisper_model": whisper,
+                                       "whisper_model": whisper, "embed_model": embed,
                                        "signing": "whole app ad-hoc; no Developer ID or notarization",
                                        "minimum_os": MINIMUM_MACOS,
                                        "source_files": [p.as_posix() for p in files]})
@@ -559,9 +575,11 @@ def main() -> int:
     parser.add_argument("--ffmpeg-output", required=True, type=Path)
     parser.add_argument("--whisper-cache", type=Path, default=WHISPER_CACHE,
                         help="verified download cache for the bundled Whisper model")
+    parser.add_argument("--embed-cache", type=Path, default=EMBED_CACHE,
+                        help="verified download cache for the bundled embedding model")
     args = parser.parse_args()
     print(build(args.wheels.resolve(), args.output.resolve(), args.ffmpeg_output.resolve(),
-                args.whisper_cache.resolve()))
+                args.whisper_cache.resolve(), args.embed_cache.resolve()))
     return 0
 
 

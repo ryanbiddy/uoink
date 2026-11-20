@@ -185,6 +185,16 @@ def test_tidy_uses_the_static_tier_too(server_mod, model):
     assert result["stays"] == 1
 
 
+def test_a_rebuild_embeds_only_new_saves(server_mod, model, monkeypatch):
+    seen = []
+    real = server_mod._static_embed
+    monkeypatch.setattr(server_mod, "_static_embed", lambda texts: seen.append(len(texts)) or real(texts))
+    server_mod._shelf_build_library(LIBRARY)
+    server_mod._shelf_build_library(LIBRARY + [row("h4", "Hearth", "Boule crumb")])
+    assert seen[-1] == 1
+    assert server_mod._shelf_build_library(LIBRARY).has_vectors()
+
+
 def test_gemma_vectors_win_over_the_static_model(server_mod, model, monkeypatch):
     monkeypatch.setattr(server_mod, "_shelf_vectors",
                         lambda ids: {i: [1.0, 0.0] for i in ids})

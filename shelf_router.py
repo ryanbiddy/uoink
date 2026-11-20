@@ -62,11 +62,23 @@ AUTHOR_MIN_ITEMS = 2
 AUTHOR_STRONG_SHARE = 0.80
 AUTHOR_STRONG_ITEMS = 3
 
-# Embedding nearest shelf (cosine against shelf centroids). These are
-# conservative and were not calibrated on the real model (see the report).
+# Embedding nearest shelf (cosine against shelf profiles). Each model has
+# its own scale. "gemma" is the optional EmbeddingGemma search model; its
+# numbers are conservative and were not calibrated on the real model.
+# "static" is the bundled potion-base-8M table (local_embed.py), calibrated
+# on tests/fixtures/shelves. Below "weak" the save stays where it is.
 EMBED_STRONG = 0.55
 EMBED_MARGIN = 0.06
 EMBED_WEAK = 0.45
+EMBED_TIERS = {
+    "gemma": {"strong": EMBED_STRONG, "margin": EMBED_MARGIN, "weak": EMBED_WEAK},
+    "static": {"strong": 0.55, "margin": 0.04, "weak": 0.45},
+}
+# A shelf's profile is the mean of its saves plus this much of its name
+# (and topic words). A shelf with too few saves is matched on its name
+# alone, which must clear a higher bar.
+NAME_WEIGHT = 0.5
+NAME_ONLY_BONUS = 0.08
 
 # New shelf proposals during Tidy.
 CLUSTER_MIN = 4
@@ -437,10 +449,13 @@ class Library:
 
     ``rows`` are dicts with video_id, topic, title, text (a short excerpt),
     author, tags, source_type, duration_seconds. ``vectors`` optionally maps
-    video_id to a unit vector from the local embedding model."""
+    video_id to a unit vector from a local embedding model, ``names`` maps a
+    shelf to the vector of its name, and ``tier`` says which model made them
+    (a key of EMBED_TIERS)."""
 
     def __init__(self, rows: Iterable[dict], *, fallback: str = FALLBACK,
-                 vectors: dict | None = None):
+                 vectors: dict | None = None, names: dict | None = None,
+                 tier: str = "gemma"):
         self.fallback = fallback
         self.docs: dict[str, dict[str, float]] = {}
         self.topic_of: dict[str, str] = {}
@@ -472,8 +487,11 @@ class Library:
                 for term in vec:
                     self.postings[term].append(vid)
         self.shelves = sorted(self.shelf_sizes)
+        self.tier = tier if tier in EMBED_TIERS else "gemma"
         self._vectors = vectors or {}
-        self._centroids = self._build_centroids() if self._vectors else {}
+        self._names = {k: _unit(list(v)) for k, v in (names or {}).items()
+                       if v is not None and not is_fallback(k, fallback) and k != CLIPS_SHELF}
+        self._centroids = self._build_centroids() if (self._vectors or self._names) else {}
 
     def _weigh(self, counts: Counter) -> dict[str, float]:
         vec = {term: (1.0 + math.log(c)) * self.idf.get(term, math.log(1 + self.n) + 1.0)
@@ -533,29 +551,75 @@ class Library:
             if vec is not None:
                 groups[topic].append(vec)
         out = {}
-        for topic, vecs in groups.items():
-            if len(vecs) < MIN_SHELF_ITEMS:
-                continue
-            out[topic] = _unit([sum(values) / len(vecs) for values in zip(*vecs)])
+        for topic in set(groups) | set(self._names):
+            vecs = groups.get(topic) or []
+            name = self._names.get(topic)
+            if len(vecs) >= MIN_SHELF_ITEMS:
+                mean = _unit(_mean(vecs))
+                if name is not None:
+                    mean = _unit([a + NAME_WEIGHT * b for a, b in zip(mean, name)])
+                out[topic] = (mean, False)
+            elif name is not None:
+                out[topic] = (name, True)
         return out
 
     def embedding_nearest(self, vector):
-        """(shelf, score, margin) against shelf centroids, or None. Items on
-        the fallback shelf are never in a centroid, so Tidy needs no
+        """(shelf, score, margin, name_only) against shelf profiles, or None.
+        Items on the fallback shelf are never in a profile, so Tidy needs no
         leave-one-out."""
         if vector is None or not self._centroids:
             return None
         query = _unit(list(vector))
+        if not any(query):
+            return None
         scored = []
-        for topic, centroid in self._centroids.items():
-            scored.append((sum(a * b for a, b in zip(query, centroid)), topic))
+        for topic, (centroid, name_only) in self._centroids.items():
+            scored.append((sum(a * b for a, b in zip(query, centroid)), topic, name_only))
         scored.sort(reverse=True)
-        top, shelf = scored[0]
+        top, shelf, name_only = scored[0]
         second = scored[1][0] if len(scored) > 1 else -1.0
-        return shelf, top, top - second
+        return shelf, top, top - second, name_only
 
     def has_vectors(self) -> bool:
         return bool(self._centroids)
+
+    def thresholds(self) -> dict:
+        return EMBED_TIERS[self.tier]
+
+
+def meaning_text(sig: Signals) -> str:
+    """What an embedding model reads for a save: its words, not its author,
+    links or handles. The transcript is capped so the title still counts."""
+    transcript = " ".join(sig.transcript.split()[:300])
+    text = " ".join(part for part in (sig.title, sig.body, sig.quoted, " ".join(sig.tags), transcript)
+                    if part)
+    return " ".join(_HANDLE_RE.sub(" ", _URL_RE.sub(" ", text)).split())
+
+
+def row_meaning_text(row: dict) -> str:
+    return meaning_text(_doc_text(row))
+
+
+def shelf_name_texts(shelves: Iterable[str], topics: "Topics | dict | None" = None) -> dict[str, str]:
+    """Text for each shelf's name vector: the name, plus its topic words
+    when topics.json defines it."""
+    topics = topics if isinstance(topics, Topics) else Topics(topics)
+    words = {name: [kw for kw, *_ in keywords] for name, keywords in topics.entries}
+    out = {}
+    for shelf in list(shelves) + topics.names:
+        if not shelf or is_fallback(shelf, topics.fallback) or shelf == CLIPS_SHELF or shelf in out:
+            continue
+        extra = words.get(shelf) or []
+        out[shelf] = shelf + (": " + ", ".join(extra[:16]) if extra else "")
+    return out
+
+
+def _mean(vecs):
+    try:
+        import numpy as np
+        return np.asarray(vecs, dtype=float).mean(axis=0).tolist()
+    except ImportError:  # pragma: no cover - numpy ships with the app
+        return [sum(values) / len(vecs) for values in zip(*vecs)]
 
 
 def _unit(values):
@@ -639,9 +703,11 @@ def route(metadata: dict, *, topics: Topics | dict | None, library: Library | No
         if vector is not None:
             near = library.embedding_nearest(vector)
             if near:
-                shelf, score, margin = near
-                if score >= EMBED_WEAK and margin >= EMBED_MARGIN / 2:
-                    strong = score >= EMBED_STRONG and margin >= EMBED_MARGIN
+                shelf, score, margin, name_only = near
+                bar = library.thresholds()
+                lift = NAME_ONLY_BONUS if name_only else 0.0
+                if score >= bar["weak"] + lift and margin >= bar["margin"] / 2:
+                    strong = score >= bar["strong"] + lift and margin >= bar["margin"]
                     votes.append((shelf, "embedding", "Close in meaning to this shelf", strong))
 
     decided = _settle(votes)
