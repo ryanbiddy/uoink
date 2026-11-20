@@ -502,6 +502,158 @@ def test_pause_resume_and_cancel(tmp_path):
     assert sc.list_jobs(tmp_path) == []
 
 
+def _running(tmp_path, job_id):
+    return next(e for e in sc.load(tmp_path, job_id)["episodes"] if e["state"] == sc.EP_RUNNING)
+
+
+def test_cancel_lets_an_episode_that_cannot_stop_finish(tmp_path):
+    backend = FakeBackend(Queue(), entries=channel_entries(5))
+    backend.cancel_episode = lambda job, ep: False      # already publishing, say
+    job = listed(tmp_path, backend)
+    sc.start(tmp_path, job["id"], backend)
+    sc.tick(tmp_path, backend, now=T0)
+    job = sc.cancel(tmp_path, job["id"], backend)
+    assert job["state"] == sc.CANCELLED and sc.counts(job)["running"] == 1
+    assert sc.view(job)["current"]["state"] == sc.EP_RUNNING   # the dashboard says so
+    job = run(tmp_path, backend, job["id"], 4)
+    assert len(backend.starts) == 1                     # nothing started after it
+    assert job["state"] == sc.CANCELLED
+    assert sc.counts(job)["done"] == 1 and sc.counts(job)["running"] == 0
+    assert not any("finishing" in e for e in job["episodes"])
+
+
+def test_pause_lets_the_episode_in_progress_finish(tmp_path):
+    backend = FakeBackend(Queue(), entries=channel_entries(5))
+    job = listed(tmp_path, backend)
+    sc.start(tmp_path, job["id"], backend)
+    sc.tick(tmp_path, backend, now=T0)
+    sc.pause(tmp_path, job["id"])
+    job = run(tmp_path, backend, job["id"], 4)
+    assert job["state"] == sc.PAUSED and len(backend.starts) == 1
+    assert sc.counts(job)["done"] == 1 and sc.counts(job)["running"] == 0
+
+
+def test_host_refusals_back_off_then_pause_the_run(tmp_path):
+    backend = FakeBackend(Queue(), feed=rss(8))
+    job = listed(tmp_path, backend, FEED)
+    sc.start(tmp_path, job["id"], backend, asr=True)
+    now, waits = T0, []
+    for _ in range(sc.MAX_HOST_FAILURES):
+        sc.tick(tmp_path, backend, now=now)                       # starts one
+        backend.script[_running(tmp_path, job["id"])["key"]] = {"state": "retry"}
+        sc.tick(tmp_path, backend, now=now)                       # the host refused
+        backend.script.clear()
+        job = sc.load(tmp_path, job["id"])
+        assert sc.counts(job)["running"] == 0 and sc.counts(job)["failed"] == 0
+        if job["state"] == sc.WAITING:
+            assert job["reason"] == "host_busy"
+            until = sc._parse_iso(job["wait_until"])
+            waits.append(int((until - now).total_seconds()))
+            starts = len(backend.starts)
+            sc.tick(tmp_path, backend, now=now + timedelta(seconds=60))
+            assert len(backend.starts) == starts                   # no request meanwhile
+            now = until
+    assert waits == [120, 240, 480, 960]
+    assert job["state"] == sc.PAUSED
+    assert job["reason"] == sc.REASON_HOST_DOWN.format(n=sc.MAX_HOST_FAILURES)
+    starts = len(backend.starts)
+    sc.tick(tmp_path, backend, now=now + timedelta(hours=3))
+    assert len(backend.starts) == starts
+    sc.resume(tmp_path, job["id"])
+    sc.tick(tmp_path, backend, now=now + timedelta(hours=3))
+    assert len(backend.starts) == starts + 1
+
+
+def test_a_host_that_honours_retry_after_and_recovers_resets_the_count(tmp_path):
+    backend = FakeBackend(Queue(), feed=rss(8))
+    job = listed(tmp_path, backend, FEED)
+    sc.start(tmp_path, job["id"], backend, asr=True)
+    sc.tick(tmp_path, backend, now=T0)
+    backend.script[_running(tmp_path, job["id"])["key"]] = {
+        "state": "retry", "until": "2026-11-01T13:00:00Z"}
+    sc.tick(tmp_path, backend, now=T0)
+    backend.script.clear()
+    job = sc.load(tmp_path, job["id"])
+    assert job["wait_until"] == "2026-11-01T13:00:00Z" and job["host_failures"] == 1
+    sc.tick(tmp_path, backend, now=T0 + timedelta(hours=1, seconds=1))
+    backend.work()
+    sc.tick(tmp_path, backend, now=T0 + timedelta(hours=1, seconds=2))
+    assert sc.load(tmp_path, job["id"])["host_failures"] == 0
+
+
+def test_a_host_failure_fails_the_episode_and_counts_toward_the_pause(tmp_path):
+    backend = FakeBackend(Queue(), feed=rss(8))
+    job = listed(tmp_path, backend, FEED)
+    sc.start(tmp_path, job["id"], backend, asr=True)
+    now = T0
+    for _ in range(sc.MAX_HOST_FAILURES):
+        sc.tick(tmp_path, backend, now=now)
+        backend.script[_running(tmp_path, job["id"])["key"]] = {
+            "state": "failed", "reason": "Couldn't download the audio from the show's host.",
+            "host_failure": True}
+        sc.tick(tmp_path, backend, now=now)
+        now += timedelta(hours=2)
+    job = sc.load(tmp_path, job["id"])
+    assert sc.counts(job)["failed"] == sc.MAX_HOST_FAILURES
+    assert job["state"] == sc.PAUSED
+
+
+def test_retrying_failures_keeps_a_wait_in_place(tmp_path):
+    backend = FakeBackend(Queue(), entries=channel_entries(4))
+    job = listed(tmp_path, backend)
+    sc.start(tmp_path, job["id"], backend)
+
+    def waiting(j):
+        j["episodes"][0].update(state=sc.EP_FAILED, reason="Nope.")
+        j.update(state=sc.WAITING, reason="bot_check", wait_until="2026-11-01T12:30:00Z")
+    sc.update(tmp_path, job["id"], waiting)
+    job = sc.retry_failed(tmp_path, job["id"], backend)
+    assert job["state"] == sc.WAITING and job["reason"] == "bot_check"
+    assert job["wait_until"] == "2026-11-01T12:30:00Z" and sc.counts(job)["failed"] == 0
+    sc.tick(tmp_path, backend, now=T0 + timedelta(minutes=10))
+    assert backend.starts == []
+    sc.tick(tmp_path, backend, now=T0 + timedelta(minutes=31))
+    assert len(backend.starts) == 1
+
+
+def test_a_rate_limit_wait_is_labelled_as_one(tmp_path):
+    backend = FakeBackend(Queue(), entries=channel_entries(3))
+    job = listed(tmp_path, backend)
+    sc.start(tmp_path, job["id"], backend)
+    backend.bot = {"active": True, "seconds_left": 600, "reason": "rate_limited"}
+    sc.tick(tmp_path, backend, now=T0)
+    assert sc.load(tmp_path, job["id"])["reason"] == "rate_limited"
+
+
+def test_a_removed_item_is_skipped_with_its_own_reason(tmp_path):
+    backend = FakeBackend(Queue(), entries=channel_entries(3))
+    backend.in_library = lambda job, ep: sc.REASON_REMOVED if ep.get("video_id") == vid(1) else False
+    job = listed(tmp_path, backend)
+    reasons = {e["video_id"]: e["reason"] for e in job["episodes"]}
+    assert reasons[vid(1)] == sc.REASON_REMOVED and reasons[vid(0)] is None
+
+
+def test_an_idle_run_is_not_rewritten_or_reparsed(tmp_path, monkeypatch):
+    backend = FakeBackend(Queue(), entries=channel_entries(3))
+    job = listed(tmp_path, backend)
+    sc.start(tmp_path, job["id"], backend)
+    backend.busy = True
+    sc.tick(tmp_path, backend, now=T0)                  # records queue_busy once
+    writes, reads = [], []
+    real_write, real_loads = sc._write, sc.json.loads
+    monkeypatch.setattr(sc, "_write", lambda root, j: (writes.append(j["id"]), real_write(root, j)))
+    monkeypatch.setattr(sc.json, "loads", lambda text, **k: (reads.append(1), real_loads(text, **k))[1])
+    for i in range(5):
+        sc.tick(tmp_path, backend, now=T0 + timedelta(seconds=15 * i))
+    assert writes == []
+    reads.clear()
+    for _ in range(3):
+        assert [j["id"] for j in sc.list_jobs(tmp_path)] == [job["id"]]
+    assert reads == []                                  # served from the parsed cache
+    sc.pause(tmp_path, job["id"])
+    assert sc.list_jobs(tmp_path)[0]["state"] == sc.PAUSED   # a change is read again
+
+
 def test_podcasts_need_local_transcription(tmp_path):
     backend = FakeBackend(Queue(), feed=rss(3))
     job = listed(tmp_path, backend, FEED)

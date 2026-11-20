@@ -63,6 +63,12 @@ LIST_WINDOW = 500
 MAX_LOST = 3              # an episode whose queue row vanished is retried this often
 MAX_JOBS_KEPT = 30        # finished runs past this are pruned, oldest first
 SKIPS_PER_TICK = 500      # already-saved episodes settled per tick without starting one
+# A host that refuses (429, 5xx, timeouts) or fails this many episodes in a
+# row pauses the run; before that each refusal waits HOST_BACKOFF_SEC,
+# doubled per refusal in a row, at most HOST_BACKOFF_MAX_SEC.
+MAX_HOST_FAILURES = 5
+HOST_BACKOFF_SEC = 120
+HOST_BACKOFF_MAX_SEC = 3600
 
 # Rough estimate inputs (shown to the user as "about"). A queued caption save
 # is two small YouTube requests plus the queue's 30 s pacing. Local Whisper
@@ -76,12 +82,15 @@ THUMBNAIL_KB = 60
 DEFAULT_EPISODE_MIN = 30
 
 REASON_ALREADY_SAVED = "Already in your library."
+REASON_REMOVED = "You removed this one from your library."
 REASON_DUPLICATE_IN_LIST = "Listed twice in this source."
 REASON_NO_AUDIO = "This episode has no audio link in the feed."
 REASON_LOST = "Uoink lost track of this one after a restart three times."
 REASON_CANCELLED_IN_QUEUE = "Removed from the download queue."
 REASON_NEEDS_ASR = "Podcast episodes need local transcription. Turn it on to save this show."
 REASON_LIVE = "This is a live or upcoming stream. Save it on its own once it has ended."
+REASON_HOST_DOWN = ("The show's host failed {n} episodes in a row, so Uoink stopped asking. "
+                    "Resume to try again later.")
 _LIVE_STATUSES = ("is_live", "is_upcoming")
 
 _YT_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com"}
@@ -113,13 +122,21 @@ class RunBlocked(Exception):
 class Backend(Protocol):
     def list_youtube(self, url: str, start: int, end: int) -> dict: ...
     def fetch_feed(self, url: str) -> bytes: ...
-    def in_library(self, job: dict, episode: dict) -> bool: ...
+    # True (or a reason string, such as REASON_REMOVED) when the episode is
+    # not to be saved: an indexed library item, or one the user removed.
+    def in_library(self, job: dict, episode: dict) -> bool | str: ...
     def queue_busy(self) -> bool: ...
     def bot_check(self) -> dict: ...
     def asr_problem(self, kind: str) -> str | None: ...
     def start_episode(self, job: dict, episode: dict) -> dict: ...
+    # {"state": "running" | "done" | "skipped" | "failed" | "lost" | "waiting"
+    #  | "retry", ...}. "retry" means the host refused for now (429, 5xx, a
+    # timeout): the episode goes back in line and the run waits. "failed"
+    # may carry host_failure=True so failures in a row pause the run.
     def episode_status(self, job: dict, episode: dict) -> dict: ...
-    def cancel_episode(self, job: dict, episode: dict) -> None: ...
+    # False when the episode can't be stopped and will finish on its own
+    # (a transcription already running, say); anything else means stopped.
+    def cancel_episode(self, job: dict, episode: dict) -> bool | None: ...
 
 
 def _utcnow() -> datetime:
@@ -227,16 +244,37 @@ def load(data_root: Path, job_id: str) -> dict:
     return job
 
 
+# Parsed run files by path, kept while the file's mtime and size are the
+# same, so the scheduler pass and the dashboard's polls don't re-read every
+# run each time. The dicts are shared: callers must not change them.
+_parsed: dict[str, tuple[tuple[int, int, int], dict]] = {}
+
+
 def list_jobs(data_root: Path) -> list[dict]:
+    """Every readable run, oldest first. Read-only: change a run with update()."""
     folder = _dir(data_root)
     jobs = []
+    seen = set()
     for path in sorted(folder.glob("show_*.json")) if folder.is_dir() else []:
+        key = str(path)
+        seen.add(key)
         try:
-            job = json.loads(path.read_text(encoding="utf-8"))
+            stat = path.stat()
+            # Every write replaces the file, so its file id changes too
+            # (a coarse clock can give two writes the same mtime).
+            stamp = (stat.st_ino, stat.st_mtime_ns, stat.st_size)
+            cached = _parsed.get(key)
+            if cached is not None and cached[0] == stamp:
+                job = cached[1]
+            else:
+                job = json.loads(path.read_text(encoding="utf-8"))
+                _parsed[key] = (stamp, job)
         except (OSError, ValueError):
             continue
         if isinstance(job, dict) and job.get("schema") == SCHEMA:
             jobs.append(job)
+    for key in [k for k in _parsed if k.startswith(str(folder)) and k not in seen]:
+        _parsed.pop(key, None)
     jobs.sort(key=lambda j: (j.get("created_at") or "", j.get("id") or ""))
     return jobs
 
@@ -347,7 +385,8 @@ def _podcast_episode(item: dict) -> dict:
     guid = str(item.get("guid") or "")
     ep = {"key": "pod:" + hashlib.sha1(guid.encode("utf-8")).hexdigest()[:16], "guid": guid,
           "video_id": None, "url": item.get("episode_page_url") or item.get("audio_url"),
-          "audio_url": item.get("audio_url"), "title": (item.get("title") or "")[:300],
+          "audio_url": item.get("audio_url"), "episode_page_url": item.get("episode_page_url"),
+          "title": (item.get("title") or "")[:300],
           "duration_seconds": item.get("duration_seconds"),
           "published_at": item.get("published_at"),
           "description": (item.get("description") or "")[:2000] or None,
@@ -452,8 +491,12 @@ def run_listing(data_root: Path, job_id: str, backend: Backend) -> dict:
             except Exception:
                 saved = False
             if saved:
-                ep["state"], ep["reason"] = EP_SKIPPED, REASON_ALREADY_SAVED
+                ep["state"], ep["reason"] = EP_SKIPPED, _skip_reason(saved)
     return _finish_listing(data_root, job_id, title=title, episodes=unique, note=note)
+
+
+def _skip_reason(saved) -> str:
+    return saved if isinstance(saved, str) and saved else REASON_ALREADY_SAVED
 
 
 def _finish_listing(data_root, job_id, *, error=None, title=None, episodes=None, note=None) -> dict:
@@ -509,21 +552,28 @@ def resume(data_root: Path, job_id: str) -> dict:
     def change(job):
         if job.get("state") != PAUSED:
             raise ShowCaptureError("Only a paused save can be resumed.", "invalid_state")
-        job.update(state=RUNNING, reason=None)
+        job.update(state=RUNNING, reason=None, host_failures=0)
     return update(data_root, job_id, change)
 
 
 def cancel(data_root: Path, job_id: str, backend: Backend) -> dict:
+    """Stop the run. An episode in flight is stopped when its backend can
+    (a queued YouTube row, a podcast download); one that can't be stopped
+    (a transcription already running, a row already publishing) finishes,
+    is recorded, and nothing starts after it."""
     def change(job):
         if job.get("state") in FINAL_STATES:
             raise ShowCaptureError("This run has already ended.", "invalid_state")
         for ep in job.get("episodes") or []:
             if ep.get("state") == EP_RUNNING:
                 try:
-                    backend.cancel_episode(job, ep)
+                    stopped = backend.cancel_episode(job, ep) is not False
                 except Exception:
-                    pass
-                ep.update(state=EP_QUEUED, reason=None)
+                    stopped = False
+                if stopped:
+                    ep.update(state=EP_QUEUED, reason=None)
+                else:
+                    ep["finishing"] = True
         job.update(state=CANCELLED, reason=None, wait_until=None, finished_at=_iso(_utcnow()))
     return update(data_root, job_id, change)
 
@@ -547,8 +597,12 @@ def retry_failed(data_root: Path, job_id: str, backend: Backend, *, asr: bool | 
                 ep.pop(handle, None)
         if asr is not None:
             job["asr"] = bool(asr)
-        job.update(state=RUNNING if job.get("state") != PAUSED else PAUSED,
-                   reason=None, finished_at=None)
+        # A paused run stays paused, and a run waiting out a bot check or a
+        # busy host keeps its wait (and its reason) until that time.
+        if job.get("state") in (PAUSED, WAITING):
+            job["finished_at"] = None
+        else:
+            job.update(state=RUNNING, reason=None, finished_at=None)
     return update(data_root, job_id, change)
 
 
@@ -575,12 +629,26 @@ def _poll(job: dict, ep: dict, backend: Backend, now: datetime) -> bool:
     except Exception:
         return True
     state = status.get("state")
+    if state in ("done", "skipped"):
+        job["host_failures"] = 0
     if state == "done":
         _set_episode(ep, EP_DONE, None, video_id=status.get("video_id") or ep.get("video_id"))
     elif state == "skipped":
         _set_episode(ep, EP_SKIPPED, status.get("reason") or REASON_ALREADY_SAVED)
     elif state == "failed":
         _set_episode(ep, EP_FAILED, status.get("reason") or "Uoink couldn't save this one.")
+        if status.get("host_failure"):
+            _host_failed(job, now, None)
+            return False
+        job["host_failures"] = 0
+    elif state == "retry":
+        # The host refused for now: back in line, and the run waits.
+        ep["attempts"] = int(ep.get("attempts") or 0) + 1
+        for handle in ("pending_id", "podcast_job_id", "episode_id"):
+            ep.pop(handle, None)
+        _set_episode(ep, EP_QUEUED, None)
+        _host_failed(job, now, _parse_iso(status.get("until")))
+        return False
     elif state == "lost":
         ep["attempts"] = int(ep.get("attempts") or 0) + 1
         for handle in ("pending_id", "podcast_job_id"):
@@ -601,6 +669,23 @@ def _poll(job: dict, ep: dict, backend: Backend, now: datetime) -> bool:
     if job.get("state") == WAITING:
         job.update(state=RUNNING, reason=None, wait_until=None)
     return False
+
+
+def _host_failed(job: dict, now: datetime, until: datetime | None) -> None:
+    """One more refusal or failure from the source's host, in a row. The
+    run waits longer each time, and pauses with the reason after
+    MAX_HOST_FAILURES in a row."""
+    failures = int(job.get("host_failures") or 0) + 1
+    job["host_failures"] = failures
+    if job.get("state") not in ACTIVE_STATES:
+        return
+    if failures >= MAX_HOST_FAILURES:
+        job.update(state=PAUSED, reason=REASON_HOST_DOWN.format(n=failures), wait_until=None)
+        return
+    if until is None or until <= now:
+        delay = min(HOST_BACKOFF_SEC * 2 ** (failures - 1), HOST_BACKOFF_MAX_SEC)
+        until = now + timedelta(seconds=delay)
+    job.update(state=WAITING, reason="host_busy", wait_until=_iso(until))
 
 
 def _finish_if_complete(job: dict) -> None:
@@ -648,7 +733,11 @@ def tick(data_root: Path, backend: Backend, *, now: datetime | None = None,
 
     in_flight = False
     for job in jobs:
-        if job.get("state") not in (RUNNING, WAITING, PAUSED):
+        # A cancelled run still settles an episode that couldn't be stopped,
+        # and nothing new starts until it has.
+        if job.get("state") not in (RUNNING, WAITING, PAUSED, CANCELLED):
+            continue
+        if not any(e.get("state") == EP_RUNNING for e in job.get("episodes") or []):
             continue
         with _lock:
             try:
@@ -660,6 +749,8 @@ def tick(data_root: Path, backend: Backend, *, now: datetime | None = None,
                 continue
             before = json.dumps(fresh, sort_keys=True)
             still = _poll(fresh, ep, backend, now)
+            if not still:
+                ep.pop("finishing", None)
             in_flight = in_flight or still
             _finish_if_complete(fresh)
             if json.dumps(fresh, sort_keys=True) != before:
@@ -677,9 +768,13 @@ def tick(data_root: Path, backend: Backend, *, now: datetime | None = None,
                 continue
             if fresh.get("state") not in ACTIVE_STATES:
                 continue
+            before = json.dumps(fresh, sort_keys=True)
             started = _feed(fresh, backend, now)
             _finish_if_complete(fresh)
-            _write(data_root, fresh)
+            # A run that is only waiting (a bot check, a busy queue) is not
+            # rewritten every pass.
+            if json.dumps(fresh, sort_keys=True) != before:
+                _write(data_root, fresh)
         if started or fresh.get("state") == RUNNING:
             # One run feeds at a time, oldest first. A run that is waiting
             # out YouTube lets the next run (a podcast, say) go meanwhile.
@@ -698,7 +793,8 @@ def _feed(job: dict, backend: Backend, now: datetime) -> bool:
             status = {}
     if status.get("active"):
         until = now + timedelta(seconds=int(status.get("seconds_left") or 0))
-        job.update(state=WAITING, reason="bot_check", wait_until=_iso(until))
+        reason = status.get("reason") if status.get("reason") in ("bot_check", "rate_limited") else "bot_check"
+        job.update(state=WAITING, reason=reason, wait_until=_iso(until))
         return False
     if job.get("state") == WAITING:
         until = _parse_iso(job.get("wait_until"))
@@ -723,7 +819,7 @@ def _feed(job: dict, backend: Backend, now: datetime) -> bool:
         except Exception:
             saved = False
         if saved:
-            _set_episode(ep, EP_SKIPPED, REASON_ALREADY_SAVED)
+            _set_episode(ep, EP_SKIPPED, _skip_reason(saved))
             skipped += 1
             if skipped >= SKIPS_PER_TICK:
                 return False

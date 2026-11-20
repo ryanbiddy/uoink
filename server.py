@@ -446,6 +446,13 @@ TRANSCRIPT_NO_MODEL_MESSAGE = (
 TRANSCRIPT_CAPTIONS_FAILED_MESSAGE = "Uoink couldn't download the captions for this video."
 TRANSCRIPT_ALREADY_SAVED_MESSAGE = (
     "Already in your library, so this transcript-only save left it as it was.")
+TRANSCRIPT_REMOVED_MESSAGE = (
+    "You removed this one from your library, so this transcript-only save left it out.")
+TRANSCRIPT_UNFINISHED_MESSAGE = (
+    "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
+# What a transcript-only attempt itself leaves in a folder (captions, a
+# partial download); these never count as a saved capture.
+_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".part", ".ytdl", ".json", ".tmp")
 # Lite mode forces the screenshot interval to at least this (1 per 5 min), so
 # a 2-hour video yields a couple dozen frames instead of hundreds.
 LITE_SHOT_INTERVAL_SEC = 5 * 60
@@ -7118,6 +7125,17 @@ def _transcript_only_entries(url: str, asset_folder: Path, mode: str,
     return entries, source, fallback
 
 
+def _clear_transcript_leftovers(folder: Path) -> None:
+    """Before a transcript-only attempt: remove what an earlier attempt that
+    never finished left (its captions, metadata and thumbnail). The folder
+    and its ownership claim stay."""
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt"):
+        for path in folder.glob(pattern):
+            if path.is_file() and not path.is_symlink():
+                with contextlib.suppress(OSError):
+                    path.unlink()
+
+
 def _discard_transcript_attempt(folder: Path) -> None:
     """Remove what a failed transcript-only attempt wrote into its own fresh
     folder, so a show with many caption-less videos leaves no empty shells.
@@ -7655,18 +7673,42 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         topic = _classify_topic(metadata)
 
     title = metadata.get("title") or "Untitled"
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES:
+        # A transcript-only save never replaces or reduces a library item.
+        # Any indexed row for this video ends it here, before a folder is
+        # claimed, even when that item's folder has moved (the folder lookup
+        # below then finds nothing and would start a new one).
+        saved = _get_index().get_yoink(_video_capture_id(url, metadata))
+        if saved is not None and saved.get("deleted_at"):
+            raise ExtractionPhaseError(
+                "metadata",
+                "You removed this one from your library, so this transcript-only save left it out.")
+        if saved is not None:
+            raise ExtractionPhaseError(
+                "metadata", "Already in your library, so this transcript-only save left it as it was.")
     output_folder, existing = _prepare_video_capture_folder(
         output_folder, url, metadata, refresh_existing=refresh_existing)
     # A new capture has only its ownership claim. Refreshes keep previous
     # artifacts until generation and the file swap have succeeded.
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
-    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and (
-            existing is not None or any(output_folder.glob("screenshots/*.jpg"))
-            or any(output_folder.glob("video.*"))):
-        # A transcript-only save never replaces a saved capture or one that
-        # has its video files or screenshots.
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and existing is not None:
         raise ExtractionPhaseError(
             "metadata", "Already in your library, so this transcript-only save left it as it was.")
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and (
+            any(output_folder.glob("screenshots/*.jpg"))
+            or any(p.suffix.lower() not in _TRANSCRIPT_ATTEMPT_SUFFIXES
+                   for p in output_folder.glob("video.*"))):
+        # Video files or screenshots with no library item: a full save that
+        # is unfinished. Captions left by an earlier transcript attempt
+        # don't count, so a crashed attempt is simply tried again.
+        raise ExtractionPhaseError(
+            "metadata",
+            "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and refreshing:
+        # Only an earlier attempt's own files can be here (saved items and
+        # unfinished full saves ended above). Start clean, not as a refresh.
+        _clear_transcript_leftovers(output_folder)
+        refreshing = False
     video_slug = output_folder.name
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
@@ -16506,8 +16548,22 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
 _SHOW_CAPTURE_POLL_SEC = 15
 _SHOW_QUEUE_INTERVAL_SEC = 30
 _show_capture_wake = threading.Event()
+# Podcast episodes a show run is downloading or has handed to transcription,
+# by episode id: {"state": downloading | queued | failed | retry | cancelled,
+# "cancel": Event, ...}. Entries go once the run has recorded the outcome.
 _show_podcast_runs: dict[int, dict] = {}
 _show_podcast_runs_lock = threading.Lock()
+# A download error that means "the host is busy or unreachable for now":
+# back off and try again. Anything else (a 404, a refused address) fails
+# the episode and still counts toward the run's failures in a row.
+_SHOW_HOST_BUSY = re.compile(
+    r"HTTP Error (?:429|5\d\d)|Too Many Requests|Service Unavailable|timed out|^timeout$"
+    r"|temporar|Connection (?:reset|refused|aborted)|getaddrinfo|Remote end closed",
+    re.IGNORECASE)
+
+
+def _show_spawn(target, *args) -> None:
+    threading.Thread(target=target, args=args, name="show-podcast", daemon=True).start()
 _SHOW_ERROR_STATUS = {"empty": 400, "invalid_url": 400, "unsupported": 400, "invalid": 400,
                       "not_found": 404, "unreadable": 500, "invalid_state": 409,
                       "needs_asr": 409, "asr_unavailable": 409}
@@ -16518,22 +16574,25 @@ def _show_youtube_waiting() -> dict:
     queued capture that is waiting out a bot check or a 429."""
     status = _youtube_bot_check_status()
     if status.get("active"):
-        return status
+        return {**status, "reason": "bot_check"}
     now = _now_iso()
     latest = None
+    reason = "bot_check"
     for row in _get_index().list_pending(limit=200):
         error = str(row.get("last_error") or "")
         retry_after = str(row.get("retry_after") or "")
         if (row.get("status") == "pending" and retry_after > now
                 and error.startswith(("youtube_bot_check", "youtube_rate_limit"))):
-            latest = max(latest or retry_after, retry_after)
+            if latest is None or retry_after > latest:
+                latest = retry_after
+                reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
     if latest is None:
         return {"active": False}
-    try:
-        left = int((datetime.fromisoformat(latest) - datetime.now()).total_seconds())
-    except ValueError:
+    until = show_capture._parse_iso(latest)
+    if until is None:
         return {"active": False}
-    return {"active": left > 0, "seconds_left": max(0, left)}
+    left = int((until - datetime.now(timezone.utc)).total_seconds())
+    return {"active": left > 0, "seconds_left": max(0, left), "reason": reason}
 
 
 def _show_reason_from_pending(row: dict) -> str:
@@ -16557,8 +16616,9 @@ def _show_podcast_feed(idx, feed_url: str):
     return dict(row) if row else None
 
 
-def _show_podcast_saved_id(idx, feed_url: str, episode: dict) -> str | None:
-    """The library id of a feed episode that is already saved, or None."""
+def _show_podcast_linked_id(idx, feed_url: str, episode: dict) -> str | None:
+    """The library id a feed episode is linked to (saved, or saved and then
+    removed by the user), or None."""
     feed = _show_podcast_feed(idx, feed_url)
     if feed is None:
         return None
@@ -16575,8 +16635,7 @@ def _show_podcast_saved_id(idx, feed_url: str, episode: dict) -> str | None:
         video_id = row["yoink_video_id"]
     if not video_id:
         return None
-    saved = idx.get_yoink(video_id)
-    return video_id if saved and not saved.get("deleted_at") else None
+    return video_id if idx.get_yoink(video_id) is not None else None
 
 
 def _register_show_episode(idx, feed_url: str, show_title, episode: dict) -> dict:
@@ -16598,28 +16657,60 @@ def _register_show_episode(idx, feed_url: str, show_title, episode: dict) -> dic
         return same
     podcasts.upsert_episodes(idx, feed_id, [{
         "guid": episode.get("guid"), "title": episode.get("title"),
-        "audio_url": episode.get("audio_url"), "episode_page_url": None,
+        "audio_url": episode.get("audio_url"),
+        "episode_page_url": episode.get("episode_page_url"),
         "duration_seconds": episode.get("duration_seconds"),
         "published_at": episode.get("published_at"),
         "description": episode.get("description")}])
-    for row in podcasts.list_episodes(idx, feed_id=feed_id, limit=5000):
-        if row.get("guid") == episode.get("guid"):
-            return row
-    raise show_capture.EpisodeError("Uoink couldn't add this episode.")
+    # One indexed lookup (feed_id, guid), not a scan of the feed's episodes.
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=? LIMIT 1",
+            (feed_id, episode.get("guid") or "")).fetchone()
+    found = podcasts.get_episode(idx, int(row["id"])) if row else None
+    if found is None:
+        raise show_capture.EpisodeError("Uoink couldn't add this episode.")
+    return found
+
+
+def _show_podcast_note(episode_id: int, **state) -> None:
+    """Record what the episode's thread is doing, keeping its cancel flag."""
+    with _show_podcast_runs_lock:
+        entry = _show_podcast_runs.setdefault(episode_id, {})
+        cancel = entry.get("cancel")
+        entry.clear()
+        entry.update(state)
+        if cancel is not None:
+            entry["cancel"] = cancel
+
+
+def _show_podcast_cancelled(episode_id: int) -> bool:
+    with _show_podcast_runs_lock:
+        event = (_show_podcast_runs.get(episode_id) or {}).get("cancel")
+    return bool(event is not None and event.is_set())
 
 
 def _show_podcast_run(episode_id: int) -> None:
     """Download one episode, then queue the normal podcast transcription
-    that publishes it into the library. Runs on its own thread."""
+    that publishes it into the library. Runs on its own thread. Cancelling
+    the run stops it before transcription (a download already under way
+    finishes and its audio stays with the episode)."""
     def note(**state):
-        with _show_podcast_runs_lock:
-            _show_podcast_runs[episode_id] = state
+        _show_podcast_note(episode_id, **state)
 
     try:
+        if _show_podcast_cancelled(episode_id):
+            return note(state="cancelled")
         idx = _get_index()
         downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+        if _show_podcast_cancelled(episode_id):
+            return note(state="cancelled")
         if not downloaded.get("ok"):
-            return note(state="failed", reason="Couldn't download the audio. Try again later.")
+            error = str(downloaded.get("error") or "")
+            if _SHOW_HOST_BUSY.search(error):
+                return note(state="retry")
+            return note(state="failed", host_failure=True,
+                        reason="Couldn't download the audio from the show's host.")
         settings = _read_settings() or {}
         queued, status = _queue_podcast_transcription(
             episode_id, model=whisper_runner.normalize_model(settings.get("whisper_model")),
@@ -16658,14 +16749,26 @@ class _ServerShowBackend:
 
     def in_library(self, job, episode):
         if episode.get("video_id"):
-            return _list_import_in_library(episode["video_id"])
+            row = _get_index().get_yoink(episode["video_id"])
+            if row is not None and row.get("deleted_at"):
+                return show_capture.REASON_REMOVED
+            return row is not None
         if job.get("kind") == show_capture.KIND_PODCAST:
-            return _show_podcast_saved_id(_get_index(), job.get("url") or "", episode) is not None
+            idx = _get_index()
+            linked = _show_podcast_linked_id(idx, job.get("url") or "", episode)
+            row = idx.get_yoink(linked) if linked else None
+            if row is not None and row.get("deleted_at"):
+                return show_capture.REASON_REMOVED
+            return row is not None
         return False
 
     def queue_busy(self):
         if _extract_lock.locked():
             return True
+        with _show_podcast_runs_lock:
+            # A cancelled run's download still finishing counts too.
+            if any(run.get("state") == "downloading" for run in _show_podcast_runs.values()):
+                return True
         soon = (datetime.now() + timedelta(seconds=60)).strftime("%Y-%m-%dT%H:%M:%S")
         for row in _get_index().list_pending(limit=200):
             if row.get("status") in ("running", "publishing"):
@@ -16702,9 +16805,9 @@ class _ServerShowBackend:
             row = _register_show_episode(idx, job.get("url") or "", job.get("title"), episode)
             episode_id = int(row["id"])
             with _show_podcast_runs_lock:
-                _show_podcast_runs[episode_id] = {"state": "downloading"}
-            threading.Thread(target=_show_podcast_run, args=(episode_id,),
-                             name="show-podcast", daemon=True).start()
+                _show_podcast_runs[episode_id] = {"state": "downloading",
+                                                  "cancel": threading.Event()}
+            _show_spawn(_show_podcast_run, episode_id)
             return {"episode_id": episode_id}
         url = _normalize_youtube_url(episode["url"]) or episode["url"]
         mode = LONG_VIDEO_MODE_TRANSCRIPT_ASR if job.get("asr") else LONG_VIDEO_MODE_TRANSCRIPT
@@ -16730,6 +16833,8 @@ class _ServerShowBackend:
         if status == "failed":
             if TRANSCRIPT_ALREADY_SAVED_MESSAGE in str(row.get("last_error") or ""):
                 return {"state": "skipped", "reason": show_capture.REASON_ALREADY_SAVED}
+            if TRANSCRIPT_REMOVED_MESSAGE in str(row.get("last_error") or ""):
+                return {"state": "skipped", "reason": show_capture.REASON_REMOVED}
             return {"state": "failed", "reason": _show_reason_from_pending(row)}
         error = str(row.get("last_error") or "")
         retry_after = str(row.get("retry_after") or "")
@@ -16754,27 +16859,42 @@ class _ServerShowBackend:
         episode_id = episode.get("episode_id")
         if episode_id is None:
             return {"state": "lost"}
-        row = podcasts.get_episode(idx, int(episode_id))
+        episode_id = int(episode_id)
+        row = podcasts.get_episode(idx, episode_id)
         if row is None:
+            self._forget_podcast_run(episode_id)
             return {"state": "lost"}
         if row.get("yoink_video_id"):
-            return {"state": "done", "video_id": row["yoink_video_id"]}
+            saved = idx.get_yoink(row["yoink_video_id"])
+            if saved is not None and not saved.get("deleted_at"):
+                self._forget_podcast_run(episode_id)
+                return {"state": "done", "video_id": row["yoink_video_id"]}
         with _show_podcast_runs_lock:
-            run = dict(_show_podcast_runs.get(int(episode_id)) or {})
+            run = dict(_show_podcast_runs.get(episode_id) or {})
         if run.get("state") == "failed":
-            return {"state": "failed", "reason": run.get("reason")}
+            self._forget_podcast_run(episode_id)
+            return {"state": "failed", "reason": run.get("reason"),
+                    "host_failure": bool(run.get("host_failure"))}
+        if run.get("state") == "retry":
+            self._forget_podcast_run(episode_id)
+            return {"state": "retry", "reason": "host_busy"}
+        if run.get("state") == "cancelled":
+            self._forget_podcast_run(episode_id)
+            return {"state": "failed", "reason": "Cancelled before it was transcribed."}
         if run.get("state") == "downloading":
             return {"state": "running"}
         with _jobs_lock:
             jobs = [dict(j) for j in _jobs.values()
-                    if j.get("kind") == "podcast_transcribe" and j.get("episode_id") == int(episode_id)]
+                    if j.get("kind") == "podcast_transcribe" and j.get("episode_id") == episode_id]
         if run.get("job_id"):
             jobs = [j for j in jobs if j.get("id") == run["job_id"]] or jobs
         if not jobs:
+            self._forget_podcast_run(episode_id)
             return {"state": "lost"}
         job = max(jobs, key=lambda j: str(j.get("updated_at") or ""))
         if job.get("state") not in _JOB_TERMINAL_STATES:
             return {"state": "running"}
+        self._forget_podcast_run(episode_id)
         if job.get("state") == "completed":
             # Publishing links the episode to its library row before the job
             # completes, so a completed job without that link means the
@@ -16785,9 +16905,36 @@ class _ServerShowBackend:
             return {"state": "failed", "reason": "The transcription was cancelled."}
         return {"state": "failed", "reason": str(job.get("error") or "Transcription failed.")[:300]}
 
+    @staticmethod
+    def _forget_podcast_run(episode_id: int) -> None:
+        with _show_podcast_runs_lock:
+            run = _show_podcast_runs.get(episode_id)
+            if run is not None and run.get("state") != "downloading":
+                _show_podcast_runs.pop(episode_id, None)
+
     def cancel_episode(self, job, episode):
+        """Stop one in-flight episode. False when it can't be stopped and
+        will finish on its own (a row already publishing, a podcast
+        transcription already queued or running: those jobs have no cancel)."""
         if episode.get("pending_id") is not None:
-            _get_index().cancel_pending(int(episode["pending_id"]))
+            return _get_index().cancel_pending(int(episode["pending_id"]))
+        episode_id = episode.get("episode_id")
+        if episode_id is None:
+            return True
+        episode_id = int(episode_id)
+        with _show_podcast_runs_lock:
+            run = _show_podcast_runs.get(episode_id)
+            if run is not None and run.get("state") == "downloading":
+                # The download under way ends on its own; nothing after it runs.
+                event = run.get("cancel")
+                if isinstance(event, threading.Event):
+                    event.set()
+                return True
+        with _jobs_lock:
+            transcribing = any(
+                j.get("kind") == "podcast_transcribe" and j.get("episode_id") == episode_id
+                and j.get("state") not in _JOB_TERMINAL_STATES for j in _jobs.values())
+        return not transcribing
 
 
 _show_backend = _ServerShowBackend()

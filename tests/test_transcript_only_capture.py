@@ -19,6 +19,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
@@ -293,5 +294,69 @@ def test_transcript_messages_match_the_literal_phase_errors():
                 and isinstance(node.args[1], ast.Constant)}
     for name in ("TRANSCRIPT_NO_CAPTIONS_MESSAGE", "TRANSCRIPT_NO_SPEECH_MESSAGE",
                  "TRANSCRIPT_NO_MODEL_MESSAGE", "TRANSCRIPT_CAPTIONS_FAILED_MESSAGE",
-                 "TRANSCRIPT_ALREADY_SAVED_MESSAGE"):
+                 "TRANSCRIPT_ALREADY_SAVED_MESSAGE", "TRANSCRIPT_REMOVED_MESSAGE",
+                 "TRANSCRIPT_UNFINISHED_MESSAGE"):
         assert getattr(server, name) in literals, name
+
+
+def _library_row(env, folder: Path, **extra):
+    """A full capture indexed for the episode, its files somewhere else."""
+    env.idx.upsert_yoink({
+        "video_id": "showep00001", "slug": folder.name, "channel": "The Example Hour",
+        "title": "Episode 12: Tide pools", "topic": "Shows", "yoinked_at": "2026-10-01T09:00:00",
+        "corpus_path": str(folder / f"{folder.name}.md"),
+        "sidecar_path": str(folder / f"{folder.name}.json"),
+        "metadata_json": json.dumps({"url": URL, "long_video_mode": "full"}),
+        "source_type": "youtube", "platform": "youtube", **extra}, content="full capture")
+    return env.idx.get_yoink("showep00001")
+
+
+def test_a_full_capture_in_a_moved_folder_is_never_replaced(env):
+    # The item's folder moved (another drive, a renamed output folder), so
+    # the folder lookup finds nothing. The library row still ends the save.
+    before = _library_row(env, env.root / "elsewhere" / "episode-12-full")
+    with pytest.raises(server.ExtractionPhaseError) as err:
+        _run(env, "transcript", folder_name="fresh")
+    assert str(err.value) == server.TRANSCRIPT_ALREADY_SAVED_MESSAGE
+    assert env.idx.get_yoink("showep00001") == before
+    assert not (env.root / "lib" / "fresh").exists()
+    assert not [c for c in env.calls if "--skip-download" in c]   # nothing fetched
+
+
+def test_a_removed_item_is_left_out(env):
+    _library_row(env, env.root / "elsewhere" / "episode-12-full")
+    env.idx.soft_delete_yoink("showep00001")
+    with pytest.raises(server.ExtractionPhaseError) as err:
+        _run(env, "transcript", folder_name="fresh")
+    assert str(err.value) == server.TRANSCRIPT_REMOVED_MESSAGE
+    assert env.idx.get_yoink("showep00001")["deleted_at"]
+
+
+def test_captions_left_by_a_crashed_attempt_are_tried_again(env, monkeypatch):
+    # The helper died after the captions were written, before the attempt
+    # could clean up: the folder keeps its claim and video.en.srt.
+    monkeypatch.setattr(server, "_discard_transcript_attempt", lambda folder: None)
+    real = server._transcript_only_entries
+    monkeypatch.setattr(server, "_transcript_only_entries",
+                        Mock(side_effect=RuntimeError("helper killed")))
+    with pytest.raises(RuntimeError):
+        _run(env, "transcript")
+    folder = env.root / "lib" / "ep"
+    assert list(folder.glob("video*.srt"))
+    monkeypatch.setattr(server, "_transcript_only_entries", real)
+    result = _run(env, "transcript")
+    assert Path(result["folder"]) == folder
+    assert _sidecar(result)["transcript"]
+
+
+def test_an_unfinished_full_save_is_left_alone(env, monkeypatch):
+    # Video files with no library item: a full save that never finished.
+    monkeypatch.setattr(server, "_index_yoink", lambda *_a, **_k: None)
+    full = _run(env, "full", _metadata(subtitles={"en": [{}]}))
+    assert env.idx.get_yoink("showep00001") is None
+    folder = Path(full["folder"])
+    before = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*") if p.is_file())
+    with pytest.raises(server.ExtractionPhaseError) as err:
+        _run(env, "transcript")
+    assert str(err.value) == server.TRANSCRIPT_UNFINISHED_MESSAGE
+    assert sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*") if p.is_file()) == before

@@ -14,7 +14,7 @@ import threading
 import urllib.error
 import urllib.request
 from contextlib import nullcontext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from types import SimpleNamespace
@@ -162,6 +162,21 @@ def test_a_bot_check_on_an_episode_holds_the_run(helper):
     assert server._show_youtube_waiting()["active"] is True
 
 
+@pytest.mark.parametrize("retry_after", [
+    (datetime.now() + timedelta(minutes=20)).isoformat(timespec="seconds"),      # how rows store it
+    (datetime.now(timezone.utc) + timedelta(minutes=20)).isoformat(timespec="seconds"),
+])
+def test_a_rate_limited_row_holds_youtube_runs_and_says_why(helper, retry_after):
+    pending_id, _ = helper.index.enqueue_pending_once(
+        "https://www.youtube.com/watch?v=tpwaiting01", 30, server._now_iso(), "transcript")
+    with helper.index.write_transaction() as conn:
+        conn.execute("UPDATE pending_yoinks SET last_error=?, retry_after=? WHERE pending_id=?",
+                     ("youtube_rate_limit: HTTP Error 429", retry_after, pending_id))
+    status = server._show_youtube_waiting()
+    assert status["active"] is True and status["reason"] == "rate_limited"
+    assert 18 * 60 < status["seconds_left"] <= 20 * 60
+
+
 def test_the_bot_check_cooldown_stops_new_episodes(helper):
     job = make_run(helper)
     for _ in range(server.YOUTUBE_BOT_CHECK_HIT_LIMIT):
@@ -241,6 +256,233 @@ def test_a_live_stream_is_left_out(helper):
     assert job["episodes"][0]["reason"] == sc.REASON_LIVE
     assert helper.index.get_pending(first)["status"] == "cancelled"
     assert job["episodes"][1]["state"] == sc.EP_RUNNING
+
+
+def test_cancel_lets_a_publishing_row_finish_and_records_it(helper):
+    job = make_run(helper)
+    tick()
+    pending_id = rows(helper)[0]["pending_id"]
+    helper.index.mark_pending_running(pending_id)
+    assert helper.index.mark_pending_publishing(pending_id)    # past the point of no return
+    job = sc.cancel(helper.data, job["id"], server._show_backend)
+    first = job["episodes"][0]
+    assert job["state"] == sc.CANCELLED and first["state"] == sc.EP_RUNNING
+    helper.index.mark_pending_succeeded(pending_id, None)
+    tick()
+    job = sc.load(helper.data, job["id"])
+    assert job["episodes"][0]["state"] == sc.EP_DONE
+    assert len(rows(helper)) == 1                              # nothing new after cancel
+
+
+# ---------------------------------------------------------------------------
+# Podcast feeds through the real podcast tables
+# ---------------------------------------------------------------------------
+
+FEED_URL = "https://feeds.example.com/tidepool.xml"
+
+
+def podcast_rss(n: int = 6) -> bytes:
+    items = "".join(
+        f"<item><title>Tidepool {i}</title><guid>tidepool-{i}</guid>"
+        f"<link>https://tidepool.example.com/ep/{i}</link>"
+        f"<pubDate>Mon, 03 Mar 2025 10:00:00 +0000</pubDate>"
+        f'<enclosure url="https://media.example.com/tidepool/{i}.mp3" type="audio/mpeg" length="1"/>'
+        "</item>" for i in range(n))
+    return (f'<?xml version="1.0"?><rss version="2.0"><channel><title>The Tidepool Hour</title>'
+            f"<link>https://tidepool.example.com</link>{items}</channel></rss>").encode("utf-8")
+
+
+@pytest.fixture
+def pod(helper, monkeypatch):
+    """Podcast downloads and transcription jobs are fakes; the feed and
+    episode tables, the show backend and the scheduler are real. Episode
+    threads run only when the test says so (run_threads)."""
+    state = SimpleNamespace(downloads=[], transcribed=[], spawned=[], download_error=None,
+                            during_download=None)
+
+    def fake_download(idx, episode_id, *, data_root, **_kwargs):
+        state.downloads.append(episode_id)
+        if state.during_download:
+            state.during_download(episode_id)
+        if state.download_error:
+            return {"ok": False, "episode_id": episode_id, "error": state.download_error}
+        return {"ok": True, "episode_id": episode_id, "local_path": "audio.mp3"}
+
+    def fake_transcribe(episode_id, *, model, diarize, consent_given=False, publish_to_corpus=True):
+        job_id = f"pod-job-{episode_id}"
+        server._jobs[job_id] = {"id": job_id, "kind": "podcast_transcribe", "episode_id": episode_id,
+                                "state": "running", "updated_at": server._now_iso()}
+        state.transcribed.append(episode_id)
+        return {"ok": True, "job_id": job_id}, 202
+
+    def publish(episode_id):
+        """What a finished transcription does: a library row, linked."""
+        video_id = f"podcast{episode_id:05d}"
+        helper.index.upsert_yoink({
+            "video_id": video_id, "slug": video_id, "channel": "The Tidepool Hour",
+            "title": f"Tidepool {episode_id}", "topic": "Tides", "yoinked_at": "2026-11-20T09:00:00",
+            "corpus_path": str(helper.data / f"{video_id}.md"),
+            "sidecar_path": str(helper.data / f"{video_id}.json"),
+            "metadata_json": "{}", "source_type": "episode", "platform": "podcast",
+            "author": "The Tidepool Hour"}, content="tides")
+        with helper.index.write_transaction() as conn:
+            conn.execute("UPDATE podcast_episodes SET yoink_video_id=? WHERE id=?", (video_id, episode_id))
+        server._jobs[f"pod-job-{episode_id}"]["state"] = "completed"
+        return video_id
+
+    def run_threads():
+        while state.spawned:
+            target, args = state.spawned.pop(0)
+            target(*args)
+
+    monkeypatch.setattr(server.podcasts, "fetch_feed", lambda row, **_k: (podcast_rss(), {}))
+    monkeypatch.setattr(server.podcasts, "download_episode_audio", fake_download)
+    monkeypatch.setattr(server.podcasts, "list_episodes",
+                        Mock(side_effect=AssertionError("register looks the episode up directly")))
+    monkeypatch.setattr(server, "_queue_podcast_transcription", fake_transcribe)
+    monkeypatch.setattr(server, "_podcast_suggestion_setup_problem", lambda: None)
+    monkeypatch.setattr(server, "_show_spawn", lambda target, *args: state.spawned.append((target, args)))
+    monkeypatch.setattr(server, "_show_podcast_runs", {})
+    state.publish, state.run_threads = publish, run_threads
+    return state
+
+
+def ptick(now):
+    sc.tick(server.DATA_ROOT, server._show_backend, now=now, spawn=inline)
+
+
+T0 = datetime(2026, 11, 20, 12, 0, tzinfo=timezone.utc)
+
+
+def test_a_podcast_show_saves_each_episode_through_the_podcast_job(helper, pod):
+    job = make_run(helper, FEED_URL, asr=True)
+    assert job["state"] == sc.RUNNING and sc.counts(job)["queued"] == 6
+    for step in range(30):
+        ptick(T0)
+        pod.run_threads()
+        for episode_id in list(pod.transcribed):
+            if server._jobs[f"pod-job-{episode_id}"]["state"] == "running":
+                pod.publish(episode_id)
+    job = sc.load(helper.data, job["id"])
+    assert job["state"] == sc.DONE and sc.counts(job)["done"] == 6
+    assert len(pod.downloads) == len(set(pod.downloads)) == 6     # each once, one at a time
+    feed = server._show_podcast_feed(helper.index, FEED_URL)
+    assert not feed["enabled"]                                    # the show is not followed
+    first = server.podcasts.get_episode(helper.index, pod.downloads[0])
+    assert first["guid"] == "tidepool-0"
+    assert first["episode_page_url"] == "https://tidepool.example.com/ep/0"
+    assert server._show_podcast_runs == {}                        # settled entries are dropped
+
+
+def test_cancel_during_a_podcast_download_transcribes_nothing(helper, pod):
+    job = make_run(helper, FEED_URL, asr=True)
+    ptick(T0)
+    assert len(pod.spawned) == 1
+    assert server._show_backend.queue_busy() is True              # a download in flight
+    cancelled = {}
+
+    def cancel_now(_episode_id):
+        cancelled["job"] = sc.cancel(helper.data, job["id"], server._show_backend)
+
+    pod.during_download = cancel_now
+    pod.run_threads()                                             # cancelled mid-download
+    assert cancelled["job"]["state"] == sc.CANCELLED
+    assert sc.counts(cancelled["job"])["running"] == 0
+    assert len(pod.downloads) == 1 and pod.transcribed == []
+    assert server._show_backend.queue_busy() is False
+    for _ in range(3):
+        ptick(T0)
+        pod.run_threads()
+    assert len(pod.downloads) == 1                                # nothing new started
+
+
+def test_cancel_before_the_episode_thread_runs_downloads_nothing(helper, pod):
+    job = make_run(helper, FEED_URL, asr=True)
+    ptick(T0)
+    sc.cancel(helper.data, job["id"], server._show_backend)
+    pod.run_threads()
+    assert pod.downloads == [] and pod.transcribed == []
+
+
+def test_cancel_during_a_podcast_transcription_lets_it_finish_and_stops(helper, pod):
+    job = make_run(helper, FEED_URL, asr=True)
+    ptick(T0)
+    pod.run_threads()
+    episode_id = pod.transcribed[0]
+    job = sc.cancel(helper.data, job["id"], server._show_backend)
+    assert job["state"] == sc.CANCELLED and sc.counts(job)["running"] == 1
+    ptick(T0)
+    pod.run_threads()
+    assert pod.downloads == [episode_id]                          # nothing new meanwhile
+    pod.publish(episode_id)
+    ptick(T0)
+    job = sc.load(helper.data, job["id"])
+    assert sc.counts(job)["done"] == 1 and sc.counts(job)["running"] == 0
+    assert job["state"] == sc.CANCELLED
+    ptick(T0)
+    pod.run_threads()
+    assert pod.downloads == [episode_id]
+
+
+def test_a_busy_podcast_host_is_backed_off_then_the_run_pauses(helper, pod):
+    pod.download_error = "ERROR: Unable to download webpage: HTTP Error 429: Too Many Requests"
+    job = make_run(helper, FEED_URL, asr=True)
+    now = T0
+    waits = []
+    for _ in range(sc.MAX_HOST_FAILURES):
+        ptick(now)                    # starts the episode
+        pod.run_threads()
+        ptick(now)                    # records the refusal
+        job = sc.load(helper.data, job["id"])
+        if job["state"] == sc.WAITING:
+            until = sc._parse_iso(job["wait_until"])
+            waits.append((until - now).total_seconds())
+            ptick(now + timedelta(seconds=30))                    # still waiting: no new request
+            pod.run_threads()
+            now = until + timedelta(seconds=1)
+    assert len(pod.downloads) == sc.MAX_HOST_FAILURES
+    assert waits == [120, 240, 480, 960]                          # doubled each time
+    assert job["state"] == sc.PAUSED and "5 episodes in a row" in job["reason"]
+    assert sc.counts(job)["queued"] == 6 and sc.counts(job)["failed"] == 0
+    ptick(now + timedelta(hours=2))
+    pod.run_threads()
+    assert len(pod.downloads) == sc.MAX_HOST_FAILURES             # paused means paused
+    sc.resume(helper.data, job["id"])
+    assert sc.load(helper.data, job["id"])["host_failures"] == 0
+
+
+def test_a_failing_podcast_host_fails_episodes_with_a_reason_then_pauses(helper, pod):
+    pod.download_error = "ERROR: HTTP Error 404: Not Found"
+    job = make_run(helper, FEED_URL, asr=True)
+    now = T0
+    for _ in range(12):
+        ptick(now)
+        pod.run_threads()
+        now += timedelta(hours=1)
+    job = sc.load(helper.data, job["id"])
+    failed = [e for e in job["episodes"] if e["state"] == sc.EP_FAILED]
+    assert len(failed) == sc.MAX_HOST_FAILURES == len(pod.downloads)
+    assert {e["reason"] for e in failed} == {"Couldn't download the audio from the show's host."}
+    assert job["state"] == sc.PAUSED
+
+
+def test_a_removed_podcast_episode_is_not_saved_again(helper, pod):
+    job = make_run(helper, FEED_URL, asr=True)
+    ptick(T0)
+    pod.run_threads()
+    episode_id = pod.transcribed[0]
+    video_id = pod.publish(episode_id)
+    ptick(T0)
+    sc.cancel(helper.data, job["id"], server._show_backend)
+    helper.index.soft_delete_yoink(video_id)
+    again = make_run(helper, FEED_URL, asr=True)
+    first = next(e for e in again["episodes"] if e["guid"] == "tidepool-0")
+    assert first["state"] == sc.EP_SKIPPED and first["reason"] == sc.REASON_REMOVED
+    # A link to a removed item never reads as done while a new save runs.
+    server._show_podcast_runs[episode_id] = {"state": "downloading"}
+    status = server._show_backend.episode_status(
+        {"kind": sc.KIND_PODCAST}, {"episode_id": episode_id})
+    assert status == {"state": "running"}
 
 
 # ---------------------------------------------------------------------------
