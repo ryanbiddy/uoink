@@ -185,3 +185,31 @@ def test_route_keeps_the_site_allowlist_and_body_cap():
         assert status == 400 and res["page_state"] == "wall"
         status, _res = post("/extract/page", {"url": "https://news.example.org/a", "pad": "x" * 70000})
         assert status in (413, "closed")  # every other route keeps the 64 KB cap
+
+
+def test_route_never_reports_an_unsaved_page_as_saved(monkeypatch):
+    import page_extractor
+
+    def broken(*_a, **_k):
+        raise OSError("disk full")
+
+    for fake in (broken, lambda *_a, **_k: None):
+        monkeypatch.setattr(page_extractor, "persist_page_yoink", fake)
+        with _route() as (post, _idx, _root):
+            status, res = post("/extract/page/dom", payload())
+            assert status == 500 and res["ok"] is False and res["code"] == "persist_failed", res
+            assert "nothing was saved" in res["error"] and "video_id" not in res
+
+
+def test_a_refused_recapture_never_replaces_a_good_save():
+    with _route() as (post, idx, _root):
+        status, first = post("/extract/page/dom", payload())
+        assert status == 200 and first["video_id"]
+        corpus = Path(idx.get_yoink(first["video_id"])["corpus_path"])
+        before = corpus.read_bytes()
+        status, res = post("/extract/page/dom", payload(markdown="Subscribe to continue reading. "
+                                                                 "Already a subscriber? Sign in to continue."))
+        assert status == 400 and res["page_state"] == "wall"
+        status, res = post("/extract/page/dom", payload(markdown="Menu"))
+        assert status == 400
+        assert corpus.read_bytes() == before and idx.get_yoink(first["video_id"])["title"] == "The ferry ramp is rebuilt"

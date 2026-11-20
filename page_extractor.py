@@ -449,6 +449,13 @@ def host_not_allowed_result(canonical: str) -> dict:
                       f"Settings, Sites Uoink works on, then try again.")}
 
 
+def persist_failed_result(canonical: str) -> dict:
+    """The page was read but could not be written to the Library."""
+    return {"ok": False, "code": "persist_failed", "url": canonical,
+            "error": ("Uoink read this page but could not save it to your Library, so nothing was saved. "
+                      "Try again in a moment.")}
+
+
 def extract_page(idx, url: str, *,
                   render_mode: str = RENDER_MODE_JS,
                   include_screenshot: bool = True,

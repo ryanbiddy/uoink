@@ -20265,11 +20265,13 @@ class Handler(BaseHTTPRequestHandler):
             video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT,
                 topic_classifier=_classify_topic)
-            result["video_id"] = video_id
         except Exception as e:
             log.warning("/extract/page persist failed: %s", e)
-            result["video_id"] = None
-
+            video_id = None
+        if not video_id:
+            # An unsaved page is never reported as saved.
+            return self._send_json(500, page_extractor.persist_failed_result(url))
+        result["video_id"] = video_id
         return self._send_json(200, result)
 
     @uoink_usage.capture("page", response=True)
@@ -20285,11 +20287,14 @@ class Handler(BaseHTTPRequestHandler):
         if not result.get("ok"):
             return self._send_json(400, result)
         try:
-            result["video_id"] = page_extractor.persist_page_yoink(
+            video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT, topic_classifier=_classify_topic)
         except Exception as e:
             log.warning("/extract/page/dom persist failed: %s", e)
-            result["video_id"] = None
+            video_id = None
+        if not video_id:
+            return self._send_json(500, page_extractor.persist_failed_result(result["url"]))
+        result["video_id"] = video_id
         return self._send_json(200, result)
 
     def _handle_settings_mcp_config(self):
