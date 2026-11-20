@@ -1,0 +1,14 @@
+[
+  {
+    "id": "KI-01",
+    "check": "shelf-counts",
+    "match": "shelf counts add up to",
+    "note": "Short notes (under 12 words) are saved with no topic. Cards call them Uncategorized, but /library/facets skips NULL topics, so the sidebar Topics counts add up to less than the library and Uncategorized undercounts."
+  },
+  {
+    "id": "KI-02",
+    "check": "a11y-dialog",
+    "match": "hook-explainer: focus does not return",
+    "note": "closeHookExplainer() hides the dialog but never moves focus back to the button that opened it, so keyboard focus is lost on a hidden element."
+  }
+]
