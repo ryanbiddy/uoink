@@ -7502,7 +7502,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
     # 3.18.0: an X video's Description is the post's whole text (X only).
-    metadata = _enrich_x_video_metadata(url, metadata)
+    if isinstance(metadata, dict) and str(
+            metadata.get("extractor") or metadata.get("extractor_key") or "").lower().startswith("twitter"):
+        metadata = _enrich_x_video_metadata(url, metadata)
     if topic is None:
         topic = _classify_topic(metadata)
 
@@ -24701,10 +24703,15 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     _start_backfill_thread()
     # 3.18.0: a "Fix cut-off X posts" run the person started picks up where
     # it stopped. It never starts here on its own.
-    _resume_x_text_repair = threading.Timer(
-        30.0, lambda: _get_x_text_repair_job().resume_if_interrupted())
-    _resume_x_text_repair.daemon = True
-    _resume_x_text_repair.start()
+    def _resume_x_text_repair_later():
+        time.sleep(30.0)
+        try:
+            _get_x_text_repair_job().resume_if_interrupted()
+        except Exception:
+            log.exception("x text repair resume failed")
+
+    threading.Thread(target=_resume_x_text_repair_later, daemon=True,
+                     name="x-text-repair-resume").start()
     # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
     # once at startup and every 24h after.
     _start_trash_purge_thread()
