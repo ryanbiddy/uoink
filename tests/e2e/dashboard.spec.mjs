@@ -104,6 +104,7 @@ test.describe("seeded library", { tag: "@seeded" }, () => {
     expect(seconds).toBeLessThanOrEqual(info.search_seconds);
     expect(seconds).toBeGreaterThanOrEqual(info.search_seconds - 60);
     await checkLayout(page, testInfo, "search");
+    await card.scrollIntoViewIfNeeded();
     await shot(page, testInfo, "04-search");
     await link.click();
     await expect(page).toHaveURL(new RegExp(`#item/${info.search_item_id}\\?t=${seconds}`));
@@ -221,6 +222,7 @@ test.describe("seeded library", { tag: "@seeded" }, () => {
     const quotes = await page.locator("#libraryGrid .uoink-card .card-match").allTextContents();
     expectNoNewProblems("search-snippet", quotes.filter((q) => /\*\*|(^|["“\s])#{1,3} \S/.test(q))
       .map((q) => `search quote shows raw Markdown: ${q.trim().slice(0, 90)}`), testInfo);
+    await card.scrollIntoViewIfNeeded();
     await shot(page, testInfo, "14-search-no-transcript");
     const badge = card.locator(".health-exception");
     await expect(badge).toBeVisible();
