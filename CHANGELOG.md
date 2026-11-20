@@ -10,6 +10,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Windows tray: right-click shows the menu again once you have saved something. A bug in the
+  Recent items list stopped the whole menu from building, so right-click did nothing. Recent
+  items now picks up a new save within half a minute, even when you haven't touched the tray.
+  Before, it stopped updating a minute after your last tray click.
+- Windows: clicking Uoink in the Start menu or on the desktop while Uoink is still starting
+  (just after you sign in, after an update, or after a restart) now opens the dashboard once
+  it is ready. Before, that click did nothing.
+- Windows: Uoink no longer reopens the dashboard by itself when it restarts after a crash.
+  Like the Mac, only the start you clicked opens it.
+- First-run window: the close button and Escape work even when you press them the moment the
+  window appears. The window dims and closes as soon as it is ready. Before, an early click hid
+  the page and left an empty window on top of everything.
+- Windows setup now checks that every Uoink program file arrived after an install, not only
+  the ones that went missing in the past.
+- First-run copy names the button you actually see. The ready notice, the empty library and the
+  Sources page now say "the Uoink button" instead of the old "rust U", and the TikTok tip points
+  at the Uoink icon in your browser toolbar. The last install screen no longer says your first
+  save opens the dashboard. It keeps you on the page and shows a notice instead.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

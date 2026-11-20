@@ -9773,7 +9773,7 @@ def _render_index(entries: list[dict]) -> str:
     ]
 
     if not entries:
-        parts.append("_No uoinks yet. Click the rust U under any YouTube video to start._")
+        parts.append("_No uoinks yet. Click the Uoink button under any YouTube video to start._")
         parts.append("")
         return "\n".join(parts)
 
@@ -24688,8 +24688,8 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     elif not _maybe_post_migration_toast():
         maybe_toast(
             "Uoink is Active & Ready ✓",
-            "Click the rust U under any YouTube video to pull context. "
-            "Open the dashboard anytime from the magnet-U in your system tray.",
+            "Click the Uoink button under any YouTube video to save it. "
+            "Open the dashboard anytime from the Uoink icon in your system tray.",
         )
     if sys.platform == "darwin" and threading.current_thread() is threading.main_thread():
         import signal
