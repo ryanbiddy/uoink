@@ -1636,6 +1636,114 @@
       justify-content: flex-end;
     }
 
+    /* Save a whole show: the runs list on the Sources card and its dialog. */
+    .show-runs {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .show-runs:empty {
+      display: none;
+    }
+
+    .show-run {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .show-run-head {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .show-run-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+      color: var(--cream);
+    }
+
+    .show-run-state {
+      flex: none;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .show-run-note,
+    .show-capture-estimate p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .show-run details summary {
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--cream);
+    }
+
+    .show-run-failures {
+      list-style: none;
+      margin: 8px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .show-run-failures li {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .show-run-failures li span:first-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--cream);
+    }
+
+    .show-run-failures li span + span {
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .show-capture-input {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    .show-capture-estimate {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .show-capture-estimate p:first-child {
+      color: var(--cream);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
     .reader-import-note {
       margin: 6px 0 0;
       color: var(--muted);
@@ -6168,6 +6276,13 @@
             <p class="universal-lede">Paste a HackerTube list, a Hacker News or Reddit thread, or a YouTube playlist. Uoink queues every video in it for a normal capture, transcripts and all, 50 at a time.</p>
             <div class="inline-row"><button class="button" type="button" id="openListImport">Import a list</button></div>
           </div>
+          <div class="universal-capture list-import-card" id="showCaptureCard">
+            <div class="eyebrow">Every episode</div>
+            <h2>Save a whole show</h2>
+            <p class="universal-lede">Paste a YouTube channel, a playlist, a podcast feed or a list of links. Uoink lists every episode and tells you the time and disk it needs before it saves anything. Then it saves transcripts only, one episode at a time.</p>
+            <div class="inline-row"><button class="button" type="button" id="openShowCapture">Save a whole show</button></div>
+            <div class="show-runs" id="showRuns" aria-label="Show saves" aria-live="polite"></div>
+          </div>
           <div class="universal-capture note-capture" id="noteCapture">
             <div class="eyebrow">Your own words</div>
             <h2>Jot a note</h2>
@@ -6928,6 +7043,29 @@
       </div>
       <p class="setting-copy">Defaults stay in your library. Activate the ones that fit, deactivate them any time, and keep deletion for anchors you add yourself.</p>
       <div class="default-anchor-list" id="defaultAnchorList"></div>
+    </div>
+  </div>
+  <!-- Save a whole show: paste, list every episode, see the cost, then start. -->
+  <div class="modal-backdrop hidden" id="showCaptureModal" role="dialog" aria-modal="true" aria-labelledby="showCaptureTitle">
+    <div class="modal-card list-import-modal">
+      <div class="panel-head">
+        <div>
+          <div class="soft-note">Sources</div>
+          <div class="panel-title" id="showCaptureTitle">Save a whole show</div>
+        </div>
+        <button class="button ghost" type="button" id="closeShowCapture">Close</button>
+      </div>
+      <label class="soft-note" for="showCaptureInput">Show link</label>
+      <textarea class="field show-capture-input" id="showCaptureInput" rows="3" autocomplete="off" spellcheck="false" placeholder="youtube.com/@channel, a playlist, a podcast RSS feed, or links one per line" aria-describedby="showCaptureStatus showCaptureHelp"></textarea>
+      <div class="inline-row"><button class="button" type="button" id="showCaptureList">List episodes</button></div>
+      <p class="list-import-status" id="showCaptureStatus" role="status" aria-live="polite">Paste a link to list every episode. Nothing is saved yet.</p>
+      <div class="show-capture-estimate hidden" id="showCaptureEstimate"></div>
+      <ul class="list-import-preview" id="showCapturePreview" aria-label="Episodes in this show"></ul>
+      <label class="inline-row setting-copy hidden" id="showCaptureAsrRow" for="showCaptureAsr"><input type="checkbox" id="showCaptureAsr"><span id="showCaptureAsrText">Transcribe on this computer when a video has no captions.</span></label>
+      <div class="inline-row list-import-actions">
+        <button class="button primary" type="button" id="showCaptureStart" disabled>Start saving</button>
+      </div>
+      <p class="setting-copy" id="showCaptureHelp">Saves transcripts only, with no video, screenshots or comments. One episode at a time, after anything you save yourself. Pause, resume or cancel from Sources, and it carries on after Uoink restarts.</p>
     </div>
   </div>
   <!-- Import a list: one paste field, a preview count, one Import button. -->
@@ -13309,6 +13447,333 @@
       });
       listImportEl("listImportGo").addEventListener("click", runListImport);
       listImportEl("listImportNext").addEventListener("click", nextListBatch);
+    }
+
+    // Save a whole show (show_capture.py on the helper). The dialog lists a
+    // source and shows the cost; the Sources card lists runs with progress,
+    // pause, resume, cancel and the failures with their reasons.
+    const showCaptureState = { run: null, seq: 0, opener: null, runs: [], last: 0, timer: null };
+    const SHOW_ACTIVE_STATES = ["listing", "running", "waiting"];
+
+    function showHoursText(hours) {
+      const h = Number(hours) || 0;
+      if (h < 1) {
+        const m = Math.max(1, Math.round(h * 60));
+        return `about ${m} minute${m === 1 ? "" : "s"}`;
+      }
+      if (h < 48) {
+        const r = Math.round(h * 10) / 10;
+        return `about ${r} hour${r === 1 ? "" : "s"}`;
+      }
+      return `about ${Math.round(h / 24)} days`;
+    }
+
+    function showDiskText(mb) {
+      const n = Number(mb) || 0;
+      if (n >= 1024) return `about ${(n / 1024).toFixed(1)} GB`;
+      if (n >= 1) return `about ${Math.round(n)} MB`;
+      return "under 1 MB";
+    }
+
+    function showCount(n, noun) {
+      const v = Number(n) || 0;
+      return `${v.toLocaleString()} ${noun}${v === 1 ? "" : "s"}`;
+    }
+
+    // The confirm step's lines: what will be saved and what it costs.
+    function showEstimateLines(run) {
+      const e = (run && run.estimate) || {};
+      const podcast = run && run.kind === "podcast_feed";
+      const lines = [`${showCount(e.to_save, "episode")} to save` +
+        (e.already_saved ? `, ${Number(e.already_saved).toLocaleString()} already in your library or left out` : "") + "."];
+      if (podcast) {
+        lines.push(`Transcribing on this computer takes ${showHoursText(e.hours)}. Each episode's audio is downloaded from the show's host and kept with it, ${showDiskText(e.disk_mb)} in all.`);
+      } else {
+        lines.push(`Takes ${showHoursText(e.hours)} at one video at a time, and ${showDiskText(e.disk_mb)} of disk. Uoink asks YouTube for each video's captions. Nothing else leaves this computer.`);
+      }
+      if (run && run.listing_note) lines.push(run.listing_note);
+      return lines;
+    }
+
+    function showAsrText(run) {
+      const e = (run && run.estimate) || {};
+      if (run && run.kind === "podcast_feed") {
+        return "Podcasts are transcribed on this computer with your Whisper model.";
+      }
+      return `Transcribe on this computer when a video has no captions. Uoink downloads that video's audio, then deletes it. Adds up to ${showHoursText(e.asr_hours_if_all)} if none had captions.`;
+    }
+
+    // One run's state for the Sources card: {label, note}.
+    function showRunStatus(run) {
+      const c = (run && run.counts) || {};
+      const total = Number(c.total) || 0;
+      const done = Number(c.done) || 0;
+      const failed = Number(c.failed) || 0;
+      const skipped = Number(c.skipped) || 0;
+      const toSave = Math.max(0, total - skipped);
+      const left = run && run.estimate ? showHoursText(run.estimate.hours) : "";
+      switch (run && run.state) {
+        case "listing":
+          return { label: "Listing episodes", note: "Reading every episode. Nothing is saved yet." };
+        case "ready":
+          return { label: "Not started", note: `${showCount(toSave, "episode")} listed. Review it to see the cost and start.` };
+        case "running":
+          return {
+            label: `${done.toLocaleString()} of ${toSave.toLocaleString()} saved`,
+            note: run.reason === "queue_busy"
+              ? "Waiting for your other saves to finish first."
+              : `${left.charAt(0).toUpperCase()}${left.slice(1)} left.${failed ? ` ${showCount(failed, "episode")} failed.` : ""}`,
+          };
+        case "waiting": {
+          const when = run.wait_until ? fmtAge(run.wait_until) : "";
+          const why = run.reason === "rate_limited" ? "YouTube is busy right now." : "YouTube asked Uoink to slow down.";
+          return { label: "Waiting on YouTube", note: `${why} ${when ? `Trying again ${when}.` : "Trying again soon."}` };
+        }
+        case "paused":
+          return { label: "Paused", note: run.reason || `${done.toLocaleString()} of ${toSave.toLocaleString()} saved. Resume to keep going.` };
+        case "done":
+          return {
+            label: "Done",
+            note: `${showCount(done, "episode")} saved.` +
+              (failed ? ` ${showCount(failed, "episode")} failed.` : "") +
+              (skipped ? ` ${Number(skipped).toLocaleString()} already in your library or left out.` : ""),
+          };
+        case "cancelled":
+          return { label: "Cancelled", note: `${showCount(done, "episode")} saved before you cancelled.` };
+        case "failed":
+          return { label: "Couldn't list", note: (run && run.reason) || "Uoink couldn't list that source." };
+        default:
+          return { label: "", note: "" };
+      }
+    }
+
+    function showRunActions(run) {
+      const failed = Number((run.counts || {}).failed) || 0;
+      const buttons = {
+        listing: [["cancel", "Cancel"]],
+        ready: [["review", "Review and start"], ["dismiss", "Remove"]],
+        running: [["pause", "Pause"], ["cancel", "Cancel"]],
+        waiting: [["pause", "Pause"], ["cancel", "Cancel"]],
+        paused: [["resume", "Resume"], ["cancel", "Cancel"]],
+        done: [["dismiss", "Remove"]],
+        cancelled: [["dismiss", "Remove"]],
+        failed: [["dismiss", "Remove"]],
+      }[run.state] || [];
+      if (failed && ["running", "waiting", "paused", "done"].includes(run.state)) {
+        buttons.splice(buttons.length - 1, 0, ["retry-failed", `Retry ${failed.toLocaleString()} failed`]);
+      }
+      return buttons;
+    }
+
+    function showRunHtml(run) {
+      const status = showRunStatus(run);
+      const c = run.counts || {};
+      const total = Math.max(0, (Number(c.total) || 0) - (Number(c.skipped) || 0));
+      const settled = (Number(c.done) || 0) + (Number(c.failed) || 0);
+      const pct = total ? Math.min(100, Math.round((settled / total) * 100)) : 0;
+      const title = htmlEscape(run.title || run.url || run.kind_label || "Show");
+      const bar = ["running", "waiting", "paused"].includes(run.state)
+        ? `<div class="progress" role="progressbar" aria-label="Saved so far" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${settled}"><span style="width:${pct}%"></span></div>`
+        : "";
+      const actions = showRunActions(run).map(([action, label]) =>
+        `<button class="button ghost" type="button" data-show-action="${action}" data-show-id="${htmlEscape(run.id)}">${htmlEscape(label)}</button>`).join("");
+      const failures = Array.isArray(run.failures) ? run.failures : [];
+      const more = (Number(run.failures_total) || 0) - failures.length;
+      const failList = failures.length ? `<details><summary>${showCount(run.failures_total, "failure")} with reasons</summary><ul class="show-run-failures">${
+        failures.map((f) => `<li><span title="${htmlEscape(f.title || f.url || "")}">${htmlEscape(f.title || f.url || "Untitled")}</span><span>${htmlEscape(f.reason || "No reason recorded.")}</span></li>`).join("")
+      }${more > 0 ? `<li><span>and ${more.toLocaleString()} more</span></li>` : ""}</ul></details>` : "";
+      return `<div class="show-run" data-show-run="${htmlEscape(run.id)}">` +
+        `<div class="show-run-head"><span class="show-run-title" title="${title}">${title}</span><span class="show-run-state">${htmlEscape(status.label)}</span></div>` +
+        bar + `<p class="show-run-note">${htmlEscape(status.note)}</p>` +
+        (actions ? `<div class="inline-row">${actions}</div>` : "") + failList + `</div>`;
+    }
+
+    function renderShowRuns(runs) {
+      showCaptureState.runs = Array.isArray(runs) ? runs : [];
+      const box = document.getElementById("showRuns");
+      if (!box) return;
+      const open = new Set(Array.from(box.querySelectorAll("details[open]")).map((d) => d.closest("[data-show-run]")?.dataset.showRun));
+      box.innerHTML = showCaptureState.runs.map(showRunHtml).join("");
+      box.querySelectorAll("[data-show-run]").forEach((row) => {
+        const details = row.querySelector("details");
+        if (details && open.has(row.dataset.showRun)) details.open = true;
+      });
+    }
+
+    async function loadShowRuns() {
+      showCaptureState.last = Date.now();
+      try {
+        const data = await authFetch("/shows");
+        renderShowRuns(data.runs);
+      } catch (_) {
+        // The Sources card keeps its last list. The next poll tries again.
+      }
+    }
+
+    function pollShowRuns() {
+      if (document.hidden) return;
+      const card = document.getElementById("showCaptureCard");
+      if (!card || card.offsetParent === null) return;
+      const active = showCaptureState.runs.some((r) => SHOW_ACTIVE_STATES.includes(r.state));
+      if (!active && Date.now() - showCaptureState.last < 30000) return;
+      loadShowRuns();
+    }
+
+    async function showRunAction(id, action) {
+      if (action === "review") {
+        const run = showCaptureState.runs.find((r) => r.id === id);
+        openShowCapture(run || null);
+        return;
+      }
+      try {
+        await authFetch(`/shows/${encodeURIComponent(id)}/${action}`, { method: "POST", body: "{}" });
+      } catch (err) {
+        showToast(err.message || "Uoink couldn't change that show save.");
+      }
+      loadShowRuns();
+    }
+
+    function showCaptureEl(id) { return document.getElementById(id); }
+
+    function resetShowCapture(message) {
+      showCaptureState.run = null;
+      showCaptureEl("showCaptureStatus").textContent = message;
+      showCaptureEl("showCaptureEstimate").classList.add("hidden");
+      showCaptureEl("showCaptureEstimate").innerHTML = "";
+      showCaptureEl("showCapturePreview").innerHTML = "";
+      showCaptureEl("showCaptureAsrRow").classList.add("hidden");
+      const start = showCaptureEl("showCaptureStart");
+      start.disabled = true;
+      start.textContent = "Start saving";
+    }
+
+    function openShowCapture(run) {
+      showCaptureState.opener = document.activeElement;
+      const modal = showCaptureEl("showCaptureModal");
+      modal.classList.remove("hidden");
+      if (run && run.state === "ready") {
+        showCaptureEl("showCaptureInput").value = run.url || "";
+        loadShowPreview(run.id, ++showCaptureState.seq);
+      }
+      focusFirstIn(modal, showCaptureEl("showCaptureInput"));
+    }
+
+    function closeShowCapture() {
+      ++showCaptureState.seq;
+      showCaptureEl("showCaptureModal").classList.add("hidden");
+      restoreFocus(showCaptureState.opener);
+      loadShowRuns();
+    }
+
+    function renderShowPreview(run) {
+      showCaptureState.run = run;
+      const status = showCaptureEl("showCaptureStatus");
+      const start = showCaptureEl("showCaptureStart");
+      if (run.state !== "ready") {
+        resetShowCapture(showRunStatus(run).note);
+        return;
+      }
+      status.textContent = `Found ${showCount((run.counts || {}).total, "episode")} in ${run.title || run.kind_label}.`;
+      const estimate = showCaptureEl("showCaptureEstimate");
+      estimate.innerHTML = showEstimateLines(run).map((line) => `<p>${htmlEscape(line)}</p>`).join("");
+      estimate.classList.remove("hidden");
+      const episodes = Array.isArray(run.episodes) ? run.episodes : [];
+      const shown = episodes.slice(0, 8).map((e) => `<li><span title="${htmlEscape(e.title || e.url || "")}">${htmlEscape(e.title || e.url || "Untitled")}</span>${e.state === "skipped" ? `<span class="list-import-chip">${htmlEscape(e.reason === "Already in your library." ? "in your library" : "left out")}</span>` : ""}</li>`);
+      if (episodes.length > 8) shown.push(`<li><span>and ${(episodes.length - 8).toLocaleString()} more</span></li>`);
+      showCaptureEl("showCapturePreview").innerHTML = shown.join("");
+      const podcast = run.kind === "podcast_feed";
+      const asr = showCaptureEl("showCaptureAsr");
+      asr.checked = podcast ? true : Boolean(run.asr);
+      asr.disabled = podcast;
+      showCaptureEl("showCaptureAsrText").textContent = showAsrText(run);
+      showCaptureEl("showCaptureAsrRow").classList.remove("hidden");
+      const count = Number((run.estimate || {}).to_save) || 0;
+      start.disabled = count === 0;
+      start.textContent = count ? `Save ${showCount(count, "transcript")}` : "Nothing new to save";
+    }
+
+    async function loadShowPreview(id, seq) {
+      const deadline = Date.now() + 10 * 60 * 1000;
+      while (seq === showCaptureState.seq) {
+        let data;
+        try {
+          data = await authFetch(`/shows/${encodeURIComponent(id)}?episodes=1`);
+        } catch (err) {
+          if (seq === showCaptureState.seq) resetShowCapture(err.message || "Uoink couldn't read that show.");
+          return;
+        }
+        if (seq !== showCaptureState.seq) return;
+        if (data.run.state !== "listing") {
+          renderShowPreview(data.run);
+          return;
+        }
+        if (Date.now() > deadline) {
+          resetShowCapture("Still listing. Close this and check Sources in a few minutes.");
+          return;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 1500));
+      }
+    }
+
+    async function listShowEpisodes() {
+      const text = showCaptureEl("showCaptureInput").value.trim();
+      if (!text) {
+        resetShowCapture("Paste a link to list every episode. Nothing is saved yet.");
+        return;
+      }
+      const seq = ++showCaptureState.seq;
+      resetShowCapture("Listing every episode. Big channels take a minute.");
+      try {
+        const data = await authFetch("/shows/preview", { method: "POST", body: JSON.stringify({ text }) });
+        if (seq !== showCaptureState.seq) return;
+        await loadShowPreview(data.run.id, seq);
+      } catch (err) {
+        if (seq !== showCaptureState.seq) return;
+        resetShowCapture(err.message || "Uoink couldn't list that source.");
+      }
+    }
+
+    async function startShowCapture() {
+      const run = showCaptureState.run;
+      if (!run) return;
+      const start = showCaptureEl("showCaptureStart");
+      start.disabled = true;
+      start.setAttribute("aria-busy", "true");
+      try {
+        await authFetch(`/shows/${encodeURIComponent(run.id)}/start`, {
+          method: "POST", body: JSON.stringify({ asr: showCaptureEl("showCaptureAsr").checked }),
+        });
+        showToast("Saving started. Follow it on the Save a whole show card.");
+        resetShowCapture("Paste a link to list every episode. Nothing is saved yet.");
+        showCaptureEl("showCaptureInput").value = "";
+        closeShowCapture();
+      } catch (err) {
+        showCaptureEl("showCaptureStatus").textContent = err.message || "Uoink couldn't start saving.";
+        start.disabled = false;
+      } finally {
+        start.removeAttribute("aria-busy");
+      }
+    }
+
+    function wireShowCapture() {
+      const opener = showCaptureEl("openShowCapture");
+      if (!opener) return;
+      opener.addEventListener("click", () => openShowCapture(null));
+      showCaptureEl("closeShowCapture").addEventListener("click", closeShowCapture);
+      const modal = showCaptureEl("showCaptureModal");
+      modal.addEventListener("click", (event) => { if (event.target === modal) closeShowCapture(); });
+      modal.addEventListener("keydown", (event) => trapModalFocus(event, modal, closeShowCapture));
+      showCaptureEl("showCaptureList").addEventListener("click", listShowEpisodes);
+      showCaptureEl("showCaptureStart").addEventListener("click", startShowCapture);
+      showCaptureEl("showCaptureInput").addEventListener("input", () => {
+        if (showCaptureState.run) resetShowCapture("Press List episodes to list this one.");
+      });
+      showCaptureEl("showRuns").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-show-action]");
+        if (button) showRunAction(button.dataset.showId, button.dataset.showAction);
+      });
+      loadShowRuns();
+      showCaptureState.timer = window.setInterval(pollShowRuns, 5000);
     }
 
     // V-4: the "Fresh from your sources" strip -- V-3 auto-uoinked items.
@@ -20751,6 +21216,7 @@
         els.universalCaptureButton.addEventListener("click", runUniversalCapture);
       }
       wireListImport();
+      wireShowCapture();
       wireResearch();
       if (els.universalCaptureAllow) {
         els.universalCaptureAllow.addEventListener("click", allowUniversalCaptureSite);
