@@ -7,14 +7,14 @@
    "articles_saved": 31,
    "outcome_accuracy": 0.9444,
    "recall": 0.9719,
-   "precision": 0.9654,
-   "f1": 0.9686,
-   "block_recall": 0.938,
+   "precision": 0.9669,
+   "f1": 0.9694,
+   "block_recall": 0.9409,
    "junk_leaks": 12,
    "structure": {
     "headings": 0.9302,
     "list_items": 0.925,
-    "code": 0.6364,
+    "code": 0.7273,
     "code_lang": 0.0,
     "tables": 0.96,
     "links": 1.0,
@@ -70,7 +70,7 @@
    "docs-highlight": {
     "outcome": "article",
     "recall": 1.0,
-    "precision": 0.946
+    "precision": 0.994
    },
    "embeds-article": {
     "outcome": "article",
@@ -216,14 +216,14 @@
    "articles_saved": 33,
    "outcome_accuracy": 0.9167,
    "recall": 0.8457,
-   "precision": 0.9432,
-   "f1": 0.8918,
-   "block_recall": 0.8188,
+   "precision": 0.9446,
+   "f1": 0.8924,
+   "block_recall": 0.8214,
    "junk_leaks": 12,
    "structure": {
     "headings": 0.8039,
     "list_items": 0.925,
-    "code": 0.6364,
+    "code": 0.7273,
     "code_lang": 0.0,
     "tables": 0.96,
     "links": 1.0,
@@ -279,7 +279,7 @@
    "docs-highlight": {
     "outcome": "article",
     "recall": 1.0,
-    "precision": 0.946
+    "precision": 0.994
    },
    "embeds-article": {
     "outcome": "article",

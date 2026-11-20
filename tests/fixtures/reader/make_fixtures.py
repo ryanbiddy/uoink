@@ -312,9 +312,10 @@ class Page:
             cls = f' class="language-{lang}"' if lang else ""
             return f"<pre><code{cls}>{esc}</code></pre>"
         if style == "highlight":  # GitHub-like source highlight wrapper with token spans
-            spans = re.sub(r"\b(def|return|const|let|import|from|if|else|for|in|async|await|function)\b",
-                           r'<span class="pl-k">\1</span>', esc)
-            spans = re.sub(r"(&quot;[^&]*&quot;|&#x27;[^&]*&#x27;|\"[^\"]*\")", r'<span class="pl-s">\1</span>', spans)
+            # Strings first, then keywords outside tags (escaped code has no raw < or >).
+            spans = re.sub(r"(&quot;[^&]*&quot;|&#x27;[^&]*&#x27;|\"[^\"]*\")", r'<span class="pl-s">\1</span>', esc)
+            spans = re.sub(r"\b(def|return|const|let|import|from|if|else|for|in|async|await|function)\b(?![^<]*>)",
+                           r'<span class="pl-k">\1</span>', spans)
             return (f'<div class="highlight highlight-source-{lang}"><pre>{spans}</pre>'
                     f'<button class="copy-btn" aria-label="Copy">Copy</button></div>')
         if style == "lineno":  # table with line numbers next to the code
