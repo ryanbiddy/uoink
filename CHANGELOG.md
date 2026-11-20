@@ -20,15 +20,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   shows done, left, the current title and a rough time left. Pause and Resume work at any
   point, a run carries on after the helper restarts, and it waits while you capture something
   new. When a site refuses requests it backs off (5, 20, then 60 minutes, longer after a bot
-  check) and keeps going with saves already on this computer. Nothing is deleted and nothing
+  check) and keeps going with saves already on this computer. A save another capture keeps
+  busy is retried with longer waits and then set aside, and a file that stops Uoink twice is
+  skipped instead of stopping it on every start. Nothing is deleted and nothing
   starts by itself. New transcripts update keyword search, meaning search, the corpus Markdown
   and `get_transcript` without a reindex. Also from a terminal: `uoink backfill
   status|start|pause|resume` (`--order longest|newest`), backed by token-gated helper routes
   `GET /library/transcript-backfill` and `POST /library/transcript-backfill/{start,pause,resume,finish}`.
 - Captures that stop midway no longer look finished. A first capture writes
-  `capture-not-finished.txt` in its folder until its sidecar is saved, and Library health
+  `capture-not-finished.txt` in its folder until its sidecar and its library index row are
+  both saved (a later good capture of the same folder clears it too), and Library health
   lists such folders as "Capture did not finish" with a Finish button that reuses the video,
-  captions, thumbnail and screenshots already there.
+  captions, thumbnail and screenshots already there. Finish runs local transcription for that
+  save even when the caption-less fallback is off in Settings, and keeps the topic folder.
 
 ## [3.17.0] - 2026-11-12
 
