@@ -215,6 +215,28 @@ def test_classify_refusals(text, code):
     assert err.value.code == code
 
 
+@pytest.mark.parametrize("text", [
+    "file:/etc/passwd", "file:///etc/passwd", "javascript:alert(1)", "data:text/xml,<rss/>",
+    "http://127.0.0.1/feed.xml", "http://127.0.0.1:5179/feed", "localhost:8080/feed",
+    "http://localhost/feed", "http://feeds.localhost/feed", "http://169.254.169.254/latest",
+    "http://10.0.0.8/feed.xml", "http://[::1]/feed", "http://user:pw@feeds.example.com/feed.xml",
+    "http://%6c%6fcalhost/feed", "https:/feeds.example.com/feed.xml",
+])
+def test_classify_refuses_unsafe_feed_addresses_before_anything_is_stored(tmp_path, text):
+    with pytest.raises(sc.ShowCaptureError) as err:
+        sc.create(tmp_path, text)
+    assert err.value.code == "invalid_url"
+    assert sc.list_jobs(tmp_path) == []
+
+
+def test_classify_keeps_scheme_less_playlists_and_ports():
+    spec = sc.classify("youtube.com/playlist?list=PLtidepool0000000001")
+    assert spec == {"kind": sc.KIND_PLAYLIST, "id": "PLtidepool0000000001",
+                    "url": "https://www.youtube.com/playlist?list=PLtidepool0000000001"}
+    assert sc.classify("feeds.example.com:8443/tide.xml")["url"] == "https://feeds.example.com:8443/tide.xml"
+    assert sc.classify(FEED + "#latest")["url"] == FEED
+
+
 # ---------------------------------------------------------------------------
 # listing and the estimate
 # ---------------------------------------------------------------------------
@@ -266,6 +288,78 @@ def test_pasted_links_note_what_was_left_out(tmp_path):
     job = listed(tmp_path, FakeBackend(Queue()), text)
     assert [e["video_id"] for e in job["episodes"]] == [vid(1), vid(2)]
     assert job["listing_note"] == "Found 2 YouTube links in 3 lines. Other lines are left out."
+
+
+@pytest.mark.parametrize("n, calls, truncated", [
+    (1000, [(1, 500), (501, 1000), (1001, 1500)], False),       # exactly full windows
+    (5000, [(s, s + 499) for s in range(1, 4501, 500)] + [(4501, 5001)], False),
+    (5300, [(s, s + 499) for s in range(1, 4501, 500)] + [(4501, 5001)], True),
+])
+def test_listing_windows_end_cleanly(tmp_path, n, calls, truncated):
+    backend = FakeBackend(Queue(), entries=[
+        {"_type": "url", "ie_key": "Youtube", "id": vid(i), "url": f"https://www.youtube.com/watch?v={vid(i)}",
+         "title": f"{SHOW} episode {i}", "channel": SHOW, "duration": 1800} for i in range(n)])
+    job = listed(tmp_path, backend)
+    assert backend.list_calls == calls
+    assert job["state"] == sc.READY and len(job["episodes"]) == min(n, sc.MAX_EPISODES)
+    assert job["listing_note"] == ("Listed the first 5,000 episodes." if truncated else None)
+
+
+def test_listing_stops_when_the_run_is_cancelled(tmp_path, monkeypatch):
+    monkeypatch.setattr(sc, "LIST_WINDOW", 100)
+    backend = FakeBackend(Queue())
+    job = sc.create(tmp_path, CHANNEL)
+    real = backend.list_youtube
+
+    def list_then_cancel(url, start, end):
+        if start == 101:
+            sc.cancel(tmp_path, job["id"], backend)
+        return real(url, start, end)
+    backend.list_youtube = list_then_cancel
+    assert sc.ensure_listing(tmp_path, job["id"], backend, spawn=inline)
+    assert backend.list_calls == [(1, 100), (101, 200)]           # no third request
+    job = sc.load(tmp_path, job["id"])
+    assert job["state"] == sc.CANCELLED and job["episodes"] == []
+
+
+def test_listing_waits_out_a_bot_check(tmp_path, monkeypatch):
+    monkeypatch.setattr(sc, "LIST_WINDOW", 100)
+    backend = FakeBackend(Queue())
+    real = backend.list_youtube
+
+    def list_then_block(url, start, end):
+        backend.bot = {"active": True, "seconds_left": 1500}
+        return real(url, start, end)
+    backend.list_youtube = list_then_block
+    job = listed(tmp_path, backend)
+    assert backend.list_calls == [(1, 100)]
+    assert job["state"] == sc.FAILED
+    assert job["reason"] == "YouTube asked Uoink to slow down, so listing stopped. Try again in 25 minutes."
+
+
+def test_a_run_dismissed_while_listing_leaves_no_error(tmp_path):
+    backend = FakeBackend(Queue())
+    job = sc.create(tmp_path, CHANNEL)
+
+    def list_then_dismiss(url, start, end):
+        sc.cancel(tmp_path, job["id"], backend)
+        sc.dismiss(tmp_path, job["id"])
+        raise RuntimeError("yt-dlp went away")
+    backend.list_youtube = list_then_dismiss
+    assert sc.ensure_listing(tmp_path, job["id"], backend, spawn=inline)   # no exception
+    assert sc.list_jobs(tmp_path) == [] and sc._listing == set()
+
+
+def test_long_feeds_and_long_pastes_say_they_were_cut(tmp_path, monkeypatch):
+    monkeypatch.setattr(sc, "MAX_EPISODES", 40)
+    job = listed(tmp_path, FakeBackend(Queue(), feed=rss(45)), FEED)
+    assert len(job["episodes"]) == 40 and job["listing_note"] == "Listed the first 40 episodes."
+    job = listed(tmp_path, FakeBackend(Queue(), feed=rss(40)), FEED)
+    assert len(job["episodes"]) == 40 and job["listing_note"] is None
+    text = "\n".join(f"https://youtu.be/{vid(i)}" for i in range(45))
+    job = listed(tmp_path, FakeBackend(Queue()), text)
+    assert len(job["episodes"]) == 40
+    assert job["listing_note"] == "Listed the first 40 links. The rest are left out."
 
 
 def test_a_listing_failure_leaves_a_reason(tmp_path):

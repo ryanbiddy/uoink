@@ -36,6 +36,7 @@ from urllib.parse import parse_qs, urlparse
 
 import list_imports
 import podcasts
+import source_subscriptions
 
 JOB_DIRNAME = "show-captures"
 SCHEMA = 1
@@ -94,6 +95,8 @@ REASON_HOST_DOWN = ("The show's host failed {n} episodes in a row, so Uoink stop
 _LIVE_STATUSES = ("is_live", "is_upcoming")
 
 _YT_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com"}
+# "name:" at the start, not followed by a port number ("example.com:8080").
+_SCHEME_PREFIX = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:(?!\d)")
 _CHANNEL_PATH = re.compile(
     r"^/(?P<base>@[A-Za-z0-9._-]{1,100}|channel/UC[A-Za-z0-9_-]{10,40}|c/[^/]{1,100}|user/[^/]{1,100})"
     r"(?:/(?P<tab>[A-Za-z]+))?/?$")
@@ -176,12 +179,15 @@ def classify(text: str) -> dict:
         if not ids:
             raise ShowCaptureError("Uoink found no YouTube video links in that list.", "unsupported")
         return {"kind": KIND_URL_LIST, "url": None, "ids": ids[:MAX_EPISODES],
-                "lines": len(lines)}
+                "lines": len(lines), "truncated": len(ids) > MAX_EPISODES}
+    # Only a bare host name ("youtube.com/@name") gets https:// in front.
+    # Anything with a scheme (file:, javascript:, ftp://) is read as written
+    # and refused below unless it is http(s).
     try:
-        u = urlparse(raw if "://" in raw else "https://" + raw)
+        u = urlparse(raw if _SCHEME_PREFIX.match(raw) else "https://" + raw)
     except ValueError:
         raise ShowCaptureError("That doesn't look like a link.", "invalid_url") from None
-    if u.scheme not in ("http", "https") or not u.hostname:
+    if u.scheme.lower() not in ("http", "https") or not u.hostname:
         raise ShowCaptureError("That doesn't look like a link.", "invalid_url")
     host = u.hostname.lower()
     if host in _YT_HOSTS or host == "youtu.be":
@@ -203,7 +209,16 @@ def classify(text: str) -> dict:
     if host in ("podcasts.apple.com", "open.spotify.com"):
         raise ShowCaptureError("Paste the show's RSS feed link. Most podcast sites list it.",
                                "unsupported")
-    return {"kind": KIND_PODCAST, "url": u.geturl()}
+    # The same address checks a followed podcast feed gets, before the run
+    # is stored: no loopback, private or link-local hosts, no credentials.
+    # The fetch itself checks the resolved address again.
+    try:
+        url = source_subscriptions.normalize_podcast_feed_url(u._replace(fragment="").geturl())
+    except source_subscriptions.ServiceError:
+        raise ShowCaptureError(
+            "Uoink can't read a feed from that address. Paste the show's public feed link.",
+            "invalid_url") from None
+    return {"kind": KIND_PODCAST, "url": url}
 
 
 # ---------------------------------------------------------------------------
@@ -406,7 +421,8 @@ def create(data_root: Path, text: str) -> dict:
         "url": spec.get("url"), "title": None, "state": LISTING, "reason": None,
         "wait_until": None, "asr": False, "created_at": now, "started_at": None,
         "finished_at": None, "listing_note": None, "episodes": [],
-        "_source": ({"ids": spec.get("ids"), "lines": spec.get("lines")}
+        "_source": ({"ids": spec.get("ids"), "lines": spec.get("lines"),
+                     "truncated": bool(spec.get("truncated"))}
                     if spec["kind"] == KIND_URL_LIST else {}),
     }
     with _lock:
@@ -415,14 +431,35 @@ def create(data_root: Path, text: str) -> dict:
     return job
 
 
-def _list_youtube(backend: Backend, url: str) -> tuple[str, list[dict], bool]:
+class _ListingStopped(Exception):
+    """The run was cancelled or dismissed while it was being listed."""
+
+
+def _list_youtube(backend: Backend, url: str,
+                  still_listing: Callable[[], bool] = lambda: True) -> tuple[str, list[dict], bool]:
     """Every video of a channel tab or playlist, in windows of LIST_WINDOW
     through the list import's yt-dlp flat listing. Returns (title, items,
-    truncated)."""
+    truncated). Before each window it stops if the run was cancelled, and
+    fails with the reason while YouTube's bot-check cooldown is on. The last
+    window asks for one video past MAX_EPISODES, so ``truncated`` is only
+    true when there really is more."""
     title, items = "", []
     start = 1
     while start <= MAX_EPISODES:
+        if not still_listing():
+            raise _ListingStopped()
+        try:
+            cooldown = backend.bot_check() or {}
+        except Exception:
+            cooldown = {}
+        if cooldown.get("active"):
+            minutes = max(1, -(-int(cooldown.get("seconds_left") or 0) // 60))
+            raise ShowCaptureError(
+                f"YouTube asked Uoink to slow down, so listing stopped. Try again in {minutes} minutes.",
+                "fetch_failed")
         end = min(start + LIST_WINDOW - 1, MAX_EPISODES)
+        if end == MAX_EPISODES:
+            end += 1
         payload = backend.list_youtube(url, start, end)
         entries = payload.get("entries") if isinstance(payload, dict) else None
         raw_count = len(entries) if isinstance(entries, list) else 0
@@ -440,7 +477,7 @@ def _list_youtube(backend: Backend, url: str) -> tuple[str, list[dict], bool]:
         if raw_count < (end - start + 1):
             return title, items, False
         start = end + 1
-    return title, items, True
+    return title, items[:MAX_EPISODES], True
 
 
 def run_listing(data_root: Path, job_id: str, backend: Backend) -> dict:
@@ -449,30 +486,39 @@ def run_listing(data_root: Path, job_id: str, backend: Backend) -> dict:
     reason; nothing is saved either way."""
     job = load(data_root, job_id)
     note = None
+    capped = f"Listed the first {MAX_EPISODES:,} episodes."
     try:
         if job["kind"] in (KIND_CHANNEL, KIND_PLAYLIST):
-            title, items, truncated = _list_youtube(backend, job["url"])
+            title, items, truncated = _list_youtube(
+                backend, job["url"], lambda: _still_listing(data_root, job_id))
             episodes = [_yt_episode(item) for item in items]
             if truncated:
-                note = f"Listed the first {MAX_EPISODES} episodes."
+                note = capped
         elif job["kind"] == KIND_PODCAST:
             body = backend.fetch_feed(job["url"])
             try:
-                parsed = podcasts.parse_feed_body(body, limit=MAX_EPISODES)
+                parsed = podcasts.parse_feed_body(body, limit=MAX_EPISODES + 1)
             except Exception:
                 raise ShowCaptureError("That link isn't a podcast feed Uoink can read.",
                                        "not_a_feed") from None
             title = (parsed.get("feed") or {}).get("title") or "Podcast"
-            episodes = [_podcast_episode(item) for item in parsed.get("episodes") or []]
+            items = parsed.get("episodes") or []
+            episodes = [_podcast_episode(item) for item in items[:MAX_EPISODES]]
+            if len(items) > MAX_EPISODES:
+                note = capped
         else:
             source = job.get("_source") or {}
             ids = source.get("ids") or []
             title = f"{len(ids)} links"
             episodes = [_yt_episode(list_imports._item(vid)) for vid in ids]
             lines = int(source.get("lines") or 0)
-            if lines > len(ids):
+            if source.get("truncated"):
+                note = f"Listed the first {MAX_EPISODES:,} links. The rest are left out."
+            elif lines > len(ids):
                 note = (f"Found {len(ids)} YouTube links in {lines} lines. "
                         "Other lines are left out.")
+    except _ListingStopped:
+        return job
     except ShowCaptureError as exc:
         return _finish_listing(data_root, job_id, error=str(exc))
     except Exception:
@@ -493,6 +539,13 @@ def run_listing(data_root: Path, job_id: str, backend: Backend) -> dict:
             if saved:
                 ep["state"], ep["reason"] = EP_SKIPPED, _skip_reason(saved)
     return _finish_listing(data_root, job_id, title=title, episodes=unique, note=note)
+
+
+def _still_listing(data_root: Path, job_id: str) -> bool:
+    try:
+        return load(data_root, job_id).get("state") == LISTING
+    except ShowCaptureError:
+        return False
 
 
 def _skip_reason(saved) -> str:
@@ -709,8 +762,11 @@ def ensure_listing(data_root: Path, job_id: str, backend: Backend, *,
         try:
             run_listing(data_root, job_id, backend)
         except Exception:
-            _finish_listing(data_root, job_id,
-                            error="Uoink couldn't list that source. Try again later.")
+            try:
+                _finish_listing(data_root, job_id,
+                                error="Uoink couldn't list that source. Try again later.")
+            except ShowCaptureError:
+                pass  # dismissed while it was listing: nothing left to record
         finally:
             with _lock:
                 _listing.discard(job_id)
