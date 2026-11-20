@@ -599,19 +599,19 @@
       location.href = "/dashboard#settings/byo-key";
     }
 
-    function dismiss() {
-      const native = nativeApi();
+    async function dismiss() {
+      splash.style.display = "none";
+      // The X or Escape can come before pywebview has added its API (a slow
+      // first start of WebView2). Wait for it: hiding the page alone left a
+      // frameless window on screen with nothing in it and no way to close it.
+      const native = nativeApi() || await waitForNativeApi(10000);
       if (native && native.close) {
         native.close();
-        splash.style.display = "none";
         return;
       }
       if (native && native.minimize) {
         native.minimize();
-        splash.style.display = "none";
-        return;
       }
-      splash.style.display = "none";
     }
 
     async function openLastYoutube() {

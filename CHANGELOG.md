@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Windows: clicking Uoink in the Start menu or on the desktop while Uoink is still starting
   (just after you sign in, after an update, or after a restart) now opens the dashboard once
   it is ready. Before, that click did nothing.
+- First-run window: the close button and Escape now close the window even when you press them
+  the moment it appears. Before, an early click could hide the page and leave an empty window
+  on screen.
 
 ## [3.17.0] - 2026-11-12
 
