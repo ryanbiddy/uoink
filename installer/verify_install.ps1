@@ -50,6 +50,7 @@ $requiredFiles = @(
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
+    'page_dom_capture.py',
     'list_imports.py',
     'research.py',
     'research_verify.py',

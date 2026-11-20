@@ -440,6 +440,15 @@ def host_is_allowed(idx, url: str) -> bool:
 
 
 # ---- extraction --------------------------------------------------------
+def host_not_allowed_result(canonical: str) -> dict:
+    """The allowlist refusal shared by /extract/page and /extract/page/dom."""
+    host = urlparse(canonical).hostname
+    return {"ok": False, "code": "host_not_allowed",
+            "error": (f"Uoink only captures pages from sites you have allowed, and "
+                      f"'{host}' is not on that list. Add it in the dashboard under "
+                      f"Settings, Sites Uoink works on, then try again.")}
+
+
 def extract_page(idx, url: str, *,
                   render_mode: str = RENDER_MODE_JS,
                   include_screenshot: bool = True,
@@ -467,11 +476,7 @@ def extract_page(idx, url: str, *,
         return {"ok": False,
                 "error": f"render_mode must be one of {list(_RENDER_MODES)}"}
     if enforce_allowlist and not host_is_allowed(idx, canonical):
-        host = urlparse(canonical).hostname
-        return {"ok": False, "code": "host_not_allowed",
-                "error": (f"Uoink only captures pages from sites you have allowed, and "
-                          f"'{host}' is not on that list. Add it in the dashboard under "
-                          f"Settings, Sites Uoink works on, then try again.")}
+        return host_not_allowed_result(canonical)
     depth = max(0, min(int(follow_links_depth or 0),
                           _MAX_FOLLOW_LINKS_DEPTH))
 

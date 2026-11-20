@@ -48,6 +48,7 @@
     "notes.py",
     "openapi_bridge.py",
     "page_extractor.py",
+    "page_dom_capture.py",
     "article_extractor.py",
     "podcasts.py",
     "provenance.py",

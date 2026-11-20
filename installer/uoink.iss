@@ -138,6 +138,7 @@ Source: "staging\third-party-notices\yt-dlp-ejs-0.8.0-LICENSES.txt"; DestDir: "{
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\defuddle-0.19.6-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\faster-whisper-base-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
@@ -231,6 +232,7 @@ Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
 ; crashed on launch with ModuleNotFoundError: No module named 'x_extractor'.
 Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\page_dom_capture.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_verify.py"; DestDir: "{app}"; Flags: ignoreversion

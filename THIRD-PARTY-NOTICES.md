@@ -281,3 +281,10 @@ The dashboard's phone-inbox setup draws its QR code on this computer with
 `assets/dashboard/qrcode.js`. No outside QR service is used.
 See the [MIT license](third-party-notices/qrcode-generator-1.4.4-MIT-LICENSE.txt).
 
+The Chrome extension's Uoink this page reads the open tab with
+[Defuddle 0.19.6](https://github.com/kepano/defuddle) (MIT), copyright (c) 2025
+Steph Ango (@kepano), shipped unchanged as `extension/lib/defuddle.js` after a
+header comment, with its license beside it as `extension/lib/defuddle-LICENSE.txt`.
+It runs only in the tab you clicked and the text goes only to the helper on this computer.
+See the [MIT license](third-party-notices/defuddle-0.19.6-MIT-LICENSE.txt).
+

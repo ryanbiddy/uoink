@@ -1,4 +1,173 @@
 {
+ "extension": {
+  "aggregate": {
+   "block_recall": 0.968,
+   "metadata": 0.99,
+   "outcome_accuracy": 0.99,
+   "precision": 0.97,
+   "recall": 0.988
+  },
+  "fixtures": {
+   "api-reference": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "blog-footnotes": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "bot-check": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "callouts-guide": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "changelog": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "comments-heavy": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "cookie-overlay": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "docs-code": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "docs-highlight": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "embeds-article": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "faq-details": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "forum-thread": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "github-readme": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "interview": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "js-shell": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "links-roundup": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "listicle": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "long-essay-images": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "math-page": {
+    "outcome": "article",
+    "recall": 0.944
+   },
+   "news-divsoup": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "news-liveblog": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "news-semantic": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "newsletter-email": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "next-data": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "paginated-article": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "paywall-teaser": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "press-release": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "qa-page": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "recipe": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "short-post": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "signin-community": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "spanish-article": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "split-body": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "tables-report": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "utility-classes": {
+    "outcome": "article",
+    "recall": 0.95
+   },
+   "wiki-style": {
+    "outcome": "article",
+    "recall": 0.897
+   }
+  },
+  "junk_leaks_max": 6,
+  "structure": {
+   "captions": 0.99,
+   "code": 0.899,
+   "code_lang": 0.79,
+   "footnotes": 0.99,
+   "headings": 0.99,
+   "images": 0.899,
+   "links": 0.99,
+   "list_items": 0.99,
+   "math": 0.74,
+   "quotes": 0.99,
+   "tables": 0.99
+  }
+ },
  "helper": {
   "aggregate": {
    "block_recall": 0.928,

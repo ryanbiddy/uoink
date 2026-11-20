@@ -43,7 +43,10 @@ icons/icon128.png
 icons/icon16.png
 icons/icon32.png
 icons/icon48.png
+lib/defuddle-LICENSE.txt
+lib/defuddle.js
 lib/extract.js
+lib/page-capture.js
 lib/popup-captures.js
 lib/store-links.js
 lib/ui.js
