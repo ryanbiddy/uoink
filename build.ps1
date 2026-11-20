@@ -118,7 +118,7 @@ $GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT
 $PIP_VERSION        = '26.1.2'
 $SETUPTOOLS_VERSION = '84.2.1'
 $WHEEL_VERSION      = '0.47.0'
-$PACKAGING_VERSION  = '26.2'
+$PACKAGING_VERSION  = '26.3'
 # C-02 (license compliance): ffmpeg is now BtbN's win64-LGPL build, not the
 # gyan.dev "essentials" GPLv3 build. The essentials build links GPL
 # components (x264/x265) and its GPL redistribution obligations (offer of
@@ -140,7 +140,7 @@ $FFMPEG_SHARED_VERSION = 'n7.1.5'
 $FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip'
 $FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
-$YTDLP_VERSION  = '2026.10.21'
+$YTDLP_VERSION  = '2026.10.26'
 # yt-dlp-ejs holds the scripts yt-dlp runs to solve YouTube's player challenges.
 # It must equal the version in yt-dlp's pyproject.toml (the `default` extra) at
 # the tag above, or yt-dlp ignores it. Bump the two together.

@@ -31,6 +31,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   at the Uoink icon in your browser toolbar. The last install screen no longer says your first
   save opens the dashboard. It keeps you on the page and shows a notice instead.
 
+### Security and maintenance
+
+- Video capture now uses yt-dlp 2026.10.26 on Windows, macOS and Linux.
+- The installer updates cryptography to 50.0.2 and refreshes the libraries
+  that handle MCP connections, including Starlette and python-multipart.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added
