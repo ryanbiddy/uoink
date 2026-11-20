@@ -7,7 +7,12 @@ The helper (server.py) hands this module three callables:
   ``key``, ``title``, ``duration``, ``saved_at``, ``media`` ("on_disk",
   "download" or "gone") and ``host`` ("youtube", "x" or "other").
 * ``work(item, checkpoint, stop_event, network_ok)`` transcribes one item
-  through the existing capture and local ASR path and returns an outcome.
+  through the existing capture and local ASR path and returns an outcome:
+  transcribed, no_speech, no_audio, gone, failed, skipped, blocked (no
+  model), busy (another capture holds it), yielded (it let a capture run),
+  backoff (a site refused) or wait_network (it needs a site that is resting).
+  ``network_ok`` lists hosts that answered normally, which resets their
+  strikes.
 * ``capture_busy()`` says whether the user is capturing something now.
 
 This module owns the order, the durable progress file, pause and resume,
@@ -39,8 +44,20 @@ UNKNOWN_DURATION_SEC = 120.0
 # Waits after a site refuses requests, by strike (same steps as captures).
 RATE_LIMIT_BACKOFF_SEC = (5 * 60, 20 * 60, 60 * 60)
 BOT_CHECK_BACKOFF_SEC = (30 * 60, 60 * 60, 4 * 60 * 60)
-# How long to wait before trying an item another capture is holding.
+# How long to wait before trying an item another capture is holding. Each
+# try waits twice as long, up to BUSY_RETRY_SEC * 30 (15 minutes), and after
+# MAX_BUSY_TRIES the item is set aside as failed for this run.
 BUSY_RETRY_SEC = 30.0
+MAX_BUSY_TRIES = 12
+# Starts per item. A start is counted before the work begins and cleared when
+# it ends, so one still counted means Uoink stopped (a crash, a kill) during
+# it. After this many, the item is skipped instead of stopping Uoink again.
+MAX_ATTEMPTS = 2
+STOPPED_REASON = ("Uoink stopped while transcribing this one, twice, so it was skipped. "
+                  "Start again to give it another try.")
+BUSY_REASON = "Another capture kept this save busy, so it was skipped for now."
+# A site's strikes are forgotten this long after its last wait ended.
+STRIKE_MEMORY_SEC = 6 * 60 * 60
 # How often the worker looks again while a capture runs.
 CAPTURE_POLL_SEC = 0.5
 # How long a scan stays fresh for status reads.
@@ -54,6 +71,13 @@ STATUSES = ("idle", "running", "paused", "done")
 
 class Paused(Exception):
     """Raised at a checkpoint when the user paused the run."""
+
+
+class YieldToCapture(Exception):
+    """Raised at a checkpoint called with ``wait=False`` while a capture runs.
+
+    The caller holds a save's capture lock, which a capture may be waiting
+    for, so it must let go instead of waiting (captures lock first)."""
 
 
 def _now() -> float:
@@ -125,6 +149,9 @@ class TranscriptBackfill:
         self._queue: list[dict] = []
         self._items: dict[str, dict] = {}
         self._retry_at: dict[str, float] = {}
+        self._busy_tries: dict[str, int] = {}
+        # Items whose last try needed the network: they wait out a back-off.
+        self._needs_network: set[str] = set()
         self._current: dict | None = None
         self._scan_cache: tuple[float, dict] | None = None
         self._state = self._load()
@@ -133,7 +160,7 @@ class TranscriptBackfill:
     def _load(self) -> dict:
         state = {"version": STATE_VERSION, "status": "idle", "order": DEFAULT_ORDER,
                  "run": _empty_run(), "results": {}, "settled": {}, "backoff": {},
-                 "requested": [], "message": None}
+                 "attempts": {}, "requested": [], "message": None}
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -144,7 +171,7 @@ class TranscriptBackfill:
             state["status"] = raw["status"]
         if raw.get("order") in ORDERS:
             state["order"] = raw["order"]
-        for key in ("run", "results", "settled", "backoff"):
+        for key in ("run", "results", "settled", "backoff", "attempts"):
             if isinstance(raw.get(key), dict):
                 state[key] = {**state[key], **raw[key]} if key == "run" else raw[key]
         if isinstance(raw.get("requested"), list):
@@ -217,8 +244,15 @@ class TranscriptBackfill:
             if order:
                 self._state["order"] = order
             self._state["run"] = {**_empty_run(), "started_at": _iso(self._clock())}
+            # A fresh Start gives every item its tries back and forgets
+            # back-offs that already ran out. A restart never does.
+            self._state["attempts"] = {}
+            self._state["backoff"] = {host: entry for host, entry in self._state["backoff"].items()
+                                      if self._backoff_active(host) > 0}
             self._queue = []
             self._retry_at = {}
+            self._busy_tries = {}
+            self._needs_network = set()
             self._wake_refill = True
             self._save()
             self._launch()
@@ -230,6 +264,7 @@ class TranscriptBackfill:
             if self._state["status"] == "running":
                 self._state["status"] = "paused"
             self._state["requested"] = []
+            self._relaunch = False
             self._save()
             self._stop.set()
             self._wake.set()
@@ -345,7 +380,7 @@ class TranscriptBackfill:
             now = self._clock()
             for item in pool:
                 wait = max(0.0, self._retry_at.get(item["key"], 0.0) - now)
-                if item.get("media") == "download":
+                if item.get("media") == "download" or item["key"] in self._needs_network:
                     wait = max(wait, self._backoff_active(item.get("host") or "other"))
                 if wait <= 0:
                     return item, 0.0
@@ -362,11 +397,16 @@ class TranscriptBackfill:
                 raise Paused()
             self._stop.wait(self._capture_poll)
 
-    def _checkpoint(self, position=None) -> None:
-        """Between ASR segments: stop when paused, yield while capturing."""
+    def _checkpoint(self, position=None, *, wait: bool = True) -> None:
+        """Between ASR segments: stop when paused, yield while capturing.
+
+        With ``wait=False`` (the caller holds a capture lock) a running
+        capture raises YieldToCapture instead of waiting for it."""
         if self._stop.is_set():
             raise Paused()
         if self._capture_busy():
+            if not wait:
+                raise YieldToCapture()
             with self._lock:
                 if self._current is not None:
                     self._current["waiting"] = True
@@ -405,7 +445,9 @@ class TranscriptBackfill:
                         self._sleep(min(wait, 60.0))
                         continue
                     with self._lock:
-                        if self._wake_refill:
+                        # A Finish request or a refill may have arrived after
+                        # _next looked: take it instead of exiting.
+                        if self._wake_refill or self._state["requested"]:
                             continue
                         if self._state["status"] == "running":
                             self._state["status"] = "done"
@@ -429,83 +471,131 @@ class TranscriptBackfill:
         key = item["key"]
         started = self._clock()
         with self._lock:
+            tries = int(self._state["attempts"].get(key) or 0)
+            if tries >= MAX_ATTEMPTS:
+                # Started this many times and Uoink stopped each time before
+                # it ended: skip it rather than stop Uoink again.
+                self._state["attempts"].pop(key, None)
+                try:
+                    self._settle(item, key, {"outcome": "failed", "reason": STOPPED_REASON}, 0.0)
+                finally:
+                    self._save()
+                return
+            # Counted before the work starts and cleared when it ends; only a
+            # helper that dies mid-item leaves it counted.
+            self._state["attempts"][key] = tries + 1
+            self._save()
             self._current = {"key": key, "title": item.get("title"),
                              "duration": item.get("duration"), "started": started,
                              "position": 0.0, "waiting": False}
         try:
             result = self._work(item, self._checkpoint, self._stop, self.network_ok) or {}
         except Paused:
+            with self._lock:
+                self._current = None
+                self._state["attempts"].pop(key, None)
+                self._save()
             raise
         except Exception as exc:  # one item never stops the run
             result = {"outcome": "failed", "reason": str(exc)[:300] or type(exc).__name__}
-        outcome = result.get("outcome") or "failed"
         elapsed = max(0.0, self._clock() - started)
         with self._lock:
             self._current = None
-            if outcome == "paused":
-                raise Paused()
-            requested = key in self._state["requested"]
-            if outcome == "blocked":
-                # Nothing can run (no transcription model): stop and say why.
-                if self._state["status"] == "running":
-                    self._state["status"] = "paused"
-                self._state["message"] = result.get("reason")
-                self._state["requested"] = []
+            self._state["attempts"].pop(key, None)
+            try:
+                self._settle(item, key, result, elapsed)
+            finally:
                 self._save()
-                self._stop.set()
+
+    def _settle(self, item: dict, key: str, result: dict, elapsed: float) -> None:
+        # Caller holds the lock and saves afterwards.
+        outcome = result.get("outcome") or "failed"
+        if outcome == "paused":
+            raise Paused()
+        requested = key in self._state["requested"]
+        if outcome == "blocked":
+            # Nothing can run (no transcription model): stop and say why.
+            if self._state["status"] == "running":
+                self._state["status"] = "paused"
+            self._state["message"] = result.get("reason")
+            self._state["requested"] = []
+            self._stop.set()
+            return
+        if outcome == "yielded":
+            # It let go so a capture could run. The loop waits for the
+            # capture before trying it again. Not the item's fault: no count.
+            self._retry_at[key] = self._clock() + min(1.0, self._busy_retry)
+            return
+        if outcome == "busy":
+            # Another capture holds this save. Wait longer each time, and set
+            # it aside after a while so the run can end.
+            tries = self._busy_tries.get(key, 0) + 1
+            if tries < MAX_BUSY_TRIES:
+                self._busy_tries[key] = tries
+                # The rest of the queue goes first.
+                self._queue = ([q for q in self._queue if q["key"] != key]
+                               + [q for q in self._queue if q["key"] == key])
+                self._retry_at[key] = self._clock() + min(
+                    self._busy_retry * 30, self._busy_retry * 2 ** (tries - 1))
                 return
-            if outcome == "busy":
-                # Another capture holds this save. Try it again later.
-                self._retry_at[key] = self._clock() + self._busy_retry
-                return
+            self._busy_tries.pop(key, None)
+            result, outcome = {"outcome": "failed", "reason": BUSY_REASON}, "failed"
+        if outcome in ("backoff", "wait_network"):
+            # It needs a site that is resting (or just refused): it waits for
+            # that back-off like a download does, never in a tight loop.
+            host = result.get("host") or item.get("host") or "other"
             if outcome == "backoff":
-                self._strike(result.get("host") or item.get("host") or "other",
-                             result.get("kind"), result.get("retry_after"))
-                if item.get("media") != "download":
-                    # Only its captions needed the network. Next time it uses
-                    # the copy on disk, so it need not wait for the back-off.
-                    self._retry_at[key] = self._clock() + 1.0
-                self._save()
-                return
-            refused = result.get("refused")
-            if isinstance(refused, dict):
-                # Its captions were refused but the copy on disk still gave
-                # words: rest that site anyway before asking it again.
-                self._strike(refused.get("host") or item.get("host") or "other",
-                             refused.get("kind"), refused.get("retry_after"))
-            elif item.get("media") == "download" and outcome != "failed":
-                self._state["backoff"].pop(item.get("host") or "other", None)
-            in_run = any(q["key"] == key for q in self._queue)
-            self._queue = [q for q in self._queue if q["key"] != key]
-            self._retry_at.pop(key, None)
-            if requested:
-                self._state["requested"].remove(key)
-            entry = {"outcome": outcome, "at": _iso(self._clock()), "title": item.get("title")}
-            if result.get("reason"):
-                entry["reason"] = str(result["reason"])[:300]
-            self._state["results"][key] = entry
-            if outcome in SETTLED:
-                self._state["settled"][key] = dict(entry)
-            if in_run:
-                run = self._state["run"]
-                run["done"] = int(run.get("done") or 0) + 1
-                counter = {WORDS_FOUND: "transcribed", "no_speech": "no_words",
-                           "no_audio": "no_words", "gone": "gone", "failed": "failed"}.get(outcome)
-                if counter:
-                    run[counter] = int(run.get(counter) or 0) + 1
-                if outcome in (WORDS_FOUND, *NO_WORDS) and result.get("media_seconds"):
-                    run["work_seconds"] = float(run.get("work_seconds") or 0) + elapsed
-                    run["media_seconds"] = (float(run.get("media_seconds") or 0)
-                                            + float(result["media_seconds"]))
-            if item.get("half") or not in_run:
-                self._scan_cache = None
-            self._save()
+                self._strike(host, result.get("kind"), result.get("retry_after"))
+            self._needs_network.add(key)
+            self._retry_at[key] = self._clock() + self._busy_retry
+            return
+        self._busy_tries.pop(key, None)
+        self._needs_network.discard(key)
+        refused = result.get("refused")
+        if isinstance(refused, dict):
+            # Its captions were refused but the copy on disk still gave
+            # words: rest that site anyway before asking it again.
+            self._strike(refused.get("host") or item.get("host") or "other",
+                         refused.get("kind"), refused.get("retry_after"))
+        elif item.get("media") == "download" and outcome != "failed":
+            self._state["backoff"].pop(item.get("host") or "other", None)
+        for host in result.get("network_ok") or ():
+            # That site answered normally: its strikes start over.
+            if not (isinstance(refused, dict) and refused.get("host") == host):
+                self._state["backoff"].pop(host, None)
+        in_run = any(q["key"] == key for q in self._queue)
+        self._queue = [q for q in self._queue if q["key"] != key]
+        self._retry_at.pop(key, None)
+        if requested:
+            self._state["requested"].remove(key)
+        entry = {"outcome": outcome, "at": _iso(self._clock()), "title": item.get("title")}
+        if result.get("reason"):
+            entry["reason"] = str(result["reason"])[:300]
+        self._state["results"][key] = entry
+        if outcome in SETTLED:
+            self._state["settled"][key] = dict(entry)
+        if in_run:
+            run = self._state["run"]
+            run["done"] = int(run.get("done") or 0) + 1
+            counter = {WORDS_FOUND: "transcribed", "no_speech": "no_words",
+                       "no_audio": "no_words", "gone": "gone", "failed": "failed"}.get(outcome)
+            if counter:
+                run[counter] = int(run.get(counter) or 0) + 1
+            if outcome in (WORDS_FOUND, *NO_WORDS) and result.get("media_seconds"):
+                run["work_seconds"] = float(run.get("work_seconds") or 0) + elapsed
+                run["media_seconds"] = (float(run.get("media_seconds") or 0)
+                                        + float(result["media_seconds"]))
+        if item.get("half") or not in_run:
+            self._scan_cache = None
 
     def _strike(self, host: str, kind: str | None, retry_after=None) -> None:
         # Caller holds the lock. Each strike waits longer, like the capture's
         # own YouTube back-off (5, 20, 60 minutes; bot checks 30 min to 4 h).
+        # Strikes from a wait that ended long ago are forgotten.
         entry = self._state["backoff"].get(host) or {}
         strikes = int(entry.get("strikes") or 0)
+        if float(entry.get("until") or 0) + STRIKE_MEMORY_SEC < self._clock():
+            strikes = 0
         steps = BOT_CHECK_BACKOFF_SEC if kind == "bot_check" else RATE_LIMIT_BACKOFF_SEC
         try:
             asked = float(retry_after or 0)

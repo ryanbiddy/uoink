@@ -538,6 +538,132 @@ def test_order_longest_or_newest():
     assert [i["key"] for i in tb.order_items(items, "newest")] == ["a", "c", "d", "b"]
 
 
+def _job(tmp_path, items, work, **kwargs):
+    return tb.TranscriptBackfill(tmp_path, scan=lambda: {"items": [dict(i) for i in items]},
+                                 work=work, capture_busy=lambda: False, **kwargs)
+
+
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
+def test_a_file_that_stops_uoink_is_tried_twice_then_skipped(tmp_path):
+    """P1: a media file that kills the helper must not kill it on every boot."""
+    items = [{"key": "crasher", "title": "Crashes the transcriber", "duration": 900, "media": "on_disk"},
+             {"key": "fine", "title": "Fine", "duration": 60, "media": "on_disk"}]
+    calls = []
+
+    def work(item, checkpoint, stop, network_ok):
+        calls.append(item["key"])
+        if item["key"] == "crasher":
+            raise SystemExit  # the helper process dies here (segfault, out of memory)
+        return {"outcome": "transcribed"}
+    job = _job(tmp_path, items, work)
+    job.start()
+    job.wait(5)
+    for _boot in range(3):
+        job = _job(tmp_path, items, work)
+        job.resume_after_restart()
+        assert job.wait(5)
+    assert calls == ["crasher", "crasher", "fine"], calls
+    result = job._state["results"]["crasher"]
+    assert result["outcome"] == "failed" and "stopped while transcribing" in result["reason"]
+    assert job._state["status"] == "done" and job._state["attempts"] == {}
+    assert job.status()["failed_items"][0]["key"] == "crasher"
+
+
+def test_a_save_that_stays_busy_waits_longer_then_is_set_aside(tmp_path):
+    """P1: busy is retried with growing waits, other saves go first, and it ends."""
+    items = [{"key": "held", "duration": 900, "media": "on_disk"},
+             {"key": "free", "duration": 60, "media": "on_disk"}]
+    calls, times = [], []
+
+    def work(item, checkpoint, stop, network_ok):
+        calls.append(item["key"])
+        times.append(time.monotonic())
+        return {"outcome": "busy"} if item["key"] == "held" else {"outcome": "transcribed"}
+    job = _job(tmp_path, items, work, busy_retry=0.002)
+    job.start()
+    assert job.wait(10), "a save that is always busy must not keep the run going forever"
+    assert calls[:2] == ["held", "free"], "the run moves on to the next save"
+    assert calls.count("held") == tb.MAX_BUSY_TRIES
+    held = [t for k, t in zip(calls, times) if k == "held"]
+    gaps = [b - a for a, b in zip(held, held[1:])]
+    assert gaps[-1] > gaps[0], "each busy try waits longer"
+    assert job._state["results"]["held"]["outcome"] == "failed"
+    assert job._state["results"]["free"]["outcome"] == "transcribed"
+
+
+def test_a_refusal_on_a_save_with_media_on_disk_waits_out_the_back_off(tmp_path):
+    """P1: no 1 s retry loop against a site that just said slow down."""
+    items = [{"key": "local", "duration": 60, "media": "on_disk", "host": "x"}]
+    calls = []
+
+    def work(item, checkpoint, stop, network_ok):
+        calls.append(network_ok("x"))
+        return {"outcome": "backoff", "host": "x", "kind": "rate_limited"}
+    job = _job(tmp_path, items, work, busy_retry=0.01)
+    job.start()
+    time.sleep(1.5)
+    status = job.status()
+    assert calls == [True], f"asked the site again during its back-off: {calls}"
+    assert status["state"] == "running" and status["backoff"]["x"]["seconds_left"] > 200
+    job.pause()
+    job.wait(5)
+
+
+def test_a_finish_request_that_lands_as_the_worker_exits_is_not_stranded(tmp_path):
+    """P2: finish(key) between "nothing left" and the worker's exit still runs."""
+    items = [{"key": "folder:AI/late", "duration": 60, "media": "on_disk", "half": True}]
+    done = []
+
+    def work(item, checkpoint, stop, network_ok):
+        done.append(item["key"])
+        return {"outcome": "transcribed"}
+    job = _job(tmp_path, items, work)
+    real_next = job._next
+    raced = {"n": 0}
+
+    def racing_next():
+        item, wait = real_next()
+        if item is None and not raced["n"]:
+            raced["n"] = 1
+            assert job.finish("folder:AI/late")["ok"]  # arrives right here
+        return item, wait
+    job._next = racing_next
+    with job._lock:
+        job._launch()  # a worker with nothing queued yet (state idle)
+    assert job.wait(5)
+    assert done == ["folder:AI/late"], "the request was left in Queued"
+    assert job._state["requested"] == []
+    job.resume()
+    job.pause()
+    assert job._relaunch is False, "a pause cancels a relaunch the resume asked for"
+
+
+def test_strikes_reset_when_the_site_answers_and_fade_with_time(tmp_path):
+    """P2: strikes do not pile up for good after one bad day."""
+    clock = {"now": 1_000_000.0}
+    items = [{"key": "a", "duration": 60, "media": "on_disk", "host": "youtube"}]
+    job = _job(tmp_path, items, lambda *a: {"outcome": "transcribed"}, clock=lambda: clock["now"])
+    with job._lock:
+        job._strike("youtube", "rate_limited")
+        job._strike("youtube", "rate_limited")
+        assert job._state["backoff"]["youtube"]["strikes"] == 2
+        clock["now"] += 3 * 3600
+        job._settle(items[0], "a", {"outcome": "transcribed", "network_ok": ["youtube"]}, 1.0)
+        assert "youtube" not in job._state["backoff"], "a normal answer clears the strikes"
+        job._strike("youtube", "rate_limited")
+        clock["now"] += tb.RATE_LIMIT_BACKOFF_SEC[0] + tb.STRIKE_MEMORY_SEC + 1
+        job._strike("youtube", "rate_limited")
+        entry = job._state["backoff"]["youtube"]
+    assert entry["strikes"] == 1, "a strike long after the last wait starts over"
+    assert entry["until"] - clock["now"] == tb.RATE_LIMIT_BACKOFF_SEC[0]
+    with job._lock:
+        job._strike("x", "rate_limited")
+    clock["now"] += tb.RATE_LIMIT_BACKOFF_SEC[0] + 1
+    job.start()
+    assert "x" not in job._state["backoff"], "a new run forgets waits that already ended"
+    job.wait(5)
+
+
 def test_newest_first_run_order(lib):
     lib.add_video("older", url=_x(12), video_id="1800000000000000012", title="Older", duration=900,
                   saved_at="2026-07-01T00:00:00", media=True)
