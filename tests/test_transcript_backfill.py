@@ -487,6 +487,24 @@ def test_pause_stops_at_a_segment_and_resume_carries_on(lib):
     assert lib.asr_calls == ["pausable", "pausable", "next-up"]
 
 
+def test_words_in_the_sidecar_are_never_listed_or_overwritten(lib):
+    """Each guard holds on its own: stale index health, no corpus lines, a late apply."""
+    folder = lib.add_video("stale-health", url=_x(24), video_id="1800000000000000024",
+                           title="Words only in the sidecar", duration=300,
+                           saved_at="2026-07-01T00:00:00", words=[(0.0, 2.0, "kept words")], media=True)
+    with lib.idx.write_transaction() as conn:
+        conn.execute("UPDATE yoinks SET health_score_json=NULL WHERE video_id=?", ("1800000000000000024",))
+    corpus = folder / "stale-health.md"
+    corpus.write_text("# Words only in the sidecar\n\n---\n\n## Transcript\n\n*older note*\n", encoding="utf-8")
+    assert server._transcript_backfill_scan()["items"] == [], "sidecar words keep it off the list"
+    before = lib.snapshot(folder)
+    item = {"key": "1800000000000000024", "folder": str(folder), "url": _x(24),
+            "sidecar_path": str(folder / "stale-health.json"), "corpus_path": str(corpus)}
+    assert server._transcript_backfill_apply(item, [(0.0, 1.0, "new words")], "asr",
+                                             {"status": "completed"}) == "skipped"
+    assert lib.snapshot(folder) == before, "a save that has words is never touched"
+
+
 def test_transcribe_media_checkpoint_runs_between_lazy_segments(tmp_path):
     """The real ASR wrapper calls the checkpoint before decoding the next segment."""
     media = tmp_path / "video.mp4"
