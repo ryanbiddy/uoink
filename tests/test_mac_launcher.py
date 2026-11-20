@@ -325,7 +325,9 @@ def test_duplicate_windows_launch_still_spawns_dashboard_script(monkeypatch, tmp
 
 @pytest.mark.parametrize("platform,command_flag,first_args", [
     ("darwin", False, ["--show-dashboard"]),
-    ("win32", True, []),
+    # 3.18.0: Windows too. It passed the flag on every start, so each crash
+    # restart reopened the dashboard (tests/test_windows_reopen.py).
+    ("win32", False, ["--show-dashboard"]),
 ])
 def test_show_dashboard_reaches_only_the_first_darwin_helper(monkeypatch, tmp_path, platform, command_flag, first_args):
     import uoink_supervisor

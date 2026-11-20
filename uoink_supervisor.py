@@ -214,7 +214,8 @@ def show_running_dashboard(root: Path) -> bool:
     return True
 
 
-def request_dashboard_later(root: Path, opened_at: float | None = None) -> None:
+def request_dashboard_later(root: Path, opened_at: float | None = None,
+                            session: str | None = None) -> None:
     # Keep the time of the user's open, not of a late handoff, so it coalesces.
     # time.monotonic is system-wide on Darwin and immune to clock corrections.
     requested = opened_at or time.monotonic()
@@ -224,7 +225,9 @@ def request_dashboard_later(root: Path, opened_at: float | None = None) -> None:
         pending = None
     if isinstance(pending, (int, float)) and pending > requested:
         return  # A newer open is already waiting.
-    write_json(root / DASHBOARD_REQUEST, {"requested_at": requested})
+    # The login session lets a supervisor starting in this same login keep it.
+    write_json(root / DASHBOARD_REQUEST,
+               {"requested_at": requested, **({"session": session} if session else {})})
 
 
 def take_dashboard_request(root: Path) -> float | None:
@@ -343,7 +346,14 @@ class Supervisor:
                 (self.root / STOP_FILE).unlink(missing_ok=True)
             if old.get("session") != self.session:
                 # Open times are per boot; a new login never honors older ones.
-                (self.root / DASHBOARD_REQUEST).unlink(missing_ok=True)
+                # A click from this login that lost the lock to this supervisor
+                # a moment ago is tagged with it and kept.
+                try:
+                    pending_session = read_json(self.root / DASHBOARD_REQUEST).get("session")
+                except (OSError, ValueError):
+                    pending_session = None
+                if pending_session != self.session:
+                    (self.root / DASHBOARD_REQUEST).unlink(missing_ok=True)
             self.state = {"schema_version": 1, "status": "starting", "last_exit_code": None,
                           "restart_count": 0, "last_start_at": None, "last_stop_at": None,
                           "ready_at": None, "reason": "Starting helper.", "action": "",
@@ -372,15 +382,14 @@ class Supervisor:
         while not self.stopped():
             run_id = uuid.uuid4().hex
             command = self.command + self.first_args if first else self.command
-            # True when this start's helper opens the dashboard itself: the
-            # first Darwin start (first_args), every Windows start (command).
-            shown = "--show-dashboard" in command
+            shown = first and "--show-dashboard" in self.first_args
             first = False
             self.save(status="starting", last_start_at=stamp(), ready_at=None,
                       reason="Waiting for helper readiness.", action="")
             env = dict(os.environ, UOINK_SUPERVISOR_RUN_ID=run_id, PYTHONUNBUFFERED="1")
             child = None
             reader = None
+            is_ready = False
             reason = "Helper could not be started. Check the installed Python files."
             code = None
             tail = [b""]
@@ -450,6 +459,11 @@ class Supervisor:
                 self.notify(self.state)
                 return 0
             delay = self.backoff[len(times)]
+            if shown and not is_ready and self.on_ready is not None:
+                # The launch flag's start died before its window could open.
+                # Restarts never repeat the flag; the restarted helper's first
+                # ready tick answers the user's open instead.
+                request_dashboard_later(self.root, session=self.session)
             self.save(status="backoff", reason=reason + f" Retrying in {delay} seconds.", action="")
             if not self.wait(delay):
                 break
@@ -482,16 +496,19 @@ def main(argv=None) -> int:
         command.append("--quiet")
     first_args = []
     if args.show_dashboard:
-        # A Darwin restart after a crash must not pop the dashboard again.
-        (first_args if sys.platform == "darwin" else command).append("--show-dashboard")
+        # A restart after a crash must not pop the dashboard again (Darwin
+        # since 3.11.2, Windows since 3.18.0, which passed it on every start).
+        first_args.append("--show-dashboard")
     root = data_root()
     on_ready = None
     if sys.platform == "darwin" and args.show_dashboard and not args.resident:
         return open_app(root)
     if sys.platform in ("darwin", "win32"):
         # The resident supervisor answers opens queued while its helper was
-        # still starting (Darwin since 3.11.2, Windows since 3.18.0).
-        shown_at = [0.0]
+        # still starting (Darwin since 3.11.2, Windows since 3.18.0). A quiet
+        # (silent upgrade) start never answers an open made before it began:
+        # that one was meant for a supervisor that has since exited.
+        shown_at = [opened_at if args.quiet else 0.0]
 
         def on_ready(shown):
             # Runs every poll while the helper is ready. Opens made before the
@@ -502,8 +519,9 @@ def main(argv=None) -> int:
             if requested is not None and requested > shown_at[0]:
                 threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
     try:
+        session = login_session()
         supervisor = Supervisor(root, command, isolation.helper_url("/health"),
-                                session=login_session(), startup=args.startup,
+                                session=session, startup=args.startup,
                                 first_args=first_args, on_ready=on_ready)
         result = supervisor.run()
         # A user open holds admission briefly while it asks an orphaned helper.
@@ -525,14 +543,14 @@ def main(argv=None) -> int:
         if args.show_dashboard and not supervisor.owned:
             # Another supervisor won admission; it consumes the request.
             request_dashboard_later(root, args.opened_at)
-    elif sys.platform == "win32" and args.show_dashboard and not supervisor.owned:
-        # A Start menu or desktop click while Uoink runs. A ready helper gets
-        # its dashboard now. One still starting (login, an upgrade, a crash
-        # restart) used to drop the click; the resident opens it once ready.
-        if status(root).get("status") == "running":
-            show_running_dashboard(root)
-        else:
-            request_dashboard_later(root, opened_at)
+    elif sys.platform == "win32":
+        if args.show_dashboard and not supervisor.owned:
+            # A Start menu or desktop click while a supervisor runs. Its helper
+            # opens it on the next ready tick (every poll, 0.5 s), or once it
+            # is ready after a start, sign-in, upgrade or crash restart. Only
+            # the resident can tell a live helper from a stale "running" and
+            # coalesce clicks with the window its own launch already opened.
+            request_dashboard_later(root, opened_at, session=session)
     elif args.show_dashboard and status(root).get("status") == "running":
         show_running_dashboard(root)
     return result
