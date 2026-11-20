@@ -6,7 +6,7 @@ even after the model object is gone. Long-lived Uoink processes (the helper
 and the stdio MCP server) therefore never load them. They call
 ``enable_offload()`` once at start; after that every transcription entry
 point (``uoink_reliability.transcribe_media``, ``detect_unreliable_spans``,
-``ensure_model`` and ``whisper_runner.transcribe_audio``) sends its work to
+and ``whisper_runner.transcribe_audio``) sends its work to
 one child process through ``call()``. The child keeps a model warm while jobs
 keep coming and is stopped after ``idle_seconds`` with nothing to do, so the
 OS reclaims everything it loaded.
@@ -14,10 +14,10 @@ OS reclaims everything it loaded.
 Guarantees:
 - One model runs at a time: a thread slot in this process plus an OS file
   lock in the data folder, so the helper and an MCP server never run two.
-- A job with a ``checkpoint`` (the transcript backfill) pauses after each
+- A job with a ``checkpoint`` (podcast, replacement or backfill) pauses after each
   segment while the caller's checkpoint runs. A paused job gives the slot
-  back, so a capture can use the same child meanwhile; that model stays
-  loaded but nothing runs it until the checkpoint returns.
+  back. Its child stays parked while the capture runs in a separate child.
+  Each child's timeout and cancellation affect only its own job.
 - Cancel stops the job at the next segment and keeps the child. If the
   child does not answer within ``STOP_GRACE_SECONDS`` it is killed.
 - A child crash (exit, out of memory, native fault) is a failed job with a
@@ -41,6 +41,8 @@ Child to caller: ``{"id", "type": "started"}``, ``{"id", "type": "progress",
 from __future__ import annotations
 
 import atexit
+from contextlib import contextmanager, ExitStack
+from functools import wraps
 import json
 import os
 import queue
@@ -57,6 +59,7 @@ HERE = Path(__file__).resolve().parent
 ENV_CHILD = "UOINK_ASR_CHILD"
 DEFAULT_IDLE_SECONDS = 120
 STOP_GRACE_SECONDS = 15.0
+FRAME_LIMIT = 64 * 1024 * 1024
 LOG_NAME = "asr-worker.log"
 LOCK_NAME = "asr-worker.lock"
 _LOG_ROTATE_BYTES = 4 * 1024 * 1024
@@ -173,9 +176,7 @@ def status_line(info: dict | None = None) -> str:
 # The OS lock is held while this process has any job (running or paused), so
 # a second Uoink process waits. Inside this process the thread slot decides
 # which job runs; a paused job hands it back.
-_plock_mutex = threading.Lock()
-_plock_count = 0
-_plock_handle = None
+_compute_handle = None  # protected by _slot, held while running or keeping an idle model warm
 
 
 def _try_os_lock(handle) -> bool:
@@ -192,52 +193,95 @@ def _try_os_lock(handle) -> bool:
         return False
 
 
-def _hold_process_lock(cancel_event: threading.Event | None) -> None:
-    global _plock_count, _plock_handle
+def _try_file(path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = path.open("a+b")
+    # Both platforms can lock a byte past EOF. No initialization write races.
+    if _try_os_lock(handle):
+        return handle
+    handle.close()
+    return None
+
+
+def _wait_file(path, cancel):
     while True:
-        with _plock_mutex:
-            if _config is None or _plock_count > 0:
-                _plock_count += 1
-                return
-            path: Path = _config["lock_path"]
-            path.parent.mkdir(parents=True, exist_ok=True)
-            handle = path.open("a+b")
-            if os.name == "nt" and handle.tell() == 0:
-                handle.write(b"\0")
-                handle.flush()
-            if _try_os_lock(handle):
-                _plock_handle, _plock_count = handle, 1
-                return
-            handle.close()
-        if cancel_event is not None and cancel_event.is_set():
-            raise TranscriptionCancelled("cancelled while waiting for another transcription")
-        time.sleep(0.25)
+        if cancel is not None and cancel.is_set():
+            raise TranscriptionCancelled("Cancelled while waiting for transcription.")
+        handle = _try_file(path)
+        if handle is not None:
+            return handle
+        time.sleep(0.025)
 
 
-def _drop_process_lock() -> None:
-    global _plock_count, _plock_handle
-    with _plock_mutex:
-        _plock_count = max(0, _plock_count - 1)
-        if _plock_count or _plock_handle is None:
-            return
-        handle, _plock_handle = _plock_handle, None
-        try:
-            if os.name == "nt":
-                import msvcrt
-                handle.seek(0)
-                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
-            else:
-                import fcntl
-                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-        except OSError:
-            pass
-        handle.close()
+def _role_file(root, background):
+    return root / ("asr-background.lock" if background else "asr-foreground.lock")
 
 
-def _take_slot(cancel_event: threading.Event | None) -> None:
-    while not _slot.acquire(timeout=0.25):
-        if cancel_event is not None and cancel_event.is_set():
-            raise TranscriptionCancelled("cancelled while waiting for another transcription")
+def _take_slot(job):
+    global _compute_handle
+    root = _config["lock_path"].parent
+    # A foreground waiter claims its role before waiting for the running
+    # segment. Background work must pass that gate on every resume.
+    with ExitStack() as gate:
+        if job.checkpoint:
+            gate.enter_context(_wait_file(_role_file(root, False), job.cancel_event))
+        while not _slot.acquire(timeout=0.05):
+            if job.cancel_event is not None and job.cancel_event.is_set():
+                raise TranscriptionCancelled("Cancelled while waiting for transcription.")
+        job.has_slot = True
+        if _compute_handle is None:
+            _compute_handle = _wait_file(_config["lock_path"], job.cancel_event)
+
+
+_local_work = threading.local()
+
+
+def model_operation(function):
+    """One-shot processes share the helper's model-use and scheduling locks."""
+    @wraps(function)
+    def run(*args, **kwargs):
+        if (offload_active() or in_child() or getattr(_local_work, "running", False)
+                or kwargs.get("_transcribe") is not None):
+            return function(*args, **kwargs)
+        import _platform
+        import uoink_install_isolation as isolation
+        root = isolation.data_root(_platform.user_data_dir())
+        checkpoint, cancel = kwargs.get("checkpoint"), kwargs.get("cancel_event")
+        compute = root / LOCK_NAME
+
+        def acquire_compute():
+            with ExitStack() as gate:
+                if checkpoint:
+                    gate.enter_context(_wait_file(_role_file(root, False), cancel))
+                return _wait_file(compute, cancel)
+
+        with _wait_file(_role_file(root, checkpoint is not None), cancel):
+            lease = acquire_compute()
+            def yield_segment(segment):
+                nonlocal lease
+                lease.close()
+                _local_work.running = False
+                try:
+                    checkpoint(segment)
+                    lease = acquire_compute()
+                finally:
+                    _local_work.running = True
+            if checkpoint:
+                kwargs["checkpoint"] = yield_segment
+            try:
+                _local_work.running = True
+                return function(*args, **kwargs)
+            finally:
+                _local_work.running = False
+                lease.close()
+    return run
+
+
+def _drop_compute():
+    global _compute_handle
+    if _compute_handle is not None:
+        _compute_handle.close()
+        _compute_handle = None
 
 
 # ---- the child process ---------------------------------------------------
@@ -290,11 +334,7 @@ def _spawn() -> subprocess.Popen:
 
     def read(stream=proc.stdout, me=proc):
         try:
-            for raw in stream:
-                try:
-                    message = json.loads(raw.decode("utf-8"))
-                except (UnicodeDecodeError, json.JSONDecodeError):
-                    continue  # stray output is never part of the protocol
+            for message in _frames(stream):
                 if isinstance(message, dict):
                     with _state_lock:
                         route = _routes.get(str(message.get("id")))
@@ -303,12 +343,20 @@ def _spawn() -> subprocess.Popen:
         except (OSError, ValueError):
             pass
         with _state_lock:
-            routes = list(_routes.values()) if _proc is me else []
+            routes = [_routes[k] for k, state in _active.items() if state.get("proc") is me]
+            idle = _proc is me and not routes
         for route in routes:
             route.put(_EOF)
+        if idle and _slot.acquire(blocking=False):
+            try:
+                if _proc is me:
+                    _reap("exited", me)
+                    _drop_compute()
+            finally:
+                _slot.release()
 
-    threading.Thread(target=read, name="uoink-asr-reader", daemon=True).start()
     _proc = proc
+    threading.Thread(target=read, name="uoink-asr-reader", daemon=True).start()
     return proc
 
 
@@ -333,10 +381,11 @@ def _reap(reason: str, proc: subprocess.Popen | None = None) -> int | None:
     with _state_lock:
         if proc is None:
             proc = _proc
-        if proc is None or proc is not _proc:
+        if proc is None:
             return None
-        _proc, _release_at = None, None
-        routes = list(_routes.values())
+        if proc is _proc:
+            _proc, _release_at = None, None
+        routes = [_routes[k] for k, state in _active.items() if state.get("proc") is proc]
     try:
         if proc.stdin:
             proc.stdin.close()
@@ -356,8 +405,8 @@ def _reap(reason: str, proc: subprocess.Popen | None = None) -> int | None:
     return code
 
 
-def _kill(reason: str) -> None:
-    with _state_lock:
+def _kill(reason: str, proc=None) -> None:
+    if proc is None:
         proc = _proc
     if proc is not None and proc.poll() is None:
         try:
@@ -377,10 +426,63 @@ def _ensure_child() -> subprocess.Popen:
     return _spawn()
 
 
+def _write_frame(stream, message):
+    data = json.dumps(message, ensure_ascii=True, allow_nan=False).encode("ascii") + b"\n"
+    if len(data) > FRAME_LIMIT:
+        raise ValueError("The transcription result exceeds the worker message size limit.")
+    remaining = memoryview(data)
+    while remaining:
+        written = stream.write(remaining)
+        if not written:
+            raise OSError("The transcription pipe closed during a write.")
+        remaining = remaining[written:]
+    stream.flush()
+
+
+def _frames(stream, limit=FRAME_LIMIT):
+    while True:
+        raw = stream.readline(limit + 1)
+        if not raw:
+            return
+        if len(raw) > limit or not raw.endswith(b"\n"):
+            raise ValueError("Invalid transcription message size.")
+        yield json.loads(raw)
+
+
 def _send(proc: subprocess.Popen, message: dict) -> None:
-    with _state_lock:
-        proc.stdin.write(json.dumps(message, ensure_ascii=True).encode("ascii") + b"\n")
-        proc.stdin.flush()
+    # One controller owns each child. Never hold the global state lock across pipe I/O.
+    _write_frame(proc.stdin, message)
+
+
+def _send_job(proc, job, args):
+    # A child can stall before it reads stdin. Even the initial request may
+    # exceed the OS pipe buffer, so the watchdog must run during the write.
+    result = queue.Queue(maxsize=1)
+
+    def write():
+        try:
+            _send(proc, {"id": job.id, "op": job.op, "args": args})
+            result.put(True)
+        except (OSError, AttributeError):
+            result.put(False)
+        except Exception as exc:
+            result.put(exc)
+
+    threading.Thread(target=write, name="asr-request", daemon=True).start()
+    deadline = time.monotonic() + _inactivity_seconds(job.duration)
+    while True:
+        try:
+            sent = result.get(timeout=0.2)
+            if isinstance(sent, Exception):
+                raise sent
+            return sent
+        except queue.Empty:
+            if job.cancel_event is not None and job.cancel_event.is_set():
+                _kill("cancelled", proc)
+                raise TranscriptionCancelled("Transcription cancelled.")
+            if time.monotonic() >= deadline:
+                _kill("timeout", proc)
+                raise WorkerCrashed("Transcription stopped making progress. Try this job again.")
 
 
 def _send_quietly(proc: subprocess.Popen, message: dict) -> bool:
@@ -430,11 +532,12 @@ def _stop_job(proc, route, job_id) -> None:
             continue
         if message is _EOF or message.get("type") in ("result", "error"):
             return
-    _kill("cancelled")
+    _kill("cancelled", proc)
 
 
 class _Job:
-    def __init__(self, op: str, cancel_event, progress, checkpoint):
+    def __init__(self, op: str, cancel_event, progress, checkpoint, duration=None):
+        self.duration = duration
         self.id = uuid.uuid4().hex
         self.op = op
         self.cancel_event = cancel_event
@@ -449,15 +552,28 @@ class _Job:
                 _active[self.id]["paused"] = flag
 
 
+def _inactivity_seconds(duration):
+    # Model startup and silent audio get five minutes, increasing to 30 for long files.
+    return min(1800, 300 + max(0, float(duration or 0)) / 8)
+
+
 def _await(job: _Job, proc: subprocess.Popen):
     started = False
+    allowance = _inactivity_seconds(job.duration)
+    deadline = time.monotonic() + allowance
     while True:
         if job.cancel_event is not None and job.cancel_event.is_set():
-            _stop_job(proc, job.route, job.id)
+            if started:
+                _stop_job(proc, job.route, job.id)
+            else:
+                _kill("cancelled", proc)
             raise TranscriptionCancelled("transcription cancelled")
         try:
             message = job.route.get(timeout=0.2)
         except queue.Empty:
+            if time.monotonic() >= deadline:
+                _kill("timeout", proc)
+                raise WorkerCrashed("Transcription stopped making progress. Try this job again.")
             continue
         if message is _EOF:
             code = _reap("crashed" if started else "exited", proc)
@@ -478,6 +594,10 @@ def _await(job: _Job, proc: subprocess.Popen):
             return message.get("value")
         elif kind == "error":
             raise _rebuild_error(message)
+        if kind in ("started", "heartbeat", "segment", "progress"):
+            job.duration = message.get("total") or job.duration
+            allowance = _inactivity_seconds(job.duration)
+            deadline = time.monotonic() + allowance
 
 
 def _run_checkpoint(job: _Job, proc: subprocess.Popen, message: dict) -> None:
@@ -490,26 +610,37 @@ def _run_checkpoint(job: _Job, proc: subprocess.Popen, message: dict) -> None:
             job.progress(message.get("end"), message.get("total"))
         except Exception:  # noqa: BLE001
             pass
+    global _proc, _compute_handle
     job.pause(True)
+    _proc = None  # park this child; a preempting job gets its own failure boundary
+    _drop_compute()
     job.has_slot = False
     _slot.release()
     try:
         job.checkpoint(segment)
+        _take_slot(job)
+        if job.cancel_event is not None and job.cancel_event.is_set():
+            raise TranscriptionCancelled("Transcription cancelled.")
+        if _proc is not None:
+            _reap("foreground finished")
+        _proc = proc
+        if not _send_quietly(proc, {"id": job.id, "control": "continue"}):
+            job.route.put(_EOF)
     except BaseException:
-        # The caller stopped this job (pause, a capture wants the save, stop).
-        # Tell the child; its answer arrives on a route nobody reads any more.
-        _send_quietly(proc, {"id": job.id, "control": "stop"})
+        _stop_job(proc, job.route, job.id)
+        # The caller may stop a backfill at a checkpoint. Keep a healthy
+        # child warm only if we can reclaim the compute slot immediately.
+        if not job.has_slot and _slot.acquire(blocking=False):
+            job.has_slot = True
+            if _proc is None and _compute_handle is None:
+                _compute_handle = _try_file(_config["lock_path"])
+        if job.has_slot and _compute_handle and _proc is None and proc.poll() is None:
+            _proc = proc
+        elif proc is not _proc:
+            _reap("checkpoint stopped", proc)
         raise
     finally:
         job.pause(False)
-    try:
-        _take_slot(job.cancel_event)
-    except TranscriptionCancelled:
-        _send_quietly(proc, {"id": job.id, "control": "stop"})
-        raise
-    job.has_slot = True
-    if not _send_quietly(proc, {"id": job.id, "control": "continue"}):
-        job.route.put(_EOF)
 
 
 def call(op: str, args: dict, *, cancel_event: threading.Event | None = None,
@@ -519,20 +650,21 @@ def call(op: str, args: dict, *, cancel_event: threading.Event | None = None,
     global _jobs_run
     if not offload_active():
         raise RuntimeError("model work is not offloaded in this process")
-    job = _Job(op, cancel_event, progress, checkpoint)
+    job = _Job(op, cancel_event, progress, checkpoint, args.get("duration_seconds"))
     if checkpoint is not None:
         args = {**args, "checkpoint": True}
-    _hold_process_lock(cancel_event)
+    role = _wait_file(_role_file(_config["lock_path"].parent, checkpoint is not None), cancel_event)
     try:
-        _take_slot(cancel_event)
-        job.has_slot = True
+        _take_slot(job)
         _cancel_idle_timer()
         with _state_lock:
             _routes[job.id] = job.route
             _active[job.id] = {"op": op, "paused": False}
         for attempt in (1, 2):
             proc = _ensure_child()
-            if not _send_quietly(proc, {"id": job.id, "op": op, "args": args}):
+            with _state_lock:
+                _active[job.id]["proc"] = proc
+            if not _send_job(proc, job, args):
                 _reap("exited", proc)
                 if attempt == 1:
                     continue
@@ -552,8 +684,12 @@ def call(op: str, args: dict, *, cancel_event: threading.Event | None = None,
             _routes.pop(job.id, None)
             _active.pop(job.id, None)
         if job.has_slot:
+            if _active and _proc is not None:
+                _reap("foreground finished")
+            if _proc is None:
+                _drop_compute()
             _slot.release()
-        _drop_process_lock()
+        role.close()
         _schedule_idle_stop()
 
 
@@ -573,7 +709,7 @@ def _schedule_idle_stop() -> None:
             return
         _generation += 1
         wait = _config["idle_seconds"]
-        timer = threading.Timer(wait, _stop_if_idle, args=(_generation,))
+        timer = threading.Timer(min(wait, 0.25), _stop_if_idle, args=(_generation,))
         timer.daemon = True
         _idle_timer = timer
         _release_at = time.time() + wait
@@ -587,7 +723,21 @@ def _stop_if_idle(generation: int) -> None:
         with _state_lock:
             if generation != _generation or _proc is None or _active:
                 return
+        remaining = (_release_at or 0) - time.time()
+        if remaining > 0:
+            with ExitStack() as locks:
+                for background in (False, True):
+                    handle = _try_file(_role_file(_config["lock_path"].parent, background))
+                    if handle is None:
+                        break
+                    locks.enter_context(handle)
+                else:
+                    timer = threading.Timer(min(remaining, 0.25), _stop_if_idle, args=(generation,))
+                    timer.daemon = True
+                    timer.start()
+                    return
         _reap("idle")
+        _drop_compute()
     finally:
         _slot.release()
 
@@ -599,18 +749,37 @@ def shutdown() -> None:
         proc = _proc
     if proc is not None:
         _reap("shutdown", proc)
+    if not _active:
+        _drop_compute()
 
 
-def release_if_idle() -> bool:
-    """Stop an idle child now so its model files are closed. False if busy."""
+@contextmanager
+def deletion_slot(root):
+    """Refuse while any process is transcribing, including a paused job."""
+    busy = "A transcription is using the model. Try again when it finishes."
     if not _slot.acquire(blocking=False):
-        return False
+        raise RuntimeError(busy)
     try:
-        with _state_lock:
-            if _active:
-                return False
-        shutdown()
-        return True
+        if _active:
+            raise RuntimeError(busy)
+        with ExitStack() as locks:
+            for background in (True, False):
+                handle = _try_file(_role_file(Path(root), background))
+                if handle is None:
+                    raise RuntimeError(busy)
+                locks.enter_context(handle)
+            shutdown()
+            # A warm idle child in another process observes our role locks
+            # within a quarter second and closes its model.
+            deadline = time.monotonic() + 1
+            handle = _try_file(Path(root) / LOCK_NAME)
+            while handle is None and time.monotonic() < deadline:
+                time.sleep(0.025)
+                handle = _try_file(Path(root) / LOCK_NAME)
+            if handle is None:
+                raise RuntimeError(busy)
+            with handle:
+                yield
     finally:
         _slot.release()
 
@@ -629,7 +798,14 @@ def _install_model_cache(limit: int = 2) -> None:
     def cached(model_name, model_root, *, local_files_only=True):
         if not local_files_only:
             return original(model_name, model_root, local_files_only=False)
-        key = (str(model_name), str(model_root) if model_root else None)
+        # A podcast may pass the resolved snapshot while a capture passes its model ID.
+        snapshot = Path(model_name) if Path(model_name).is_absolute() else None
+        if snapshot is None:
+            source, snapshot = rel.resolve_model(model_name, model_root)
+            if source == rel.SOURCE_DOWNLOADED and model_root:
+                snapshot = rel._cached_reliability_snapshot(model_root, model_name)
+        key = (str(snapshot.resolve()), None) if snapshot else (
+            str(model_name), str(model_root) if model_root else None)
         if key in cache:
             cache[key] = cache.pop(key)  # most recent last
             return cache[key]
@@ -698,11 +874,11 @@ def _run_op(op: str, args: dict, progress: Callable[[Any, Any], None],
             args.get("transcript_text") or "", args["audio_path"],
             threshold=args.get("threshold", rel.DEFAULT_THRESHOLD),
             model_name=args.get("model_name") or rel.DEFAULT_MODEL,
-            model_root=args.get("model_root"))
+            model_root=args.get("model_root"), cancel_event=stop, progress=progress)
         return [span.to_dict() for span in spans]
     if op == "ensure_model":
         import uoink_reliability as rel
-        return rel.ensure_model(args.get("model_name") or rel.DEFAULT_MODEL, args.get("model_root"))
+        return rel.ensure_model(args.get("model_name") or rel.DEFAULT_MODEL, args.get("model_root"), cancel_event=stop)
     if op == "transcribe_audio":
         import whisper_runner
         return whisper_runner.transcribe_audio(
@@ -710,7 +886,8 @@ def _run_op(op: str, args: dict, progress: Callable[[Any, Any], None],
             model_size=args.get("model_size") or whisper_runner.MODEL_BASE,
             language=args.get("language"), diarize=bool(args.get("diarize")),
             consent_given=bool(args.get("consent_given")),
-            initial_prompt=args.get("initial_prompt"))
+            initial_prompt=args.get("initial_prompt"), cancel_event=stop, checkpoint=checkpoint,
+            progress=progress, duration_seconds=args.get("duration_seconds"))
     raise ValueError(f"unknown transcription operation: {op}")
 
 
@@ -723,9 +900,8 @@ def _child_main(argv: list[str]) -> int:
     write_lock = threading.Lock()
 
     def emit(message: dict) -> None:
-        data = json.dumps(message, ensure_ascii=True, default=str).encode("ascii") + b"\n"
         with write_lock:
-            channel.write(data)
+            _write_frame(channel, message)
 
     import uoink_install_isolation as isolation
     isolation.apply_from_process(argv)
@@ -742,13 +918,12 @@ def _child_main(argv: list[str]) -> int:
     inbox = _ChildJobs()
 
     def read() -> None:
-        for raw in sys.stdin.buffer:
-            try:
-                message = json.loads(raw.decode("utf-8"))
-            except (UnicodeDecodeError, json.JSONDecodeError):
-                continue
-            if isinstance(message, dict) and message.get("id"):
-                inbox.deliver(message)
+        try:
+            for message in _frames(sys.stdin.buffer):
+                if isinstance(message, dict) and message.get("id"):
+                    inbox.deliver(message)
+        except (ValueError, OSError):
+            pass
         # The caller closed the pipe (idle stop) or died: leave now, even mid-job.
         sys.stderr.flush()
         os._exit(0)
@@ -771,20 +946,8 @@ def _child_main(argv: list[str]) -> int:
                 return segment.get(name) if isinstance(segment, dict) else getattr(segment, name, None)
             emit({"id": job_id, "type": "segment", "start": field("start"),
                   "end": field("end"), "text": field("text")})
-            # Wait for the caller. A capture may send its own job meanwhile:
-            # run it here (this job is paused, so still one model at a time).
-            while True:
-                try:
-                    answer = controls.get(timeout=0.1)
-                except queue.Empty:
-                    try:
-                        handle(inbox.jobs.get_nowait())
-                    except queue.Empty:
-                        pass
-                    continue
-                if answer == "continue":
-                    return
-                raise TranscriptionCancelled("stopped by the caller")
+            if controls.get() != "continue":
+                raise TranscriptionCancelled("Stopped by the caller.")
 
         try:
             args = job.get("args") or {}

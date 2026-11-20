@@ -100,7 +100,7 @@ HARNESS = textwrap.dedent('''
     rel.transcribe_media(media, model_name="tiny", model_root=os.path.join(work, "models"))
     out["pid2"] = asr_worker.status()["pid"]
     out["podcast"] = whisper_runner.transcribe_audio(
-        media, data_root=os.path.join(work, "data"), model_size="base", diarize=False)
+        media, data_root=os.path.join(work, "data"), model_size="base", diarize=False) if os.name == "nt" else None
     try:
         rel.transcribe_media(os.path.join(work, "crash.wav"), model_name="tiny")
         out["crash"] = None
@@ -155,6 +155,49 @@ HARNESS = textwrap.dedent('''
     full = rel.transcribe_media(os.path.join(work, "steps.wav"), model_name="tiny",
                                 checkpoint=lambda seg: None)
     out["checkpoint_full"] = [row[2] for row in full]
+
+    # A second background job cannot enter the first job's paused stack.
+    outside = threading.Event()
+    inside = threading.Event()
+    errors = []
+    def other_background():
+        try:
+            rel.transcribe_media(media, model_name="tiny", checkpoint=lambda _: inside.set())
+        except Exception as exc:
+            errors.append(str(exc))
+    bg = threading.Thread(target=other_background)
+    def paused_first(_):
+        if not outside.is_set():
+            outside.set()
+            bg.start()
+            out["second_entered_while_paused"] = inside.wait(0.4)
+    rel.transcribe_media(media, model_name="tiny", checkpoint=paused_first)
+    bg.join(10)
+    out["both_finished"] = inside.is_set() and not bg.is_alive() and not errors
+
+    # A foreground native stall must not take its parked caller down with it.
+    def interrupt_with_stall(segment):
+        if "isolated_timeout" in out:
+            return
+        original = getattr(asr_worker, "_inactivity_seconds", None)
+        if original is None:
+            out["isolated_timeout"] = "no inactivity watchdog"
+            return
+        guard = threading.Event()
+        timer = threading.Timer(2, guard.set)
+        timer.start()
+        try:
+            asr_worker._inactivity_seconds = lambda _: 0.5
+            rel.transcribe_media(os.path.join(work, "stuck.wav"), model_name="tiny", cancel_event=guard)
+        except asr_worker.TranscriptionCancelled:
+            out["isolated_timeout"] = "manual cancellation"
+        except asr_worker.WorkerCrashed as exc:
+            out["isolated_timeout"] = str(exc)
+        finally:
+            timer.cancel()
+            asr_worker._inactivity_seconds = original
+    out["surviving_steps"] = len(rel.transcribe_media(os.path.join(work, "steps.wav"),
+                                  model_name="tiny", checkpoint=interrupt_with_stall))
 
     # A child that cannot answer a stop in time is killed.
     asr_worker.STOP_GRACE_SECONDS = 1.0
@@ -236,6 +279,7 @@ def test_results_come_back_from_a_warm_child(harness_result):
     assert out["pid1"] and out["pid1"] == out["pid2"]  # one warm child for back-to-back jobs
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows podcast fast path")
 def test_transcript_only_podcast_skips_whisperx(harness_result):
     out, _log = harness_result
     podcast = out["podcast"]
@@ -270,7 +314,7 @@ def test_checkpoint_pauses_between_segments_and_frees_the_engine(harness_result)
     # The caller saw segments in order, and its exception stopped the job.
     assert out["checkpoint_seen"] == [1.0, 2.0, 3.0, 4.0]
     assert out["checkpoint_stop"] == "backfill paused"
-    # While the backfill job was paused, a capture used the same child.
+    # While the backfill job was paused, the foreground capture completed.
     assert out["checkpoint_paused_jobs"] == [1]
     assert out["checkpoint_nested"][0] == [0.0, 2.0, "hello from the child"]
     assert out["pid_after_checkpoint"] == out["pid3"]  # no kill for a pause
@@ -314,6 +358,9 @@ def test_errors_keep_their_type_across_the_process_boundary():
 
 
 def test_plain_engine_only_without_speaker_labels(monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(whisper_runner, "sys", SimpleNamespace(platform="win32"))
+    monkeypatch.setattr(whisper_runner.importlib.util, "find_spec", lambda _: object())
     monkeypatch.setattr(whisper_runner, "transcription_engine", lambda: "whisperx")
     assert whisper_runner.plain_engine_for(False) is True
     assert whisper_runner.plain_engine_for(True) is False
@@ -328,3 +375,138 @@ def test_status_line_wording():
         "Transcription engine: loaded, frees its memory after 2 minutes idle.")
     assert "working now" in asr_worker.status_line({"offloaded": True, "state": "running",
                                                      "idle_release_seconds": 120})
+
+
+def test_complete_bounded_frames():
+    import io
+    class Short(io.BytesIO):
+        def write(self, data):
+            return super().write(data[:3107])
+    stream = Short()
+    msg = {"id": "1", "text": "word " * 300000}
+    asr_worker._write_frame(stream, msg)
+    stream.seek(0)
+    assert list(asr_worker._frames(stream)) == [msg]
+    with pytest.raises(ValueError):
+        list(asr_worker._frames(io.BytesIO(b"x" * 20), limit=10))
+
+
+def test_inactive_child_fails_just_one_job(monkeypatch, tmp_path):
+    import threading
+    asr_worker.enable_offload(log_dir=tmp_path)
+    try:
+        monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda duration: 0.25, raising=False)
+        # The fake child accepts the job and emits no progress. Keep the test bounded.
+        real_send = asr_worker._send
+        def silent(proc, message):
+            if message.get("op") == "quiet":
+                return
+            return real_send(proc, message)
+        monkeypatch.setattr(asr_worker, "_send", silent)
+        cancel = threading.Event()
+        timer = threading.Timer(2, cancel.set)
+        timer.start()
+        monkeypatch.setattr(asr_worker, "STOP_GRACE_SECONDS", 0.1)
+        try:
+            with pytest.raises(asr_worker.WorkerCrashed, match="progress"):
+                asr_worker.call("quiet", {}, cancel_event=cancel)
+        finally:
+            timer.cancel()
+        assert asr_worker.call("ping", {})["pid"]
+    finally:
+        asr_worker.disable_offload()
+
+
+@pytest.mark.parametrize("platform", ["darwin", "linux"])
+def test_plain_fast_path_preserves_native_route(monkeypatch, platform):
+    from types import SimpleNamespace
+    monkeypatch.setattr(whisper_runner, "sys", SimpleNamespace(platform=platform))
+    monkeypatch.setattr(whisper_runner, "transcription_engine", lambda: "whisperx")
+    monkeypatch.setattr(whisper_runner.importlib.util, "find_spec", lambda _: object())
+    assert not whisper_runner.plain_engine_for(False)
+
+
+def test_two_checkpoint_jobs_cannot_nest(harness_result):
+    out, _ = harness_result
+    assert not out["second_entered_while_paused"] and out["both_finished"]
+
+
+def test_warm_owner_hands_process_lock_to_next_process(tmp_path):
+    asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
+    try:
+        first = asr_worker.call("ping", {})["pid"]
+        script = ("import asr_worker as w, sys; w.enable_offload(log_dir=sys.argv[1]); "
+                  "print(w.call('ping', {})['pid'], flush=True); sys.stdin.readline(); w.shutdown()")
+        with subprocess.Popen([sys.executable, "-B", "-c", script, str(tmp_path)],
+                              cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+                              creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as other:
+            try:
+                second = int(other.stdout.readline().strip())
+                assert second != first and asr_worker.status()["pid"] is None
+            finally:
+                other.communicate("\n", timeout=10)
+        assert (tmp_path / asr_worker.LOCK_NAME).stat().st_size <= 1
+    finally:
+        asr_worker.disable_offload()
+
+
+def test_idle_child_is_reaped_on_pipe_eof(tmp_path):
+    import time
+    asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
+    try:
+        asr_worker.call("ping", {})
+        child = asr_worker._proc
+        child.kill()
+        end = time.monotonic() + 2
+        while asr_worker._proc is child and time.monotonic() < end:
+            time.sleep(0.02)
+        assert asr_worker._proc is None and child.returncode is not None
+    finally:
+        asr_worker.disable_offload()
+
+
+def test_foreground_timeout_preserves_paused_background_job(harness_result):
+    out, _ = harness_result
+    assert "progress" in out["isolated_timeout"] and out["surviving_steps"] == 5
+
+
+def test_watchdog_allows_long_silences_with_a_finite_ceiling():
+    short = asr_worker._inactivity_seconds(None)
+    long = asr_worker._inactivity_seconds(7200)
+    assert 300 <= short < long < asr_worker._inactivity_seconds(86400) <= 1800
+
+
+def test_capture_and_podcast_share_the_same_cached_snapshot(monkeypatch, tmp_path):
+    import uoink_reliability as rel
+    loads = []
+    def load(name, root, **kwargs):
+        loads.append(name)
+        return object()
+    monkeypatch.setattr(rel, "_load_model", load)
+    monkeypatch.setattr(rel, "resolve_model", lambda *args: (rel.SOURCE_BUNDLED, tmp_path))
+    asr_worker._install_model_cache()
+    by_name = rel._load_model("base", None)
+    by_path = rel._load_model(str(tmp_path), None)
+    assert by_name is by_path and loads == ["base"]
+
+
+def test_stalled_request_write_has_a_watchdog(monkeypatch, tmp_path):
+    import threading
+    guard = threading.Event()
+    original = asr_worker._send
+    def write(proc, message):
+        if message.get("op") == "blocked_write":
+            if not guard.wait(3):
+                raise AssertionError("The caller waited for a blocked pipe")
+            return
+        return original(proc, message)
+    monkeypatch.setattr(asr_worker, "_send", write)
+    monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda _: 0.25, raising=False)
+    asr_worker.enable_offload(log_dir=tmp_path)
+    try:
+        with pytest.raises(asr_worker.WorkerCrashed, match="progress"):
+            asr_worker.call("blocked_write", {})
+        assert asr_worker.call("ping", {})["pid"]
+    finally:
+        guard.set()
+        asr_worker.disable_offload()

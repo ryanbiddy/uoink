@@ -290,3 +290,46 @@ def test_auto_publish_failure_preserves_completed_transcript_for_retry(
     assert episode["transcript_status"] == "done"
     assert episode["status"] == podcasts.EPISODE_STATUS_TRANSCRIBED
     idx.close()
+
+
+def test_running_podcast_cancels_at_checkpoint_and_preserves_audio(tmp_path, monkeypatch):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    episode = _seed_downloaded_episodes(idx, tmp_path, 1)[0]
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server.whisper_runner, "is_transcription_available", lambda: True)
+    monkeypatch.setattr(server.whisper_runner, "is_model_downloaded", lambda *_: True)
+    entered = threading.Event()
+    def transcribe(path, **kw):
+        entered.set()
+        assert kw["cancel_event"].wait(3)
+        kw["checkpoint"]({"end": 1})
+        raise AssertionError("continued after cancellation")
+    monkeypatch.setattr(server.whisper_runner, "transcribe_audio", transcribe)
+    result, status = server._queue_podcast_transcription(episode)
+    assert status == 202 and entered.wait(3)
+    public, error, _ = server._cancel_playlist_job(result["job_id"])
+    assert not error and public["state"] == "cancelled"
+    server._podcast_transcription_queue.join()
+    assert server._get_public_job(result["job_id"])["state"] == "cancelled"
+    assert podcasts.get_episode(idx, episode)["transcript_status"] == "none"
+    assert not list(tmp_path.glob("*.transcript.json"))
+    idx.close()
+
+
+def test_cancelling_queued_podcast_clears_episode_status(tmp_path, monkeypatch):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    episode = _seed_downloaded_episodes(idx, tmp_path, 1)[0]
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server.whisper_runner, "is_transcription_available", lambda: True)
+    monkeypatch.setattr(server.whisper_runner, "is_model_downloaded", lambda *_: True)
+    monkeypatch.setattr(server, "_ensure_podcast_transcription_worker", lambda: None)
+    import queue
+    monkeypatch.setattr(server, "_podcast_transcription_queue", queue.Queue())
+    payload, status = server._queue_podcast_transcription(episode)
+    assert status == 202
+    job, error, _ = server._cancel_playlist_job(payload["job_id"])
+    assert not error and job["state"] == "cancelled"
+    assert podcasts.get_episode(idx, episode)["transcript_status"] == "none"
+    idx.close()

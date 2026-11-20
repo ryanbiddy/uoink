@@ -21,7 +21,7 @@ const timers = [];
 const ctx = {
   document: {getElementById: (id) => nodes[id] || null},
   htmlEscape: (v) => String(v).replace(/[&<>"]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])),
-  humanLabel: (v) => v, state: {}, setTimeout: (fn) => { timers.push(fn); return timers.length; },
+  humanLabel: (v) => v, state: {activeTab:"settings"}, setTimeout: (fn) => { timers.push(fn); return timers.length; },
   clearTimeout: () => {}, Math, Number, Array, String, Boolean, JSON,
 };
 vm.createContext(ctx);
@@ -97,3 +97,54 @@ def test_the_detail_button_names_the_model_and_posts_the_real_route():
     assert 'authFetch("/transcription/retranscribe"' in PAGE
     retranscribe = PAGE.split("async function requestRetranscription()", 1)[1].split("async function ", 1)[0]
     assert "diarize: false" in retranscribe and "not ready in this build" not in retranscribe
+
+
+def test_click_cancel_recovers_and_hidden_load_skips_network():
+    code = HARNESS.split("const input =")[0] + """
+    (async () => {
+      ctx.state.activeTab = "settings";
+      ctx.confirm = () => false;
+      for (const action of ["download", "delete"]) {
+        const b = {disabled:false, dataset:{asrAction:action, asrModel:"tiny"}};
+        await ctx.onAsrModelClick({target:{closest:()=>b}});
+        if (b.disabled) throw Error(action + " remained disabled");
+      }
+      let reads = 0;
+      ctx.authFetch = async () => { reads++; return {models:[]}; };
+      ctx.state.activeTab = "library";
+      await ctx.loadAsrModels();
+      ctx.state.activeTab = "settings";
+      ctx.document.hidden = true;
+      await ctx.loadAsrModels();
+      if (reads) throw Error("fetched off screen");
+    })();
+    """
+    result = subprocess.run(["node", "-e", code], cwd=ROOT, text=True, capture_output=True)
+    assert result.returncode == 0, result.stderr
+
+
+def test_chooser_selection_updates_settings_and_off_tab_refresh_skips_network():
+    code = HARNESS.split("const input =")[0] + """
+    (async () => {
+      let reads = 0, selectionAtRefresh;
+      ctx.els = {whisperModel:{value:"base"}};
+      ctx.showToast = () => {};
+      ctx.confirm = () => true;
+      ctx.refreshSettings = async () => {selectionAtRefresh = ctx.els.whisperModel.value;};
+      ctx.authFetch = async (url) => {
+        if (url === "/asr/models") reads++;
+        return url.endsWith("/delete") ? {selected_reset_to:"base"} : {models:[]};
+      };
+      for (const [action, expected] of [["use","distil-large-v3.5"],["delete","base"]]) {
+        const button = {disabled:false, dataset:{asrModel:"distil-large-v3.5",asrAction:action}};
+        await ctx.runAsrModelAction(action, button.dataset.asrModel, button);
+        if (selectionAtRefresh !== expected || button.disabled) throw Error("selection did not match " + action);
+      }
+      reads = 0;
+      ctx.state.activeTab = "library";
+      await ctx.loadAsrModels();
+      if (reads) throw Error("Settings fetched while hidden");
+    })();
+    """
+    result = subprocess.run(["node", "-e", code], cwd=ROOT, text=True, capture_output=True)
+    assert result.returncode == 0, result.stderr

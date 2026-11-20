@@ -3341,7 +3341,7 @@ def _resolve_video_transcript(
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
         cancel_event: threading.Event | None = None,
-        asr_titles: tuple = (),
+        asr_titles: tuple = (), progress=None, checkpoint=None,
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
@@ -3376,8 +3376,14 @@ def _resolve_video_transcript(
 
     # 3.18: an English-only model reports when the audio wasn't English and
     # the multilingual model ran instead (other models leave the call as is).
-    asr_info: dict = {}
-    guard_kw = {"info": asr_info} if uoink_reliability.is_english_only(model_name) else {}
+    chunk_details = []
+    controls = {}
+    if progress:
+        controls["progress"] = progress
+    if checkpoint:
+        controls["checkpoint"] = checkpoint
+    if asr_worker.offload_active():
+        controls["duration_seconds"] = expectation.get("duration_seconds")
     try:
         with contextlib.ExitStack() as cleanup:
             entries = []
@@ -3385,6 +3391,8 @@ def _resolve_video_transcript(
             for number, (path, offset, length) in enumerate(
                     media_chunks or [(media_path, 0.0, None)]):
                 _raise_if_cancelled(cancel_event)
+                asr_info = {}
+                guard_kw = {"info": asr_info} if uoink_reliability.is_english_only(model_name) else {}
                 has_audio = _media_has_audio(path, cancel_event)
                 _raise_if_cancelled(cancel_event)
                 needs_source_audio = has_audio is False
@@ -3396,7 +3404,7 @@ def _resolve_video_transcript(
                             model_root=RELIABILITY_MODEL_ROOT,
                             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                             **({"cancel_event": cancel_event} if cancel_event is not None else {}),
-                            **guard_kw,
+                            **guard_kw, **controls,
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3453,9 +3461,11 @@ def _resolve_video_transcript(
                         model_root=RELIABILITY_MODEL_ROOT,
                         **({"initial_prompt": initial_prompt} if initial_prompt else {}),
                         **({"cancel_event": cancel_event} if cancel_event is not None else {}),
-                        **guard_kw,
+                        **guard_kw, **controls,
                     )
                 _raise_if_cancelled(cancel_event)
+                if local_entries:
+                    chunk_details.append(asr_info.get("english_fallback"))
                 if media_chunks:
                     # ASR timestamps are local to each sampled section. Bound
                     # them to that section before linking to the source video.
@@ -3501,7 +3511,9 @@ def _resolve_video_transcript(
     }
     if media_chunks:
         completed["coverage"] = "sampled_sections"
-    fallback = asr_info.get("english_fallback")
+    fallback = chunk_details[0] if chunk_details and all(f == chunk_details[0] for f in chunk_details) else None
+    if media_chunks and any(chunk_details):
+        completed["section_fallbacks"] = chunk_details
     if isinstance(fallback, dict):
         completed["model"] = fallback.get("used_model") or completed["model"]
         completed["requested_model"] = model_name
@@ -4077,6 +4089,7 @@ def _compute_transcript_reliability(
     threshold: float = RELIABILITY_DEFAULT_THRESHOLD,
     allow_model_download: bool = False,
     force: bool = False,
+    cancel_event=None,
 ) -> dict:
     """Compute/cache transcript reliability for one saved yoink.
 
@@ -4136,6 +4149,7 @@ def _compute_transcript_reliability(
             threshold=threshold,
             model_name=reliability_model,
             model_root=RELIABILITY_MODEL_ROOT,
+            **({"cancel_event": cancel_event} if cancel_event is not None else {}),
         )
         return {
             "status": "completed",
@@ -7956,9 +7970,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
                 if asr_fallback and asr_fallback.get("requested_model"):
                     transcript_note += (
-                        f" (the audio is not English, so the multilingual "
+                        f" (the language check selected the multilingual "
                         f"{asr_fallback.get('model')} model ran instead of "
                         f"{asr_fallback['requested_model']})")
+                elif asr_fallback and asr_fallback.get("section_fallbacks"):
+                    transcript_note += " (some sections used a multilingual model)"
             elif asr_fallback and asr_fallback.get("status") == "no_audio":
                 transcript_note = f"No transcript: {asr_fallback['reason']}"
             elif asr_fallback and asr_fallback.get("status") == "no_speech":
@@ -8254,7 +8270,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 rel = _compute_transcript_reliability(
                     sidecar.get("video_id") or metadata.get("id") or "",
                     folder=output_folder,
-                    audio_path=video_files[0],
+                    audio_path=video_files[0], cancel_event=cancel_event,
                     threshold=RELIABILITY_DEFAULT_THRESHOLD,
                     allow_model_download=False,
                 )
@@ -10836,6 +10852,7 @@ def _validate_persisted_job(raw: dict) -> dict | None:
     job = _public_job(raw)
     if job["state"] not in _JOB_TERMINAL_STATES and kind in ("podcast_transcribe", "retranscribe"):
         now = _now_iso()
+        job["_cancel_event"] = threading.Event()
         job.update({
             "state": "queued",
             "current_video_phase": "queued",
@@ -11237,6 +11254,7 @@ def _podcast_transcription_worker() -> None:
                 # disk) resumes only as the verified owner of its start.
                 continue
             model = whisper_runner.normalize_model(job.get("model"))
+            _raise_if_cancelled(job.get("_cancel_event"))
             audio_path = Path(job["audio_path"])
             reusable = None
             try:
@@ -11278,7 +11296,10 @@ def _podcast_transcription_worker() -> None:
                         language=job.get("language"),
                         diarize=bool(job.get("diarize")),
                         consent_given=bool(job.get("consent_given")),
-                        initial_prompt=vocabulary_hint)
+                        initial_prompt=vocabulary_hint, cancel_event=job.get("_cancel_event"),
+                        duration_seconds=job.get("duration_seconds"),
+                        checkpoint=lambda _: _raise_if_cancelled(job.get("_cancel_event")))
+                _raise_if_cancelled(job.get("_cancel_event"))
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
@@ -11358,6 +11379,12 @@ def _podcast_transcription_worker() -> None:
                 job_id, video_id=(corpus_result or {}).get("video_id"),
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
+        except (asr_worker.TranscriptionCancelled, PlaylistJobCancelled):
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), episode_id, status=whisper_runner.STATUS_NONE, model_used=model)
+            _update_job(job_id, state="cancelled", current_video_phase=None,
+                        completed_at=_now_iso(), message="Transcription cancelled.")
+            _settle_source_capture(job_id, video_id=None, failure_code="cancelled")
         except BaseException as exc:  # keep the one long-lived worker alive
             if not usage_publish_attempted and isinstance(job, dict) and job.get("publish_to_corpus"):
                 try:
@@ -11673,7 +11700,12 @@ def _manual_extraction_ownership(url: str):
     # Never wait on an identity while holding the process slot: its owner may
     # be queued for YouTube and need that slot back to finish publication.
     try:
-        ownership.lock = _ServerCaptureBackend.acquire_identity(key)
+        intent = _manual_capture_intent(key)
+        try:
+            ownership.lock = _ServerCaptureBackend.acquire_identity(key)
+        finally:
+            if intent is not None:
+                intent.close()
     except OSError as exc:
         log.exception("capture identity lock unavailable for manual extraction")
         ownership.error = (f"capture ownership unavailable ({type(exc).__name__}); "
@@ -11846,6 +11878,7 @@ def _queue_podcast_transcription(
     job = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
         "artwork_url": podcasts.episode_artwork_url(_get_index(), episode_id),
+        "duration_seconds": episode.get("duration_seconds"),
         "source_url": episode.get("episode_page_url"),
         "title": episode.get("title") or "Untitled episode",
         "playlist_title": None, "session_folder": None,
@@ -11854,7 +11887,7 @@ def _queue_podcast_transcription(
         "current_video_phase": "queued", "started_at": None,
         "updated_at": now, "completed_at": None, "error": None,
         "error_detail": None, "result": None, "warnings": [],
-        "message": "Podcast transcription queued.",
+        "message": "Podcast transcription queued.", "_cancel_event": threading.Event(),
         "episode_id": episode_id, "model": selected_model,
         "language": language, "diarize": bool(diarize),
         "consent_given": bool(consent_given), "audio_path": str(audio_path),
@@ -11917,6 +11950,7 @@ def asr_models_payload() -> dict:
         if row["state"] in ("missing", "partial") and uoink_reliability.is_model_ready(
                 row["id"], RELIABILITY_MODEL_ROOT):
             row["state"] = "ready"
+            row["bytes_on_disk"] = asr_models.installed_bytes(row["id"], RELIABILITY_MODEL_ROOT)
     data["engine"] = asr_worker.status_line()
     return {"ok": True, **data}
 
@@ -11930,27 +11964,32 @@ def start_asr_model_download(model: object) -> tuple[dict, int]:
     model_id = entry["id"]
     with _asr_download_lock:
         current = _asr_downloads.get(model_id)
-        if current and current["state"] == "downloading":
+        if current and current["state"] in ("downloading", "cancelling"):
             return {"ok": True, "model": model_id, "already_running": True,
                     "download": _asr_download_public(current)}, 202
         cancel = threading.Event()
         record = {"state": "downloading", "done": 0, "total": asr_models.total_bytes(model_id),
-                  "error": None, "started_at": _now_iso(), "cancel": cancel}
+                  "error": None, "started_at": _now_iso(), "finished_at": None, "cancel": cancel}
         _asr_downloads[model_id] = record
+        initial = _asr_download_public(record)
+
+    def update(**values):
+        with _asr_download_lock:
+            record.update(values)
 
     def run() -> None:
         try:
             asr_models.download(model_id, RELIABILITY_MODEL_ROOT, cancel_event=cancel,
-                                progress=lambda done, total: record.update(done=done, total=total))
-            record.update(state="done", done=record["total"], finished_at=_now_iso())
+                                progress=lambda done, total: update(done=done, total=total))
+            update(state="done", done=record["total"], finished_at=_now_iso())
         except asr_models.DownloadCancelled:
-            record.update(state="cancelled", finished_at=_now_iso())
+            update(state="cancelled", finished_at=_now_iso())
         except Exception as exc:  # noqa: BLE001 - reported to the person, kept for resume
             log.warning("model download %s failed: %s", model_id, exc)
-            record.update(state="failed", error=_sanitize_error(str(exc)), finished_at=_now_iso())
+            update(state="failed", error=_sanitize_error(str(exc)), finished_at=_now_iso())
 
     threading.Thread(target=run, name=f"uoink-model-download-{model_id}", daemon=True).start()
-    return {"ok": True, "model": model_id, "download": _asr_download_public(record)}, 202
+    return {"ok": True, "model": model_id, "download": initial}, 202
 
 
 def cancel_asr_model_download(model: object) -> tuple[dict, int]:
@@ -11962,6 +12001,7 @@ def cancel_asr_model_download(model: object) -> tuple[dict, int]:
         record = _asr_downloads.get(model_id)
         if not record or record["state"] != "downloading":
             return {"ok": True, "model": model_id, "cancelled": False}, 200
+        record["state"] = "cancelling"
         record["cancel"].set()
     return {"ok": True, "model": model_id, "cancelled": True}, 200
 
@@ -11973,14 +12013,13 @@ def delete_asr_model(model: object) -> tuple[dict, int]:
         return {"ok": False, "error": f"model must be one of {asr_models.ids()}"}, 400
     with _asr_download_lock:
         record = _asr_downloads.get(model_id)
-        if record and record["state"] == "downloading":
+        if record and record["state"] in ("downloading", "cancelling"):
             return {"ok": False, "error": "Cancel the download first."}, 409
     # A loaded model keeps its files open on Windows: stop an idle engine first.
-    if not asr_worker.release_if_idle():
-        return {"ok": False, "error": "A transcription is running. Try again when it finishes."}, 409
     try:
-        result = asr_models.delete(model_id, RELIABILITY_MODEL_ROOT)
-    except asr_models.DownloadBusy as exc:
+        with asr_worker.deletion_slot(DATA_ROOT):
+            result = asr_models.delete(model_id, RELIABILITY_MODEL_ROOT)
+    except (RuntimeError, asr_models.DownloadBusy) as exc:
         return {"ok": False, "error": str(exc)}, 409
     except OSError as exc:
         return {"ok": False, "error": _sanitize_error(str(exc))}, 500
@@ -12032,13 +12071,8 @@ def queue_retranscribe(body: dict) -> tuple[dict, int]:
     if not _reliability_model_status(model).get("cached"):
         return {"ok": False, "model": model, "model_missing": True,
                 "error": "Download this model in Settings first."}, 409
-    with _jobs_lock:
-        existing = next((job for job in _jobs.values()
-                         if job.get("kind") == RETRANSCRIBE_KIND and job.get("video_id") == video_id
-                         and job.get("state") not in _JOB_TERMINAL_STATES), None)
-        if existing:
-            return {"ok": True, "job_id": existing["id"], "job": _public_job(existing),
-                    "reused_existing": True}, 202
+    if _item_capture_active(video_id, item):
+        return {"ok": False, "error": "A capture of this item is running."}, 409
     now = _now_iso()
     job = {
         "id": _make_job_id(), "kind": RETRANSCRIBE_KIND, "state": "queued",
@@ -12052,7 +12086,18 @@ def queue_retranscribe(body: dict) -> tuple[dict, int]:
         "message": "Queued to transcribe again.", "video_id": video_id, "model": model,
         "progress": 0, "_cancel_event": threading.Event(),
     }
-    public = _add_job_record(job)
+    existing = None
+
+    def already_queued():
+        nonlocal existing
+        existing = next((_public_job(other) for other in _jobs.values()
+                         if other.get("kind") == RETRANSCRIBE_KIND and other.get("video_id") == video_id
+                         and other.get("state") not in _JOB_TERMINAL_STATES), None)
+        return existing is not None
+
+    public = _add_job_record(job, unless=already_queued)
+    if existing is not None:
+        return {"ok": True, "job_id": existing["id"], "job": existing, "reused_existing": True}, 202
     _podcast_transcription_queue.put(job["id"])
     _ensure_podcast_transcription_worker()
     return {"ok": True, "job_id": job["id"], "job": public}, 202
@@ -12083,7 +12128,15 @@ def _run_retranscribe_job(job_id: str) -> None:
     _update_job(job_id, state="running", started_at=_now_iso(), current_video_phase="transcribing",
                 message="Transcribing again. The current transcript stays until the new one is saved.")
     try:
-        result = retranscribe_item(video_id, model, cancel_event=cancel)
+        last = 0
+        def progress(done, total):
+            nonlocal last
+            if done is not None and total and total > 0:
+                percent = min(99, int(100 * done / total))
+                if percent > last:
+                    last = percent
+                    _update_job(job_id, progress=percent)
+        result = retranscribe_item(video_id, model, cancel_event=cancel, progress=progress)
         _update_job(job_id, state="completed", current_video_phase=None, progress=100,
                     videos_done=1, completed_at=_now_iso(), result=result,
                     message="New transcript saved.")
@@ -12100,8 +12153,51 @@ def _run_retranscribe_job(job_id: str) -> None:
                     message="Transcribing again did not finish. The transcript is unchanged.")
 
 
-def retranscribe_item(video_id: str, model: str, *,
-                      cancel_event: threading.Event | None = None) -> dict:
+def _manual_capture_intent(key):
+    # Signal before waiting on the identity lock held by a replacement.
+    name = source_subscriptions.sha256_text(key)[:40] + ".foreground"
+    return asr_worker._try_file(Path(DATA_ROOT) / "capture_locks" / name)
+
+
+def _item_capture_active(video_id, item):
+    import library_media
+    with _jobs_lock:
+        active = [dict(job) for job in _jobs.values() if job.get("kind") in ("single", "playlist")
+                  and job.get("state") not in _JOB_TERMINAL_STATES]
+    target = item.get("source_url") or library_media._item_url(item)
+    if target:
+        intent = _manual_capture_intent(_manual_capture_key(target))
+        if intent is None:
+            return True
+        intent.close()
+    for capture in active + _live_extracts_public():
+        current = capture.get("current_video")
+        urls = [capture.get("source_url"), current.get("url") if isinstance(current, dict) else None]
+        if capture.get("video_id") == video_id or any(
+                u and (u == target or source_subscriptions.SourceSubscriptionService._youtube_id_from_url(u) == video_id)
+                for u in urls):
+            return True
+    return False
+
+
+def retranscribe_item(video_id: str, model: str, *, cancel_event=None, progress=None) -> dict:
+    _raise_if_cancelled(cancel_event)
+    folder, item = _folder_for_video_id(video_id)
+    if folder is None:
+        raise ValueError("Saved item not found.")
+    if _item_capture_active(video_id, item):
+        raise ValueError("A capture of this item is running.")
+    import library_media
+    side = library_media.read_owned_sidecar(Path(item["sidecar_path"])) or {}
+    url = side.get("source_url") or side.get("url") or ""
+    lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, _manual_capture_key(url))
+    if lock is None:
+        raise ValueError("A capture of this item is running.")
+    with lock:
+        return _replace_transcript(video_id, model, folder, item, cancel_event, progress)
+
+
+def _replace_transcript(video_id, model, folder, item, cancel_event, progress):
     """Transcribe one saved video again and replace its transcript.
 
     The audio is fetched again and the whole new transcript is made first;
@@ -12115,9 +12211,6 @@ def retranscribe_item(video_id: str, model: str, *,
     import library_media as media
 
     idx = _get_index()
-    folder, item = _folder_for_video_id(video_id)
-    if folder is None:
-        raise ValueError("Saved item not found.")
     side_path = Path(item["sidecar_path"])
     side = media.read_owned_sidecar(side_path)
     if not side or side.get("video_id") != video_id:
@@ -12125,42 +12218,70 @@ def retranscribe_item(video_id: str, model: str, *,
     url = side.get("source_url") or side.get("url")
     if not isinstance(url, str) or not url.startswith(("http://", "https://")):
         raise ValueError("This save has no source link to fetch its audio from.")
+    item = {**item, "source_url": url}
     old_block = side.get("media_depth") or {}
     if old_block.get("diarization_state") not in (None, "not_requested"):
         raise ValueError("This transcript has speaker labels, so Uoink left it as is.")
-    settings = {**(_read_settings() or {}), "whisper_model": model, "asr_fallback_enabled": True}
+    old_plan = _capture_media_plan(side, folder, item=item)
+    if not old_plan or not old_block:
+        raise ValueError("This save predates the transcript history needed to replace it safely.")
+    corpus_path = Path(item["corpus_path"])
+    corpus = corpus_path.read_bytes()
+    newline = b"\r\n" if b"\r\n" in corpus else b"\n"
+    old = old_plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
+    if not old or corpus.count(old) != 1:
+        raise ValueError("The saved transcript section has changed. Your edits were kept.")
+    plain = folder / "transcript.txt"
+    plain_before = None
+    if plain.exists() or plain.is_symlink():
+        if plain.is_symlink() or plain.resolve().parent != folder.resolve():
+            raise ValueError("The transcript file has moved.")
+        plain_before = plain.read_bytes()
+        saved_plain = plain_before.decode("utf-8", "replace").replace("\r\n", "\n").strip()
+        old_plain = "\n".join(str(r.get("text") or "") for r in side.get("transcript") or []
+                              if isinstance(r, dict)).strip()
+        if saved_plain != old_plain:
+            raise ValueError("transcript.txt was edited after saving. Your edits were kept.")
+    def checkpoint(_segment):
+        _raise_if_cancelled(cancel_event)
+        if _item_capture_active(video_id, item):
+            raise ValueError("A capture of this item is waiting. Your old transcript was kept.")
+
+    settings = {**(_read_settings() or {}), "whisper_model": model, "asr_fallback_enabled": True,
+                "long_video_mode": LONG_VIDEO_MODE_FULL}
     with tempfile.TemporaryDirectory(prefix="uoink-retranscribe-", ignore_cleanup_errors=True) as tmp:
         audio = _download_reliability_audio(url, Path(tmp), cancel_event)
         _raise_if_cancelled(cancel_event)
         entries, source, meta = _resolve_video_transcript(
             [], audio, side.get("duration_seconds"), url=url, settings=settings,
-            cancel_event=cancel_event, asr_titles=(side.get("channel"), side.get("title")))
+            cancel_event=cancel_event, progress=progress, checkpoint=checkpoint,
+            asr_titles=(side.get("channel"), side.get("title")))
     _raise_if_cancelled(cancel_event)
     if source != "asr" or not entries:
         if meta.get("status") == "no_speech":
             raise ValueError("Whisper found no speech, so the transcript is unchanged.")
         raise ValueError(meta.get("error") or meta.get("reason") or "Transcription failed.")
 
+    words = sum(len(text.split()) for _, _, text in entries)
+    old_words = len(_transcript_text_from_sidecar(side).split())
+    if not words or words * 4 < old_words or meta.get("coverage") == "sampled_sections":
+        raise ValueError("The new transcript has too little speech. The old transcript was kept.")
+    if _item_capture_active(video_id, item):
+        raise ValueError("A capture of this item is running.")
     binding = media.capture_sidecar_inputs(side)
     used = meta.get("model") or model
     note = f"Local Whisper transcript, transcribed again with the {used} model"
     if meta.get("requested_model"):
-        note += f" (the audio is not English, so it ran instead of {meta['requested_model']})"
+        note += f" (the language check selected it in place of {meta['requested_model']})"
     new_side = dict(side, transcript=_transcript_entries_with_links(side, entries),
                     transcript_source="asr", asr_fallback=meta, transcript_note=note)
-    old_plan = _capture_media_plan(side, folder, item=item)
     plan = _capture_media_plan(new_side, folder, item=item)
-    if not old_plan or not plan or not old_block:
-        raise ValueError("This save predates the transcript history needed to replace it safely.")
-    corpus_path = Path(item["corpus_path"])
-    corpus = corpus_path.read_bytes()
-    newline = b"\r\n" if b"\r\n" in corpus else b"\n"
-    old = old_plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
+    if not plan:
+        raise ValueError("The replacement transcript could not be prepared.")
+    if corpus_path.read_bytes() != corpus or (plain.read_bytes() if plain.exists() else None) != plain_before:
+        raise ValueError("The transcript changed while transcribing. Your edits were kept.")
     new = plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
-    if old and corpus.count(old) == 1:
-        corpus = corpus.replace(old, new, 1)
-    else:
-        raise ValueError("The saved transcript section has changed. Your edits were kept.")
+    corpus = corpus.replace(old, new, 1)
     head = corpus[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
     row = media._merge_item(item)
     revision = library_cards.build_card(row, clips.merge_cues(plan["cues"], row),
@@ -12173,15 +12294,6 @@ def retranscribe_item(video_id: str, model: str, *,
     artifacts = {corpus_path: corpus,
                  folder / media.MEDIA_INPUTS_DIR / (digest + ".json"): plan["artifact"],
                  side_path: json.dumps(dict(new_side, media_depth=block), ensure_ascii=False).encode()}
-    plain = folder / "transcript.txt"
-    if plain.exists() or plain.is_symlink():
-        if plain.is_symlink() or plain.resolve().parent != folder.resolve():
-            raise ValueError("The transcript file has moved.")
-        saved_plain = plain.read_bytes().decode("utf-8", "replace").replace("\r\n", "\n").strip()
-        old_plain = "\n".join(str(r.get("text") or "") for r in side.get("transcript") or []
-                              if isinstance(r, dict)).strip()
-        if saved_plain != old_plain:
-            raise ValueError("transcript.txt was edited after saving. Your edits were kept.")
     artifacts[plain] = "\n".join(text for _s, _e, text in entries).encode("utf-8")
     # Keep the exact old details file next to the media inputs, so the old
     # transcript can be recovered by hand. Retention prunes only <sha256>.json.
@@ -13876,6 +13988,10 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
         event = job.get("_cancel_event")
         if not isinstance(event, threading.Event):
             return None, "job cancel failed", 200
+        if job.get("kind") == "podcast_transcribe" and job.get("state") == "queued":
+            # The queue skips terminal jobs. Clear the episode badge before a retry can enqueue.
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), job["episode_id"], status=whisper_runner.STATUS_NONE)
         event.set()
         now = _now_iso()
         job.update({
@@ -13885,7 +14001,8 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
             "completed_at": now,
             "error": None,
             "result": None,
-            "message": "Playlist job cancelled. Partial outputs were left on disk.",
+            "message": ("Transcription cancelled." if job.get("kind") in ("podcast_transcribe", "retranscribe")
+                        else "Playlist job cancelled. Partial outputs were left on disk."),
             "updated_at": now,
         })
         _persist_jobs_locked(job)

@@ -666,6 +666,7 @@ def models_command(ns, server):
         return server.delete_asr_model(ns.model)[0]
     if ns.action == "use":
         return server.use_asr_model(ns.model)[0]
+    import http.client
     asr_models = server.asr_models
     try:
         entry = asr_models.get(ns.model)
@@ -689,7 +690,7 @@ def models_command(ns, server):
         cancel.set()
         return {"ok": False, "model": entry["id"],
                 "error": "Download stopped. Run the same command to resume it."}
-    except (asr_models.DownloadBusy, asr_models.DownloadCancelled, ConnectionError) as exc:
+    except (asr_models.DownloadBusy, asr_models.DownloadCancelled, http.client.HTTPException, OSError, ValueError) as exc:
         return {"ok": False, "model": entry["id"], "error": str(exc)}
 
 

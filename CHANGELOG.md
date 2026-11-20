@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- A capture can take its turn while a podcast or saved video is being transcribed. You can cancel either background job. If transcription stalls, the next capture can still run.
+- Transcribing a saved video again updates search immediately. An empty, much shorter or sampled transcript leaves the original in place.
+- Local transcription leaves CPU cores free for other apps. Existing Turbo downloads still work after the model repository changed names.
+
 ### Added
 
 - Settings, Capture: a transcription model chooser. Each model shows its download size, a

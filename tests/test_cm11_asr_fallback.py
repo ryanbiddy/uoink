@@ -44,6 +44,7 @@ def offline_capture(monkeypatch):
     monkeypatch.setattr(server, "_get_saved_scrapecreators_key", lambda: "")
     monkeypatch.setattr(server, "_anthropic_key_for_feature", lambda *_args: None)
     monkeypatch.setattr(server, "_autostart_enabled", lambda: False)
+    monkeypatch.setattr(server.uoink_usage, "disclosure", lambda: {})
 
     def probe_only(cmd, **_kwargs):
         assert Path(cmd[0]).stem == "ffprobe", f"unexpected command: {cmd}"
@@ -336,8 +337,9 @@ def test_transcribe_media_uses_cached_model_only(tmp_path, monkeypatch):
 
 
 def test_explicit_model_download_writes_readiness_marker(tmp_path, monkeypatch):
-    monkeypatch.setattr(reliability, "_load_model",
-                        lambda *_args, **_kwargs: object())
+    def install(model, root, **_kwargs):
+        (root / (model + ".pt")).write_text("ready")
+    monkeypatch.setattr(reliability.asr_models, "download", install)
     result = reliability.ensure_model("tiny", tmp_path)
     marker = tmp_path / "tiny.pt"
     _assert(marker.is_file(),
@@ -351,7 +353,7 @@ def test_failed_model_download_never_writes_readiness_marker(
     def _fail(*_args, **_kwargs):
         raise RuntimeError("download failed")
 
-    monkeypatch.setattr(reliability, "_load_model", _fail)
+    monkeypatch.setattr(reliability.asr_models, "download", _fail)
     try:
         reliability.ensure_model("tiny", tmp_path)
         raise AssertionError("failed model load must propagate")

@@ -51,9 +51,9 @@ def test_catalog_matches_what_the_loader_reads():
 
 
 def test_speed_and_recommendation_follow_this_computer():
-    assert asr_models.minutes_per_hour("base", 8) == 4
-    assert asr_models.minutes_per_hour("base", 2) == 8       # fewer threads, slower
-    assert asr_models.minutes_per_hour("base", 32) == 4      # 4 threads is the default ceiling
+    assert asr_models.minutes_per_hour("base", 8) == 3
+    assert asr_models.minutes_per_hour("base", 2) == 16       # fewer threads, slower
+    assert asr_models.minutes_per_hour("base", 32) == 2      # eight threads at the ceiling
     order = [asr_models.minutes_per_hour(i, 4) for i in ("tiny", "base", "small", "large")]
     assert order == sorted(order)
     assert asr_models.recommended_english(8) == "distil-large-v3.5"
@@ -123,6 +123,7 @@ class FakeHub:
                 if rng and not hub.ignore_range:
                     start = int(rng.split("=")[1].rstrip("-"))
                     self.send_response(206)
+                    self.send_header("Content-Range", getattr(hub, "content_range", f"bytes {start}-{len(data)-1}/{len(data)}"))
                 else:
                     self.send_response(200)
                 body = data[start:]
@@ -241,3 +242,103 @@ def test_a_downloaded_model_is_what_the_loader_finds(tmp_path, hub, monkeypatch)
     _download(tmp_path, hub)
     assert rel.is_model_ready("tiny", tmp_path)
     assert rel._cached_reliability_snapshot(tmp_path, "tiny") == asr_models._snapshot_dir(tmp_path, FAKE)
+
+
+def test_space_checked_before_first_request(tmp_path, hub, monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(asr_models.shutil, "disk_usage", lambda _: SimpleNamespace(free=10))
+    with pytest.raises(OSError, match="space"):
+        _download(tmp_path, hub)
+    assert not hub.requests
+
+
+def test_wrong_content_range_keeps_partial(tmp_path, hub):
+    hub.cut_after = 23000
+    with pytest.raises(Exception):
+        _download(tmp_path, hub)
+    hub.content_range = "bytes 2-3/4"
+    with pytest.raises(ValueError, match="range"):
+        _download(tmp_path, hub)
+    assert (asr_models._partial_dir(tmp_path, FAKE) / "model.bin.part").stat().st_size == 23000
+
+
+def test_redirect_policy():
+    from urllib.request import Request
+    handler = asr_models.ModelRedirectHandler()
+    req = Request("https://huggingface.co/model")
+    for url in ("http://huggingface.co/file", "https://unrelated.test/file"):
+        with pytest.raises(ValueError, match="redirect"):
+            handler.redirect_request(req, None, 302, "", {}, url)
+    url = "https://cas-bridge.xethub.hf.co/file"
+    assert handler.redirect_request(req, None, 302, "", {}, url).full_url == url
+
+
+def test_core_budget_used_by_loader(monkeypatch):
+    monkeypatch.setattr(asr_models, "physical_cores", lambda: 12, raising=False)
+    seen = {}
+    monkeypatch.setattr(rel, "_import_faster_whisper", lambda: lambda model, **kw: seen.update(kw))
+    rel._load_model("base", None)
+    assert 4 < seen["cpu_threads"] < 12
+    assert asr_models.machine()["threads_used"] == seen["cpu_threads"]
+
+
+def test_turbo_uses_current_repo_and_reads_old_snapshot(tmp_path, monkeypatch):
+    from tests.test_asr_worker import _make_snapshot
+    model = "large-v3-turbo"
+    old = "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    new = "dropbox-dash/faster-whisper-large-v3-turbo"
+    assert asr_models.get(model)["repo"] == rel._MODEL_REPOSITORIES[model] == new
+    _make_snapshot(tmp_path, old)
+    (tmp_path / (model + ".pt")).touch()
+    calls = []
+    monkeypatch.setattr(rel, "_import_faster_whisper", lambda: lambda path, **kw: calls.append(path))
+    rel._load_model(model, tmp_path)
+    assert Path(calls[0]).is_dir() and "mobiuslabs" in calls[0]
+
+
+def test_repeated_locks_do_not_grow(tmp_path):
+    lock = tmp_path / "sample.lock"
+    for _ in range(8):
+        with asr_models._exclusive(lock):
+            pass
+    assert lock.stat().st_size <= 1
+
+
+def test_status_survives_file_disappearing(tmp_path, hub, monkeypatch):
+    final = asr_models._snapshot_dir(tmp_path, FAKE) / "config.json"
+    final.parent.mkdir(parents=True)
+    final.write_bytes(FILES["config.json"])
+    original = Path.stat
+    def stat(path, *a, **kw):
+        if path == final:
+            raise FileNotFoundError("concurrent delete")
+        return original(path, *a, **kw)
+    monkeypatch.setattr(Path, "is_file", lambda p: p == final)
+    monkeypatch.setattr(Path, "stat", stat)
+    assert asr_models.state("tiny", tmp_path)["state"] == "missing"
+
+
+def test_configs_and_weights_have_sha256_pins():
+    for entry in asr_models.CATALOG:
+        for name, (_, algorithm, digest) in entry["files"].items():
+            if name != "tokenizer.json" or not entry["english_only"]:
+                assert algorithm == "sha256" and HEX64.fullmatch(digest), (entry["id"], name)
+
+
+def test_legacy_download_buttons_also_verify_the_pinned_files(tmp_path, hub, monkeypatch):
+    import types
+    import whisper_runner
+    # Fail closed if either old entry point tries to start an external download.
+    monkeypatch.setattr(rel, "_load_model", lambda *a, **kw: pytest.fail("unverified model loader"))
+    monkeypatch.setitem(sys.modules, "faster_whisper.utils", types.SimpleNamespace(
+        download_model=lambda *a, **kw: pytest.fail("unverified podcast download")))
+    pinned = asr_models.download
+    monkeypatch.setattr(asr_models, "download", lambda model, root, **kw:
+                        pinned(model, root, base_url=hub.url, timeout=2, **kw))
+    assert Path(rel.ensure_model("tiny", tmp_path / "capture")["ready_marker"]).is_file()
+    podcast = whisper_runner._download_model_snapshot("tiny", tmp_path / "podcast")
+    assert (podcast / "model.bin").read_bytes() == FILES["model.bin"]
+    hub.corrupt = True
+    with pytest.raises(ValueError, match="checksum"):
+        rel.ensure_model("tiny", tmp_path / "broken")
+    assert not (tmp_path / "broken" / "tiny.pt").exists()

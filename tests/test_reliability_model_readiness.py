@@ -199,8 +199,8 @@ def test_all_six_models_have_sizes_and_can_be_ready():
     _assert(set(rel._MODEL_REPOSITORIES) == set(expected),
             rel._MODEL_REPOSITORIES)
     _assert(rel._MODEL_REPOSITORIES["large-v3-turbo"]
-            == "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
-            "production turbo mapping must not switch providers")
+            == "dropbox-dash/faster-whisper-large-v3-turbo",
+            "production turbo mapping must follow the renamed repository")
     with tempfile.TemporaryDirectory() as raw:
         root = Path(raw).resolve()
         for model, size in expected.items():

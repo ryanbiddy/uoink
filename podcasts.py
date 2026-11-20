@@ -22,6 +22,7 @@ from __future__ import annotations
 import uoink_usage
 
 import hashlib
+import math
 import json
 import logging
 import os
@@ -1252,10 +1253,10 @@ def _valid_words(raw) -> list[dict] | None:
         start, end = word.get("start"), word.get("end")
         if (isinstance(start, bool) or isinstance(end, bool)
                 or not isinstance(start, (int, float)) or not isinstance(end, (int, float))
-                or not (0 <= start <= end)):
+                or not math.isfinite(start) or not math.isfinite(end) or min(start, end) < 0):
             continue
         if word["word"].strip():
-            words.append({"word": word["word"].strip(), "start": start, "end": end})
+            words.append({"word": word["word"].strip(), "start": start, "end": max(start, end)})
     return words or None
 
 

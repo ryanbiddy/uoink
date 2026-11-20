@@ -153,6 +153,7 @@ def test_faster_whisper_transcript_uses_resolved_snapshot(
         def __init__(self, path, **kwargs):
             constructed.append(path)
             assert path == str(expected)
+            assert kwargs.pop("cpu_threads") == uoink_reliability.asr_models.cpu_threads()
             assert kwargs == {"device": "cpu", "compute_type": "int8", "local_files_only": True}
 
         def transcribe(self, path, **kwargs):

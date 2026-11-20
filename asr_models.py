@@ -18,11 +18,16 @@ long-lived helper.
 """
 from __future__ import annotations
 
+import errno
 import hashlib
 import http.client
 import os
 import shutil
+import subprocess
+import sys
 import threading
+from functools import lru_cache
+from urllib.parse import urlsplit
 import time
 import urllib.error
 import urllib.request
@@ -33,15 +38,14 @@ from typing import Any, Callable
 HF_BASE = "https://huggingface.co"
 PARTIAL_DIR = ".uoink-partial"
 READY_TEXT = "Uoink faster-whisper model ready\n"
-_CHUNK = 1 << 20
+_CHUNK = 128 * 1024
+LEGACY_TURBO_REPO = "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
 
 # Rough minutes of processing per hour of audio for the bundled base model on
-# a computer with 4 or more cores (int8 on the processor, one beam, voice
-# detection and word timings on). faster-whisper uses 4 threads by default,
-# so more cores than that do not make Uoink faster. Relative costs per model
-# come from their published encoder/decoder sizes. Rough by design.
+# four worker threads. Scale this estimate by the same physical-core budget
+# the loader uses; relative model costs come from encoder/decoder sizes.
 BASE_MINUTES_PER_HOUR = 4.0
-_THREADS_USED = 4
+_REFERENCE_THREADS = 4
 RECOMMEND_MAX_MINUTES = 30
 
 S, G = "sha256", "git_sha1"
@@ -52,10 +56,10 @@ CATALOG: tuple[dict, ...] = (
      "revision": "d90ca5fe260221311c53c58e660288d3deb8d356",
      "english_only": False, "cost": 0.5,
      "note": "Quickest, and it misses the most words.",
-     "files": {"config.json": (2249, G, "3baa18e2b321a2f489614607852a729fcd516480"),
+     "files": {"config.json": (2249, S, "a73a28cdfe1c43ccc7202fa333d1f89c202477271407ae9a7f19afa52039cac8"),
                "model.bin": (75538270, S, "dcb76c6586fc06cbdac6dd21f14cfd129cc4cdd9dce19bf4ffa62e59cbe6e6d1"),
-               "tokenizer.json": (2203239, G, "7818adb6de9fa3064d3ff81226fdd675be1f6344"),
-               "vocabulary.txt": (459861, G, "c9074644d9d1205686f16d411564729461324b75")}},
+               "tokenizer.json": (2203239, S, "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab"),
+               "vocabulary.txt": (459861, S, "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913")}},
     {"id": "base", "label": "Balanced", "repo": "Systran/faster-whisper-base",
      "revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66",
      "english_only": False, "cost": 1.0,
@@ -69,59 +73,56 @@ CATALOG: tuple[dict, ...] = (
      "revision": "ef77d90526ccd62cde3808ee70626a01e5cf83e4",
      "english_only": True, "cost": 1.6,
      "note": "Clearer English than Balanced at a similar speed.",
-     "files": {"config.json": (2812, G, "cab338fd7cd3a2f484ee8ece80d3c63964d47c4a"),
+     "files": {"config.json": (2812, S, "b571ae8022a34c1df50876a65b5f813a5c22e5ee3b87bc0e4db5662dfc9c2c3d"),
                "model.bin": (332308257, S, "1187de3982cdcf962a2fb8f797e429fb4651b875b18fe9ce50b58b52fc9072b7"),
-               "preprocessor_config.json": (339, G, "91876762a536a746d268353c5cba57286e76b058"),
+               "preprocessor_config.json": (339, S, "a6a76d28c93edb273669eb9e0b0636a2bddbb1272c3261e47b7ca6dfdbac1b8d"),
                "tokenizer.json": (2405466, G, "d7cd7ef030d38ff11df010adc96a29e3a0222151"),
-               "vocabulary.json": (825480, G, "b9bc6c16dcfbfc54ab235b55e079d4311f97edf5")}},
+               "vocabulary.json": (825480, S, "4dadfee7c4a871665f65c06037f5f5ec893fb2d7f5eb4cf11063618e31dbe11a")}},
     {"id": "small", "label": "Careful", "repo": "Systran/faster-whisper-small",
      "revision": "536b0662742c02347bc0e980a01041f333bce120",
      "english_only": False, "cost": 2.6,
      "note": "A solid step up for any language.",
-     "files": {"config.json": (2370, G, "e5047537059bd8f182d9ca64c470201585015187"),
+     "files": {"config.json": (2370, S, "b55496ac7940a7ae47d2c01eab40edfd8701feec1229d9cce3b40014383fb828"),
                "model.bin": (483546902, S, "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"),
-               "tokenizer.json": (2203239, G, "7818adb6de9fa3064d3ff81226fdd675be1f6344"),
-               "vocabulary.txt": (459861, G, "c9074644d9d1205686f16d411564729461324b75")}},
+               "tokenizer.json": (2203239, S, "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab"),
+               "vocabulary.txt": (459861, S, "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913")}},
     {"id": "distil-large-v3.5", "label": "English, best",
      "repo": "distil-whisper/distil-large-v3.5-ct2",
      "revision": "9793ccc07920e0f830e1dba0343efcdf0ef8c903",
      "english_only": True, "cost": 5.5,
      "note": "Close to Max accuracy on English, in a fraction of the time.",
-     "files": {"config.json": (2690, G, "499468d516090aee836412556ca759be4e9e73f7"),
+     "files": {"config.json": (2690, S, "90c55f775cc4e0bb17293d0bf12f96557a486f20dea886fabd8e6075a3588b21"),
                "model.bin": (1512927867, S, "c58b88b8585ffcd2135fddaaf421ce72cb223b32edea70d156aed1dea319a119"),
-               "preprocessor_config.json": (340, G, "931c77a740890c46365c7ae0c9d350ba3cca908f"),
+               "preprocessor_config.json": (340, S, "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711"),
                "tokenizer.json": (2480645, G, "e08f6459ce450dc8547e6acb2e42fd724f082632"),
-               "vocabulary.json": (1068114, G, "0adcd01e7c237205d593b707e66dd5d7bc785d2d")}},
+               "vocabulary.json": (1068114, S, "c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1")}},
     {"id": "large-v3-turbo", "label": "Turbo",
-     # faster-whisper looks this model up under its original name; the files
-     # now live under the renamed repository (Hugging Face redirects too).
-     "repo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
-     "source_repo": "dropbox-dash/faster-whisper-large-v3-turbo",
+     "repo": "dropbox-dash/faster-whisper-large-v3-turbo",
      "revision": "0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf",
      "english_only": False, "cost": 6.0,
      "note": "Near Max accuracy in any language, much faster than it.",
-     "files": {"config.json": (2263, G, "0351d1d6870005e865747b781b5d7c23ea0459cd"),
+     "files": {"config.json": (2263, S, "b0253ea6c0d3bea6b1e19e91a02acfd3b53f4467362efcb5a3e6b16c9b3a9b7e"),
                "model.bin": (1617884929, S, "e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da"),
-               "preprocessor_config.json": (340, G, "931c77a740890c46365c7ae0c9d350ba3cca908f"),
-               "tokenizer.json": (2710337, G, "17456db595adc78a973f97d69d8cb50bc87c0b1c"),
-               "vocabulary.json": (1068114, G, "0adcd01e7c237205d593b707e66dd5d7bc785d2d")}},
+               "preprocessor_config.json": (340, S, "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711"),
+               "tokenizer.json": (2710337, S, "297b13372ac43916285644fb9687add3cc62ee2a1adb60da3dc25cc94c1871fd"),
+               "vocabulary.json": (1068114, S, "c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1")}},
     {"id": "medium", "label": "Deep", "repo": "Systran/faster-whisper-medium",
      "revision": "08e178d48790749d25932bbc082711ddcfdfbc4f",
      "english_only": False, "cost": 7.0,
      "note": "Strong on accents and noisy rooms, and slow.",
-     "files": {"config.json": (2257, G, "242aa06a480a7b5509375c645097e87af5136774"),
+     "files": {"config.json": (2257, S, "3622a2ddc41ec0e0fd4e68c13c6830f03b90c38d89aaad184de02c8c642cf807"),
                "model.bin": (1527906378, S, "9b45e1009dcc4ab601eff815b61d80e60ce3fd8c74c1a14f4a282258286b51ae"),
-               "tokenizer.json": (2203239, G, "7818adb6de9fa3064d3ff81226fdd675be1f6344"),
-               "vocabulary.txt": (459861, G, "c9074644d9d1205686f16d411564729461324b75")}},
+               "tokenizer.json": (2203239, S, "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab"),
+               "vocabulary.txt": (459861, S, "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913")}},
     {"id": "large", "label": "Max accuracy", "repo": "Systran/faster-whisper-large-v3",
      "revision": "edaa852ec7e145841d8ffdb056a99866b5f0a478",
      "english_only": False, "cost": 14.0,
      "note": "The most accurate in any language, and the slowest.",
-     "files": {"config.json": (2394, G, "75336feae814999bae6ccccdecf177639ffc6f9d"),
+     "files": {"config.json": (2394, S, "a9306624f5ec14270a014b647e5c316b6e03a662c369758d1b90697a7b0655b9"),
                "model.bin": (3087284237, S, "69f74147e3334731bc3a76048724833325d2ec74642fb52620eda87352e3d4f1"),
-               "preprocessor_config.json": (340, G, "931c77a740890c46365c7ae0c9d350ba3cca908f"),
-               "tokenizer.json": (2480617, G, "3a5e2ba63acdcac9a19ba56cf9bd27f185bfff61"),
-               "vocabulary.json": (1068114, G, "0adcd01e7c237205d593b707e66dd5d7bc785d2d")}},
+               "preprocessor_config.json": (340, S, "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711"),
+               "tokenizer.json": (2480617, S, "6d8cbd7cd0d8d5815e478dac67b85a26bbe77c1f5e0c6d76d1ce2abc0e5f21ca"),
+               "vocabulary.json": (1068114, S, "c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1")}},
 )
 _BY_ID = {entry["id"]: entry for entry in CATALOG}
 
@@ -150,17 +151,55 @@ def total_bytes(model_id: str) -> int:
 
 
 # ---- this computer ---------------------------------------------------------
+@lru_cache(maxsize=1)
+def physical_cores() -> int:
+    logical = os.cpu_count() or 1
+    try:
+        if sys.platform == "win32":
+            import ctypes
+            count = ctypes.c_ulong()
+            query = ctypes.windll.kernel32.GetLogicalProcessorInformationEx
+            query(0, None, ctypes.byref(count))  # RelationProcessorCore
+            buf = ctypes.create_string_buffer(count.value)
+            if query(0, buf, ctypes.byref(count)):
+                offset = cores = 0
+                while offset + 8 <= count.value:
+                    size = int.from_bytes(buf[offset + 4:offset + 8], "little")
+                    if size < 8:
+                        break
+                    cores += 1
+                    offset += size
+                if cores and offset == count.value:
+                    return cores
+        elif sys.platform == "darwin":
+            return max(1, int(subprocess.check_output(
+                ["/usr/sbin/sysctl", "-n", "hw.physicalcpu"], timeout=2)))
+        else:
+            topology = Path("/sys/devices/system/cpu")
+            siblings = {p.read_text().strip() for p in topology.glob("cpu[0-9]*/topology/thread_siblings_list")}
+            if siblings:
+                return len(siblings)
+    except (OSError, ValueError, AttributeError, subprocess.SubprocessError):
+        pass
+    return max(1, logical // 2)
+
+
+def cpu_threads(cores=None) -> int:
+    cores = physical_cores() if cores is None else cores
+    return max(1, min(8, cores - max(1, cores // 4)))
+
+
 def machine() -> dict:
     """Processor count and whether a graphics card is visible. Read only:
     no benchmark, no process started."""
-    cores = os.cpu_count() or 1
+    cores = physical_cores()
     gpu = bool(shutil.which("nvidia-smi"))
-    return {"cpu_cores": cores, "gpu": gpu, "threads_used": min(cores, _THREADS_USED)}
+    return {"cpu_cores": cores, "gpu": gpu, "threads_used": cpu_threads(cores)}
 
 
 def minutes_per_hour(model_id: str, cores: int) -> int:
-    threads = max(1, min(int(cores or 1), _THREADS_USED))
-    minutes = BASE_MINUTES_PER_HOUR * get(model_id)["cost"] * (_THREADS_USED / threads)
+    threads = cpu_threads(cores)
+    minutes = BASE_MINUTES_PER_HOUR * get(model_id)["cost"] * (_REFERENCE_THREADS / threads)
     return max(1, round(minutes))
 
 
@@ -216,6 +255,13 @@ def _file_ok(path: Path, size: int, kind: str, digest: str, cancel_event=None) -
     return _digest_of(path, kind, size, cancel_event) == digest
 
 
+def _size(path: Path) -> int:
+    try:
+        return path.stat().st_size
+    except OSError:
+        return 0
+
+
 def state(model_id: str, root: Path) -> dict:
     """What is on disk for one model: ready (pinned revision complete with
     its marker), partial (some bytes kept for a resume) or missing. Cheap:
@@ -227,13 +273,12 @@ def state(model_id: str, root: Path) -> dict:
     complete = True
     for name, (size, _kind, _digest) in entry["files"].items():
         final = snapshot / name
-        if final.is_file() and final.stat().st_size == size:
+        if _size(final) == size:
             have += size
             continue
         complete = False
         part = partial / (name + ".part")
-        if part.is_file():
-            have += min(part.stat().st_size, size)
+        have += min(_size(part), size)
     ref = _repo_dir(root, entry) / "refs" / "main"
     try:
         pinned = ref.read_text(encoding="ascii").strip() == entry["revision"]
@@ -252,9 +297,6 @@ def _exclusive(path: Path):
     try:
         if os.name == "nt":
             import msvcrt
-            if handle.tell() == 0:
-                handle.write(b"\0")
-                handle.flush()
             handle.seek(0)
             try:
                 msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
@@ -278,6 +320,18 @@ def _exclusive(path: Path):
         handle.close()
 
 
+class ModelRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        target = urlsplit(newurl)
+        host = target.hostname or ""
+        if (target.scheme != "https" or target.username is not None or target.port not in (None, 443)
+                or host not in {"huggingface.co", "cdn-lfs.huggingface.co", "cdn-lfs.hf.co",
+                                "cdn-lfs-us-1.hf.co", "cdn-lfs-eu-1.hf.co",
+                                "cas-bridge.xethub.hf.co", "transfer.xethub.hf.co"}):
+            raise ValueError("The model download redirected outside Hugging Face.")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def _fetch(url: str, part: Path, size: int, *, cancel_event, on_bytes, opener, timeout) -> None:
     have = part.stat().st_size if part.is_file() else 0
     if have > size:
@@ -291,11 +345,17 @@ def _fetch(url: str, part: Path, size: int, *, cancel_event, on_bytes, opener, t
     try:
         response = opener(request, timeout=timeout)
     except urllib.error.HTTPError as exc:
-        if exc.code == 416 and have:   # nothing left to send: verify what is here
-            return
+        if exc.code == 416 and have:
+            exc.close()
+            part.unlink()
+            on_bytes(-have)
+            return _fetch(url, part, size, cancel_event=cancel_event, on_bytes=on_bytes,
+                          opener=opener, timeout=timeout)
         raise
     with response:
         status = getattr(response, "status", None) or response.getcode()
+        if status == 206 and response.headers.get("Content-Range") != f"bytes {have}-{size - 1}/{size}":
+            raise ValueError("The server returned the wrong file range. Try again to resume.")
         mode = "ab"
         if have and status != 206:     # the server ignored the range: start over
             mode, have = "wb", 0
@@ -327,16 +387,21 @@ def _fetch(url: str, part: Path, size: int, *, cancel_event, on_bytes, opener, t
 
 def download(model_id: str, root: str | Path, *, cancel_event: threading.Event | None = None,
              progress: Callable[[int, int], None] | None = None, base_url: str = HF_BASE,
-             opener=urllib.request.urlopen, timeout: float = 60.0) -> dict:
+             opener=None, timeout: float = 60.0) -> dict:
     """Fetch, verify and install one pinned model. Safe to call again after
     a cancel or a crash: finished files are kept and partial ones resume."""
     entry = get(model_id)
     root = Path(root)
     snapshot, partial = _snapshot_dir(root, entry), _partial_dir(root, entry)
     total = total_bytes(model_id)
-    source = entry.get("source_repo") or entry["repo"]
+    source = entry["repo"]
+    if opener is None:
+        opener = urllib.request.build_opener(ModelRedirectHandler()).open
     lock = root / f".{entry['id']}.download.lock"
     with _exclusive(lock):
+        remaining = max(0, total - state(model_id, root)["bytes_on_disk"])
+        if remaining and shutil.disk_usage(root).free < remaining + 16 * 1024**2:
+            raise OSError("There is not enough free disk space for this model.")
         snapshot.mkdir(parents=True, exist_ok=True)
         partial.mkdir(parents=True, exist_ok=True)
         done = [0]
@@ -363,8 +428,14 @@ def download(model_id: str, root: str | Path, *, cancel_event: threading.Event |
                 report(-size)
                 final.unlink()
             url = f"{base_url.rstrip('/')}/{source}/resolve/{entry['revision']}/{name}"
-            _fetch(url, part, size, cancel_event=cancel_event, on_bytes=report,
-                   opener=opener, timeout=timeout)
+            try:
+                _fetch(url, part, size, cancel_event=cancel_event, on_bytes=report,
+                       opener=opener, timeout=timeout)
+            except OSError as exc:
+                if exc.errno != errno.ENOSPC:
+                    raise
+                part.unlink(missing_ok=True)
+                raise OSError("There is not enough free disk space for this model.") from exc
             if not _file_ok(part, size, kind, digest, cancel_event):
                 report(-(part.stat().st_size if part.is_file() else 0))
                 part.unlink(missing_ok=True)
@@ -382,24 +453,26 @@ def download(model_id: str, root: str | Path, *, cancel_event: threading.Event |
     return {"ok": True, "model": entry["id"], "revision": entry["revision"], "bytes": total}
 
 
+def _installed_repos(root, entry):
+    yield _repo_dir(root, entry)
+    if entry["id"] == "large-v3-turbo":
+        yield _repo_dir(root, {"repo": LEGACY_TURBO_REPO})
+
+
+def installed_bytes(model_id, root):
+    return sum(_size(p) for repo in _installed_repos(root, get(model_id))
+               for p in repo.rglob("*") if p.is_file() and not p.is_symlink())
+
+
 def delete(model_id: str, root: str | Path) -> dict:
-    """Remove a downloaded model (and any partial download). The bundled copy
-    lives in the app folder and is untouched."""
     entry = get(model_id)
     root = Path(root)
-    repo = _repo_dir(root, entry)
     with _exclusive(root / f".{entry['id']}.download.lock"):
-        freed = 0
-        if repo.is_dir():
-            for path in repo.rglob("*"):
-                try:
-                    if path.is_file() and not path.is_symlink():
-                        freed += path.stat().st_size
-                except OSError:
-                    pass
+        freed = installed_bytes(model_id, root)
+        for repo in _installed_repos(root, entry):
+            if repo.exists():
+                shutil.rmtree(repo)
         _marker(root, entry).unlink(missing_ok=True)
-        if repo.exists():
-            shutil.rmtree(repo)
     return {"ok": True, "model": entry["id"], "freed_bytes": freed}
 
 

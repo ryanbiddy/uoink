@@ -6524,7 +6524,7 @@
                 <h3 class="asr-chooser-title" id="asrModelChooserTitle">Choose a transcription model</h3>
                 <p class="setting-copy">Downloads come from Hugging Face (huggingface.co) and stay in your Uoink data folder. Uoink checks every file before using it. Balanced comes with Uoink and works offline.</p>
                 <p class="setting-copy" id="asrModelMachine"></p>
-                <div class="asr-model-list" id="asrModelList" aria-live="polite">Loading models...</div>
+                <div class="asr-model-list" id="asrModelList">Loading models...</div>
               </section>
             </div>
           </div>
@@ -7219,7 +7219,7 @@
       ["mixed", "Mixed"],
     ];
 
-    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo"];
+    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo", "distil-small.en", "distil-large-v3.5"];
 
     const SCRIPT_LENGTH_PRESETS = [
       [30, "30 sec"],
@@ -16451,6 +16451,16 @@
     // start only from a click here and run in the helper; this page only
     // polls while one is running.
     let asrModelPollTimer = null;
+    let asrModelRead = 0;
+
+    function asrSettingsVisible() {
+      return state.activeTab === "settings" && !document.hidden;
+    }
+
+    function stopAsrModelPolling() {
+      clearTimeout(asrModelPollTimer);
+      asrModelRead++;
+    }
 
     function asrBytesCopy(bytes) {
       const mb = Number(bytes) / 1e6;
@@ -16465,6 +16475,7 @@
 
     function asrModelStatusCopy(row) {
       const dl = row.download || {};
+      if (dl.state === "cancelling") return "Stopping the download...";
       if (dl.state === "downloading") {
         return `Downloading, ${asrDownloadPercent(dl)}% (${asrBytesCopy(dl.done)} of ${asrBytesCopy(dl.total)}). You can keep using Uoink.`;
       }
@@ -16494,11 +16505,11 @@
         list.textContent = "No models to show.";
         return;
       }
-      list.innerHTML = rows.map((row) => {
+      const markup = rows.map((row) => {
         const id = htmlEscape(row.id);
         const label = htmlEscape(transcriptModelLabel(row.id));
         const dl = row.download || {};
-        const busy = dl.state === "downloading";
+        const busy = dl.state === "downloading" || dl.state === "cancelling";
         const onDisk = row.state === "ready" || row.state === "bundled";
         const badges = (row.recommended ? '<span class="asr-model-badge is-pick">Best for English on this computer</span>' : "")
           + (row.selected ? '<span class="asr-model-badge">In use</span>' : "");
@@ -16518,23 +16529,53 @@
           <p class="asr-model-status">${htmlEscape(asrModelStatusCopy(row))}</p>
         </article>`;
       }).join("");
-      if (rows.some((row) => row.download && row.download.state === "downloading")) {
+      if (!list.children || !list.children.length) {
+        list.innerHTML = markup;
+      } else {
+        const next = document.createElement("div");
+        next.innerHTML = markup;
+        for (const card of Array.from(next.children)) {
+          const old = Array.from(list.children).find(el => el.dataset.asrRow === card.dataset.asrRow);
+          if (!old) { list.append(card); continue; }
+          old.dataset.selected = card.dataset.selected;
+          old.dataset.state = card.dataset.state;
+          // Patch progress and status in place. Keep the actual focused button
+          // in the DOM for the whole download.
+          if (!card.querySelector(".asr-model-progress")) old.querySelector(".asr-model-progress")?.remove();
+          for (const child of Array.from(card.children)) {
+            const previous = old.querySelector("." + child.classList[0]);
+            if (!previous) old.append(child);
+            else if (previous.outerHTML !== child.outerHTML) {
+              const focused = previous.contains(document.activeElement);
+              previous.replaceWith(child);
+              if (focused) (child.querySelector("button") || old.querySelector("button"))?.focus({preventScroll:true});
+            }
+          }
+        }
+      }
+      if (asrSettingsVisible() && rows.some(row => ["downloading", "cancelling"].includes(row.download?.state))) {
         asrModelPollTimer = setTimeout(loadAsrModels, 1000);
       }
     }
 
     async function loadAsrModels() {
       const list = document.getElementById("asrModelList");
-      if (!list) return;
+      if (!list || !asrSettingsVisible()) return;
+      const read = ++asrModelRead;
       try {
-        state.asrModels = await authFetch("/asr/models");
+        const data = await authFetch("/asr/models");
+        if (read !== asrModelRead || !asrSettingsVisible()) return;
+        state.asrModels = data;
         renderAsrModels(state.asrModels);
       } catch (err) {
-        list.textContent = `Could not load the model list: ${(err && err.message) || "try Reload"}.`;
+        if (read !== asrModelRead || !asrSettingsVisible()) return;
+        clearTimeout(asrModelPollTimer);
+        asrModelPollTimer = setTimeout(loadAsrModels, 3000);
+        if (!state.asrModels) list.textContent = `Could not load the model list: ${(err && err.message) || "try Reload"}.`;
       }
     }
 
-    async function runAsrModelAction(action, model) {
+    async function runAsrModelAction(action, model, button) {
       const rows = (state.asrModels && state.asrModels.models) || [];
       const row = rows.find((item) => item.id === model) || {};
       const label = transcriptModelLabel(model);
@@ -16543,22 +16584,27 @@
         if (!confirm(`Download ${label} from Hugging Face (huggingface.co)? It's ${asrBytesCopy(left)} and stays in your Uoink data folder. You can cancel it, and a stopped download resumes.`)) return;
       }
       if (action === "delete" && !confirm(`Delete ${label} from this computer? This frees about ${asrBytesCopy(row.bytes_on_disk)}. You can download it again later.`)) return;
+      button.disabled = true;
       try {
         const data = await authFetch(`/asr/models/${action}`, { method: "POST", body: JSON.stringify({ model }) });
         if (action === "use") showToast(`New transcripts use ${label}.`);
         if (action === "delete") showToast(data.selected_reset_to ? `${label} deleted. New transcripts use Balanced again.` : `${label} deleted.`);
-        if (action === "use" || data.selected_reset_to) refreshSettings();
+        if (action === "use" || data.selected_reset_to) {
+          els.whisperModel.value = data.selected_reset_to || model;
+          await refreshSettings();
+        }
       } catch (err) {
         showToast(`${label}: ${(err && err.message) || "that didn't work"}`);
+      } finally {
+        button.disabled = false;
       }
-      loadAsrModels();
+      return loadAsrModels();
     }
 
     function onAsrModelClick(event) {
       const button = event.target && event.target.closest ? event.target.closest("[data-asr-action]") : null;
       if (!button) return;
-      button.disabled = true;
-      runAsrModelAction(button.dataset.asrAction, button.dataset.asrModel);
+      if (!button.disabled) return runAsrModelAction(button.dataset.asrAction, button.dataset.asrModel, button);
     }
 
     async function refreshSettings() {
@@ -19167,7 +19213,9 @@
         setSettingFeedback(id, "Not saved: enter a folder path.", "error");
         return Promise.resolve(false);
       }
-      return saveSettingsPatch({ [field]: value }, id);
+      const save = saveSettingsPatch({ [field]: value }, id);
+      if (field === "whisper_model") save.then(ok => { if (ok) loadAsrModels(); });
+      return save;
     }
 
     function dashboardScreenshotInterval() {
@@ -20435,6 +20483,7 @@
       if (tab === "activity") refreshActivity();
       const settingsRead = tab === "settings" ? refreshSettings() : null;
       if (tab === "settings") loadAsrModels();
+      else stopAsrModelPolling();
       const back = tab === "library" && previousTab === "yoink" ? state.libraryScroll : null;
       setPageScrollPosition(back || { content: 0, page: 0 });
       syncReaderCrumbs();
@@ -20884,6 +20933,10 @@
       if (els.libraryMirrorResync) els.libraryMirrorResync.addEventListener("click", resyncLibraryMirror);
       els.downloadReliabilityModel.addEventListener("click", downloadSelectedReliabilityModel);
       const asrModelList = document.getElementById("asrModelList");
+      document.addEventListener("visibilitychange", () => {
+        if (asrSettingsVisible()) loadAsrModels();
+        else stopAsrModelPolling();
+      });
       if (asrModelList) asrModelList.addEventListener("click", onAsrModelClick);
       els.pickOutputFolder.addEventListener("click", pickOutputFolder);
       document.getElementById("openOutput").addEventListener("click", () => {
