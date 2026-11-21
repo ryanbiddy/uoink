@@ -54,13 +54,13 @@ from install_receipt.validation import (  # noqa: E402
 )
 
 
-def _free_port() -> int:
+def _free_port(*, exclude=None) -> int:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("127.0.0.1", 0))
     port = sock.getsockname()[1]
     sock.close()
-    if port == FORBIDDEN_PORT:
-        return _free_port()
+    if port in (FORBIDDEN_PORT, exclude):
+        return _free_port(exclude=exclude)
     return port
 
 
@@ -251,7 +251,8 @@ def test_fixture_feed_loopback_non_5179(scratch):
     base = feed.start()
     try:
         assert "127.0.0.1" in base
-        assert str(FORBIDDEN_PORT) not in base
+        from urllib.parse import urlsplit
+        assert urlsplit(base).port == port
         assert feed.port != FORBIDDEN_PORT
         import urllib.request
         with urllib.request.urlopen(feed.audio_url, timeout=2) as response:
@@ -282,7 +283,7 @@ def test_empty_and_versioned_populated_profiles(scratch):
 def test_synthetic_helper_scenarios_and_verdict(scratch, monkeypatch):
     """Labeled non-installed synthetic instrument check. Not installed credit."""
     helper_port = _free_port()
-    fixture_port = _free_port()
+    fixture_port = _free_port(exclude=helper_port)
     # Current scenarios measure original child methods and module provenance.
     # Use the existing source-runtime fixture with synthetic acquisition;
     # the stand-alone HTTP stub cannot provide that evidence.

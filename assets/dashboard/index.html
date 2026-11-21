@@ -8551,6 +8551,7 @@
 
     function sourceNameFromUrl(value) {
       const raw = String(value || "");
+      if (/\[twitter(?:\]|:)|https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\//i.test(raw)) return "X";
       const named = raw.match(/(?:\[|^)(youtube|twitter|x|tiktok|instagram|vimeo)(?:[:\]\s]|$)/i);
       if (named) return { youtube: "YouTube", twitter: "X", x: "X", tiktok: "TikTok", instagram: "Instagram", vimeo: "Vimeo" }[named[1].toLowerCase()];
       try {
@@ -8569,6 +8570,24 @@
       const haystack = `${errors.pop() || raw} ${context.code || ""}`.toLowerCase();
       const source = sourceNameFromUrl(context.url || raw);
       if (!raw) return "";
+      if (source === "X") {
+        const reasons = [
+          [["tweet was deleted", "post was deleted", "tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"],
+            "X says this post was deleted."],
+          [["protected tweet", "protected post", "protected account"],
+            "The post is from a protected X account."],
+          [["nsfw tweet requires authentication", "age-restricted", "age restricted", "age verification", "age-gated"],
+            "X restricts this video by age."],
+          [["not available in your country", "unavailable in your country", "not available in your region", "withheld in", "geo-restricted", "geoblocked"],
+            "X restricts this video in your region."],
+          [["no video could be found in this tweet", "no video in this post", "does not contain a video"],
+            "This X post has no video to save."],
+          [["too many requests", "http error 429", "rate-limit", "rate limit"],
+            "X is limiting requests. Wait a few minutes and try again."],
+        ];
+        const match = reasons.find(([signals]) => signals.some((signal) => haystack.includes(signal)));
+        if (match) return match[1];
+      }
       if (haystack.includes("too many requests") || haystack.includes("http error 429") || haystack.includes("rate-limit") || haystack.includes("rate limit")) {
         // G-43 (E2E D4): a terminal row never promises a retry that won't
         // run. This also covers failed jobs that predate the /jobs
@@ -8819,7 +8838,7 @@
       const key = String(value || "").toLowerCase();
       if (key === "shipped") return "Ready";
       if (key === "in-flight") return "In progress";
-      if (key === "planned") return "Coming soon";
+      if (key === "planned") return "Planned";
       return humanLabel(value) || "Planned";
     }
 

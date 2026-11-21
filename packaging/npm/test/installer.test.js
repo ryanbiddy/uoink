@@ -24,7 +24,7 @@ function fakeRelease(files, opts = {}) {
   const server = http.createServer((req, res) => {
     hits.push({ url: req.url, range: req.headers.range || null, ua: req.headers['user-agent'] || '' });
     if (opts.handler && opts.handler(req, res, files)) return;
-    const m = /\/download\/(?:v[\d.]+\/)?([^/]+)$/.exec(req.url);
+    const m = /\/download\/(?:v[^/]+\/)?([^/]+)$/.exec(req.url);
     const body = m && files[m[1]];
     if (!body) {
       res.writeHead(404).end();
@@ -125,8 +125,20 @@ test('asset selection per platform', () => {
   assert.equal(pickAsset('linux', 'x64', sums), null);
   assert.equal(pickAsset('win32', 'arm64', sums), null);
   assert.equal(cmpVersion('3.16.3', '3.17.0'), -1);
+  assert.equal(cmpVersion('3.16.0', '3.20.0'), -1);
   assert.equal(cmpVersion('3.17.0', '3.17.0'), 0);
   assert.equal(cmpVersion('3.10.0', '3.9.9'), 1);
+});
+
+test('prerelease precedence and installer asset names', () => {
+  assert.equal(cmpVersion('3.18.2-rc.1', '3.18.1'), 1);
+  assert.equal(cmpVersion('3.18.2-rc.2', '3.18.2-rc.10'), -1);
+  assert.equal(cmpVersion('3.18.2-rc.1', '3.18.2'), -1);
+  assert.equal(cmpVersion('3.18.2-rc.1', '3.18.2-rc.1'), 0);
+  const name = 'Uoink-Setup-3.18.2-rc.1.exe';
+  assert.equal(pickAsset('win32', 'x64', [[name, 'hash']]).version, '3.18.2-rc.1');
+  const dmg = 'Uoink-3.18.2-rc.1-macos-arm64.dmg';
+  assert.equal(pickAsset('darwin', 'arm64', [[dmg, 'hash']]).version, '3.18.2-rc.1');
 });
 
 test('Linux and Intel Mac get a docs link and exit 0 without any network', async (t) => {
@@ -328,6 +340,43 @@ test('arguments with nothing installed explain how to install', async (t) => {
   const s = setup(t);
   assert.equal(await main(['search', 'x'], s.deps), 1);
   assert.match(s.err.text(), /npx uoink/);
+});
+
+for (const args of [['update'], ['update', '--version', '9.9.9'], ['install', '--version', '9.9.9']]) {
+  test(`newer installed version stays in place for ${args.join(' ')}`, async (t) => {
+    const rel = await fakeRelease(exeFiles());
+    t.after(rel.close);
+    const s = setup(t, { base: rel.base, capture: async () => ({
+      code: 0, stdout: JSON.stringify({ version: '9.12.0' }),
+    }) });
+    for (const file of ['cli/uoink.cmd', 'python/python.exe', 'uoink_cli.py']) {
+      const p = path.join(s.deps.env.LOCALAPPDATA, 'Uoink', file);
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.writeFileSync(p, '');
+    }
+    assert.equal(await main([...args, '--yes'], s.deps), 0);
+    assert.match(s.out.text(), /9\.12\.0.*newer.*9\.9\.9/);
+    assert.doesNotMatch(s.out.text(), /Update Uoink to/);
+    assert.equal(s.calls.run.length, 0);
+    assert.ok(rel.hits.every(hit => hit.url.endsWith('SHA256SUMS.txt')));
+  });
+}
+
+test('an explicit prerelease cannot downgrade the installed stable release', async (t) => {
+  const tag = '9.9.9-rc.2';
+  const name = `Uoink-Setup-${tag}.exe`;
+  const rel = await fakeRelease({ [name]: EXE, 'SHA256SUMS.txt': Buffer.from(`${sha(EXE)}  ${name}\n`) });
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  for (const file of ['cli/uoink.cmd', 'python/python.exe', 'uoink_cli.py']) {
+    const p = path.join(s.deps.env.LOCALAPPDATA, 'Uoink', file);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, '');
+  }
+  assert.equal(await main(['install', '--version', tag, '--yes'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /9\.9\.9 is newer than the offered version 9\.9\.9-rc\.2/);
+  assert.equal(s.calls.run.length, 0);
+  assert.deepEqual(rel.hits.map(hit => hit.url), [`/download/v${tag}/SHA256SUMS.txt`]);
 });
 
 test('--help works and unknown options are rejected', async (t) => {

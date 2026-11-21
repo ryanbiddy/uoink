@@ -7,6 +7,7 @@ temporary placeholder files. No model, decoder or download code is exercised.
 from __future__ import annotations
 
 import ast
+import logging
 from pathlib import Path
 import re
 import sys
@@ -30,7 +31,7 @@ def runner_functions(source):
     }
     constants = {
         "MODEL_TINY", "MODEL_BASE", "MODEL_SMALL", "MODEL_MEDIUM", "MODEL_LARGE",
-        "MODEL_LARGE_V3_TURBO", "_MODELS", "_MODEL_REPOSITORIES", "_ASR_CACHE_FILES",
+        "MODEL_LARGE_V3_TURBO", "_MODELS", "_MODEL_REPOSITORIES", "_ASR_CACHE_FILES", "log",
     }
     tree = ast.parse(Path(source).read_text(encoding="utf-8-sig"))
     nodes = [node for node in tree.body if (
@@ -41,7 +42,7 @@ def runner_functions(source):
     )]
     assert functions == {node.name for node in nodes if isinstance(node, ast.FunctionDef)}
     scope = {
-        "Path": Path, "re": re, "sys": sys, "_WHISPERX_AVAILABLE": True,
+        "logging": logging, "Path": Path, "re": re, "sys": sys, "_WHISPERX_AVAILABLE": True,
         "_download_model_snapshot": blocked, "_runtime_device": lambda: "cpu",
         # These contracts cover the user's cache. The installer-bundled copy
         # has its own tests (test_bundled_whisper_model.py); none here.
@@ -106,6 +107,32 @@ class ProductGuardContracts(unittest.TestCase):
                 with self.assertRaises(PermissionError):
                     self.transcribe()
                 self.assertEqual(self.events, [])
+
+    def test_missing_consent_precedes_runtime_import(self):
+        import builtins
+        original_import = builtins.__import__
+        attempts = []
+
+        def broken(name, *args, **kwargs):
+            if name == "whisperx":
+                attempts.append(name)
+                raise ImportError("fixture runtime unavailable")
+            return original_import(name, *args, **kwargs)
+
+        with patch.object(builtins, "__import__", broken):
+            with self.assertRaises(PermissionError):
+                self.transcribe()
+            self.assertEqual(attempts, [])
+
+    def test_broken_import_is_logged(self):
+        self.assertIn("log", self.scope)
+        self.cached()
+        with patch.dict(sys.modules, {"whisperx": None}):
+            with self.assertLogs(self.scope["log"].name, level="WARNING") as logs:
+                with self.assertRaises(RuntimeError):
+                    self.scope["transcribe_audio"](self.audio, data_root=self.root)
+        self.assertIn("ModuleNotFoundError", logs.output[0])
+        self.assertIn("whisperx", logs.output[0])
 
     def test_empty_tokenizer_is_not_ready(self):
         (self.cached() / "tokenizer.json").write_bytes(b"")

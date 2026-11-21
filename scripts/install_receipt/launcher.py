@@ -681,6 +681,7 @@ def inventory_installed(installed_app: Path) -> dict[str, Any]:
                 "migrations/0034_item_opens.sql",
                 "migrations/0037_shelf_by_hand.sql",
                 "migrations/0038_published_day.sql",
+                "migrations/0039_podcast_follow.sql",
                 "VERSION", MARKER_FILENAME):
         path = installed_app / rel
         files[rel.replace("\\", "/")] = {

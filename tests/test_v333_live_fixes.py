@@ -188,6 +188,14 @@ def test_x_no_video_error_copy_is_honest_not_a_download():
     print("ok  X 404 (no video) yields honest, non-download guidance")
 
 
+def test_x_video_rate_limit_does_not_schedule_a_youtube_retry():
+    import subprocess
+    exc = subprocess.CalledProcessError(1, ["yt-dlp", "https://x.com/i/status/1790000000000000000"],
+                                        stderr="ERROR: HTTP Error 429: Too Many Requests")
+    assert not server._is_youtube_rate_limit(exc)
+    assert server.friendly_error(exc) == "X is limiting requests. Wait a few minutes and try again."
+
+
 def test_dashboard_mirrors_honest_x_no_video_copy():
     # translateMachineMessage must carry the same honest X-no-video branch,
     # keyed on the syndication 404 signature.

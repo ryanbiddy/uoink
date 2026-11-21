@@ -174,6 +174,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Linux: `install.sh` also stages the shelf model (skipped with `--no-model`).
 - Notes and podcast episodes are shelved like everything else instead of always landing on
   Uncategorized.
+- The helper waits until transcription needs WhisperX before loading it. Local search releases its embedding model after five idle minutes. Set `UOINK_MODEL_IDLE_SECONDS` to change the wait.
+- `uoink --text get <id>` shows the saved item, including its shelf and available transcript. Other text commands show their result values.
+- Following a suggested podcast saves the show's name and schedules feed checks. Upgrading also resumes checks for untitled shows left unpolled by 3.17. Audio capture still requires separate consent.
+- The npm installer tells you when your installed version is newer and keeps it. Failed X video captures show the reason when X supplies one.
 
 ## [3.17.0] - 2026-11-12
 

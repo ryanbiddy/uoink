@@ -279,6 +279,7 @@ def _handler(monkeypatch, idx, tmp_path, *, enabled=True, token=True):
     handler._check_token = lambda: token
     handler.command, handler.path = "GET", "/suggestions/podcasts"
     monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "_source_service_instance", None)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     monkeypatch.setattr(server, "_read_settings", lambda: {"suggest_podcasts": enabled})
     monkeypatch.setattr(server, "_podcast_suggestions_refresh_async", lambda **kw: False)
@@ -416,6 +417,119 @@ def test_follow_turns_a_saved_show_on(monkeypatch, idx, tmp_path):
     handler._handle_podcast_suggestions_follow({"id": item["id"]})
     assert resp.sent[-1][0] == 200
     assert podcasts.list_feeds(idx)[0]["enabled"] == 1
+
+
+def test_follow_from_card_has_title_and_reports_actual_first_poll(monkeypatch, idx, tmp_path):
+    item = _cache_item(tmp_path)
+    handler, resp = _handler(monkeypatch, idx, tmp_path)
+    adapter = FakeAdapter([ss.AdapterResult("snapshot", coverage="complete", observations=[])])
+    service = make_service(idx, clock=Clock(int(time.time() * 1000) + 1000), adapter=adapter)
+    monkeypatch.setattr(server, "_source_service", lambda: service)
+    handler._handle_podcast_suggestions_follow({"id": item["id"]})
+    assert resp.sent[-1][0] == 200
+    [feed] = podcasts.list_feeds(idx)
+    assert feed["title"] == item["show"] and feed["last_polled_at"] is None
+    [source] = service.due_poll_ids()
+    assert service.run_claimed_poll(service.claim_poll(source))["ok"]
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"]
+    assert not podcasts.get_feed(idx, feed["id"])["auto_ingest"]
+    assert service.archive_source(server._source_operator_context(), {"source_id": source})["ok"]
+    assert idx._conn.execute("SELECT follow_feed FROM source_subscriptions WHERE source_id=?",
+                             (source,)).fetchone()[0] == 0
+    handler._handle_podcast_suggestions_follow({"id": item["id"]})
+    assert resp.sent[-1][1]["feed_id"] == feed["id"]
+    assert len(podcasts.list_feeds(idx)) == 1
+
+
+@pytest.mark.parametrize("reverse_updates", [False, True])
+def test_upgrade_restores_untitled_unpolled_follow_in_place(tmp_path, monkeypatch, reverse_updates):
+    path = tmp_path / "upgrade.db"
+    migrations = index_mod._discover_migrations()
+    with monkeypatch.context() as old:
+        old.setattr(index_mod, "_discover_migrations", lambda: [(n, p) for n, p in migrations if n <= 38])
+        with index_mod.Index.open(path) as previous:
+            feed = podcasts.add_feed(previous, "https://shows.test/feed.xml")
+            saved = podcasts.add_feed(previous, "https://saved.test/feed.xml", enabled=False)
+            titled = podcasts.add_feed(previous, "https://titled.test/rss", title="Known title")
+            attempted = podcasts.add_feed(previous, "https://attempted.test/rss")
+            failed = podcasts.add_feed(previous, "https://failed.test/rss")
+            with previous.write_transaction() as db:
+                db.execute("UPDATE source_detection_cursors SET last_poll_attempt_ms=1 WHERE source_id=?",
+                           (attempted["source_id"],))
+                db.execute("UPDATE podcast_feeds SET last_polled_at='2026-01-01', error_count=1 WHERE id=?",
+                           (failed["id"],))
+                db.execute("UPDATE podcast_feeds SET last_polled_at=?, error_count=1 WHERE id=?",
+                           ("2026-01-01T00:00:00Z", saved["id"]))
+            assert "follow_feed" not in [r[1] for r in previous._conn.execute("pragma table_info(source_subscriptions)")]
+    migration = next(p for n, p in migrations if n == 39)
+    ddl, follow, clear, trigger = migration.read_text(encoding="utf-8").split(";", 3)
+    updates = ";".join((clear, follow) if reverse_updates else (follow, clear)) + ";"
+    if reverse_updates:
+        swapped = tmp_path / migration.name
+        swapped.write_text(ddl + ";" + updates + trigger, encoding="utf-8")
+        monkeypatch.setattr(index_mod, "_discover_migrations",
+                            lambda: [(n, swapped if n == 39 else p) for n, p in migrations])
+    with index_mod.Index.open(path) as idx:
+        conn = idx._conn
+        before = conn.total_changes
+        conn.executescript(updates)
+        assert conn.total_changes == before
+        for excluded in (titled, attempted, failed, saved):
+            assert conn.execute("SELECT follow_feed FROM source_subscriptions WHERE source_id=?",
+                                (excluded["source_id"],)).fetchone()[0] == 0
+        assert podcasts.get_feed(idx, saved["id"])["last_polled_at"] is None
+        adapter = FakeAdapter([ss.AdapterResult("snapshot", coverage="complete", observations=[], feed_title="Moon Radio")])
+        service = make_service(idx, clock=Clock(int(time.time() * 1000) + 1000), adapter=adapter)
+        assert service.due_poll_ids() == [feed["source_id"]]
+        assert service.run_claimed_poll(service.claim_poll(feed["source_id"]))["ok"]
+        repaired = podcasts.get_feed(idx, feed["id"])
+        assert repaired["title"] == "Moon Radio" and not repaired["auto_ingest"]
+        assert idx._conn.execute("SELECT consent_state FROM source_subscriptions WHERE source_id=?",
+                                 (feed["source_id"],)).fetchone()[0] == "off"
+
+
+def test_duplicate_legacy_feed_binding_is_refused(idx):
+    import sqlite3
+    first = podcasts.add_feed(idx, "https://one.test/rss")
+    other = podcasts.add_feed(idx, "https://two.test/rss")
+    with pytest.raises(sqlite3.IntegrityError, match="UNIQUE"):
+        with idx.write_transaction() as db:
+            db.execute("UPDATE source_subscriptions SET legacy_feed_id=? WHERE source_id=?",
+                       (first["id"], other["source_id"]))
+
+
+@pytest.mark.parametrize("later_cursor", [None, 1000])
+def test_list_feeds_keeps_newest_cursor_if_a_legacy_binding_is_shared(idx, later_cursor):
+    first = podcasts.add_feed(idx, "https://first.test/rss")
+    second = podcasts.add_feed(idx, "https://second.test/rss")
+    # The current schema enforces uniqueness. Present the reader with both
+    # cursors through a temporary view to exercise the defensive aggregation.
+    with idx.write_transaction() as db:
+        db.execute("UPDATE source_detection_cursors SET last_poll_success_ms=5000 WHERE source_id=?",
+                   (first["source_id"],))
+        db.execute("UPDATE source_detection_cursors SET last_poll_success_ms=? WHERE source_id=?",
+                   (later_cursor, second["source_id"]))
+        db.execute("CREATE TEMP VIEW source_subscriptions AS "
+                   "SELECT MIN(legacy_feed_id) OVER () AS legacy_feed_id, source_id "
+                   "FROM main.source_subscriptions ORDER BY rowid")
+    result = next(feed for feed in podcasts.list_feeds(idx) if feed["id"] == first["id"])
+    assert result["last_polled_at"] == "1970-01-01T00:00:05Z"
+
+
+def test_last_polled_at_only_advances_on_success(idx):
+    feed = podcasts.add_feed(idx, "https://shows.test/feed.xml")
+    with idx.write_transaction() as db:
+        db.execute("UPDATE source_detection_cursors SET last_poll_attempt_ms=2000")
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] is None
+    podcasts.record_feed_meta(idx, feed["id"], ok=False, error="offline", title=None,
+                              description=None, homepage=None, etag=None, last_modified=None)
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] is None
+    with idx.write_transaction() as db:
+        db.execute("UPDATE source_detection_cursors SET last_poll_success_ms=1000")
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] == "1970-01-01T00:00:01Z"
+    with idx.write_transaction() as db:
+        db.execute("UPDATE podcast_feeds SET last_polled_at='2026-01-02T00:00:00Z'")
+    assert podcasts.list_feeds(idx)[0]["last_polled_at"] == "2026-01-02T00:00:00Z"
 
 
 # ---- 3.17.0 review fixes -------------------------------------------------------

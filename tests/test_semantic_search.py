@@ -200,12 +200,92 @@ def test_restart_resumes_only_persisted_opt_in(db, monkeypatch):
     idx, engine = ready(db)
     assert ls.LocalSearch.enabled_at(idx._path.parent)
     calls = []
-    monkeypatch.setattr(engine, "start", lambda: calls.append("start"))
+    monkeypatch.setattr(engine, "_launch", lambda: calls.append("launch"))
     server._resume_local_search()
-    assert calls == ["start"]
+    # The first query opens the saved vectors. Startup launches no worker.
+    assert not calls and engine._warm and not engine._warm_ready.is_set()
+    engine._full = engine._warm = False
     engine.manager.terms_path.unlink()
     server._resume_local_search()
-    assert calls == ["start"]
+    # Without accepted terms nothing resumes: restore() would set _warm.
+    assert not calls and not engine._full and not engine._warm
+
+
+def test_concurrent_search_reads_cached_sources_while_hit_details_load(db, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    idx, engine, _ = db
+    seed(idx, "mars", "Mars has rusty red soil")
+    ready(db)
+    entered, release = Event(), Event()
+    snapshot = engine.sources._snapshot
+    def held(**kwargs):
+        if kwargs.get("cache") is False:  # request-local read of the matched passage
+            entered.set()
+            assert release.wait(5)
+        return snapshot(**kwargs)
+    monkeypatch.setattr(engine.sources, "_snapshot", held)
+    with ThreadPoolExecutor() as pool:
+        first = pool.submit(idx.search_mode, "rusty", mode="semantic")
+        try:
+            assert entered.wait(5)
+            assert engine.embedding_search("rusty")[0].source_id == "mars"
+        finally:
+            release.set()
+        assert first.result(timeout=5)["search_mode"] == "semantic"
+
+
+def test_public_query_during_restore_waits_for_verification(db, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError
+    from threading import Event
+
+    idx, original, _ = db
+    seed(idx, "mars", "Mars has rusty red soil")
+    ready(db)
+    replacement = ls.LocalSearch(original.root, idx, model_factory=FakeModel)
+    monkeypatch.setattr(idx, "_local_search", replacement)
+    entered, release = Event(), Event()
+    verify = replacement.manager.verify
+    def held():
+        entered.set()
+        assert release.wait(5)
+        verify()
+    monkeypatch.setattr(replacement.manager, "verify", held)
+    assert replacement.restore()
+    try:
+        with ThreadPoolExecutor() as pool:
+            first = pool.submit(idx.search_mode, "rusty", mode="semantic")
+            try:
+                assert entered.wait(5)
+                second = pool.submit(idx.search_mode, "rusty", mode="semantic")
+                with pytest.raises(TimeoutError):
+                    second.result(timeout=.15)
+            finally:
+                release.set()
+            for task in (first, second):
+                result = task.result(timeout=5)
+                assert result["search_mode"] == "semantic"
+                assert result["results"][0]["video_id"] == "mars"
+    finally:
+        replacement.close()
+
+
+def test_first_public_semantic_request_uses_persisted_vectors(db, monkeypatch):
+    idx, original, _ = db
+    seed(idx, "mars", "Mars has rusty red soil")
+    ready(db)
+    # Replace the engine just as a new helper process would.
+    replacement = ls.LocalSearch(original.root, idx, model_factory=FakeModel)
+    monkeypatch.setattr(idx, "_local_search", replacement)
+    monkeypatch.setattr(server, "_local_search_singleton", replacement)
+    try:
+        server._resume_local_search()
+        assert replacement._model is None
+        result = idx.search_mode("rusty", mode="semantic")
+        assert result["search_mode"] == "semantic" and result["results"][0]["video_id"] == "mars"
+    finally:
+        replacement.pause(timeout=5)
 
 
 @pytest.mark.parametrize("state,paused,expected", [("not_installed", False, "keyword"),

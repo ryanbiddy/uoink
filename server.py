@@ -3108,9 +3108,7 @@ def _resume_local_search():
     from uoink_core.local_search import LocalSearch
     if LocalSearch.enabled_at(DATA_ROOT):
         try:
-            engine = _get_local_search()
-            if engine.manager.acceptance() and not engine.status()["paused"]:
-                engine.start()
+            _get_local_search().restore()
         except Exception:
             log.warning("Semantic search could not resume; keyword search is available")
 
@@ -3793,6 +3791,8 @@ def _is_youtube_bot_check(e: BaseException) -> bool:
     if not isinstance(e, subprocess.CalledProcessError):
         return False
     text = _subprocess_output(e).lower()
+    if _source_name_from_error(text + "\n" + str(e.cmd)) == "X":
+        return False
     return "not a bot" in text or "confirm you" in text
 
 
@@ -10237,6 +10237,9 @@ def _youtube_429_endpoints(e: BaseException) -> set[str]:
         return set()
     stderr = (e.stderr.decode("utf-8", errors="ignore")
               if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    if re.search(r"\[twitter(?:\]|:)|https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/",
+                 stderr + "\n" + str(e.cmd), re.IGNORECASE):
+        return set()
     endpoints = set()
     for line in stderr.splitlines():
         if not re.search(r"\b429\b", line):
@@ -10415,10 +10418,11 @@ def _error_summary(e: BaseException) -> str:
 
 def _source_name_from_error(text: str) -> str:
     lower = text.lower()
+    if any(marker in lower for marker in ("[twitter]", "[twitter:", "//x.com/", "//www.x.com/", "//mobile.x.com/",
+                                          "//twitter.com/", "//www.twitter.com/", "//mobile.twitter.com/")):
+        return "X"
     if "youtube" in lower or "youtu.be" in lower:
         return "YouTube"
-    if "x.com" in lower or "twitter" in lower:
-        return "X"
     if "tiktok" in lower:
         return "TikTok"
     if "instagram" in lower:
@@ -10434,6 +10438,23 @@ def _plain_error_from_text(text: str) -> str:
               if line.strip().upper().startswith("ERROR:")]
     lower = (errors[-1] if errors else text).lower()
     source = _source_name_from_error(text)
+    if source == "X":
+        for signals, message in (
+            (("tweet was deleted", "post was deleted", "tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"),
+             "X says this post was deleted."),
+            (("protected tweet", "protected post", "protected account"),
+             "The post is from a protected X account."),
+            (("nsfw tweet requires authentication", "age-restricted", "age restricted", "age verification", "age-gated"),
+             "X restricts this video by age."),
+            (("not available in your country", "unavailable in your country", "not available in your region", "withheld in", "geo-restricted", "geoblocked"),
+             "X restricts this video in your region."),
+            (("no video could be found in this tweet", "no video in this post", "does not contain a video"),
+             "This X post has no video to save."),
+            (("too many requests", "http error 429", "rate-limit", "rate limit"),
+             "X is limiting requests. Wait a few minutes and try again."),
+        ):
+            if any(signal in lower for signal in signals):
+                return message
     if ("too many requests" in lower or "http error 429" in lower
             or "rate-limit" in lower or "rate limit" in lower):
         # Terminal contexts store this string, so it can't promise a retry
@@ -14510,14 +14531,8 @@ def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
     under its real GUID. Otherwise the row gets a marked stand-in GUID that a
     later poll of the feed swaps for the real one (podcasts.upsert_episodes,
     source_subscriptions.project_podcast_episode)."""
-    existed = any(f.get("feed_url") == feed_url for f in podcasts.list_feeds(idx))
-    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False, enabled=False, title=item.get("show"))
     feed_id = int(feed["id"])
-    if not existed:
-        podcasts.set_feed_enabled(idx, feed_id, False)
-        podcasts.record_feed_meta(
-            idx, feed_id, title=item.get("show") or None, description=None,
-            homepage=None, etag=None, last_modified=None, ok=True)
     same = podcasts.find_feed_episode(
         idx, feed_id, audio_url=item.get("episode_url"), title=item.get("title"),
         published=item.get("released") or None)
@@ -21979,9 +21994,23 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
         try:
             feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
-            row = podcasts.add_feed(_get_index(), feed_url)
-            if not row.get("enabled", 1):
-                podcasts.set_feed_enabled(_get_index(), int(row["id"]), True)
+            item = suggestions.get_item(DATA_ROOT, sid) or {}
+            title = (str(item.get("show") or "").strip() or urlparse(feed_url).hostname or "")[:200]
+            register = _source_service().register_source(_source_operator_context(), {
+                "kind": "podcast_rss", "url": feed_url, "display_name": title})
+            if not register.get("ok"):
+                raise ValueError("This feed could not be scheduled for checks.")
+            source = register["source"]
+            feed_id = source["legacy"]["feed_id"]
+            with _get_index().write_transaction() as conn:
+                if not feed_id or not conn.execute(
+                        "UPDATE source_subscriptions SET detection_enabled=1, follow_feed=1, "
+                        "display_name=coalesce(nullif(trim(display_name),''), ?) "
+                        "WHERE source_id=? AND archived=0 AND legacy_feed_id=?",
+                        (title, source["source_id"], feed_id)).rowcount:
+                    raise ValueError("This feed could not be scheduled for checks.")
+                conn.execute("UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''), ?) "
+                             "WHERE id=?", (title, feed_id))
         except suggestions.SuggestionError as exc:
             status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
             return self._send_json(status, {"ok": False, "error": str(exc)})
@@ -21990,7 +22019,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             log.exception("/suggestions/podcasts/follow failed")
             return self._send_json(500, {"ok": False, "error": "Couldn't follow this show."})
-        return self._send_json(200, {"ok": True, "id": sid, "feed_id": row.get("id"),
+        return self._send_json(200, {"ok": True, "id": sid, "feed_id": feed_id,
                                      "message": "Following. New episodes show up under Podcasts."})
 
     def _handle_podcasts_episode_to_corpus(self, body):
@@ -27471,7 +27500,9 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
             close_children()
         _remove_suite_lease()
         if _local_search_singleton is not None:
-            _local_search_singleton.pause()
+            # close(), not pause(): a pause here was saved and kept semantic
+            # search paused after every orderly restart.
+            _local_search_singleton.close()
         server.server_close()
 
 
