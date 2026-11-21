@@ -34,6 +34,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Imports keep your folders. X bookmark folders, YouTube playlists, CSV "folder" or "playlist"
   columns and Takeout playlist files become shelves.
 - A shelf you set by hand now survives an index rebuild (it is written to the save's files too).
+  It also stays put when you capture the same page again, re-import it, a transcript arrives
+  later, or Tidy suggests a shelf from before you moved it. Moves from the CLI go through the
+  running helper, and a move that stops halfway is finished on the next start.
+- Undo for a shelf move survives a reload of the dashboard, and a big move that fails partway
+  keeps Undo for what moved.
+- Linux: `install.sh` also stages the shelf model (skipped with `--no-model`).
 - Notes and podcast episodes are shelved like everything else instead of always landing on
   Uncategorized.
 
