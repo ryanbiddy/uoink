@@ -620,7 +620,6 @@ def _watched_segments(segments, cancel_event=None, progress=None, total=None):
                 pass
 
 
-@asr_worker.model_operation
 def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
@@ -652,21 +651,19 @@ def transcribe_media(media_path: str | Path, *,
     ``progress(done_seconds, total_seconds)`` reports how far along it is.
 
     ``checkpoint(segment)`` runs after each decoded segment, before the next
-    one is decoded. The transcript backfill uses it to pause, or to wait
-    while the user captures something; an exception it raises stops here.
-    In the helper the child pauses there and the slot is free meanwhile.
+    one is decoded. Backfill raises here to pause an item and release its engine.
     """
     media = Path(media_path)
     if not media.is_file():
         raise FileNotFoundError(f"media file not found: {media}")
 
     if _transcribe is None and _offload_active():
-        import asr_worker
         result = asr_worker.call("transcribe_media", {
             "media_path": str(media), "model_name": str(model_name),
             "model_root": str(model_root) if model_root is not None else None,
             "language": language, "initial_prompt": initial_prompt, "duration_seconds": duration_seconds,
-        }, cancel_event=cancel_event, progress=progress, checkpoint=checkpoint)
+        }, cancel_event=cancel_event, progress=progress, checkpoint=checkpoint,
+            background=checkpoint is not None)
         if info is not None:
             info.update(result.get("info") or {})
         return [entry_from_json(row) for row in result.get("entries") or []]
@@ -676,11 +673,13 @@ def transcribe_media(media_path: str | Path, *,
     else:
         run_model, language, fallback = _english_guard(media, model_name, model_root, language,
                                                        cancel_event=cancel_event)
+        asr_worker.report_phase("model load")
         model = _load_model(
             run_model,
             model_root,
             local_files_only=True,
         )
+        asr_worker.report_phase("decode")
         segments, detected = model.transcribe(
             str(media),
             beam_size=1,
@@ -753,6 +752,7 @@ def _english_guard(media: Path, model_name: str, model_root, language, *, checke
         return model_name, language, None
     if language is not None and str(language).lower().split("-", 1)[0] == "en":
         return model_name, "en", None
+    asr_worker.report_phase("language check")
     check_model = checker_name
     if not checker_path and model_root and not any(resolve_model(check_model, model_root)):
         check_model = next((name for name in _MODEL_REPOSITORIES if not is_english_only(name)
@@ -896,7 +896,6 @@ def _cluster_low_words(word_rows: list[dict[str, Any]],
     return [_span_from_cluster(cluster, threshold) for cluster in clusters]
 
 
-@asr_worker.model_operation
 def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
                             threshold: float = DEFAULT_THRESHOLD,
                             *,
@@ -919,7 +918,6 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
         raise FileNotFoundError(f"audio file not found: {audio}")
 
     if _transcribe is None and _offload_active():
-        import asr_worker
         rows = asr_worker.call("detect_unreliable_spans", {
             "transcript_text": transcript_text, "audio_path": str(audio),
             "threshold": threshold, "model_name": str(model_name),
@@ -933,7 +931,9 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
         model_name, language, _ = _english_guard(audio, model_name, model_root,
                                                   None if is_english_only(model_name) else "en",
                                                   cancel_event=cancel_event)
+        asr_worker.report_phase("model load")
         model = _load_model(model_name, model_root, local_files_only=True)
+        asr_worker.report_phase("decode")
         segments, _info = model.transcribe(
             str(audio), language=language, word_timestamps=True,
             beam_size=1, best_of=1)

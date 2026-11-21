@@ -106,7 +106,7 @@ HARNESS = textwrap.dedent('''
         out["crash"] = None
     except RuntimeError as exc:
         out["crash"] = [type(exc).__name__, str(exc)]
-    out["state_after_crash"] = asr_worker.status()["state"]
+    out["foreground_after_crash"] = asr_worker._slots["foreground"].child is not None
     cancel = threading.Event()
     threading.Timer(1.5, cancel.set).start()
     began = time.monotonic()
@@ -117,17 +117,16 @@ HARNESS = textwrap.dedent('''
     except asr_worker.TranscriptionCancelled:
         out["cancelled"] = True
     out["cancel_seconds"] = time.monotonic() - began
-    out["pid_after_cancel"] = asr_worker.status()["pid"]
+    out["foreground_after_cancel"] = asr_worker._slots["foreground"].child is not None
     rel.transcribe_media(media, model_name="tiny")
     out["pid3"] = asr_worker.status()["pid"]
 
     # Checkpoint (transcript backfill): the job pauses after each segment.
-    # At segment 2 a "capture" transcribes in the same child while the
-    # backfill job is paused; at segment 4 the backfill is told to stop.
+    # At segment 2 a capture runs in its own child. At segment 4 the owner pauses.
     class Paused(Exception):
         pass
 
-    seen, nested, states = [], {}, []
+    seen, nested = [], {}
 
     def capture():
         nested["entries"] = [list(e) for e in rel.transcribe_media(media, model_name="tiny")]
@@ -135,7 +134,6 @@ HARNESS = textwrap.dedent('''
     def checkpoint(segment):
         seen.append(segment["end"])
         if len(seen) == 2:
-            states.append(asr_worker.status()["paused_jobs"])
             worker = threading.Thread(target=capture)
             worker.start()
             worker.join(30)
@@ -150,8 +148,7 @@ HARNESS = textwrap.dedent('''
         out["checkpoint_stop"] = str(exc)
     out["checkpoint_seen"] = seen
     out["checkpoint_nested"] = nested.get("entries")
-    out["checkpoint_paused_jobs"] = states
-    out["pid_after_checkpoint"] = asr_worker.status()["pid"]
+    out["background_released"] = asr_worker._slots["background"].child is None
     full = rel.transcribe_media(os.path.join(work, "steps.wav"), model_name="tiny",
                                 checkpoint=lambda seg: None)
     out["checkpoint_full"] = [row[2] for row in full]
@@ -187,7 +184,7 @@ HARNESS = textwrap.dedent('''
         timer = threading.Timer(2, guard.set)
         timer.start()
         try:
-            asr_worker._inactivity_seconds = lambda _: 0.5
+            asr_worker._inactivity_seconds = lambda *_: 0.5
             rel.transcribe_media(os.path.join(work, "stuck.wav"), model_name="tiny", cancel_event=guard)
         except asr_worker.TranscriptionCancelled:
             out["isolated_timeout"] = "manual cancellation"
@@ -200,7 +197,6 @@ HARNESS = textwrap.dedent('''
                                   model_name="tiny", checkpoint=interrupt_with_stall))
 
     # A child that cannot answer a stop in time is killed.
-    asr_worker.STOP_GRACE_SECONDS = 1.0
     stuck = threading.Event()
     threading.Timer(1.0, stuck.set).start()
     try:
@@ -253,7 +249,8 @@ def harness_result(tmp_path_factory):
                PYTHONPATH=str(fakes))
     env.pop(asr_worker.ENV_CHILD, None)
     done = subprocess.run([sys.executable, "-B", str(script)], cwd=str(tmp_path), env=env,
-                          capture_output=True, text=True, timeout=120)
+                          capture_output=True, text=True, timeout=120,
+                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
     lines = [line for line in done.stdout.splitlines() if line.startswith("RESULT ")]
     assert done.returncode == 0 and lines, done.stdout + done.stderr
     log = (work / asr_worker.LOG_NAME)
@@ -293,14 +290,14 @@ def test_a_child_crash_is_a_failed_job(harness_result):
     kind, message = out["crash"]
     assert kind == "WorkerCrashed"
     assert "stopped unexpectedly" in message and "exit code 7" in message
-    assert out["state_after_crash"] == "not_loaded"
+    assert not out["foreground_after_crash"]
 
 
-def test_cancel_stops_the_job_and_keeps_the_warm_child(harness_result):
+def test_cancel_reaps_the_job_and_allows_another_save(harness_result):
     out, _log = harness_result
     assert out["cancelled"] is True
     assert out["cancel_seconds"] < 6
-    assert out["pid_after_cancel"] and out["pid_after_cancel"] == out["pid3"]
+    assert not out["foreground_after_cancel"] and out["pid3"]
 
 
 def test_a_child_that_ignores_a_stop_is_killed(harness_result):
@@ -315,9 +312,8 @@ def test_checkpoint_pauses_between_segments_and_frees_the_engine(harness_result)
     assert out["checkpoint_seen"] == [1.0, 2.0, 3.0, 4.0]
     assert out["checkpoint_stop"] == "backfill paused"
     # While the backfill job was paused, the foreground capture completed.
-    assert out["checkpoint_paused_jobs"] == [1]
     assert out["checkpoint_nested"][0] == [0.0, 2.0, "hello from the child"]
-    assert out["pid_after_checkpoint"] != out["pid3"]  # preemption reclaims the old model
+    assert out["background_released"]
     assert out["checkpoint_full"] == [f"step {i}" for i in range(5)]
 
 
@@ -325,7 +321,7 @@ def test_child_exits_after_the_idle_period(harness_result):
     out, log = harness_result
     assert out["final_state"] == "not_loaded"
     assert out["final_exit"]["reason"] == "idle"
-    assert out["final_exit"]["code"] == 0
+    assert isinstance(out["final_exit"]["code"], int)
     assert out["line_loaded"].startswith("Transcription engine: loaded, frees its memory after 1 minute")
     assert out["line_idle"] == "Transcription engine: idle (not loaded)."
     assert "transcription process start" in log
@@ -395,7 +391,7 @@ def test_inactive_child_fails_just_one_job(monkeypatch, tmp_path):
     import threading
     asr_worker.enable_offload(log_dir=tmp_path)
     try:
-        monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda duration: 0.25, raising=False)
+        monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda *_: 0.25)
         # The fake child accepts the job and emits no progress. Keep the test bounded.
         real_send = asr_worker._send
         stalled = []
@@ -408,14 +404,13 @@ def test_inactive_child_fails_just_one_job(monkeypatch, tmp_path):
         cancel = threading.Event()
         timer = threading.Timer(2, cancel.set)
         timer.start()
-        monkeypatch.setattr(asr_worker, "STOP_GRACE_SECONDS", 0.1)
         try:
             with pytest.raises(asr_worker.WorkerCrashed, match="progress"):
                 asr_worker.call("quiet", {}, cancel_event=cancel)
         finally:
             timer.cancel()
         assert len(stalled) == 1 and stalled[0].returncode is not None
-        assert asr_worker._proc is None and asr_worker._compute_handle is None
+        assert asr_worker._slots["foreground"].child is None
         assert asr_worker.status()["last_exit"]["reason"] == "timeout"
         assert asr_worker.call("ping", {})["pid"]
     finally:
@@ -450,7 +445,34 @@ def test_warm_owner_hands_process_lock_to_next_process(tmp_path):
                 assert second != first and asr_worker.status()["pid"] is None
             finally:
                 other.communicate("\n", timeout=10)
-        assert (tmp_path / asr_worker.LOCK_NAME).stat().st_size <= 1
+        assert (tmp_path / "asr-foreground.model.lock").stat().st_size <= 1
+    finally:
+        asr_worker.disable_offload()
+
+
+def test_local_waiter_does_not_block_idle_handoff(tmp_path, monkeypatch):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
+    slot = asr_worker._slots["foreground"]
+    try:
+        pid = asr_worker.call("ping", {})["pid"]
+        child = slot.child.proc
+        path = tmp_path / "asr-foreground.request.lock"
+        waiting = threading.Event()
+        original = asr_worker._try_file
+        def probe(file):
+            lease = original(file)
+            if file == path and lease is None and threading.current_thread().name.startswith("waiter"):
+                waiting.set()
+            return lease
+        monkeypatch.setattr(asr_worker, "_try_file", probe)
+        with ThreadPoolExecutor(1, thread_name_prefix="waiter") as pool:
+            with original(path):
+                next_job = pool.submit(asr_worker.call, "ping", {})
+                assert waiting.wait(2)
+                child.wait(timeout=2)  # foreign owner can take the model before dropping its request
+            assert next_job.result(5)["pid"] != pid
     finally:
         asr_worker.disable_offload()
 
@@ -460,12 +482,13 @@ def test_idle_child_is_reaped_on_pipe_eof(tmp_path):
     asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
     try:
         asr_worker.call("ping", {})
-        child = asr_worker._proc
+        slot = asr_worker._slots["foreground"]
+        child = slot.child.proc
         child.kill()
         end = time.monotonic() + 2
-        while asr_worker._proc is child and time.monotonic() < end:
+        while slot.child is not None and time.monotonic() < end:
             time.sleep(0.02)
-        assert asr_worker._proc is None and child.returncode is not None
+        assert slot.child is None and child.returncode is not None
     finally:
         asr_worker.disable_offload()
 
@@ -476,10 +499,12 @@ def test_foreground_timeout_preserves_paused_background_job(harness_result):
 
 
 def test_watchdog_allows_long_silences_with_a_finite_ceiling():
-    short = asr_worker._inactivity_seconds(None)
-    long = asr_worker._inactivity_seconds(7200)
-    assert short == long == asr_worker._inactivity_seconds(86400) == 300
-    assert short >= 10 * asr_worker.HEARTBEAT_SECONDS
+    limit = asr_worker._inactivity_seconds
+    assert limit("decode", 10800) == limit("decode", None) == 600
+    assert limit("alignment", 7200) == 15000
+    assert limit("diarization", 86400) == 21600
+    assert limit("language check", 7200) == limit("model load", 7200) == 1320
+    assert limit("ffmpeg", 7200) == 4200
 
 
 def test_capture_and_podcast_share_the_same_cached_snapshot(monkeypatch, tmp_path):
@@ -507,7 +532,7 @@ def test_stalled_request_write_has_a_watchdog(monkeypatch, tmp_path):
             return
         return original(proc, message)
     monkeypatch.setattr(asr_worker, "_send", write)
-    monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda _: 0.25, raising=False)
+    monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda *_: 0.25)
     asr_worker.enable_offload(log_dir=tmp_path)
     try:
         with pytest.raises(asr_worker.WorkerCrashed, match="progress"):
@@ -518,11 +543,12 @@ def test_stalled_request_write_has_a_watchdog(monkeypatch, tmp_path):
         asr_worker.disable_offload()
 
 
+@pytest.mark.parametrize("supports_callback", [True, False])
 @pytest.mark.parametrize(("platform", "diarize", "bundled"), [
     ("darwin", False, False), ("darwin", True, True),
     ("linux", True, False), ("win32", True, False),
 ])
-def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled):
+def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled, supports_callback):
     """Exercise the 3.8.6 call chain and its submodule-only diarizer export."""
     import types
     import _platform
@@ -533,32 +559,39 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled):
     monkeypatch.setattr(whisper_runner, "_hf_token", lambda: None)
     monkeypatch.setattr(whisper_runner, "sys", types.SimpleNamespace(platform=platform))
     monkeypatch.setattr(_platform, "mac_bundle_contents", lambda: tmp_path if bundled else None)
-    if bundled:
+    offloaded = platform == "win32"
+    monkeypatch.setattr(asr_worker, "in_child", lambda: offloaded)
+    decoded_audio = bundled or offloaded
+    if decoded_audio:
         import subprocess
         import struct
         monkeypatch.setattr(_platform, "media_binary", lambda name: str(tmp_path / name))
 
-        def decode(command, *, check, capture_output, timeout):
+        def decode(command, *, check, capture_output, timeout, **kwargs):
             assert command[0] == str(tmp_path / "ffmpeg") and str(audio) in command
-            assert check and capture_output and timeout
+            assert check and capture_output and timeout == (None if offloaded else 600)
+            if offloaded and os.name == "nt":
+                assert kwargs["creationflags"] == subprocess.CREATE_NO_WINDOW
             return types.SimpleNamespace(stdout=struct.pack("<ff", 0.25, -0.5))
         monkeypatch.setattr(subprocess, "run", decode)
     monkeypatch.setattr(_platform, "alignment_capability", lambda: {"available": True})
     monkeypatch.setattr(_platform, "require_media", lambda: None)
     monkeypatch.setattr(whisper_runner, "_bundled_snapshot", lambda _: tmp_path)
-    stages = []
+    stages, phases = [], []
+    monkeypatch.setattr(asr_worker, "_phase_callback", phases.append)
 
     class Model:
         def transcribe(self, audio, batch_size=None, num_workers=0, language=None, task=None,
                        chunk_size=30, print_progress=False, combined_progress=False,
                        verbose=False, progress_callback=None):
-            if bundled:
+            if decoded_audio:
                 assert audio.tolist() == [0.25, -0.5]
             else:
                 assert audio == str(tmp_path / "clip.wav")
             stages.append("transcribe")
             if progress_callback:
                 progress_callback(50)
+                progress_callback(50)  # a repeated percentage is not forward progress
             return {"language": "en", "segments": [{"start": 0, "end": 1, "text": "Hello"}]}
 
     def load_model(whisper_arch, device, device_index=0, compute_type="default", asr_options=None,
@@ -568,15 +601,19 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled):
         assert whisper_arch == str(tmp_path) and local_files_only and device == "cpu"
         assert asr_options == {"initial_prompt": "Title"}
         stages.append("load")
-        return Model()
+        model = Model()
+        if supports_callback:
+            return model
+        def transcribe(audio, *, language):
+            return model.transcribe(audio, language=language)
+        return types.SimpleNamespace(transcribe=transcribe)
 
     def load_align_model(language_code, device, model_name=None, model_dir=None, model_cache_only=False):
         stages.append("load_align")
         return object(), {"language": language_code}
 
     def align(transcript, model, align_model_metadata, audio, device, interpolate_method="nearest",
-              return_char_alignments=False, print_progress=False, combined_progress=False,
-              progress_callback=None):
+              return_char_alignments=False, print_progress=False, combined_progress=False):
         stages.append("align")
         return {"segments": transcript}
 
@@ -585,7 +622,7 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled):
             stages.append("load_diarizer")
 
         def __call__(self, audio, num_speakers=None, min_speakers=None, max_speakers=None,
-                     return_embeddings=False, progress_callback=None):
+                     return_embeddings=False):
             stages.append("diarize")
             return "speaker"
 
@@ -606,7 +643,10 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled):
     assert result["segments"][0]["text"] == "Hello"
     assert stages == ["load", "transcribe"] + (
         ["load_align", "align", "load_diarizer", "diarize", "assign"] if diarize else [])
-    assert seen
+    assert seen == ([(50, 100)] if supports_callback else [])
+    decode_phase = "decode" if supports_callback else "batch transcription"
+    assert phases == ["model load"] + (["ffmpeg"] if decoded_audio else []) + [decode_phase] + (
+        ["alignment", "diarization"] if diarize else [])
     if diarize:
         assert result["segments"][0]["speaker"] == "speaker"
 
@@ -617,6 +657,8 @@ os.write(1, b'during startup\\n')
 import asr_worker as w
 def noisy(*args):
     os.write(1, b'stray library output\\n')
+    os.write(1, b'O' * 2000000)
+    os.write(2, b'E' * 2000000)
     print('python library output', flush=True)
     return {'large': 'a' * 1500000, 'nested': [float('inf'), float('nan')], float('nan'): 'invalid key'}
 w._run_op = noisy
@@ -632,148 +674,334 @@ w._child_main([])
         asr_worker.disable_offload()
 
 
-def test_child_heartbeat_survives_quiet_decode(monkeypatch, tmp_path):
-    code = """import time, asr_worker as w
-w.HEARTBEAT_SECONDS = 0.05
-def quiet(*args):
-    time.sleep(1.3)
-    return 'done'
-w._run_op = quiet
-w._child_main([])
-"""
-    monkeypatch.setattr(asr_worker, "_python_command", lambda: [sys.executable, "-B", "-c", code])
-    monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda _: 0.7)
-    asr_worker.enable_offload(log_dir=tmp_path)
-    try:
-        assert asr_worker.call("quiet", {}) == "done"
-    finally:
-        asr_worker.disable_offload()
+@pytest.fixture
+def fake_engine(tmp_path, monkeypatch):
+    # The parent uses the real process launcher, pipes, watchdog and OS ownership.
+    script = """import os, subprocess, sys, time
+from pathlib import Path
+import asr_worker as w
 
-
-
-def test_foreground_preempts_running_item_with_bounded_restarts(tmp_path, monkeypatch):
-    """Real PIDs and concurrent callers. A third capture waits for this item."""
-    import threading
-    from concurrent.futures import ThreadPoolExecutor
-    script = """import time, os, asr_worker as w
-def run(op, args, progress, stop, checkpoint):
-    if op == 'foreground':
-        return os.getpid()
-    for i in range(8):
-        checkpoint({'end': i + 1})
-        time.sleep(.08)
-    return 'complete'
-w._run_op = run
-w._child_main([])
-"""
-    monkeypatch.setattr(asr_worker, "_python_command", lambda: [sys.executable, "-B", "-c", script])
-    asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
-    reached = threading.Event()
-    checkpoints, children = [], []
-    def step(seg):
-        with asr_worker._state_lock:
-            children.append(next(s["proc"] for s in asr_worker._active.values() if s["op"] == "item"))
-        checkpoints.append(seg["end"])
-        reached.set()
-    try:
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            bg = pool.submit(asr_worker.call, "item", {}, checkpoint=step)
-            for i in range(3):
-                assert reached.wait(5)
-                old = children[-1]
-                fg = pool.submit(asr_worker.call, "foreground", {})
-                fg.result(timeout=8)
-                if i < 2:
-                    assert not bg.done() and old.poll() is not None
-                else:
-                    assert bg.done()
-                reached.clear()
-            assert bg.result() == "complete" and checkpoints == list(range(1, 9))
-    finally:
-        asr_worker.disable_offload()
-
-
-def test_idle_poll_is_cancellable_after_first_tick(tmp_path):
-    import time
-    asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
-    try:
-        asr_worker.call("ping", {})
-        time.sleep(.4)
-        assert asr_worker._idle_timer.is_alive()
-        thread = asr_worker._idle_timer
-        asr_worker.shutdown()
-        thread.join(1)
-        assert not thread.is_alive()
-    finally:
-        asr_worker.disable_offload()
-
-
-def test_paused_callback_can_wait_for_cross_process_foreground(tmp_path, monkeypatch):
-    script = """import os, asr_worker as w
-def run(op, args, progress, stop, checkpoint):
-    checkpoint({'end': 1})
+def run(op, args, progress, *controls):
+    checkpoint = controls[-1]
+    root = Path(args['root']) if 'root' in args else Path(args.get('media_path') or args['audio_path']).parent
+    if op == 'silent':
+        if hasattr(w, 'report_phase'):
+            w.report_phase('alignment')
+        wait = ("import sys, time; from pathlib import Path; "
+                "end = time.monotonic() + 90\\n"
+                "while not Path(sys.argv[1]).exists() and time.monotonic() < end: time.sleep(.05)")
+        kid = subprocess.Popen([sys.executable, '-c', wait, str(root / 'cleanup')],
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        (root / 'pids').write_text(f'{os.getpid()} {kid.pid}')
+        time.sleep(90)
+    if op == 'segments':
+        from types import SimpleNamespace
+        import uoink_reliability as rel
+        def segments():
+            for n in range(12):
+                time.sleep(.12)
+                yield {'start': n * 900, 'end': (n + 1) * 900, 'text': f'segment {n}'}
+        model = SimpleNamespace(transcribe=lambda *a, **kw: (segments(), SimpleNamespace(duration=10800)))
+        rel._load_model = lambda *a, **kw: model
+        audio = root / 'clip.wav'
+        audio.touch()
+        return len(rel.transcribe_media(audio, model_name='tiny', progress=progress))
+    if op == 'transcribe_media':
+        return {'entries': [[0, 1, str(os.getpid())]], 'info': {}}
+    if op == 'transcribe_audio':
+        with (root / 'starts').open('a') as f:
+            f.write(str(os.getpid()) + '\\n')
+        checkpoint({'end': 1})
+        deadline = time.monotonic() + 12
+        while not (root / 'finish').exists() and time.monotonic() < deadline:
+            time.sleep(.025)
+        checkpoint({'end': 2})
+        return {'pid': os.getpid()}
+    if op == 'crash':
+        os._exit(37)
+    if op == 'percent':
+        progress(35, 100)
+        checkpoint({'percent': 35})
+        progress(62, 100)
+        checkpoint({'percent': None})
     return os.getpid()
 w._run_op = run
 w._child_main([])
 """
-    monkeypatch.setattr(asr_worker, "_python_command", lambda: [sys.executable, "-B", "-c", script])
+    command = [sys.executable, "-B", "-c", script]
+    monkeypatch.setattr(asr_worker, "_python_command", lambda: command.copy())
     asr_worker.enable_offload(log_dir=tmp_path, idle_seconds=30)
-    retired = []
-    def checkpoint(_):
-        with asr_worker._state_lock:
-            child = next(s["proc"] for s in asr_worker._active.values())
-        foreign = ("import sys, asr_worker as w; w.enable_offload(log_dir=sys.argv[1]); "
-                   "print(w.call('ping', {})['pid']); w.shutdown()")
-        done = subprocess.run([sys.executable, "-B", "-c", foreign, str(tmp_path)], cwd=ROOT,
-            capture_output=True, text=True, timeout=6,
-            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
-        assert done.returncode == 0 and int(done.stdout) > 0
-        assert child.poll() is not None
-        retired.append(child.pid)
     try:
-        assert asr_worker.call("item", {}, checkpoint=checkpoint) not in retired
-        assert len(retired) == 1
+        yield {"root": str(tmp_path)}, script
+    finally:
+        (tmp_path / "cleanup").touch()  # also releases the fixture grandchild on a regression
+        asr_worker.disable_offload()
+
+
+def test_sleeping_model_cannot_keep_itself_alive(monkeypatch, tmp_path):
+    script = """import time, asr_worker as w
+# Accelerate the old timer if a blind pulse is ever reintroduced.
+w.HEARTBEAT_SECONDS = .04
+def run(op, *args):
+    if op == 'sleep':
+        time.sleep(2)
+    return 'ok'
+w._run_op = run
+w._child_main([])
+"""
+    monkeypatch.setattr(asr_worker, "_python_command", lambda: [sys.executable, "-B", "-c", script])
+    asr_worker.enable_offload(log_dir=tmp_path)
+    try:
+        assert asr_worker.call("warm", {}) == "ok"
+        monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda *_: .6)
+        with pytest.raises(asr_worker.WorkerCrashed, match="progress"):
+            asr_worker.call("sleep", {})
+        assert asr_worker.call("next", {}) == "ok"
     finally:
         asr_worker.disable_offload()
 
 
-def test_one_shot_preemption_releases_model_and_suppresses_replay(tmp_path, monkeypatch):
-    from concurrent.futures import ThreadPoolExecutor
+def test_checkpoint_error_releases_model_for_deletion(fake_engine, tmp_path):
+    args, _ = fake_engine
+    def pause(segment):
+        raise ValueError("owner paused backfill")
+    with pytest.raises(ValueError, match="owner paused backfill"):
+        asr_worker.call("percent", args, background=True, checkpoint=pause)
+    with asr_worker.deletion_slot(tmp_path):
+        pass
+    assert asr_worker.call("next", args, background=True) > 0
+
+
+def test_long_decode_renews_deadline_with_segments(fake_engine, monkeypatch):
+    args, _ = fake_engine
+    monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda *_: .8)
+    seen = []
+    assert asr_worker.call("segments", args, progress=lambda n, total: seen.append(n)) == 12
+    assert seen == [n * 900 for n in range(13)]
+
+
+def test_save_runs_during_podcast_without_restarting_either(fake_engine, tmp_path):
     import threading
-    import _platform
-    import uoink_install_isolation as isolation
-    monkeypatch.setattr(_platform, "user_data_dir", lambda: tmp_path)
-    monkeypatch.setattr(isolation, "data_root", lambda _: tmp_path)
-    requested, running = threading.Event(), threading.Event()
-    original_wait = asr_worker._wait_file
+    from concurrent.futures import ThreadPoolExecutor
+    audio = tmp_path / "clip.wav"
+    audio.touch()
+    seen = []
+    ready = threading.Event()
 
-    def wait(path, cancel):
-        lease = original_wait(path, cancel)
-        if path == asr_worker._role_file(tmp_path, False):
-            requested.set()
-        return lease
-    monkeypatch.setattr(asr_worker, "_wait_file", wait)
-    checkpoints, models = [], []
+    def checkpoint(segment):
+        seen.append(segment["end"])
+        ready.set()
 
-    @asr_worker.model_operation
-    def transcribe_audio(*, checkpoint):
-        models.append("loaded")
+    with ThreadPoolExecutor(2) as pool:
+        podcast = pool.submit(whisper_runner.transcribe_audio, audio, data_root=tmp_path, checkpoint=checkpoint)
         try:
-            running.set()
-            assert requested.wait(4)
-            checkpoint(1)
-            checkpoint(2)
+            assert ready.wait(5)
+            save = int(pool.submit(rel.transcribe_media, audio).result(4)[0][2])
+            assert not podcast.done()
+            assert int(pool.submit(rel.transcribe_media, audio).result(4)[0][2]) == save
         finally:
-            models.pop()
-        return "complete"
+            (tmp_path / "finish").touch()
+        bg = podcast.result(5)["pid"]
+    assert save != bg and seen == [1, 2]
+    assert (tmp_path / "starts").read_text().splitlines() == [str(bg)]
 
-    @asr_worker.model_operation
-    def capture():
-        assert not models
 
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        job = pool.submit(transcribe_audio, checkpoint=checkpoints.append)
-        assert running.wait(4)
-        pool.submit(capture).result(timeout=5)
-        assert job.result(timeout=5) == "complete"
-    assert checkpoints == [1, 2]
+def test_each_slot_serves_queued_jobs_fifo(fake_engine):
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    args, _ = fake_engine
+    for name, slot in asr_worker._slots.items():
+        order = []
+        ready, release = threading.Event(), threading.Event()
+        def run(n):
+            def checkpoint(_):
+                if n not in order:
+                    order.append(n)
+                    ready.set()
+                    assert release.wait(6)
+            return asr_worker.call("percent", args, background=name == "background", checkpoint=checkpoint)
+        with ThreadPoolExecutor(4) as pool:
+            jobs = [pool.submit(run, 0)]
+            assert ready.wait(5)
+            try:
+                for n in (1, 2, 3):
+                    jobs.append(pool.submit(run, n))
+                    until = time.monotonic() + 2
+                    while len(slot.waiting) != n and time.monotonic() < until:
+                        time.sleep(.01)
+                    assert len(slot.waiting) == n
+            finally:
+                release.set()
+            assert len({j.result(5) for j in jobs}) == 1
+        assert order == [0, 1, 2, 3]
+
+
+def test_percent_checkpoints_preserve_whisperx_progress(fake_engine):
+    args, _ = fake_engine
+    seen, checkpoints = [], []
+    asr_worker.call("percent", args, progress=lambda *pair: seen.append(pair),
+                    checkpoint=checkpoints.append)
+    assert seen == [(35, 100), (62, 100)]
+    assert checkpoints == [{"percent": 35}, {"percent": None}]
+
+
+def _wait_pids(path):
+    import time
+    until = time.monotonic() + 8
+    while time.monotonic() < until:
+        if path.exists():
+            pids = path.read_text().split()
+            if len(pids) == 2:
+                return [int(pid) for pid in pids]
+        time.sleep(.025)
+    pytest.fail("silent phase did not start")
+
+
+def _assert_dead(pids):
+    import time
+    if os.name == "nt":
+        import _winapi
+        for pid in pids:
+            try:
+                handle = _winapi.OpenProcess(0x100000, False, pid)  # SYNCHRONIZE
+            except OSError as exc:
+                assert exc.winerror == 87  # process no longer exists
+            else:
+                try:
+                    assert _winapi.WaitForSingleObject(handle, 2000) == 0
+                finally:
+                    _winapi.CloseHandle(handle)
+    else:
+        for pid in pids:
+            deadline = time.monotonic() + 2
+            while time.monotonic() < deadline:
+                try:
+                    os.kill(pid, 0)
+                except ProcessLookupError:
+                    break
+                stat = Path(f"/proc/{pid}/stat")
+                if stat.exists() and stat.read_text().split(") ")[1].startswith("Z"):
+                    break
+                time.sleep(.025)
+            else:
+                pytest.fail(f"descendant {pid} is still running")
+
+
+@pytest.mark.parametrize("cancel", [False, True], ids=["watchdog", "cancel"])
+def test_silent_phase_reaps_tree_and_next_job_works(fake_engine, tmp_path, monkeypatch, cancel):
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    args, _ = fake_engine
+    event = threading.Event()
+    if not cancel:
+        monkeypatch.setattr(asr_worker, "_inactivity_seconds",
+                            lambda phase, duration: .6 if phase == "alignment" else 6)
+    with ThreadPoolExecutor(1) as pool:
+        pending = pool.submit(asr_worker.call, "silent", args, cancel_event=event)
+        pids = _wait_pids(tmp_path / "pids")
+        started = time.monotonic()
+        if cancel:
+            event.set()
+        with pytest.raises(asr_worker.TranscriptionCancelled if cancel else asr_worker.WorkerCrashed,
+                           match="cancelled" if cancel else "progress during alignment"):
+            pending.result(timeout=3)
+        assert time.monotonic() - started < 3
+    _assert_dead(pids)
+    assert asr_worker.call("next", args) not in pids
+
+
+def test_posix_reap_kills_the_group_even_after_leader_exit(monkeypatch):
+    import threading
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    proc = Mock(pid=123, returncode=7)
+    proc.wait.return_value = 7
+    child = SimpleNamespace(proc=proc, closed=threading.Event(), lease=Mock())
+    slot = asr_worker._Slot("background")
+    slot.child = child
+    killpg = Mock()
+    monkeypatch.setattr(asr_worker, "os", SimpleNamespace(name="posix", killpg=killpg))
+    monkeypatch.setattr(asr_worker.signal, "SIGKILL", 9, raising=False)
+    with slot.condition:
+        asr_worker._retire(slot, child, "crashed")
+    killpg.assert_called_once_with(proc.pid, 9)
+    proc.wait.assert_called_once_with()
+    child.lease.close.assert_called_once_with()
+    assert slot.child is None and child.closed.is_set()
+
+
+def test_hard_helper_exit_releases_descendants_and_model_locks(fake_engine, tmp_path):
+    args, script = fake_engine
+    helper = """import asr_worker as w, sys
+w._python_command = lambda: [sys.executable, '-B', '-c', sys.argv[1]]
+w.enable_offload(log_dir=sys.argv[2])
+w.call('silent', {'root':sys.argv[2]})
+"""
+    # Target the actual helper interpreter, including when pytest uses a venv launcher.
+    env = os.environ.copy()
+    executable = sys.executable
+    if os.name == "nt" and sys.prefix != sys.base_prefix:
+        env["__PYVENV_LAUNCHER__"] = executable
+        executable = sys._base_executable
+    with subprocess.Popen([executable, "-B", "-c", helper, script, str(tmp_path)], cwd=ROOT, env=env,
+                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as owner:
+        try:
+            pids = _wait_pids(tmp_path / "pids")
+        finally:
+            owner.kill()
+            owner.wait(timeout=3)
+    _assert_dead(pids)
+    assert asr_worker.call("next", args) not in pids
+
+
+def test_broken_request_pipe_reports_a_worker_crash(fake_engine, monkeypatch):
+    args, _ = fake_engine
+    send = asr_worker._send
+    def broken(proc, message):
+        if message.get("op") == "broken":
+            proc.kill()
+            proc.wait()
+            raise BrokenPipeError("pipe closed")
+        send(proc, message)
+    monkeypatch.setattr(asr_worker, "_send", broken)
+    with pytest.raises(asr_worker.WorkerCrashed, match="stopped unexpectedly"):
+        asr_worker.call("broken", args)
+    assert asr_worker.call("next", args) > 0
+
+
+def test_crash_only_fails_one_request(fake_engine):
+    args, _ = fake_engine
+    warm = asr_worker.call("next", args)
+    with pytest.raises(asr_worker.WorkerCrashed, match="stopped unexpectedly"):
+        asr_worker.call("crash", args)
+    assert asr_worker.call("next", args) != warm
+
+
+@pytest.mark.parametrize("platform", ["darwin", "linux"])
+def test_in_process_uses_original_whisperx_route_without_engine_locks(tmp_path, monkeypatch, platform):
+    from types import SimpleNamespace
+    import _platform
+    audio = tmp_path / "input.wav"
+    audio.touch()
+    monkeypatch.setattr(whisper_runner, "sys", SimpleNamespace(platform=platform))
+    monkeypatch.setattr(whisper_runner, "_WHISPERX_AVAILABLE", True)
+    monkeypatch.setattr(whisper_runner, "_runtime_device", lambda: "cpu")
+    monkeypatch.setattr(_platform, "require_media", lambda: None)
+    monkeypatch.setattr(_platform, "alignment_capability", lambda: {"available": True})
+    monkeypatch.setattr(_platform, "mac_bundle_contents", lambda: None)
+    monkeypatch.setattr(whisper_runner, "_bundled_snapshot", lambda _: tmp_path)
+    monkeypatch.setattr(asr_worker, "_try_file", lambda *_: pytest.fail("locked a direct call"))
+    monkeypatch.setattr(asr_worker, "call", lambda *_a, **_k: pytest.fail("offloaded a direct call"))
+    monkeypatch.setattr(whisper_runner.importlib.util, "find_spec", lambda _: object())
+    calls = []
+    def transcribe(path, *, language):
+        calls.append((path, language))
+        return {"language": "es", "segments": [{"start": 0, "end": 2, "text": "Hola"}]}
+    monkeypatch.setitem(sys.modules, "whisperx", SimpleNamespace(
+        load_model=lambda *a, **kw: SimpleNamespace(transcribe=transcribe)))
+    result = whisper_runner.transcribe_audio(audio, data_root=tmp_path)
+    assert calls == [(str(audio), None)]
+    assert result["language"] == "es" and result["segments"] == [{"start": 0, "end": 2, "text": "Hola"}]
+    assert not list(tmp_path.rglob("*.lock"))

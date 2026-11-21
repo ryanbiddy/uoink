@@ -279,6 +279,7 @@ def test_bundled_base_checks_mixed_podcast_and_capture(monkeypatch, tmp_path, me
             lang = "en" if path == "intro" else "es"
             return [seg(0, 2, "Buenos dias.")], SimpleNamespace(language=lang, language_probability=0.99)
     monkeypatch.setattr(rel, "_import_faster_whisper", lambda: Multilingual)
+    monkeypatch.setattr(runner.asr_worker, "in_child", lambda: True)
     monkeypatch.setattr(runner, "plain_engine_for", lambda _: True)
     for run in ("capture", "podcast"):
         calls.clear()
@@ -353,6 +354,31 @@ def test_language_probe_music_speech_and_silence(tmp_path, monkeypatch, intro_va
                 duration_after_vad=20 if speech else (intro_vad_seconds if audio.max() else 0))
     monkeypatch.setattr(rel, "_load_model", lambda *a, **kw: Checker())
     assert rel._english_guard(path, "distil-small.en", None, None) == ("distil-small.en", "en", None)
+
+
+@pytest.mark.parametrize(("speech", "expected"), [
+    ("en", "distil-small.en"), ("es", "base"),
+])
+def test_english_only_model_after_forty_seconds_of_music(media, monkeypatch, speech, expected):
+    # Three consecutive 20-second windows. VAD finds music in the first two.
+    english = FakeModel("distil-small.en")
+    class Checker(FakeModel):
+        def transcribe(self, audio, **kwargs):
+            if isinstance(audio, int):
+                assert kwargs["vad_filter"]
+                return [], SimpleNamespace(language="fr" if audio < 40 else speech,
+                    language_probability=.99, duration_after_vad=0 if audio < 40 else 19)
+            return super().transcribe(audio, **kwargs)
+    loads = models(monkeypatch, base=Checker("base", language=speech), **{"distil-small.en": english})
+    monkeypatch.setattr(rel, "_language_samples", lambda *_: iter((0, 20, 40)))
+    info = {}
+    phases = []
+    monkeypatch.setattr(rel.asr_worker, "_phase_callback", phases.append)
+    rows = rel.transcribe_media(media, model_name="distil-small.en", info=info)
+    assert phases == ["language check", "model load", "decode"]
+    assert loads == ["base", expected] and info["language"] == speech
+    assert rows[0][2] == f"spoken words from {expected}"
+    assert bool(english.calls) == (speech == "en")
 
 
 @pytest.mark.parametrize("empty", [True, False])

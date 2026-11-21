@@ -2955,6 +2955,8 @@ _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 # at a time, on a below-normal-priority worker thread. Queue state is mirrored
 # into the durable jobs table through the ordinary job helpers below.
 _podcast_transcription_queue: queue.Queue[str] = queue.Queue()
+_retranscribe_queue: queue.Queue[str] = queue.Queue()
+_retranscribe_worker_thread: threading.Thread | None = None
 _podcast_transcription_worker_lock = threading.Lock()
 _podcast_transcription_worker_thread: threading.Thread | None = None
 # Feed HTTP polls are short compared with media work, but a manual refresh can
@@ -11230,9 +11232,6 @@ def _podcast_transcription_worker() -> None:
                 job = dict(_jobs.get(job_id) or {})
             if not job or job.get("state") in _JOB_TERMINAL_STATES:
                 continue
-            if job.get("kind") == RETRANSCRIBE_KIND:   # 3.18: same queue, same engine
-                _run_retranscribe_job(job_id)
-                continue
             episode_id = int(job["episode_id"])
             if not job.get("source_start_id"):
                 # AS-03: a manual job shares the cross-process capture-identity
@@ -12071,9 +12070,7 @@ RETRANSCRIBE_KIND = "retranscribe"
 
 
 def queue_retranscribe(body: dict) -> tuple[dict, int]:
-    """Queue "Transcribe again with <model>" for one saved video. It runs on
-    the same queue as podcast transcription, and every model runs through
-    the one transcription engine, so two models never run at once."""
+    """Queue a saved video for foreground transcription."""
     video_id = str((body or {}).get("video_id") or "").strip()
     folder, item = _folder_for_video_id(video_id) if video_id else (None, None)
     if folder is None:
@@ -12113,8 +12110,7 @@ def queue_retranscribe(body: dict) -> tuple[dict, int]:
     public = _add_job_record(job, unless=already_queued)
     if existing is not None:
         return {"ok": True, "job_id": existing["id"], "job": existing, "reused_existing": True}, 202
-    _podcast_transcription_queue.put(job["id"])
-    _ensure_podcast_transcription_worker()
+    _enqueue_retranscribe(job["id"])
     return {"ok": True, "job_id": job["id"], "job": public}, 202
 
 
@@ -12123,10 +12119,27 @@ def _resume_retranscribe_jobs() -> int:
         job_ids = [job_id for job_id, job in _jobs.items()
                    if job.get("kind") == RETRANSCRIBE_KIND and job.get("state") == "queued"]
     for job_id in job_ids:
-        _podcast_transcription_queue.put(job_id)
-    if job_ids:
-        _ensure_podcast_transcription_worker()
+        _enqueue_retranscribe(job_id)
     return len(job_ids)
+
+
+def _enqueue_retranscribe(job_id):
+    global _retranscribe_worker_thread
+    with _podcast_transcription_worker_lock:
+        _retranscribe_queue.put(job_id)
+        if _retranscribe_worker_thread is None or not _retranscribe_worker_thread.is_alive():
+            _retranscribe_worker_thread = threading.Thread(
+                target=_retranscribe_worker, name="uoink-retranscribe", daemon=True)
+            _retranscribe_worker_thread.start()
+
+
+def _retranscribe_worker():
+    while True:
+        job_id = _retranscribe_queue.get()
+        try:
+            _run_retranscribe_job(job_id)
+        finally:
+            _retranscribe_queue.task_done()
 
 
 def _run_retranscribe_job(job_id: str) -> None:
@@ -12298,7 +12311,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
             _raise_if_cancelled(cancel_event)
             entries, source, meta = _resolve_video_transcript(
                 [], audio, side.get("duration_seconds"), url=url, settings=settings,
-                cancel_event=cancel_event, progress=progress, checkpoint=lambda _: _raise_if_cancelled(cancel_event),
+                cancel_event=cancel_event, progress=progress,
                 asr_titles=(side.get("channel"), side.get("title")))
         _raise_if_cancelled(cancel_event)
         if source != "asr" or not entries:
@@ -25268,7 +25281,7 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
             "Click the rust U under any YouTube video to pull context. "
             "Open the dashboard anytime from the magnet-U in your system tray.",
         )
-    if sys.platform == "darwin" and threading.current_thread() is threading.main_thread():
+    if os.name != "nt" and threading.current_thread() is threading.main_thread():
         import signal
         # launchctl bootout and verified uninstall send SIGTERM. Let main return
         # so atexit removes the identity and owned-child lifelines close.
@@ -25284,6 +25297,7 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     except KeyboardInterrupt:
         log.info("Shutting down.")
     finally:
+        asr_worker.shutdown()
         _stop_relay_inbox_thread()
         if sys.platform == "darwin":
             from helper.mac_ui import close_children

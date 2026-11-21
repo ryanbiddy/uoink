@@ -10,6 +10,7 @@ import json
 import queue
 import sys
 import threading
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -259,8 +260,8 @@ def test_cancel_before_saving_keeps_the_old_transcript(saved):
 def job_queue(monkeypatch):
     jobs = queue.Queue()
     monkeypatch.setattr(server, "_jobs", {})
-    monkeypatch.setattr(server, "_podcast_transcription_queue", jobs)
-    monkeypatch.setattr(server, "_ensure_podcast_transcription_worker", lambda: None)
+    monkeypatch.setattr(server, "_retranscribe_queue", jobs)
+    monkeypatch.setattr(server, "_retranscribe_worker_thread", SimpleNamespace(is_alive=lambda: True))
     return jobs
 
 
@@ -301,11 +302,11 @@ def test_a_queued_job_comes_back_after_a_restart():
     assert restored["state"] == "queued" and restored["video_id"] == VID
 
 
-def test_the_worker_runs_retranscribe_jobs_on_the_same_queue(saved, job_queue, monkeypatch):
+def test_the_button_dispatches_independently_of_the_podcast_queue(saved, job_queue, monkeypatch):
     payload, _ = server.queue_retranscribe({"video_id": VID, "model": "small"})
     monkeypatch.setattr(job_queue, "get", lambda: queue.Queue.get(job_queue, block=False))
     with pytest.raises(queue.Empty):
-        server._podcast_transcription_worker()
+        server._retranscribe_worker()
     assert server._jobs[payload["job_id"]]["state"] == "completed"
 
 
@@ -344,7 +345,7 @@ def test_progress_reaches_the_queued_job(saved, job_queue, monkeypatch):
     def transcribe(*args, **kwargs):
         kwargs["progress"](4, 9)
         seen.append(server._jobs[payload["job_id"]]["progress"])
-        assert callable(kwargs["checkpoint"])
+        assert "checkpoint" not in kwargs and kwargs["cancel_event"] is not None
         return original(*args, **kwargs)
     monkeypatch.setattr(server.uoink_reliability, "transcribe_media", transcribe)
     server._run_retranscribe_job(payload["job_id"])
@@ -383,7 +384,7 @@ def test_delete_refused_while_another_process_owns_worker(models_root, tmp_path,
     import os
     worker = server.asr_worker
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
-    lock = tmp_path / worker.LOCK_NAME
+    lock = tmp_path / "asr-foreground.request.lock"
     script = ("import asr_worker as w, sys; from pathlib import Path; "
               "f=Path(sys.argv[1]).open('a+b'); assert w._try_os_lock(f); "
               "print('locked', flush=True); sys.stdin.readline()")
@@ -457,25 +458,26 @@ def test_deleted_legacy_turbo_reports_real_size(models_root, monkeypatch):
 def test_deletion_holds_slot_through_unlink(models_root, monkeypatch):
     checked = []
     def delete(model, root):
-        acquired = server.asr_worker._slot.acquire(blocking=False)
-        if acquired:
-            server.asr_worker._slot.release()
-        checked.append(acquired)
+        for role in ("foreground", "background"):
+            lease = server.asr_worker._try_file(Path(server.DATA_ROOT) / f"asr-{role}.model.lock")
+            checked.append(lease is None)
+            if lease:
+                lease.close()
         return {"ok": True}
     monkeypatch.setattr(server.asr_models, "delete", delete)
     assert server.delete_asr_model("tiny")[1] == 200
-    assert checked == [False]
+    assert checked == [True, True]
 
 
 
 def test_same_item_foreground_can_capture_during_decode(saved, monkeypatch):
-    def transcribe(*args, checkpoint, **kwargs):
+    def transcribe(*args, **kwargs):
         key = server._manual_capture_key("https://www.youtube.com/watch?v=" + VID)
         with server._manual_capture_intent(key):
             lock = server.source_subscriptions.CaptureLock.try_acquire(server.DATA_ROOT, key)
             assert lock is not None
             with lock:
-                checkpoint({"end": 1})
+                assert server.source_subscriptions.CaptureLock.try_acquire(server.DATA_ROOT, key) is None
         return [(0, 1, "finished replacement")], "asr", {}
     monkeypatch.setattr(server, "_resolve_video_transcript", transcribe)
     assert server.retranscribe_item(VID, "small")["segments"] == 1

@@ -510,7 +510,6 @@ def _transcribe_audio_plain(audio_path: Path, *, data_root: Path, model_size: st
     }
 
 
-@asr_worker.model_operation
 def transcribe_audio(audio_path: Path, *,
                       data_root: Path,
                       model_size: str = MODEL_BASE,
@@ -541,7 +540,7 @@ def transcribe_audio(audio_path: Path, *,
             "model_size": model_size, "language": language, "diarize": bool(diarize),
             "consent_given": bool(consent_given), "initial_prompt": initial_prompt,
             "duration_seconds": duration_seconds},
-            cancel_event=cancel_event, checkpoint=checkpoint or (lambda _: None), progress=progress)
+            cancel_event=cancel_event, checkpoint=checkpoint, progress=progress, background=True)
     model_size = normalize_model(model_size)
     fallback = None
     if reliability.is_english_only(model_size):
@@ -558,7 +557,8 @@ def transcribe_audio(audio_path: Path, *,
         model_size, language, fallback = reliability._english_guard(
             audio_path, model_size, Path(data_root) / "models" / "whisper", language,
             checker_path=checker, checker_name=checker_name, cancel_event=cancel_event)
-    if plain_engine_for(diarize):
+    asr_worker.report_phase("model load")
+    if asr_worker.in_child() and plain_engine_for(diarize):
         result = _transcribe_audio_plain(
             audio_path, data_root=data_root, model_size=normalize_model(model_size),
             language=language, consent_given=consent_given, initial_prompt=initial_prompt,
@@ -635,6 +635,11 @@ def transcribe_audio(audio_path: Path, *,
         if (model_path != _bundled_snapshot(model_size)
                 and _cached_model_snapshot(data_root, model_size) != model_path):
             raise RuntimeError('Local ASR snapshot changed before model construction')
+        # A previous transcript-only job may have left a faster-whisper model
+        # resident in this child. Release it before constructing the WhisperX model.
+        clear_cache = getattr(reliability._load_model, "cache_clear", None)
+        if asr_worker.in_child() and clear_cache:
+            clear_cache()
         model = whisperx.load_model(str(model_path), device=device,
                                       compute_type=_compute_type(device),
                                       **({"threads": asr_models.cpu_threads()} if device == "cpu" else {}),
@@ -643,20 +648,30 @@ def transcribe_audio(audio_path: Path, *,
                                       **({"asr_options": {"initial_prompt": initial_prompt}}
                                          if initial_prompt else {}))
         audio_input = str(audio_path)
-        if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+        offloaded = asr_worker.in_child()
+        if offloaded or (sys.platform == "darwin" and _platform.mac_bundle_contents() is not None):
             # WhisperX's string loader invokes bare `ffmpeg`. Supply samples so
             # transcription, alignment and diarization all use our resolver.
             import numpy as np
             import subprocess
+            asr_worker.report_phase("ffmpeg")
             decoded = subprocess.run([
                 _platform.media_binary("ffmpeg"), "-nostdin", "-v", "error",
                 "-i", str(audio_path), "-vn", "-ac", "1", "-ar", "16000",
                 "-c:a", "pcm_f32le", "-f", "f32le", "pipe:1"],
-                check=True, capture_output=True, timeout=600)
+                check=True, capture_output=True, timeout=None if offloaded else 600,
+                **({"creationflags": subprocess.CREATE_NO_WINDOW} if offloaded and os.name == "nt" else {}))
             audio_input = np.frombuffer(decoded.stdout, dtype=np.float32).copy()
+
+        last_percent = None
+
         def segment_progress(percent):
+            nonlocal last_percent
             if cancel_event is not None and cancel_event.is_set():
                 raise reliability._cancelled_error()
+            if percent is not None and last_percent is not None and percent <= last_percent:
+                return
+            last_percent = percent
             if progress is not None and percent is not None:
                 progress(percent, 100)
             if checkpoint is not None:
@@ -671,7 +686,9 @@ def transcribe_audio(audio_path: Path, *,
                     pass
             return {}
 
-        result = model.transcribe(audio_input, language=language, **callbacks(model.transcribe))
+        decode_callbacks = callbacks(model.transcribe)
+        asr_worker.report_phase("decode" if decode_callbacks else "batch transcription")
+        result = model.transcribe(audio_input, language=language, **decode_callbacks)
         segment_progress(None)
         segments = result.get("segments") or []
         detected_lang = result.get("language") or language or "en"
@@ -693,12 +710,14 @@ def transcribe_audio(audio_path: Path, *,
                 "parameters": {"language": detected_lang, "alignment_model": None},
             }
             try:
+                asr_worker.report_phase("alignment")
                 align_model, align_meta = whisperx.load_align_model(
                     language_code=detected_lang, device=device)
                 aligned = whisperx.align(
                     segments, align_model, align_meta,
                     audio_input, device=device, **callbacks(whisperx.align))
                 segment_progress(None)
+                asr_worker.report_phase("diarization")
                 diarize_pipeline = _diarization_pipeline(
                     whisperx, device=device, data_root=data_root)
                 diarize_segments = diarize_pipeline(audio_input, **callbacks(diarize_pipeline))

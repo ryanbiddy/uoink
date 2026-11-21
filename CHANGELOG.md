@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- A capture can take its turn while a podcast or saved video is being transcribed. You can cancel either background job. If transcription stalls, the next capture can still run.
+- You can save or re-transcribe a video while a podcast is transcribing. Both keep their progress. Cancelling a transcription also stops any audio decoder it started. If transcription stalls, the next capture can still run.
 - Transcribing a saved video again updates search immediately. If the new transcript is much shorter, you can restore the previous one from the saved item. An empty result or a few sampled sections leave a full transcript in place.
 - Speaker labels work with the bundled WhisperX version. English-only models now check for speech across the recording, so an intro or outro with music can be skipped.
 - Local transcription leaves CPU cores free for other apps. Existing Turbo downloads still work after the model repository changed names.
@@ -29,8 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - An English-only model never runs on other languages: the bundled multilingual model checks
   the language first and transcribes instead, and the transcript note says so.
 - The item's Re-transcribe button works (it posted to a route that did not exist) and names the
-  model: "Re-transcribe with <model>". It goes through the same queue as podcast transcription,
-  fetches the audio again and replaces the transcript only once the new one is complete. The old
+  model: "Re-transcribe with <model>". It fetches the audio again and replaces the transcript only once the new one is complete. The old
   details file is kept in `.media-inputs`. A failure, a cancel or an edited transcript leaves
   everything as it was. New routes: `GET /asr/models`, `POST /asr/models/download|cancel|delete|use`
   and `POST /transcription/retranscribe`. CLI: `uoink models [list|download|delete|use] <model>`.
@@ -39,11 +38,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Speech models now run in a separate background process that exits after 2 minutes idle, so
-  the helper gets the memory back after transcribing (a 3.17.0 helper could hold several GB
-  after two podcast episodes). One model runs at a time, progress and cancel still work, and a
-  crash in that process fails the one job instead of taking the helper down. Settings,
-  Diagnostics and `/health` show the engine state ("Transcription engine: idle (not loaded)").
+- Captures and the Re-transcribe button share one transcription process. Podcasts and backfill
+  use a second process. Each frees its memory after two minutes idle. When both are busy,
+  there can be two models in memory. A process crash fails only its current job.
+  Settings, Diagnostics and `/health` show when the engine is working or holding a model.
 - Podcasts without speaker labels are transcribed with faster-whisper instead of WhisperX, which
   no longer loads PyTorch for them. WhisperX is used only when speaker labels are on.
 - Fewer repeated-phrase loops in local transcripts: Whisper no longer conditions on its previous
