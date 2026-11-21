@@ -28,8 +28,8 @@ the skill also works through the `uoink` command alone.
 - **Reads:** your local Uoink library. Searching and reading saved items make
   no network calls and need no API key.
 - **Fetches:** only the source you ask Uoink to capture (YouTube, X, Reddit,
-  a podcast feed or a web page). Truncated X posts may use the FxTwitter
-  fallback.
+  a podcast feed or a web page). Long X posts that X cuts short use
+  FxTwitter only if you turn that switch on (off by default).
 - **Optional, off by default:** AI analysis features send relevant source text
   to Anthropic with your own API key. ScrapeCreators discovery uses your own key
   with a credit cap. Anonymous usage counts go to usage.uoink.app only if you

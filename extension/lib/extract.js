@@ -283,14 +283,16 @@
   // The server owns the feature flag (x_text_capture_enabled) and the
   // honest failure copy, so this just relays the JSON body. 60s timeout:
   // worst case is a hop-capped ancestor walk, not a transcript job.
-  async function postExtractX(url) {
+  // 3.18.0: domPost is the open tab's own text of the post ({id, text,
+  // show_more}); the helper uses it only when it matches X's copy.
+  async function postExtractX(url, domPost) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 60 * 1000);
     try {
       const res = await _authedFetch("/extract/x", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(domPost ? { url, dom_post: domPost } : { url }),
         signal: controller.signal,
       });
       return withHttpStatus(await res.json(), res);

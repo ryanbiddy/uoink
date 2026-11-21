@@ -91,6 +91,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   duration and the source link. `GET /api/cues/v1/items` lists items by show and publish
   date. Both are in the OpenAPI document, and `uoink cues <id>` prints them from the command
   line. See `docs/integrations/timed-cues.md`. The corpus read contract v1 is unchanged.
+- Long X posts no longer save cut off near 280 characters. X's public endpoint sends only the
+  start of a long post, so Uoink now marks those saves as cut off instead of treating them as
+  whole. Saving from an open X tab with the extension reads the full post from the page (it
+  presses "Show more" first), including the text of an X video's post, and hands it to Uoink on
+  this computer. Quoted posts and full link addresses are kept.
+
+### Added
+
+- Settings, Capture: "Get full long posts and Articles through FxTwitter", off by default.
+  FxTwitter is a free community service. It sees the post's ID and your computer's internet
+  address, never your library. Turning the switch off stops it at once, even mid-run. When it is off and a
+  save comes back cut off, or only links to an X Article, the reader shows one prompt with two
+  choices: turn the switch on, or open the post on X and save it with the extension. X Article
+  bodies come through FxTwitter or the extension's "Uoink this article", with headings, lists,
+  quotes, links, code and images kept.
+- Settings, Library and export: "Fix cut-off X posts". It counts the saves that look cut off and
+  explains both fixes. With the FxTwitter switch on, Start fills them in one post at a time, about
+  3.5 seconds each, slowing down when asked to. Pause, Stop and a restart pick up where it left
+  off. It keeps the original text when a post is gone and never touches notes, shelves,
+  transcripts, screenshots or open history. It never starts on its own.
 
 ## [3.17.0] - 2026-11-12
 

@@ -1,0 +1,374 @@
+{
+  "_about": "Made-up X posts shaped like the syndication endpoint, FxTwitter v2 and the extension's read of an open X tab (shapes probed 2026-11-20). Handles, names, IDs, text and links are invented.",
+  "cases": {
+    "short_post": {
+      "tweet_id": "1900000000000000001",
+      "syndication": {
+        "__typename": "Tweet",
+        "id_str": "1900000000000000001",
+        "text": "Short and whole. Nothing more to read here, and that is the point.",
+        "created_at": "2026-11-01T10:00:00.000Z",
+        "display_text_range": [
+          0,
+          67
+        ],
+        "user": {
+          "id_str": "4400000000000000001",
+          "name": "Example Writer",
+          "screen_name": "example_writer"
+        },
+        "entities": {
+          "urls": [],
+          "user_mentions": [],
+          "hashtags": [],
+          "symbols": []
+        }
+      }
+    },
+    "long_post": {
+      "tweet_id": "1900000000000000002",
+      "full_text": "Spent the week rebuilding a small notes app from scratch. The first version kept everything in one giant file, and every save rewrote the whole thing. That was fine at fifty notes and painful at five thousand.\n\nThe fix was boring: one file per note, an index on the side, and a lock around writes. Search went from four seconds to forty milliseconds.\n\nThe part nobody warns you about is migration. Old notes had three date formats and a few had none. I wrote a tiny checker that lists the odd ones instead of guessing.\n\nFull write-up with the checker script: https://example.com/notes-checker FULL-TEXT-END",
+      "syndication": {
+        "__typename": "Tweet",
+        "id_str": "1900000000000000002",
+        "text": "Spent the week rebuilding a small notes app from scratch. The first version kept everything in one giant file, and every save rewrote the whole thing. That was fine at fifty notes and painful at five thousand.\n\nThe fix was boring: one file per note, an index on the side,",
+        "created_at": "2026-11-01T10:00:00.000Z",
+        "display_text_range": [
+          0,
+          271
+        ],
+        "user": {
+          "id_str": "4400000000000000001",
+          "name": "Example Writer",
+          "screen_name": "example_writer"
+        },
+        "entities": {
+          "urls": [],
+          "user_mentions": [],
+          "hashtags": [],
+          "symbols": []
+        },
+        "note_tweet": {
+          "id": "Tm90ZUV4YW1wbGVMb25n"
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "message": "OK",
+        "status": {
+          "type": "status",
+          "id": "1900000000000000002",
+          "url": "https://x.com/example_writer/status/1900000000000000002",
+          "text": "Spent the week rebuilding a small notes app from scratch. The first version kept everything in one giant file, and every save rewrote the whole thing. That was fine at fifty notes and painful at five thousand.\n\nThe fix was boring: one file per note, an index on the side, and a lock around writes. Search went from four seconds to forty milliseconds.\n\nThe part nobody warns you about is migration. Old notes had three date formats and a few had none. I wrote a tiny checker that lists the odd ones instead of guessing.\n\nFull write-up with the checker script: https://example.com/notes-checker FULL-TEXT-END",
+          "created_at": "Sun Nov 01 10:00:00 +0000 2026",
+          "author": {
+            "name": "Example Writer",
+            "screen_name": "example_writer"
+          },
+          "is_note_tweet": true
+        }
+      },
+      "dom_post": {
+        "id": "1900000000000000002",
+        "text": "Spent the week rebuilding a small notes app from scratch. The first version kept everything in one giant file, and every save rewrote the whole thing. That was fine at fifty notes and painful at five thousand.\n\nThe fix was boring: one file per note, an index on the side, and a lock around writes. Search went from four seconds to forty milliseconds.\n\nThe part nobody warns you about is migration. Old notes had three date formats and a few had none. I wrote a tiny checker that lists the odd ones instead of guessing.\n\nFull write-up with the checker script: https://example.com/notes-checker FULL-TEXT-END",
+        "show_more": false
+      }
+    },
+    "long_post_media": {
+      "tweet_id": "1900000000000000003",
+      "full_text": "Three things I changed in the studio this month, with the photo of the new desk below. First, the lights moved behind the camera so the glasses glare is gone. Second, the microphone arm is clamped to the wall, not the desk, so typing no longer thumps into every take. Third, cables run through one tray.\n\nTotal cost was under a hundred dollars and an afternoon. MEDIA-TEXT-END",
+      "syndication": {
+        "__typename": "Tweet",
+        "id_str": "1900000000000000003",
+        "text": "Three things I changed in the studio this month, with the photo of the new desk below. First, the lights moved behind the camera so the glasses glare is gone. Second, the microphone arm is clamped to the wall, not the desk, so typing no longer thumps into every take. Third, https://t.co/MediaLink01",
+        "created_at": "2026-11-02T10:00:00.000Z",
+        "display_text_range": [
+          0,
+          274
+        ],
+        "user": {
+          "id_str": "4400000000000000001",
+          "name": "Example Maker",
+          "screen_name": "example_maker"
+        },
+        "entities": {
+          "media": [
+            {
+              "display_url": "pic.example.test/AbCd",
+              "expanded_url": "https://x.com/example_maker/status/1900000000000000003/photo/1",
+              "url": "https://t.co/MediaLink01",
+              "type": "photo",
+              "media_url_https": "https://pbs.example.test/media/desk.jpg",
+              "ext_alt_text": "A wooden desk with a camera and a wall-mounted microphone arm.",
+              "original_info": {
+                "width": 1200,
+                "height": 800
+              }
+            }
+          ]
+        },
+        "mediaDetails": [
+          {
+            "display_url": "pic.example.test/AbCd",
+            "expanded_url": "https://x.com/example_maker/status/1900000000000000003/photo/1",
+            "url": "https://t.co/MediaLink01",
+            "type": "photo",
+            "media_url_https": "https://pbs.example.test/media/desk.jpg",
+            "ext_alt_text": "A wooden desk with a camera and a wall-mounted microphone arm.",
+            "original_info": {
+              "width": 1200,
+              "height": 800
+            }
+          }
+        ],
+        "photos": [
+          {
+            "url": "https://pbs.example.test/media/desk.jpg",
+            "width": 1200,
+            "height": 800,
+            "accessibilityLabel": "A wooden desk with a camera and a wall-mounted microphone arm."
+          }
+        ],
+        "note_tweet": {
+          "id": "Tm90ZUV4YW1wbGVNZWRpYQ=="
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "message": "OK",
+        "status": {
+          "type": "status",
+          "id": "1900000000000000003",
+          "url": "https://x.com/example_maker/status/1900000000000000003",
+          "text": "Three things I changed in the studio this month, with the photo of the new desk below. First, the lights moved behind the camera so the glasses glare is gone. Second, the microphone arm is clamped to the wall, not the desk, so typing no longer thumps into every take. Third, cables run through one tray.\n\nTotal cost was under a hundred dollars and an afternoon. MEDIA-TEXT-END",
+          "created_at": "Sun Nov 01 10:00:00 +0000 2026",
+          "author": {
+            "name": "Example Maker",
+            "screen_name": "example_maker"
+          },
+          "is_note_tweet": true
+        }
+      }
+    },
+    "quoted_post": {
+      "tweet_id": "1900000000000000004",
+      "quote_id": "1900000000000000005",
+      "quote_full_text": "A short guide to naming things in a codebase you will read again in a year. Name a function for what it promises, not how it works today. Name a flag for the state it describes, never for the bug that made you add it. Keep one word per idea across the whole project, and write the word down in the readme so new people use it too.\n\nIf a name needs a comment, the name is not done yet. QUOTE-TEXT-END",
+      "syndication": {
+        "__typename": "Tweet",
+        "id_str": "1900000000000000004",
+        "text": "The best short guide on naming I have read this year.",
+        "created_at": "2026-11-03T10:00:00.000Z",
+        "user": {
+          "id_str": "4400000000000000001",
+          "name": "Example Reader",
+          "screen_name": "example_reader"
+        },
+        "entities": {
+          "urls": [],
+          "user_mentions": [],
+          "hashtags": [],
+          "symbols": []
+        },
+        "quoted_tweet": {
+          "id_str": "1900000000000000005",
+          "text": "A short guide to naming things in a codebase you will read again in a year. Name a function for what it promises, not how it works today. Name a flag for the state it describes, never for the bug that made you add it. Keep one word per idea across the whole project, and",
+          "created_at": "2026-11-02T08:00:00.000Z",
+          "user": {
+            "id_str": "4400000000000000001",
+            "name": "Example Quoter",
+            "screen_name": "example_quoter"
+          },
+          "entities": {
+            "urls": []
+          },
+          "note_tweet": {
+            "id": "Tm90ZUV4YW1wbGVRdW90ZQ=="
+          }
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "message": "OK",
+        "status": {
+          "type": "status",
+          "id": "1900000000000000004",
+          "url": "https://x.com/example_reader/status/1900000000000000004",
+          "text": "The best short guide on naming I have read this year.",
+          "created_at": "Sun Nov 01 10:00:00 +0000 2026",
+          "author": {
+            "name": "Example Reader",
+            "screen_name": "example_reader"
+          },
+          "is_note_tweet": false,
+          "quote": {
+            "type": "status",
+            "id": "1900000000000000005",
+            "url": "https://x.com/example_quoter/status/1900000000000000005",
+            "text": "A short guide to naming things in a codebase you will read again in a year. Name a function for what it promises, not how it works today. Name a flag for the state it describes, never for the bug that made you add it. Keep one word per idea across the whole project, and write the word down in the readme so new people use it too.\n\nIf a name needs a comment, the name is not done yet. QUOTE-TEXT-END",
+            "created_at": "Sun Nov 01 10:00:00 +0000 2026",
+            "author": {
+              "name": "Example Quoter",
+              "screen_name": "example_quoter"
+            },
+            "is_note_tweet": true
+          }
+        }
+      }
+    },
+    "article_only": {
+      "tweet_id": "1900000000000000006",
+      "article_url": "https://x.com/i/article/1900000000000000777",
+      "syndication": {
+        "__typename": "Tweet",
+        "id_str": "1900000000000000006",
+        "text": "https://t.co/ArticleL1",
+        "created_at": "2026-11-04T10:00:00.000Z",
+        "display_text_range": [
+          0,
+          22
+        ],
+        "user": {
+          "id_str": "4400000000000000001",
+          "name": "Example Author",
+          "screen_name": "example_author"
+        },
+        "entities": {
+          "urls": [
+            {
+              "url": "https://t.co/ArticleL1",
+              "display_url": "x.com/i/article/1900…",
+              "expanded_url": "https://x.com/i/article/1900000000000000777"
+            }
+          ]
+        },
+        "article": {
+          "rest_id": "1900000000000000777",
+          "title": "How we cut our build time in half",
+          "preview_text": "Our builds took eleven minutes. Here is what we measured first, and why"
+        }
+      },
+      "fxtwitter": {
+        "code": 200,
+        "message": "OK",
+        "status": {
+          "type": "status",
+          "id": "1900000000000000006",
+          "url": "https://x.com/example_author/status/1900000000000000006",
+          "text": "",
+          "created_at": "Sun Nov 01 10:00:00 +0000 2026",
+          "author": {
+            "name": "Example Author",
+            "screen_name": "example_author"
+          },
+          "is_note_tweet": false,
+          "article": {
+            "id": "1900000000000000777",
+            "title": "How we cut our build time in half",
+            "preview_text": "Our builds took eleven minutes.",
+            "created_at": "2026-11-04T09:00:00.000Z",
+            "content": {
+              "blocks": [
+                {
+                  "key": "a1",
+                  "type": "unstyled",
+                  "text": "Our builds took eleven minutes. Here is what we measured first, and why it mattered more than any cache.",
+                  "entityRanges": []
+                },
+                {
+                  "key": "a2",
+                  "type": "header-two",
+                  "text": "Measure before you cache",
+                  "entityRanges": []
+                },
+                {
+                  "key": "a3",
+                  "type": "unordered-list-item",
+                  "text": "Time every step for a week.",
+                  "entityRanges": []
+                },
+                {
+                  "key": "a4",
+                  "type": "unordered-list-item",
+                  "text": "Sort by total time, not by worst run.",
+                  "entityRanges": []
+                },
+                {
+                  "key": "a5",
+                  "type": "atomic",
+                  "text": " ",
+                  "entityRanges": [
+                    {
+                      "key": 1,
+                      "offset": 0,
+                      "length": 1
+                    }
+                  ]
+                },
+                {
+                  "key": "a6",
+                  "type": "unstyled",
+                  "text": "The full numbers are in our notes.",
+                  "entityRanges": [
+                    {
+                      "key": 0,
+                      "offset": 24,
+                      "length": 9
+                    }
+                  ]
+                },
+                {
+                  "key": "a7",
+                  "type": "code-block",
+                  "text": "make build --profile",
+                  "entityRanges": []
+                },
+                {
+                  "key": "a8",
+                  "type": "blockquote",
+                  "text": "Most of the time went to one test nobody owned. ARTICLE-BODY-END",
+                  "entityRanges": []
+                }
+              ],
+              "entityMap": [
+                {
+                  "key": "0",
+                  "value": {
+                    "type": "LINK",
+                    "mutability": "MUTABLE",
+                    "data": {
+                      "url": "https://example.com/build-notes"
+                    }
+                  }
+                },
+                {
+                  "key": "1",
+                  "value": {
+                    "type": "MEDIA",
+                    "mutability": "IMMUTABLE",
+                    "data": {
+                      "mediaItems": [
+                        {
+                          "mediaId": "5500000000000000001"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "media_entities": [
+              {
+                "media_id": "5500000000000000001",
+                "media_info": {
+                  "__typename": "ApiImage",
+                  "original_img_url": "https://pbs.example.test/media/build-chart.jpg"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

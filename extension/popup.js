@@ -239,6 +239,18 @@ function messageActiveTab(tabId, payload) {
   });
 }
 
+// 3.18.0: X's link copy of a long post stops near 280 characters. The worker
+// asks the open tab (content-x-article.js) for the post's own text when it
+// runs the save, so the popup only passes the tab's id and never waits.
+// Null when the tab is unknown.
+async function activeTabId() {
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs && tabs[0];
+    return tab && Number.isInteger(tab.id) ? tab.id : null;
+  } catch { return null; }
+}
+
 async function captureXArticle(url) {
   let tab = null;
   try {
@@ -476,7 +488,11 @@ async function runPopupUoinkCurrent() {
     // The worker owns the text and optional video, including deduplication
     // against pasted links, after this popup closes.
     if (src.action === "x_video") {
-      await queueCapture({ route: "x_post", url: src.canonical, interval });
+      // 3.18.0: queue first. The worker reads the open tab's own text of the
+      // post while it saves, so closing the popup never drops the save.
+      const tabId = await activeTabId();
+      await queueCapture(Object.assign({ route: "x_post", url: src.canonical, interval },
+        tabId !== null ? { readTabId: tabId } : {}));
       return;
     }
     // X article: content-script DOM parse first, /extract/page as fallback.

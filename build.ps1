@@ -371,6 +371,8 @@ foreach ($f in @(
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
+    'x_fulltext.py',
+    'x_text_repair.py',
     'list_imports.py',
     'show_capture.py',
     'timed_cues.py',
@@ -753,6 +755,10 @@ Copy-Item (Join-Path $RepoRoot 'reddit_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'x_extractor.py') $StagingDir -Force
 # V-2c X Article capture. server.py imports x_article_extractor at module top.
 Copy-Item (Join-Path $RepoRoot 'x_article_extractor.py') $StagingDir -Force
+# 3.18.0 full X post text and the cut-off repair job. x_extractor imports
+# x_fulltext and server.py imports x_text_repair at module top.
+Copy-Item (Join-Path $RepoRoot 'x_fulltext.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'x_text_repair.py') $StagingDir -Force
 # Import a list. server.py imports list_imports, so it must ship.
 Copy-Item (Join-Path $RepoRoot 'list_imports.py') $StagingDir -Force
 # Save a whole show and the timed cues read. server.py imports both.
@@ -851,7 +857,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research.pyresearch_verify.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research.pyresearch_verify.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py x_fulltext.py x_text_repair.py research.py research_verify.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

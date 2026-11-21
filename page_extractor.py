@@ -485,7 +485,9 @@ def extract_page(idx, url: str, *,
     if ((result.get("ok") and _is_x_login_wall(canonical, result)) or
             (urlparse(canonical).hostname in _X_HOSTS and
              "JavaScript page" in result.get("diagnostic", ""))):
-        return {
+        import x_article_extractor  # lazy: keeps this module's import graph flat
+        article = x_article_extractor.canonical_article_url(canonical)
+        wall = {
             **result,
             "ok": False,
             "code": "x_login_wall",
@@ -498,6 +500,11 @@ def extract_page(idx, url: str, *,
                       "logged-in page. X posts and threads capture fully from "
                       "a /status/ link."),
         }
+        if article:
+            # 3.18.0: an Article link gets its own copy and a link to open,
+            # so the dashboard can put the Article one click away.
+            wall.update(error=x_article_extractor.OPEN_IN_BROWSER, open_url=article)
+        return wall
     return result
 
 

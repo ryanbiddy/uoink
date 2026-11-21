@@ -294,11 +294,137 @@
     };
   }
 
+  // ---- the open X post (3.18.0) ------------------------------------------
+  // X's link copy of a long post stops near 280 characters. The status page
+  // the person has open shows the whole post, so "Uoink this post" reads it
+  // here and sends it to the local helper with the link. The helper keeps
+  // it only when it has the same post id and continues X's own copy, so a
+  // wrong pick on a busy page is dropped there, never saved.
+  const POST_SELECTOR = 'article[data-testid="tweet"]';
+  const POST_TEXT_SELECTOR = '[data-testid="tweetText"]';
+  const SHOW_MORE_SELECTOR = '[data-testid="tweet-text-show-more-link"]';
+  const POST_TEXT_MAX = 30000; // X's own limit is 25,000 characters
+
+  function statusIdFromUrl(raw) {
+    const m = String(raw || "").match(/\/status(?:es)?\/(\d{5,25})(?:[/?#]|$)/);
+    return m ? m[1] : null;
+  }
+
+  // A quoted post is drawn inside the post as a card with role="link" (a
+  // div, unlike the post's own links). Nothing in that card is the post's.
+  function _inQuoteCard(el, article) {
+    for (let node = el && el.parentNode; node && node !== article; node = node.parentNode) {
+      const role = node.getAttribute ? node.getAttribute("role") : null;
+      if (role === "link" && (node.tagName || "").toUpperCase() !== "A") return true;
+    }
+    return false;
+  }
+
+  // The post's own elements that match, in page order, quote cards left out.
+  function _own(article, selector) {
+    let all = [];
+    try { all = article.querySelectorAll(selector); } catch { all = []; }
+    return Array.from(all).filter((el) => !_inQuoteCard(el, article));
+  }
+
+  // The post an <article> shows: its timestamp links to its own status.
+  function _postIdOf(article) {
+    const links = _own(article, 'a[href*="/status/"]');
+    for (const a of links) {
+      let hasTime = false;
+      try { hasTime = !!a.querySelector("time"); } catch { hasTime = false; }
+      if (!hasTime) continue;
+      const id = statusIdFromUrl(a.getAttribute("href"));
+      if (id) return id;
+    }
+    return null;
+  }
+
+  // The <article> for this status, or null. Never a parent or a reply.
+  function findXPost(root, url) {
+    root = root || (typeof document !== "undefined" ? document : null);
+    const id = statusIdFromUrl(url || (typeof location !== "undefined" ? location.href : ""));
+    if (!root || !id) return null;
+    let articles = [];
+    try { articles = root.querySelectorAll(POST_SELECTOR); } catch { articles = []; }
+    for (const article of articles) {
+      if (_postIdOf(article) === id) return { id, article };
+    }
+    // The open post itself sometimes has no timestamp link: X marks it as
+    // the one article that isn't in the tab order. That only says which post
+    // it is when the tab is showing this status (X swaps pages in place).
+    const here = typeof location !== "undefined" && location && location.href
+      ? statusIdFromUrl(location.href) : id;
+    if (here !== id) return null;
+    for (const article of articles) {
+      if (article.getAttribute && article.getAttribute("tabindex") === "-1"
+          && _postIdOf(article) === null) return { id, article };
+    }
+    return null;
+  }
+
+  // A link as X shows it: a short label, the rest of the address in hidden
+  // spans, then "…". The whole address is the text minus the ellipsis.
+  function _postLink(a) {
+    const href = (a.getAttribute && a.getAttribute("href")) || "";
+    const shown = (a.textContent || "").replace(/…\s*$/, "").trim();
+    if (!/^https?:\/\//i.test(href)) return a.textContent || ""; // @handle, #tag, $cash
+    if (/^https?:\/\/\S+$/i.test(shown)) return shown;
+    if (/^[\w.-]+\.[a-z]{2,}(\/\S*)?$/i.test(shown)) return "https://" + shown;
+    return href;
+  }
+
+  function _postText(el) {
+    let out = "";
+    for (const node of el.childNodes || []) {
+      if (node.nodeType === 3) {
+        out += node.nodeValue || node.textContent || "";
+        continue;
+      }
+      if (node.nodeType !== 1) continue;
+      const tag = (node.tagName || "").toUpperCase();
+      if (tag === "BR") out += "\n";
+      else if (tag === "IMG") out += (node.getAttribute && node.getAttribute("alt")) || ""; // emoji
+      else if (tag === "A") out += _postLink(node);
+      else out += _postText(node);
+    }
+    return out;
+  }
+
+  // The open post's own button that expands it in place, if it shows one.
+  // A "Show more" that is a link would open another page, so it's left be.
+  function showMoreButton(root, url) {
+    const found = findXPost(root, url);
+    if (!found) return null;
+    const el = _own(found.article, SHOW_MORE_SELECTOR)[0] || null;
+    return el && (el.tagName || "").toUpperCase() === "BUTTON" ? el : null;
+  }
+
+  // readXPost(root?, url?) -> {ok:true, id, text, show_more}
+  //                         | {ok:false, code, error}
+  function readXPost(root, url) {
+    const found = findXPost(root, url);
+    if (!found) {
+      return { ok: false, code: "no_post", error: "Couldn't find this post on the page." };
+    }
+    const textEl = _own(found.article, POST_TEXT_SELECTOR)[0] || null;
+    if (!textEl) {
+      return { ok: false, code: "no_text", error: "This post has no text on the page." };
+    }
+    const text = _postText(textEl).replace(/[^\S\n]+\n/g, "\n").trim().slice(0, POST_TEXT_MAX);
+    const more = _own(found.article, SHOW_MORE_SELECTOR)[0] || null;
+    return { ok: !!text, id: found.id, text, show_more: !!more };
+  }
+
   global.XArticle = {
     X_ARTICLE_HOSTS,
     normalizeXArticleUrl,
     isXArticleUrl,
     parseXArticle,
+    statusIdFromUrl,
+    findXPost,
+    readXPost,
+    showMoreButton,
     MIN_BODY_CHARS,
     TITLE_SELECTORS,
     BODY_SELECTORS,

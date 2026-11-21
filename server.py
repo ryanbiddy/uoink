@@ -126,6 +126,7 @@ import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
+import x_text_repair  # noqa: E402  -- 3.18.0 fix cut-off X posts job
 import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
 import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
@@ -1105,6 +1106,10 @@ def _default_settings() -> dict:
         # honors the key, so a user who sets it False falls back to the
         # video-only path in the extension.
         "x_text_capture_enabled": True,
+        # 3.18.0: FxTwitter (api.fxtwitter.com, a third-party service) is
+        # asked for X text only when the user turns this on. Long posts come
+        # from X's own logged-out endpoints either way (x_fulltext).
+        "fxtwitter_enrichment_enabled": False,
         # E-1 (Zing enabler): keep the downloaded media file for short-video
         # captures instead of deleting it after extraction, so a downstream
         # director tool (Zing) can analyze the actual clip (cuts / captions /
@@ -1317,6 +1322,7 @@ def _normalize_settings(data: dict) -> dict:
     clean["x_text_capture_enabled"] = bool(
         clean.get("x_text_capture_enabled", True)
     )
+    clean["fxtwitter_enrichment_enabled"] = clean.get("fxtwitter_enrichment_enabled") is True
     clean["keep_media"] = bool(clean.get("keep_media"))
     theme = str(clean.get("dashboard_theme") or "system").strip().lower()
     clean["dashboard_theme"] = theme if theme in _DASHBOARD_THEMES else "system"
@@ -2119,6 +2125,7 @@ def _public_settings(data: dict | None = None) -> dict:
         ),
         "auto_update_check": data.get("auto_update_check") is True,
         "suggest_podcasts": data.get("suggest_podcasts") is True,
+        "fxtwitter_enrichment_enabled": data.get("fxtwitter_enrichment_enabled") is True,
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
@@ -8495,6 +8502,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if phase_callback:
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
+    # 3.18.0: an X video's Description is the post's whole text (X only).
+    if isinstance(metadata, dict) and str(
+            metadata.get("extractor") or metadata.get("extractor_key") or "").lower().startswith("twitter"):
+        metadata = _enrich_x_video_metadata(url, metadata)
     if topic is None:
         topic = _classify_topic(metadata)
 
@@ -9155,6 +9166,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "like_count": metadata.get("like_count"),
                 "comment_count": metadata.get("comment_count"),
                 "channel_follower_count": metadata.get("channel_follower_count"),
+                # 3.18.0: whether an X video's post text is whole (x_text_repair).
+                "x_text": metadata.get("x_text"),
                 "video_id": video_id,
                 # Phase 6 (BC-2): every transcript row carries its actual stored
                 # link values, and the held chapter metadata travels with the
@@ -17038,6 +17051,148 @@ def _persist_x_thread(result: dict):
         topic_classifier=_classify_topic)
 
 
+def _persist_x_article(result: dict):
+    return page_extractor.persist_page_yoink(
+        _get_index(), result, data_root=DESKTOP_ROOT,
+        source_type=x_article_extractor.SOURCE_TYPE, subfolder="X", slug_prefix="x-article",
+        topic_classifier=_classify_topic)
+
+
+# ---- 3.18.0: full X post text ------------------------------------------------
+def _x_fxtwitter_kwargs(settings: dict) -> dict:
+    """FxTwitter (a third-party service) is the user's opt-in. The call
+    stays bare when it is off, so the default path never names it."""
+    return {"fxtwitter": True} if settings.get("fxtwitter_enrichment_enabled") is True else {}
+
+
+def _fxtwitter_switch_on() -> bool:
+    """The user's FxTwitter switch, read fresh from settings."""
+    try:
+        return (_read_settings() or {}).get("fxtwitter_enrichment_enabled") is True
+    except Exception:
+        return False
+
+
+# x_extractor reads this before every FxTwitter request, whatever its
+# caller asked for, so turning the switch off stops requests at once.
+x_extractor.set_fxtwitter_gate(_fxtwitter_switch_on)
+
+
+def _clean_dom_post(value) -> dict | None:
+    """The extension's read of the open X tab: {id, text, show_more}. Kept
+    small and typed; anything else is dropped."""
+    if not isinstance(value, dict):
+        return None
+    post_id, text = str(value.get("id") or ""), value.get("text")
+    if not x_extractor.is_post_id(post_id) or not isinstance(text, str) or not text.strip():
+        return None
+    return {"id": post_id, "text": text[:100000], "show_more": value.get("show_more") is True}
+
+
+# The open tab's text of a post, in memory for half an hour, so the video
+# half of the same "Uoink this post" (queued right after) gets it too.
+_X_DOM_POSTS: dict = {}
+_X_DOM_POSTS_LOCK = threading.Lock()
+_X_DOM_POST_TTL_SEC = 1800
+
+
+def _remember_dom_post(dom_post: dict | None) -> None:
+    if not dom_post:
+        return
+    now = time.monotonic()
+    with _X_DOM_POSTS_LOCK:
+        for key in [k for k, (at, _post) in _X_DOM_POSTS.items() if now - at > _X_DOM_POST_TTL_SEC]:
+            _X_DOM_POSTS.pop(key, None)
+        _X_DOM_POSTS[dom_post["id"]] = (now, dom_post)
+        while len(_X_DOM_POSTS) > 64:
+            _X_DOM_POSTS.pop(next(iter(_X_DOM_POSTS)))
+
+
+def _recent_dom_post(tweet_id: str) -> dict | None:
+    with _X_DOM_POSTS_LOCK:
+        hit = _X_DOM_POSTS.get(str(tweet_id))
+    if hit and time.monotonic() - hit[0] <= _X_DOM_POST_TTL_SEC:
+        return hit[1]
+    return None
+
+
+def _enrich_x_video_metadata(url: str, metadata: dict) -> dict:
+    """An X video's Description gets the post's text with its links
+    expanded and the quoted post, and the whole long post when the user's
+    FxTwitter opt-in is on. yt-dlp reads X's syndication copy, which stops
+    long posts near 280 characters; ``x_text`` records whether this one is
+    cut off so the repair view can count it. Best effort and X-only: any
+    failure keeps yt-dlp's description."""
+    if not isinstance(metadata, dict):
+        return metadata
+    extractor = str(metadata.get("extractor") or metadata.get("extractor_key") or "").lower()
+    tweet_id = (x_extractor.tweet_id_from_url(url)
+                or x_extractor.tweet_id_from_url(str(metadata.get("webpage_url") or "")))
+    if not extractor.startswith("twitter") or not tweet_id:
+        return metadata
+    marker = metadata.get("x_text")
+    if isinstance(marker, dict) and marker.get("text_completeness") == "complete":
+        return metadata  # a retry or refresh reusing this capture's metadata
+    try:
+        record = x_extractor.post_text_record(
+            tweet_id, timeout=10, dom_post=_recent_dom_post(tweet_id),
+            **_x_fxtwitter_kwargs(_read_settings() or {}))
+    except Exception as exc:  # the video capture never waits on this
+        log.info("X post text lookup skipped for %s: %s", tweet_id, type(exc).__name__)
+        return metadata
+    if not (record.get("description") or "").strip():
+        return metadata
+    enriched = dict(metadata)
+    enriched["description"] = record["description"]
+    enriched["x_text"] = x_text_repair.text_marker(record)
+    return enriched
+
+
+_X_OPEN_URL_RE = re.compile(r"^https://(?:x|twitter)\.com/[A-Za-z0-9_/]+$")
+
+
+def _x_cut_off_detail(sidecar: dict) -> dict | None:
+    """{reason, open_url, title?} when an X save holds only part of the
+    text: "long_post" (X cut it) or "article" (the post only links to an
+    X Article). The reader offers the FxTwitter switch or the open-tab
+    save. None once it is whole or the Article was saved on its own."""
+    if not isinstance(sidecar, dict):
+        return None
+    meta = sidecar.get("metadata") if isinstance(sidecar.get("metadata"), dict) else {}
+    cut = meta.get("text_cut_off")
+    if isinstance(cut, dict):
+        open_url = cut.get("open_url")
+        if cut.get("saved_as") or not isinstance(open_url, str) or not _X_OPEN_URL_RE.match(open_url):
+            return None
+        out = {"reason": "article" if cut.get("reason") == "article" else "long_post", "open_url": open_url}
+        title = cut.get("title")
+        if isinstance(title, str) and title.strip():
+            out["title"] = title.strip()[:200]
+        return out
+    marker = sidecar.get("x_text")
+    if isinstance(marker, dict) and (
+            (marker.get("long_post") and marker.get("text_completeness") != "complete")
+            or marker.get("quote_complete") is False):
+        tweet_id = x_extractor.tweet_id_from_url(str(sidecar.get("url") or ""))
+        if tweet_id:
+            return {"reason": "long_post", "open_url": f"https://x.com/i/status/{tweet_id}"}
+    return None
+
+
+_x_text_repair_job = None
+_x_text_repair_job_lock = threading.Lock()
+
+
+def _get_x_text_repair_job():
+    global _x_text_repair_job
+    with _x_text_repair_job_lock:
+        if _x_text_repair_job is None:
+            _x_text_repair_job = x_text_repair.RepairJob(
+                data_root=DATA_ROOT, index_getter=_get_index, fxtwitter_getter=_fxtwitter_switch_on,
+                corpus_lock=_corpus_update_lock, persist_article=_persist_x_article)
+        return _x_text_repair_job
+
+
 def _persist_reddit_thread(result: dict):
     return page_extractor.persist_page_yoink(
         _get_index(), result, data_root=DESKTOP_ROOT,
@@ -17072,8 +17227,18 @@ def _saves_capture_one(now=None) -> bool:
         video_id = None
         try:
             if item["source"] == list_imports.SOURCE_X_BOOKMARKS:
-                result = x_extractor.extract_x_thread(item["url"])
-                if result.get("ok"):
+                # A bookmarked post that is cut off, or only links to an X
+                # Article, keeps what X gave (marked cut off) unless the
+                # FxTwitter opt-in can fetch the rest.
+                result = x_extractor.extract_x_thread(
+                    item["url"], **_x_fxtwitter_kwargs(_read_settings() or {}))
+                if result.get("ok") and result.get("source_type") == x_article_extractor.SOURCE_TYPE:
+                    video_id = page_extractor.persist_page_yoink(
+                        _get_index(), result, data_root=DESKTOP_ROOT,
+                        source_type=x_article_extractor.SOURCE_TYPE,
+                        subfolder="X", slug_prefix="x-article",
+                        topic_classifier=_classify_topic)
+                elif result.get("ok"):
                     video_id = _persist_x_thread(result)
                     if video_id:
                         _save_x_video_poster(video_id, result)
@@ -19069,6 +19234,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_research_get(bare)
         if bare == "/relay/status":
             return self._send_json(200, _relay_status_payload())
+        if bare == "/library/x-text-repair":
+            # ?video_id= adds where the reader's one-save fix stands.
+            job = _get_x_text_repair_job()
+            reply = job.status()
+            video_id = (parse_qs(urlparse(self.path).query).get("video_id") or [""])[0].strip()
+            if video_id:
+                reply["item"] = job.item_status(video_id[:200])
+            return self._send_json(200, reply)
         if bare == "/search/status":
             return self._handle_search_control("status")
         if bare.startswith("/search/notices/"):
@@ -22135,6 +22308,7 @@ class Handler(BaseHTTPRequestHandler):
             "usage_sharing_prompt_seen",
             "auto_update_check",            # daily GitHub release check (default OFF)
             "suggest_podcasts",             # 3.17 podcast suggestions (default OFF)
+            "fxtwitter_enrichment_enabled",  # 3.18 FxTwitter for X text (default OFF)
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -22912,12 +23086,23 @@ class Handler(BaseHTTPRequestHandler):
         url = (body.get("url") or "").strip()
         if not url:
             return self._send_json(400, {"ok": False, "error": "url required"})
-        result = x_extractor.extract_x_thread(url)
+        # 3.18.0: the extension may send the post text it read from the open
+        # X tab (dom_post). It is only used when it extends X's own copy.
+        options = dict(_x_fxtwitter_kwargs(settings))
+        dom_post = _clean_dom_post(body.get("dom_post"))
+        if dom_post:
+            options["dom_post"] = dom_post
+            _remember_dom_post(dom_post)
+        result = x_extractor.extract_x_thread(url, **options)
         if not result.get("ok"):
             log.info("POST /extract/x -> %s", result.get("code"))
             return self._send_json(200, {
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
+        if result.get("source_type") == x_article_extractor.SOURCE_TYPE:
+            # A post that only links to an X Article, read with the user's
+            # FxTwitter opt-in: it lands like an extension Article capture.
+            return self._handle_extract_x_article_result(result)
         try:
             video_id = _persist_x_thread(result)
         except Exception:
@@ -22931,13 +23116,17 @@ class Handler(BaseHTTPRequestHandler):
         _save_x_video_poster(video_id, result)
         log.info("POST /extract/x -> ok (%s, %d posts)",
                  video_id, result.get("tweets_captured", 0))
-        return self._send_json(200, {
+        reply = {
             "ok": True,
             "video_id": video_id,
             "title": result["title"],
             "tweets_captured": result.get("tweets_captured", 0),
             "metadata": result.get("metadata", {}),
-        })
+        }
+        if result.get("text_cut_off"):
+            # Saved what X gave. The caller shows the two ways to get the rest.
+            reply["text_cut_off"] = result["text_cut_off"]
+        return self._send_json(200, reply)
 
     @uoink_usage.capture("x", response=True)
     def _handle_extract_x_article(self, body: dict):
@@ -22957,6 +23146,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
+        return self._handle_extract_x_article_result(result)
+
+    def _handle_extract_x_article_result(self, result: dict):
+        """Persist an ok x_article extract_result (extension DOM, or the
+        FxTwitter opt-in) and answer the capture request."""
         try:
             video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT,
@@ -24302,6 +24496,11 @@ class Handler(BaseHTTPRequestHandler):
                 clean_diar["segments"] = clean_diar_segs
             filtered["diarization"] = clean_diar
 
+        # 3.18.0: an X save that holds only part of the post's text.
+        cut_off = _x_cut_off_detail(data)
+        if cut_off:
+            filtered["x_text_cut_off"] = cut_off
+
         return self._send_json(200, {
             "ok": True,
             "video_id": video_id,
@@ -24452,6 +24651,23 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_x(body)
         if bare == "/extract/x-article":
             return self._handle_extract_x_article(body)
+        if bare == "/library/x-text-repair":
+            # 3.18.0 fix cut-off X posts: {action: start|pause|stop|fix}. Only a
+            # person starts it; progress survives a helper restart.
+            action = (body or {}).get("action") if isinstance(body, dict) else None
+            job = _get_x_text_repair_job()
+            if action == "start":
+                return self._send_json(200, job.start())
+            if action == "pause":
+                return self._send_json(200, job.pause())
+            if action == "stop":
+                return self._send_json(200, job.stop())
+            if action == "fix":
+                video_id = str((body or {}).get("video_id") or "").strip()
+                if not video_id:
+                    return self._send_json(400, {"ok": False, "error": "video_id required"})
+                return self._send_json(200, job.fix_one(video_id))
+            return self._send_json(400, {"ok": False, "error": "action must be start, pause, stop or fix"})
         if bare.startswith("/tools/"):
             return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":
@@ -26220,6 +26436,17 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     _start_backfill_thread()
     # 3.18: a transcript backfill the user started carries on after a restart.
     _resume_transcript_backfill_at_boot()
+    # 3.18.0: a "Fix cut-off X posts" run the person started picks up where
+    # it stopped. It never starts here on its own.
+    def _resume_x_text_repair_later():
+        time.sleep(30.0)
+        try:
+            _get_x_text_repair_job().resume_if_interrupted()
+        except Exception:
+            log.exception("x text repair resume failed")
+
+    threading.Thread(target=_resume_x_text_repair_later, daemon=True,
+                     name="x-text-repair-resume").start()
     # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
     # once at startup and every 24h after.
     _start_trash_purge_thread()

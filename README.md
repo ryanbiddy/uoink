@@ -175,8 +175,9 @@ sent history. UOINK_USAGE_SHARING=0 forces it off.
 See the [usage payload and counting design](docs/usage-sharing.md).
 
 Capture fetches the source you ask for. Podcast watches poll feeds you enable;
-Auto-ingest can also download new episodes. Truncated X posts may use the
-FxTwitter fallback to retrieve full text. Transcription can download models with
+Auto-ingest can also download new episodes. Long X posts and Articles that X
+cuts short use FxTwitter only if you turn that switch on (off by default).
+Transcription can download models with
 your consent, and **Check now** (or the daily update check, off by default) contacts GitHub
 for release information.
 

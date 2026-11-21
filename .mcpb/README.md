@@ -273,8 +273,9 @@ section 4. They are not a Claude Code CLI acceptance claim.
 
 Corpora, screenshots, podcast audio, transcripts, the library index and logs
 stay on your computer. Capture fetches the source you request; enabled podcast
-watches poll feeds and Auto-ingest can download episodes. Truncated X posts may
-use FxTwitter to retrieve full text. Transcription can download models with
+watches poll feeds and Auto-ingest can download episodes. Long X posts that X
+cuts short use FxTwitter only if you turn that switch on (off by default).
+Transcription can download models with
 consent; **Check now** contacts GitHub.
 
 Optional Anthropic features require your own key and send relevant source text.

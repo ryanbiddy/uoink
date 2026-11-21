@@ -23,7 +23,8 @@ with your key only after you enable it and authorize the call. The optional
 phone inbox contacts only the relay address you set, on your own Render
 account, after you turn it on. Optional podcast suggestions (off by default)
 send a few topic words to Apple's podcast search about once a day after you
-turn them on. The rest of
+turn them on. The optional FxTwitter switch (off by default) sends only the ID
+of a long X post or Article link that X cut short. The rest of
 this document names those requests, browser visits from dashboard links,
 and the local data they create.
 
@@ -57,7 +58,10 @@ Uoink makes these outbound requests:
   public video data, thumbnails, transcripts, comments, and metadata from
   YouTube and its delivery hosts. A pasted Reddit thread uses Reddit's public
   JSON endpoint. A pasted X post uses X's public syndication endpoint at
-  `cdn.syndication.twimg.com`. A web-page or podcast capture requests the
+  `cdn.syndication.twimg.com`, and an X video's post text comes from the same
+  endpoint. When you save a post from an open X tab with the extension, it
+  also reads that post's text from the page and sends it only to Uoink on
+  your computer. A web-page or podcast capture requests the
   user-supplied web page or podcast feed; a web-page capture also requests
   the preview image the page names for its thumbnail, which can be on another
   host. Import a list reads the list you paste from its source: HackerTube's
@@ -149,6 +153,16 @@ Uoink makes these outbound requests:
   Save or Follow show asks `itunes.apple.com` for it by the show ID Apple
   returned. Save then captures the episode like any podcast capture. Apple receives the normal request metadata, such as
   your IP address and Uoink's user agent.
+- **FxTwitter for long X posts and Articles: only if you turn it on.** It is
+  off by default (Settings, Capture, "Get full long posts and Articles
+  through FxTwitter"). X's public endpoint cuts long posts short and does not
+  give Article bodies. When the switch is on and a save comes back cut off or
+  links to an Article, Uoink asks FxTwitter, a free community service, at
+  `api.fxtwitter.com` for that one post by its ID. The "Fix cut-off X posts"
+  job in Settings, Library and export does the same for older saves, one post
+  at a time, only after you press Start. FxTwitter sees only the post's ID,
+  your IP address and Uoink's user agent, never your library, notes or
+  sign-ins. With the switch off, Uoink never contacts it.
 - **GitHub release check — only when you click `Check now` or turn on the
   daily check.** The daily check is off by default. When on, the dashboard
   asks at most once a day. Either way it requests the latest Uoink release
@@ -327,7 +341,8 @@ host), Anthropic for enabled automatic analysis, key tests or AI actions that
 you or a connected agent start with your key, ScrapeCreators for authorized
 discovery or balance checks after you enable it, the relay you deploy to your
 own Render account if you turn on the phone inbox, Apple's podcast search if
-you turn on podcast suggestions, Hugging Face for model
+you turn on podcast suggestions, FxTwitter if you turn on full long X posts,
+Hugging Face for model
 loading during requested speaker labeling, and GitHub when you request an
 update check. Their handling of request data is governed by their own
 policies and, where applicable, the terms of your account.

@@ -95,6 +95,8 @@
     "writing_studio.py",
     "x_article_extractor.py",
     "x_extractor.py",
+    "x_fulltext.py",
+    "x_text_repair.py",
     "yoink_mcp.py",
     "yt_extract.py"
   ],
