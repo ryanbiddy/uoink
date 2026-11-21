@@ -105,7 +105,9 @@ jobs:
       - name: Run the portable suite
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: pytest tests/ -q -rfE --junitxml="$RUNNER_TEMP/mac-evidence/pytest.xml"
+          # The jsdom page-capture checks run in ci.yml stdlib-tests; here they skip by this name.
+          UOINK_READER_BENCH_SKIP: "jsdom checks run in ci.yml stdlib-tests (ubuntu, windows)"
+        run: pytest tests/ -q -rfEs --junitxml="$RUNNER_TEMP/mac-evidence/pytest.xml"
       - name: Record installed versions
         if: always()
         run: python -m pip freeze --all | tee "$RUNNER_TEMP/mac-evidence/pip-freeze.txt"

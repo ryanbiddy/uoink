@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import os
 import re
 import socket
 import sys
@@ -107,8 +106,26 @@ def test_pasted_link_path_meets_its_floors(monkeypatch):
 
 def test_extension_path_meets_its_floors():
     if not bench.extension_available():
-        if os.environ.get("UOINK_READER_BENCH_REQUIRED") == "1":
-            pytest.fail("jsdom missing: run npm ci --prefix tests/js/reader")
-        pytest.skip("jsdom not installed (npm ci --prefix tests/js/reader)")
+        bench.jsdom_gate("The Uoink this page benchmark")
     rows, agg = bench.run("extension", bench.load_fixtures())
     _assert_floors("extension", rows, agg)
+
+
+def test_a_missing_jsdom_never_hides_behind_a_green_job(monkeypatch):
+    for key in ("UOINK_READER_BENCH_REQUIRED", "UOINK_READER_BENCH_SKIP", "CI"):
+        monkeypatch.delenv(key, raising=False)
+    with pytest.raises(pytest.skip.Exception, match="npm ci"):
+        bench.jsdom_gate("checks")  # a dev machine: a named skip
+    monkeypatch.setenv("CI", "true")
+    with pytest.raises(pytest.fail.Exception, match="missing in CI"):
+        bench.jsdom_gate("checks")  # CI that does not say where they run: fails
+    monkeypatch.setenv("UOINK_READER_BENCH_SKIP", "they run in ci.yml stdlib-tests")
+    with pytest.raises(pytest.skip.Exception, match="stdlib-tests"):
+        bench.jsdom_gate("checks")
+    monkeypatch.setenv("UOINK_READER_BENCH_REQUIRED", "1")
+    with pytest.raises(pytest.fail.Exception, match="required"):
+        bench.jsdom_gate("checks")  # the job that owns them always fails without jsdom
+    ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    mac = (ROOT / ".github/workflows/mac-qualify.yml").read_text(encoding="utf-8")
+    assert 'UOINK_READER_BENCH_REQUIRED: "1"' in ci and "npm ci --prefix tests/js/reader" in ci
+    assert "UOINK_READER_BENCH_SKIP:" in mac

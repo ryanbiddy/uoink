@@ -131,8 +131,13 @@ test("a wall the tab shows is reported, not retried through the helper fetch", a
 
 // ---- page-capture.js on real DOMs (jsdom) --------------------------------------
 const jsdomReady = existsSync(join(here, "reader", "node_modules", "jsdom"));
-const domTest = (name, fn) => test(name, { skip: !jsdomReady && process.env.UOINK_READER_BENCH_REQUIRED !== "1"
-  ? "jsdom not installed (npm ci --prefix tests/js/reader)" : false }, fn);
+// Without jsdom these skip by name on a dev machine. Where they are required,
+// or in CI with no UOINK_READER_BENCH_SKIP naming the job that runs them,
+// they run (and fail), so a green job never hides them.
+const mayskip = process.env.UOINK_READER_BENCH_REQUIRED !== "1" &&
+  !(process.env.CI && !String(process.env.UOINK_READER_BENCH_SKIP || "").trim());
+const domTest = (name, fn) => test(name, { skip: !jsdomReady && mayskip
+  ? `jsdom not installed: ${process.env.UOINK_READER_BENCH_SKIP || "npm ci --prefix tests/js/reader"}` : false }, fn);
 
 async function capture(name) {
   const { captureHtml } = await import("./reader_capture_bench.mjs");

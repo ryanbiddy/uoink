@@ -47,6 +47,12 @@ def test_extension_page_capture_node_tests():
     proc = subprocess.run([node, "--test", str(ROOT / "tests/js/page_capture_test.mjs")], cwd=ROOT,
                           capture_output=True, text=True, encoding="utf-8", timeout=300)
     assert proc.returncode == 0, proc.stdout[-4000:] + proc.stderr[-4000:]
+    import re
+    skipped = re.search(r"^\S* ?skipped (\d+)$", proc.stdout, re.M)
+    if skipped and int(skipped[1]):
+        sys.path.insert(0, str(ROOT / "tests"))
+        import reader_bench
+        reader_bench.jsdom_gate(f"{skipped[1]} jsdom page-capture checks")
 
 
 def test_page_dom_capture_ships_with_the_helper():

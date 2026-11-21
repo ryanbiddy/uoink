@@ -355,6 +355,20 @@ def extension_available():
         (ROOT / "extension" / "lib" / "page-capture.js").is_file()
 
 
+def jsdom_gate(what):
+    """When jsdom is missing: fail where the checks are required, fail in CI
+    unless the job names where they run (UOINK_READER_BENCH_SKIP), and skip
+    by name on a dev machine. A green job never hides a skipped DOM check."""
+    import pytest
+    if os.environ.get("UOINK_READER_BENCH_REQUIRED") == "1":
+        pytest.fail(f"{what}: jsdom is missing here, where it is required (npm ci --prefix tests/js/reader)")
+    reason = os.environ.get("UOINK_READER_BENCH_SKIP", "").strip()
+    if os.environ.get("CI") and not reason:
+        pytest.fail(f"{what}: jsdom is missing in CI. Install it (npm ci --prefix tests/js/reader) or set "
+                    "UOINK_READER_BENCH_SKIP to the job that runs these checks.")
+    pytest.skip(f"{what} skipped: {reason or 'jsdom not installed (npm ci --prefix tests/js/reader)'}")
+
+
 def run_extension_all(fixtures):
     """Uoink this page: Defuddle + page-capture.js on the DOM the user sees, then the helper's checks."""
     names = [f["gold"]["name"] for f in fixtures]
