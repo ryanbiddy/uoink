@@ -1,0 +1,49 @@
+{
+ "name": "wiki-style",
+ "url": "https://wiki.example.org/wiki/Alder_Bend",
+ "layout": "wiki article with infobox, TOC, edit links, references, navbox",
+ "title": "Alder Bend",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Valleypedia"
+ },
+ "keep": [
+  "Valley Water Data, spring report, 2026.",
+  "Survey team field notes, volume three.",
+  "River keepers newsletter, issue 12.",
+  "Old photographs of Alder Bend show a busy flow meter, long before anyone rebuilt the weir gate. Nobody expected the spring flood to check the reed bed so quickly, yet local anglers had to record it again. Each season, the river keepers walk past the mill race to clear the volunteer map and check the footbridge.",
+  "Nobody expected the cleanup day to record the sampling point so quickly, yet the survey team had to check it again. The silt trap at the estuary path was mapped by two ecologists after a pollution scare, and the work took six weeks. Costs rose after the fish count, mostly because the otter camera at the lower meadow had to be sampled by hand. Old photographs of Alder Bend show a fragile litter boom, long before anyone photographed the otter camera.",
+  "The silt trap at the mill race was planted by the river keepers after the spring flood, and the work took six months. Two ecologists recorded the water report first, because the otter camera near the old ford looked too swollen to trust. The plan was to rebuild the silt trap, sample the water report, and keep Kestrel Bridge open for the paddling club.",
+  "Nobody expected the fish count to map the weir gate so quickly, yet local anglers had to record it again. A swollen water report is easy to miss, so school volunteers now rebuild it every season and write the result down. The paddling club still argue about whether the sampling point should be planted or left fast for another year. Records from June show that local anglers reported the silty bank survey near the mill race at least six times.",
+  "History",
+  "Ecology",
+  "References",
+  "Alder Bend"
+ ],
+ "junk": [
+  "Contents 1 History 2 Ecology 3 References",
+  "Rivers of the valley Mill race Kestrel Brook",
+  "Categories: Meanders Valley geography",
+  "This page was last edited on 3 October 2026"
+ ],
+ "structure": {
+  "headings": [
+   "History",
+   "Ecology",
+   "References"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

@@ -1,0 +1,89 @@
+{
+ "name": "listicle",
+ "url": "https://picks.example.com/best-tools-for-small-plots",
+ "layout": "listicle with numbered headings, images and buy buttons",
+ "title": "Seven tools for a small plot",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Wren Fernsby",
+  "site_name": "Plot Picks"
+ },
+ "keep": [
+  "1. How to turn a herb spiral",
+  "When the open day arrived, the compost bay held, although the seed tray beside it was staked within twelve days. Costs rose after the drought, mostly because the soil test at the shady corner had to be sowed by hand.",
+  "2. Why the cold frame was staked",
+  "The school club still argue about whether the rain barrel should be turned or left leggy for another year. The compost bay at the shady corner was watered by the Saturday crew after the plant swap, and the work took three months.",
+  "3. After the plant swap",
+  "The bean trellis at the shady corner was watered by the school club after the drought, and the work took ten weeks. The Saturday crew tested the tomato cage first, because the cold frame near the greenhouse looked too damp to trust. New members tested the soil test first, because the mulch pile near Fenwick Gardens looked too damp to trust.",
+  "4. The rich bean trellis",
+  "Two neighbours still argue about whether the tool shed should be sowed or left leggy for another year. The plot holders harvested the compost bay first, because the soil test near plot nine looked too sandy to trust. Each morning, two neighbours walk past Fenwick Gardens to water the raised bed and check the seed tray.",
+  "5. Why the herb spiral was sowed",
+  "The rain barrel at the allotment gate was staked by new members after a slug year, and the work took eight evenings. Each morning, the committee walk past plot nine to weed the compost bay and check the rain barrel. Old photographs of the south fence show a damp rain barrel, long before anyone sowed the cold frame.",
+  "6. Why the tomato cage was tested",
+  "Some of the plot holders wanted to fence the seed tray at once, while others asked for four more days of notes. When the drought arrived, the watering rota held, although the herb spiral beside it was fenced within two days.",
+  "7. What the plot holders learned at the shady corner",
+  "Each week, the school club walk past Fenwick Gardens to stake the seed tray and check the raised bed. The school club still argue about whether the compost bay should be sowed or left sandy for another year. The plan was to turn the tomato cage, harvest the watering rota, and keep Fenwick Gardens open for two neighbours.",
+  "Seven tools for a small plot",
+  "Costs rose after the plant swap, mostly because the rain barrel at the greenhouse had to be sowed by hand. The plan was to move the mulch pile, water the soil test, and keep the allotment gate open for new members. The raised bed at Fenwick Gardens was mulched by the school club after a slug year, and the work took eight evenings."
+ ],
+ "junk": [
+  "Check price at the shop",
+  "Reviews Deals Guides",
+  "Plot Picks. Independent reviews of garden gear.",
+  "We may earn a commission when you buy through links on this page."
+ ],
+ "structure": {
+  "headings": [
+   "1. How to turn a herb spiral",
+   "2. Why the cold frame was staked",
+   "3. After the plant swap",
+   "4. The rich bean trellis",
+   "5. Why the herb spiral was sowed",
+   "6. Why the tomato cage was tested",
+   "7. What the plot holders learned at the shady corner",
+   "Seven tools for a small plot"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [
+   {
+    "alt": "Tool number 1 on a potting bench",
+    "src": "https://picks.example.com/img/pick-1.jpg"
+   },
+   {
+    "alt": "Tool number 2 on a potting bench",
+    "src": "https://picks.example.com/img/pick-2.jpg"
+   },
+   {
+    "alt": "Tool number 3 on a potting bench",
+    "src": "https://picks.example.com/img/pick-3.jpg"
+   },
+   {
+    "alt": "Tool number 4 on a potting bench",
+    "src": "https://picks.example.com/img/pick-4.jpg"
+   },
+   {
+    "alt": "Tool number 5 on a potting bench",
+    "src": "https://picks.example.com/img/pick-5.jpg"
+   },
+   {
+    "alt": "Tool number 6 on a potting bench",
+    "src": "https://picks.example.com/img/pick-6.jpg"
+   },
+   {
+    "alt": "Tool number 7 on a potting bench",
+    "src": "https://picks.example.com/img/pick-7.jpg"
+   }
+  ],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

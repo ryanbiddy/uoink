@@ -127,6 +127,7 @@ import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 import x_text_repair  # noqa: E402  -- 3.18.0 fix cut-off X posts job
+import page_dom_capture  # noqa: E402  -- 3.18 Uoink this page from the tab's DOM
 import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
 import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
@@ -19031,7 +19032,7 @@ class Handler(BaseHTTPRequestHandler):
             self.status = status
             self.message = message
 
-    def _read_json_body(self, *, strict: bool = False) -> dict:
+    def _read_json_body(self, *, strict: bool = False, limit: int = MAX_BODY_BYTES) -> dict:
         # P1-3: bound everything we trust from the network. Without these
         # checks Content-Length was unbounded (memory exhaustion via large
         # POST), Content-Type was unchecked (HTML form posts could trigger
@@ -19052,8 +19053,8 @@ class Handler(BaseHTTPRequestHandler):
             raise Handler._BodyError(400, "Bad Content-Length")
         if length < 0:
             raise Handler._BodyError(400, "Bad Content-Length")
-        if length > MAX_BODY_BYTES:
-            raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
+        if length > limit:
+            raise Handler._BodyError(413, f"Body too large (>{limit} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
         self._body_consumed = True
         try:
@@ -22129,11 +22130,36 @@ class Handler(BaseHTTPRequestHandler):
             video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT,
                 topic_classifier=_classify_topic)
-            result["video_id"] = video_id
         except Exception as e:
             log.warning("/extract/page persist failed: %s", e)
-            result["video_id"] = None
+            video_id = None
+        if not video_id:
+            # An unsaved page is never reported as saved.
+            return self._send_json(500, page_extractor.persist_failed_result(url))
+        result["video_id"] = video_id
+        return self._send_json(200, result)
 
+    @uoink_usage.capture("page", response=True)
+    def _handle_extract_page_dom(self, body):
+        """POST /extract/page/dom {url, title, markdown, author?, published?,
+        site?, ...}: the page the user sees, already read in their tab by the
+        extension (Defuddle). Same site allowlist and Library save as
+        /extract/page; the helper fetches nothing."""
+        url = page_extractor.normalize_page_url(str((body or {}).get("url") or ""))
+        if url and not page_extractor.host_is_allowed(_get_index(), url):
+            return self._send_json(403, page_extractor.host_not_allowed_result(url))
+        result = page_dom_capture.build_extract_result(body)
+        if not result.get("ok"):
+            return self._send_json(400, result)
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DESKTOP_ROOT, topic_classifier=_classify_topic)
+        except Exception as e:
+            log.warning("/extract/page/dom persist failed: %s", e)
+            video_id = None
+        if not video_id:
+            return self._send_json(500, page_extractor.persist_failed_result(result["url"]))
+        result["video_id"] = video_id
         return self._send_json(200, result)
 
     def _handle_settings_mcp_config(self):
@@ -24546,7 +24572,9 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/images":
             return self._handle_create_image()
         try:
-            body = self._read_json_body(strict=_strict_json_route(bare))
+            # A page read in the user's tab can be far larger than 64KB of JSON.
+            body = self._read_json_body(strict=_strict_json_route(bare), limit=(
+                page_dom_capture.MAX_BODY_BYTES if bare == "/extract/page/dom" else MAX_BODY_BYTES))
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
@@ -24796,6 +24824,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_writing_style_anchor_modify(bare, body)
         if bare == "/extract/page":
             return self._handle_extract_page(body)
+        if bare == "/extract/page/dom":
+            return self._handle_extract_page_dom(body)
         if bare == "/extract/page/allowlist":
             return self._handle_page_allowlist_modify(body)
 

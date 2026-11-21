@@ -20,7 +20,9 @@ import time
 from urllib.parse import quote, urljoin, urlsplit
 
 ENGINE = "readability_stdlib"
-VERSION = "1"
+# 2 (3.18): code languages, images, figure and table captions, footnotes, math,
+# layout tables, Q&A pages, robot checks and paywall teasers.
+VERSION = "2"
 MAX_INPUT = 8 * 1024 * 1024
 MAX_NODES = 40000
 MAX_DEPTH = 80
@@ -34,13 +36,31 @@ _POSITIVE = re.compile(r"article|body|content|entry|main|post|text|blog|story", 
 _NEGATIVE = re.compile(r"banner|comment|footer|masthead|promo|related|share|sidebar|sponsor|widget|advert|(?:^|[-_ ])ads?(?:$|[-_ ])", re.I)
 # Keep wall prompts until the chosen content is checked. A wall class elsewhere
 # in the document must not decide whether the selected prose is an article.
-_UNLIKELY = re.compile(r"breadcrumb|combx|comment|disqus|footer|menu|related|replies|sidebar|social|share|sponsor|advert|popup|cookie|(?:^|[-_ ])ads?(?:$|[-_ ])", re.I)
+_UNLIKELY = re.compile(r"breadcrumb|combx|comment|disqus|footer|menu|related|replies|sidebar|social|share|sponsor|advert|popup|cookie|(?:^|[-_ ])ads?(?:$|[-_ ])"
+                       # Wiki contents boxes, navigation boxes, category bars and [edit] links.
+                       r"|(?:^|[-_ ])toc(?:$|[-_ ])|navbox|catlinks|editsection", re.I)
 _VOID = set("area base br col embed hr img input link meta param source track wbr".split())
 _HIDDEN = set("script style template noscript svg canvas iframe object".split())
 _NOISE = set("header nav footer aside form button input select textarea".split())
 _BLOCK = set("article section div p pre blockquote table ul ol li dl h1 h2 h3 h4 h5 h6".split())
 _WALL = re.compile(r"(?:sign\s*in|log\s*in|subscribe|subscription|register|create an account)\s+(?:is required|required|to (?:read|continue|view|access|unlock))|(?:subscriber|members?)[- ]only|already a subscriber|unlock (?:this|the|full) article|purchase (?:a )?subscription", re.I)
 _JS = re.compile(r"enable javascript|javascript is (?:not available|disabled|required)|requires javascript|please turn on javascript", re.I)
+# Robot checks and "keep reading" teasers. A teaser is a few paragraphs and
+# then a subscribe prompt: saving it as the article would hide that the rest
+# is missing.
+_BOT = re.compile(r"checking (?:your browser|if the site connection is secure)|verify(?:ing)? (?:that )?you are (?:a )?human|are you a robot|press (?:and|&) hold|unusual traffic from your|enable javascript and cookies|complete the security check|attention required", re.I)
+_TEASER = re.compile(r"(?:subscribe|sign in|log in|register)(?: now)? to (?:continue|keep) reading|keep reading with a (?:subscription|free account)|already a subscriber|this (?:article|story) is (?:only )?(?:for|available to) (?:subscribers|members)|subscribers get (?:every|full|unlimited)|to read the full (?:article|story)", re.I)
+MAX_TEASER = 2000
+# The prompt says the article goes on behind it (not just "subscribe").
+_CONTINUES = re.compile(r"(?:subscribe|sign in|log in|register)(?: now)? to (?:continue|keep) reading|keep reading with a "
+                        r"(?:subscription|free account)|to (?:read|see) the (?:full|rest of the) (?:article|story)|"
+                        r"this (?:article|story) is (?:only )?(?:for|available to) (?:subscribers|members)|"
+                        r"the rest of (?:this|the) (?:article|story)|unlock (?:this|the full) (?:article|story)", re.I)
+_LANG = re.compile(r"(?:^|\s)(?:language|lang|highlight-source)-([A-Za-z0-9_+#.-]{1,24})(?=\s|$)")
+_GUTTER = re.compile(r"(?:^|\s)(?:linenos|linenodiv|lineno|rouge-gutter|line-numbers-rows|hljs-ln-numbers)(?:\s|$)")
+_FN_REF = re.compile(r"^#(?:user-content-)?(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
+_FN_ITEM = re.compile(r"^(?:user-content-)?(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
+_FN_BACK = re.compile(r"^#(?:user-content-)?(?:fnref|footnote-?ref)", re.I)
 _BYLINE = re.compile(r"(?:^|[\s_-])(?:byline|author|writtenby)(?:$|[\s_-])", re.I)
 _TITLE_SEPARATOR = re.compile(r" [|\-–—\\/>»] ")
 # Lead image sources in preference order. Relative URLs resolve like links.
@@ -206,7 +226,8 @@ def _metadata(doc, base):
                     elif isinstance(value, dict):
                         types = value.get("@type", [])
                         types = [types] if isinstance(types, str) else types
-                        if isinstance(types, list) and any(str(t).endswith(("Article", "Posting", "Report")) for t in types):
+                        if isinstance(types, list) and any(str(t).endswith(("Article", "Posting", "Report", "Recipe", "HowTo", "Review"))
+                                                           for t in types):
                             ld.setdefault("names", (_value(value.get("headline")), _value(value.get("name"))))
                             ld.setdefault("author", _value(value.get("author")))
                             ld.setdefault("published_date", _value(value.get("datePublished")))
@@ -225,18 +246,40 @@ def _metadata(doc, base):
         "site_name": ld.get("site_name") or first("og:site_name", "application-name"),
         "image": next((images[k] for k in _IMAGE_KEYS if images.get(k)), None),
     }
-    bylines = []
+    bylines, headings = [], []
     for node in doc.nodes:
         if (not result["author"] and node.tag not in {"html", "body", "main", "article"}
                 and node.tag not in _HIDDEN and _BYLINE.search(node.hint)):
             text = _text(node, limit=201)
             if text and len(text) <= 200:
                 bylines.append(text)
-        if not result["title"] and node.tag == "h1":
-            result["title"] = _text(node, limit=500) or None
+        if node.tag == "h1" and len(headings) < 10:
+            headings.append(_text(node, limit=500))
+    if not result["title"]:
+        result["title"] = next(filter(None, headings), None)
     if bylines:
         result["author"] = min(bylines, key=len)
+    _split_site_from_title(result, headings)
     return {k: v for k, v in result.items() if v}
+
+
+def _split_site_from_title(result, headings):
+    # "Alder Bend | Valleypedia": drop the site part when it is the known site
+    # name, or when an <h1> is exactly the rest (then the rest is the title and
+    # the part after the separator names the site).
+    title, site = result.get("title") or "", (result.get("site_name") or "").casefold()
+    separators = list(_TITLE_SEPARATOR.finditer(title))
+    if not separators:
+        return
+    head, tail = title[:separators[-1].start()].strip(), title[separators[-1].end():].strip()
+    lead, rest = title[:separators[0].start()].strip(), title[separators[0].end():].strip()
+    if site and head and tail.casefold() == site:
+        result["title"] = head
+    elif site and rest and lead.casefold() == site:
+        result["title"] = rest
+    elif (not site and head and 0 < len(tail.split()) <= 5
+          and any(h.casefold() == head.casefold() for h in headings if h)):
+        result["title"], result["site_name"] = head, tail
 
 
 def _prepare(doc):
@@ -247,7 +290,10 @@ def _prepare(doc):
         # Root classes carry skin and feature flags ("main-menu-pinned-disabled"),
         # not a content role. Readability never strips <body> as unlikely either.
         noise = (node.tag in _NOISE or a.get("role") in {"navigation", "complementary", "menu", "contentinfo"}
-                 or (node.tag not in {"html", "body"} and _UNLIKELY.search(node.hint)))
+                 or (node.tag not in {"html", "body"} and _UNLIKELY.search(node.hint))
+                 # Line numbers beside highlighted code are not part of the code.
+                 or _GUTTER.search(a.get("class", "")) is not None
+                 or (node.tag == "td" and "gutter" in a.get("class", "").split()))
         node.excluded = bool((node.parent and node.parent.excluded) or hidden or noise or node.tag in _HIDDEN or node.tag == "head")
     for node in reversed(doc.nodes):
         if node.excluded:
@@ -294,6 +340,18 @@ def _choose(doc):
     if not ranked:
         return []
     best = max(ranked, key=lambda n: n.score)
+    # As in Readability: when other top candidates score close to the best one
+    # (a question and its answers, a body split into posts), use the nearest
+    # ancestor that holds the best one and at least two of them.
+    top = sorted(ranked, key=lambda n: -n.score)[1:6]
+    alternatives = [n for n in top if n.score >= best.score * .75 and not _contains(n, best) and not _contains(best, n)]
+    if len(alternatives) >= 2:
+        parent = best.parent
+        while parent is not None and parent.tag not in {"document", "html", "body"}:
+            if sum(_contains(parent, n) for n in alternatives) >= 2:
+                best = parent
+                break
+            parent = parent.parent
     # Lift one-child wrappers to recover adjacent headings and later sections.
     while best.parent and best.parent.tag not in {"document", "html", "body"}:
         siblings = [n for n in best.parent.children if isinstance(n, Node) and not n.excluded and n.length]
@@ -309,9 +367,18 @@ def _choose(doc):
         bonus = best.score * .2 if node.attrs.get("class") and node.attrs.get("class") == best.attrs.get("class") else 0
         prose = node.tag == "p" and node.length > 80 and node.density < .25
         heading = node.tag in {"h1", "h2"} and node.density == 0
-        if node is best or node.score + bonus >= threshold or prose or heading:
+        figure = node.tag in {"figure", "picture"} and node.density < .5
+        if node is best or node.score + bonus >= threshold or prose or heading or figure:
             chosen.append(node)
     return chosen
+
+
+def _contains(ancestor, node):
+    while node is not None:
+        if node is ancestor:
+            return True
+        node = node.parent
+    return False
 
 
 def safe_link(href, url):
@@ -328,16 +395,102 @@ def safe_link(href, url):
         return None
 
 
+def _descendants(node):
+    stack = list(reversed(node.children))
+    while stack:
+        item = stack.pop()
+        if isinstance(item, Node):
+            yield item
+            stack.extend(reversed(item.children))
+
+
+def _layout_table(table, inside, rows):
+    # Close to Readability's data-table test: a caption, a header row or <th>
+    # cells mean data; nested tables, headings, lists or a single column mean
+    # layout.
+    if table.attrs.get("role") in {"presentation", "none"}:
+        return True
+    if any(isinstance(c, Node) and c.tag in {"caption", "thead"} for c in table.children):
+        return False
+    if any(n.tag in {"table", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "blockquote"} for n in inside):
+        return True
+    if any(n.tag == "th" for n in inside):
+        return False
+    return max(map(len, rows), default=0) <= 1
+
+
+def _code_language(pre):
+    # language-x / lang-x / highlight-source-x, or data-lang, on the <pre>, its
+    # <code>, or a highlighter wrapper a few levels up.
+    nodes = [pre] + [c for c in pre.children if isinstance(c, Node) and c.tag == "code"][:1]
+    parent = pre.parent
+    for _ in range(5):
+        if parent is None or parent.tag in {"article", "main", "body", "document"}:
+            break
+        nodes.append(parent)
+        parent = parent.parent
+    for node in nodes:
+        lang = node.attrs.get("data-lang") or node.attrs.get("data-language") or ""
+        match = _LANG.search(node.attrs.get("class", ""))
+        lang = (lang or (match[1] if match else "")).strip().lower()
+        if re.fullmatch(r"[a-z0-9_+#.-]{1,24}", lang) and lang not in {"none", "plaintext", "nohighlight"}:
+            return lang
+    return ""
+
+
+# Tracking pixels and beacons: never saved as images (a viewer that loads them
+# tells a third party the page was opened).
+_PIXEL_SIZE = re.compile(r"^\s*[01](?:\.0*)?\s*(?:px)?\s*$", re.I)
+_BEACON = re.compile(
+    r"^https?://(?:[^/?#]*\.)?(?:google-analytics\.com|doubleclick\.net|googletagmanager\.com|"
+    r"scorecardresearch\.com|quantserve\.com|bat\.bing\.com)(?:[/?#:]|$)"
+    r"|^https?://(?:[^/?#]*\.)?facebook\.com/tr(?:[/?#]|$)"
+    r"|/(?:pixel|beacon|1x1|spacer|blank|clear|transparent|track|tracking|open)"
+    r"(?:\.(?:gif|png|jpe?g|webp))?(?:[?#]|$)", re.I)
+
+
+def is_pixel(attrs, src):
+    return bool(_PIXEL_SIZE.match(attrs.get("width", "x")) or _PIXEL_SIZE.match(attrs.get("height", "x"))
+                or _BEACON.search(src or ""))
+
+
+def _image_source(attrs, url):
+    # Lazy loaders keep the real image in data-src (or a srcset) and a 1px
+    # placeholder in src.
+    for key in ("data-src", "data-lazy-src", "data-original", "src", "data-srcset", "srcset"):
+        value = attrs.get(key, "").strip()
+        if key.endswith("srcset"):
+            value = re.split(r",\s+", value)[0].strip().split(" ")[0]
+        if value and not value.lower().startswith("data:"):
+            link = safe_link(value, url)
+            if link:
+                return None if is_pixel(attrs, link) else link
+    return None
+
+
 def _escape(text):
     text = _SPACE.sub(" ", text)
     return re.sub(r"([\\`*_[\]])", r"\\\1", text).replace("<", "&lt;").replace(">", "&gt;")
 
 
 class Markdown:
-    def __init__(self, url, check):
+    def __init__(self, url, check, roots=()):
         self.url, self.check = url, check
+        self.roots = set(roots)
         self.links = []
         self.truncated = False
+
+    def clutter(self, node):
+        # Inside the chosen content, as in Readability's conditional cleaning:
+        # a box that is mostly one link ("Read next: ...") and a short byline
+        # (already in the metadata) are not the article.
+        # A span is inline: a name inside a sentence stays in the sentence.
+        if node in self.roots or node.tag not in {"div", "section", "aside", "p"}:
+            return False
+        if node.tag in {"div", "section", "aside"} and node.length and node.density > .6 and node.length < 300 and not any(
+                n.tag in {"img", "pre", "table", "ul", "ol"} for n in _descendants(node)):
+            return True
+        return node.length < 100 and _BYLINE.search(node.hint) is not None
 
     def cap(self, text):
         if len(text) > MAX_MARKDOWN:
@@ -348,26 +501,56 @@ class Markdown:
         self.check()
         if isinstance(node, str):
             return _escape(node)
-        if node.excluded:
+        if node.excluded or self.clutter(node):
             return ""
         tag = node.tag
         if tag == "pre":
             code = _text(node, raw=True, limit=MAX_MARKDOWN).strip("\n")
             fence = "`" * max(3, 1 + max((len(m[0]) for m in re.finditer(r"`+", code)), default=0))
-            return self.cap(f"\n\n{fence}\n{code}\n{fence}\n\n")
+            return self.cap(f"\n\n{fence}{_code_language(node)}\n{code}\n{fence}\n\n")
+        if tag == "img":
+            src = _image_source(node.attrs, self.url)
+            if not src:
+                return ""
+            return f"![{_escape(node.attrs.get('alt', '')).strip()}]({src})"
+        if tag == "math":
+            # MathML: keep the TeX source when the page carries it.
+            note = next((n for n in _descendants(node) if n.tag == "annotation"
+                         and "tex" in n.attrs.get("encoding", "").lower()), None)
+            tex = (_text(note, raw=True) if note else node.attrs.get("alttext", "") or _text(node)).strip()
+            # "<" in TeX is \lt: a bare "<" could open an HTML tag in a Markdown app.
+            tex = tex.replace("<", "\\lt ")
+            if not tex:
+                return ""
+            if node.attrs.get("display") == "block":
+                # Display math keeps its line breaks (aligned equations), never a blank line.
+                lines = [re.sub(r"[ \t]+", " ", line).strip() for line in tex.splitlines()]
+                body = "\n".join(line for line in lines if line)
+                return f"\n\n$${body}$$\n\n" if "\n" not in body else f"\n\n$$\n{body}\n$$\n\n"
+            return f"${_SPACE.sub(' ', tex)}$"
         if tag == "table":
-            rows, stack = [], list(reversed(node.children))
+            inside = [n for n in _descendants(node) if not n.excluded]
+            pres = [n for n in inside if n.tag == "pre" and not any(_contains(p, n) for p in inside if p.tag == "pre" and p is not n)]
+            if pres and sum(n.length for n in pres) >= node.length * .9:
+                # A table around highlighted code (line numbers in one cell).
+                return self.cap("".join(self.render(n) for n in pres))
+            caption = next((c for c in node.children if isinstance(c, Node) and c.tag == "caption" and not c.excluded), None)
+            caption = self.render(caption).strip() if caption else ""
+            trs, stack = [], list(reversed(node.children))
             while stack:
                 child = stack.pop()
                 if not isinstance(child, Node) or child.excluded:
                     continue
                 if child.tag == "tr":
-                    cells = [self.render(c).strip().replace("|", "\\|").replace("\n", " ")
-                             for c in child.children if isinstance(c, Node) and c.tag in {"th", "td"}]
-                    if cells:
-                        rows.append(cells)
+                    trs.append([c for c in child.children if isinstance(c, Node) and c.tag in {"th", "td"} and not c.excluded])
                 elif child.tag != "table":
                     stack.extend(reversed(child.children))
+            if _layout_table(node, inside, trs):
+                # Email and old-site layout tables: the cells are the page, in order.
+                blocks = (self.render(c).strip() for cells in trs for c in cells)
+                return self.cap("".join(f"\n\n{b}\n\n" for b in blocks if b))
+            rows = [cells for cells in ([self.render(c).strip().replace("|", "\\|").replace("\n", " ") for c in tr]
+                                        for tr in trs) if cells]
             if not rows:
                 return ""
             width = min(20, max(map(len, rows)))
@@ -375,7 +558,7 @@ class Markdown:
                 self.truncated = True
             lines = ["| " + " | ".join((r + [""] * width)[:width]) + " |" for r in rows]
             lines.insert(1, "| " + " | ".join(["---"] * width) + " |")
-            return self.cap("\n\n" + "\n".join(lines) + "\n\n")
+            return self.cap("\n\n" + (caption + "\n\n" if caption else "") + "\n".join(lines) + "\n\n")
         parts, size = [], 0
         for child in node.children:
             if (isinstance(child, str) and child.isspace() and
@@ -393,6 +576,12 @@ class Markdown:
                 break
         inner = self.cap("".join(parts))
         if tag == "a":
+            raw_href = node.attrs.get("href", "").strip()
+            ref = _FN_REF.match(raw_href)
+            if ref and len(_text(node).strip()) <= 6:  # the words shown ("[100]"), not escaped Markdown
+                return f"[^{ref[1]}]"
+            if _FN_BACK.match(raw_href) or "backref" in node.attrs.get("class", "") or inner.strip() in {"↩", "↩︎", "^"}:
+                return ""
             href = safe_link(node.attrs.get("href"), self.url)
             if href and inner.strip():
                 if len(self.links) < 50 and {"href": href} not in self.links:
@@ -411,9 +600,12 @@ class Markdown:
         if tag == "blockquote":
             return self.cap("\n\n" + "\n".join("> " + line for line in inner.strip().splitlines()) + "\n\n")
         if tag == "li":
+            note = _FN_ITEM.match(node.attrs.get("id", "")) if node.parent and node.parent.tag == "ol" else None
+            if note:
+                return self.cap(f"\n[^{note[1]}]: " + inner.strip().replace("\n", "\n    ") + "\n")
             marker = "1. " if node.parent and node.parent.tag == "ol" else "- "
             return self.cap("\n" + marker + inner.strip().replace("\n", "\n   ") + "\n")
-        if tag in _BLOCK or tag in {"main", "header"}:
+        if tag in _BLOCK or tag in {"main", "header", "figure", "figcaption", "caption"}:
             return self.cap("\n\n" + inner.strip() + "\n\n")
         if tag == "br":
             return "\n"
@@ -428,15 +620,41 @@ def _solid_prose(text):
             and bool(re.search(r"[.!?]", text)))
 
 
-def text_diagnostic(text, *, script_backed=False, allow_short=False):
-    """Judge chosen prose, not page chrome. Never echo page data in diagnostics."""
+def _units(text):
     # Count distinct sentences/blocks so repeated account copy cannot drown out
     # a wall prompt. Keep block boundaries for headings and Markdown fallbacks.
     units = {}
-    for part in re.split(r"(?<=[.!?])\s+|[\r\n]+", text or ""):
+    for part in re.split(r"(?<=[.!?…])\s+|[\r\n]+", text or ""):
         part = _SPACE.sub(" ", part).strip(" \t#>*-_").casefold()
         if part:
             units[part] = units.get(part, 0) + 1
+    return units
+
+
+def _teaser(units):
+    """"preview" when a short body ends in two or more subscribe prompts and
+    says the article goes on (a continue-reading prompt, or text cut off with
+    an ellipsis); "maybe" for the same ending without that evidence (a short
+    article with a newsletter box: saved, and labeled); else None."""
+    ordered = list(units)
+    tail = ordered[-6:]
+    prompts = [u for u in tail if sum(len(m[0]) for m in _TEASER.finditer(u)) >= len(u) * .35
+               or sum(len(m[0]) for m in _WALL.finditer(u)) >= len(u) * .35]
+    other = sum(len(u) for u in ordered if u not in prompts)
+    if len(prompts) < 2 or other >= MAX_TEASER:
+        return None
+    cut = any(u.endswith(("…", "...")) for u in tail if u not in prompts)
+    return "preview" if cut or any(_CONTINUES.search(u) for u in prompts) else "maybe"
+
+
+def maybe_paywall_preview(text):
+    """A saved short page that ends like a paywall preview, for its label."""
+    return _teaser(_units(text)) == "maybe"
+
+
+def text_diagnostic(text, *, script_backed=False, allow_short=False):
+    """Judge chosen prose, not page chrome. Never echo page data in diagnostics."""
+    units = _units(text)
 
     def substance(pattern):
         # A mention inside a report is not a prompt. Measure phrase coverage,
@@ -446,8 +664,10 @@ def text_diagnostic(text, *, script_backed=False, allow_short=False):
         return prompts and other < MIN_TEXT and (len(prompts) >= 2 or sum(map(len, prompts)) >= other * .5)
 
     text = _SPACE.sub(" ", text or "").strip()
-    if substance(_WALL):
+    if substance(_WALL) or _teaser(units) == "preview":
         return "article body not found: login or paywall page"
+    if substance(_BOT):
+        return "article body not found: robot check page"
     if substance(_JS):
         return "article body not found: empty JavaScript page"
     if script_backed:
@@ -508,7 +728,7 @@ def extract(html: bytes | str, url: str) -> dict:
         if diagnostic:
             result.update(code="article_body_not_found", diagnostic=diagnostic, error=diagnostic)
             return result
-        renderer = Markdown(base, doc.check)
+        renderer = Markdown(base, doc.check, chosen)
         markdown = renderer.cap("".join(renderer.render(n) for n in chosen)).strip()
         doc.check()
         result.update(ok=True, markdown=markdown, links=renderer.links,
@@ -516,6 +736,9 @@ def extract(html: bytes | str, url: str) -> dict:
                       output_truncated=renderer.truncated)
         if length < MIN_TEXT:
             result["diagnostic"] = "short article"
+        if maybe_paywall_preview(text):
+            # Saved, since it may be the whole article, and labeled in case it is not.
+            result.update(preview_hint=True, diagnostic="short article: may be a paywall preview")
         return result
     except ExtractionLimit as exc:
         diagnostic = "article body not found: " + str(exc)

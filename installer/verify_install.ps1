@@ -53,6 +53,7 @@ $requiredFiles = @(
     'x_article_extractor.py',
     'x_fulltext.py',
     'x_text_repair.py',
+    'page_dom_capture.py',
     'list_imports.py',
     'show_capture.py',
     'timed_cues.py',

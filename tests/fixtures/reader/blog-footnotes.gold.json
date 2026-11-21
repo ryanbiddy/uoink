@@ -1,0 +1,53 @@
+{
+ "name": "blog-footnotes",
+ "url": "https://wren.example.net/posts/soil-notes",
+ "layout": "personal blog with footnotes, author bio, comments, tags",
+ "title": "Notes on stubborn soil",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Nell Brightwater",
+  "published": "2026-05-02",
+  "site_name": "Wren Field Notes"
+ },
+ "keep": [
+  "The soil test kit came from the allotment shed and was two seasons old.",
+  "Plot nine has always drained badly, according to the committee minutes.",
+  "We used leaf mould rather than bark because it was free.",
+  "By July, the school club had tested the mulch pile twice, which left the watering rota damp but usable. It helped that the rain barrel was sandy, since the Saturday crew could stake the bean trellis without waiting for the open day. The school club sowed the herb spiral first, because the rain barrel near the allotment gate looked too hardy to trust.",
+  "Nobody expected the drought to weed the seed tray so quickly, yet the Saturday crew had to sow it again. Records from April show that two neighbours weeded the tidy herb spiral near plot nine at least two times. Nobody expected the open day to harvest the soil test so quickly, yet the plot holders had to sow it again. When the plant swap arrived, the soil test held, although the mulch pile beside it was staked within twelve evenings.",
+  "When a wet spring arrived, the tomato cage held, although the watering rota beside it was sowed within twelve days. By April, the plot holders had fenced the rain barrel twice, which left the cold frame tidy but usable. New members still argue about whether the compost bay should be weeded or left leggy for another year. The plot holders still argue about whether the bean trellis should be staked or left sunny for another year.",
+  "Costs rose after the drought, mostly because the tomato cage at the south fence had to be fenced by hand. Nobody expected the drought to turn the rain barrel so quickly, yet two neighbours had to weed it again. Each morning, the Saturday crew walk past plot nine to turn the mulch pile and check the herb spiral. Nobody expected the open day to weed the watering rota so quickly, yet the Saturday crew had to test it again. The plan was to harvest the tomato cage, move the seed tray, and keep the greenhouse open for two neighbours.",
+  "Records from April show that new members staked the sandy watering rota near the greenhouse at least six times. It helped that the tool shed was tender, since the school club could mulch the compost bay without waiting for the plant swap. By March, the plot holders had harvested the seed tray twice, which left the tomato cage hardy but usable. It helped that the watering rota was tender, since the Saturday crew could test the cold frame without waiting for the plant swap.",
+  "Notes on stubborn soil",
+  "What changed"
+ ],
+ "junk": [
+  "Nell writes about small gardens, slow repairs and the weather on the allotment.",
+  "Home Archive About Feed",
+  "Lovely write-up, our plot has the same clay problem every single spring.",
+  "Wren Field Notes. Written by hand, hosted on a small server."
+ ],
+ "structure": {
+  "headings": [
+   "Notes on stubborn soil",
+   "What changed"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [
+   "The soil test kit came from the allotment shed and was two seasons old.",
+   "Plot nine has always drained badly, according to the committee minutes.",
+   "We used leaf mould rather than bark because it was free."
+  ],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

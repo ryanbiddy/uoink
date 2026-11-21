@@ -1,0 +1,44 @@
+{
+ "name": "spanish-article",
+ "url": "https://diario.example.es/local/obras-del-muelle",
+ "layout": "Spanish-language news article",
+ "title": "Terminan las obras del muelle",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Marta Olivar",
+  "published": "2026-06-05",
+  "site_name": "Diario Ejemplo"
+ },
+ "keep": [
+  "Terminan las obras del muelle",
+  "Algunas personas querían cambiar el muelle enseguida, mientras otras pedían más datos del pozo. Nadie esperaba que la fiesta del pueblo cambiara tanto el camino, pero la cooperativa tuvieron que volver a medirlo. Los registros de marzo muestran que los vecinos limpiaron el faro junto a la plaza vieja varias veces. Los registros de marzo muestran que los voluntarios limpiaron el tejado junto a la escuela varias veces.",
+  "Cada semana, la cooperativa pasan por el monte para revisar el puente y anotar el estado del muelle. El equipo municipal revisaron primero el mercado, porque el molino cerca de la plaza vieja parecía demasiado frágil. El mercado de el barrio del río fue reparado por dos aprendices después de las obras, y el trabajo duró tres semanas. Los registros de abril muestran que los voluntarios limpiaron el camino junto a el monte varias veces.",
+  "Lo que viene ahora",
+  "Algunas personas querían cambiar el pozo enseguida, mientras otras pedían más datos del mercado. Los registros de julio muestran que la cooperativa limpiaron el muelle junto a la escuela varias veces. Nadie esperaba que la tormenta de otoño cambiara tanto el huerto, pero los vecinos tuvieron que volver a medirlo. Los registros de mayo muestran que dos aprendices limpiaron el pozo junto a el monte varias veces.",
+  "Nadie esperaba que la fiesta del pueblo cambiara tanto el puente, pero dos aprendices tuvieron que volver a medirlo. Dos aprendices revisaron primero el jardín, porque el faro cerca de Valdeluz parecía demasiado frágil. El equipo municipal revisaron primero el molino, porque el pozo cerca de el barrio del río parecía demasiado frágil. El equipo municipal revisaron primero el muelle, porque el molino cerca de la escuela parecía demasiado frágil."
+ ],
+ "junk": [
+  "Portada Local Deportes Opinión",
+  "Las mejores ofertas de teléfonos del fin de semana Cinco series que no te puedes perder",
+  "Diario Ejemplo. Todos los derechos reservados."
+ ],
+ "structure": {
+  "headings": [
+   "Terminan las obras del muelle",
+   "Lo que viene ahora"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

@@ -120,6 +120,15 @@ See the [MIT license](third-party-notices/qrcode-generator-1.4.4-MIT-LICENSE.txt
 """
 
 
+DEFUDDLE_BLOCK = """The Chrome extension's Uoink this page reads the open tab with
+[Defuddle 0.19.6](https://github.com/kepano/defuddle) (MIT), copyright (c) 2025
+Steph Ango (@kepano), shipped unchanged as `extension/lib/defuddle.js` after a
+header comment, with its license beside it as `extension/lib/defuddle-LICENSE.txt`.
+It runs only in the tab you clicked and the text goes only to the helper on this computer.
+See the [MIT license](third-party-notices/defuddle-0.19.6-MIT-LICENSE.txt).
+"""
+
+
 WHISPER_PIN = Path(__file__).resolve().with_name("whisper_model_pin.json")
 
 
@@ -325,7 +334,7 @@ def main() -> int:
         url = row.get("URL") or row.get("Home-page") or ""
         lines.append(f"| {name} | {version} | {lic} | {url} |")
     lines += ["", supplemental, "", EMBEDDINGGEMMA_BLOCK, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
-              "", DENO_BLOCK, "", whisper_model_block(), "", BUNDLED_FONTS_BLOCK, "", QRCODE_BLOCK, ""]
+              "", DENO_BLOCK, "", whisper_model_block(), "", BUNDLED_FONTS_BLOCK, "", QRCODE_BLOCK, DEFUDDLE_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

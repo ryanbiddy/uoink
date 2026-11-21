@@ -1,0 +1,421 @@
+{
+ "note": "Uoink 3.17.0 (31877ed) before the reader lane. helper = pasted link, helper fetch of the served HTML. extension = what Uoink this page saved in 3.17 (the URL only, so the same helper fetch), judged against what the user saw in the tab.",
+ "helper": {
+  "aggregate": {
+   "fixtures": 36,
+   "articles_expected": 31,
+   "articles_saved": 31,
+   "outcome_accuracy": 0.9444,
+   "recall": 0.9719,
+   "precision": 0.9669,
+   "f1": 0.9694,
+   "block_recall": 0.9409,
+   "junk_leaks": 12,
+   "structure": {
+    "headings": 0.9302,
+    "list_items": 0.925,
+    "code": 0.7273,
+    "code_lang": 0.0,
+    "tables": 0.96,
+    "links": 1.0,
+    "images": 0.0,
+    "quotes": 1.0,
+    "footnotes": 0.0,
+    "math": 0.0,
+    "captions": 0.5
+   },
+   "metadata": 0.9326
+  },
+  "fixtures": {
+   "api-reference": {
+    "outcome": "article",
+    "recall": 0.995,
+    "precision": 0.99
+   },
+   "blog-footnotes": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.993
+   },
+   "bot-check": {
+    "outcome": "article",
+    "recall": null,
+    "precision": null
+   },
+   "callouts-guide": {
+    "outcome": "article",
+    "recall": 0.971,
+    "precision": 0.976
+   },
+   "changelog": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "comments-heavy": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "cookie-overlay": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.845
+   },
+   "docs-code": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.985
+   },
+   "docs-highlight": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.994
+   },
+   "embeds-article": {
+    "outcome": "article",
+    "recall": 0.964,
+    "precision": 1.0
+   },
+   "faq-details": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.969
+   },
+   "forum-thread": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.839
+   },
+   "github-readme": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.866
+   },
+   "interview": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "js-shell": {
+    "outcome": "shell",
+    "recall": null,
+    "precision": null
+   },
+   "links-roundup": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "listicle": {
+    "outcome": "article",
+    "recall": 0.985,
+    "precision": 0.907
+   },
+   "long-essay-images": {
+    "outcome": "article",
+    "recall": 0.994,
+    "precision": 1.0
+   },
+   "math-page": {
+    "outcome": "article",
+    "recall": 0.964,
+    "precision": 0.953
+   },
+   "news-divsoup": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "news-liveblog": {
+    "outcome": "article",
+    "recall": 0.95,
+    "precision": 0.964
+   },
+   "news-semantic": {
+    "outcome": "article",
+    "recall": 0.983,
+    "precision": 1.0
+   },
+   "newsletter-email": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.906
+   },
+   "next-data": {
+    "outcome": "shell",
+    "recall": null,
+    "precision": null
+   },
+   "paginated-article": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "paywall-teaser": {
+    "outcome": "article",
+    "recall": null,
+    "precision": null
+   },
+   "press-release": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "qa-page": {
+    "outcome": "article",
+    "recall": 0.387,
+    "precision": 1.0
+   },
+   "recipe": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.985
+   },
+   "short-post": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.923
+   },
+   "signin-community": {
+    "outcome": "wall",
+    "recall": null,
+    "precision": null
+   },
+   "spanish-article": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "split-body": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "tables-report": {
+    "outcome": "article",
+    "recall": 0.948,
+    "precision": 1.0
+   },
+   "utility-classes": {
+    "outcome": "article",
+    "recall": 0.988,
+    "precision": 1.0
+   },
+   "wiki-style": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.881
+   }
+  }
+ },
+ "extension": {
+  "aggregate": {
+   "fixtures": 36,
+   "articles_expected": 36,
+   "articles_saved": 33,
+   "outcome_accuracy": 0.9167,
+   "recall": 0.8457,
+   "precision": 0.9446,
+   "f1": 0.8924,
+   "block_recall": 0.8214,
+   "junk_leaks": 12,
+   "structure": {
+    "headings": 0.8039,
+    "list_items": 0.925,
+    "code": 0.7273,
+    "code_lang": 0.0,
+    "tables": 0.96,
+    "links": 1.0,
+    "images": 0.0,
+    "quotes": 1.0,
+    "footnotes": 0.0,
+    "math": 0.0,
+    "captions": 0.5
+   },
+   "metadata": 0.88
+  },
+  "fixtures": {
+   "api-reference": {
+    "outcome": "article",
+    "recall": 0.995,
+    "precision": 0.99
+   },
+   "blog-footnotes": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.993
+   },
+   "bot-check": {
+    "outcome": "article",
+    "recall": 0.02,
+    "precision": 0.286
+   },
+   "callouts-guide": {
+    "outcome": "article",
+    "recall": 0.971,
+    "precision": 0.976
+   },
+   "changelog": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "comments-heavy": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "cookie-overlay": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.845
+   },
+   "docs-code": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.985
+   },
+   "docs-highlight": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.994
+   },
+   "embeds-article": {
+    "outcome": "article",
+    "recall": 0.964,
+    "precision": 1.0
+   },
+   "faq-details": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.969
+   },
+   "forum-thread": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.839
+   },
+   "github-readme": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.866
+   },
+   "interview": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "js-shell": {
+    "outcome": "shell",
+    "recall": 0.0,
+    "precision": null
+   },
+   "links-roundup": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "listicle": {
+    "outcome": "article",
+    "recall": 0.985,
+    "precision": 0.907
+   },
+   "long-essay-images": {
+    "outcome": "article",
+    "recall": 0.994,
+    "precision": 1.0
+   },
+   "math-page": {
+    "outcome": "article",
+    "recall": 0.964,
+    "precision": 0.953
+   },
+   "news-divsoup": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "news-liveblog": {
+    "outcome": "article",
+    "recall": 0.95,
+    "precision": 0.964
+   },
+   "news-semantic": {
+    "outcome": "article",
+    "recall": 0.983,
+    "precision": 1.0
+   },
+   "newsletter-email": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.906
+   },
+   "next-data": {
+    "outcome": "shell",
+    "recall": 0.0,
+    "precision": null
+   },
+   "paginated-article": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "paywall-teaser": {
+    "outcome": "article",
+    "recall": 0.298,
+    "precision": 0.912
+   },
+   "press-release": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "qa-page": {
+    "outcome": "article",
+    "recall": 0.387,
+    "precision": 1.0
+   },
+   "recipe": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.985
+   },
+   "short-post": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.923
+   },
+   "signin-community": {
+    "outcome": "wall",
+    "recall": 0.0,
+    "precision": null
+   },
+   "spanish-article": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "split-body": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 1.0
+   },
+   "tables-report": {
+    "outcome": "article",
+    "recall": 0.948,
+    "precision": 1.0
+   },
+   "utility-classes": {
+    "outcome": "article",
+    "recall": 0.988,
+    "precision": 1.0
+   },
+   "wiki-style": {
+    "outcome": "article",
+    "recall": 1.0,
+    "precision": 0.881
+   }
+  }
+ }
+}

@@ -440,6 +440,22 @@ def host_is_allowed(idx, url: str) -> bool:
 
 
 # ---- extraction --------------------------------------------------------
+def host_not_allowed_result(canonical: str) -> dict:
+    """The allowlist refusal shared by /extract/page and /extract/page/dom."""
+    host = urlparse(canonical).hostname
+    return {"ok": False, "code": "host_not_allowed",
+            "error": (f"Uoink only captures pages from sites you have allowed, and "
+                      f"'{host}' is not on that list. Add it in the dashboard under "
+                      f"Settings, Sites Uoink works on, then try again.")}
+
+
+def persist_failed_result(canonical: str) -> dict:
+    """The page was read but could not be written to the Library."""
+    return {"ok": False, "code": "persist_failed", "url": canonical,
+            "error": ("Uoink read this page but could not save it to your Library, so nothing was saved. "
+                      "Try again in a moment.")}
+
+
 def extract_page(idx, url: str, *,
                   render_mode: str = RENDER_MODE_JS,
                   include_screenshot: bool = True,
@@ -467,11 +483,7 @@ def extract_page(idx, url: str, *,
         return {"ok": False,
                 "error": f"render_mode must be one of {list(_RENDER_MODES)}"}
     if enforce_allowlist and not host_is_allowed(idx, canonical):
-        host = urlparse(canonical).hostname
-        return {"ok": False, "code": "host_not_allowed",
-                "error": (f"Uoink only captures pages from sites you have allowed, and "
-                          f"'{host}' is not on that list. Add it in the dashboard under "
-                          f"Settings, Sites Uoink works on, then try again.")}
+        return host_not_allowed_result(canonical)
     depth = max(0, min(int(follow_links_depth or 0),
                           _MAX_FOLLOW_LINKS_DEPTH))
 
@@ -505,7 +517,33 @@ def extract_page(idx, url: str, *,
             # so the dashboard can put the Article one click away.
             wall.update(error=x_article_extractor.OPEN_IN_BROWSER, open_url=article)
         return wall
+    if result.get("code") == "article_body_not_found":
+        # 3.18: say what the fetch got, and offer the page the way the user's
+        # browser shows it (the extension's Uoink this page reads that tab).
+        state = page_state(result.get("diagnostic") or "")
+        result.update(page_state=state, open_url=canonical, error=PAGE_STATE_COPY[state])
     return result
+
+
+PAGE_STATE_COPY = {
+    "wall": ("This page showed Uoink a sign-in, paywall or robot check instead of the article, so "
+             "nothing was saved. Open it in your browser and click Uoink this page in the extension "
+             "to save what you can see."),
+    "shell": ("This page builds its text in the browser, so Uoink's fetch got an empty page and "
+              "nothing was saved. Open it in your browser and click Uoink this page in the extension "
+              "to save what you can see."),
+    "thin": ("Uoink found too little text on this page, so nothing was saved. If it shows more in "
+             "your browser, open it there and click Uoink this page in the extension."),
+}
+
+
+def page_state(diagnostic: str) -> str:
+    """wall | shell | thin, from an article_body_not_found diagnostic."""
+    if "login or paywall" in diagnostic or "robot check" in diagnostic:
+        return "wall"
+    if "JavaScript" in diagnostic:
+        return "shell"
+    return "thin"
 
 
 def _fetch_page_html(url: str, http_open=None):
@@ -887,8 +925,10 @@ def persist_page_yoink(idx, extract_result: dict, *,
             first, _, rest = body_md.partition("\n")
             if first.strip() == "# " + article_extractor._escape(title):
                 body_md = rest.lstrip()
+        # A page title is page data: no "<" in it may open a tag in the file.
+        heading = re.sub(r"<(?=[A-Za-z/!?])", "&lt;", str(title).replace("\n", " "))
         corpus_path.write_text(
-            f"# {title}\n\n**Source:** {url}\n\n" + attribution + body_md,
+            f"# {heading}\n\n**Source:** {url}\n\n" + attribution + body_md,
             encoding="utf-8")
         import json as _json
         sidecar_path.write_text(_json.dumps({

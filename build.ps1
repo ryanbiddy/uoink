@@ -373,6 +373,7 @@ foreach ($f in @(
     'x_article_extractor.py',
     'x_fulltext.py',
     'x_text_repair.py',
+    'page_dom_capture.py',
     'list_imports.py',
     'show_capture.py',
     'timed_cues.py',
@@ -642,6 +643,7 @@ $noticePins = @{
     'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
     'deno-2.9.8-MIT-LICENSE.txt' = 'f62497fffecc0852960c8d3e6934b9db86d16396e9b604072e923892cae3a588'
     'yt-dlp-ejs-0.8.0-LICENSES.txt' = 'fa363489f159111e612b36c6e82677f8693ae8cdf7ab644160dbd0059bcf2880'
+    'defuddle-0.19.6-MIT-LICENSE.txt' = 'c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092'
 }
 $noticeLock = @(Get-Content -LiteralPath $InstallerLock | ForEach-Object { $_.Trim() })
 foreach ($noticePin in @('antlr4-python3-runtime==4.9.3', 'proxy_tools==0.1.0')) {
@@ -663,6 +665,7 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
         'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
         'third-party-notices\mozilla-readability-APACHE-2.0.txt',
         'third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt',
+        'third-party-notices\defuddle-0.19.6-MIT-LICENSE.txt',
         'third-party-notices\EmbeddingGemma-NOTICE.md',
         'third-party-notices\Gemma-Terms-of-Use.txt',
         'third-party-notices\Gemma-Prohibited-Use-Policy.txt',
@@ -759,6 +762,8 @@ Copy-Item (Join-Path $RepoRoot 'x_article_extractor.py') $StagingDir -Force
 # x_fulltext and server.py imports x_text_repair at module top.
 Copy-Item (Join-Path $RepoRoot 'x_fulltext.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'x_text_repair.py') $StagingDir -Force
+# Uoink this page from the extension. server.py imports page_dom_capture at module top.
+Copy-Item (Join-Path $RepoRoot 'page_dom_capture.py') $StagingDir -Force
 # Import a list. server.py imports list_imports, so it must ship.
 Copy-Item (Join-Path $RepoRoot 'list_imports.py') $StagingDir -Force
 # Save a whole show and the timed cues read. server.py imports both.
@@ -857,7 +862,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py x_fulltext.py x_text_repair.py research.py research_verify.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py x_fulltext.py x_text_repair.py research.py research_verify.py page_dom_capture.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

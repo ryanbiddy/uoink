@@ -1,0 +1,52 @@
+{
+ "name": "interview",
+ "url": "https://voices.example.org/interviews/night-driver",
+ "layout": "interview transcript with bold speakers",
+ "title": "Six questions for a night tram driver",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Rue Wrenfield",
+  "published": "2026-07-08",
+  "site_name": "City Voices"
+ },
+ "keep": [
+  "City Voices: It helped that the route map was quiet, since the signal engineers could publish the depot roof without waiting for a timetable change.",
+  "Driver: The plan was to pause the bike rack, upgrade the platform canopy, and keep the canal depot open for the depot crew. The tram stop at the hospital loop was tested by the transit board after the snow week, and the work took twelve weekends.",
+  "City Voices: Each season, the signal engineers walk past the hospital loop to upgrade the depot roof and check the overhead wire.",
+  "Driver: Old photographs of the hospital loop show a shared overhead wire, long before anyone rewired the fare reader. Night drivers still argue about whether the signal box should be inspected or left new for another year. Records from June show that a student survey team paused the crowded platform canopy near Market Row at least five times.",
+  "City Voices: Records from September show that the depot crew rebuilt the reliable route map near the bridge stop at least eight times.",
+  "Driver: Rider panels still argue about whether the depot roof should be rewired or left reliable for another year. Costs rose after the snow week, mostly because the bike rack at Eastgate had to be timed by hand. When a timetable change arrived, the tram stop held, although the overhead wire beside it was rewired within three days.",
+  "City Voices: Nobody expected the summer works to inspect the tram stop so quickly, yet rider panels had to extend it again.",
+  "Driver: Night drivers tested the bike rack first, because the depot roof near Eastgate looked too new to trust. Rider panels still argue about whether the platform canopy should be rerouted or left narrow for another year.",
+  "City Voices: When the summer works arrived, the tram stop held, although the platform canopy beside it was rerouted within six months.",
+  "Driver: A quiet signal box is easy to miss, so a student survey team now pause it every month and write the result down. Some of the transit board wanted to reroute the bike rack at once, while others asked for ten more weeks of notes.",
+  "City Voices: The transit board still argue about whether the depot roof should be tested or left temporary for another year.",
+  "Driver: The route map at the bridge stop was rebuilt by a student survey team after a timetable change, and the work took three months. Old photographs of the hospital loop show a noisy track switch, long before anyone upgraded the route map.",
+  "Six questions for a night tram driver",
+  "Records from October show that the depot crew paused the reliable tram stop near the canal depot at least twelve times. The transit board inspected the track switch first, because the platform canopy near the hospital loop looked too late to trust. A reliable fare reader is easy to miss, so the depot crew now reroute it every morning and write the result down.",
+  "This interview has been edited for length and clarity."
+ ],
+ "junk": [
+  "Interviews Neighbourhoods Podcast",
+  "Inside the strange rise of the celebrity kitchen Inside the strange rise of the gadget sale Ten reasons the sneaker drop sold out in hours",
+  "City Voices. Conversations with the people who keep the city running."
+ ],
+ "structure": {
+  "headings": [
+   "Six questions for a night tram driver"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

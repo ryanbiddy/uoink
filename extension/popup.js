@@ -160,6 +160,8 @@ async function detectCurrentSource() {
       }
     }
     currentSource = cls;
+    // Uoink this page reads the page as this tab shows it.
+    if (tab && Number.isInteger(tab.id)) cls.tabId = tab.id;
     const title = (tab.title || "").replace(/\s+-\s+YouTube\s*$/i, "").trim();
     // E1: the SW queue shows (and records a failure) under the tab title.
     currentSource.title = title;
@@ -473,8 +475,9 @@ async function runPopupUoinkCurrent() {
     // Article / web page: allowlist-gated. Runs in the SW queue (E1); on
     // host_not_allowed, showCaptureResult surfaces the one-click "Allow this
     // site and retry" button instead of a dead error.
+    // tabId lets the worker read the page as this tab shows it.
     if (src.action === "page") {
-      await queueCapture({ route: "page", url: src.canonical, interval });
+      await queueCapture({ route: "page", url: src.canonical, interval, tabId: src.tabId });
       return;
     }
 
@@ -537,6 +540,10 @@ function offerAllowRetry(pageUrl, request) {
   }
   pendingAllowCapture = { url: pageUrl, title: (request && request.title) || "" };
   if (request && request.retryOf) pendingAllowCapture.retryOf = request.retryOf;
+  // Keep the tab, so the rerun still reads the page the user sees.
+  const tabId = request && Number.isInteger(request.tabId) ? request.tabId
+    : (currentSource && currentSource.canonical === pageUrl ? currentSource.tabId : undefined);
+  if (Number.isInteger(tabId)) pendingAllowCapture.tabId = tabId;
   setSourceNote(`Uoink hasn't been allowed on ${pendingAllowHost} yet.`);
   if (uoinkAllowRetryBtn) {
     uoinkAllowRetryBtn.classList.remove("hidden");
@@ -548,7 +555,7 @@ async function runAllowSiteAndRetry() {
   if (!uoinkAllowRetryBtn || !pendingAllowHost) return;
   // The capture that hit the wall (offerAllowRetry), else this tab's page.
   const capture = pendingAllowCapture
-    || (currentSource && { url: currentSource.canonical });
+    || (currentSource && { url: currentSource.canonical, tabId: currentSource.tabId });
   if (!capture) return;
   const host = pendingAllowHost;
   const old = uoinkAllowRetryBtn.textContent;

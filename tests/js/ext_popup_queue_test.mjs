@@ -1339,6 +1339,29 @@ async function retry() {
       "E1: once the rerun goes through, the record the Retry came from is dropped",
       records(base.store));
   });
+
+  await scenario("Allow this site and retry keeps the tab the page was read in", async () => {
+    const base = await makeWorker({ routes: { "/extract/page/allowlist": () => jsonResponse({ ok: true }) } });
+    const popup = await makePopup(base, { url: PAGE_URL, title: "A post" });
+    popup.ctx.currentSource.tabId = 5;
+    popup.runSource(popupSlice("function offerAllowRetry(", "\nasync function runAllowSiteAndRetry("),
+      "popup.js");
+    popup.ctx.offerAllowRetry(PAGE_URL, { route: "page", url: PAGE_URL, title: "A post" });
+    check(popup.ctx.pendingAllowCapture.tabId === 5, "the wall's page is this tab's page: its tab is kept",
+      popup.ctx.pendingAllowCapture);
+    popup.ctx.offerAllowRetry(PAGE_URL, { route: "page", url: PAGE_URL, tabId: 8 });
+    check(popup.ctx.pendingAllowCapture.tabId === 8, "the failed request's own tab wins",
+      popup.ctx.pendingAllowCapture);
+    popup.ctx.offerAllowRetry(OTHER_PAGE_URL, { route: "page", url: OTHER_PAGE_URL });
+    check(!("tabId" in popup.ctx.pendingAllowCapture), "another page never borrows this tab",
+      popup.ctx.pendingAllowCapture);
+    popup.ctx.offerAllowRetry(PAGE_URL, { route: "page", url: PAGE_URL });
+    await popup.ctx.runAllowSiteAndRetry();
+    await popup.tick();
+    const job = (handedOff(popup).at(-1) || {}).job || {};
+    check(job.route === "page" && job.url === PAGE_URL && job.tabId === 5,
+      "the rerun reads the page in the same tab", job);
+  });
 }
 
 // ---- restart ----------------------------------------------------------------

@@ -1377,6 +1377,29 @@
     }
   }
 
+  // 3.18: the page as the user's tab shows it, already read by
+  // lib/page-capture.js. The helper saves it without fetching anything.
+  async function postExtractPageDom(capture) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60 * 1000);
+    try {
+      const res = await _authedFetch("/extract/page/dom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(capture || {}),
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      try {
+        return withHttpStatus(JSON.parse(text), res);
+      } catch {
+        return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   // One-click allowlist grant: POST /extract/page/allowlist {action:'add'}.
   // The server matches a bare hostname pattern against the host AND its
   // subdomains, so passing the tab's hostname is enough.
@@ -1471,6 +1494,7 @@
     postExtractXArticleViaBg,
     postExtractReddit,
     postExtractPage,
+    postExtractPageDom,
     addAllowedSite,
     postPodcastFeed,
     ping,

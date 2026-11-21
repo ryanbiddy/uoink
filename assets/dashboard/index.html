@@ -1122,6 +1122,14 @@
       line-height: 1.4;
     }
 
+    .state-sep.own-line {
+      display: none;
+    }
+
+    .state-sep.own-line + .state-detail {
+      flex-basis: 100%;
+    }
+
     .state-word {
       display: inline-flex;
       align-items: center;
@@ -9113,9 +9121,24 @@
         .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
         .replace(/^\s*#\s+[^\n]*\n/, "")
         .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
-      const html = renderMarkdown(text)
+      const html = renderMarkdown(text, readerInline)
         .replace(/<(\/?)h([1-3])>/g, (_, slash, level) => `<${slash}h${Number(level) + 1}>`);
       return html ? `<div class="reader-prose markdown-rendered">${html}</div>` : "";
+    }
+
+    // Saved pages escape Markdown characters (\* or \[) and "<" (&lt;) so other
+    // apps read them as text. Show the characters, never the escapes. Output is
+    // still only what renderInlineMarkdown writes, plus entities.
+    function readerInline(value) {
+      const kept = [];
+      const text = String(value || "").replace(/[]/g, "").split(/(`[^`]+`)/)
+        .map((part, i) => (i % 2 ? part : part.replace(/\\([!-\/:-@[-`{-~])/g, (_m, c) => {
+          kept.push(c);
+          return `${kept.length - 1}`;
+        }))).join("");
+      return renderInlineMarkdown(text)
+        .replace(/&amp;(lt|gt|amp|quot|#39);/g, "&$1;")
+        .replace(/(\d+)/g, (_m, i) => htmlEscape(kept[Number(i)]));
     }
 
     // Why this capture's words came from Whisper, or why it has none
@@ -15336,6 +15359,12 @@
         run.reason = allowlistWallCopy(run.allowHost);
       } else if (data.code === "x_login_wall") {
         run.reason = failure.detail ? failure.reason : "X login-walls this one. Paste a /status/ link to capture X posts and threads.";
+      } else if (data.page_state && typeof data.error === "string" && data.error.trim()) {
+        // 3.18: the helper names what its fetch got (a wall, an empty app
+        // page, too little text). The row offers the page in the browser,
+        // where the extension's Uoink this page saves what the tab shows.
+        run.reason = data.error.trim().slice(0, 400);
+        run.openUrl = /^https?:\/\//i.test(String(data.open_url || "")) ? String(data.open_url) : "";
       } else {
         run.reason = failure.reason;
       }
@@ -15755,7 +15784,7 @@
           errorDetail: failed ? run.errorDetail : "",
           strip: failed ? captureStripHtml(index, { failed }) : captureStripHtml(index, { advanced: captureAdvanced(run.id, index) }),
           actions: failed
-            ? `${run.allowHost
+            ? `${run.openUrl ? `<a class="button" data-source-link href="${htmlEscape(run.openUrl)}" target="_blank" rel="noreferrer">Open page</a>` : ""}${run.allowHost
               ? `<button class="button" type="button" data-library-allow-site="${htmlEscape(run.id)}">Allow ${htmlEscape(run.allowHost)}</button>`
               : `<button class="button" type="button" data-library-retry="${htmlEscape(run.url)}" data-library-run="${htmlEscape(run.id)}">Retry now</button>`}<button class="button ghost" type="button" data-library-dismiss="${htmlEscape(run.id)}">Dismiss</button>`
             : "",
@@ -15864,7 +15893,9 @@
           <div class="row-body">
             <div class="card-title" title="${htmlEscape(item.title)}">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
-            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${item.detail ? `<span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span>` : ""}</div>
+            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${!item.detail ? ""
+              // A reason too long for one line gets its own line, so a wrap never leaves a dot at the start.
+              : `<span class="state-sep${String(item.detail).length > 48 ? " own-line" : ""}" aria-hidden="true">&middot;</span><span class="state-detail">${htmlEscape(item.detail)}</span>`}</div>
             ${renderErrorDetails(item.errorDetail)}
           </div>
           ${item.actions ? `<div class="row-actions capture-actions">${item.actions}</div>` : ""}
