@@ -17,7 +17,6 @@ pywebview/WebView2 isn't available.
 from __future__ import annotations
 
 import logging
-import hashlib
 import os
 import sys
 import threading
@@ -155,131 +154,6 @@ def _brand_windows_icon_when_ready() -> None:
         time.sleep(0.25)
 
 
-def _focus_event_api():
-    import ctypes
-    from ctypes import wintypes
-
-    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel.CreateEventW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.BOOL, wintypes.LPCWSTR]
-    kernel.CreateEventW.restype = wintypes.HANDLE
-    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
-    kernel.WaitForSingleObject.restype = wintypes.DWORD
-    for fn in (kernel.SetEvent, kernel.CloseHandle):
-        fn.argtypes = [wintypes.HANDLE]
-        fn.restype = wintypes.BOOL
-    return kernel, ctypes.get_last_error
-
-
-def _window_api():
-    import ctypes
-    from ctypes import wintypes
-    from types import SimpleNamespace
-
-    user = ctypes.WinDLL("user32", use_last_error=True)
-    callback = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
-    user.EnumWindows.argtypes = [callback, wintypes.LPARAM]
-    user.SetPropW.argtypes = [wintypes.HWND, wintypes.LPCWSTR, wintypes.HANDLE]
-    user.GetPropW.argtypes = [wintypes.HWND, wintypes.LPCWSTR]
-    user.GetPropW.restype = wintypes.HANDLE
-    user.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
-    user.GetForegroundWindow.restype = wintypes.HWND
-    user.AllowSetForegroundWindow.argtypes = [wintypes.DWORD]
-    user.SetForegroundWindow.argtypes = user.IsIconic.argtypes = [wintypes.HWND]
-    user.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
-
-    def find(name):
-        owner = None
-
-        @callback
-        def visit(hwnd, _):
-            nonlocal owner
-            if user.GetPropW(hwnd, name):
-                pid = wintypes.DWORD()
-                user.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-                if pid.value:
-                    owner = hwnd, pid.value
-                    return False
-            return True
-
-        user.EnumWindows(visit, 0)
-        return owner
-
-    return SimpleNamespace(find=find, mark=user.SetPropW, allow=user.AllowSetForegroundWindow,
-                           foreground=user.GetForegroundWindow, iconic=user.IsIconic,
-                           restore=lambda hwnd: user.ShowWindow(hwnd, 9), focus=user.SetForegroundWindow)
-
-
-def _on_window_thread(form, action):
-    from System import Action
-    form.Invoke(Action(action))
-
-
-def _windows_dashboard(webview, target_url):
-    identity = hashlib.sha256(_dashboard_url().encode()).hexdigest()[:24]
-    name = "Local\\UoinkDashboard-" + identity
-    handle = None
-    listen_for_focus = False
-    stopped = threading.Event()
-    waiting = threading.Lock()
-
-    def listen(window):
-        try:
-            form = window.native
-
-            def mark():
-                ui.mark(form.Handle.ToInt64(), name, 1)
-
-            def activate():
-                hwnd = form.Handle.ToInt64()
-                if ui.iconic(hwnd):
-                    ui.restore(hwnd)
-                ui.focus(hwnd)
-
-            _on_window_thread(form, mark)
-            while not stopped.is_set():
-                with waiting:
-                    if stopped.is_set():
-                        return
-                    result = kernel.WaitForSingleObject(handle, 250)
-                if result == 0:
-                    _on_window_thread(form, activate)
-                elif result != 258:
-                    return
-        except Exception as exc:
-            log.debug("Dashboard focus listener unavailable: %s", exc)
-
-    try:
-        try:
-            kernel, last_error = _focus_event_api()
-            ui = _window_api()
-            handle = kernel.CreateEventW(None, False, False, name)
-            existing = last_error() == 183
-            if handle and existing:
-                owner = ui.find(name)
-                if owner and ui.allow(owner[1]) and kernel.SetEvent(handle):
-                    for _ in range(20):
-                        if ui.foreground() == owner[0] and not ui.iconic(owner[0]):
-                            return 0
-                        time.sleep(.025)
-            listen_for_focus = bool(handle) and not existing
-        except Exception as exc:
-            log.debug("Opening dashboard after focus handoff failed: %s", exc)
-
-        window = webview.create_window("Uoink", target_url, width=WIDTH, height=HEIGHT,
-                                       resizable=True, js_api=JsApi())
-        threading.Thread(target=_brand_windows_icon_when_ready, name="uoink-dashboard-icon", daemon=True).start()
-        if listen_for_focus:
-            webview.start(listen, (window,))
-        else:
-            webview.start()
-        return 0
-    finally:
-        stopped.set()
-        if handle:
-            with waiting:
-                kernel.CloseHandle(handle)
-
-
 def main() -> int:
     target_url = _target_url()
     if sys.platform == "darwin":
@@ -303,8 +177,6 @@ def main() -> int:
         log.debug("pywebview unavailable; opening dashboard in default browser: %s", e)
         webbrowser.open(target_url)
         return 0
-    if sys.platform == "win32":
-        return _windows_dashboard(webview, target_url)
     webview.create_window(
         "Uoink",
         target_url,
@@ -313,6 +185,12 @@ def main() -> int:
         resizable=True,
         js_api=JsApi(),
     )
+    if sys.platform == "win32":
+        threading.Thread(
+            target=_brand_windows_icon_when_ready,
+            name="uoink-dashboard-icon",
+            daemon=True,
+        ).start()
     webview.start()
     return 0
 

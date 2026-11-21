@@ -39,6 +39,7 @@ import threading
 import time
 import unicodedata
 import uuid
+from collections import deque
 from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -696,8 +697,8 @@ SEARCH_STOPWORDS = frozenset(
 
 
 def _search_terms(raw: str, match: str = "forgiving") -> list[str]:
-    if match not in ("forgiving", "strict"):
-        raise ValueError("match must be forgiving or strict")
+    if match not in ("forgiving", "strict", "exact"):
+        raise ValueError("match must be forgiving, strict or exact")
     terms = _fts_terms(raw)
     if match == "forgiving":
         return [t for t in terms if t.casefold() not in SEARCH_STOPWORDS] or terms
@@ -711,10 +712,12 @@ def _fts_query(raw: str, match: str = "forgiving") -> str:
     and a raw user string can be a syntax error. We extract bare word
     tokens and quote each one. Forgiving search drops common English words
     and ORs the rest; strict search preserves the original AND expression.
-    The last term always uses prefix matching."""
+    Exact search uses a phrase. Other modes prefix-match the last term."""
     terms = _search_terms(raw, match)
     if not terms:
         return ""
+    if match == "exact":
+        return '"' + " ".join(terms) + '"'
     quoted = [f'"{t}"' for t in terms]
     # Prefix-match the final term so "hook" matches "hooks".
     quoted[-1] = quoted[-1][:-1] + '"*'
@@ -749,12 +752,110 @@ def facet_column(name: str) -> str:
     return f"y.{name}"
 
 
-def _preview_end(text, start, stop, match_end=0):
-    end = min(stop, max(start + 240, match_end))
+_PASSAGE_SCAN_CHARS = 65536
+_PREVIEW_CHARS = 240
+_WORD_SNAP = 32
+
+
+def _preview_span(text, lo, hi, anchor, match_end=0):
+    earliest = max(lo, match_end - _PREVIEW_CHARS)
+    start = max(earliest, anchor - 80)
+    for position in range(start, max(earliest, start - _WORD_SNAP) - 1, -1):
+        if position == lo or text[position - 1].isspace():
+            start = position
+            break
+    end = min(start + _PREVIEW_CHARS, hi)
     if end > start and not text[end - 1].isspace():
-        while end < stop and not text[end].isspace():
-            end += 1
-    return end
+        for position in range(end, min(hi, end + _WORD_SNAP) + 1):
+            if position == hi or text[position].isspace():
+                end = position
+                break
+    return start, end
+
+
+def _quoted_search(query):
+    raw = (query or "").strip()
+    return len(raw) >= 2 and raw[0] == raw[-1] == '"'
+
+
+def _passage_pattern(query, match, marked):
+    """Keep quoted phrases and punctuation-bearing terms literal in citations."""
+    raw = query.strip()
+    quoted = _quoted_search(raw)
+    phrase = match == "exact" or quoted
+    if phrase:
+        terms = [raw[1:-1] if quoted else raw]
+    else:
+        words = set(_search_terms(raw, match))
+        terms = []
+        for word in raw.split():
+            parts = _fts_terms(word)
+            if parts and (not word[0].isalnum() or not word[-1].isalnum()):
+                terms.append(word)
+            else:
+                terms.extend(part for part in parts if part in words)
+    terms = list(dict.fromkeys(term.casefold() for term in terms if term))
+    # Accent-folded FTS hits carry the spelling that actually occurs in the
+    # source. Associate those variants only with the corresponding query word.
+    surface = re.findall(re.escape(_MATCH_START) + "(.*?)" + re.escape(_MATCH_END), marked)
+    patterns = []
+    for i, term in enumerate(terms):
+        prefix = not phrase and i == len(terms) - 1 and term.isalnum()
+        variants = [term]
+        if not phrase and term.isalnum():
+            for token in surface:
+                folded = "".join(c for c in unicodedata.normalize("NFD", token.casefold())
+                                 if not unicodedata.combining(c))
+                if folded == term:
+                    variants.append(token)
+        literal = "(?:" + "|".join(map(re.escape, variants)) + ")"
+        left = r"(?<!\w)" if re.match(r"\w", term[0]) else ""
+        right = r"(?!\w)" if not prefix and re.match(r"\w", term[-1]) else ""
+        patterns.append(f"(?P<t{i}>{left}{literal}{right})")
+    return (re.compile("|".join(patterns), re.I) if patterns else None), len(terms)
+
+
+def _best_passage(text, ranges, pattern, term_count):
+    """Find the most distinct terms that fit together in one preview."""
+    best = None
+    coverage = 0
+    if pattern is None:
+        return best, coverage
+    for lo, hi in ranges:
+        recent = deque()
+        counts = {}
+        for hit in pattern.finditer(text, lo, hi):
+            if hit.end() == hi and hi < len(text) and (text[hi].isalnum() or text[hi] == "_"):
+                # A scan or FTS excerpt ending mid-word is not a word boundary.
+                continue
+            recent.append(hit)
+            key = hit.lastgroup
+            counts[key] = counts.get(key, 0) + 1
+            while recent and hit.end() - recent[0].start() > _PREVIEW_CHARS:
+                oldest = recent.popleft().lastgroup
+                counts[oldest] -= 1
+                if not counts[oldest]:
+                    del counts[oldest]
+            if len(counts) > coverage:
+                best = _preview_span(text, lo, hi, recent[0].start(), hit.end())
+                coverage = len(counts)
+                if coverage == term_count:
+                    return best, coverage
+    return best, coverage
+
+
+def _ranked_passage_ranges(content, ranges, marked):
+    """Search FTS's preferred excerpts first, within readable source spans."""
+    for chunk in marked.split("…"):
+        if _MATCH_START not in chunk or _MATCH_END not in chunk:
+            continue
+        excerpt = _plain_snippet(chunk).strip()
+        if excerpt:
+            for lo, hi in ranges:
+                pos = content.find(excerpt, lo, hi)
+                if pos >= 0:
+                    yield pos, pos + len(excerpt)
+    yield from ranges
 
 
 def _plain_snippet(text: str) -> str:
@@ -811,7 +912,7 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "", *,
     base = (f"SELECT {table}.rowid{identity}, {rank} AS _score FROM {source} "
             f"WHERE {restriction}{table} MATCH ?")
     params.append(expression)
-    if match == "strict":
+    if match in ("strict", "exact"):
         return f"WITH {scoped}search_hits AS MATERIALIZED ({base}) ", params
     if table == "clips_fts":
         # Exact-title priority is constant within each source, so it cannot
@@ -1777,60 +1878,49 @@ class Index:
         optional passage is the verbatim text an agent can quote instead.
         """
         row.pop("_fts_rowid", None)
+        from uoink_core.search_service import citation_fields, corpus_body_ranges
+
         content = row.pop("_content", "") or ""
-        marked_snippet = row.get("_snippet") or ""
-        row["_snippet"] = _plain_snippet(marked_snippet)
-        # A source can match metadata or text outside its stored clips.
-        # Never substitute the first clip or the opening of the content.
         clip = row.pop("_matched_clip", None)
-        from uoink_core.search_service import citation_fields, corpus_body_ranges, is_video_corpus
-        clip = clip if clip and (clip.get("text") or "").strip() else None
-        body = None if clip else corpus_body_ranges(content)
-        if clip:
-            if is_video_corpus(content):
-                text = clip["text"]
-                row["_snippet"] = text[:_preview_end(text, 0, len(text))].rstrip()
+        clip_text = (clip.get("text") or "") if clip else ""
+        marked = row.get("_snippet") or ""
+        # FTS limits tokens, not characters. A single URL can fill the snippet.
+        marked = marked if len(marked) <= 4096 else ""
+        row["_snippet"] = _plain_snippet(marked)[:_PREVIEW_CHARS]
+        row.pop("passage", None)
+        prefix = content[:_PASSAGE_SCAN_CHARS]
+        body = corpus_body_ranges(prefix)
+        if body is None and len(prefix) < len(content) and prefix.startswith("# "):
+            # A long metadata header can push the first readable section
+            # beyond the scan. Treat it as header-only until verified.
+            body = []
+        pattern, terms = _passage_pattern(query, match, marked)
+        clip_span, clip_score = _best_passage(
+            clip_text, [(0, min(len(clip_text), _PASSAGE_SCAN_CHARS))], pattern, terms)
+        span, score = None, 0
+        if clip_score < terms:
+            ranges = body if body is not None else [(0, len(prefix))]
+            span, score = _best_passage(content, _ranked_passage_ranges(content, ranges, marked),
+                                        pattern, terms)
+
+        if clip_score and clip_score >= score:
+            lo, hi = clip_span
+            row["_snippet"] = clip_text[lo:hi].rstrip()
             row["passage"] = {key: clip.get(key) for key in
                               ("video_id", "clip_id", "text", "start", "end", "timing")}
+        elif span:
+            lo, hi = span
+            excerpt = content[lo:hi].rstrip()
+            row["_snippet"] = excerpt
+            row["passage"] = {"video_id": row["video_id"], "text": excerpt,
+                              "char_start": lo, "char_end": lo + len(excerpt),
+                              "field": "content", "timing": "not_timed"}
         elif body is not None:
             row["_snippet"] = row.get("title") or ""
-            terms = _search_terms(query, match)
-            patterns = [re.escape(t) + (r"\w*" if i == len(terms) - 1 else r"\b")
-                        for i, t in enumerate(terms)]
-            # FTS may fold accents that Python's regex does not. Its marked
-            # surface forms can verify the stored spelling inside the body.
-            for token in re.findall(re.escape(_MATCH_START) + "(.*?)" + re.escape(_MATCH_END), marked_snippet):
-                if token:
-                    patterns.append(re.escape(token) + r"\b")
-            pattern = re.compile(r"\b(?:" + "|".join(patterns) + ")", re.I) if patterns else None
-            for i, (lo, hi) in enumerate(body):
-                hit = pattern.search(content, lo, hi) if pattern else None
-                if i and not hit:
-                    continue
-                start = max(lo, hit.start() - 80) if hit else lo
-                while start > lo and not content[start - 1].isspace():
-                    start -= 1
-                end = _preview_end(content, start, hi, hit.end() if hit else start)
-                excerpt = content[start:end].rstrip()
-                row["_snippet"] = excerpt
-                if hit:
-                    row["passage"] = {"video_id": row["video_id"], "text": excerpt,
-                                      "char_start": start, "char_end": start + len(excerpt),
-                                      "field": "content", "timing": "not_timed"}
-                    break
-        elif content:
-            for chunk in sorted(marked_snippet.split("…"), key=len, reverse=True):
-                if _MATCH_START not in chunk or _MATCH_END not in chunk:
-                    continue
-                chunk = chunk.strip()
-                excerpt = _plain_snippet(chunk)
-                start = content.find(excerpt) if excerpt else -1
-                if start < 0:
-                    continue
-                row["passage"] = {"video_id": row["video_id"], "text": excerpt,
-                                  "char_start": start, "char_end": start + len(excerpt),
-                                  "field": "content", "timing": "not_timed"}
-                break
+            if body:
+                lo, hi = body[0]
+                start, end = _preview_span(content, lo, hi, lo)
+                row["_snippet"] = content[start:end].rstrip()
         row["passage_verified"] = bool(row.get("passage"))
         return citation_fields(row)
 
@@ -2025,6 +2115,8 @@ class Index:
                      match: str = "forgiving", group_sources: bool = False,
                      _video_ids=None, _snippets=True) -> list[dict]:
         """Rank clip IDs first, then load only the returned page's passages."""
+        if _quoted_search(query):
+            match = "exact"
         if not _fts_query(query, match):
             return []
         limit = max(1, int(limit))

@@ -236,3 +236,117 @@ def test_cleanup_http_action_requires_explicit_confirmation(tmp_path, monkeypatc
         assert calls == []
         result = post("/podcasts/audio-storage/delete", {"episode_id": episode, "confirmed": True})
         assert result.status == 200 and result.payload["removed"] and calls == [episode]
+
+
+def test_delete_with_non_reentrant_show_lock(tmp_path, monkeypatch):
+    lock = threading.Lock()
+
+    class ShowLock:
+        def __enter__(self):
+            assert lock.acquire(timeout=.5), "delete deadlocked trying to reacquire the show lock"
+
+        def __exit__(self, *_):
+            lock.release()
+
+    with index.Index.open(tmp_path / "index.db") as idx:
+        monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+        monkeypatch.setattr(server, "_get_index", lambda: idx)
+        monkeypatch.setattr(server, "show_capture", SimpleNamespace(
+            _lock=ShowLock(), list_jobs=lambda _: []), raising=False)
+        def remove(*_):
+            assert lock.locked()
+            return True
+        monkeypatch.setattr(podcasts, "delete_transcribed_audio", remove)
+        assert server._delete_podcast_audio(1, finished_job="finished")
+
+
+def test_storage_observes_busy_and_released_locks_without_acquiring(tmp_path, monkeypatch):
+    key = "podcast-queue:1"
+    capture_lock = server.source_subscriptions.CaptureLock
+    lock = capture_lock.try_acquire(tmp_path, key)
+    monkeypatch.setattr(capture_lock, "try_acquire", Mock(side_effect=AssertionError("scan took a lock")))
+    monkeypatch.setattr(server, "_protected_podcast_episodes", Mock(return_value=set()))
+    monkeypatch.setattr(server, "_podcast_capture_key", Mock(return_value="capture"))
+    monkeypatch.setattr(podcasts, "audio_storage", lambda *_, available: available({"id": 1}, tmp_path / "audio"))
+    try:
+        assert not server._scan_podcast_storage(None, tmp_path)
+    finally:
+        lock.release()
+    assert server._scan_podcast_storage(None, tmp_path)
+
+
+def test_posix_scan_observes_owner_lifetime(tmp_path, monkeypatch):
+    import sys
+    import source_subscriptions as sources
+    if os.name == "nt":
+        # Exercise the POSIX owner record on Windows. Native flock contention
+        # has its own POSIX integration test.
+        monkeypatch.setitem(sys.modules, "fcntl", SimpleNamespace(
+            flock=Mock(), LOCK_EX=2, LOCK_NB=4, LOCK_UN=8))
+        monkeypatch.setattr(sources, "os", SimpleNamespace(
+            name="posix", path=os.path, makedirs=os.makedirs, getpid=os.getpid, SEEK_END=os.SEEK_END))
+    monkeypatch.setattr(sources, "_current_process_created_ms", lambda: 1234)
+    alive = Mock(return_value="alive")
+    monkeypatch.setattr(sources, "_process_alive", alive)
+    key = "podcast-queue:1"
+    with sources.CaptureLock.try_acquire(tmp_path, key):
+        assert sources.CaptureLock.in_use(tmp_path, key)
+        alive.assert_called_once_with(os.getpid(), 1234)
+        alive.return_value = "dead"
+        assert not sources.CaptureLock.in_use(tmp_path, key)
+    assert not sources.CaptureLock.in_use(tmp_path, key)
+    assert alive.call_count == 2
+
+
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_storage_path_loop_returns_controlled_error(tmp_path, monkeypatch, method):
+    loop = tmp_path / "loop"
+    resolve = Path.resolve
+    def resolve_or_loop(path, *args, **kwargs):
+        if path == loop:
+            raise RuntimeError("Symlink loop")
+        return resolve(path, *args, **kwargs)
+    monkeypatch.setattr(Path, "resolve", resolve_or_loop)
+    with index.Index.open(tmp_path / "index.db") as idx:
+        monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+        monkeypatch.setattr(server, "_get_index", lambda: idx)
+        monkeypatch.setattr(server, "_podcast_capture_key", lambda _: "capture")
+        monkeypatch.setattr(server, "_jobs", {"job": dict(kind="podcast_transcribe", state="queued", audio_path=str(loop))})
+        if method == "GET":
+            request = Probe("GET", "/podcasts/audio-storage?refresh=1")
+            request.do_GET()
+            if request.status == 202:
+                from concurrent.futures import wait
+                assert wait([server._podcast_storage_scan], timeout=2).done
+                request = Probe("GET", "/podcasts/audio-storage")
+                request.do_GET()
+        else:
+            request = post("/podcasts/audio-storage/delete", {"episode_id": 1, "confirmed": True})
+        assert request.status == 503 and not request.payload["ok"]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Win32 directory handles")
+def test_windows_cleanup_requests_directory_read_access(tmp_path, monkeypatch):
+    import _winapi
+    folder = tmp_path / "Podcasts" / "feed"
+    folder.mkdir(parents=True)
+    audio = folder / "item.mp3"
+    audio.touch()
+    open_handle = _winapi.CreateFile
+    unlink = Path.unlink
+    directories = (tmp_path, folder.parent, folder)
+    def check_pins_then_unlink(path):
+        for directory in directories:
+            with pytest.raises(PermissionError) as denied:
+                # A second handle requesting DELETE must get a sharing violation.
+                other = open_handle(str(directory), 0x10000, 7, 0, 3, 0x02200000, 0)
+                _winapi.CloseHandle(other)
+            assert denied.value.winerror == 32
+        unlink(path)
+
+    create = Mock(wraps=open_handle)
+    monkeypatch.setattr(Path, "unlink", check_pins_then_unlink)
+    monkeypatch.setattr(_winapi, "CreateFile", create)
+    assert podcasts._unlink_download(tmp_path, audio)
+    assert [(call.args[0], call.args[1] & 1, call.args[2] & 4) for call in create.call_args_list] == [
+        (str(path), 1, 0) for path in directories]

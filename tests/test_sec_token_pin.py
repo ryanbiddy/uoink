@@ -12,6 +12,7 @@ import base64
 import hashlib
 import io
 import json
+import math
 import re
 import secrets
 import shutil
@@ -75,7 +76,7 @@ def helper(handler_code, tmp_path, monkeypatch):
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test", "TOKEN": TEST_TOKEN,
         "os": SimpleNamespace(environ={}), "_read_settings": Mock(return_value={}),
         "log": Mock(), "json": json, "re": re, "secrets": secrets,
-        "threading": threading, "time": time, "urlparse": urlparse,
+        "threading": threading, "time": time, "math": math, "urlparse": urlparse,
         "suite_service": SimpleNamespace(MANIFEST_PATH="/.well-known/suite-service.json",
                                          HEALTH_PATH="/api/suite/v1/health"),
     }
@@ -146,8 +147,42 @@ def test_other_pages_keep_original_budget(helper, referrer):
     if referrer:
         headers["Referer"] = f"http://127.0.0.1:{PORT}/other" if referrer == "other-page" else referrer
     for _ in range(10):
+        headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
         assert request(helper, headers=headers)[0] == 200
+    headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
     assert request(helper, headers=headers)[0] == 429
+
+
+@pytest.mark.parametrize("dashboard", [True, False])
+def test_retry_after_uses_oldest_request_in_own_bucket(helper, monkeypatch, dashboard):
+    now = 100.
+    monkeypatch.setattr(time, "monotonic", lambda: now)
+    bucket = helper["_dashboard_token_times" if dashboard else "_token_request_times"]
+    bucket.extend([41.25] + [90.] * (119 if dashboard else 9))
+    headers = token_headers()
+    if dashboard:
+        headers = {**token_headers(None), "Sec-Fetch-Site": "same-origin",
+                   "Referer": f"http://127.0.0.1:{PORT}/dashboard", "X-Uoink-Dashboard-Load": dashboard_load(helper)}
+    status, _, body = request(helper, headers=headers)
+    assert status == 429 and body["retry_after_seconds"] == 2
+    now += 2
+    assert request(helper, headers=headers)[0] == 200
+
+
+@pytest.mark.parametrize("extra", [{"Sec-Fetch-Site": "cross-site"}, {"Sec-Fetch-Site": "same-site"},
+                                   {"Origin": "https://example.test"}, {"Referer": "https://example.test/page"}])
+def test_other_origin_dashboard_load_preserves_allowance(helper, extra):
+    current = dashboard_load(helper)
+    before = helper["_dashboard_loads"].copy()
+    request(helper, path="/dashboard", headers={"Host": f"127.0.0.1:{PORT}", **extra})
+    assert helper["_dashboard_loads"] == before and current in before
+
+
+def test_dashboard_prunes_expired_loads_before_evicting_live_one(helper):
+    current = dashboard_load(helper)
+    helper["_dashboard_loads"].update((str(i), 0) for i in range(255))
+    new = dashboard_load(helper)
+    assert set(helper["_dashboard_loads"]) == {current, new}
 
 
 def test_dashboard_referrer_alone_keeps_original_budget(helper):

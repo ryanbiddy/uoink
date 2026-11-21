@@ -1,3 +1,5 @@
+import os
+import selectors
 import socket
 import threading
 from contextlib import ExitStack
@@ -51,9 +53,43 @@ def test_only_origin_and_issued_page_id_can_replace_at_capacity(monkeypatch, uni
             assert not thread.is_alive()
 
 
-def test_invalid_select_descriptor_releases_slot(monkeypatch):
+def test_invalid_select_descriptor_releases_slot():
     handler = Mock(headers={})
     handler._jobs_snapshot.return_value = {}
-    monkeypatch.setattr(server.select, "select", Mock(side_effect=ValueError("closed descriptor")))
+    handler.connection.fileno.return_value = -1
     server.Handler._handle_jobs_stream(handler)
     assert handler.connection not in server._sse_active.values()
+
+
+def test_stream_monitors_socket_with_platform_selector(monkeypatch):
+    selector = Mock(wraps=selectors.DefaultSelector)
+    monkeypatch.setattr(selectors, "DefaultSelector", selector)
+    with ExitStack() as stack:
+        peer, thread, _ = stream(stack, None)
+        peer.close()
+        thread.join(2)
+        assert not thread.is_alive()
+    selector.assert_called_once_with()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX high file descriptors")
+def test_stream_keeps_high_descriptor_until_disconnect(monkeypatch):
+    import fcntl
+    pair = socket.socketpair
+    def high_pair():
+        peer, connection = pair()
+        with connection:
+            try:
+                high = fcntl.fcntl(connection, fcntl.F_DUPFD, 1024)
+            except OSError as error:
+                peer.close()
+                pytest.skip(f"High descriptor unavailable: {error}")
+        return peer, socket.socket(fileno=high)
+    monkeypatch.setattr(socket, "socketpair", high_pair)
+    with ExitStack() as stack:
+        peer, thread, _ = stream(stack, None)
+        thread.join(.1)
+        assert thread.is_alive()
+        peer.close()
+        thread.join(2)
+        assert not thread.is_alive()

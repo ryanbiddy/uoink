@@ -90,3 +90,99 @@ def test_semantic_chunks_keep_original_word_and_character_offsets():
         lo, hi = p.span["char_start"], p.span["char_end"]
         assert content[lo:hi] == p.text
         assert len(content[:lo].split()) == p.span["word_start"]
+
+
+@pytest.mark.parametrize("query", ["memory leak", '"memory leak"'])
+def test_search_prefers_passage_covering_query(tmp_path, query):
+    content = ("# Memory leak\n\n**URL:** https://example.test\n\n## Description\n\nMemory foam. "
+               + "background " * 60 + "\n\n## Transcript\n\nWe traced the memory leak to a buffer.")
+    with index.Index.open(tmp_path / "index.db") as idx:
+        item = seed_yoink_item(idx, tmp_path, video_id="trace", slug="trace", title="Memory leak", corpus_text=content)
+        idx.upsert_yoink(item, content=content)
+        row, = idx.search(query)
+    passage = row["passage"]
+    assert "memory leak to a buffer" in row["_snippet"]
+    assert passage["text"] == content[passage["char_start"]:passage["char_end"]]
+
+
+@pytest.mark.parametrize(("query", "body"), [
+    ('"memory leak"', "Memory foam and a leaky pipe."),
+    ("C++", "A C program."), (".NET", "A net result."), ("@handle", "A door handle."),
+])
+def test_header_only_literal_cannot_verify_a_body_quote(tmp_path, query, body):
+    literal = query.strip('"')
+    content = f"# {literal}\n\n**URL:** https://example.test\n\n## Description\n\n{body}"
+    with index.Index.open(tmp_path / "index.db") as idx:
+        item = seed_yoink_item(idx, tmp_path, video_id="literal", slug="literal", title=literal, corpus_text=content)
+        idx.upsert_yoink(item, content=content)
+        row, = idx.search(query)
+        assert not row["passage_verified"] and "passage" not in row
+        idx.upsert_yoink(item, content=content + " Here is " + literal + ".")
+        row, = idx.search(query)
+        assert row["passage_verified"] and literal in row["passage"]["text"]
+
+
+def test_large_corpus_bounds_scan_and_word_snapping(tmp_path, monkeypatch):
+    from uoink_core import search_service
+    ranges = search_service.corpus_body_ranges
+    lengths = []
+    def observe(text):
+        lengths.append(len(text))
+        return ranges(text)
+    monkeypatch.setattr(search_service, "corpus_body_ranges", observe)
+    body = "壁" * 1500 + "/match/" + "壁" * 500000
+    content = "# Match\n\n**URL:** https://example.test\n\n## Transcript\n\n" + body
+    with index.Index.open(tmp_path / "index.db") as idx:
+        row = idx._search_passage({"video_id": "fixture", "_content": content}, "match", "forgiving")
+        assert row["passage_verified"] and "/match/" in row["_snippet"]
+        assert len(row["_snippet"]) <= 304
+        assert max(lengths) <= 65536
+        row = idx._search_passage({"video_id": "fixture", "_content": content,
+                                   "_matched_clip": {"clip_id": 1, "text": body}}, "match", "forgiving")
+        assert len(row["_snippet"]) <= 272 and "/match/" in row["_snippet"]
+        assert row["passage"]["text"] == body
+
+
+def test_exact_phrase_mode_and_clip_require_literal_phrase(tmp_path):
+    content = "# Memory leak\n\n**URL:** https://example.test\n\n## Transcript\n\nMemory leakage."
+    with index.Index.open(tmp_path / "index.db") as idx:
+        item = seed_yoink_item(idx, tmp_path, video_id="trace", slug="trace", title="Memory leak", corpus_text=content)
+        idx.upsert_yoink(item, content=content)
+        row, = idx.search("memory leak", match="exact")
+        assert not row["passage_verified"]
+        row = idx._search_passage({"video_id": "trace", "_content": content,
+                                   "_matched_clip": {"clip_id": 1, "text": "Memory leakage."}},
+                                  '"memory leak"', "forgiving")
+        assert not row["passage_verified"]
+
+
+def test_scan_limit_cannot_turn_a_long_header_into_a_quote(tmp_path):
+    content = "# Memory leak\n\n**URL:** https://example.test\n" + "padding " * 10000
+    content += "\n## Description\n\nMemory foam."
+    marked = index._MATCH_START + "Memory leak" + index._MATCH_END
+    with index.Index.open(tmp_path / "index.db") as idx:
+        row = idx._search_passage({"video_id": "trace", "title": "Memory leak", "_content": content,
+                                   "_snippet": "# " + marked}, '"memory leak"', "forgiving")
+    assert not row["passage_verified"]
+
+
+def test_scan_boundary_is_not_an_exact_word_ending(tmp_path):
+    header = "# Leak\n\n**URL:** https://example.test\n\n## Description\n\n"
+    content = header + " " * (65536 - len(header) - 4) + "leakage"
+    with index.Index.open(tmp_path / "index.db") as idx:
+        row = idx._search_passage({"video_id": "trace", "_content": content}, '"leak"', "forgiving")
+    assert not row["passage_verified"]
+
+
+def test_quoted_search_picks_clip_containing_phrase(tmp_path):
+    content = "# Memory leak\n\n**URL:** https://example.test\n\n## Description\n\nDebugging notes."
+    phrase_clip = "After much investigation we found a memory leak. " + "details " * 60
+    with index.Index.open(tmp_path / "index.db") as idx:
+        item = seed_yoink_item(idx, tmp_path, video_id="trace", slug="trace", title="Memory leak",
+                               corpus_text=content, clips=[
+                                   {"text": "Memory usage. Leak found.", "start": 0, "end": 5},
+                                   {"text": phrase_clip, "start": 200, "end": 260}])
+        idx.upsert_yoink(item, content=content)
+        assert len(idx.get_clips("trace")) == 2
+        row, = idx.search('"memory leak"')
+    assert row["passage_verified"] and row["passage"]["start"] == 200

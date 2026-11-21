@@ -1366,7 +1366,7 @@ def audio_storage(idx, data_root, protected=(), *, available=None):
                             files[path] = path.stat().st_size
                     except (OSError, RuntimeError):
                         continue
-            except OSError:
+            except (OSError, RuntimeError):
                 continue
     with idx.read_snapshot() as db:
         rows = _audio_rows(db)
@@ -1395,8 +1395,9 @@ def _unlink_download(root, path):
             share_read_write = 0x1 | 0x2
             open_existing = 3
             directory_no_follow = 0x02000000 | 0x00200000  # BACKUP_SEMANTICS | OPEN_REPARSE_POINT
+            file_list_directory = 0x0001
             for folder in (root, path.parent.parent, path.parent):
-                handle = _winapi.CreateFile(str(folder), 0, share_read_write, 0, open_existing,
+                handle = _winapi.CreateFile(str(folder), file_list_directory, share_read_write, 0, open_existing,
                                             directory_no_follow, 0)
                 held.callback(_winapi.CloseHandle, handle)
                 if folder.resolve(strict=True) != folder:
