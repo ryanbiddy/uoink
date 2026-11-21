@@ -5019,14 +5019,10 @@ def _transcript_backfill_identity_busy(url: str | None) -> bool:
                 if key in _transcript_backfill_held_keys:
                     continue
                 return True
-        # Another process (a CLI capture): peek at its file lock and let go.
-        try:
-            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
-        except OSError:
+        # A status scan and the worker can inspect this folder concurrently.
+        # Taking its lock here would make the other scan see a phantom capture.
+        if source_subscriptions.CaptureLock.in_use(DATA_ROOT, key):
             return True
-        if lock is None:
-            return True
-        lock.release()
     return False
 
 
@@ -6116,6 +6112,14 @@ def _clean_shelf(value) -> str | None:
     return shelf_router.clean_shelf_name(value)
 
 
+def _remember_capture_shelf(url: str, shelf: str, *, by_hand: bool) -> None:
+    import shelf_router
+    try:
+        shelf_router.remember_hints(DATA_ROOT, [(url, shelf)], by_hand=by_hand)
+    except OSError as exc:
+        log.warning("shelf hint not saved: %s", exc)
+
+
 def _shelf_from_body(body, *, remember_url: str | None = None) -> tuple[str | None, str | None]:
     """The optional shelf a capture request names ("shelf", or "folder" for
     imports). Returns (name, None), (None, None) or (None, error). A "shelf"
@@ -6135,10 +6139,7 @@ def _shelf_from_body(body, *, remember_url: str | None = None) -> tuple[str | No
         return None, "shelf must be a name of 1 to 64 characters that also works as a folder name"
     name = _canonical_shelf(name)
     if remember_url:
-        try:
-            shelf_router.remember_hints(DATA_ROOT, [(remember_url, name)], by_hand=by_hand)
-        except OSError as exc:
-            log.warning("shelf hint not saved: %s", exc)
+        _remember_capture_shelf(remember_url, name, by_hand=by_hand)
     return name, None
 
 
@@ -17850,9 +17851,9 @@ def _persist_x_thread(result: dict, *, topic: str | None = None):
         topic_classifier=_route_topic)
 
 
-def _persist_x_article(result: dict):
+def _persist_x_article(result: dict, *, topic: str | None = None):
     return page_extractor.persist_page_yoink(
-        _get_index(), result, data_root=DESKTOP_ROOT,
+        _get_index(), result, topic=topic, data_root=DESKTOP_ROOT,
         source_type=x_article_extractor.SOURCE_TYPE, subfolder="X", slug_prefix="x-article",
         topic_classifier=_route_topic)
 
@@ -18424,23 +18425,20 @@ def _show_youtube_waiting() -> dict:
     status = _youtube_bot_check_status()
     if status.get("active"):
         return {**status, "reason": "bot_check"}
-    now = _now_iso()
-    latest = None
+    now = datetime.now(timezone.utc)
+    latest = now
     reason = "bot_check"
     for row in _get_index().list_pending(limit=200):
         error = str(row.get("last_error") or "")
-        retry_after = str(row.get("retry_after") or "")
-        if (row.get("status") == "pending" and retry_after > now
-                and error.startswith(("youtube_bot_check", "youtube_rate_limit"))):
-            if latest is None or retry_after > latest:
-                latest = retry_after
-                reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
-    if latest is None:
+        if row.get("status") != "pending" or not error.startswith(("youtube_bot_check", "youtube_rate_limit")):
+            continue
+        retry_after = show_capture._parse_iso(row.get("retry_after"))
+        if retry_after is not None and retry_after > latest:
+            latest = retry_after
+            reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
+    if latest == now:
         return {"active": False}
-    until = show_capture._parse_iso(latest)
-    if until is None:
-        return {"active": False}
-    left = int((until - datetime.now(timezone.utc)).total_seconds())
+    left = int((latest - now).total_seconds())
     return {"active": left > 0, "seconds_left": max(0, left), "reason": reason}
 
 
@@ -24107,7 +24105,9 @@ class Handler(BaseHTTPRequestHandler):
         if result.get("source_type") == x_article_extractor.SOURCE_TYPE:
             # A post that only links to an X Article, read with the user's
             # FxTwitter opt-in: it lands like an extension Article capture.
-            return self._handle_extract_x_article_result(result)
+            if shelf:
+                _remember_capture_shelf(result["url"], shelf, by_hand=body.get("shelf") is not None)
+            return self._handle_extract_x_article_result(result, shelf)
         try:
             video_id = _persist_x_thread(result, topic=shelf)
         except Exception:
@@ -24145,8 +24145,9 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                          "error": "json object required"})
-        article_url = body.get("url") if isinstance(body.get("url"), str) else None
-        shelf, shelf_error = _shelf_from_body(body, remember_url=(article_url or "").strip() or None)
+        article_url = body.get("url") if isinstance(body.get("url"), str) else ""
+        shelf, shelf_error = _shelf_from_body(
+            body, remember_url=x_article_extractor.canonical_article_url(article_url))
         if shelf_error:
             return self._send_json(400, {"ok": False, "error": shelf_error})
         result = x_article_extractor.build_extract_result(body)
@@ -24155,17 +24156,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
-        return self._handle_extract_x_article_result(result)
+        return self._handle_extract_x_article_result(result, shelf)
 
-    def _handle_extract_x_article_result(self, result: dict):
+    def _handle_extract_x_article_result(self, result: dict, shelf: str | None):
         """Persist an ok x_article extract_result (extension DOM, or the
         FxTwitter opt-in) and answer the capture request."""
         try:
-            video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
-                source_type=x_article_extractor.SOURCE_TYPE,
-                subfolder="X", slug_prefix="x-article",
-                topic_classifier=_route_topic)
+            video_id = _persist_x_article(result, topic=shelf)
         except Exception:
             log.exception("/extract/x-article persist failed")
             return self._send_json(500, {

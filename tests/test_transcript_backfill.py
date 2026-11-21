@@ -850,6 +850,21 @@ def test_capture_in_progress_is_not_listed_as_half(lib):
     assert folder.exists()
 
 
+def test_scanning_a_half_capture_does_not_claim_it(lib):
+    url = _x(34)
+    lib.add_half_capture("asr-off-half", url=url, video_id="1800000000000000034",
+                         title="Finish with ASR off", duration=60)
+    locks = server.source_subscriptions.CaptureLock
+    key = server._manual_capture_key(url)
+    path = Path(locks.path_for(lib.data, key))
+    assert [item["key"] for item in server._transcript_backfill_scan()["items"]] == ["folder:AI/asr-off-half"]
+    assert not path.exists(), "a status scan must not take the worker's capture lock"
+    # A CLI capture holds the OS lock without registering a helper-local identity.
+    with locks.try_acquire(lib.data, key):
+        assert server._transcript_backfill_scan()["items"] == []
+    assert len(server._transcript_backfill_scan()["items"]) == 1
+
+
 def _meta(n: int, title: str, duration: int = 60) -> dict:
     return {"id": f"18000000000000000{n:02d}", "title": title, "duration": duration,
             "uploader": "samplebuilder", "webpage_url": _x(n), "thumbnails": []}

@@ -448,6 +448,8 @@ def test_dashboard_init_does_not_request_remote_features():
         "autoCheckUpdatesOnLoad",
         # Asks the local helper whether Zing is installed; no remote request.
         "loadZingStatus",
+        # Registered as a timer. It reads local show runs when the card is visible.
+        "pollShowRuns",
         # Wires the For You podcast panel's buttons; fetches nothing at init.
         "wireForYouPod",
         # Asks the local helper for cached podcast suggestions. The helper
@@ -464,6 +466,7 @@ for (const name of {json.dumps(local_steps)}) context[name] = () => calls.push(n
 vm.runInContext({json.dumps(_function('init'))}, context);
 await context.init();
 assert.deepEqual(requests, []);
+assert.ok(!calls.includes('pollShowRuns'));
 assert.ok(calls.includes('loadLibrary'));
 assert.ok(calls.includes('loadLibraryAvailability'));
 assert.ok(calls.includes('connectJobsStream'));

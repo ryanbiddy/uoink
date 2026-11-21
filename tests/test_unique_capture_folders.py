@@ -31,6 +31,7 @@ import pytest
 import _platform
 import uoink_usage
 from provenance import clamp_title
+from uoink_core.storage import read_export_markdown
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -152,6 +153,7 @@ def capture(tmp_path, monkeypatch):
         "_transcript_entries_with_links": lambda *a: [],
         "_capture_media_plan": lambda *a, **k: None,
         "_build_yoink_md": lambda **k: f"# {k['metadata']['title']}\n\nBody for {k['url']}\n",
+        "_read_export_markdown": read_export_markdown,
         "_atomic_write_text": write_text, "_should_start_hook_type": lambda m: False,
         "_read_settings": lambda: {}, "_anthropic_key_for_feature": lambda f: None,
         "compute_health": lambda s: {}, "_now_iso": lambda: "2026-10-15T12:00:00",

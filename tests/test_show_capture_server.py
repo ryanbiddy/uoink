@@ -162,11 +162,9 @@ def test_a_bot_check_on_an_episode_holds_the_run(helper):
     assert server._show_youtube_waiting()["active"] is True
 
 
-@pytest.mark.parametrize("retry_after", [
-    (datetime.now() + timedelta(minutes=20)).isoformat(timespec="seconds"),      # how rows store it
-    (datetime.now(timezone.utc) + timedelta(minutes=20)).isoformat(timespec="seconds"),
-])
-def test_a_rate_limited_row_holds_youtube_runs_and_says_why(helper, retry_after):
+@pytest.mark.parametrize("zone", [None, timezone.utc], ids=["local", "utc"])
+def test_a_rate_limited_row_holds_youtube_runs_and_says_why(helper, zone):
+    retry_after = (datetime.now(zone) + timedelta(minutes=20)).isoformat(timespec="seconds")
     pending_id, _ = helper.index.enqueue_pending_once(
         "https://www.youtube.com/watch?v=tpwaiting01", 30, server._now_iso(), "transcript")
     with helper.index.write_transaction() as conn:
@@ -174,6 +172,21 @@ def test_a_rate_limited_row_holds_youtube_runs_and_says_why(helper, retry_after)
                      ("youtube_rate_limit: HTTP Error 429", retry_after, pending_id))
     status = server._show_youtube_waiting()
     assert status["active"] is True and status["reason"] == "rate_limited"
+    assert 18 * 60 < status["seconds_left"] <= 20 * 60
+
+
+def test_latest_youtube_hold_uses_elapsed_time_across_offsets(helper):
+    now = datetime.now(timezone.utc)
+    for n, minutes, offset, error in [(1, 5, 14, "youtube_bot_check"),
+                                      (2, 20, -10, "youtube_rate_limit")]:
+        retry = (now + timedelta(minutes=minutes)).astimezone(timezone(timedelta(hours=offset)))
+        pending_id, _ = helper.index.enqueue_pending_once(
+            f"https://www.youtube.com/watch?v={vid(n)}", 30, server._now_iso(), "transcript")
+        with helper.index.write_transaction() as conn:
+            conn.execute("UPDATE pending_yoinks SET last_error=?, retry_after=? WHERE pending_id=?",
+                         (error, retry.isoformat(), pending_id))
+    status = server._show_youtube_waiting()
+    assert status["active"] and status["reason"] == "rate_limited"
     assert 18 * 60 < status["seconds_left"] <= 20 * 60
 
 

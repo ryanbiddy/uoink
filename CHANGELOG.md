@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- X Articles save to the shelf you choose, whether you capture the open article or save it from a post.
+- Checking transcript progress while a backfill starts no longer makes it miss an unfinished capture.
+- Whole-show capture waits for the latest YouTube retry time, even when queue entries use different time zones.
 - Windows tray: right-click shows the menu again once you have saved something. A bug in the
   Recent items list stopped the whole menu from building, so right-click did nothing. Recent
   items now picks up a new save within half a minute, even when you haven't touched the tray.

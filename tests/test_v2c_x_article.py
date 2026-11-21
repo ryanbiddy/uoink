@@ -194,6 +194,26 @@ def test_route_relays_honest_errors():
     print("ok  route relays the extractor's honest empty-parse error")
 
 
+def test_article_routes_keep_the_requested_shelf(tmp_path, monkeypatch):
+    article = _good_payload(url="https://twitter.com/synthauthor/article/1900000000001")
+    full = x_article_extractor.build_full_text_result(article, provider="FxTwitter")
+    monkeypatch.setattr(server.x_extractor, "extract_x_thread", lambda *a, **kw: full)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "output")
+    monkeypatch.setattr(server, "_route_topic", lambda _: "Automatic shelf")
+    with index_mod.Index.open(tmp_path / "index.db") as idx:
+        monkeypatch.setattr(server, "_get_index", lambda: idx)
+        with _server({"x_text_capture_enabled": True, "fxtwitter_enrichment_enabled": True}):
+            for route, payload, shelf in [
+                ("/extract/x-article", article, "From the open tab"),
+                ("/extract/x", {"url": "https://x.com/synthetic/status/1800000000001"}, "From the post"),
+            ]:
+                status, res = _post(route, {**payload, "shelf": shelf})
+                assert status == 200 and res["ok"], res
+                assert idx.get_yoink(res["video_id"])["topic"] == shelf
+                assert idx.shelf_hand_seq(res["video_id"]) > 0
+
+
 def test_route_persists_under_output_root():
     # The v3.3.2 output-root discipline: an X ARTICLE capture must write its
     # corpus under the configured output root (server.DESKTOP_ROOT), NOT

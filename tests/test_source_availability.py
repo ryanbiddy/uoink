@@ -733,7 +733,7 @@ def test_migration_upgrade_rerun_constraints_and_preserved_saved_content(tmp_pat
             before = old.get_yoink("item")
     with index_mod.Index.open(path) as upgraded:
         assert upgraded.schema_version() == index_mod.latest_schema_version()
-        assert upgraded.get_yoink("item") == before
+        assert upgraded.get_yoink("item") == {**before, "published_day": None}
         assert upgraded._conn.execute("SELECT content FROM yoinks_fts WHERE video_id='item'").fetchone()[0] == "preserved transcript"
         upgraded.record_availability("item", status="available")
         migration = next(p for v, p in migrations if v == 33)
