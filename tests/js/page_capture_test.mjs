@@ -207,4 +207,77 @@ domTest("page capture refuses non-web pages", async () => {
   const res = captureHtml("<p>x</p>", "file:///C:/notes/page.html");
   assert.equal(res.ok, false);
   assert.equal(res.code, "bad_url");
+  // A tab showing a non-HTML document (an XML feed, a PDF viewer) is not read here.
+  const xml = captureHtml("<feed><title>x</title></feed>", "https://docs.example.dev/feed.xml", "application/xml");
+  assert.equal(xml.ok, false);
+  assert.equal(xml.code, "not_html");
+});
+
+const INTRO = "<h1>T</h1><p>Intro words that are long enough to keep this little test page around for the " +
+  "reader. More words follow here so the reader treats it as the article body and not as page chrome.</p>";
+
+domTest("review round: data tables keep cells with paragraphs, lists and code", async () => {
+  const md = await markdownOf(INTRO +
+    "<table><thead><tr><th>Step</th><th>Notes</th></tr></thead><tbody>" +
+    "<tr><td><p>Install</p></td><td><p>First line.</p><p>Second line.</p></td></tr>" +
+    "<tr><td>Run</td><td><ul><li>fast</li><li>safe</li></ul><pre>quill run</pre></td></tr></tbody></table>");
+  assert.match(md, /\| Step \| Notes \|\n\| --- \| --- \|/);
+  assert.match(md, /\| Install \| First line\. Second line\. \|/);
+  assert.match(md, /\| Run \| fast safe `quill run` \|/);
+});
+
+domTest("review round: tracking pixels are dropped and lazy images keep their real source", async () => {
+  const md = await markdownOf(INTRO +
+    "<p><img src=\"https://cdn.example.dev/a.png\" width=\"1\" height=\"1\" alt=\"one\">" +
+    "<img src=\"https://www.facebook.com/tr?id=1\" alt=\"two\"><img src=\"/stats/pixel.gif\" alt=\"three\">" +
+    "<img src=\"/img/blank.gif\" data-src=\"/img/real.jpg\" alt=\"The real one\"></p>");
+  assert.doesNotMatch(md, /a\.png|facebook|pixel\.gif|blank\.gif/);
+  assert.match(md, /!\[The real one\]\(https:\/\/docs\.example\.dev\/img\/real\.jpg\)/);
+});
+
+domTest("review round: code in lists and quotes stays a code block at column 0", async () => {
+  const md = await markdownOf(INTRO +
+    "<ol><li><p>Install it:</p><pre><code class=\"language-bash\">npm i quill\n&lt;done&gt;</code></pre></li>" +
+    "<li>Run it</li></ol><blockquote><p>Quoted:</p><pre>a = 1</pre></blockquote>");
+  assert.match(md, /1\. Install it:\n\n```bash\nnpm i quill\n<done>\n```\n\n2\. Run it/);
+  assert.match(md, /> Quoted:\n\n```\na = 1\n```/);
+});
+
+domTest("review round: MathML encodings, breaks, link spaces and inline code", async () => {
+  const md = await markdownOf(INTRO +
+    "<p>Ratio <math><semantics><mi>x</mi><annotation encoding=\"TeX\">a &lt; b</annotation></semantics></math>, " +
+    "empty <math><semantics><annotation encoding=\"application/x-tex\"> </annotation></semantics></math>.</p>" +
+    "<p>Line one<br>line two, see<a href=\"/n\"> the notes </a>now, run <code>a ``b`` c</code>.</p>");
+  assert.match(md, /Ratio \$a \\lt b\$, empty \./);
+  assert.match(md, /Line one {2}\nline two, see \[the notes\]\(https:\/\/docs\.example\.dev\/n\) now/);
+  assert.match(md, /run ```a ``b`` c```\./);
+});
+
+domTest("review round: footnote-* ids are notes, and two notes never share a label", async () => {
+  // Straight through toMarkdown: Defuddle renumbers notes on its own path.
+  const { JSDOM } = await import("./reader/node_modules/jsdom/lib/api.js");
+  const dom = new JSDOM("<body><p>Tides rose<sup><a href=\"#footnote-1\">1</a></sup> and fell" +
+    "<sup><a href=\"#fn1\">2</a></sup>.</p><ol class=\"footnotes\"><li id=\"footnote-1\"><p>First note.</p></li>" +
+    "<li id=\"fn1\"><p>Second note.</p></li></ol><div class=\"footnotes\"><p>Notes without ids.</p></div></body>",
+  { runScripts: "outside-only" });
+  dom.window.eval(readFileSync(join(here, "..", "..", "extension", "lib", "page-capture.js"), "utf8"));
+  const md = dom.window.UoinkPageCapture.toMarkdown(dom.window.document.body, "https://docs.example.dev/");
+  assert.match(md, /Tides rose\[\^1\] and fell\[\^1-2\]\./);
+  assert.match(md, /^\[\^1\]: First note\.$/m);
+  assert.match(md, /^\[\^1-2\]: Second note\.$/m);
+  assert.match(md, /Notes without ids\./);
+});
+
+domTest("review round: reading is capped in time and deep pages stay linear", async () => {
+  const { JSDOM } = await import("./reader/node_modules/jsdom/lib/api.js");
+  const deep = "<span>".repeat(3000) + "word " + "</span>".repeat(3000);
+  const wide = "<p><span>x</span> y</p>".repeat(3000);
+  const dom = new JSDOM(`<body><div>${deep}</div>${wide}</body>`, { runScripts: "outside-only" });
+  dom.window.eval(readFileSync(join(here, "..", "..", "extension", "lib", "page-capture.js"), "utf8"));
+  const capture = dom.window.UoinkPageCapture;
+  const started = Date.now();
+  capture.toMarkdown(dom.window.document.body, "https://docs.example.dev/");
+  assert.ok(Date.now() - started < 3000, `took ${Date.now() - started} ms`);
+  assert.throws(() => capture.toMarkdown(dom.window.document.body, "https://docs.example.dev/", Date.now() - 1),
+    /capture_timeout/);
 });

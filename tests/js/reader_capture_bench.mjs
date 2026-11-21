@@ -19,9 +19,9 @@ const root = new URL('../../', import.meta.url);
 const defuddle = readFileSync(new URL('extension/lib/defuddle.js', root), 'utf8');
 const pageCapture = readFileSync(new URL('extension/lib/page-capture.js', root), 'utf8');
 
-export function captureHtml(html, url) {
+export function captureHtml(html, url, contentType = 'text/html') {
   const quiet = new VirtualConsole();
-  const dom = new JSDOM(html, { url, runScripts: 'outside-only', virtualConsole: quiet });
+  const dom = new JSDOM(html, { url, contentType, runScripts: 'outside-only', virtualConsole: quiet });
   const win = dom.window;
   let netCalls = 0;
   win.fetch = () => { netCalls += 1; return Promise.reject(new Error('offline')); };
