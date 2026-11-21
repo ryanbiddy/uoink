@@ -122,6 +122,12 @@ data.groups[1].draft = "Tomatoes <b>";
 data.groups[1].key = "1:tomatoes";
 const drafted = ctx.tidyGroupsHtml(data, new Set());
 check(drafted.includes('value="Tomatoes &lt;b&gt;"'), "a name typed before re-render stays, escaped");
+data.groups[1].draft = `x" onfocus="alert(1)' y`;
+const quoted = ctx.tidyGroupsHtml(data, new Set());
+check(quoted.includes('value="x&quot; onfocus=&quot;alert(1)&#39; y"') && !quoted.includes('" onfocus="'),
+  "quotes in a typed name cannot leave the value attribute");
+check(ctx.htmlEscape(`<a href='x'>"&"</a>`) === "&lt;a href=&#39;x&#39;&gt;&quot;&amp;&quot;&lt;/a&gt;",
+  "htmlEscape covers all five characters");
 check((ctx.tidyGroupsHtml(data, new Set(["1:tomatoes"])).match(/data-tidy-move-item="1:/g) || []).length === 9,
   "an open group stays open by its key, whatever its name becomes");
 delete data.groups[1].key;
