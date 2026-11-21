@@ -147,6 +147,19 @@ def test_dashboard_row_says_what_the_fetch_got_and_offers_the_page():
     assert "Open page" not in result["thin"]["actions"] and result["thin"]["detail"] == "Too little text."
 
 
+def test_a_long_reason_gets_its_own_line_and_never_starts_with_a_dot():
+    # Seen in the 390px screenshot: the wrapped reason began with a stray middle dot.
+    from test_dashboard_runthrough_fixes import run_js
+    html = run_js("""(() => [
+      libraryCaptureRowHtml({key: "a", kind: "Article", title: "t", source: "Web", strip: "", tone: "failed",
+        word: "Failed", detail: %s, errorDetail: "", actions: ""}),
+      libraryCaptureRowHtml({key: "b", kind: "Article", title: "t", source: "Web", strip: "", tone: "failed",
+        word: "Failed", detail: "Too little text.", errorDetail: "", actions: ""})])()""" % json.dumps(
+        pages.PAGE_STATE_COPY["wall"]))
+    assert '<span class="state-sep own-line" aria-hidden="true">&middot;</span><span class="state-detail">' in html[0]
+    assert '<span class="state-sep" aria-hidden="true">&middot;</span><span class="state-detail">Too little text.' in html[1]
+
+
 def test_a_full_article_with_a_subscribe_box_is_still_saved():
     paragraphs = "".join(f"<p>On day {i} the crews checked berth {i}. The ramp at berth {i} held its line, "
                          f"and the tide gauge read {i + 2} metres at dawn.</p>" for i in range(30))

@@ -1122,6 +1122,14 @@
       line-height: 1.4;
     }
 
+    .state-sep.own-line {
+      display: none;
+    }
+
+    .state-sep.own-line + .state-detail {
+      flex-basis: 100%;
+    }
+
     .state-word {
       display: inline-flex;
       align-items: center;
@@ -15018,7 +15026,9 @@
           <div class="row-body">
             <div class="card-title" title="${htmlEscape(item.title)}">${htmlEscape(item.title)}</div>
             <div class="card-source">${htmlEscape(item.source)}</div>
-            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${item.detail ? `<span class="state-detail"> &middot; ${htmlEscape(item.detail)}</span>` : ""}</div>
+            <div class="row-state">${item.strip}<span class="state-word ${htmlEscape(item.tone)}"><i class="state-dot" aria-hidden="true"></i>${htmlEscape(item.word)}</span>${!item.detail ? ""
+              // A reason too long for one line gets its own line, so a wrap never leaves a dot at the start.
+              : `<span class="state-sep${String(item.detail).length > 48 ? " own-line" : ""}" aria-hidden="true">&middot;</span><span class="state-detail">${htmlEscape(item.detail)}</span>`}</div>
             ${renderErrorDetails(item.errorDetail)}
           </div>
           ${item.actions ? `<div class="row-actions capture-actions">${item.actions}</div>` : ""}
