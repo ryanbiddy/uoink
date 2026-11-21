@@ -305,6 +305,29 @@ class _SaveItems(list):
     truncated = False
 
 
+# Lists that are a queue or a reaction, not a place the user filed things.
+_NOT_FOLDERS = {"watch later", "watch-later", "liked videos", "liked", "bookmarks", "saved"}
+
+
+def folder_name(value: Any) -> str | None:
+    """The user's own folder or playlist name, cleaned to work as a shelf.
+    None for empty values and for lists like Watch later."""
+    if not isinstance(value, str):
+        return None
+    import shelf_router  # local: keeps this module importable alone in tests
+    name = shelf_router.clean_shelf_name(_clean(value, 200))
+    if not name or name.strip().lower() in _NOT_FOLDERS:
+        return None
+    return name
+
+
+def _with_folder(item: dict, folder: Any) -> dict:
+    name = folder_name(folder)
+    if name:
+        item["folder"] = name
+    return item
+
+
 def _save_item(source: str, value: Any) -> dict | None:
     import reddit_extractor
     import x_extractor
@@ -316,9 +339,10 @@ def _save_item(source: str, value: Any) -> dict | None:
     raw = raw.strip().lstrip("\ufeff")
     fields = {"title": row.get("title"), "channel": row.get("channel") or row.get("author"),
               "note": row.get("note")}
+    folder = (row.get("folder") or row.get("collection") or row.get("playlist")) if row else None
     if source == SOURCE_WATCH_LATER:
         ids = [raw] if _YT_ID_RE.fullmatch(raw) else extract_youtube_ids(raw)
-        return _item(ids[0], **fields) if len(ids) == 1 else None
+        return _with_folder(_item(ids[0], **fields), folder) if len(ids) == 1 else None
     try:
         if source == SOURCE_X_BOOKMARKS:
             if re.fullmatch(r"[0-9]+", raw):
@@ -350,12 +374,12 @@ def _save_item(source: str, value: Any) -> dict | None:
             prefix = "reddit"
     except ValueError:
         return None
-    return {
+    return _with_folder({
         "item_key": key, "kind": "post", "url": url,
         "video_id": f"{prefix}_{hashlib.sha1(library_url.encode('utf-8')).hexdigest()[:11]}",
         "title": _clean(fields["title"], 300), "channel": _clean(fields["channel"], 200),
         "note": _clean(fields["note"]), "duration_seconds": None, "quality_score": None,
-    }
+    }, folder)
 
 
 def parse_save_items(source: str, values: Iterable[Any]) -> list[dict]:
@@ -389,18 +413,42 @@ def _csv_rows(text: str) -> Iterable[list[str]]:
             continue  # Invalid/oversized rows don't hide the remaining saves.
 
 
-def _csv_values(text: str, header: str) -> Iterable[str]:
-    """Find the real header after optional Takeout playlist metadata."""
-    column = None
+_FOLDER_COLUMNS = ("folder", "collection", "playlist", "playlist title", "list")
+
+
+def _csv_values(text: str, header: str) -> Iterable[Any]:
+    """Find the real header after optional Takeout playlist metadata.
+    Yields the link, or {url, folder} when the file names a folder: a
+    folder/collection/playlist column, or the Title in the playlist
+    metadata block of a legacy Takeout file."""
+    column = folder_col = title_col = None
+    folder = None
     for row in _csv_rows(text):
         cells = [cell.strip() for cell in row]
         lowered = [cell.lower() for cell in cells]
         if header in lowered:
             column = lowered.index(header)
+            folder_col = next((lowered.index(c) for c in _FOLDER_COLUMNS if c in lowered), None)
+        elif "playlist id" in lowered and "title" in lowered:
+            title_col = lowered.index("title")
+        elif title_col is not None:
+            folder = cells[title_col] if len(cells) > title_col else None
+            title_col = None
         elif column is not None and len(cells) > column:
-            yield cells[column]
+            name = cells[folder_col] if folder_col is not None and len(cells) > folder_col else folder
+            yield {"url": cells[column], "folder": name} if name else cells[column]
         elif len(cells) == 1:
             yield cells[0]
+
+
+def folder_from_filename(filename: Any) -> str | None:
+    """Google Takeout names each playlist file "<playlist>-videos.csv"."""
+    if not isinstance(filename, str):
+        return None
+    stem = Path(filename).stem
+    if not stem.lower().endswith("-videos"):
+        return None
+    return folder_name(stem[: -len("-videos")])
 
 
 def parse_watch_later_csv(text: str) -> list[dict]:
@@ -491,11 +539,20 @@ def _stage_result(stage_id: str, data: dict) -> dict:
             "source": data["source"], "truncated": bool(data.get("truncated"))}
 
 
-def stage_saves(data_root: Path, source: str, items: list[dict], *, filename=None) -> dict:
-    """Atomically stage a bounded list; keep the newest 20 lists."""
+def _default_folder(items: list[dict], folder: str | None) -> None:
+    if folder:
+        for item in items:
+            item.setdefault("folder", folder)
+
+
+def stage_saves(data_root: Path, source: str, items: list[dict], *, filename=None, folder=None) -> dict:
+    """Atomically stage a bounded list; keep the newest 20 lists. ``folder``
+    (an X bookmark folder) or a Takeout playlist file name becomes each
+    item's shelf unless the item names its own."""
     parsed = parse_save_items(source, items)
     if not parsed:
         raise ImportListError("Found nothing to import in that file.", "empty_file")
+    _default_folder(parsed, folder_name(folder) or folder_from_filename(filename))
     data = {"source": source, "items": parsed,
             "filename": Path(filename).name if filename else None,
             "truncated": bool(getattr(items, "truncated", False) or parsed.truncated)}
@@ -507,7 +564,8 @@ def stage_saves(data_root: Path, source: str, items: list[dict], *, filename=Non
     return _stage_result(stage_id, data)
 
 
-def append_stage_items(data_root: Path, token: str, source: str, items: Iterable[Any]) -> dict:
+def append_stage_items(data_root: Path, token: str, source: str, items: Iterable[Any], *,
+                       folder=None) -> dict:
     """Append unique items to a stage, preserving its order and token."""
     match = _STAGE_TOKEN_RE.fullmatch(token) if isinstance(token, str) else None
     if not match:
@@ -518,6 +576,7 @@ def append_stage_items(data_root: Path, token: str, source: str, items: Iterable
         if source != data["source"]:
             raise ImportListError("source must match the staged saves list.", "invalid_items")
         parsed = parse_save_items(source, items)
+        _default_folder(parsed, folder_name(folder))
         merged = list(data["items"])
         seen = {item["item_key"] for item in merged}
         truncated = bool(data.get("truncated") or getattr(items, "truncated", False) or parsed.truncated)
@@ -841,6 +900,7 @@ def fetch_source(spec: dict, *, offset: int, limit: int,
         if mode == "playlist":
             title, items = parse_hackertube_playlist(fetch_json(
                 f"{HACKERTUBE_ORIGIN}/api/playlist?slug={quote(spec['id'])}"))
+            items = [_with_folder(item, title) for item in items]
             return {"title": title, "items": _slice(items, offset, limit),
                     "total": len(items), "credit": HACKERTUBE_CREDIT}
         if mode == "video":
@@ -899,6 +959,9 @@ def fetch_source(spec: dict, *, offset: int, limit: int,
             raise ImportListError("YouTube playlists need the local media tools.", "unavailable")
         payload = ytdlp_playlist(spec["url"], offset + 1, offset + limit)
         title, items, total = parse_ytdlp_flat_playlist(payload)
+        # The playlist's own name is the user's folder (Watch later is not).
+        named = payload.get("title") if isinstance(payload, dict) else None
+        items = [_with_folder(item, named) for item in items]
         return {"title": title, "items": items[:limit], "total": total, "credit": None}
     raise ImportListError("Unsupported list source.", "unsupported")
 
@@ -1065,6 +1128,8 @@ def record_import(data_root: Path, preview: dict, queued: list[dict]) -> dict:
                 "imported_at": now,
                 "applied": bool(prev.get("applied")),
             }
+            if row.get("folder"):
+                data["items"][row["video_id"]]["folder"] = row["folder"]
             if row.get("kind") == "post":
                 data["items"][row["video_id"]].update(
                     kind="post", item_key=row["item_key"], url=row["url"], status="queued",

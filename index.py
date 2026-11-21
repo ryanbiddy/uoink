@@ -98,6 +98,17 @@ ENGAGEMENT_METADATA_FIELDS = (
     "channel_follower_count",
 )
 
+# 3.18 shelves: the helper installs this (set_explicit_shelf_hook). Given a
+# record about to be written, it says whether the record's topic is a shelf
+# the user named for this capture, which may replace a shelf set by hand.
+_explicit_shelf_hook = None
+
+
+def set_explicit_shelf_hook(check) -> None:
+    global _explicit_shelf_hook
+    _explicit_shelf_hook = check
+
+
 _YOINK_COLUMNS = (
     "video_id", "slug", "channel", "title", "topic", "hook_type",
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
@@ -1485,12 +1496,27 @@ class Index:
         if isinstance(record.get("title"), str):
             # One title limit for every source; truncates, never rejects.
             record = {**record, "title": _clamp_title(record["title"])}
-        values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(
             f"{col}=excluded.{col}" for col in _YOINK_COLUMNS if col != "video_id"
         )
+        # 3.18 shelves: this is the one write every capture path shares, so
+        # a shelf the user set by hand is kept here. Only the user's own
+        # choice for this write (record["shelf_by_hand"], or the helper's
+        # explicit shelf hook) may change it.
+        explicit = bool(record.get("shelf_by_hand")) or self._explicit_shelf(record)
+        kept_shelf = None
         with self._lock, self._rollback_on_error():
+            try:
+                hand = self._conn.execute(
+                    "SELECT y.topic FROM shelf_by_hand h JOIN yoinks y ON y.video_id=h.video_id "
+                    "WHERE h.video_id=?", (video_id,)).fetchone()
+            except sqlite3.OperationalError:
+                hand = None  # an index opened before migration 0037
+            if hand is not None and hand[0] and not explicit and record.get("topic") != hand[0]:
+                kept_shelf = hand[0]
+                record = {**record, "topic": kept_shelf}
+            values = [record.get(col) for col in _YOINK_COLUMNS]
             self._conn.execute(
                 f"INSERT INTO yoinks ({', '.join(_YOINK_COLUMNS)}) "
                 f"VALUES ({placeholders}) "
@@ -1530,7 +1556,14 @@ class Index:
                 import logging
                 logging.getLogger("uoink.index").warning(
                     "self-channel recognition skipped: %s", e)
+            if explicit and record.get("topic") and (hand is None or hand[0] != record.get("topic")):
+                try:
+                    self._mark_shelf_by_hand(video_id)
+                except sqlite3.OperationalError:
+                    pass
             self._conn.commit()
+        if kept_shelf is not None:
+            self._sync_kept_shelf(record, kept_shelf)
         self._invalidate_library_sources([video_id])
         self._notify_source_changed(video_id)
 
@@ -1544,6 +1577,45 @@ class Index:
                 ready = self._published_day_ready = (self._conn, "published_day" in {
                     row[1] for row in self._conn.execute("PRAGMA table_xinfo(yoinks)")})
         return f"{alias}.published_day" if ready[1] else f"uoink_published_day({alias}.metadata_json)"
+
+    def _explicit_shelf(self, record: dict) -> bool:
+        check = _explicit_shelf_hook
+        if check is None or not record.get("topic"):
+            return False
+        try:
+            return bool(check(record))
+        except Exception:  # pragma: no cover -- a hint lookup never blocks a save
+            return False
+
+    def _mark_shelf_by_hand(self, video_id: str, seq: int | None = None) -> int:
+        """Record a hand placement (inside the caller's transaction). seq
+        defaults to one more than the save's last hand move."""
+        if seq is None:
+            row = self._conn.execute(
+                "SELECT seq FROM shelf_by_hand WHERE video_id=?", (video_id,)).fetchone()
+            seq = (int(row[0]) if row else 0) + 1
+        self._conn.execute(
+            "INSERT INTO shelf_by_hand (video_id, seq, set_at) VALUES (?, ?, ?) "
+            "ON CONFLICT(video_id) DO UPDATE SET seq=excluded.seq, set_at=excluded.set_at",
+            (video_id, int(seq), _now_iso()))
+        return int(seq)
+
+    def _sync_kept_shelf(self, record: dict, shelf: str) -> None:
+        """A capture just rewrote the save's files with its own guess; put
+        the user's shelf back in them."""
+        try:
+            from shelf_router import sync_files
+            sync_files(record.get("sidecar_path"), record.get("corpus_path"), shelf, by_hand=True)
+        except Exception as e:  # pragma: no cover -- the index already holds the shelf
+            import logging
+            logging.getLogger("uoink.index").warning("kept shelf not written to files: %s", e)
+
+    def shelf_hand_seq(self, video_id: str) -> int:
+        """0 when routing placed the save, else its hand-move count."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT seq FROM shelf_by_hand WHERE video_id=?", (video_id,)).fetchone()
+        return int(row[0]) if row else 0
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
@@ -2773,6 +2845,25 @@ class Index:
                 f"UPDATE yoinks SET {set_sql} WHERE video_id=?", params)
             self._conn.commit()  # C-03: facets must survive a kill
         return len(pairs)
+
+    def set_shelf(self, video_id: str, topic: str | None, *, hand_seq: int | None = None) -> bool:
+        """Move one save to a shelf (its topic), keeping the full-text row's
+        topic column in step. None clears it. hand_seq records how it got
+        there: a number above 0 is a hand move (see shelf_by_hand), 0 means
+        routing placed it, None leaves that as it was. Returns True when a
+        row changed."""
+        with self._lock, self._rollback_on_error():
+            changed = self._conn.execute(
+                "UPDATE yoinks SET topic=? WHERE video_id=?", (topic, video_id)).rowcount
+            if changed:
+                self._conn.execute(
+                    "UPDATE yoinks_fts SET topic=? WHERE video_id=?", (topic, video_id))
+                if hand_seq is not None and hand_seq > 0:
+                    self._mark_shelf_by_hand(video_id, hand_seq)
+                elif hand_seq is not None:
+                    self._conn.execute("DELETE FROM shelf_by_hand WHERE video_id=?", (video_id,))
+            self._conn.commit()
+        return bool(changed)
 
     def add_tags(self, video_id: str, tags, *, source: str = "agent") -> int:
         """Append free-form tags to a yoink (idempotent via the (video_id, tag)

@@ -89,7 +89,7 @@ def test_store_allowlist_includes_saves_script():
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="Node.js is unavailable")
-@pytest.mark.parametrize("group", ["parsers", "collectors", "scroll", "requests", "background", "http"])
+@pytest.mark.parametrize("group", ["parsers", "collectors", "scroll", "requests", "background", "http", "folders"])
 def test_saves_node_contracts(group):
     result = subprocess.run(
         [shutil.which("node"), str(ROOT / "tests/js/extension_saves_test.mjs"), group],

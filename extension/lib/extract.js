@@ -319,9 +319,9 @@
     }
   }
 
-  function postStageSaves(source, items, appendTo) {
+  function postStageSaves(source, items, appendTo, folder) {
     return postSavesRequest("/import-list/stage", {
-      source, items, ...(appendTo ? { append_to: appendTo } : {}),
+      source, items, ...(appendTo ? { append_to: appendTo } : {}), ...(folder ? { folder } : {}),
     });
   }
 

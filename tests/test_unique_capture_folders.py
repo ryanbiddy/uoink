@@ -94,11 +94,14 @@ def capture(tmp_path, monkeypatch):
     # The AST loader copies methods without their module-level imports.
     index_scope = {"threading": threading, "unicodedata": unicodedata,
                    "contextmanager": contextmanager, "suppress": suppress,
-                   "_clamp_title": clamp_title}
+                   "_clamp_title": clamp_title,
+                   # 3.18: upsert_yoink keeps a shelf set by hand (no such
+                   # table in this schema, so it never applies here).
+                   "sqlite3": sqlite3, "_explicit_shelf_hook": None}
     _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
           index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
     _load(ROOT / "index.py", {"__init__", "upsert_yoink", "_rollback_on_error", "get_yoink", "get_by_slug",
-                              "_notify_source_changed"},
+                              "_notify_source_changed", "_explicit_shelf"},
           index_scope, class_name="Index")
     if "def list_capture_sources(" in (ROOT / "index.py").read_text(encoding="utf-8"):
         _load(ROOT / "index.py", {"list_capture_sources"}, index_scope, class_name="Index")
@@ -157,6 +160,11 @@ def capture(tmp_path, monkeypatch):
         "maybe_toast": Mock(), "fmt_time": str, "_citations_from_sidecar": lambda *a: [],
         "_mirror_event": Mock(), "friendly_error": str, "machine_error_detail": str,
         "_topic_folder_name": lambda topic: topic,
+        # 3.18 shelving helpers that _run_extraction calls (loaded below).
+        "_shelf_is_default": lambda topic: topic in ("Uncategorized", "Clips"),
+        "_shelf_hint": lambda *a, **k: None, "_route_topic": lambda m, **k: "Test",
+        "_explicit_shelf_hint": lambda *a, **k: None,
+        "_shelf_from_body": lambda body, **k: (None, None),
         "page_extractor": SimpleNamespace(PLATFORM_YOUTUBE="youtube",
                                           platform_for=lambda *a: "youtube",
                                           author_for=lambda *a: "Example"),
@@ -172,6 +180,7 @@ def capture(tmp_path, monkeypatch):
         "_index_yoink", "_corpus_path", "_resolve_corpus_path", "_build_corpus", "_demote_headings",
         "_playlist_worker", "_unique_child_folder", "_write_failed_marker",
         "_build_playlist_corpus", "_strip_image_refs", "_raise_if_cancelled", "_finish_job_cancelled",
+        "_keep_placed_shelf", "_reroute_with_transcript",
     }, scope, constants={
         "_YOUTUBE_HOSTS", "_TWITTER_HOSTS", "_TIKTOK_HOSTS", "_INSTAGRAM_HOSTS",
         "_VIDEO_ID_RE", "_TWITTER_STATUS_RE", "_TWITTER_HANDLE_RE", "_INSTAGRAM_KIND_RE",
@@ -917,6 +926,7 @@ def test_mcp_capture_uses_the_source_derived_folder(tmp_path):
         _manual_extraction_ownership=ownership,
         _fetch_metadata=lambda _url: meta,
         _classify_topic=lambda _meta: "Test",
+        _route_topic=lambda _meta, **_k: "Test",  # 3.18: the capture paths route through this
         _topic_folder_name=lambda topic: topic,
         slugify=lambda text: text.replace(" ", "_"),
         _video_capture_folder=Mock(return_value=unique),

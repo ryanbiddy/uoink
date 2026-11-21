@@ -2632,6 +2632,224 @@
       color: var(--text-2);
     }
 
+    /* 3.18 shelves: Tidy Uncategorized (a dialog of proposed shelves) and
+       Select (a bottom bar that moves picked saves). Long names ellipsize
+       with a title and every grid child can shrink (PR #443 lessons). */
+    .topic-overview-tidy {
+      min-height: var(--target-chip);
+      border: 0;
+      border-radius: var(--radius-input);
+      padding: 0 10px;
+      background: transparent;
+      color: var(--text-2);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .topic-overview-tidy:hover,
+    .topic-overview-tidy:focus-visible {
+      color: var(--text);
+    }
+
+    @media (min-width: 1081px) {
+      .library-tidy-entry {
+        display: none;
+      }
+    }
+
+    .summary-line .hook-help-link + .hook-help-link,
+    .summary-line .hook-help-link + .facet-status {
+      margin-left: 10px;
+    }
+
+    .tidy-card {
+      align-content: start;
+      width: min(720px, calc(100vw - 48px));
+    }
+
+    .tidy-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .tidy-groups {
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .tidy-group {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 12px;
+    }
+
+    .tidy-group-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 12px;
+      min-width: 0;
+    }
+
+    .tidy-group-name {
+      display: flex;
+      flex: 1 1 220px;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      min-width: 0;
+    }
+
+    .tidy-group-name strong {
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      font-size: 15px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tidy-name {
+      flex: 1 1 160px;
+      min-width: 0;
+      max-width: 280px;
+    }
+
+    .tidy-new,
+    .tidy-count {
+      color: var(--text-2);
+      font-size: 12px;
+    }
+
+    .tidy-new {
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-pill);
+      padding: 1px 8px;
+    }
+
+    .tidy-items {
+      display: grid;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tidy-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      border-top: 1px solid var(--line);
+      padding: 6px 0;
+    }
+
+    .tidy-item-text {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .tidy-item-title {
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tidy-item-why,
+    .tidy-stays {
+      color: var(--text-2);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .shelf-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      z-index: 27;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+      width: min(640px, calc(100vw - 32px));
+      transform: translateX(-50%);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 10px 12px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .shelf-bar-count {
+      flex: 1 1 140px;
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .shelf-bar-move {
+      display: flex;
+      flex: 1 1 260px;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .shelf-bar-move .control {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .library-list.selecting {
+      padding-bottom: 120px;
+    }
+
+    .library-list.selecting .row-thumb::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      z-index: 1;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--surface);
+      border-radius: 4px;
+      background: var(--scrim);
+      color: var(--on-action);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 14px;
+      text-align: center;
+    }
+
+    .library-list.selecting .uoink-card.selected {
+      background: var(--surface-sel);
+      box-shadow: inset 3px 0 0 var(--action);
+    }
+
+    .library-list.selecting .uoink-card.selected .row-thumb::before {
+      content: "\2713";
+      border-color: var(--action);
+      background: var(--action);
+    }
+
     /* Advanced options disclosure (U-03): one drawer for everything a
        first draft doesn't need, so Source > Output > Topic > Generate fit
        one screen. */
@@ -5845,7 +6063,7 @@
             <span id="resultSummary" aria-live="polite">Loading library...</span>
             <span class="library-count hidden" id="searchModeLabel" role="status"></span>
             <div class="library-filter-chips hidden" id="activeFilters" aria-live="polite"></div>
-            <span><span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
+            <span><button class="hook-help-link library-tidy-entry hidden" type="button" id="libraryTidyEntry" data-tidy-open title="Find shelves for the saves on Uncategorized">Tidy Uncategorized</button> <button class="hook-help-link" type="button" id="librarySelectToggle" aria-pressed="false" title="Pick saves and move them to a shelf">Select</button> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
             <span class="health-legend" title="A row names its state in words; the dot only repeats it.">
               <span class="warn"><i></i>still working</span>
               <span class="fail"><i></i>needs attention</span>
@@ -7215,6 +7433,33 @@
       </div>
     </div>
   </div>
+  <!-- 3.18 shelves: Tidy Uncategorized. GET /library/shelves/tidy proposes;
+       nothing moves until a Move button, and the shelf bar offers Undo. -->
+  <div class="modal-backdrop hidden" id="tidyPanel" role="dialog" aria-modal="true" aria-labelledby="tidyTitle">
+    <div class="modal-card tidy-card">
+      <div class="tidy-head">
+        <div>
+          <div class="soft-note">Library</div>
+          <div class="panel-title" id="tidyTitle">Tidy Uncategorized</div>
+        </div>
+        <button class="button ghost small" type="button" id="tidyClose">Close</button>
+      </div>
+      <p class="setting-copy" id="tidyIntro" role="status" aria-live="polite">Reading the saves on Uncategorized...</p>
+      <div class="tidy-groups" id="tidyGroups"></div>
+      <p class="tidy-stays" id="tidyStays"></p>
+    </div>
+  </div>
+  <!-- 3.18 shelves: the bar for Select mode and for undoing the last move. -->
+  <div class="shelf-bar hidden" id="shelfBar" role="region" aria-label="Move saves">
+    <span class="shelf-bar-count" id="shelfBarCount" role="status" aria-live="polite"></span>
+    <span class="shelf-bar-move" id="shelfBarMove">
+      <input class="control" id="shelfBarName" type="text" list="shelfNames" maxlength="64" placeholder="Shelf name" aria-label="Move to this shelf">
+      <button class="button primary small" type="button" id="shelfBarApply">Move</button>
+    </span>
+    <button class="button small hidden" type="button" id="shelfBarUndo">Undo</button>
+    <button class="button ghost small" type="button" id="shelfBarClose">Done</button>
+  </div>
+  <datalist id="shelfNames"></datalist>
   <!-- U-06 (UX-14): the in-app hooks explainer. Fed by GET /hooks/guide so
        the copy can never drift from the classifier. -->
   <div class="modal-backdrop hidden" id="hookExplainer" role="dialog" aria-modal="true" aria-labelledby="hookExplainerTitle">
@@ -7309,6 +7554,11 @@
       libraryAutoRetried: false,
       libraryRetryTimer: null,
       topicOverviewExpanded: false,
+      // 3.18 shelves: Select mode picks, the last move's undo, Tidy's proposals.
+      shelfSelect: { on: false, ids: new Set() },
+      shelfUndo: null,
+      shelfFallback: "Uncategorized",
+      tidy: null,
       filters: {
         q: "",
         platform: "",
@@ -7653,6 +7903,21 @@
       channelFilter: document.getElementById("channelFilter"),
       topicFilter: document.getElementById("topicFilter"),
       topicOverview: document.getElementById("topicOverview"),
+      libraryTidyEntry: document.getElementById("libraryTidyEntry"),
+      librarySelectToggle: document.getElementById("librarySelectToggle"),
+      tidyPanel: document.getElementById("tidyPanel"),
+      tidyClose: document.getElementById("tidyClose"),
+      tidyIntro: document.getElementById("tidyIntro"),
+      tidyGroups: document.getElementById("tidyGroups"),
+      tidyStays: document.getElementById("tidyStays"),
+      shelfBar: document.getElementById("shelfBar"),
+      shelfBarCount: document.getElementById("shelfBarCount"),
+      shelfBarMove: document.getElementById("shelfBarMove"),
+      shelfBarName: document.getElementById("shelfBarName"),
+      shelfBarApply: document.getElementById("shelfBarApply"),
+      shelfBarUndo: document.getElementById("shelfBarUndo"),
+      shelfBarClose: document.getElementById("shelfBarClose"),
+      shelfNames: document.getElementById("shelfNames"),
       hookExplainer: document.getElementById("hookExplainer"),
       hookExplainerList: document.getElementById("hookExplainerList"),
       hookExplainerClose: document.getElementById("hookExplainerClose"),
@@ -15004,6 +15269,7 @@
       els.libraryGrid.innerHTML = rows.map(cardHtml).join("");
       rows.forEach(loadThumbnail);
       markOpenLibraryRow();
+      syncSelection();
     }
 
     // Re-haul list rows: what the transcript came from (CM-11's
@@ -16276,6 +16542,8 @@
       syncFacetOptions();
       updateVideoFacetVisibility();
       renderTopicOverview();
+      syncShelfNames();
+      loadShelfUndo();
     }
 
     // Phase 2 (source-first browse): the video-only facets (hook, format,
@@ -16354,8 +16622,356 @@
           active === value ? "active" : "",
           isUncat ? "uncategorized" : ""].filter(Boolean).join(" ");
         return `<button type="button" class="${classes}" data-topic-overview="${htmlEscape(value)}" title="${htmlEscape(hint)}" aria-pressed="${active === value}"><b class="topic-overview-label">${htmlEscape(label)}</b><span>${count}</span></button>`;
-      }).join("") + toggle;
+      }).join("") + toggle + (uncategorizedCountFrom(state.facets)
+        ? `<button type="button" class="topic-overview-tidy" data-tidy-open title="Find shelves for the saves on Uncategorized">Tidy Uncategorized</button>` : "");
       wrap.classList.remove("hidden");
+    }
+
+    // ---- 3.18 shelves: Tidy Uncategorized and Select ----------------------
+    // Tidy asks the helper for a shelf and a reason for each save on
+    // Uncategorized. Select picks saves in the Library and moves them. Both
+    // move through /library/shelves/apply and every move can be undone.
+    const TIDY_PREVIEW_ITEMS = 5;
+    // The helper caps a request body at 64 KB, so a big move goes in parts
+    // (measured in UTF-8 bytes, with room for the rest of the body) that
+    // join one undo.
+    const SHELF_MOVE_BYTES = 56 * 1024;
+
+    function isFallbackShelf(value, fallback) {
+      return String(value || "").trim().toLowerCase() === String(fallback || "Uncategorized").trim().toLowerCase();
+    }
+
+    function uncategorizedCountFrom(facets, fallback = "Uncategorized") {
+      const topics = facets && Array.isArray(facets.topic) ? facets.topic : [];
+      const row = topics.find((t) => isFallbackShelf(t.value, fallback));
+      return row ? Number(row.count) || 0 : 0;
+    }
+
+    function shelfMoveChunks(moves, limit = SHELF_MOVE_BYTES) {
+      const encoder = new TextEncoder();
+      const out = [];
+      let part = [];
+      let size = 0;
+      for (const move of moves) {
+        const bytes = encoder.encode(JSON.stringify(move)).length + 1;
+        if (part.length && size + bytes > limit) {
+          out.push(part);
+          part = [];
+          size = 0;
+        }
+        part.push(move);
+        size += bytes;
+      }
+      if (part.length) out.push(part);
+      return out;
+    }
+
+    // The newest move the helper can still undo, as the shelf bar shows it.
+    function shelfUndoFromSummary(summary) {
+      if (!summary || !summary.id || summary.undone || !(Number(summary.count) > 0)) return null;
+      const shelves = Array.isArray(summary.shelves) ? summary.shelves : [];
+      const where = shelves.length === 1 ? shelves[0] : `${shelves.length} shelves`;
+      return { batchId: summary.id, text: `Moved ${savesWord(Number(summary.count))} to ${where}.` };
+    }
+
+    function shelfMoveText(result, shelf) {
+      const n = result.movedIds.length;
+      let text = n ? `Moved ${savesWord(n)} to ${shelf}.` : "Nothing moved. Those saves were already there.";
+      if (result.skipped && n) text += ` Left ${result.skipped} as they were.`;
+      if (result.failed) {
+        text = `${n ? `Moved ${savesWord(n)} to ${shelf}. ` : ""}${savesWord(result.failed)} did not move. `
+          + `${result.error ? `${result.error} ` : ""}Try again for the rest.`;
+      }
+      return text;
+    }
+
+    function savesWord(n) {
+      return `${n} save${n === 1 ? "" : "s"}`;
+    }
+
+    function tidyIntroText(data) {
+      const total = Number(data && data.total) || 0;
+      if (!total) return "Nothing is on Uncategorized. Every save has a shelf.";
+      const found = (data.groups || []).reduce((n, g) => n + (g.items || []).length, 0);
+      if (!found) {
+        return `No shelf fits the ${savesWord(total)} on Uncategorized yet, so ${total === 1 ? "it stays" : "they stay"} there. `
+          + "You can still pick saves in the Library with Select and move them.";
+      }
+      return `Uoink found a shelf for ${found} of the ${savesWord(total)} on Uncategorized. `
+        + "Nothing moves until you click Move, and you can undo any move.";
+    }
+
+    function tidyStaysText(data) {
+      const stays = Number(data && data.stays) || 0;
+      const parts = [];
+      if (stays && (data.groups || []).length) {
+        parts.push(`${savesWord(stays)} stay on Uncategorized: nothing points to one shelf yet.`);
+      }
+      if (data && data.more) parts.push("There are more saves on Uncategorized. Tidy again after these to see them.");
+      return parts.join(" ");
+    }
+
+    function tidyGroupsHtml(data, expanded) {
+      return ((data && data.groups) || []).map((group, gi) => {
+        const items = group.items || [];
+        const shelf = String(group.shelf || "");
+        const open = !!(expanded && expanded.has(String(group.key || shelf)));
+        const shown = open ? items : items.slice(0, TIDY_PREVIEW_ITEMS);
+        const name = group.new
+          ? `<input class="control tidy-name" type="text" value="${htmlEscape(group.draft ?? shelf)}" maxlength="64" data-tidy-name="${gi}" aria-label="Name for the new shelf"><span class="tidy-new">New shelf</span>`
+          : `<strong title="${htmlEscape(shelf)}">${htmlEscape(shelf)}</strong>`;
+        const rows = shown.map((item, ii) => {
+          const title = htmlEscape(item.title || item.video_id || "Untitled");
+          return `<li class="tidy-item"><div class="tidy-item-text"><span class="tidy-item-title" title="${title}">${title}</span>`
+            + `<span class="tidy-item-why">${htmlEscape(item.reason || "")}</span></div>`
+            + `<button class="button ghost small" type="button" data-tidy-move-item="${gi}:${ii}" aria-label="Move ${title} to ${htmlEscape(shelf)}">Move</button></li>`;
+        }).join("");
+        const more = items.length > TIDY_PREVIEW_ITEMS
+          ? `<button class="hook-help-link" type="button" data-tidy-more="${gi}" aria-expanded="${open}">${open ? "Show fewer" : `Show all ${items.length}`}</button>`
+          : "";
+        return `<section class="tidy-group" aria-label="${htmlEscape(shelf)}"><header class="tidy-group-head">`
+          + `<div class="tidy-group-name">${name}<span class="tidy-count">${savesWord(items.length)}</span></div>`
+          + `<button class="button small" type="button" data-tidy-move-group="${gi}">${items.length === 1 ? "Move it" : `Move all ${items.length}`}</button>`
+          + `</header><ul class="tidy-items">${rows}</ul>${more}</section>`;
+      }).join("");
+    }
+
+    function syncShelfNames() {
+      if (!els.shelfNames) return;
+      const topics = state.facets && Array.isArray(state.facets.topic) ? state.facets.topic : [];
+      els.shelfNames.innerHTML = topics
+        .filter((t) => !isFallbackShelf(t.value, state.shelfFallback))
+        .map((t) => `<option value="${htmlEscape(String(t.value || ""))}"></option>`).join("");
+      if (els.libraryTidyEntry) {
+        els.libraryTidyEntry.classList.toggle("hidden", !uncategorizedCountFrom(state.facets, state.shelfFallback));
+      }
+    }
+
+    // Undo comes from the helper's move log, so it survives a reload. A bar
+    // the user closed stays closed for that move.
+    async function loadShelfUndo() {
+      let data;
+      try {
+        data = await authFetch("/library/shelves/undo");
+      } catch (err) {
+        return;
+      }
+      if (data && typeof data.fallback === "string" && data.fallback.trim()) state.shelfFallback = data.fallback;
+      const undo = shelfUndoFromSummary(data && data.undo);
+      let closed = "";
+      try { closed = localStorage.getItem("uoink.shelfUndoClosed") || ""; } catch (err) { closed = ""; }
+      state.shelfUndo = undo && undo.batchId !== closed ? undo : null;
+      syncShelfNames();
+      renderShelfBar();
+    }
+
+    // Moves go in parts. If a later part fails, the parts before it stay
+    // moved and can still be undone; the result says how many did not move.
+    async function moveToShelves(moves, label, extra = {}) {
+      let batchId = null;
+      const movedIds = [];
+      let skipped = 0;
+      let failed = 0;
+      let error = "";
+      const parts = shelfMoveChunks(moves);
+      for (let i = 0; i < parts.length; i++) {
+        let res;
+        try {
+          res = await authFetch("/library/shelves/apply", {
+            method: "POST",
+            body: JSON.stringify({ moves: parts[i], label, ...extra, ...(batchId ? { append_to: batchId } : {}) }),
+          });
+        } catch (err) {
+          if (!i) throw err;
+          failed = parts.slice(i).reduce((n, part) => n + part.length, 0);
+          error = String((err && err.message) || "");
+          break;
+        }
+        batchId = res.batch_id || batchId;
+        (res.moves || []).forEach((m) => movedIds.push(m.video_id));
+        skipped += (res.skipped || []).length;
+      }
+      return { batchId, movedIds, skipped, failed, error };
+    }
+
+    function afterShelfMove(result, shelf) {
+      const text = shelfMoveText(result, shelf);
+      state.shelfUndo = result.batchId ? { batchId: result.batchId, text } : null;
+      if (!state.shelfUndo || result.failed) showToast(text);
+      renderShelfBar();
+      loadLibraryFacets();
+      loadLibrary({ reset: true });
+    }
+
+    async function undoShelfMove() {
+      const undo = state.shelfUndo;
+      if (!undo) return;
+      els.shelfBarUndo.disabled = true;
+      try {
+        const res = await authFetch("/library/shelves/undo", {
+          method: "POST", body: JSON.stringify({ batch_id: undo.batchId }),
+        });
+        const kept = (res.skipped || []).length;
+        showToast(`Put back ${savesWord(res.restored || 0)}.${kept ? ` ${kept} moved again since, so they stay.` : ""}`);
+        state.shelfUndo = null;
+        renderShelfBar();
+        loadLibraryFacets();
+        loadLibrary({ reset: true });
+        if (state.tidy && !els.tidyPanel.classList.contains("hidden")) openTidyPanel();
+      } catch (err) {
+        showToast(`Couldn't undo that move. ${err.message || ""}`.trim());
+      } finally {
+        els.shelfBarUndo.disabled = false;
+      }
+    }
+
+    async function openTidyPanel() {
+      state.tidy = { data: null, expanded: new Set(), busy: false };
+      els.tidyPanel.classList.remove("hidden");
+      els.tidyIntro.textContent = "Reading the saves on Uncategorized...";
+      els.tidyGroups.innerHTML = "";
+      els.tidyStays.textContent = "";
+      els.tidyClose.focus();
+      try {
+        state.tidy.data = await authFetch("/library/shelves/tidy");
+      } catch (err) {
+        els.tidyIntro.textContent = `Couldn't read your library just now. ${err.message || ""}`.trim();
+        return;
+      }
+      // A stable key per group, so renaming or moving one save never
+      // collapses an open group.
+      (state.tidy.data.groups || []).forEach((group, gi) => { group.key = `${gi}:${group.shelf}`; });
+      if (state.tidy.data.fallback) state.shelfFallback = state.tidy.data.fallback;
+      if (!state.shelfUndo) state.shelfUndo = shelfUndoFromSummary(state.tidy.data.undo);
+      renderShelfBar();
+      renderTidy();
+    }
+
+    function closeTidyPanel() {
+      els.tidyPanel.classList.add("hidden");
+    }
+
+    function renderTidy() {
+      const data = state.tidy && state.tidy.data;
+      if (!data) return;
+      els.tidyIntro.textContent = tidyIntroText(data);
+      els.tidyGroups.innerHTML = tidyGroupsHtml(data, state.tidy.expanded);
+      els.tidyStays.textContent = tidyStaysText(data);
+    }
+
+    async function tidyMove(gi, ii) {
+      const tidy = state.tidy;
+      const group = tidy && tidy.data && tidy.data.groups[gi];
+      if (!group || tidy.busy) return;
+      const input = els.tidyGroups.querySelector(`[data-tidy-name="${gi}"]`);
+      const shelf = String(input ? input.value : (group.draft ?? group.shelf)).replace(/\s+/g, " ").trim();
+      if (!shelf) {
+        showToast("Give the new shelf a name first.");
+        if (input) input.focus();
+        return;
+      }
+      const items = ii === null ? group.items : [group.items[ii]].filter(Boolean);
+      tidy.busy = true;
+      els.tidyGroups.setAttribute("aria-busy", "true");
+      try {
+        const fallback = tidy.data.fallback || state.shelfFallback;
+        const result = await moveToShelves(items.map((item) => ({ video_id: item.video_id, shelf, from: fallback })),
+          "Tidy", { source: "tidy" });
+        const moved = new Set(result.movedIds);
+        group.items = group.items.filter((item) => !moved.has(item.video_id));
+        group.count = group.items.length;
+        if (group.new && moved.size) {
+          group.new = false;
+          delete group.draft;
+        }
+        group.shelf = shelf;
+        tidy.data.groups = tidy.data.groups.filter((g) => g.items.length);
+        tidy.data.total = Math.max(0, (Number(tidy.data.total) || 0) - moved.size);
+        afterShelfMove(result, shelf);
+      } catch (err) {
+        showToast(`Couldn't move those saves. ${err.message || ""}`.trim());
+      } finally {
+        tidy.busy = false;
+        els.tidyGroups.removeAttribute("aria-busy");
+        renderTidy();
+      }
+    }
+
+    function setSelectMode(on) {
+      state.shelfSelect.on = !!on;
+      if (!on) state.shelfSelect.ids.clear();
+      els.librarySelectToggle.setAttribute("aria-pressed", String(!!on));
+      syncSelection();
+      renderShelfBar();
+      if (on) els.shelfBarName.focus({ preventScroll: true });
+    }
+
+    function syncSelection() {
+      const on = state.shelfSelect.on;
+      els.libraryGrid.classList.toggle("selecting", on);
+      els.libraryGrid.querySelectorAll(".uoink-card[data-video-id]").forEach((card) => {
+        const picked = on && state.shelfSelect.ids.has(card.dataset.videoId);
+        card.classList.toggle("selected", picked);
+        if (on) {
+          if (!card.dataset.openLabel) card.dataset.openLabel = card.getAttribute("aria-label") || "";
+          const title = card.querySelector(".card-title");
+          card.setAttribute("aria-label", `${picked ? "Picked" : "Pick"}: ${title ? title.textContent : card.dataset.videoId}`);
+          card.setAttribute("aria-pressed", String(picked));
+        } else if (card.dataset.openLabel) {
+          card.setAttribute("aria-label", card.dataset.openLabel);
+          card.removeAttribute("aria-pressed");
+        }
+      });
+    }
+
+    function toggleShelfPick(videoId) {
+      if (!videoId) return;
+      const ids = state.shelfSelect.ids;
+      if (ids.has(videoId)) ids.delete(videoId);
+      else ids.add(videoId);
+      syncSelection();
+      renderShelfBar();
+    }
+
+    function renderShelfBar() {
+      const sel = state.shelfSelect;
+      const undo = state.shelfUndo;
+      const onLibrary = (state.activeTab || "library") === "library";
+      els.shelfBar.classList.toggle("hidden", !onLibrary || !(sel.on || undo));
+      els.shelfBarMove.classList.toggle("hidden", !sel.on);
+      els.shelfBarUndo.classList.toggle("hidden", !undo);
+      els.shelfBarApply.disabled = !sel.ids.size;
+      if (sel.on) {
+        els.shelfBarCount.textContent = sel.ids.size
+          ? `${sel.ids.size} picked${undo ? `. ${undo.text}` : ""}` : (undo ? undo.text : "Pick saves to move.");
+      } else {
+        els.shelfBarCount.textContent = undo ? undo.text : "";
+      }
+    }
+
+    async function moveSelectedSaves() {
+      const shelf = els.shelfBarName.value.replace(/\s+/g, " ").trim();
+      const ids = Array.from(state.shelfSelect.ids);
+      if (!ids.length) return;
+      if (!shelf) {
+        showToast("Type the shelf to move them to.");
+        els.shelfBarName.focus();
+        return;
+      }
+      els.shelfBarApply.disabled = true;
+      els.shelfBarApply.setAttribute("aria-busy", "true");
+      try {
+        const result = await moveToShelves(ids.map((id) => ({ video_id: id, shelf })), "Move");
+        state.shelfSelect.ids.clear();
+        els.shelfBarName.value = "";
+        afterShelfMove(result, shelf);
+        syncSelection();
+      } catch (err) {
+        showToast(`Couldn't move those saves. ${err.message || ""}`.trim());
+      } finally {
+        els.shelfBarApply.removeAttribute("aria-busy");
+        renderShelfBar();
+      }
     }
 
     function facetSourceKeys(key) {
@@ -21427,6 +22043,8 @@
       }
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       state.activeTab = tab;
+      // The shelf bar belongs to the Library list.
+      renderShelfBar();
       if (typeof scheduleResearchPoll === "function") scheduleResearchPoll();
       if (tab === "research") researchWork(async () => {
         const versions = ["researchConsent", "researchSettingsConsent"].map((id) => settingEdit(id).version);
@@ -21869,6 +22487,56 @@
         const panel = manager && manager.closest(".panel");
         if (panel) panel.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
       });
+      els.tidyClose.addEventListener("click", closeTidyPanel);
+      els.tidyPanel.addEventListener("keydown", (event) => {
+        trapModalFocus(event, els.tidyPanel, closeTidyPanel);
+      });
+      els.tidyPanel.addEventListener("click", (event) => {
+        if (event.target === els.tidyPanel) {
+          closeTidyPanel();
+          return;
+        }
+        const more = event.target.closest("[data-tidy-more]");
+        if (more && state.tidy && state.tidy.data) {
+          const group = state.tidy.data.groups[Number(more.dataset.tidyMore)];
+          if (!group) return;
+          const key = String(group.key || group.shelf);
+          if (state.tidy.expanded.has(key)) state.tidy.expanded.delete(key);
+          else state.tidy.expanded.add(key);
+          renderTidy();
+          return;
+        }
+        const whole = event.target.closest("[data-tidy-move-group]");
+        if (whole) {
+          tidyMove(Number(whole.dataset.tidyMoveGroup), null);
+          return;
+        }
+        const one = event.target.closest("[data-tidy-move-item]");
+        if (one) {
+          const [gi, ii] = one.dataset.tidyMoveItem.split(":").map(Number);
+          tidyMove(gi, ii);
+        }
+      });
+      els.tidyPanel.addEventListener("input", (event) => {
+        const input = event.target.closest("[data-tidy-name]");
+        const group = input && state.tidy && state.tidy.data && state.tidy.data.groups[Number(input.dataset.tidyName)];
+        if (group) group.draft = input.value;
+      });
+      els.librarySelectToggle.addEventListener("click", () => setSelectMode(!state.shelfSelect.on));
+      els.shelfBarApply.addEventListener("click", moveSelectedSaves);
+      els.shelfBarName.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.isComposing) return;
+        event.preventDefault();
+        moveSelectedSaves();
+      });
+      els.shelfBarUndo.addEventListener("click", undoShelfMove);
+      els.shelfBarClose.addEventListener("click", () => {
+        if (state.shelfUndo) {
+          try { localStorage.setItem("uoink.shelfUndoClosed", state.shelfUndo.batchId); } catch (err) { /* private window */ }
+        }
+        state.shelfUndo = null;
+        setSelectMode(false);
+      });
       els.hookExplainerClose.addEventListener("click", closeHookExplainer);
       els.hookExplainer.addEventListener("click", (event) => {
         if (event.target === els.hookExplainer) closeHookExplainer();
@@ -21882,6 +22550,10 @@
         if (!card || event.target.closest("a, button, input, select, textarea, summary")) return;
         if (!card.dataset.videoId && !card.dataset.folder) return;
         event.preventDefault();
+        if (state.shelfSelect.on && card.closest("#libraryGrid")) {
+          toggleShelfPick(card.dataset.videoId);
+          return;
+        }
         openYoinkDetail(rowFromCard(card));
         focusReaderHeading();
       });
@@ -22230,6 +22902,17 @@
           // Before the card branch: the button sits inside a [data-folder]
           // card and must win over opening the detail view.
           writeFromSource(writeFrom.dataset.writeFrom);
+          return;
+        }
+        const tidyOpen = event.target.closest("[data-tidy-open]");
+        if (tidyOpen) {
+          openTidyPanel();
+          return;
+        }
+        // Select mode: a Library row click picks the save instead of opening it.
+        const pickCard = state.shelfSelect.on && event.target.closest("#libraryGrid .uoink-card[data-video-id]");
+        if (pickCard && !event.target.closest("a, button")) {
+          toggleShelfPick(pickCard.dataset.videoId);
           return;
         }
         const card = event.target.closest("[data-folder]");

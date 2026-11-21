@@ -73,6 +73,7 @@ def parser():
     search.add_argument("--limit", type=int, default=5, help="most results to show (default 5)")
     capture = command("capture", help="route a URL through existing capture tools")
     capture.add_argument("url", help="video, playlist, post or page link")
+    capture.add_argument("--shelf", help="put the save on this shelf instead of picking one")
     recent = command("recent", help="list the newest items in your library")
     recent.add_argument("--limit", type=int, default=20, help="most items to show (default 20)")
     get = command("get", help="get a bounded library card by item id")
@@ -105,6 +106,23 @@ def parser():
     saves.add_argument("--limit", type=int, default=50, help="items per batch, 1-50 (default 50)")
     saves.add_argument("--offset", type=int, default=0, help="start position in the staged list")
     saves.add_argument("--preview", action="store_true", help="count without queueing")
+    shelves = command("shelves", help="tidy Uncategorized: see proposed shelves, move saves, undo",
+                      formatter_class=argparse.RawDescriptionHelpFormatter,
+                      description="Nothing moves until you run apply or move, and undo puts the last move back.\n"
+                                  "Moves change the shelf in the library, the search index and the saved\n"
+                                  "notes. Folders on disk stay where they are.")
+    shelves_sub = shelves.add_subparsers(dest="shelves_command", required=True, metavar="<action>")
+    tidy = shelves_sub.add_parser("tidy", parents=[common],
+                                  help="propose a shelf and a reason for each save on Uncategorized")
+    tidy.add_argument("--limit", type=int, default=2000, help="most saves to look at, 1-5000 (default 2000)")
+    accept = shelves_sub.add_parser("apply", parents=[common], help="accept one proposed group from tidy")
+    accept.add_argument("shelf", help="the group's shelf name, as tidy printed it")
+    accept.add_argument("--only", nargs="+", metavar="ID", help="move only these items from the group")
+    move = shelves_sub.add_parser("move", parents=[common], help="move items to a shelf (new or existing)")
+    move.add_argument("shelf", help="shelf name, 1-64 characters")
+    move.add_argument("ids", nargs="+", metavar="ID", help="item ids from search, recent or tidy")
+    undo = shelves_sub.add_parser("undo", parents=[common], help="put the last move back")
+    undo.add_argument("batch_id", nargs="?", help="a specific move to undo (default: the latest)")
     research = command("research", help="discover sources, capture evidence and publish a research report")
     research.add_argument("words", nargs="+", metavar="WORDS",
                           help="a question to research, or status, publish, open or list")
@@ -251,6 +269,15 @@ def friendly_call(ns, server):
     if not route.get("ok") or route["source"] not in CAPTURE_TOOLS:
         raise UsageError(route.get("note") or "unsupported capture URL")
     name, key = CAPTURE_TOOLS[route["source"]]
+    if getattr(ns, "shelf", None):
+        if route["source"] in ("youtube_playlist", "podcast_feed"):
+            raise UsageError("--shelf works for one save at a time, not a playlist or podcast feed")
+        # The capture tools route through server._route_topic, which reads
+        # this hint first, so the save lands on the named shelf. It is the
+        # user's own pick, so it also replaces a shelf they set before.
+        import shelf_router
+        shelf_router.remember_hints(server.DATA_ROOT, [(route["canonical"], ns.shelf),
+                                                       (ns.url, ns.shelf)], by_hand=True)
     return name, {key: route["canonical"]}
 
 
@@ -412,6 +439,160 @@ def cues_text(payload):
     if next_offset is not None:
         rows.append(f"More cues after these: add --offset {next_offset}.")
     return "\n".join(head + rows)
+def shelves_check(ns):
+    """Usage errors for shelf options, before the backend or storage loads."""
+    import shelf_router
+    if ns.command == "capture" and ns.shelf is not None and not shelf_router.clean_shelf_name(ns.shelf):
+        raise UsageError("--shelf must be 1-64 characters that also work as a folder name")
+    if ns.command != "shelves":
+        return
+    if ns.shelves_command == "tidy" and not 1 <= ns.limit <= 5000:
+        raise UsageError("--limit must be from 1 to 5000")
+    if ns.shelves_command == "move":
+        if not shelf_router.clean_shelf_name(ns.shelf):
+            raise UsageError("the shelf name must be 1-64 characters that also work as a folder name")
+        if len(ns.ids) > shelf_router.MAX_MOVES:
+            raise UsageError(f"move at most {shelf_router.MAX_MOVES} items at a time")
+
+
+SHELF_BODY_BYTES = 56 * 1024  # the helper refuses a body over 64 KB
+
+
+def _helper_shelves(server, path, body):
+    """POST one /library/shelves route to the running helper. Raises OSError
+    when it can't be reached."""
+    import urllib.error
+    import urllib.request
+    request = urllib.request.Request(
+        f"http://{server.HOST}:{server.PORT}{path}", data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json", "X-Uoink-Token": server._current_token()},
+        method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            payload = json.loads(exc.read().decode("utf-8"))
+        except ValueError:
+            payload = None
+        return payload if isinstance(payload, dict) else {"ok": False, "error": f"helper returned HTTP {exc.code}"}
+
+
+def _move_parts(moves):
+    """Moves in parts that each fit under the helper's body cap."""
+    part, size = [], 0
+    for move in moves:
+        n = len(json.dumps(move, ensure_ascii=False).encode("utf-8")) + 1
+        if part and size + n > SHELF_BODY_BYTES:
+            yield part
+            part, size = [], 0
+        part.append(move)
+        size += n
+    if part:
+        yield part
+
+
+def _helper_apply(server, moves, label, *, source=None):
+    """One undoable move on the running helper, sent in parts."""
+    total = {"ok": True, "moved": 0, "skipped": [], "moves": [], "batch_id": None}
+    for part in _move_parts(moves):
+        body = {"moves": part, "label": label, **({"source": source} if source else {}),
+                **({"append_to": total["batch_id"]} if total["batch_id"] else {})}
+        result = _helper_shelves(server, "/library/shelves/apply", body)
+        if not result.get("ok"):
+            # What moved stays moved and can be undone; say what did not.
+            return {**total, **result, "moved": total["moved"], "batch_id": total["batch_id"],
+                    "not_moved": len(moves) - total["moved"] - len(total["skipped"])}
+        total["batch_id"] = result.get("batch_id") or total["batch_id"]
+        total["moved"] += int(result.get("moved") or 0)
+        total["skipped"] += result.get("skipped") or []
+        total["moves"] += result.get("moves") or []
+        if result.get("files_not_updated"):
+            total.setdefault("files_not_updated", []).extend(result["files_not_updated"])
+    return total
+
+
+def shelves_command(ns, server):
+    """Tidy Uncategorized through the same helpers as the dashboard. When
+    Uoink is running, moves and undo go to it, so its library stays current
+    and one process writes the move log; otherwise they run here, under the
+    same cross-process lock."""
+    import shelf_router
+    import uoink_agent_runtime as runtime
+    remote = ns.shelves_command != "tidy" and runtime.helper_running(server)
+    try:
+        return _shelves_run(ns, server, shelf_router, remote)
+    except OSError:
+        if not remote:
+            raise
+        # The helper stopped answering: do it here instead.
+        return _shelves_run(ns, server, shelf_router, False)
+
+
+def _shelves_run(ns, server, shelf_router, remote):
+    if ns.shelves_command == "tidy":
+        return server._shelf_proposals(limit=ns.limit)
+    if ns.shelves_command == "undo":
+        if remote:
+            return _helper_shelves(server, "/library/shelves/undo",
+                                   {"batch_id": ns.batch_id} if ns.batch_id else {})
+        return server._shelf_undo(ns.batch_id)
+    if ns.shelves_command == "move":
+        shelf = shelf_router.clean_shelf_name(ns.shelf)
+        ids = list(dict.fromkeys(ns.ids))
+        if remote:
+            return _helper_apply(server, [{"video_id": item, "shelf": shelf} for item in ids], "Move")
+        return server._reshelve([(item, shelf) for item in ids], label="Move")
+    proposals = server._shelf_proposals(limit=shelf_router.MAX_MOVES)
+    wanted = shelf_router.shelf_key(" ".join(ns.shelf.split()))
+    group = next((g for g in proposals.get("groups") or [] if shelf_router.shelf_key(g["shelf"]) == wanted), None)
+    if group is None:
+        return {"ok": False, "error": f"No proposed group is called {ns.shelf}. "
+                                      "Run 'uoink shelves tidy --text' to see the groups."}
+    ids = [item["video_id"] for item in group["items"]]
+    if ns.only:
+        missing = [item for item in ns.only if item not in ids]
+        if missing:
+            return {"ok": False, "error": "Not in that group: " + ", ".join(missing)}
+        ids = [item for item in ids if item in set(ns.only)]
+    fallback = proposals.get("fallback") or "Uncategorized"
+    if remote:
+        return _helper_apply(server, [{"video_id": item, "shelf": group["shelf"], "from": fallback} for item in ids],
+                             "Tidy", source="tidy")
+    return server._reshelve([(item, group["shelf"]) for item in ids], label="Tidy",
+                            expect={item: fallback for item in ids}, skip_by_hand=True)
+
+
+def shelves_text(payload):
+    def label(value):
+        return terminal_label(value)[:240]
+    if "groups" in payload:
+        moving = sum(group["count"] for group in payload["groups"])
+        lines = [f"Uncategorized: {payload['total']} saves. {moving} have a proposed shelf, "
+                 f"{payload['stays']} stay where they are."]
+        if payload.get("more"):
+            lines.append("There are more saves on Uncategorized; run tidy again after moving these.")
+        for group in payload["groups"]:
+            lines.append(f"\n{label(group['shelf'])} ({'new shelf, ' if group['new'] else ''}{group['count']})")
+            for item in group["items"][:5]:
+                lines.append(f"  {label(item.get('title') or item['video_id'])} [{label(item['video_id'])}]"
+                             f"\n    {label(item.get('reason') or '')}")
+            if group["count"] > 5:
+                lines.append(f"  and {group['count'] - 5} more")
+        if payload["groups"]:
+            lines.append(f'\nMove a group: uoink shelves apply "{label(payload["groups"][0]["shelf"])}"')
+        return "\n".join(lines)
+    if "moved" in payload:
+        text = f"Moved {payload['moved']} {'save' if payload['moved'] == 1 else 'saves'}."
+        if payload.get("skipped"):
+            text += f" Left {len(payload['skipped'])} as they were."
+        if payload.get("batch_id"):
+            text += f"\nUndo: uoink shelves undo {label(payload['batch_id'])}"
+        return text
+    text = f"Put back {payload['restored']} {'save' if payload['restored'] == 1 else 'saves'}."
+    if payload.get("skipped"):
+        text += f" {len(payload['skipped'])} moved again since, or are gone, so they stay."
+    return text
 
 
 def error_text(payload):
@@ -694,6 +875,9 @@ def human(payload, *, index=None):
         return backfill_text(payload)
     if payload.get("contract") == "uoink.cues.read":
         return cues_text(payload)
+    if ("groups" in payload and "stays" in payload) or "restored" in payload or (
+            "moved" in payload and "undo" in payload):
+        return shelves_text(payload)
     if "tools" in payload:
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
     if "data_dir" in payload:
@@ -926,6 +1110,7 @@ def main(argv=None):
         call_args = arguments(ns) if ns.command == "call" else None
         if ns.command == "research":
             research_action(ns)
+        shelves_check(ns)
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
@@ -933,6 +1118,8 @@ def main(argv=None):
                 payload = research_command(ns, server)
             elif ns.command == "cues":
                 payload = cues_command(ns, server)
+            elif ns.command == "shelves":
+                payload = shelves_command(ns, server)
             elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,
                            "data_dir": str(server.DATA_ROOT.resolve()),

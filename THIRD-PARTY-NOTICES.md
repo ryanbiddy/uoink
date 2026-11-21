@@ -252,6 +252,24 @@ the upstream JavaScript implementation. See the
   [model notice](third-party-notices/faster-whisper-base-NOTICE.md).
 
 
+## Bundled text-embedding model (not a Python package)
+
+- **Component:** potion-base-8M, a Model2Vec static embedding model by
+  MinishLab, distilled from baai/bge-base-en-v1.5:
+  https://huggingface.co/minishlab/potion-base-8M at pinned revision
+  `bf8b056651a2c21b8d2565580b8569da283cab23`. Installed read-only at
+  `models/embed-bundled/potion-base-8m/` (macOS: `Contents/Resources/models/embed-bundled/potion-base-8m/`).
+  Uoink reads it with its own code; the model2vec package is not shipped.
+- **License:** MIT. The model card declares `license: mit`; the Model2Vec
+  project's MIT License is Copyright (c) 2024 Thomas van Dongen.
+- **Files** (the build refuses any size or hash mismatch):
+  - `config.json`: 202 bytes, SHA-256 `2a6ac0e9aaa356a68a5688070db78fc3a464fefe85d2f06a1905ce3718687553`
+  - `model.safetensors`: 30,236,760 bytes, SHA-256 `f65d0f325faadc1e121c319e2faa41170d3fa07d8c89abd48ca5358d9a223de2`
+  - `tokenizer.json`: 683,666 bytes, SHA-256 `e67e803f624fb4d67dea1c730d06e1067e1b14d830e2c2202569e3ef0f70bb50`
+- Provenance and the full license text:
+  [model notice](third-party-notices/potion-base-8m-NOTICE.md).
+
+
 ## Bundled fonts (not Python packages)
 
 The dashboard and the Chrome extension ship their own copies of three

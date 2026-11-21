@@ -401,7 +401,8 @@ const SAVES_STAGE_CHUNK_MAX = 500;
 function savesPageSource(url) {
   if (SAVES_ORIGINS.watch_later.includes(url.origin) && /^\/playlist\/?$/.test(url.pathname)
       && url.searchParams.get("list") === "WL") return "watch_later";
-  if (SAVES_ORIGINS.x_bookmarks.includes(url.origin) && /^\/i\/bookmarks\/?$/.test(url.pathname)) {
+  // /i/bookmarks/<id> is one of the user's bookmark folders.
+  if (SAVES_ORIGINS.x_bookmarks.includes(url.origin) && /^\/i\/bookmarks(?:\/[0-9]{1,25})?\/?$/.test(url.pathname)) {
     return "x_bookmarks";
   }
   if (SAVES_ORIGINS.reddit_saved.includes(url.origin) && /^\/user\/[A-Za-z0-9_-]+\/saved\/?$/i.test(url.pathname)) {
@@ -426,19 +427,20 @@ function allowedSavesSender(sender, source) {
   }
 }
 
-async function stageSavesInChunks(source, items) {
+async function stageSavesInChunks(source, items, folder) {
   let staged;
   let url;
   for (let offset = 0; offset < items.length;) {
     const chunk = [];
     while (offset < items.length && chunk.length < SAVES_STAGE_CHUNK_MAX) {
       const candidate = [...chunk, items[offset]];
-      const body = { source, items: candidate, ...(url ? { append_to: url } : {}) };
+      const body = { source, items: candidate, ...(url ? { append_to: url } : {}), ...(folder ? { folder } : {}) };
       if (JSON.stringify(body).length >= SAVES_STAGE_BODY_MAX) break;
       chunk.push(items[offset++]);
     }
     // Each validated item is at most 300 characters, so one always fits.
-    staged = await STC.postStageSaves(source, chunk, url);
+    staged = await (folder ? STC.postStageSaves(source, chunk, url, folder)
+      : STC.postStageSaves(source, chunk, url));
     if (!staged || !staged.ok) return staged || { ok: false, error: "Uoink couldn't stage these saves." };
     if (typeof staged.url !== "string" || !SAVES_URL_RE.test(staged.url) || (url && staged.url !== url)) {
       return { ok: false, error: "Uoink returned an invalid saves list." };
@@ -465,14 +467,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (typeof msg.source !== "string" || !Object.hasOwn(SAVES_ORIGINS, msg.source)
         || !allowedSavesSender(sender, msg.source)
         || !Array.isArray(msg.items) || msg.items.length < 1 || msg.items.length > 5000
-        || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)) {
+        || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)
+        || (msg.folder !== undefined && (msg.source !== "x_bookmarks" || typeof msg.folder !== "string"
+          || !msg.folder.trim() || msg.folder.length > 64 || /[\u0000-\u001f\u007f]/.test(msg.folder)
+          || !/[\p{L}\p{N}]/u.test(msg.folder)))) {
       sendResponse({ ok: false, error: "Invalid saves request or page." });
       return;
     }
     (async () => {
       let staged;
       try {
-        staged = await stageSavesInChunks(msg.source, msg.items);
+        staged = await stageSavesInChunks(msg.source, msg.items, msg.folder);
         if (!staged || !staged.ok) {
           sendResponse(staged || { ok: false, error: "Uoink couldn't stage these saves." });
           return;

@@ -142,6 +142,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Uoink this page checks the tab before reading it and never reads browser, store, extension,
   file or PDF tabs, or a tab that moved to another page. Big or slow pages fall back to the
   link fetch.
+### Added
+
+- Library: Tidy Uncategorized. It looks at what sits on Uncategorized and suggests a shelf for
+  each save, with the reason, grouped by shelf. New shelves are named from the words the saves
+  share. Accept a whole group, pick single saves, or leave them. Nothing moves until you click,
+  and Undo puts every save back. Select in the Library list moves any saves to a shelf at once.
+- CLI: `uoink shelves tidy`, `uoink shelves apply SHELF`, `uoink shelves move SHELF ID...` and
+  `uoink shelves undo`, plus `uoink capture --shelf NAME`. The helper has matching routes under
+  `/library/shelves/` (tidy, apply, move, undo). No new MCP tools.
+- Short videos with little text go to a "Clips" shelf instead of Uncategorized.
+
+### Changed
+
+- New saves land on a better shelf. Uoink now weighs the post text, quote, author, transcript,
+  source and the saves already on your shelves, all on this computer. When the evidence is thin
+  the save stays on Uncategorized. A transcript that arrives later can move a save off
+  Uncategorized, and a shelf you picked is never changed.
+- Shelving also compares saves by meaning, with a small model that now ships with the app
+  (potion-base-8M, about 30 MB, MIT). It is a table of word vectors that runs on this computer
+  in milliseconds, with no network or GPU. When the optional EmbeddingGemma search is ready its
+  vectors are used instead. If neither is there, words, authors and neighbours still decide.
+- Imports keep your folders. X bookmark folders, YouTube playlists, CSV "folder" or "playlist"
+  columns and Takeout playlist files become shelves.
+- A shelf you set by hand now survives an index rebuild (it is written to the save's files too).
+  It also stays put when you capture the same page again, re-import it, a transcript arrives
+  later, or Tidy suggests a shelf from before you moved it. Moves from the CLI go through the
+  running helper, and a move that stops halfway is finished on the next start.
+- Undo for a shelf move survives a reload of the dashboard, and a big move that fails partway
+  keeps Undo for what moved.
+- Linux: `install.sh` also stages the shelf model (skipped with `--no-model`).
+- Notes and podcast episodes are shelved like everything else instead of always landing on
+  Uncategorized.
 
 ## [3.17.0] - 2026-11-12
 

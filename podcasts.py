@@ -1340,7 +1340,7 @@ def _link_episode_to_yoink(idx, episode_id: int, video_id: str) -> None:
 
 
 @uoink_usage.capture("podcast")
-def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
+def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier=None) -> dict:
     """Publish a completed episode transcript into the shared corpus.
 
     Identity and file paths are deterministic, so retrying repairs a partial
@@ -1415,10 +1415,24 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
     artwork_url = episode_artwork_url(idx, episode_id)
+    # A republish keeps the shelf the user (or an earlier pass) chose. A new
+    # episode is shelved from its transcript when the caller passes a router.
+    topic = (existing or {}).get("topic")
+    if not topic or str(topic).strip().lower() == "uncategorized":
+        topic = "Uncategorized"
+        if topic_classifier is not None:
+            try:
+                topic = topic_classifier({
+                    "title": episode_title, "channel": podcast_title, "description": "",
+                    "source_type": "podcast", "url": source_url,
+                    "transcript": " ".join(s["text"] for s in segments[:400]),
+                }) or "Uncategorized"
+            except Exception as exc:  # a shelf never blocks publication
+                log.warning("podcast shelf routing failed: %s", exc)
     record = {
         "video_id": video_id, "slug": folder.name,
         "channel": podcast_title, "author": podcast_title,
-        "title": episode_title, "topic": "Uncategorized",
+        "title": episode_title, "topic": topic,
         "hook_type": None, "yoinked_at": captured_at,
         "corpus_path": str(corpus_path), "sidecar_path": str(sidecar_path),
         "health_score_json": None,

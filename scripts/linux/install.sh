@@ -10,7 +10,8 @@ Install the headless Linux runtime from this checkout.
   --prefix DIR           App folder (default: $HOME/.local/lib/uoink)
   --bin-dir DIR          Command symlink folder (default: $HOME/.local/bin)
   --python PATH          Python >= 3.11 used for the venv (default: python3)
-  --no-model             Skip the pinned Whisper base model (~145 MB)
+  --no-model             Skip the pinned Whisper base model (~145 MB) and the
+                         shelf embedding model (~30 MB)
   --with-whisperx        Add podcast diarization with CPU torch and WhisperX
   --skip-ffmpeg-check    Allow image builds to install ffmpeg later
   -h, --help             Show this help
@@ -186,10 +187,43 @@ PY
     model_status='staged (pinned base model, SHA-256 verified)'
 fi
 
+# The shelf router's meaning model (minishlab/potion-base-8M), staged the
+# same way from scripts/embed_model_pin.json. Without it shelves still work
+# from words alone.
+embed_status='skipped (--no-model; existing models kept)'
+if [ "$no_model" -eq 0 ]; then
+    embed_cache=${XDG_CACHE_HOME:-$HOME/.cache}/uoink/embed-model
+    embed_dest=$prefix/models/embed-bundled
+    [ ! -L "$embed_dest" ] || fail 'The bundled embedding model folder must not be a symlink.'
+    if [ -e "$embed_dest" ]; then
+        embed_dest=$install_tmp/embed-bundled
+    fi
+    "$venv_python" "$repo/scripts/stage_embed_model.py" \
+        --cache "$embed_cache" --dest "$embed_dest"
+    if [ "$embed_dest" != "$prefix/models/embed-bundled" ]; then
+        "$venv_python" - "$embed_dest" "$prefix/models/embed-bundled" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+source, target = map(Path, sys.argv[1:])
+for path in (target, *target.rglob("*")):
+    if path.is_symlink():
+        raise SystemExit(f"Linked model path: {path}")
+if target.exists() and not target.is_dir():
+    raise SystemExit(f"Bundled model path is not a directory: {target}")
+# Replace, not merge: a new pin must not leave files from the old revision.
+shutil.rmtree(target)
+shutil.move(str(source), str(target))
+PY
+    fi
+    embed_status='staged (pinned potion-base-8M, SHA-256 verified)'
+fi
+
 chmod +x "$prefix/uoink" "$prefix/cli/uoink"
 ln -sf -- "$prefix/uoink" "$bin_dir/uoink"
-printf '\nApp folder: %s\nData folder: %s\nWhisper model: %s\n' \
-    "$prefix" "${XDG_DATA_HOME:-$HOME/.local/share}/Uoink" "$model_status"
+printf '\nApp folder: %s\nData folder: %s\nWhisper model: %s\nShelf model: %s\n' \
+    "$prefix" "${XDG_DATA_HOME:-$HOME/.local/share}/Uoink" "$model_status" "$embed_status"
 printf 'Next: uoink status\n      uoink connect claude-code\n'
 case :${PATH:-}: in
     *:"$bin_dir":*) ;;

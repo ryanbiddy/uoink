@@ -141,7 +141,9 @@ def _load_manual_dispatch(ns):
     handler = next(node for node in parsed.body if getattr(node, 'name', None) == 'Handler')
     nodes.append(next(node for node in handler.body if getattr(node, 'name', None) == '_handle_extract'))
     assert len(nodes) == len(names) + len(constants) + 1
-    ns.update(contextlib=contextlib, re=re, uuid=uuid)
+    ns.update(contextlib=contextlib, re=re, uuid=uuid,
+              # 3.18: /extract reads an optional shelf; these requests name none.
+              _shelf_from_body=lambda body, **k: (None, None))
     # Keep server_parts' dormant Thread while using real in-memory capture state.
     ns['threading'].Lock = threading.Lock
     ns['threading'].local = threading.local

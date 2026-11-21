@@ -859,6 +859,44 @@ class LocalSearch:
             raise errors[0]
         return result[0]
 
+    def source_vectors(self, source_ids=None):
+        """Mean stored passage vector per saved source, for shelf routing.
+        Uses only the published snapshot and never runs the model. Empty when
+        the snapshot is not ready."""
+        try:
+            _, rows, matrix, np = self.store.cached()
+        except SearchUnavailable:
+            return {}
+        wanted = None if source_ids is None else set(source_ids)
+        groups = {}
+        for position, row in enumerate(rows):
+            if wanted is None or row[0] in wanted:
+                groups.setdefault(row[0], []).append(position)
+        out = {}
+        for identity, positions in groups.items():
+            if np is not None:
+                values = matrix[positions].mean(axis=0).tolist()
+            else:
+                values = [math.fsum(column) / len(positions) for column in zip(*(matrix[i] for i in positions))]
+            try:
+                out[identity] = _unit_vector(values)
+            except ValueError:
+                continue
+        return out
+
+    def document_vector(self, title, text):
+        """Embed one new save the way the indexer embeds a passage, without
+        waiting: raises SearchUnavailable when the model is busy or off."""
+        if self._model is None:
+            raise SearchUnavailable("Start local search before routing by meaning")
+        if not self._activity.acquire(blocking=False):
+            raise SearchUnavailable("The search model is busy")
+        try:
+            words = str(text or "").split()[:230]
+            return self._model.embed([f"title: {title or 'none'} | text: {' '.join(words)}"], wait=False)[0]
+        finally:
+            self._activity.release()
+
     def embedding_search(self, query, limit=100, filters=None, *, source_id=None,
                          source_types=None, clips_only=False):
         if not isinstance(query, str):
