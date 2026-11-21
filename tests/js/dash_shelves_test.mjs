@@ -37,10 +37,11 @@ function check(cond, msg, got) {
   console.error(`FAIL: ${msg}${got === undefined ? "" : ` -- got ${JSON.stringify(got)}`}`);
 }
 
-const ctx = vm.createContext({ Number, Math, Array, String, Set, JSON });
+const ctx = vm.createContext({ Number, Math, Array, String, Set, JSON, TextEncoder });
 vm.runInContext([
-  constant("TIDY_PREVIEW_ITEMS"), constant("SHELF_MOVE_CHUNK"),
-  grab("htmlEscape"), grab("uncategorizedCountFrom"), grab("shelfMoveChunks"), grab("savesWord"),
+  constant("TIDY_PREVIEW_ITEMS"), constant("SHELF_MOVE_BYTES"),
+  grab("htmlEscape"), grab("isFallbackShelf"), grab("uncategorizedCountFrom"), grab("shelfMoveChunks"),
+  grab("savesWord"), grab("shelfUndoFromSummary"), grab("shelfMoveText"), `async ${grab("moveToShelves")}`,
   grab("tidyIntroText"), grab("tidyStaysText"), grab("tidyGroupsHtml"),
 ].join("\n"), ctx);
 
@@ -49,12 +50,49 @@ check(ctx.uncategorizedCountFrom({ topic: [{ value: "AI", count: 4 }, { value: "
 check(ctx.uncategorizedCountFrom(null) === 0 && ctx.uncategorizedCountFrom({ topic: [] }) === 0,
   "no facets means nothing to tidy");
 
-const moves = Array.from({ length: 2500 }, (_, i) => ({ video_id: `v${i}`, shelf: "Cooking" }));
+// Real ids and the longest shelf name, in a script that takes three bytes a
+// character: every part, with the rest of the body, still fits under 64 KB.
+const wide = "\u98df".repeat(64);
+const moves = Array.from({ length: 2500 }, (_, i) => ({
+  video_id: `reddit_${(i * 7919).toString(16).padStart(11, "0")}`, shelf: wide, from: "Uncategorized" }));
 const chunks = ctx.shelfMoveChunks(moves);
-check(chunks.length === 3 && chunks[0].length === 1000 && chunks[2].length === 500,
-  "a big move is sent in parts of 1,000", chunks.map((c) => c.length));
-check(JSON.stringify({ moves: chunks[0], label: "Tidy", append_to: "mv_0123456789ab" }).length < 64 * 1024,
-  "each part fits under the helper's 64 KB body cap");
+const bodyBytes = (part) => new TextEncoder().encode(JSON.stringify({
+  moves: part, label: "Tidy", source: "tidy", append_to: "mv_0123456789ab" })).length;
+check(chunks.length > 3 && chunks.every((part) => bodyBytes(part) < 64 * 1024),
+  "each part fits under the helper's 64 KB body cap, measured in bytes", chunks.map(bodyBytes));
+check(chunks.reduce((n, part) => n + part.length, 0) === 2500 && chunks[0][0] === moves[0],
+  "every move is sent once, in order");
+check(ctx.shelfMoveChunks([{ video_id: "v1", shelf: "Cooking" }]).length === 1, "a small move is one part");
+
+// A later part that fails leaves the earlier parts moved, with their undo.
+const sent = [];
+ctx.authFetch = async (path, init) => {
+  const body = JSON.parse(init.body);
+  sent.push(body);
+  if (sent.length === 2) throw new Error("Request body too large.");
+  return { batch_id: "mv_aaaaaaaaaaaa", moves: body.moves.map((m) => ({ video_id: m.video_id })), skipped: [] };
+};
+const partial = await ctx.moveToShelves(moves, "Tidy", { source: "tidy" });
+check(partial.batchId === "mv_aaaaaaaaaaaa" && partial.movedIds.length === chunks[0].length
+    && partial.failed === 2500 - chunks[0].length,
+  "a failed part keeps what moved and counts what did not", { moved: partial.movedIds.length, failed: partial.failed });
+check(sent[0].source === "tidy" && !sent[0].append_to && sent[1].append_to === "mv_aaaaaaaaaaaa",
+  "later parts join the first part's undo");
+check(/did not move\. Request body too large\. Try again for the rest\./.test(ctx.shelfMoveText(partial, "Bread")),
+  "the toast says how many did not move", ctx.shelfMoveText(partial, "Bread"));
+ctx.authFetch = async () => { throw new Error("offline"); };
+let threw = false;
+try { await ctx.moveToShelves(moves.slice(0, 3), "Move"); } catch (err) { threw = true; }
+check(threw, "a move that never started still reports the error");
+
+check(ctx.shelfUndoFromSummary({ id: "mv_1", count: 3, shelves: ["Bread"], undone: false }).text === "Moved 3 saves to Bread.",
+  "Undo after a reload reads the helper's last move");
+check(ctx.shelfUndoFromSummary({ id: "mv_1", count: 3, shelves: ["A", "B"] }).text === "Moved 3 saves to 2 shelves.",
+  "a move to several shelves says how many");
+check(ctx.shelfUndoFromSummary({ id: "mv_1", count: 3, undone: true }) === null && ctx.shelfUndoFromSummary(null) === null,
+  "nothing to undo shows no Undo");
+check(ctx.uncategorizedCountFrom({ topic: [{ value: "Inbox", count: 5 }, { value: "Uncategorized", count: 2 }] }, "Inbox") === 5,
+  "Tidy follows a fallback shelf renamed in topics.json");
 
 check(ctx.tidyIntroText({ total: 0, groups: [] }) === "Nothing is on Uncategorized. Every save has a shelf.",
   "the empty state says every save has a shelf");
@@ -80,6 +118,14 @@ check(html.includes("Move all 9") && html.includes("Show all 9"), "a big group o
 check((html.match(/data-tidy-move-item="1:/g) || []).length === 5, "a closed group previews five saves");
 check(html.includes(`data-tidy-name="1"`) && html.includes("New shelf"), "a new shelf can be renamed before moving");
 check(html.includes(`<strong title="Cooking">Cooking</strong>`), "an existing shelf name carries its full name as a tooltip");
+data.groups[1].draft = "Tomatoes <b>";
+data.groups[1].key = "1:tomatoes";
+const drafted = ctx.tidyGroupsHtml(data, new Set());
+check(drafted.includes('value="Tomatoes &lt;b&gt;"'), "a name typed before re-render stays, escaped");
+check((ctx.tidyGroupsHtml(data, new Set(["1:tomatoes"])).match(/data-tidy-move-item="1:/g) || []).length === 9,
+  "an open group stays open by its key, whatever its name becomes");
+delete data.groups[1].key;
+delete data.groups[1].draft;
 const openHtml = ctx.tidyGroupsHtml(data, new Set([long]));
 check((openHtml.match(/data-tidy-move-item="1:/g) || []).length === 9 && openHtml.includes("Show fewer"),
   "an open group lists every save");

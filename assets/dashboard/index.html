@@ -7310,6 +7310,7 @@
       // 3.18 shelves: Select mode picks, the last move's undo, Tidy's proposals.
       shelfSelect: { on: false, ids: new Set() },
       shelfUndo: null,
+      shelfFallback: "Uncategorized",
       tidy: null,
       filters: {
         q: "",
@@ -15644,6 +15645,7 @@
       updateVideoFacetVisibility();
       renderTopicOverview();
       syncShelfNames();
+      loadShelfUndo();
     }
 
     // Phase 2 (source-first browse): the video-only facets (hook, format,
@@ -15733,19 +15735,56 @@
     // move through /library/shelves/apply and every move can be undone.
     const TIDY_PREVIEW_ITEMS = 5;
     // The helper caps a request body at 64 KB, so a big move goes in parts
-    // that join one undo.
-    const SHELF_MOVE_CHUNK = 1000;
+    // (measured in UTF-8 bytes, with room for the rest of the body) that
+    // join one undo.
+    const SHELF_MOVE_BYTES = 56 * 1024;
 
-    function uncategorizedCountFrom(facets) {
+    function isFallbackShelf(value, fallback) {
+      return String(value || "").trim().toLowerCase() === String(fallback || "Uncategorized").trim().toLowerCase();
+    }
+
+    function uncategorizedCountFrom(facets, fallback = "Uncategorized") {
       const topics = facets && Array.isArray(facets.topic) ? facets.topic : [];
-      const row = topics.find((t) => String(t.value || "").trim().toLowerCase() === "uncategorized");
+      const row = topics.find((t) => isFallbackShelf(t.value, fallback));
       return row ? Number(row.count) || 0 : 0;
     }
 
-    function shelfMoveChunks(moves, size = SHELF_MOVE_CHUNK) {
+    function shelfMoveChunks(moves, limit = SHELF_MOVE_BYTES) {
+      const encoder = new TextEncoder();
       const out = [];
-      for (let i = 0; i < moves.length; i += size) out.push(moves.slice(i, i + size));
+      let part = [];
+      let size = 0;
+      for (const move of moves) {
+        const bytes = encoder.encode(JSON.stringify(move)).length + 1;
+        if (part.length && size + bytes > limit) {
+          out.push(part);
+          part = [];
+          size = 0;
+        }
+        part.push(move);
+        size += bytes;
+      }
+      if (part.length) out.push(part);
       return out;
+    }
+
+    // The newest move the helper can still undo, as the shelf bar shows it.
+    function shelfUndoFromSummary(summary) {
+      if (!summary || !summary.id || summary.undone || !(Number(summary.count) > 0)) return null;
+      const shelves = Array.isArray(summary.shelves) ? summary.shelves : [];
+      const where = shelves.length === 1 ? shelves[0] : `${shelves.length} shelves`;
+      return { batchId: summary.id, text: `Moved ${savesWord(Number(summary.count))} to ${where}.` };
+    }
+
+    function shelfMoveText(result, shelf) {
+      const n = result.movedIds.length;
+      let text = n ? `Moved ${savesWord(n)} to ${shelf}.` : "Nothing moved. Those saves were already there.";
+      if (result.skipped && n) text += ` Left ${result.skipped} as they were.`;
+      if (result.failed) {
+        text = `${n ? `Moved ${savesWord(n)} to ${shelf}. ` : ""}${savesWord(result.failed)} did not move. `
+          + `${result.error ? `${result.error} ` : ""}Try again for the rest.`;
+      }
+      return text;
     }
 
     function savesWord(n) {
@@ -15778,10 +15817,10 @@
       return ((data && data.groups) || []).map((group, gi) => {
         const items = group.items || [];
         const shelf = String(group.shelf || "");
-        const open = !!(expanded && expanded.has(shelf));
+        const open = !!(expanded && expanded.has(String(group.key || shelf)));
         const shown = open ? items : items.slice(0, TIDY_PREVIEW_ITEMS);
         const name = group.new
-          ? `<input class="control tidy-name" type="text" value="${htmlEscape(shelf)}" maxlength="64" data-tidy-name="${gi}" aria-label="Name for the new shelf"><span class="tidy-new">New shelf</span>`
+          ? `<input class="control tidy-name" type="text" value="${htmlEscape(group.draft ?? shelf)}" maxlength="64" data-tidy-name="${gi}" aria-label="Name for the new shelf"><span class="tidy-new">New shelf</span>`
           : `<strong title="${htmlEscape(shelf)}">${htmlEscape(shelf)}</strong>`;
         const rows = shown.map((item, ii) => {
           const title = htmlEscape(item.title || item.video_id || "Untitled");
@@ -15803,33 +15842,64 @@
       if (!els.shelfNames) return;
       const topics = state.facets && Array.isArray(state.facets.topic) ? state.facets.topic : [];
       els.shelfNames.innerHTML = topics
-        .filter((t) => String(t.value || "").trim().toLowerCase() !== "uncategorized")
+        .filter((t) => !isFallbackShelf(t.value, state.shelfFallback))
         .map((t) => `<option value="${htmlEscape(String(t.value || ""))}"></option>`).join("");
-      if (els.libraryTidyEntry) els.libraryTidyEntry.classList.toggle("hidden", !uncategorizedCountFrom(state.facets));
+      if (els.libraryTidyEntry) {
+        els.libraryTidyEntry.classList.toggle("hidden", !uncategorizedCountFrom(state.facets, state.shelfFallback));
+      }
     }
 
-    async function moveToShelves(moves, label) {
+    // Undo comes from the helper's move log, so it survives a reload. A bar
+    // the user closed stays closed for that move.
+    async function loadShelfUndo() {
+      let data;
+      try {
+        data = await authFetch("/library/shelves/undo");
+      } catch (err) {
+        return;
+      }
+      if (data && typeof data.fallback === "string" && data.fallback.trim()) state.shelfFallback = data.fallback;
+      const undo = shelfUndoFromSummary(data && data.undo);
+      let closed = "";
+      try { closed = localStorage.getItem("uoink.shelfUndoClosed") || ""; } catch (err) { closed = ""; }
+      state.shelfUndo = undo && undo.batchId !== closed ? undo : null;
+      syncShelfNames();
+      renderShelfBar();
+    }
+
+    // Moves go in parts. If a later part fails, the parts before it stay
+    // moved and can still be undone; the result says how many did not move.
+    async function moveToShelves(moves, label, extra = {}) {
       let batchId = null;
       const movedIds = [];
       let skipped = 0;
-      for (const chunk of shelfMoveChunks(moves)) {
-        const res = await authFetch("/library/shelves/apply", {
-          method: "POST",
-          body: JSON.stringify({ moves: chunk, label, ...(batchId ? { append_to: batchId } : {}) }),
-        });
+      let failed = 0;
+      let error = "";
+      const parts = shelfMoveChunks(moves);
+      for (let i = 0; i < parts.length; i++) {
+        let res;
+        try {
+          res = await authFetch("/library/shelves/apply", {
+            method: "POST",
+            body: JSON.stringify({ moves: parts[i], label, ...extra, ...(batchId ? { append_to: batchId } : {}) }),
+          });
+        } catch (err) {
+          if (!i) throw err;
+          failed = parts.slice(i).reduce((n, part) => n + part.length, 0);
+          error = String((err && err.message) || "");
+          break;
+        }
         batchId = res.batch_id || batchId;
         (res.moves || []).forEach((m) => movedIds.push(m.video_id));
         skipped += (res.skipped || []).length;
       }
-      return { batchId, movedIds, skipped };
+      return { batchId, movedIds, skipped, failed, error };
     }
 
     function afterShelfMove(result, shelf) {
-      const n = result.movedIds.length;
-      let text = n ? `Moved ${savesWord(n)} to ${shelf}.` : "Nothing moved. Those saves were already there.";
-      if (result.skipped && n) text += ` Left ${result.skipped} as they were.`;
+      const text = shelfMoveText(result, shelf);
       state.shelfUndo = result.batchId ? { batchId: result.batchId, text } : null;
-      if (!state.shelfUndo) showToast(text);
+      if (!state.shelfUndo || result.failed) showToast(text);
       renderShelfBar();
       loadLibraryFacets();
       loadLibrary({ reset: true });
@@ -15870,6 +15940,12 @@
         els.tidyIntro.textContent = `Couldn't read your library just now. ${err.message || ""}`.trim();
         return;
       }
+      // A stable key per group, so renaming or moving one save never
+      // collapses an open group.
+      (state.tidy.data.groups || []).forEach((group, gi) => { group.key = `${gi}:${group.shelf}`; });
+      if (state.tidy.data.fallback) state.shelfFallback = state.tidy.data.fallback;
+      if (!state.shelfUndo) state.shelfUndo = shelfUndoFromSummary(state.tidy.data.undo);
+      renderShelfBar();
       renderTidy();
     }
 
@@ -15890,7 +15966,7 @@
       const group = tidy && tidy.data && tidy.data.groups[gi];
       if (!group || tidy.busy) return;
       const input = els.tidyGroups.querySelector(`[data-tidy-name="${gi}"]`);
-      const shelf = input ? input.value.replace(/\s+/g, " ").trim() : group.shelf;
+      const shelf = String(input ? input.value : (group.draft ?? group.shelf)).replace(/\s+/g, " ").trim();
       if (!shelf) {
         showToast("Give the new shelf a name first.");
         if (input) input.focus();
@@ -15900,11 +15976,16 @@
       tidy.busy = true;
       els.tidyGroups.setAttribute("aria-busy", "true");
       try {
-        const result = await moveToShelves(items.map((item) => ({ video_id: item.video_id, shelf })), "Tidy");
+        const fallback = tidy.data.fallback || state.shelfFallback;
+        const result = await moveToShelves(items.map((item) => ({ video_id: item.video_id, shelf, from: fallback })),
+          "Tidy", { source: "tidy" });
         const moved = new Set(result.movedIds);
         group.items = group.items.filter((item) => !moved.has(item.video_id));
         group.count = group.items.length;
-        if (group.new && moved.size) group.new = false;
+        if (group.new && moved.size) {
+          group.new = false;
+          delete group.draft;
+        }
         group.shelf = shelf;
         tidy.data.groups = tidy.data.groups.filter((g) => g.items.length);
         tidy.data.total = Math.max(0, (Number(tidy.data.total) || 0) - moved.size);
@@ -21234,8 +21315,9 @@
         if (more && state.tidy && state.tidy.data) {
           const group = state.tidy.data.groups[Number(more.dataset.tidyMore)];
           if (!group) return;
-          if (state.tidy.expanded.has(group.shelf)) state.tidy.expanded.delete(group.shelf);
-          else state.tidy.expanded.add(group.shelf);
+          const key = String(group.key || group.shelf);
+          if (state.tidy.expanded.has(key)) state.tidy.expanded.delete(key);
+          else state.tidy.expanded.add(key);
           renderTidy();
           return;
         }
@@ -21250,6 +21332,11 @@
           tidyMove(gi, ii);
         }
       });
+      els.tidyPanel.addEventListener("input", (event) => {
+        const input = event.target.closest("[data-tidy-name]");
+        const group = input && state.tidy && state.tidy.data && state.tidy.data.groups[Number(input.dataset.tidyName)];
+        if (group) group.draft = input.value;
+      });
       els.librarySelectToggle.addEventListener("click", () => setSelectMode(!state.shelfSelect.on));
       els.shelfBarApply.addEventListener("click", moveSelectedSaves);
       els.shelfBarName.addEventListener("keydown", (event) => {
@@ -21259,6 +21346,9 @@
       });
       els.shelfBarUndo.addEventListener("click", undoShelfMove);
       els.shelfBarClose.addEventListener("click", () => {
+        if (state.shelfUndo) {
+          try { localStorage.setItem("uoink.shelfUndoClosed", state.shelfUndo.batchId); } catch (err) { /* private window */ }
+        }
         state.shelfUndo = null;
         setSelectMode(false);
       });
