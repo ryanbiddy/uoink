@@ -6,6 +6,7 @@ same tests check that everything still works when the weights are absent.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 
 import pytest
@@ -51,15 +52,15 @@ def make_model(folder):
 def pin(monkeypatch, folder):
     """Pin the made-up model's own hashes, as the build pins the real ones."""
     monkeypatch.setattr(local_embed, "PINNED_SHA256", {
-        name: local_embed._sha256(folder / name)
-        for name in (local_embed.WEIGHTS_FILE, local_embed.TOKENIZER_FILE)})
+        name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
+        for name in ("model.safetensors", "tokenizer.json")}, raising=False)
 
 
 @pytest.fixture(autouse=True)
 def _fresh(monkeypatch, tmp_path):
     monkeypatch.setenv(local_embed.ENV_DIR, str(tmp_path / "no-model"))
-    monkeypatch.setattr(local_embed, "_failed", {})
-    monkeypatch.setattr(local_embed, "_verified", set())
+    monkeypatch.setattr(local_embed, "_failed", {}, raising=False)
+    monkeypatch.setattr(local_embed, "_verified", set(), raising=False)
     local_embed.release()
     yield
     local_embed.release()

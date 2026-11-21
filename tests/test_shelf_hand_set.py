@@ -378,9 +378,9 @@ def test_x_article_refuses_a_bad_shelf_name_like_the_other_routes(helper):
     sent = []
     fake = SimpleNamespace(_send_json=lambda status, payload: sent.append((status, payload)))
     server.Handler._handle_extract_x_article(fake, {
-        "url": "https://x.com/someone/article/1", "title": "t", "markdown": "m", "shelf": "CON"})
+        "url": "https://x.com/someone/article/1790000000000000001", "title": "t", "markdown": "m", "shelf": "CON"})
     assert sent and sent[0][0] == 400 and not sent[0][1]["ok"]
-    assert shelf_router.hint_for(server.DATA_ROOT, "https://x.com/someone/article/1") is None
+    assert shelf_router.hint_for(server.DATA_ROOT, "https://x.com/someone/article/1790000000000000001") is None
 
 
 def test_capture_shelf_moves_a_save_already_on_a_hand_shelf(helper):
