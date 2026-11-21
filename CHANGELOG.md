@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Long transcriptions keep running while they report progress, including while a model downloads. Transcription also works when Windows restricts how Uoink can manage its worker process.
 - You can save or re-transcribe a video while a podcast is transcribing. Both keep their progress. Cancelling a transcription also stops any audio decoder it started. If transcription stalls, the next capture can still run.
 - Transcribing a saved video again updates search immediately. If the new transcript is much shorter, you can restore the previous one from the saved item. An empty result or a few sampled sections leave a full transcript in place.
 - Speaker labels work with the bundled WhisperX version. English-only models now check for speech across the recording, so an intro or outro with music can be skipped.

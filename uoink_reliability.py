@@ -220,7 +220,8 @@ def ensure_model(model_name: str = DEFAULT_MODEL,
     else:
         root = Path(model_root)
     model = asr_models.get(model_name)["id"]
-    asr_models.download(model, root, cancel_event=cancel_event)
+    asr_models.download(model, root, cancel_event=cancel_event,
+                        progress=asr_worker.report_download_bytes)
     return {"ok": True, "model": model, "model_root": str(model_root) if model_root else None,
             "ready_marker": str(root / (model + ".pt")) if model_root else None}
 
@@ -607,6 +608,7 @@ def build_initial_prompt(*titles) -> str | None:
 def _watched_segments(segments, cancel_event=None, progress=None, total=None):
     """Yield segments; stop between them on cancel and report how far along."""
     if progress is not None and total:
+        asr_worker.report_phase("decode", duration_seconds=total)
         progress(0, total)
     for segment in segments:
         if cancel_event is not None and cancel_event.is_set():

@@ -15,6 +15,7 @@ import os
 import subprocess
 import sys
 import textwrap
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -498,13 +499,66 @@ def test_foreground_timeout_preserves_paused_background_job(harness_result):
     assert "progress" in out["isolated_timeout"] and out["surviving_steps"] == 5
 
 
-def test_watchdog_allows_long_silences_with_a_finite_ceiling():
-    limit = asr_worker._inactivity_seconds
-    assert limit("decode", 10800) == limit("decode", None) == 600
-    assert limit("alignment", 7200) == 15000
-    assert limit("diarization", 86400) == 21600
-    assert limit("language check", 7200) == limit("model load", 7200) == 1320
-    assert limit("ffmpeg", 7200) == 4200
+class TimedReplies:
+    """Advance a fake monotonic clock through scheduled child messages."""
+
+    def __init__(self, monkeypatch, schedule):
+        self.now = 0
+        self.events = iter(schedule)
+        self.next_event = next(self.events, None)
+        monkeypatch.setattr(asr_worker, "time", SimpleNamespace(monotonic=lambda: self.now))
+        monkeypatch.setattr(asr_worker, "_config", {"closing": False})
+
+    def get(self, timeout):
+        # Simulate polling once per minute to cover hours without wall-clock sleeps.
+        wake = self.now + (60 if timeout else 0)
+        if self.next_event and self.next_event[0] <= wake:
+            self.now, message = self.next_event
+            self.next_event = next(self.events, None)
+            return {"id": "job", **message}
+        self.now = wake
+        raise asr_worker.queue.Empty
+
+
+def test_segments_every_twenty_minutes_for_twelve_hours(monkeypatch):
+    schedule = [(n * 1200, {"type": "segment", "segment": n}) for n in range(1, 37)]
+    replies = TimedReplies(monkeypatch, [*schedule, (12 * 3600, {"type": "result"})])
+    monkeypatch.setattr(asr_worker, "_send", lambda *_: None)
+    segments = []
+    child = SimpleNamespace(messages=replies, proc=object())
+    assert asr_worker._await(child, "job", 300, None, None, segments.append)["type"] == "result"
+    assert segments == list(range(1, 37))
+
+
+@pytest.mark.parametrize(("duration", "reported", "limit"), [
+    (60, None, 1800), (None, None, 86400), (None, 10800, 43200), (60, 86400, 345600),
+])
+def test_silent_child_times_out_at_audio_limit(monkeypatch, duration, reported, limit):
+    replies = TimedReplies(monkeypatch, [(120, {"type": "phase", "name": "batch transcription",
+                                               "duration_seconds": reported})])
+    with pytest.raises(asr_worker.WorkerCrashed, match="batch transcription"):
+        asr_worker._await(SimpleNamespace(messages=replies), "job", duration, None, None, None)
+    assert replies.now == 120 + limit
+
+
+@pytest.mark.parametrize("podcast", [True, False])
+def test_download_bytes_keep_job_alive_for_an_hour(monkeypatch, tmp_path, podcast):
+    schedule = []
+    def phase(name, **fields):
+        schedule.append((fields["downloaded_bytes"] * 1200, {"type": "phase", "name": name, **fields}))
+    monkeypatch.setattr(asr_worker, "_phase_callback", phase)
+    def download(*args, progress=None, **kwargs):
+        for done in (1, 2, 3):
+            if progress:
+                progress(done, 3)
+    monkeypatch.setattr(whisper_runner.asr_models, "download", download)
+    if podcast:
+        whisper_runner._download_model_snapshot("tiny", tmp_path)
+    else:
+        rel.ensure_model("tiny", tmp_path)
+    replies = TimedReplies(monkeypatch, [*schedule, (3600, {"type": "result"})])
+    assert asr_worker._await(SimpleNamespace(messages=replies), "job", 60, None,
+                             lambda *_: pytest.fail("bytes sent as audio progress"), None)["type"] == "result"
 
 
 def test_capture_and_podcast_share_the_same_cached_snapshot(monkeypatch, tmp_path):
@@ -572,19 +626,29 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled, 
             assert check and capture_output and timeout == (None if offloaded else 600)
             if offloaded and os.name == "nt":
                 assert kwargs["creationflags"] == subprocess.CREATE_NO_WINDOW
-            return types.SimpleNamespace(stdout=struct.pack("<ff", 0.25, -0.5))
+            import weakref
+            nonlocal decoded_ref
+            decoded = subprocess.CompletedProcess(command, 0, stdout=struct.pack("<ff", 0.25, -0.5))
+            decoded_ref = weakref.ref(decoded)
+            return decoded
         monkeypatch.setattr(subprocess, "run", decode)
     monkeypatch.setattr(_platform, "alignment_capability", lambda: {"available": True})
     monkeypatch.setattr(_platform, "require_media", lambda: None)
     monkeypatch.setattr(whisper_runner, "_bundled_snapshot", lambda _: tmp_path)
     stages, phases = [], []
-    monkeypatch.setattr(asr_worker, "_phase_callback", phases.append)
+    decoded_ref = None
+    def phase(name, **details):
+        phases.append(name)
+        if name == "batch transcription" and decoded_audio:
+            assert details["duration_seconds"] == 2 / 16000
+    monkeypatch.setattr(asr_worker, "_phase_callback", phase)
 
     class Model:
         def transcribe(self, audio, batch_size=None, num_workers=0, language=None, task=None,
                        chunk_size=30, print_progress=False, combined_progress=False,
                        verbose=False, progress_callback=None):
             if decoded_audio:
+                assert decoded_ref() is None
                 assert audio.tolist() == [0.25, -0.5]
             else:
                 assert audio == str(tmp_path / "clip.wav")
@@ -644,8 +708,7 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled, 
     assert stages == ["load", "transcribe"] + (
         ["load_align", "align", "load_diarizer", "diarize", "assign"] if diarize else [])
     assert seen == ([(50, 100)] if supports_callback else [])
-    decode_phase = "decode" if supports_callback else "batch transcription"
-    assert phases == ["model load"] + (["ffmpeg"] if decoded_audio else []) + [decode_phase] + (
+    assert phases == ["model load"] + (["ffmpeg"] if decoded_audio else []) + ["batch transcription"] + (
         ["alignment", "diarization"] if diarize else [])
     if diarize:
         assert result["segments"][0]["speaker"] == "speaker"
@@ -761,6 +824,82 @@ w._child_main([])
         asr_worker.disable_offload()
 
 
+def test_idle_watcher_ends_promptly_on_shutdown(fake_engine):
+    import threading
+    args, _ = fake_engine
+    before = set(threading.enumerate())
+    asr_worker.call("warm", args)
+    watcher, = [t for t in threading.enumerate() if t.name == "asr-idle" and t not in before]
+    asr_worker.shutdown()
+    watcher.join(1)
+    assert not watcher.is_alive()
+
+
+def test_stdin_watcher_starts_before_isolation(monkeypatch, tmp_path):
+    script = """import threading
+import asr_worker as w, uoink_install_isolation as isolation
+def check(argv):
+    assert any(t.name == 'uoink-asr-input' and t.is_alive() for t in threading.enumerate())
+isolation.apply_from_process = check
+w._child_main([])
+"""
+    monkeypatch.setattr(asr_worker, "_python_command", lambda: [sys.executable, "-B", "-c", script])
+    asr_worker.enable_offload(log_dir=tmp_path)
+    try:
+        assert asr_worker.call("ping", {})["pid"]
+    finally:
+        asr_worker.disable_offload()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows Job Object fallback")
+@pytest.mark.parametrize("failure", ["create", "assign"])
+def test_failed_job_object_still_transcribes_and_reaps_tree(fake_engine, tmp_path, monkeypatch, caplog, failure):
+    import library_mirror as mirror
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    args, _ = fake_engine
+    if failure == "create":
+        monkeypatch.setattr(mirror, "_win_create_kill_job", lambda: None)
+    else:
+        monkeypatch.setattr(mirror, "_win_assign_job", lambda *_: False)
+    audio = tmp_path / "clip.wav"
+    audio.touch()
+    entries = rel.transcribe_media(audio)
+    child = asr_worker._slots["foreground"].child
+    assert entries[0][2] == str(child.proc.pid)
+    assert child.win_job is None
+    assert sum("Job Object" in record.message for record in caplog.records) == 1
+    event = threading.Event()
+    with ThreadPoolExecutor(1) as pool:
+        pending = pool.submit(asr_worker.call, "silent", args, cancel_event=event)
+        pids = _wait_pids(tmp_path / "pids")
+        event.set()
+        with pytest.raises(asr_worker.TranscriptionCancelled):
+            pending.result(timeout=6)
+    _assert_dead(pids)
+    assert child.lease.handle.closed
+    assert asr_worker._slots["foreground"].child is None
+
+
+def test_retire_terminates_job_before_close_and_bounds_every_wait(monkeypatch):
+    import library_mirror as mirror
+    from unittest.mock import Mock
+    calls = []
+    proc = Mock()
+    proc.wait.side_effect = [subprocess.TimeoutExpired("worker", 2), 1]
+    child = SimpleNamespace(proc=proc, win_job=123, closed=Mock(), lease=Mock())
+    slot = asr_worker._Slot("foreground")
+    slot.child = child
+    monkeypatch.setattr(asr_worker, "os", SimpleNamespace(name="nt"))
+    monkeypatch.setattr(mirror, "_win_terminate_job", lambda job: calls.append(("terminate", job)))
+    monkeypatch.setattr(mirror, "_win_close_handle", lambda job: calls.append(("close", job)))
+    asr_worker._retire(slot, child, "cancelled")
+    assert calls == [("terminate", 123), ("close", 123)]
+    assert all(0 < call.kwargs["timeout"] <= 2 for call in proc.wait.call_args_list)
+    proc.kill.assert_called_once_with()
+    child.lease.close.assert_called_once_with()
+
+
 def test_checkpoint_error_releases_model_for_deletion(fake_engine, tmp_path):
     args, _ = fake_engine
     def pause(segment):
@@ -774,10 +913,15 @@ def test_checkpoint_error_releases_model_for_deletion(fake_engine, tmp_path):
 
 def test_long_decode_renews_deadline_with_segments(fake_engine, monkeypatch):
     args, _ = fake_engine
-    monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda *_: .8)
+    durations = []
+    def limit(duration):
+        durations.append(duration)
+        return .8
+    monkeypatch.setattr(asr_worker, "_inactivity_seconds", limit)
     seen = []
     assert asr_worker.call("segments", args, progress=lambda n, total: seen.append(n)) == 12
     assert seen == [n * 900 for n in range(13)]
+    assert durations[0] is None and durations[-1] == 10800
 
 
 def test_save_runs_during_podcast_without_restarting_either(fake_engine, tmp_path):
@@ -896,8 +1040,8 @@ def test_silent_phase_reaps_tree_and_next_job_works(fake_engine, tmp_path, monke
     args, _ = fake_engine
     event = threading.Event()
     if not cancel:
-        monkeypatch.setattr(asr_worker, "_inactivity_seconds",
-                            lambda phase, duration: .6 if phase == "alignment" else 6)
+        asr_worker.call("warm", args)
+        monkeypatch.setattr(asr_worker, "_inactivity_seconds", lambda *_: .6)
     with ThreadPoolExecutor(1) as pool:
         pending = pool.submit(asr_worker.call, "silent", args, cancel_event=event)
         pids = _wait_pids(tmp_path / "pids")
@@ -927,7 +1071,7 @@ def test_posix_reap_kills_the_group_even_after_leader_exit(monkeypatch):
     with slot.condition:
         asr_worker._retire(slot, child, "crashed")
     killpg.assert_called_once_with(proc.pid, 9)
-    proc.wait.assert_called_once_with()
+    proc.wait.assert_called_once_with(timeout=2)
     child.lease.close.assert_called_once_with()
     assert slot.child is None and child.closed.is_set()
 

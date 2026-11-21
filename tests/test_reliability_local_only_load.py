@@ -91,7 +91,8 @@ def test_ensure_model_is_the_explicit_acquisition_path():
         with (patch.object(rel.asr_models, "download", side_effect=fixture_download) as download,
               patch.object(rel, "_import_faster_whisper", return_value=_FakeModel)):
             result = rel.ensure_model("small", root)
-        download.assert_called_once_with("small", root, cancel_event=None)
+        download.assert_called_once_with("small", root, cancel_event=None,
+                                         progress=rel.asr_worker.report_download_bytes)
         marker = root / "small.pt"
         _assert(root.is_dir(), "the explicit download creates its cache")
         _assert(marker.is_file(), "the verified download creates the readiness marker")

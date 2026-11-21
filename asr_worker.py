@@ -18,6 +18,7 @@ import atexit
 from collections import deque
 from contextlib import contextmanager, ExitStack
 import json
+import logging
 import math
 import os
 import queue
@@ -34,7 +35,6 @@ from typing import Any, Callable
 HERE = Path(__file__).resolve().parent
 ENV_CHILD = "UOINK_ASR_CHILD"
 DEFAULT_IDLE_SECONDS = 120
-DECODE_SECONDS = 600
 FRAME_LIMIT = 64 * 1024 * 1024
 LOG_NAME = "asr-worker.log"
 _LOG_ROTATE_BYTES = 4 * 1024 * 1024
@@ -330,20 +330,24 @@ def _spawn(lease):
             writer = write_fd
             inherit = {"pass_fds": (writer,), "start_new_session": True}
         env["UOINK_ASR_CHANNEL"] = str(writer)
-        if os.name == "nt":
-            from library_mirror import _win_create_kill_job, _win_assign_job, _win_close_handle
-            win_job = _win_create_kill_job()
-            if not win_job:
-                raise OSError("Could not create a transcription Job Object.")
         proc = subprocess.Popen(
             [*command, *extra_args], cwd=str(HERE), env=env,
-            stdin=subprocess.PIPE, stdout=log, stderr=log,
+            stdin=subprocess.PIPE, stdout=log, stderr=log, bufsize=0,
             creationflags=flags, close_fds=True, **inherit)
-        if win_job and not _win_assign_job(win_job, proc):
-            proc.kill()
-            proc.wait()
-            proc.stdin.close()
-            raise OSError("Could not contain the transcription process.")
+        if os.name == "nt":
+            from library_mirror import _win_create_kill_job, _win_assign_job, _win_close_handle
+            try:
+                win_job = _win_create_kill_job()
+                if not win_job:
+                    raise OSError("creation failed")
+                if not _win_assign_job(win_job, proc):
+                    raise OSError("assignment failed")
+            except Exception as exc:  # Containment is optional even on partial Windows APIs.
+                if win_job:
+                    _win_close_handle(win_job)
+                win_job = None
+                logging.getLogger(__name__).warning(
+                    "Transcription is continuing without a Windows Job Object: %s", exc)
     except BaseException as exc:
         os.close(read_fd)
         if win_job:
@@ -359,22 +363,60 @@ def _spawn(lease):
     return _Child(proc, os.fdopen(read_fd, "rb"), win_job, lease)
 
 
+def _win_kill_descendants(proc):
+    """Stop children by verified process handle while their parent is still alive."""
+    import library_mirror as mirror
+
+    def stop_children(pid, handle, created_ms, native_created):
+        for child_pid, _, child_ms, child_native, child_handle in mirror._verified_toolhelp_children(
+                pid, created_ms, handle, native_created):
+            try:
+                stop_children(child_pid, child_handle, child_ms, child_native)
+                mirror._win_terminate_retained_handle(child_handle, child_ms)
+            finally:
+                mirror._win_close_handle(child_handle)
+
+    handle = proc._handle
+    stop_children(proc.pid, handle, mirror._windows_process_created_ms(handle),
+                  mirror._windows_process_created_100ns(handle))
+
+
 def _retire(slot, child, reason):
-    """Called under the slot condition. Kill descendants even if the leader exited."""
+    """Stop the worker tree and release its slot. Called under the slot condition."""
     global _last_exit
     if slot.child is not child:
         return
     child.closed.set()
     proc = child.proc
     if os.name == "nt":
-        from library_mirror import _win_close_handle
-        _win_close_handle(child.win_job)
+        from library_mirror import _win_close_handle, _win_terminate_job
+        if child.win_job:
+            _win_terminate_job(child.win_job)
+            _win_close_handle(child.win_job)
+        elif proc.poll() is None:
+            try:
+                _win_kill_descendants(proc)
+            except (OSError, AttributeError):
+                pass
+            try:
+                proc.kill()
+            except OSError:
+                pass  # Still check for exit below.
     else:
         try:
             os.killpg(proc.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
-    code = proc.wait()
+    try:
+        code = proc.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        try:
+            proc.kill()
+            code = proc.wait(timeout=1)
+        except (OSError, subprocess.TimeoutExpired):
+            code = proc.poll()
+            if code is None:
+                logging.getLogger(__name__).warning("Could not confirm transcription worker %s exited", proc.pid)
     try:
         proc.stdin.close()
     except OSError:
@@ -482,29 +524,28 @@ def _crashed(code: int | None) -> WorkerCrashed:
     return WorkerCrashed(f"The transcription process stopped unexpectedly{detail}.")
 
 
-def _inactivity_seconds(phase, duration):
-    """Decode: 10 min between segments. Silent stages: 10 min plus a bounded
-    multiple of audio seconds (unknown length: one hour). All cap at 6 hours.
-    Model load and language check add 0.1x, ffmpeg 0.5x, batch transcription,
-    alignment and diarization 2x. Each actual progress update renews its phase.
+def _inactivity_seconds(duration):
+    """Allow silence for 30 minutes or 4 times the audio length, whichever is longer.
+
+    Unknown length counts as 6 hours of audio (24 hours of silence). Every
+    child message for this job renews the deadline. There is no total runtime limit.
     """
-    scale = {"model load": .1, "language check": .1, "ffmpeg": .5,
-             "batch transcription": 2, "alignment": 2, "diarization": 2}.get(phase, 0)
-    seconds = duration if isinstance(duration, (int, float)) and duration > 0 else 3600
-    return min(21600, DECODE_SECONDS + scale * seconds)
+    if not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0:
+        duration = 6 * 3600
+    return max(30 * 60, 4 * duration)
 
 
 def _await(child, job_id, duration, cancel, progress, checkpoint):
-    phase = "decode"
-    deadline = time.monotonic() + _inactivity_seconds(phase, duration)
+    phase = "startup"
+    deadline = time.monotonic() + _inactivity_seconds(duration)
     while True:
         _check_cancel(cancel)
         remaining = deadline - time.monotonic()
-        if remaining <= 0:
-            raise WorkerCrashed(f"Transcription stopped making progress during {phase}. Try again.")
         try:
-            message = child.messages.get(timeout=min(.1, remaining))
+            message = child.messages.get(timeout=max(0, min(.1, remaining)))
         except queue.Empty:
+            if remaining <= 0:
+                raise WorkerCrashed(f"Transcription stopped making progress during {phase}. Try again.")
             continue
         if message is _EOF:
             # Windows can close the pipe just before it publishes the exit code.
@@ -522,6 +563,8 @@ def _await(child, job_id, duration, cancel, progress, checkpoint):
             return message
         if kind == "phase":
             phase = message["name"]
+            if message.get("duration_seconds") is not None:
+                duration = message["duration_seconds"]
         elif kind == "progress":
             if progress is not None and message.get("done") is not None:
                 try:
@@ -535,9 +578,7 @@ def _await(child, job_id, duration, cancel, progress, checkpoint):
                 _send(child.proc, {"id": job_id, "control": "continue"})
             except (ValueError, OSError):
                 raise _crashed(child.proc.poll()) from None
-        elif kind != "started":
-            continue
-        deadline = time.monotonic() + _inactivity_seconds(phase, duration)
+        deadline = time.monotonic() + _inactivity_seconds(duration)
 
 
 def call(op: str, args: dict, *, cancel_event=None, progress=None, checkpoint=None,
@@ -655,9 +696,13 @@ def _install_model_cache() -> None:
 _phase_callback = None
 
 
-def report_phase(name):
+def report_phase(name, **details):
     if _phase_callback is not None:
-        _phase_callback(name)
+        _phase_callback(name, **details)
+
+
+def report_download_bytes(done, total):
+    report_phase("model download", downloaded_bytes=done, total_bytes=total)
 
 
 def _run_op(op: str, args: dict, progress: Callable[[Any, Any], None],
@@ -697,6 +742,24 @@ def _run_op(op: str, args: dict, progress: Callable[[Any, Any], None],
 
 
 def _child_main(argv: list[str]) -> int:
+    jobs = queue.Queue()
+    controls = queue.Queue()
+
+    def read():
+        try:
+            for message in _frames(sys.stdin.buffer):
+                if message.get("op"):
+                    jobs.put(message)
+                elif message.get("control") == "continue":
+                    controls.put(message["id"])
+        finally:
+            if os.name != "nt" and os.getpgrp() == os.getpid():
+                os.killpg(os.getpid(), signal.SIGKILL)
+            os._exit(0)
+
+    # Linux parent-death signals follow the spawning request thread, which
+    # can exit while this warm child is still serving the helper.
+    threading.Thread(target=read, name="uoink-asr-input", daemon=True).start()
     # stdout and stderr have pointed to the log since process creation, even
     # during interpreter startup. Only the framed writer gets this handle.
     descriptor = int(os.environ.pop("UOINK_ASR_CHANNEL"))
@@ -716,30 +779,14 @@ def _child_main(argv: list[str]) -> int:
             os.nice(10)
         except OSError:
             pass
-    jobs = queue.Queue()
-    controls = queue.Queue()
-
-    def read():
-        try:
-            for message in _frames(sys.stdin.buffer):
-                if message.get("op"):
-                    jobs.put(message)
-                elif message.get("control") == "continue":
-                    controls.put(message["id"])
-        finally:
-            if os.name != "nt" and os.getpgrp() == os.getpid():
-                os.killpg(os.getpid(), signal.SIGKILL)
-            os._exit(0)
-
-    threading.Thread(target=read, name="uoink-asr-input", daemon=True).start()
     _install_model_cache()
 
     def handle(job: dict) -> None:
         global _phase_callback
         job_id = str(job["id"])
         emit({"id": job_id, "type": "started"})
-        def phase(name):
-            emit({"id": job_id, "type": "phase", "name": name})
+        def phase(name, **details):
+            emit({"id": job_id, "type": "phase", "name": name, **details})
 
         def progress(done, total):
             emit({"id": job_id, "type": "progress", "done": done, "total": total})

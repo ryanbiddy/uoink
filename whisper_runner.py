@@ -294,7 +294,8 @@ def _download_model_snapshot(model_size: str, cache_root: Path, *, cancel_event=
     """Use the chooser's pinned downloader within the podcast cache after consent."""
     entry = asr_models.get(model_size)
     try:
-        asr_models.download(model_size, cache_root, cancel_event=cancel_event)
+        asr_models.download(model_size, cache_root, cancel_event=cancel_event,
+                            progress=asr_worker.report_download_bytes)
     except asr_models.DownloadCancelled as exc:
         raise asr_worker.TranscriptionCancelled("Transcription cancelled.") from exc
     return asr_models._snapshot_dir(cache_root, entry)
@@ -662,6 +663,8 @@ def transcribe_audio(audio_path: Path, *,
                 check=True, capture_output=True, timeout=None if offloaded else 600,
                 **({"creationflags": subprocess.CREATE_NO_WINDOW} if offloaded and os.name == "nt" else {}))
             audio_input = np.frombuffer(decoded.stdout, dtype=np.float32).copy()
+            del decoded
+            duration_seconds = len(audio_input) / 16000
 
         last_percent = None
 
@@ -687,7 +690,7 @@ def transcribe_audio(audio_path: Path, *,
             return {}
 
         decode_callbacks = callbacks(model.transcribe)
-        asr_worker.report_phase("decode" if decode_callbacks else "batch transcription")
+        asr_worker.report_phase("batch transcription", duration_seconds=duration_seconds)
         result = model.transcribe(audio_input, language=language, **decode_callbacks)
         segment_progress(None)
         segments = result.get("segments") or []
