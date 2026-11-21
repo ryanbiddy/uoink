@@ -4423,6 +4423,7 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         "author": _author,
         "title": sidecar.get("title"),
         "topic": sidecar.get("topic"),
+        "shelf_by_hand": sidecar.get("shelf_by_hand") is True,
         "hook_type": sidecar.get("hook_type"),
         "yoinked_at": sidecar.get("yoinked_at") or _now_iso(),
         "corpus_path": str(corpus_path) if corpus_path else "",
@@ -4913,6 +4914,8 @@ _shelf_library_cache: dict = {"key": None, "at": 0.0, "library": None}
 _shelf_generation = [0]
 SHELF_LIBRARY_ROWS = 5000
 SHELF_LIBRARY_TTL = 600.0
+SHELF_TRANSCRIPT_WORDS = 3000
+SHELF_ID_CHUNK = 500
 
 
 def _shelf_fallback() -> str:
@@ -4921,7 +4924,8 @@ def _shelf_fallback() -> str:
 
 def _shelf_rows(idx, *, only_fallback: bool = False, limit: int = SHELF_LIBRARY_ROWS) -> list[dict]:
     """Saves as shelf evidence: title, author, topic, tags, length and a
-    short excerpt of the saved text (metadata lines removed)."""
+    short excerpt of the saved text (metadata lines removed). by_hand says
+    the user placed the save."""
     import shelf_router
     fallback = _shelf_fallback()
     where = ""
@@ -4933,14 +4937,22 @@ def _shelf_rows(idx, *, only_fallback: bool = False, limit: int = SHELF_LIBRARY_
     with idx.detached_snapshot() as db:
         rows = db.execute(
             "SELECT y.video_id, y.title, y.topic, y.author, y.channel, y.platform, y.source_type, "
-            "y.metadata_json, y.corpus_path, y.sidecar_path FROM yoinks y WHERE y.deleted_at IS NULL"
+            "y.metadata_json, y.corpus_path, y.sidecar_path, "
+            "EXISTS(SELECT 1 FROM shelf_by_hand h WHERE h.video_id = y.video_id) AS by_hand "
+            "FROM yoinks y WHERE y.deleted_at IS NULL"
             + where + f" ORDER BY {captured} DESC LIMIT ?", (*params, int(limit))).fetchall()
-        ids = {row["video_id"] for row in rows}
-        excerpts = {r[0]: r[1] or "" for r in db.execute(
-            "SELECT video_id, substr(content, 1, 2400) FROM yoinks_fts") if r[0] in ids}
+        ids = [row["video_id"] for row in rows]
+        excerpts: dict = {}
         tags: dict = {}
-        for r in db.execute("SELECT video_id, tag FROM yoink_tags WHERE source != 'list_import'"):
-            if r[0] in ids:
+        # Only the chosen saves' text and tags, not the whole library's.
+        for at in range(0, len(ids), SHELF_ID_CHUNK):
+            part = ids[at:at + SHELF_ID_CHUNK]
+            marks = ",".join("?" * len(part))
+            for r in db.execute("SELECT video_id, substr(content, 1, 2400) FROM yoinks_fts "
+                                f"WHERE video_id IN ({marks})", part):
+                excerpts[r[0]] = r[1] or ""
+            for r in db.execute("SELECT video_id, tag FROM yoink_tags "
+                                f"WHERE source != 'list_import' AND video_id IN ({marks})", part):
                 tags.setdefault(r[0], []).append(r[1])
     out = []
     for row in rows:
@@ -4957,6 +4969,7 @@ def _shelf_rows(idx, *, only_fallback: bool = False, limit: int = SHELF_LIBRARY_
                     "tags": tags.get(row["video_id"], [])[:20],
                     "duration_seconds": meta.get("duration_seconds"),
                     "is_fallback": shelf_router.is_fallback(row["topic"], fallback),
+                    "by_hand": bool(row["by_hand"]), "url": meta.get("url"),
                     "corpus_path": row["corpus_path"], "sidecar_path": row["sidecar_path"]})
     return out
 
@@ -4973,15 +4986,24 @@ def _shelf_vectors(ids=None) -> dict:
         return {}
 
 
+def _index_data_version(idx):
+    """Changes whenever another process (the CLI, an MCP server) commits to
+    the index, so a shelf move made there is seen here at once."""
+    try:
+        with idx._lock:
+            return idx._conn.execute("PRAGMA data_version").fetchone()[0]
+    except Exception:
+        return None
+
+
 def _shelf_library():
     """The user's shelves as routing evidence, cached until the library
-    changes (or ten minutes pass, for edits made elsewhere)."""
-    import shelf_router
+    changes here or in another process (or ten minutes pass)."""
     idx = _get_index()
     with idx.detached_snapshot() as db:
         count, last = db.execute("SELECT COUNT(*), MAX(rowid) FROM yoinks WHERE deleted_at IS NULL").fetchone()
-    key = (str(INDEX_PATH), count, last, _shelf_generation[0], _local_search_singleton is not None,
-           _static_embed_available())
+    key = (str(INDEX_PATH), count, last, _shelf_generation[0], _index_data_version(idx),
+           _local_search_singleton is not None, _static_embed_available())
     now = time.monotonic()
     with _shelf_library_lock:
         cached = _shelf_library_cache
@@ -5014,43 +5036,69 @@ def _static_embed(texts: list) -> list:
         return []
 
 
+# Static-model vectors for texts already seen, so a rebuild after each
+# capture embeds only what is new. Keyed by the weights' identity (folder,
+# sizes, modified times), bounded, and dropped when the model is.
+_static_vector_lock = threading.Lock()
+_static_vector_cache: dict = {}  # insertion order is the use order
+STATIC_VECTOR_CACHE_MAX = 20000
+
+
+def _clear_static_vectors() -> None:
+    with _static_vector_lock:
+        _static_vector_cache.clear()
+
+
+def _static_cached_vectors(texts: list) -> list | None:
+    """One vector (or None) per text, or None when the model can't run."""
+    import local_embed
+    ident = local_embed.identity()
+    if ident is None:
+        return None
+    local_embed.on_release(_clear_static_vectors)
+    keys = [(ident, hashlib.blake2b(t.encode("utf-8", "replace"), digest_size=16).digest()) for t in texts]
+    with _static_vector_lock:
+        known = {k: _static_vector_cache[k] for k in keys if k in _static_vector_cache}
+    missing = list(dict.fromkeys(k for k in keys if k not in known))
+    if missing:
+        first = {k: i for i, k in reversed(list(enumerate(keys)))}
+        found = _static_embed([texts[first[k]] for k in missing])
+        if not found:
+            return None
+        known.update(zip(missing, found))
+    with _static_vector_lock:
+        for k in keys:
+            _static_vector_cache.pop(k, None)
+            _static_vector_cache[k] = known.get(k)
+        while len(_static_vector_cache) > STATIC_VECTOR_CACHE_MAX:
+            _static_vector_cache.pop(next(iter(_static_vector_cache)))
+    return [known.get(k) for k in keys]
+
+
 def _shelf_build_library(rows: list):
     """Library evidence for routing. Meaning comes from the optional search
-    model when it has vectors, else from the bundled static model, else
-    only words, authors and neighbours count."""
+    model when it gives every shelf a profile, else from the bundled static
+    model, else only words, authors and neighbours count."""
     import shelf_router
     fallback = _shelf_fallback()
     placed = [r for r in rows if not shelf_router.is_fallback(r.get("topic"), fallback)]
     vectors = _shelf_vectors([r["video_id"] for r in placed])
     if vectors:
-        return shelf_router.Library(rows, fallback=fallback, vectors=vectors, tier="gemma")
-    names = shelf_router.shelf_name_texts(sorted({r.get("topic") for r in placed if r.get("topic")}),
-                                          _load_topics())
+        library = shelf_router.Library(rows, fallback=fallback, vectors=vectors, tier="gemma")
+        if library.has_vectors():
+            return library
+        # Too few saves have search vectors to profile a shelf yet.
     if not _static_embed_available():
         return shelf_router.Library(rows, fallback=fallback)
-    # Each capture changes the library, so keep vectors for texts already
-    # seen: a rebuild then embeds only what is new or edited.
-    import hashlib
-    import local_embed
+    names = shelf_router.shelf_name_texts(sorted({r.get("topic") for r in placed if r.get("topic")}),
+                                          _load_topics())
     texts = [shelf_router.row_meaning_text(r) for r in placed] + list(names.values())
-    model = str(local_embed.model_dir())
-    keys = [(model, hashlib.blake2b(t.encode("utf-8", "replace"), digest_size=16).digest()) for t in texts]
-    cache = _static_vector_cache
-    if len(cache) > 50000:
-        cache.clear()
-    missing = [i for i, k in enumerate(keys) if k not in cache]
-    found = _static_embed([texts[i] for i in missing])
-    if missing and not found:
+    embedded = _static_cached_vectors(texts)
+    if embedded is None:
         return shelf_router.Library(rows, fallback=fallback)
-    for i, vec in zip(missing, found):
-        cache[keys[i]] = vec
-    embedded = [cache.get(k) for k in keys]
     static = {r["video_id"]: vec for r, vec in zip(placed, embedded) if vec is not None}
     name_vectors = {name: vec for name, vec in zip(names, embedded[len(placed):]) if vec is not None}
     return shelf_router.Library(rows, fallback=fallback, vectors=static, names=name_vectors, tier="static")
-
-
-_static_vector_cache: dict = {}
 
 
 def _static_query_vectors(sigs: list) -> list:
@@ -5060,17 +5108,78 @@ def _static_query_vectors(sigs: list) -> list:
     return found or [None] * len(sigs)
 
 
-def _shelf_hint(metadata: dict, url: str | None = None) -> str | None:
-    """A shelf the user or an agent picked for this URL before it was captured."""
-    import shelf_router
+def _shelf_hint_urls(metadata: dict, url: str | None = None) -> list:
     urls = [url, metadata.get("url"), metadata.get("webpage_url"), metadata.get("original_url")]
     if str(metadata.get("extractor_key") or "").lower() == "youtube" and metadata.get("id"):
         urls.append(str(metadata["id"]))
+    return [u for u in urls if u]
+
+
+def _shelf_hint(metadata: dict, url: str | None = None) -> str | None:
+    """A shelf the user or an agent picked for this URL before it was captured."""
+    import shelf_router
     try:
-        return shelf_router.hint_for(DATA_ROOT, *[u for u in urls if u])
+        return shelf_router.hint_for(DATA_ROOT, *_shelf_hint_urls(metadata, url))
     except Exception:
         log.debug("shelf hint lookup failed", exc_info=True)
         return None
+
+
+def _explicit_shelf_hint(metadata: dict, url: str | None = None) -> str | None:
+    """The shelf the user named for this capture (capture --shelf, a shelf
+    picked in the extension), not an import folder."""
+    import shelf_router
+    try:
+        entry = shelf_router.hint_entry(DATA_ROOT, *_shelf_hint_urls(metadata, url))
+    except Exception:
+        log.debug("shelf hint lookup failed", exc_info=True)
+        return None
+    return entry["shelf"] if entry and entry["by_hand"] else None
+
+
+def _explicit_shelf_for_record(record: dict) -> bool:
+    """index.upsert_yoink's hook: this write's shelf is one the user named
+    for this capture, so it may replace a shelf set by hand."""
+    import shelf_router
+    try:
+        meta = json.loads(record.get("metadata_json") or "{}")
+    except (TypeError, ValueError):
+        meta = {}
+    meta = meta if isinstance(meta, dict) else {}
+    urls = [meta.get("url")]
+    if str(record.get("platform") or meta.get("platform") or "").lower() == "youtube":
+        urls.append(record.get("video_id"))
+    try:
+        entry = shelf_router.hint_entry(DATA_ROOT, *[u for u in urls if u])
+    except Exception:
+        return False
+    shelf = entry["shelf"] if entry and entry["by_hand"] else None
+    return bool(shelf) and shelf_router.shelf_key(shelf) == shelf_router.shelf_key(record.get("topic"))
+
+
+index.set_explicit_shelf_hook(_explicit_shelf_for_record)
+
+
+def _known_shelves() -> list:
+    """Shelf names in the library and in topics.json."""
+    names = [t.get("name") for t in _load_topics().get("topics") or [] if isinstance(t, dict)]
+    try:
+        idx = _get_index()
+        with idx.detached_snapshot() as db:
+            names += [r[0] for r in db.execute(
+                "SELECT DISTINCT topic FROM yoinks WHERE deleted_at IS NULL AND topic IS NOT NULL")]
+    except Exception:
+        log.debug("shelf names unavailable", exc_info=True)
+    return [n for n in names if isinstance(n, str) and n.strip()]
+
+
+def _canonical_shelf(name: str | None, known=None) -> str | None:
+    """An existing shelf's spelling for name ("cooking" lands on "Cooking",
+    NFD "Café" on NFC "Café"), so case and Unicode form never split a shelf."""
+    import shelf_router
+    if not name:
+        return name
+    return shelf_router.canonical_shelf(name, _known_shelves() if known is None else known)
 
 
 def _shelf_decision(metadata: dict, *, url: str | None = None, hint: str | None = None,
@@ -5080,8 +5189,10 @@ def _shelf_decision(metadata: dict, *, url: str | None = None, hint: str | None 
     metadata = metadata if isinstance(metadata, dict) else {}
     url = url or metadata.get("url") or metadata.get("webpage_url")
     source_type = source_type or metadata.get("source_type")
+    if not transcript and isinstance(metadata.get("transcript"), str):
+        transcript = metadata["transcript"]  # podcasts pass it in the metadata
     keyword = _classify_topic(metadata)
-    hint = hint or _shelf_hint(metadata, url)
+    hint = _canonical_shelf(hint or _shelf_hint(metadata, url))
     library = vector = None
     if not hint:
         try:
@@ -5124,22 +5235,25 @@ def _clean_shelf(value) -> str | None:
 
 def _shelf_from_body(body, *, remember_url: str | None = None) -> tuple[str | None, str | None]:
     """The optional shelf a capture request names ("shelf", or "folder" for
-    imports). Returns (name, None), (None, None) or (None, error). With
-    remember_url the choice is also kept for a capture that waits in a queue."""
+    imports). Returns (name, None), (None, None) or (None, error). A "shelf"
+    is the user's own pick and must be a valid name; a "folder" comes from
+    another app and is tidied into one. With remember_url the choice is also
+    kept for a capture that waits in a queue, and a "shelf" pick there may
+    replace a shelf set by hand earlier."""
     import shelf_router
     if not isinstance(body, dict):
         return None, None
-    raw = body.get("shelf")
-    if raw is None:
-        raw = body.get("folder")
+    by_hand = body.get("shelf") is not None
+    raw = body.get("shelf") if by_hand else body.get("folder")
     if raw is None or (isinstance(raw, str) and not raw.strip()):
         return None, None
-    name = shelf_router.clean_shelf_name(raw)
+    name = shelf_router.clean_shelf_name(raw) if by_hand else shelf_router.folder_shelf_name(raw)
     if not name:
         return None, "shelf must be a name of 1 to 64 characters that also works as a folder name"
+    name = _canonical_shelf(name)
     if remember_url:
         try:
-            shelf_router.remember_hints(DATA_ROOT, [(remember_url, name)])
+            shelf_router.remember_hints(DATA_ROOT, [(remember_url, name)], by_hand=by_hand)
         except OSError as exc:
             log.warning("shelf hint not saved: %s", exc)
     return name, None
@@ -5153,15 +5267,32 @@ def _shelf_is_default(topic) -> bool:
 
 def _keep_placed_shelf(topic: str, existing: dict | None, *, explicit: str | None = None) -> str:
     """Saving a link again keeps the shelf the save already sits on (the
-    user may have moved it), unless the caller named a shelf this time."""
+    user may have moved it), unless the caller named a shelf this time. The
+    index write keeps a shelf set by hand either way (index.upsert_yoink)."""
     if explicit or not existing:
         return explicit or topic
     try:
-        row = _get_index().get_yoink(existing["video_id"])
+        idx = _get_index()
+        row = idx.get_yoink(existing["video_id"])
     except Exception:
         return topic
+    try:
+        by_hand = idx.shelf_hand_seq(existing["video_id"]) > 0
+    except Exception:
+        by_hand = False
     current = (row or {}).get("topic")
-    return current if current and not _shelf_is_default(current) else topic
+    return current if current and (by_hand or not _shelf_is_default(current)) else topic
+
+
+def _shelf_transcript_text(entries, limit: int = SHELF_TRANSCRIPT_WORDS) -> str:
+    """The first words of a transcript, without joining a multi-hour one."""
+    words: list = []
+    for entry in entries or []:
+        if isinstance(entry, dict):
+            words.extend(str(entry.get("text") or "").split())
+            if len(words) >= limit:
+                break
+    return " ".join(words[:limit])
 
 
 def _reroute_with_transcript(topic: str, metadata: dict, entries, *, url: str,
@@ -5174,7 +5305,7 @@ def _reroute_with_transcript(topic: str, metadata: dict, entries, *, url: str,
         return existing.get("topic")
     if _shelf_hint(metadata, url):
         return topic
-    text = " ".join(str(e.get("text") or "") for e in (entries or []) if isinstance(e, dict))
+    text = _shelf_transcript_text(entries)
     if len(text.split()) < 20:
         return topic
     try:
@@ -5188,15 +5319,69 @@ def _reroute_with_transcript(topic: str, metadata: dict, entries, *, url: str,
     return decision.shelf
 
 
-def _reshelve(moves, *, record: bool = True, label: str = "", append_to: str | None = None) -> dict:
+def _shelf_sync_one(row: dict | None, shelf: str | None, by_hand: bool | None) -> bool:
+    """The save's sidecar and note follow its index row. False when a file
+    could not be written."""
+    import shelf_router
+    if not row:
+        return True
+    try:
+        shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"),
+                                shelf or _shelf_fallback(), by_hand=by_hand)
+        return True
+    except OSError as exc:
+        log.warning("shelf files for %s not updated (%s)", row.get("video_id"), exc)
+        return False
+
+
+def _shelf_recover() -> list:
+    """Finish what a stopped move or undo left half done, from the move log.
+    The index is the truth: files are brought in step with it, a move batch
+    keeps the moves that happened, and a stopped undo is finished. Returns
+    the batch ids it touched."""
+    import shelf_router
+    touched = []
+    with shelf_router.locked(DATA_ROOT):
+        for batch in shelf_router.unfinished_batches(DATA_ROOT):
+            if batch.get("undoing"):
+                _shelf_undo_moves(batch)
+                shelf_router.mark_undone(DATA_ROOT, batch["id"])
+                touched.append(batch["id"])
+                continue
+            idx = _get_index()
+            done = []
+            for move in batch.get("pending") or []:
+                row = idx.get_yoink(move.get("video_id") or "")
+                if (row and row.get("topic") == move.get("to")
+                        and idx.shelf_hand_seq(row["video_id"]) == move.get("seq")):
+                    _shelf_sync_one(row, move.get("to"), True)
+                    done.append(move)
+            shelf_router.finish_batch(DATA_ROOT, batch["id"], done)
+            touched.append(batch["id"])
+        if touched:
+            _shelf_generation[0] += 1
+    if touched:
+        log.info("shelves: finished %d stopped move(s) from the log", len(touched))
+    return touched
+
+
+def _reshelve(moves, *, record: bool = True, label: str = "", append_to: str | None = None,
+              expect: dict | None = None, skip_by_hand: bool = False, by_hand: bool = True) -> dict:
     """Move saves to shelves the way a manual re-shelve does: the index row
     (and its search entry), the sidecar's topic and the note's Topic line all
-    change together. Folders stay where they are. Each batch can be undone;
-    append_to joins the newest batch, for a big move sent in parts."""
+    change together, and the save counts as placed by hand. Folders stay
+    where they are.
+
+    The planned moves are written to the move log first, so a move that
+    stops halfway is finished by _shelf_recover. Each batch can be undone;
+    append_to joins the newest batch, for a big move sent in parts. expect
+    maps a video_id to the shelf it should still be on (a Tidy suggestion
+    made earlier); skip_by_hand leaves saves the user placed (Tidy)."""
     import shelf_router
     idx = _get_index()
-    done, skipped = [], []
-    with shelf_router._lock:
+    done, skipped, planned, files_behind = [], [], [], []
+    with shelf_router.locked(DATA_ROOT):
+        _shelf_recover()
         if append_to:
             log_batches = shelf_router.batches(DATA_ROOT)
             last = log_batches[-1] if log_batches else None
@@ -5204,6 +5389,9 @@ def _reshelve(moves, *, record: bool = True, label: str = "", append_to: str | N
                     or len(last.get("moves") or []) + len(moves) > shelf_router.MAX_MOVES):
                 return {"ok": False, "code": "stale_batch",
                         "error": "That move changed since it started. Check the shelves and try again."}
+        known = _known_shelves()
+        fallback = _shelf_fallback()
+        rows = {}
         for video_id, shelf in moves:
             name = shelf_router.clean_shelf_name(shelf)
             row = idx.get_yoink(video_id) if isinstance(video_id, str) and video_id else None
@@ -5213,65 +5401,118 @@ def _reshelve(moves, *, record: bool = True, label: str = "", append_to: str | N
             if not row or row.get("deleted_at"):
                 skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
                 continue
+            if video_id in rows:
+                skipped.append({"video_id": video_id, "reason": "Listed twice, moved once."})
+                continue
+            name = shelf_router.canonical_shelf(name, known)
+            known.append(name)
             previous = row.get("topic")
+            seq = idx.shelf_hand_seq(video_id)
+            if expect is not None and video_id in expect and not (
+                    previous == expect[video_id] or (shelf_router.is_fallback(previous, fallback)
+                                                     and shelf_router.is_fallback(expect[video_id], fallback))):
+                skipped.append({"video_id": video_id, "reason": "Moved since Tidy looked, so it stays."})
+                continue
+            if skip_by_hand and seq:
+                skipped.append({"video_id": video_id, "reason": "You put it there yourself, so it stays."})
+                continue
             if previous == name:
                 skipped.append({"video_id": video_id, "reason": "Already on that shelf."})
                 continue
-            idx.set_shelf(video_id, name)
-            try:
-                shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"), name)
-            except OSError as exc:
-                log.warning("reshelve %s: files not updated (%s)", video_id, exc)
-            done.append({"video_id": video_id, "from": previous, "to": name})
-        _shelf_generation[0] += 1
+            rows[video_id] = row
+            planned.append({"video_id": video_id, "from": previous, "to": name,
+                            "from_seq": seq, "seq": seq + 1 if by_hand else seq})
         batch = None
-        if record and append_to:
-            batch = shelf_router.record_batch(DATA_ROOT, done, label=label, append_to=append_to)
-        elif record and done:
-            batch = shelf_router.record_batch(DATA_ROOT, done, label=label)
-    return {"ok": True, "moved": len(done), "skipped": skipped, "moves": done,
-            "batch_id": batch["id"] if batch else None, "undo": shelf_router.batch_summary(batch)}
+        if record and planned:
+            batch = shelf_router.begin_batch(DATA_ROOT, planned, label=label, append_to=append_to)
+            if batch is None:
+                return {"ok": False, "code": "stale_batch",
+                        "error": "That move changed since it started. Check the shelves and try again."}
+        for move in planned:
+            idx.set_shelf(move["video_id"], move["to"], hand_seq=move["seq"] if by_hand else None)
+            done.append(move)
+            if not _shelf_sync_one(rows[move["video_id"]], move["to"], True if by_hand else None):
+                files_behind.append(move["video_id"])
+        if done:
+            try:
+                shelf_router.forget_hints(DATA_ROOT, [_row_url(r) for r in rows.values()])
+            except OSError as exc:
+                log.warning("old shelf hints not cleared: %s", exc)
+        _shelf_generation[0] += 1
+        if batch is not None:
+            batch = shelf_router.finish_batch(DATA_ROOT, batch["id"], done) or batch
+        elif append_to and record:
+            batch = shelf_router.find_batch(DATA_ROOT, append_to)
+    result = {"ok": True, "moved": len(done), "skipped": skipped,
+              "moves": [{"video_id": m["video_id"], "from": m["from"], "to": m["to"]} for m in done],
+              "batch_id": batch["id"] if batch else None, "undo": shelf_router.batch_summary(batch)}
+    if files_behind:
+        result["files_not_updated"] = files_behind
+    return result
+
+
+def _row_url(row: dict) -> str | None:
+    try:
+        meta = json.loads(row.get("metadata_json") or "{}")
+    except (TypeError, ValueError):
+        return None
+    return meta.get("url") if isinstance(meta, dict) else None
+
+
+def _shelf_undo_moves(batch: dict) -> tuple[int, list]:
+    """Put a batch's moves back, newest first. A save moved again since
+    (by hand, in another batch or by an agent) stays where it is now."""
+    idx = _get_index()
+    restored, skipped = 0, []
+    for move in reversed(batch.get("moves") or []):
+        video_id = move.get("video_id") or ""
+        row = idx.get_yoink(video_id)
+        if not row or row.get("deleted_at"):
+            skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
+            continue
+        seq = idx.shelf_hand_seq(video_id)
+        if row.get("topic") != move.get("to") or ("seq" in move and seq != move.get("seq")):
+            skipped.append({"video_id": video_id, "reason": "Moved again since, so it stays."})
+            continue
+        previous = move.get("from")
+        before = int(move.get("from_seq") or 0)
+        idx.set_shelf(video_id, previous, hand_seq=before if "seq" in move else None)
+        _shelf_sync_one(row, previous, bool(before))
+        restored += 1
+    return restored, skipped
 
 
 def _shelf_undo(batch_id: str | None = None) -> dict:
     """Put a batch of moves back, unless a save was moved again since."""
     import shelf_router
-    idx = _get_index()
-    with shelf_router._lock:
+    with shelf_router.locked(DATA_ROOT):
+        _shelf_recover()
         batch = shelf_router.find_batch(DATA_ROOT, batch_id)
         if not batch:
             return {"ok": False, "error": "Nothing to undo.", "code": "not_found"}
         if batch.get("undone"):
             return {"ok": False, "error": "That move was already undone.", "code": "already_undone"}
-        restored, skipped = 0, []
-        for move in batch.get("moves") or []:
-            video_id = move.get("video_id") or ""
-            row = idx.get_yoink(video_id)
-            if not row or row.get("deleted_at"):
-                skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
-                continue
-            if row.get("topic") != move.get("to"):
-                skipped.append({"video_id": video_id, "reason": "Moved again since, so it stays."})
-                continue
-            previous = move.get("from")
-            idx.set_shelf(video_id, previous)
-            try:
-                shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"),
-                                        previous or _shelf_fallback())
-            except OSError as exc:
-                log.warning("undo %s: files not updated (%s)", video_id, exc)
-            restored += 1
+        shelf_router.mark_undoing(DATA_ROOT, batch["id"])
+        restored, skipped = _shelf_undo_moves(batch)
         shelf_router.mark_undone(DATA_ROOT, batch["id"])
         _shelf_generation[0] += 1
     return {"ok": True, "batch_id": batch["id"], "restored": restored, "skipped": skipped}
 
 
+def _shelf_last_undo() -> dict | None:
+    """The newest move that can still be undone, for the dashboard's Undo."""
+    import shelf_router
+    return shelf_router.batch_summary(shelf_router.find_batch(DATA_ROOT, None))
+
+
 def _shelf_proposals(*, limit: int = 2000) -> dict:
     """Tidy Uncategorized: a proposed shelf and a reason for each save there.
-    Reads only; nothing moves until the user accepts."""
+    Reads only; nothing moves until the user accepts. A save the user put on
+    Uncategorized by hand is left out."""
     import shelf_router
     idx = _get_index()
-    candidates = _shelf_rows(idx, only_fallback=True, limit=limit + 1)
+    _shelf_recover()
+    candidates = [c for c in _shelf_rows(idx, only_fallback=True, limit=limit + 1) if not c.get("by_hand")]
     more = len(candidates) > limit
     candidates = candidates[:limit]
     library = _shelf_library()
@@ -5289,7 +5530,8 @@ def _shelf_proposals(*, limit: int = 2000) -> dict:
             "shelves": sorted(set(shelves) | set(library.shelves), key=str.lower),
             "meaning": "on" if library.has_vectors() else "off",
             "meaning_model": library.tier if library.has_vectors() else None,
-            "undo": shelf_router.batch_summary(shelf_router.find_batch(DATA_ROOT, None))}
+            "fallback": library.fallback,
+            "undo": _shelf_last_undo()}
 
 
 # ---------------------------------------------------------------------------
@@ -7884,6 +8126,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if phase_callback:
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
+    shelf_hint = shelf_hint or _explicit_shelf_hint(metadata, url)
     if shelf_hint:
         topic = shelf_hint
     if topic is None:
@@ -8423,6 +8666,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "source_type": source_type,
                 "title": title,
                 "topic": topic,
+                # 3.18: the user named this shelf; a rebuild keeps it as theirs.
+                **({"shelf_by_hand": True} if shelf_hint else {}),
                 "yoinked_at": yoinked_at,
                 "interval_seconds": interval,
                 "requested_interval_seconds": requested_interval,
@@ -18002,6 +18247,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_library_facets()
         if bare == "/library/shelves/tidy":
             return self._handle_shelves_tidy()
+        if bare == "/library/shelves/undo":
+            return self._handle_shelves_last_undo()
         if bare == "/library/availability":
             return self._handle_library_availability()
         if bare == "/corpus/channels":
@@ -18689,6 +18936,18 @@ class Handler(BaseHTTPRequestHandler):
             log.exception("/library/shelves/tidy failed")
             return self._send_json(503, {"ok": False, "error": "Couldn't read the library just now."})
 
+    def _handle_shelves_last_undo(self):
+        """GET /library/shelves/undo -- the newest move that can still be
+        undone (or null), and the fallback shelf's name."""
+        if not self._require_token():
+            return
+        try:
+            return self._send_json(200, {"ok": True, "undo": _shelf_last_undo(),
+                                         "fallback": _shelf_fallback()})
+        except Exception:
+            log.exception("/library/shelves/undo failed")
+            return self._send_json(503, {"ok": False, "error": "Couldn't read the move log just now."})
+
     def _handle_shelves_post(self, bare: str, body):
         """POST /library/shelves/apply {moves: [{video_id, shelf}]},
         /library/shelves/move {video_ids: [...], shelf} and
@@ -18698,6 +18957,7 @@ class Handler(BaseHTTPRequestHandler):
         the same undo. Token gate cleared by do_POST."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False, "error": "json object required"})
+        tidy, expect = False, None
         if bare == "/library/shelves/undo":
             batch_id = body.get("batch_id")
             if batch_id is not None and not isinstance(batch_id, str):
@@ -18714,10 +18974,14 @@ class Handler(BaseHTTPRequestHandler):
         else:
             raw = body.get("moves")
             if not isinstance(raw, list) or not raw or not all(
-                    isinstance(m, dict) and isinstance(m.get("video_id"), str) for m in raw):
+                    isinstance(m, dict) and isinstance(m.get("video_id"), str)
+                    and (m.get("from") is None or isinstance(m.get("from"), str)) for m in raw):
                 return self._send_json(400, {"ok": False, "error": "moves must be a list of {video_id, shelf}"})
             moves = [(m["video_id"], m.get("shelf")) for m in raw]
             label = "Tidy"
+            if body.get("source") == "tidy":
+                tidy = True
+                expect = {m["video_id"]: m.get("from") for m in raw if "from" in m}
         import shelf_router
         if len(moves) > shelf_router.MAX_MOVES:
             return self._send_json(400, {"ok": False,
@@ -18730,7 +18994,8 @@ class Handler(BaseHTTPRequestHandler):
         if append_to is not None and not (isinstance(append_to, str) and append_to):
             return self._send_json(400, {"ok": False, "error": "append_to must be a batch id"})
         try:
-            result = _reshelve(moves, label=str(body.get("label") or label), append_to=append_to)
+            result = _reshelve(moves, label=str(body.get("label") or label), append_to=append_to,
+                               expect=expect, skip_by_hand=tidy)
         except Exception:
             log.exception("%s failed", bare)
             return self._send_json(500, {"ok": False, "error": "Couldn't move those saves."})
@@ -18771,18 +19036,29 @@ class Handler(BaseHTTPRequestHandler):
                         meta.get("duration_seconds") or meta.get("duration"))
                     if lb:
                         clean["length_bucket"] = lb
-        if clean.get("topic") and _clean_shelf(clean["topic"]) == clean["topic"]:
-            # A topic is a shelf: keep the search row, sidecar and note in step.
-            try:
-                _reshelve([(video_id, clean["topic"])], record=False)
-            except Exception as exc:
-                log.warning("/facets/classify: shelf files not updated: %s", exc)
+        topic_kept = None
+        if clean.get("topic"):
+            import shelf_router
+            shelf = _canonical_shelf(shelf_router.folder_shelf_name(clean["topic"]))
+            if not shelf:
+                return self._send_json(400, {"ok": False, "error": "topic must be a shelf name"})
+            clean["topic"] = shelf
+            if idx.shelf_hand_seq(video_id):
+                # The user's own shelf wins over an agent's guess.
+                topic_kept = (idx.get_yoink(video_id) or {}).get("topic")
+                clean.pop("topic")
+            else:
+                # A topic is a shelf: keep the search row, sidecar and note in step.
+                try:
+                    _reshelve([(video_id, shelf)], record=False, by_hand=False)
+                except Exception as exc:
+                    log.warning("/facets/classify: shelf files not updated: %s", exc)
         facets_set = idx.set_facets(video_id, **clean)
         tags_added = idx.add_tags(video_id, tags or [], source="agent") if tags else 0
         self._send_json(200, {
             "ok": True, "video_id": video_id,
             "facets_set": facets_set, "tags_added": tags_added,
-            "facets": clean,
+            "facets": clean, **({"topic_kept": topic_kept} if topic_kept else {}),
         })
 
     def _handle_facets_backfill(self):
@@ -20711,8 +20987,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False,
                 "error": "follow_links_depth must be an integer"})
-        if _shelf_from_body(body)[1]:
-            return self._send_json(400, {"ok": False, "error": _shelf_from_body(body)[1]})
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url or None)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
 
         try:
             result = page_extractor.extract_page(
@@ -20747,7 +21024,7 @@ class Handler(BaseHTTPRequestHandler):
         # of a split with %LOCALAPPDATA%.
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, topic=_shelf_from_body(body)[0], data_root=DESKTOP_ROOT,
+                _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
                 topic_classifier=_route_topic)
             result["video_id"] = video_id
         except Exception as e:
@@ -21690,7 +21967,7 @@ class Handler(BaseHTTPRequestHandler):
         url = (body.get("url") or "").strip()
         if not url:
             return self._send_json(400, {"ok": False, "error": "url required"})
-        shelf, shelf_error = _shelf_from_body(body)
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url)
         if shelf_error:
             return self._send_json(400, {"ok": False, "error": shelf_error})
         result = x_extractor.extract_x_thread(url)
@@ -21732,6 +22009,10 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                          "error": "json object required"})
+        article_url = body.get("url") if isinstance(body.get("url"), str) else None
+        shelf, shelf_error = _shelf_from_body(body, remember_url=(article_url or "").strip() or None)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
         result = x_article_extractor.build_extract_result(body)
         if not result.get("ok"):
             log.info("POST /extract/x-article -> %s", result.get("code"))
@@ -21740,7 +22021,7 @@ class Handler(BaseHTTPRequestHandler):
                 "code": result.get("code")})
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, topic=_shelf_from_body(body)[0], data_root=DESKTOP_ROOT,
+                _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
                 source_type=x_article_extractor.SOURCE_TYPE,
                 subfolder="X", slug_prefix="x-article",
                 topic_classifier=_route_topic)
@@ -21907,7 +22188,7 @@ class Handler(BaseHTTPRequestHandler):
                          reddit_extractor.DEFAULT_DEPTH_LIMIT, 0, 10)
         score = _bounded(body.get("score_threshold"),
                          reddit_extractor.DEFAULT_SCORE_THRESHOLD, -100, 100000)
-        shelf, shelf_error = _shelf_from_body(body)
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url)
         if shelf_error:
             return self._send_json(400, {"ok": False, "error": shelf_error})
         result = reddit_extractor.extract_reddit_thread(
@@ -23986,7 +24267,7 @@ class Handler(BaseHTTPRequestHandler):
                 "error": ("URL must be http(s) with a valid hostname "
                           "(yt-dlp accepts 1,800+ sites; the helper "
                           "filters attacker-shaped inputs)")})
-        if _shelf_from_body(body)[1]:
+        if _shelf_from_body(body, remember_url=canonical)[1]:
             return self._send_json(400, {"ok": False, "error": _shelf_from_body(body)[1]})
         # If it's a known platform we already have a full pipeline for,
         # delegate. The downstream handler runs its own validation; we

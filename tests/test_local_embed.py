@@ -48,9 +48,18 @@ def make_model(folder):
     return folder
 
 
+def pin(monkeypatch, folder):
+    """Pin the made-up model's own hashes, as the build pins the real ones."""
+    monkeypatch.setattr(local_embed, "PINNED_SHA256", {
+        name: local_embed._sha256(folder / name)
+        for name in (local_embed.WEIGHTS_FILE, local_embed.TOKENIZER_FILE)})
+
+
 @pytest.fixture(autouse=True)
 def _fresh(monkeypatch, tmp_path):
     monkeypatch.setenv(local_embed.ENV_DIR, str(tmp_path / "no-model"))
+    monkeypatch.setattr(local_embed, "_failed", {})
+    monkeypatch.setattr(local_embed, "_verified", set())
     local_embed.release()
     yield
     local_embed.release()
@@ -63,6 +72,7 @@ def _fresh(monkeypatch, tmp_path):
 def model(tmp_path, monkeypatch):
     folder = make_model(tmp_path / "potion")
     monkeypatch.setenv(local_embed.ENV_DIR, str(folder))
+    pin(monkeypatch, folder)
     return folder
 
 
@@ -103,13 +113,14 @@ def test_model_is_released_when_idle_and_loads_again(model):
     assert local_embed.is_loaded()
 
 
-def test_half_precision_weights_load(model):
+def test_half_precision_weights_load(model, monkeypatch):
     write_safetensors(model / "model.safetensors", np.array(list(WORDS.values())), dtype="F16")
+    pin(monkeypatch, model)
     assert float(local_embed.embed(["crust"])[0][0]) > 0.99
 
 
 @pytest.mark.parametrize("damage", ["header", "short", "empty"])
-def test_damaged_weights_fail_cleanly(model, damage):
+def test_damaged_weights_fail_cleanly(model, damage, monkeypatch):
     path = model / "model.safetensors"
     if damage == "header":
         path.write_bytes((10 ** 9).to_bytes(8, "little") + b"{}")
@@ -117,6 +128,7 @@ def test_damaged_weights_fail_cleanly(model, damage):
         path.write_bytes(path.read_bytes()[:-8])
     else:
         path.write_bytes(b"")
+    pin(monkeypatch, model)  # past the hash check, so the reader's own checks run
     if damage == "empty":
         assert not local_embed.is_available()
     with pytest.raises(local_embed.EmbedUnavailable):
@@ -225,3 +237,143 @@ def test_shelf_names_carry_topic_words():
            "topics": [{"name": "Cooking", "keywords": ["recipe", "kitchen"]}]}
     names = sr.shelf_name_texts(["Hearth", "Uncategorized", "Clips"], cfg)
     assert names == {"Hearth": "Hearth", "Cooking": "Cooking: recipe, kitchen"}
+
+
+# ---- review fixes: the pin, the reader, the idle timer, the vector cache ------
+
+def test_weights_that_do_not_match_the_pin_are_never_loaded(model, monkeypatch):
+    monkeypatch.setattr(local_embed, "PINNED_SHA256",
+                        {**local_embed.PINNED_SHA256, local_embed.WEIGHTS_FILE: "0" * 64})
+    with pytest.raises(local_embed.EmbedUnavailable, match="pinned sha256"):
+        local_embed.embed(["crust"])
+    # Remembered for this file version: captures stop re-reading it.
+    assert not local_embed.is_available()
+    reads = []
+    monkeypatch.setattr(local_embed, "_sha256", lambda path: reads.append(path) or "x")
+    with pytest.raises(local_embed.EmbedUnavailable):
+        local_embed.embed(["crust"])
+    assert reads == []
+
+
+def test_the_pin_is_checked_once_per_file_version(model, monkeypatch):
+    calls = []
+    real = local_embed._sha256
+    monkeypatch.setattr(local_embed, "_sha256", lambda path: calls.append(path.name) or real(path))
+    local_embed.embed(["crust"])
+    local_embed.release()
+    local_embed.embed(["loaf"])
+    assert sorted(calls) == ["model.safetensors", "tokenizer.json"]
+
+
+@pytest.mark.parametrize("header", [
+    {"embeddings": {"dtype": "F32", "shape": [-4, 4], "data_offsets": [0, 64]}},
+    {"embeddings": {"dtype": "F32", "shape": [4, 4], "data_offsets": [64, 0]}},
+    {"embeddings": {"dtype": "F32", "shape": [1 << 20, 1 << 10], "data_offsets": [0, 1 << 32]}},
+    {"embeddings": {"dtype": "F32", "shape": [4, 4], "data_offsets": [0, 1 << 40]}},
+    {"embeddings": {"dtype": "F32", "shape": [4, "4"], "data_offsets": [0, 64]}},
+    {"embeddings": {"dtype": "F32", "shape": [4, 4]}},
+    {"embeddings": {"dtype": "I8", "shape": [4, 4], "data_offsets": [0, 16]}},
+    ["not", "a", "dict"],
+])
+def test_crafted_headers_fail_cleanly(model, monkeypatch, header):
+    raw = json.dumps(header).encode()
+    (model / "model.safetensors").write_bytes(len(raw).to_bytes(8, "little") + raw + b"\0" * 64)
+    pin(monkeypatch, model)
+    with pytest.raises(local_embed.EmbedUnavailable):
+        local_embed.embed(["crust"])
+    assert not local_embed.is_available()
+
+
+@pytest.mark.parametrize("damage", ["tiny", "nan", "tokenizer"])
+def test_other_damage_fails_cleanly(model, monkeypatch, damage):
+    if damage == "tiny":
+        (model / "model.safetensors").write_bytes(b"\x01\x02")
+    elif damage == "nan":
+        table = np.array(list(WORDS.values()), dtype=np.float32)
+        table[1][0] = np.inf
+        write_safetensors(model / "model.safetensors", table)
+    else:
+        (model / "tokenizer.json").write_text("{not json", encoding="utf-8")
+    pin(monkeypatch, model)
+    with pytest.raises(local_embed.EmbedUnavailable):
+        local_embed.embed(["crust"])
+    assert not local_embed.is_available()
+
+
+def test_a_linked_model_folder_is_ignored(model, tmp_path, monkeypatch):
+    link = tmp_path / "linked"
+    try:
+        link.symlink_to(model, target_is_directory=True)
+    except OSError:
+        pytest.skip("making a symlink needs extra rights on this computer")
+    monkeypatch.setenv(local_embed.ENV_DIR, str(link))
+    assert local_embed.model_dir() is None
+
+
+def test_idle_release_waits_only_for_what_is_left(model, monkeypatch):
+    scheduled = []
+    monkeypatch.setattr(local_embed, "_schedule", lambda seconds: scheduled.append(seconds))
+    local_embed.embed(["crust"])
+    local_embed._last_used -= 400
+    used = local_embed._last_used
+    local_embed._idle_check()
+    assert local_embed.is_loaded()
+    assert local_embed._last_used == used  # a check is not a use
+    assert local_embed.IDLE_SECONDS - 401 <= scheduled[-1] <= local_embed.IDLE_SECONDS - 399
+
+
+def test_release_cancels_the_timer_and_runs_the_hooks(model, monkeypatch):
+    monkeypatch.setattr(local_embed, "_release_hooks", [])
+    ran = []
+    local_embed.on_release(lambda: ran.append(1))
+    local_embed.embed(["crust"])
+    timer = local_embed._timer
+    assert timer is not None
+    local_embed.release()
+    assert local_embed._timer is None and timer.finished.is_set() and ran == [1]
+
+
+def test_vector_cache_follows_the_weights_and_goes_with_the_model(server_mod, model, monkeypatch):
+    server_mod._clear_static_vectors()
+    server_mod._shelf_build_library(LIBRARY)
+    keys = set(server_mod._static_vector_cache)
+    assert keys
+    local_embed.release()
+    assert not server_mod._static_vector_cache
+    server_mod._shelf_build_library(LIBRARY)
+    # New weights in the same folder never reuse the old vectors.
+    write_safetensors(model / "model.safetensors", np.array(list(WORDS.values())), dtype="F16")
+    pin(monkeypatch, model)
+    server_mod._shelf_build_library(LIBRARY)
+    assert set(server_mod._static_vector_cache) - keys
+
+
+def test_vector_cache_is_bounded(server_mod, model, monkeypatch):
+    monkeypatch.setattr(server_mod, "STATIC_VECTOR_CACHE_MAX", 5)
+    server_mod._clear_static_vectors()
+    found = server_mod._static_cached_vectors([f"crust {'loaf ' * i}" for i in range(12)])
+    assert len(found) == 12 and len(server_mod._static_vector_cache) == 5
+
+
+def test_too_few_search_vectors_fall_back_to_the_static_model(server_mod, model, monkeypatch):
+    monkeypatch.setattr(server_mod, "_shelf_vectors", lambda ids: {"h1": [1.0, 0.0]})
+    library = server_mod._shelf_build_library(LIBRARY)
+    assert (library.tier, library.has_vectors()) == ("static", True)
+
+
+def test_the_search_model_hears_a_podcast_transcript(server_mod, monkeypatch):
+    heard = []
+
+    class Engine:
+        def document_vector(self, title, text):
+            heard.append(text)
+            return [1.0, 0.0]
+
+        def source_vectors(self, ids):
+            return {i: [1.0, 0.0] for i in ids}
+    monkeypatch.setattr(server_mod, "_local_search_singleton", Engine())
+    library = server_mod._shelf_build_library(LIBRARY)
+    monkeypatch.setattr(server_mod, "_shelf_library", lambda: library)
+    server_mod._shelf_decision({"title": "Episode 12", "source_type": "podcast",
+                                "transcript": "levain crumb and a long talk"}, url="https://example.com/ep/12")
+    assert "levain crumb and a long talk" in heard[-1]

@@ -94,11 +94,14 @@ def capture(tmp_path, monkeypatch):
     # The AST loader copies methods without their module-level imports.
     index_scope = {"threading": threading, "unicodedata": unicodedata,
                    "contextmanager": contextmanager, "suppress": suppress,
-                   "_clamp_title": clamp_title}
+                   "_clamp_title": clamp_title,
+                   # 3.18: upsert_yoink keeps a shelf set by hand (no such
+                   # table in this schema, so it never applies here).
+                   "sqlite3": sqlite3, "_explicit_shelf_hook": None}
     _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
           index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
     _load(ROOT / "index.py", {"__init__", "upsert_yoink", "_rollback_on_error", "get_yoink", "get_by_slug",
-                              "_notify_source_changed"},
+                              "_notify_source_changed", "_explicit_shelf"},
           index_scope, class_name="Index")
     if "def list_capture_sources(" in (ROOT / "index.py").read_text(encoding="utf-8"):
         _load(ROOT / "index.py", {"list_capture_sources"}, index_scope, class_name="Index")
@@ -158,6 +161,7 @@ def capture(tmp_path, monkeypatch):
         # 3.18 shelving helpers that _run_extraction calls (loaded below).
         "_shelf_is_default": lambda topic: topic in ("Uncategorized", "Clips"),
         "_shelf_hint": lambda *a, **k: None, "_route_topic": lambda m, **k: "Test",
+        "_explicit_shelf_hint": lambda *a, **k: None,
         "_shelf_from_body": lambda body, **k: (None, None),
         "page_extractor": SimpleNamespace(PLATFORM_YOUTUBE="youtube",
                                           platform_for=lambda *a: "youtube",

@@ -111,8 +111,7 @@ def test_conflicting_evidence_stays_put():
     # neither wins, so the save is not guessed onto a shelf.
     meta = {"title": "Sourdough starter crumb proofing", "channel": "@laugh_track7"}
     d = sr.route(meta, topics=CFG, library=lib(COOKING + MEMES))
-    assert d.shelf in ("Cooking", "Uncategorized")
-    assert d.shelf != "Memes"
+    assert d.shelf == "Uncategorized"
 
 
 def test_transcript_gives_a_second_chance():
@@ -159,11 +158,54 @@ def test_clean_shelf_name():
     assert sr.clean_shelf_name(5) is None
 
 
+@pytest.mark.parametrize("bad", ["../evil", "a/b", "a\..\b", "<script>x</script>", "foo.", "...", "..",
+                                 "CON", "nul", "com1", "LPT9.txt", 'say "hi"', "a|b", "what?", "a:b",
+                                 "x‮y", "xy"])
+def test_clean_shelf_name_refuses_unsafe_folder_names(bad):
+    assert sr.clean_shelf_name(bad) is None
+
+
+def test_clean_shelf_name_keeps_real_names_in_one_unicode_form():
+    assert sr.clean_shelf_name("  Café   notes ") == "Café notes"
+    for good in ("C++ & Rust (2026)", "Console", ".NET", "Recipes, 2026", "🍞 Bread"):
+        assert sr.clean_shelf_name(good) == good
+
+
+def test_folder_names_from_other_apps_are_tidied_not_lost(tmp_path):
+    assert sr.folder_shelf_name("AI/ML: notes") == "AI ML notes"
+    assert sr.folder_shelf_name("Ideas...") == "Ideas"
+    assert sr.folder_shelf_name("///") is None and sr.folder_shelf_name("CON") is None
+    assert sr.remember_hints(tmp_path, [("https://x.com/a/status/7", "AI/ML")]) == 1
+    assert sr.hint_for(tmp_path, "https://x.com/a/status/7") == "AI ML"
+
+
+def test_one_shelf_for_every_case_and_unicode_spelling():
+    assert sr.canonical_shelf("café", ["Cooking", "Café"]) == "Café"
+    assert sr.canonical_shelf("COOKING", ["Cooking"]) == "Cooking"
+    assert sr.canonical_shelf("Bread", ["Cooking"]) == "Bread"
+
+
+def test_the_save_being_routed_does_not_prop_up_its_own_shelf():
+    tiny = [row(f"t{i}", "Tiny", "sourdough crumb proofing", "sourdough levain crumb") for i in range(3)]
+    library = lib(tiny)
+    # Without t0 the shelf has two saves, under the three a shelf needs.
+    assert library.nearest(sr._doc_text(tiny[0]), exclude="t0") is None
+    assert library.nearest(sr._doc_text(tiny[0]))[0] == "Tiny"
+
+
+def test_a_vector_of_another_size_never_scores():
+    library = sr.Library([row(f"h{i}", "Hearth", "x") for i in range(3)],
+                         vectors={f"h{i}": [1.0, 0.0, 0.0] for i in range(3)}, tier="static")
+    assert library.embedding_nearest([1.0, 0.0]) is None
+    assert library.embedding_nearest([1.0, 0.0, 0.0])[0] == "Hearth"
+
+
 def test_url_keys_match_across_spellings():
     assert sr.url_key("https://youtu.be/abcdefghijk") == sr.url_key("https://www.youtube.com/watch?v=abcdefghijk")
     assert sr.url_key("https://twitter.com/a/status/123") == sr.url_key("https://x.com/b/status/123?s=20")
     assert sr.url_key("https://old.reddit.com/r/x/comments/AbC/t/") == "reddit:abc"
-    assert sr.url_key("not a url at all") is None or sr.url_key("not a url at all").startswith("url:")
+    assert sr.url_key("not a url at all") is None
+    assert sr.url_key("https://example.com/Notes/") == "url:example.com/notes"
 
 
 def test_hints_round_trip_and_expire(tmp_path, monkeypatch):

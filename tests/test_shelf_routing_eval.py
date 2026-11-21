@@ -22,6 +22,10 @@ import server  # noqa: E402
 def _no_hints(tmp_path, monkeypatch):
     # Folder hints come from the fixture rows, never from a real data folder.
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    # The words-only tier, whatever this computer has installed: no bundled
+    # weights, no local search model.
+    monkeypatch.setenv("UOINK_EMBED_MODEL_DIR", str(tmp_path / "no-model"))
+    monkeypatch.setattr(server, "_local_search_singleton", None)
 
 
 @pytest.mark.parametrize("holdout", [False, True])

@@ -15,12 +15,14 @@ so tests and the CLI can use it without the helper running.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import math
 import os
 import re
 import threading
 import time
+import unicodedata
 import uuid
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
@@ -159,7 +161,10 @@ _BOILERPLATE_RE = re.compile(
     re.IGNORECASE)
 _TOPIC_LINE_RE = re.compile(r"^\*\*Topic:\*\* .*$", re.MULTILINE)
 _CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
-_FORBIDDEN_PATH_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+_FORBIDDEN_PATH_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f\x7f]')
+_RESERVED_NAMES = frozenset({"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$",
+                             *(f"COM{n}" for n in "123456789¹²³"),
+                             *(f"LPT{n}" for n in "123456789¹²³")})
 
 
 # ---------------------------------------------------------------------------
@@ -172,16 +177,64 @@ def is_fallback(topic: Any, fallback: str = FALLBACK) -> bool:
     return not value or value == str(fallback or FALLBACK).strip().lower()
 
 
+def _tidy_name_text(value: str) -> str:
+    """NFC, controls as spaces, runs of whitespace as one space, trimmed."""
+    return " ".join(_CONTROL_RE.sub(" ", unicodedata.normalize("NFC", value)).split())
+
+
+def _name_char_ok(ch: str) -> bool:
+    # Letters, marks, numbers, punctuation, symbols and the plain space.
+    # Format, private-use and unassigned characters (bidi overrides, for
+    # one) are out; the zero width joiner stays for emoji sequences.
+    return ch == " " or ch == "‍" or unicodedata.category(ch)[0] in "LMNPS"
+
+
 def clean_shelf_name(value: Any) -> str | None:
     """A shelf name a user can type: 1 to 64 visible characters that also
-    make a usable folder name. Returns the cleaned name or None."""
+    make a safe folder name on Windows, macOS and Linux. No path separators
+    or other characters Windows refuses, no trailing dot, no reserved device
+    name (CON, NUL, COM1...). Returns the cleaned name (NFC) or None."""
     if not isinstance(value, str):
         return None
-    name = " ".join(_CONTROL_RE.sub(" ", value).split())
+    name = _tidy_name_text(value)
     if not name or len(name) > SHELF_NAME_MAX:
         return None
-    if not _FORBIDDEN_PATH_CHARS.sub("", name).strip().rstrip("."):
+    if _FORBIDDEN_PATH_CHARS.search(name) or name.endswith("."):
         return None
+    if name.split(".")[0].strip().upper() in _RESERVED_NAMES:
+        return None
+    if not all(_name_char_ok(ch) for ch in name):
+        return None
+    return name
+
+
+def folder_shelf_name(value: Any) -> str | None:
+    """A shelf name from someone else's folder name (an X bookmark folder, a
+    playlist title). Characters a shelf can't hold become spaces, so
+    "AI/ML: notes" lands on "AI ML notes" instead of being lost. None when
+    nothing usable is left."""
+    if not isinstance(value, str):
+        return None
+    text = "".join(ch if _name_char_ok(ch) or ch.isspace() else " " for ch in _tidy_name_text(value))
+    text = " ".join(_FORBIDDEN_PATH_CHARS.sub(" ", text).split()).rstrip(". ")
+    if len(text) > SHELF_NAME_MAX:
+        text = text[:SHELF_NAME_MAX].rstrip(". ")
+    return clean_shelf_name(text)
+
+
+def shelf_key(name: Any) -> str:
+    """Two spellings that mean one shelf ("cooking", "Cooking", NFD "Café")
+    share this key."""
+    return unicodedata.normalize("NFC", str(name or "")).strip().casefold()
+
+
+def canonical_shelf(name: str, known: Iterable[str]) -> str:
+    """The spelling of an existing shelf that matches name (any case, any
+    Unicode form), else name itself."""
+    key = shelf_key(name)
+    for shelf in known:
+        if shelf and shelf_key(shelf) == key:
+            return shelf
     return name
 
 
@@ -521,7 +574,9 @@ class Library:
         best: dict[str, float] = {}
         for sim, vid in ranked:
             shelf = self.topic_of[vid]
-            if self.shelf_sizes[shelf] - (1 if vid == exclude else 0) < MIN_SHELF_ITEMS:
+            # The save being routed does not count toward its own shelf.
+            own = 1 if exclude is not None and self.topic_of.get(exclude) == shelf else 0
+            if self.shelf_sizes[shelf] - own < MIN_SHELF_ITEMS:
                 continue
             votes[shelf] += sim
             support[shelf] += 1
@@ -574,7 +629,11 @@ class Library:
             return None
         scored = []
         for topic, (centroid, name_only) in self._centroids.items():
+            if len(centroid) != len(query):
+                continue  # a vector from another model never scores
             scored.append((sum(a * b for a, b in zip(query, centroid)), topic, name_only))
+        if not scored:
+            return None
         scored.sort(reverse=True)
         top, shelf, name_only = scored[0]
         second = scored[1][0] if len(scored) > 1 else -1.0
@@ -721,9 +780,10 @@ def route(metadata: dict, *, topics: Topics | dict | None, library: Library | No
 def _settle(votes: list[tuple[str, str, str, bool]]) -> Decision | None:
     """Turn the softer votes into a decision, or None to stay put.
 
-    Two different kinds of evidence that agree win. One strong vote wins
-    when nothing points elsewhere. A strong vote also beats one weak vote
-    for another shelf. Anything murkier stays where it is."""
+    Two different kinds of evidence that agree win, unless a strong vote
+    points elsewhere. One strong vote wins only when nothing points
+    elsewhere: any vote for another shelf, even a weak one, keeps the save
+    where it is (a wrong shelf is worse than Uncategorized)."""
     if not votes:
         return None
     tally: dict[str, list] = defaultdict(list)
@@ -888,28 +948,38 @@ def _proposal_item(row: dict, reason: str, source: str) -> dict:
 # Files: keep the save's own files in step with its shelf
 # ---------------------------------------------------------------------------
 
-def sync_files(sidecar_path: Any, corpus_path: Any, shelf: str) -> list[str]:
+def sync_files(sidecar_path: Any, corpus_path: Any, shelf: str, *,
+               by_hand: bool | None = None) -> list[str]:
     """Write the new shelf into the save's sidecar (when it records one) and
     the corpus note's Topic line (when it has one). Folders stay where they
-    are. Returns the files changed."""
+    are. by_hand=True also records in the sidecar that the user placed it
+    (with the shelf, so a rebuild keeps it); False clears that. Returns the
+    files changed. A file that exists but can't be read or written raises
+    OSError, so the caller can say the files are behind."""
     changed = []
     from uoink_core.storage import _atomic_write_text
     if sidecar_path:
         path = Path(sidecar_path)
-        try:
-            data = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
-        except (OSError, ValueError):
-            data = None
-        if isinstance(data, dict) and "topic" in data and data.get("topic") != shelf:
-            data["topic"] = shelf
-            _atomic_write_text(path, json.dumps(data, indent=2, ensure_ascii=False))
-            changed.append(str(path))
+        data = None
+        if path.is_file():
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except ValueError:
+                data = None
+        if isinstance(data, dict):
+            before = dict(data)
+            if "topic" in data or by_hand:
+                data["topic"] = shelf
+            if by_hand:
+                data["shelf_by_hand"] = True
+            elif by_hand is False:
+                data.pop("shelf_by_hand", None)
+            if data != before:
+                _atomic_write_text(path, json.dumps(data, indent=2, ensure_ascii=False))
+                changed.append(str(path))
     if corpus_path:
         path = Path(corpus_path)
-        try:
-            text = path.read_text(encoding="utf-8") if path.is_file() else None
-        except OSError:
-            text = None
+        text = path.read_text(encoding="utf-8") if path.is_file() else None
         if text is not None:
             line = f"**Topic:** {shelf}"
             match = _TOPIC_LINE_RE.search(text)
@@ -936,10 +1006,64 @@ def files_topic(sidecar_path: Any, corpus_path: Any) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Move log (undo) and folder hints, both small JSON files in the data folder
+# Move log (undo) and folder hints, both small JSON files in the data folder.
+# The helper, the CLI and an MCP stdio server can all write them, so every
+# read and write holds a lock file in the data folder as well as the
+# in-process lock.
 # ---------------------------------------------------------------------------
 
+MAX_LOG_MOVES = 20000
+LOCK_NAME = ".shelves.lock"
+
 _lock = threading.RLock()
+_held = threading.local()
+
+
+def _lock_file(handle) -> None:
+    if os.name == "nt":
+        import msvcrt
+        if handle.seek(0, 2) == 0:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+
+
+def _unlock_file(handle) -> None:
+    if os.name == "nt":
+        import msvcrt
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
+def locked(data_root: Path):
+    """Hold the shelves lock for this data folder, in this process and
+    across processes. Nested use in one thread is fine."""
+    with _lock:
+        if getattr(_held, "depth", 0):
+            _held.depth += 1
+            try:
+                yield
+            finally:
+                _held.depth -= 1
+            return
+        path = Path(data_root) / LOCK_NAME
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a+b") as handle:
+            _lock_file(handle)
+            _held.depth = 1
+            try:
+                yield
+            finally:
+                _held.depth = 0
+                _unlock_file(handle)
 
 
 def _read_json(path: Path, default):
@@ -955,12 +1079,80 @@ def _read_json(path: Path, default):
 def _write_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-    tmp.write_text(json.dumps(value, ensure_ascii=False, indent=1), encoding="utf-8")
-    os.replace(tmp, path)
+    try:
+        tmp.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        for attempt in range(20):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:
+                # Windows refuses the swap while another program (a virus
+                # scanner, an editor) holds the file open for a moment.
+                if os.name != "nt" or attempt == 19:
+                    raise
+                time.sleep(0.05)
+    finally:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
 
 
 def move_log_path(data_root: Path) -> Path:
     return Path(data_root) / "shelf-moves.json"
+
+
+def _load_batches(data_root: Path) -> list[dict]:
+    data = _read_json(move_log_path(data_root), {})
+    return [b for b in data.get("batches") or [] if isinstance(b, dict)]
+
+
+def _save_batches(data_root: Path, items: list[dict]) -> None:
+    """Keep the newest batches, at most MOVE_LOG_BATCHES of them and about
+    MAX_LOG_MOVES moves in all (the newest batch always stays)."""
+    keep, total = [], 0
+    for batch in reversed(items[-MOVE_LOG_BATCHES:]):
+        size = len(batch.get("moves") or []) + len(batch.get("pending") or [])
+        if keep and total + size > MAX_LOG_MOVES:
+            break
+        keep.append(batch)
+        total += size
+    _write_json(move_log_path(data_root), {"version": 2, "batches": keep[::-1]})
+
+
+def begin_batch(data_root: Path, planned: list[dict], *, label: str = "",
+                append_to: str | None = None) -> dict | None:
+    """Write down the moves about to happen before any of them does, so a
+    move that stops halfway can be finished or put back (see finish_batch
+    and the helper's recovery). append_to joins the newest batch when it has
+    that id and is not undone; otherwise None comes back."""
+    with locked(data_root):
+        items = _load_batches(data_root)
+        if append_to:
+            batch = items[-1] if items else None
+            if (not batch or batch.get("id") != append_to or batch.get("undone")
+                    or len(batch.get("moves") or []) + len(planned) > MAX_MOVES):
+                return None
+        else:
+            batch = {"id": "mv_" + uuid.uuid4().hex[:12], "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                     "label": str(label or "")[:80], "moves": [], "undone": False}
+            items.append(batch)
+        batch["pending"] = list(batch.get("pending") or []) + list(planned)
+        _save_batches(data_root, items)
+        return dict(batch)
+
+
+def finish_batch(data_root: Path, batch_id: str, done: list[dict]) -> dict | None:
+    """The planned moves that really happened join the batch; the plan goes."""
+    with locked(data_root):
+        items = _load_batches(data_root)
+        batch = next((b for b in items if b.get("id") == batch_id), None)
+        if batch is None:
+            return None
+        batch["moves"] = list(batch.get("moves") or []) + list(done)
+        batch.pop("pending", None)
+        _save_batches(data_root, items)
+        return dict(batch)
 
 
 def record_batch(data_root: Path, moves: list[dict], *, label: str = "",
@@ -969,27 +1161,22 @@ def record_batch(data_root: Path, moves: list[dict], *, label: str = "",
     {video_id, from, to}. ``append_to`` adds them to the newest batch when
     it has that id and is not undone (a big move sent in several requests
     stays one undo); otherwise None comes back and nothing is written."""
-    with _lock:
-        path = move_log_path(data_root)
-        data = _read_json(path, {})
-        batches = [b for b in data.get("batches") or [] if isinstance(b, dict)]
-        if append_to:
-            batch = batches[-1] if batches else None
-            if (not batch or batch.get("id") != append_to or batch.get("undone")
-                    or len(batch.get("moves") or []) + len(moves) > MAX_MOVES):
-                return None
-            batch["moves"] = list(batch.get("moves") or []) + list(moves)
-        else:
-            batch = {"id": "mv_" + uuid.uuid4().hex[:12], "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                     "label": str(label or "")[:80], "moves": moves, "undone": False}
-            batches.append(batch)
-        _write_json(path, {"version": 1, "batches": batches[-MOVE_LOG_BATCHES:]})
-    return batch
+    with locked(data_root):
+        batch = begin_batch(data_root, moves, label=label, append_to=append_to)
+        return finish_batch(data_root, batch["id"], moves) if batch else None
 
 
 def batches(data_root: Path) -> list[dict]:
-    data = _read_json(move_log_path(data_root), {})
-    return [b for b in data.get("batches") or [] if isinstance(b, dict)]
+    with locked(data_root):
+        return _load_batches(data_root)
+
+
+def unfinished_batches(data_root: Path) -> list[dict]:
+    """Batches a stopped move or undo left half done."""
+    path = move_log_path(data_root)
+    if not path.exists():
+        return []
+    return [b for b in batches(data_root) if b.get("pending") or b.get("undoing")]
 
 
 def find_batch(data_root: Path, batch_id: str | None) -> dict | None:
@@ -1000,23 +1187,39 @@ def find_batch(data_root: Path, batch_id: str | None) -> dict | None:
     return next((b for b in reversed(items) if not b.get("undone")), None)
 
 
+def mark_undoing(data_root: Path, batch_id: str) -> None:
+    _set_batch(data_root, batch_id, undoing=True)
+
+
 def mark_undone(data_root: Path, batch_id: str) -> None:
-    with _lock:
-        path = move_log_path(data_root)
-        data = _read_json(path, {})
-        for batch in data.get("batches") or []:
-            if isinstance(batch, dict) and batch.get("id") == batch_id:
-                batch["undone"] = True
-        _write_json(path, data)
+    """An undone batch keeps its count and shelves for the summary; its
+    moves go, so the log stays small."""
+    _set_batch(data_root, batch_id, undone=True)
+
+
+def _set_batch(data_root: Path, batch_id: str, *, undoing: bool = False, undone: bool = False) -> None:
+    with locked(data_root):
+        items = _load_batches(data_root)
+        for batch in items:
+            if batch.get("id") != batch_id:
+                continue
+            if undoing:
+                batch["undoing"] = True
+            if undone:
+                summary = batch_summary(batch)
+                batch.update(undone=True, count=summary["count"], shelves=summary["shelves"], moves=[])
+                batch.pop("undoing", None)
+        _save_batches(data_root, items)
 
 
 def batch_summary(batch: dict | None) -> dict | None:
     if not batch:
         return None
     moves = batch.get("moves") or []
-    shelves = sorted({m.get("to") for m in moves if m.get("to")})
+    shelves = sorted({m.get("to") for m in moves if m.get("to")}) or list(batch.get("shelves") or [])
+    count = len(moves) if moves or "count" not in batch else int(batch.get("count") or 0)
     return {"id": batch.get("id"), "at": batch.get("at"), "label": batch.get("label") or "",
-            "count": len(moves), "shelves": shelves, "undone": bool(batch.get("undone"))}
+            "count": count, "shelves": shelves, "undone": bool(batch.get("undone"))}
 
 
 def url_key(url: Any) -> str | None:
@@ -1055,8 +1258,8 @@ def url_key(url: Any) -> str | None:
         match = re.search(r"/comments/([A-Za-z0-9]+)", path)
         if match:
             return "reddit:" + match.group(1).lower()
-    if not host:
-        return None
+    if not host or not re.fullmatch(r"[\w.-]+", host) or "." not in host.strip("."):
+        return None  # not a web address ("not a url at all")
     return "url:" + host + path.rstrip("/").lower()
 
 
@@ -1064,43 +1267,76 @@ def hints_path(data_root: Path) -> Path:
     return Path(data_root) / "shelf-hints.json"
 
 
-def remember_hints(data_root: Path, pairs: Iterable[tuple[str, str]]) -> int:
-    """Remember the shelf a not-yet-captured URL should land on."""
+def _hint_fresh(value: Any, now: float) -> bool:
+    try:
+        return isinstance(value, dict) and now - float(value.get("at") or 0) < HINT_TTL_SECONDS
+    except (TypeError, ValueError):
+        return False
+
+
+def remember_hints(data_root: Path, pairs: Iterable[tuple[str, str]], *, by_hand: bool = False) -> int:
+    """Remember the shelf a not-yet-captured URL should land on. A folder
+    name from an import is tidied into a shelf name (folder_shelf_name).
+    by_hand marks a shelf the user named for this capture: it may replace a
+    shelf the user set before, where an import folder never does."""
     now = time.time()
     clean = []
     for url, shelf in pairs:
-        key, name = url_key(url), clean_shelf_name(shelf)
+        key = url_key(url)
+        name = clean_shelf_name(shelf) if by_hand else folder_shelf_name(shelf)
         if key and name:
             clean.append((key, name))
     if not clean:
         return 0
-    with _lock:
+    with locked(data_root):
         path = hints_path(data_root)
         data = _read_json(path, {})
-        hints = {k: v for k, v in (data.get("hints") or {}).items()
-                 if isinstance(v, dict) and now - float(v.get("at") or 0) < HINT_TTL_SECONDS}
+        hints = {k: v for k, v in (data.get("hints") or {}).items() if _hint_fresh(v, now)}
         for key, name in clean:
-            hints[key] = {"shelf": name, "at": now}
+            hints[key] = {"shelf": name, "at": now, **({"hand": True} if by_hand else {})}
         if len(hints) > HINT_CAP:
             hints = dict(sorted(hints.items(), key=lambda kv: kv[1].get("at") or 0)[-HINT_CAP:])
         _write_json(path, {"version": 1, "hints": hints})
     return len(clean)
 
 
-def hint_for(data_root: Path, *urls: Any) -> str | None:
-    """The remembered shelf for any of these URLs, if one is still fresh."""
-    keys = [k for k in (url_key(u) for u in urls) if k]
-    if not keys:
-        return None
+def forget_hints(data_root: Path, urls: Iterable[Any]) -> int:
+    """Drop the hints for these URLs: the user has placed the save since, so
+    an old folder must not pull it back on the next capture."""
+    keys = {k for k in (url_key(u) for u in urls) if k}
     path = hints_path(data_root)
-    if not path.exists():
+    if not keys or not path.exists():
+        return 0
+    with locked(data_root):
+        data = _read_json(path, {})
+        hints = data.get("hints") if isinstance(data.get("hints"), dict) else {}
+        gone = [k for k in keys if k in hints]
+        for key in gone:
+            hints.pop(key)
+        if gone:
+            _write_json(path, {"version": 1, "hints": hints})
+    return len(gone)
+
+
+def hint_entry(data_root: Path, *urls: Any) -> dict | None:
+    """{"shelf", "by_hand"} remembered for any of these URLs, if still fresh."""
+    keys = [k for k in (url_key(u) for u in urls) if k]
+    path = hints_path(data_root)
+    if not keys or not path.exists():
         return None
-    hints = _read_json(path, {}).get("hints") or {}
+    with locked(data_root):
+        hints = _read_json(path, {}).get("hints") or {}
     now = time.time()
     for key in keys:
-        value = hints.get(key)
-        if isinstance(value, dict) and now - float(value.get("at") or 0) < HINT_TTL_SECONDS:
+        value = hints.get(key) if isinstance(hints, dict) else None
+        if _hint_fresh(value, now):
             name = clean_shelf_name(value.get("shelf"))
             if name:
-                return name
+                return {"shelf": name, "by_hand": value.get("hand") is True}
     return None
+
+
+def hint_for(data_root: Path, *urls: Any) -> str | None:
+    """The remembered shelf for any of these URLs, if one is still fresh."""
+    entry = hint_entry(data_root, *urls)
+    return entry["shelf"] if entry else None

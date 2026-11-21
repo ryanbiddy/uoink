@@ -249,10 +249,11 @@ def friendly_call(ns, server):
         if route["source"] in ("youtube_playlist", "podcast_feed"):
             raise UsageError("--shelf works for one save at a time, not a playlist or podcast feed")
         # The capture tools route through server._route_topic, which reads
-        # this hint first, so the save lands on the named shelf.
+        # this hint first, so the save lands on the named shelf. It is the
+        # user's own pick, so it also replaces a shelf they set before.
         import shelf_router
         shelf_router.remember_hints(server.DATA_ROOT, [(route["canonical"], ns.shelf),
-                                                       (ns.url, ns.shelf)])
+                                                       (ns.url, ns.shelf)], by_hand=True)
     return name, {key: route["canonical"]}
 
 
@@ -272,19 +273,97 @@ def shelves_check(ns):
             raise UsageError(f"move at most {shelf_router.MAX_MOVES} items at a time")
 
 
+SHELF_BODY_BYTES = 56 * 1024  # the helper refuses a body over 64 KB
+
+
+def _helper_shelves(server, path, body):
+    """POST one /library/shelves route to the running helper. Raises OSError
+    when it can't be reached."""
+    import urllib.error
+    import urllib.request
+    request = urllib.request.Request(
+        f"http://{server.HOST}:{server.PORT}{path}", data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json", "X-Uoink-Token": server._current_token()},
+        method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            payload = json.loads(exc.read().decode("utf-8"))
+        except ValueError:
+            payload = None
+        return payload if isinstance(payload, dict) else {"ok": False, "error": f"helper returned HTTP {exc.code}"}
+
+
+def _move_parts(moves):
+    """Moves in parts that each fit under the helper's body cap."""
+    part, size = [], 0
+    for move in moves:
+        n = len(json.dumps(move, ensure_ascii=False).encode("utf-8")) + 1
+        if part and size + n > SHELF_BODY_BYTES:
+            yield part
+            part, size = [], 0
+        part.append(move)
+        size += n
+    if part:
+        yield part
+
+
+def _helper_apply(server, moves, label, *, source=None):
+    """One undoable move on the running helper, sent in parts."""
+    total = {"ok": True, "moved": 0, "skipped": [], "moves": [], "batch_id": None}
+    for part in _move_parts(moves):
+        body = {"moves": part, "label": label, **({"source": source} if source else {}),
+                **({"append_to": total["batch_id"]} if total["batch_id"] else {})}
+        result = _helper_shelves(server, "/library/shelves/apply", body)
+        if not result.get("ok"):
+            # What moved stays moved and can be undone; say what did not.
+            return {**total, **result, "moved": total["moved"], "batch_id": total["batch_id"],
+                    "not_moved": len(moves) - total["moved"] - len(total["skipped"])}
+        total["batch_id"] = result.get("batch_id") or total["batch_id"]
+        total["moved"] += int(result.get("moved") or 0)
+        total["skipped"] += result.get("skipped") or []
+        total["moves"] += result.get("moves") or []
+        if result.get("files_not_updated"):
+            total.setdefault("files_not_updated", []).extend(result["files_not_updated"])
+    return total
+
+
 def shelves_command(ns, server):
-    """Tidy Uncategorized in-process, through the same helpers as the dashboard."""
+    """Tidy Uncategorized through the same helpers as the dashboard. When
+    Uoink is running, moves and undo go to it, so its library stays current
+    and one process writes the move log; otherwise they run here, under the
+    same cross-process lock."""
     import shelf_router
+    import uoink_agent_runtime as runtime
+    remote = ns.shelves_command != "tidy" and runtime.helper_running(server)
+    try:
+        return _shelves_run(ns, server, shelf_router, remote)
+    except OSError:
+        if not remote:
+            raise
+        # The helper stopped answering: do it here instead.
+        return _shelves_run(ns, server, shelf_router, False)
+
+
+def _shelves_run(ns, server, shelf_router, remote):
     if ns.shelves_command == "tidy":
         return server._shelf_proposals(limit=ns.limit)
     if ns.shelves_command == "undo":
+        if remote:
+            return _helper_shelves(server, "/library/shelves/undo",
+                                   {"batch_id": ns.batch_id} if ns.batch_id else {})
         return server._shelf_undo(ns.batch_id)
     if ns.shelves_command == "move":
         shelf = shelf_router.clean_shelf_name(ns.shelf)
-        return server._reshelve([(item, shelf) for item in dict.fromkeys(ns.ids)], label="Move")
+        ids = list(dict.fromkeys(ns.ids))
+        if remote:
+            return _helper_apply(server, [{"video_id": item, "shelf": shelf} for item in ids], "Move")
+        return server._reshelve([(item, shelf) for item in ids], label="Move")
     proposals = server._shelf_proposals(limit=shelf_router.MAX_MOVES)
-    wanted = " ".join(ns.shelf.split()).casefold()
-    group = next((g for g in proposals.get("groups") or [] if g["shelf"].casefold() == wanted), None)
+    wanted = shelf_router.shelf_key(" ".join(ns.shelf.split()))
+    group = next((g for g in proposals.get("groups") or [] if shelf_router.shelf_key(g["shelf"]) == wanted), None)
     if group is None:
         return {"ok": False, "error": f"No proposed group is called {ns.shelf}. "
                                       "Run 'uoink shelves tidy --text' to see the groups."}
@@ -294,7 +373,12 @@ def shelves_command(ns, server):
         if missing:
             return {"ok": False, "error": "Not in that group: " + ", ".join(missing)}
         ids = [item for item in ids if item in set(ns.only)]
-    return server._reshelve([(item, group["shelf"]) for item in ids], label="Tidy")
+    fallback = proposals.get("fallback") or "Uncategorized"
+    if remote:
+        return _helper_apply(server, [{"video_id": item, "shelf": group["shelf"], "from": fallback} for item in ids],
+                             "Tidy", source="tidy")
+    return server._reshelve([(item, group["shelf"]) for item in ids], label="Tidy",
+                            expect={item: fallback for item in ids}, skip_by_hand=True)
 
 
 def shelves_text(payload):
