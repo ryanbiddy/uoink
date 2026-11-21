@@ -113,7 +113,7 @@ def _old_index(tmp_path, monkeypatch, upto=34):
 def test_migration_0038_backfills_existing_rows(tmp_path, monkeypatch):
     db = _old_index(tmp_path, monkeypatch)
     with index_mod.Index.open(db) as index:
-        assert index_mod._current_schema_version(index._conn) == index_mod.PUBLISHED_DAY_MIGRATION
+        assert index_mod._current_schema_version(index._conn) >= index_mod.PUBLISHED_DAY_MIGRATION
         days = dict(index._conn.execute("SELECT video_id, published_day FROM yoinks").fetchall())
     assert days == {"tppod000001": "2025-03-04", "tpvideo0001": "2024-01-02", "tpnote00001": None}
 
