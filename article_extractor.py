@@ -51,6 +51,11 @@ _JS = re.compile(r"enable javascript|javascript is (?:not available|disabled|req
 _BOT = re.compile(r"checking (?:your browser|if the site connection is secure)|verify(?:ing)? (?:that )?you are (?:a )?human|are you a robot|press (?:and|&) hold|unusual traffic from your|enable javascript and cookies|complete the security check|attention required", re.I)
 _TEASER = re.compile(r"(?:subscribe|sign in|log in|register)(?: now)? to (?:continue|keep) reading|keep reading with a (?:subscription|free account)|already a subscriber|this (?:article|story) is (?:only )?(?:for|available to) (?:subscribers|members)|subscribers get (?:every|full|unlimited)|to read the full (?:article|story)", re.I)
 MAX_TEASER = 2000
+# The prompt says the article goes on behind it (not just "subscribe").
+_CONTINUES = re.compile(r"(?:subscribe|sign in|log in|register)(?: now)? to (?:continue|keep) reading|keep reading with a "
+                        r"(?:subscription|free account)|to (?:read|see) the (?:full|rest of the) (?:article|story)|"
+                        r"this (?:article|story) is (?:only )?(?:for|available to) (?:subscribers|members)|"
+                        r"the rest of (?:this|the) (?:article|story)|unlock (?:this|the full) (?:article|story)", re.I)
 _LANG = re.compile(r"(?:^|\s)(?:language|lang|highlight-source)-([A-Za-z0-9_+#.-]{1,24})(?=\s|$)")
 _GUTTER = re.compile(r"(?:^|\s)(?:linenos|linenodiv|lineno|rouge-gutter|line-numbers-rows|hljs-ln-numbers)(?:\s|$)")
 _FN_REF = re.compile(r"^#(?:user-content-)?(?:fn|footnote-?)(?!ref)[:._-]?(\w[\w.-]{0,19})$", re.I)
@@ -615,15 +620,41 @@ def _solid_prose(text):
             and bool(re.search(r"[.!?]", text)))
 
 
-def text_diagnostic(text, *, script_backed=False, allow_short=False):
-    """Judge chosen prose, not page chrome. Never echo page data in diagnostics."""
+def _units(text):
     # Count distinct sentences/blocks so repeated account copy cannot drown out
     # a wall prompt. Keep block boundaries for headings and Markdown fallbacks.
     units = {}
-    for part in re.split(r"(?<=[.!?])\s+|[\r\n]+", text or ""):
+    for part in re.split(r"(?<=[.!?…])\s+|[\r\n]+", text or ""):
         part = _SPACE.sub(" ", part).strip(" \t#>*-_").casefold()
         if part:
             units[part] = units.get(part, 0) + 1
+    return units
+
+
+def _teaser(units):
+    """"preview" when a short body ends in two or more subscribe prompts and
+    says the article goes on (a continue-reading prompt, or text cut off with
+    an ellipsis); "maybe" for the same ending without that evidence (a short
+    article with a newsletter box: saved, and labeled); else None."""
+    ordered = list(units)
+    tail = ordered[-6:]
+    prompts = [u for u in tail if sum(len(m[0]) for m in _TEASER.finditer(u)) >= len(u) * .35
+               or sum(len(m[0]) for m in _WALL.finditer(u)) >= len(u) * .35]
+    other = sum(len(u) for u in ordered if u not in prompts)
+    if len(prompts) < 2 or other >= MAX_TEASER:
+        return None
+    cut = any(u.endswith(("…", "...")) for u in tail if u not in prompts)
+    return "preview" if cut or any(_CONTINUES.search(u) for u in prompts) else "maybe"
+
+
+def maybe_paywall_preview(text):
+    """A saved short page that ends like a paywall preview, for its label."""
+    return _teaser(_units(text)) == "maybe"
+
+
+def text_diagnostic(text, *, script_backed=False, allow_short=False):
+    """Judge chosen prose, not page chrome. Never echo page data in diagnostics."""
+    units = _units(text)
 
     def substance(pattern):
         # A mention inside a report is not a prompt. Measure phrase coverage,
@@ -632,17 +663,8 @@ def text_diagnostic(text, *, script_backed=False, allow_short=False):
         other = sum(len(u) for u in units if u not in prompts)
         return prompts and other < MIN_TEXT and (len(prompts) >= 2 or sum(map(len, prompts)) >= other * .5)
 
-    def teaser():
-        # A short body that ends in two or more subscribe prompts is the free
-        # preview of a paywalled article, not the article.
-        ordered = list(units)
-        prompts = [u for u in ordered[-6:] if sum(len(m[0]) for m in _TEASER.finditer(u)) >= len(u) * .35
-                   or sum(len(m[0]) for m in _WALL.finditer(u)) >= len(u) * .35]
-        other = sum(len(u) for u in ordered if u not in prompts)
-        return len(prompts) >= 2 and other < MAX_TEASER
-
     text = _SPACE.sub(" ", text or "").strip()
-    if substance(_WALL) or teaser():
+    if substance(_WALL) or _teaser(units) == "preview":
         return "article body not found: login or paywall page"
     if substance(_BOT):
         return "article body not found: robot check page"
@@ -714,6 +736,9 @@ def extract(html: bytes | str, url: str) -> dict:
                       output_truncated=renderer.truncated)
         if length < MIN_TEXT:
             result["diagnostic"] = "short article"
+        if maybe_paywall_preview(text):
+            # Saved, since it may be the whole article, and labeled in case it is not.
+            result.update(preview_hint=True, diagnostic="short article: may be a paywall preview")
         return result
     except ExtractionLimit as exc:
         diagnostic = "article body not found: " + str(exc)

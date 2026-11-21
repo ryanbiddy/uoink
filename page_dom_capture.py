@@ -286,4 +286,6 @@ def build_extract_result(payload) -> dict:
     }
     if short:
         result["diagnostic"] = "short article"
+    if article_extractor.maybe_paywall_preview(plain):
+        result.update(preview_hint=True, diagnostic="short article: may be a paywall preview")
     return result

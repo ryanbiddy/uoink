@@ -173,3 +173,18 @@ def test_review_round_pixels_math_footnotes_and_inline_names():
     assert "![Real](https://news.example.org/img/real.jpg)" in out and "blank.gif" not in out
     assert r"$a \lt b$" in out and "<" not in out
     assert "$$\na = 1 " + "\\\\" + "\nb = 2\n$$" in out
+
+
+def test_a_short_article_with_a_subscribe_box_is_saved_and_labeled_but_a_cut_preview_is_not():
+    story = ("<h1>Ferry fares</h1><p>The council set the new ferry fares on Monday after a long debate. "
+             "Adult tickets rise by forty cents, children still ride free, and the night boat keeps its "
+             "old price until spring. The harbor trust says the money pays for the ramp repairs.</p>")
+    box = "<p>Subscribers get every issue first.</p><p>Already a subscriber? Sign in.</p>"
+    saved = article.extract(page(story + box), URL)
+    assert saved["ok"] and saved.get("preview_hint") is True, saved
+    assert "may be a paywall preview" in saved["diagnostic"]
+    cut = article.extract(page(story.replace("old price until spring.", "old price until…") + box), URL)
+    assert not cut["ok"] and "login or paywall" in cut["diagnostic"], cut
+    told = article.extract(page(story + "<p>Subscribe to continue reading.</p><p>Already a subscriber? Sign in.</p>"),
+                           URL)
+    assert not told["ok"] and "login or paywall" in told["diagnostic"]
