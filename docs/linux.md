@@ -28,6 +28,8 @@ browser extension. An agent uses the CLI or MCP tools to capture and search.
 The [pinned `base` model](../scripts/whisper_model_pin.json) has about 145 MB
 of weights. Allow a few hundred MB for the model, its download cache and the
 Python venv, plus space for captures. WhisperX needs a much larger download.
+The [pinned shelf model](../scripts/embed_model_pin.json) (potion-base-8M,
+about 30 MB) is staged the same way, from the same checks.
 
 ## Install
 
@@ -52,7 +54,7 @@ The installer accepts these options. Run
 | `--prefix DIR` | App folder. Defaults to `~/.local/lib/uoink`; must be outside the checkout. |
 | `--bin-dir DIR` | Command symlink folder. Defaults to `~/.local/bin`. |
 | `--python PATH` | Python 3.11 or newer to create the venv. Defaults to `python3`. |
-| `--no-model` | Skip staging the pinned Whisper `base` model. Keeps an existing model. |
+| `--no-model` | Skip staging the pinned Whisper `base` model and the shelf model. Keeps existing models. Shelves then use words only. |
 | `--with-whisperx` | Add WhisperX and CPU torch for podcast speaker labels. |
 | `--skip-ffmpeg-check` | Let image builds install ffmpeg later. Media capture still needs ffmpeg and ffprobe at runtime. |
 | `-h`, `--help` | Print help and exit. |
@@ -89,8 +91,8 @@ You can also remove these folders to delete the saved data and download cache.
 
 - `${XDG_DATA_HOME:-$HOME/.local/share}/Uoink` holds the library. Keep it if
   you want to reinstall without losing the library.
-- `${XDG_CACHE_HOME:-$HOME/.cache}/uoink/whisper-model` holds the installer's
-  model download cache.
+- `${XDG_CACHE_HOME:-$HOME/.cache}/uoink/whisper-model` and `.../uoink/embed-model`
+  hold the installer's model download caches.
 - The `uoink` source checkout is separate from the installed app.
 
 Captures in `~/Desktop/Uoink` or a custom output folder are separate too.

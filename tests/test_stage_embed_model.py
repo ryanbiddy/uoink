@@ -152,3 +152,30 @@ def test_mac_bundle_stages_the_same_pin_under_resources(tmp_path, monkeypatch):
     workflow = (ROOT / ".github/workflows/mac-qualify.yml").read_text(encoding="utf-8")
     assert "key: embed-model-${{ hashFiles('scripts/embed_model_pin.json') }}" in workflow
     assert '--embed-cache "$RUNNER_TEMP/embed-model"' in workflow
+
+
+def test_local_embed_checks_the_same_hashes_the_build_pins():
+    import local_embed
+    pin = stager.load_pin()
+    assert local_embed.PINNED_SHA256 == {
+        name: pin["files"][name]["sha256"] for name in (local_embed.WEIGHTS_FILE, local_embed.TOKENIZER_FILE)}
+
+
+def test_shelf_router_and_the_new_migration_ship_everywhere():
+    assert "'shelf_router.py'" in (ROOT / "build.ps1").read_text(encoding="utf-8")
+    assert "'shelf_router.py'" in (ROOT / "installer/verify_install.ps1").read_text(encoding="utf-8")
+    assert 'Source: "staging\shelf_router.py"; DestDir: "{app}"' in (
+        ROOT / "installer/uoink.iss").read_text(encoding="utf-8")
+    assert "shelf_router.py" in json.loads((ROOT / "scripts/mac/payload.json").read_text(encoding="utf-8"))["paths"]
+    launcher = (ROOT / "scripts/install_receipt/launcher.py").read_text(encoding="utf-8")
+    assert '"migrations/0037_shelf_by_hand.sql"' in launcher
+
+
+def test_linux_install_stages_the_model_like_whisper():
+    script = (ROOT / "scripts/linux/install.sh").read_text(encoding="utf-8")
+    block = script[script.index("embed_status="):script.index("embed_status='staged")]
+    assert 'if [ "$no_model" -eq 0 ]; then' in block
+    assert '"$repo/scripts/stage_embed_model.py"' in block
+    assert "$prefix/models/embed-bundled" in block and "is a symlink" not in block
+    assert "Linked model path" in block  # the same replace step as Whisper
+    assert "Shelf model: %s" in script
