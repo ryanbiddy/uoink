@@ -1770,6 +1770,30 @@ class CaptureLock:
                             sha256_text(key)[:40] + ".lock")
 
     @classmethod
+    def in_use(cls, root, key: str) -> bool:
+        """Read-only storage estimate. Deletion must still acquire the lock."""
+        try:
+            with open(cls.path_for(root, key), "rb") as handle:
+                if os.name == "nt":
+                    # Windows rejects reads of the byte locked by a writer.
+                    handle.read(1)
+                    return False
+                # POSIX flock is advisory. The owner record after the lock
+                # byte lets readers also recognize a dead or reused pid.
+                handle.seek(1)
+                owner = handle.read(80)
+                if not owner:
+                    return False
+                pid, birth = json.loads(owner)
+                if type(pid) is not int or pid <= 0 or (birth is not None and type(birth) not in (int, float)):
+                    return True
+                return _process_alive(pid, birth) != "dead"
+        except FileNotFoundError:
+            return False
+        except (OSError, ValueError, TypeError):
+            return True
+
+    @classmethod
     def try_acquire(cls, root, key: str) -> "CaptureLock | None":
         path = cls.path_for(root, key)
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -1786,6 +1810,10 @@ class CaptureLock:
             else:
                 import fcntl
                 fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                handle.truncate(1)
+                owner = (os.getpid(), _current_process_created_ms())
+                handle.write(json.dumps(owner).encode("ascii"))
+                handle.flush()
         except OSError:
             handle.close()
             return None
@@ -1818,6 +1846,7 @@ class CaptureLock:
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 import fcntl
+                handle.truncate(1)
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
         except OSError:
             pass

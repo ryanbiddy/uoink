@@ -7,6 +7,8 @@ import threading
 import time
 from pathlib import Path
 
+import pytest
+
 import index as index_mod
 import podcasts
 import server
@@ -138,11 +140,17 @@ def test_transcription_preflight_observes_consent_and_restart_requeues(
     idx.close()
 
 
-def test_restarted_job_reuses_a_completed_transcript(tmp_path, monkeypatch):
+@pytest.mark.parametrize("keep_audio", [True, False])
+def test_restarted_job_reuses_a_completed_transcript(tmp_path, monkeypatch, keep_audio):
     idx = index_mod.Index.open(tmp_path / "index.db")
     episode_id = _seed_downloaded_episodes(idx, tmp_path, count=1)[0]
     episode = podcasts.get_episode(idx, episode_id)
-    audio_path = Path(episode["audio_local_path"])
+    audio_path = tmp_path / "Podcasts" / "example-show" / "episode.mp3"
+    audio_path.parent.mkdir(parents=True)
+    Path(episode["audio_local_path"]).rename(audio_path)
+    podcasts._record_audio_result(idx, episode_id, local_path=str(audio_path), size_bytes=audio_path.stat().st_size,
+                                  error=None, status=podcasts.EPISODE_STATUS_DOWNLOADED)
+    monkeypatch.setattr(server, "_read_settings", lambda: {"keep_podcast_audio": keep_audio})
     transcript = {
         "model": "base",
         "language": "en",
@@ -201,6 +209,8 @@ def test_restarted_job_reuses_a_completed_transcript(tmp_path, monkeypatch):
 
     assert job["state"] == "completed"
     assert job["result"]["transcript_reused"] is True
+    assert audio_path.exists() == keep_audio
+    assert transcript_path.is_file()
     assert job["result"]["transcript_path"] == str(transcript_path)
     assert job["result"]["segments"] == 1
     assert podcasts.get_episode(idx, episode_id)["transcript_status"] == "done"

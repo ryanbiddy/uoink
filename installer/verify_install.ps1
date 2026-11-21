@@ -119,6 +119,7 @@ $requiredFiles = @(
     'writing_studio.py',
     'yoink_mcp.py',
     'yt_extract.py',
+    'uoink_browser.py',
     'extension\store-config.json',
     'defaults\style_anchors.json',
     # 3.16.1: yt-dlp's JavaScript runtime for YouTube.

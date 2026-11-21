@@ -12,6 +12,7 @@ import base64
 import hashlib
 import io
 import json
+import math
 import re
 import secrets
 import shutil
@@ -45,7 +46,7 @@ def handler_code():
     names = {
         "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "_TOKEN_RATE_LIMIT", "_TOKEN_RATE_WINDOW_SEC",
-        "_token_request_times", "_token_rate_lock", "_UOINK_CLIENT_HEADER_VALUE",
+        "_token_request_times", "_dashboard_token_times", "_dashboard_loads", "_dashboard_load_id", "_token_rate_lock", "_UOINK_CLIENT_HEADER_VALUE",
         "_YOINK_CLIENT_HEADER_VALUE", "_allowed_extension_ids",
         "_check_token_rate_limit", "_reports_live_extract", "Handler",
     }
@@ -70,11 +71,12 @@ def helper(handler_code, tmp_path, monkeypatch):
     monkeypatch.setattr(uoink_store, "CONFIG_PATH", tmp_path / "store-config.json")
     namespace = {
         "uoink_usage": uoink_usage,
+        "DASHBOARD_PATH": ROOT / "assets/dashboard/index.html", "sys": SimpleNamespace(platform="win32"),
         "__name__": "offline_token_handler", "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test", "TOKEN": TEST_TOKEN,
         "os": SimpleNamespace(environ={}), "_read_settings": Mock(return_value={}),
         "log": Mock(), "json": json, "re": re, "secrets": secrets,
-        "threading": threading, "time": time, "urlparse": urlparse,
+        "threading": threading, "time": time, "math": math, "urlparse": urlparse,
         "suite_service": SimpleNamespace(MANIFEST_PATH="/.well-known/suite-service.json",
                                          HEALTH_PATH="/api/suite/v1/health"),
     }
@@ -96,7 +98,7 @@ def request(helper, *, method="GET", path="/token", headers=None):
     head, body = handler.wfile.getvalue().split(b"\r\n\r\n", 1)
     status_line, header_bytes = head.split(b"\r\n", 1)
     return (int(status_line.split()[1]), BytesParser().parsebytes(header_bytes),
-            json.loads(body) if body else None)
+            (body if path == "/dashboard" else json.loads(body)) if body else None)
 
 
 def token_headers(origin=ORIGIN):
@@ -115,6 +117,93 @@ def test_manifest_public_key_derives_pinned_id():
 
 def test_default_allowlist_is_pinned(helper):
     assert helper["_allowed_extension_ids"]() == {PINNED_ID}
+
+
+def dashboard_load(helper):
+    status, _, body = request(helper, path="/dashboard", headers={"Host": f"127.0.0.1:{PORT}"})
+    assert status == 200
+    match = re.search(rb'<meta name="uoink-dashboard-load" content="([a-zA-Z0-9_-]+)">', body)
+    assert match
+    return match[1].decode()
+
+
+def test_dashboard_reloads_have_a_separate_bootstrap_budget(helper):
+    headers = {**token_headers(None), "Sec-Fetch-Site": "same-origin",
+               "Referer": f"http://127.0.0.1:{PORT}/dashboard?tab=library"}
+    for _ in range(120):
+        headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
+        assert request(helper, headers=headers)[0] == 200
+    headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
+    status, _, body = request(helper, headers=headers)
+    assert status == 429 and "token" not in body
+    for _ in range(10):
+        assert request(helper, method="POST", headers=token_headers())[0] == 200
+    assert request(helper, method="POST", headers=token_headers())[0] == 429
+
+
+@pytest.mark.parametrize("referrer", ["", "https://example.test/dashboard", "/dashboard", "other-page"])
+def test_other_pages_keep_original_budget(helper, referrer):
+    headers = {**token_headers(None), "Sec-Fetch-Site": "same-origin"}
+    if referrer:
+        headers["Referer"] = f"http://127.0.0.1:{PORT}/other" if referrer == "other-page" else referrer
+    for _ in range(10):
+        headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
+        assert request(helper, headers=headers)[0] == 200
+    headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
+    assert request(helper, headers=headers)[0] == 429
+
+
+@pytest.mark.parametrize("dashboard", [True, False])
+def test_retry_after_uses_oldest_request_in_own_bucket(helper, monkeypatch, dashboard):
+    now = 100.
+    monkeypatch.setattr(time, "monotonic", lambda: now)
+    bucket = helper["_dashboard_token_times" if dashboard else "_token_request_times"]
+    bucket.extend([41.25] + [90.] * (119 if dashboard else 9))
+    headers = token_headers()
+    if dashboard:
+        headers = {**token_headers(None), "Sec-Fetch-Site": "same-origin",
+                   "Referer": f"http://127.0.0.1:{PORT}/dashboard", "X-Uoink-Dashboard-Load": dashboard_load(helper)}
+    status, _, body = request(helper, headers=headers)
+    assert status == 429 and body["retry_after_seconds"] == 2
+    now += 2
+    assert request(helper, headers=headers)[0] == 200
+
+
+@pytest.mark.parametrize("extra", [{"Sec-Fetch-Site": "cross-site"}, {"Sec-Fetch-Site": "same-site"},
+                                   {"Origin": "https://example.test"}, {"Referer": "https://example.test/page"}])
+def test_other_origin_dashboard_load_preserves_allowance(helper, extra):
+    current = dashboard_load(helper)
+    before = helper["_dashboard_loads"].copy()
+    request(helper, path="/dashboard", headers={"Host": f"127.0.0.1:{PORT}", **extra})
+    assert helper["_dashboard_loads"] == before and current in before
+
+
+def test_dashboard_prunes_expired_loads_before_evicting_live_one(helper):
+    current = dashboard_load(helper)
+    helper["_dashboard_loads"].update((str(i), 0) for i in range(255))
+    new = dashboard_load(helper)
+    assert set(helper["_dashboard_loads"]) == {current, new}
+
+
+def test_dashboard_referrer_alone_keeps_original_budget(helper):
+    headers = {**token_headers(None), "Sec-Fetch-Site": "same-origin",
+               "Referer": f"http://127.0.0.1:{PORT}/dashboard"}
+    for _ in range(10):
+        assert request(helper, headers=headers)[0] == 200
+    assert request(helper, headers=headers)[0] == 429
+    headers["X-Uoink-Dashboard-Load"] = dashboard_load(helper)
+    assert request(helper, headers=headers)[0] == 200
+    assert request(helper, headers=headers)[0] == 429
+
+
+def test_extension_origin_with_same_origin_metadata_keeps_normal_limit(helper):
+    headers = {**token_headers(), "Sec-Fetch-Site": "same-origin",
+               "Referer": f"http://127.0.0.1:{PORT}/dashboard",
+               "X-Uoink-Dashboard-Load": dashboard_load(helper)}
+    for _ in range(10):
+        assert request(helper, headers=headers)[0] == 200
+    status, _, body = request(helper, headers=headers)
+    assert status == 429 and "token" not in body
 
 
 def test_store_id_adds_exact_origin_without_unpinning_dev(helper, tmp_path, monkeypatch):

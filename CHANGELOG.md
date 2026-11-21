@@ -178,6 +178,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `uoink --text get <id>` shows the saved item, including its shelf and available transcript. Other text commands show their result values.
 - Following a suggested podcast saves the show's name and schedules feed checks. Upgrading also resumes checks for untitled shows left unpolled by 3.17. Audio capture still requires separate consent.
 - The npm installer tells you when your installed version is newer and keeps it. Failed X video captures show the reason when X supplies one.
+- Library search shows a description or matching passage when a video has no captions. Short notes now count toward the Uncategorized shelf and appear when you filter by it.
+- Each library card has a keyboard-accessible Open button on its title. Closing the hook guide, source consent dialog, or screenshot handoff returns focus to its opener.
+- Closing the dashboard or extension popup frees its activity stream promptly. The dashboard retries when the helper is busy.
+- Lite captures explain that they skip comments. Settings shows the disk space used by podcast downloads and lets you remove audio after transcription or clean up existing downloads with a finished transcript.
+- The dashboard and first-run window show the extensions page for your detected browser and explain how to pin Uoink.
 
 ## [3.17.0] - 2026-11-12
 

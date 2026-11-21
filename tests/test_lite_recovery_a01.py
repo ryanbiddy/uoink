@@ -141,6 +141,8 @@ def test_lite_extraction_path(tmp: Path):
             f"lite does not enter the comments phase: {phases}")
 
     sidecar = json.loads((tmp / f"{tmp.name}.json").read_text(encoding="utf-8"))
+    corpus = (tmp / f"{tmp.name}.md").read_text(encoding="utf-8")
+    assert "Fetching comments" not in corpus and "Lite captures skip comments" in corpus
     _assert(sidecar["comments_status"] == "skipped",
             f"comments marked skipped, not pending: {sidecar['comments_status']}")
     _assert(sidecar["hook_type_status"] == "skipped",
@@ -152,6 +154,32 @@ def test_lite_extraction_path(tmp: Path):
             "lite still writes the transcript from kept captions")
     print("ok  lite path: full download + sparse shots + kept transcript + "
           "skipped comments/hook typing")
+
+
+def test_old_lite_export_on_read(tmp_path, monkeypatch):
+    import uoink_mcp_tools
+    from unittest.mock import Mock
+    pending = "*Fetching comments... they'll appear here when ready.*"
+    path = tmp_path / f"{tmp_path.name}.md"
+    saved = f"Quoted text: {pending}\n{server.COMMENTS_START_MARK}\n{pending}\n{server.COMMENTS_END_MARK}"
+    path.write_text(saved, encoding="utf-8")
+    sidecar = tmp_path / f"{tmp_path.name}.json"
+    monkeypatch.setattr(uoink_mcp_tools, "_find_yoink", lambda slug: (tmp_path, path))
+    monkeypatch.setattr(uoink_mcp_tools, "_backend", server)
+    for mode, status, expected in [("lite", "skipped", 1), ("full", "pending", 2)]:
+        sidecar.write_text(json.dumps({"long_video_mode": mode, "comments_status": status}), encoding="utf-8")
+        handler = Mock()
+        handler._yoink_markdown_path.return_value = path, None
+        server.Handler._handle_yoink_markdown(handler, "/yoinks/fixture/markdown")
+        assert handler._send_json.call_args.args[1]["markdown"].count(pending) == expected
+        assert server._generate_paste_corpus(tmp_path).count(pending) == expected
+        assert uoink_mcp_tools.get_uoink_corpus({"slug": "fixture"})["corpus_md"].count(pending) == expected
+        assert path.read_text(encoding="utf-8") == saved
+    sidecar.write_text(json.dumps({"long_video_mode": "lite", "comments_status": "skipped"}))
+    viewed = []
+    monkeypatch.setattr(server._platform, "open_in_os", lambda path: viewed.append(path.read_text(encoding="utf-8")))
+    server.Handler._handle_yoink_open_markdown(handler, "/yoinks/fixture/open-markdown")
+    assert len(viewed) == 1 and viewed[0].count(pending) == 1
 
 
 def test_extract_route_carries_lite_mode(tmp: Path):

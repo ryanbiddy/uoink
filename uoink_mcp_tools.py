@@ -434,7 +434,8 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     if not folder or not corpus:
         return _err("uoink not found")
     try:
-        md = corpus.read_text(encoding="utf-8")
+        from uoink_core.storage import read_export_markdown
+        md = read_export_markdown(corpus)
     except OSError as e:
         return _err(f"corpus read failed: {e}")
     sidecar = _read_sidecar(folder)

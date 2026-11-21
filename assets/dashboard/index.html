@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="uoink-dashboard-load" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Uoink Dashboard</title>
   <!-- Appearance: apply the saved theme before the first paint, so a forced
@@ -1058,8 +1059,8 @@
     }
 
     .uoink-card:hover,
-    .uoink-card:focus-visible,
-    .uoink-card[aria-current="true"] {
+    .uoink-card:focus-within,
+    .uoink-card:has(.card-title[aria-current="true"]) {
       background: var(--surface-sel);
     }
 
@@ -1299,6 +1300,10 @@
 
 
     .card-title {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      text-align: inherit;
       display: -webkit-box;
       overflow: hidden;
       -webkit-box-orient: vertical;
@@ -1308,6 +1313,11 @@
       font-weight: 600;
       line-height: 1.35;
       overflow-wrap: anywhere;
+    }
+
+    .card-title:focus-visible, .insight-title:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
     }
 
     .topic-chip {
@@ -1768,6 +1778,13 @@
       font-weight: 800;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+    }
+
+    button.insight-title {
+      background: transparent;
+      padding: 0;
+      border: 0;
+      text-align: start;
     }
 
     .insight-title {
@@ -6590,13 +6607,13 @@
               <button class="button" type="button" data-open-extension>Open extension folder</button>
             </div>
             <ol class="get-extension-steps">
-              <li>Open <code>chrome://extensions</code> in Chrome.</li>
-              <li>Turn on <strong>Developer mode</strong> in the top right.</li>
+              <li>Open <code id="extensionBrowserUrl">chrome://extensions/</code> in <span id="extensionBrowserName">your Chromium browser</span>.</li>
+              <li>Turn on <strong>Developer mode</strong>.</li>
               <li>Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.</li>
               <li id="extensionMacPickerHint" hidden>On a Mac that folder is inside the hidden Library. In the <strong>Load unpacked</strong> window press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd>, paste the path the button copied, press Return, then click <strong>Select</strong>.</li>
               <li>Click the puzzle-piece Extensions icon in the toolbar and pin <strong>Uoink</strong>, so the Uoink button stays visible.</li>
             </ol>
-            <p class="get-extension-note">Uoink is built and tested for Chrome. Edge and Brave are Chromium-based and may work, but are not tested.</p>
+            <p class="get-extension-note">Uoink is tested in Chrome. Other Chromium browsers may work.</p>
             <p class="get-extension-note">Chrome Web Store review is still pending, so you load it unpacked for now.</p>
           </div>
           <div class="source-map-heading">
@@ -7025,7 +7042,7 @@
           </section>
           <dialog id="semanticNoticeDialog" aria-labelledby="semanticNoticeTitle">
             <h2 id="semanticNoticeTitle">Gemma notice</h2>
-            <pre id="semanticNoticeText" style="white-space:pre-wrap;max-width:70ch;max-height:65vh;overflow:auto"></pre>
+            <pre id="semanticNoticeText" tabindex="0" style="white-space:pre-wrap;max-width:70ch;max-height:65vh;overflow:auto"></pre>
             <form method="dialog"><button class="button ghost" type="submit">Close</button></form>
           </dialog>
 
@@ -7138,6 +7155,19 @@
                 <input class="field" id="outputFolder" type="text" value="Loading..." aria-label="Output folder path" aria-describedby="outputFolderSaveStatus">
               </details>
               <div class="setting-feedback"><span class="setting-status" id="outputFolderSaveStatus" role="status" aria-live="polite" aria-atomic="true"></span><button class="button ghost setting-retry hidden" id="outputFolderSaveRetry" type="button" data-setting-retry="outputFolder">Retry save</button></div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Podcast audio</h2>
+              <p class="setting-copy" id="podcastAudioUsage" role="status">Checking disk use…</p>
+              <label class="inline-row"><input type="checkbox" id="keepPodcastAudio" checked aria-describedby="keepPodcastAudioSaveStatus"> Keep podcast audio after transcribing</label>
+              <p class="setting-copy">Keeping the download lets you transcribe the episode again offline. Turning this off removes audio after future transcriptions finish.</p>
+              <div class="setting-feedback"><span class="setting-status" id="keepPodcastAudioSaveStatus" role="status"></span><button class="button ghost setting-retry hidden" type="button" data-setting-retry="keepPodcastAudio" id="keepPodcastAudioSaveRetry">Retry save</button></div>
+              <div class="inline-row">
+                <button class="button" type="button" id="deletePodcastAudio" disabled>Delete podcast audio already transcribed</button>
+                <button class="button ghost hidden" type="button" id="stopPodcastCleanup">Stop</button>
+              </div>
+              <span class="setting-status" id="podcastCleanupStatus" role="status"></span>
             </div>
 
             <div class="setting-block" id="library-mirror">
@@ -7491,7 +7521,7 @@
     </div>
     <p class="activity-meta" id="itemHealthNote"></p>
   </dialog>
-  <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
+  <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="true" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
         <div class="soft-note">Screenshot handoff</div>
@@ -8164,11 +8194,32 @@
 
     async function getToken() {
       if (state.token) return state.token;
-      const res = await fetch("/token", { headers: { "X-Uoink-Client": "uoink-extension" } });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "token unavailable");
-      state.token = data.token;
-      return state.token;
+      if (!state.tokenRequest) {
+        state.tokenRequest = requestDashboardToken().finally(() => { state.tokenRequest = null; });
+      }
+      return state.tokenRequest;
+    }
+
+    async function requestDashboardToken() {
+      let retryAfter = 0;
+      for (const delay of [0, 250, 750]) {
+        if (delay) await new Promise(resolve => setTimeout(resolve, Math.max(delay, retryAfter)));
+        retryAfter = 0;
+        try {
+          const headers = { "X-Uoink-Client": "uoink-extension" };
+          const load = globalThis.document?.querySelector('meta[name="uoink-dashboard-load"]')?.content;
+          if (load) headers["X-Uoink-Dashboard-Load"] = load;
+          const res = await fetch("/token", {headers});
+          if (res.ok) {
+            const data = await res.json();
+            if (data.ok && data.token) return (state.token = data.token);
+          }
+          if (res.status === 429) {
+            retryAfter = Math.min(60, Number((await res.json()).retry_after_seconds) || 0) * 1000;
+          } else if (res.status < 500) break;
+        } catch (_) {}
+      }
+      throw new Error("Couldn’t connect to Uoink. Check that the helper is running, then try again.");
     }
 
     async function authFetch(path, opts = {}) {
@@ -8295,17 +8346,13 @@
       }
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (event.shiftKey && (document.activeElement === first || !focusables.includes(document.activeElement))) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
         first.focus();
       }
-    }
-
-    function isCardActivationKey(event) {
-      return event.key === "Enter" || event.key === " ";
     }
 
     function renderInlineMarkdown(value) {
@@ -12600,6 +12647,8 @@
 
     function openConsentModal(source, targetConsent, displaySummary) {
       if (!els.sourceConsentModal) return;
+      state.consentFocusTarget = els.standingSubscriptionList?.querySelector(
+        `.toggle-consent-btn[data-source-id="${CSS.escape(source.source_id)}"]`) || document.activeElement;
       const title = source.display_name || source.canonical_url || "this source";
       const isEnabling = targetConsent === "on";
 
@@ -12649,6 +12698,8 @@
       if (!els.sourceConsentModal) return;
       els.sourceConsentModal.classList.add("hidden");
       state.standingPendingIntent = null;
+      restoreFocus(state.consentFocusTarget);
+      state.consentFocusTarget = null;
     }
 
     async function confirmConsentMutation() {
@@ -12697,6 +12748,10 @@
       } finally {
         if (els.confirmSourceConsent) els.confirmSourceConsent.disabled = false;
         await loadStandingSubscriptions();
+        if (document.activeElement === document.body) {
+          restoreFocus(els.standingSubscriptionList.querySelector(
+            `.toggle-consent-btn[data-source-id="${CSS.escape(intent.source_id)}"]`) || els.refreshStandingSources);
+        }
       }
     }
 
@@ -13140,9 +13195,9 @@
         ? `<button class="button${lead ? " primary" : ""} insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(rowTitle(row))}">Write from this</button>`
         : "";
       return `
-        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
-          <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
+          <button type="button" class="insight-title" aria-label="Open ${htmlEscape(rowTitle(row))}">${htmlEscape(rowTitle(row))}</button>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
           <div class="insight-copy">${age >= 9000 ? "No activity on this one yet." : `${age} days since you last touched it.`}</div>
           ${scorePill}
@@ -13507,10 +13562,10 @@
       const image = row.thumbnail_path
         ? `<div class="insight-image" aria-hidden="true"><img alt="" class="hidden" data-card-thumb="${htmlEscape(row.thumbnail_path)}"></div>` : "";
       return `
-        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}">
           ${image}
           <div class="insight-kicker">${htmlEscape(origin.label || "imported")}${origin.list_title && origin.list_title !== origin.label ? ` &middot; ${htmlEscape(origin.list_title)}` : ""}</div>
-          <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
+          <button type="button" class="insight-title" aria-label="Open ${htmlEscape(rowTitle(row))}">${htmlEscape(rowTitle(row))}</button>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")}${row.topic ? ` | ${htmlEscape(row.topic)}` : ""}</div>
           ${origin.note ? `<div class="insight-note">${htmlEscape(origin.note)}</div>` : ""}
           ${scorePill}
@@ -15350,7 +15405,7 @@
     function libraryMatchHtml(row) {
       if (!state.filters.q.trim()) return "";
       const passage = row.passage_verified === true && row.passage;
-      if (!passage || !passage.text) return '<div class="card-match">No matching quote available.</div>';
+      if (!passage || !passage.text) return `<div class="card-match">${row.snippet ? matchExcerptHtml(row.snippet, state.filters.q) : "No matching quote available."}</div>`;
       const seconds = storedTime(passage.timestamp_seconds, passage.start, row.timestamp_seconds);
       const label = readerClock(seconds);
       const id = videoIdOf(row);
@@ -15415,13 +15470,13 @@
       const current = state.activeTab === "yoink" && videoIdOf(state.selectedYoink) === String(row.video_id || row.slug || "")
         ? ' aria-current="true"' : "";
       return `
-        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}"${current}>
+        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}">
           <div class="row-thumb" aria-hidden="true">
             <img alt="" data-thumb-for="${id}" class="hidden">
             <span class="source-type-chip">${sourceType}</span>
           </div>
           <div class="row-body" title="${title}">
-            <div class="card-title" title="${title}">${title}</div>
+            <button class="card-title" type="button" title="${title}" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}"${current}>${title}</button>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
@@ -16214,8 +16269,10 @@
       if (!grid || typeof grid.querySelectorAll !== "function") return;
       const open = state.activeTab === "yoink" ? videoIdOf(state.selectedYoink) : "";
       grid.querySelectorAll(".uoink-card").forEach((card) => {
-        if (open && card.dataset.videoId === open) card.setAttribute("aria-current", "true");
-        else card.removeAttribute("aria-current");
+        const title = card.querySelector(".card-title");
+        if (!title) return;
+        if (open && card.dataset.videoId === open) title.setAttribute("aria-current", "true");
+        else title.removeAttribute("aria-current");
       });
     }
 
@@ -16314,8 +16371,8 @@
     function fallbackTopicItems() {
       const counts = new Map();
       (state.library || []).forEach((row) => {
-        const topic = String(row.topic || "").trim();
-        if (topic) counts.set(topic, (counts.get(topic) || 0) + 1);
+        const topic = String(row.topic || "").trim() || "Uncategorized";
+        counts.set(topic, (counts.get(topic) || 0) + 1);
       });
       return [...counts.entries()]
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -16423,9 +16480,12 @@
       return state.hookGuide;
     }
 
-    async function openHookExplainer(hookId) {
+    async function openHookExplainer(hookId, opener = document.activeElement) {
+      state.hookFocusTarget = opener;
       els.hookExplainer.classList.remove("hidden");
+      els.hookExplainerClose.focus();
       const hooks = await loadHookGuide();
+      if (state.hookFocusTarget !== opener) return;
       els.hookExplainerList.innerHTML = hooks.length
         ? hooks.map((h) => `
           <div class="hook-explainer-row ${h.id === hookId ? "active" : ""}">
@@ -16436,11 +16496,15 @@
         : `<div class="soft-note">The guide didn't load. It ships with the helper; close this and try again.</div>`;
       const active = els.hookExplainerList.querySelector(".hook-explainer-row.active");
       if (active) active.scrollIntoView({ block: "nearest" });
-      els.hookExplainerClose.focus();
     }
 
     function closeHookExplainer() {
       els.hookExplainer.classList.add("hidden");
+      const opener = state.hookFocusTarget;
+      const id = opener?.closest("[data-card-id]")?.dataset.cardId;
+      restoreFocus(opener?.isConnected ? opener :
+        (id && els.libraryGrid.querySelector(`[data-card-id="${CSS.escape(id)}"] [data-hook-explain]`)) || els.searchInput);
+      state.hookFocusTarget = null;
     }
 
     function channelInitial(label) {
@@ -17931,6 +17995,68 @@
       }
     }
 
+    let podcastStorageVersion = 0;
+    let podcastCleanupIds = [];
+    let podcastCleanupRunning = false;
+    let podcastCleanupStopped = false;
+
+    async function refreshPodcastStorage() {
+      const version = ++podcastStorageVersion;
+      const usage = document.getElementById("podcastAudioUsage");
+      const button = document.getElementById("deletePodcastAudio");
+      button.disabled = true;
+      try {
+        let result = await authFetch("/podcasts/audio-storage?refresh=1");
+        while (result.pending) {
+          if (version !== podcastStorageVersion) return;
+          await new Promise(resolve => setTimeout(resolve, 250));
+          result = await authFetch("/podcasts/audio-storage");
+        }
+        if (version !== podcastStorageVersion) return;
+        const {bytes, deletable_bytes, episodes} = result;
+        podcastCleanupIds = episodes;
+        const size = n => n < 1048576 ? `${n.toLocaleString()} bytes` : `${(n / 1048576).toLocaleString(undefined, {maximumFractionDigits: 2})} MiB`;
+        usage.textContent = `${size(bytes)} on disk. ${size(deletable_bytes)} can be removed. ${size(bytes - deletable_bytes)} will be kept.`;
+        button.disabled = podcastCleanupRunning || !episodes.length;
+      } catch (_) {
+        if (version === podcastStorageVersion) usage.textContent = "Couldn’t check podcast storage. Reload Settings to try again.";
+      }
+    }
+
+    async function deletePodcastAudio() {
+      if (podcastCleanupRunning || !podcastCleanupIds.length ||
+          !window.confirm("Delete downloaded audio for episodes with a finished transcript? Your transcripts stay in your library.")) return;
+      const status = document.getElementById("podcastCleanupStatus");
+      const stop = document.getElementById("stopPodcastCleanup");
+      podcastCleanupRunning = true;
+      podcastCleanupStopped = false;
+      document.getElementById("deletePodcastAudio").disabled = true;
+      stop.disabled = false;
+      stop.textContent = "Stop";
+      stop.classList.remove("hidden");
+      const batch = podcastCleanupIds.slice();
+      let count = 0, kept = 0;
+      const removed = () => `Removed ${count} audio ${count === 1 ? "file" : "files"}`;
+      try {
+        for (const episode_id of batch) {
+          if (podcastCleanupStopped) break;
+          const result = await authFetch("/podcasts/audio-storage/delete", {
+            method: "POST", body: JSON.stringify({episode_id, confirmed: true}),
+          });
+          if (result.removed) count++;
+          else kept++;
+          status.textContent = `${removed()}.`;
+        }
+        status.textContent = `${podcastCleanupStopped && count + kept < batch.length ? "Stopped. " : ""}${removed()}.${kept ? ` Kept ${kept} that could not be safely removed.` : ""}`;
+      } catch (_) {
+        status.textContent = `${removed()} before cleanup stopped. Try again to continue.`;
+      } finally {
+        stop.classList.add("hidden");
+        podcastCleanupRunning = false;
+        await refreshPodcastStorage();
+      }
+    }
+
     async function refreshSettings() {
       const request = ++settingsReadVersion;
       const versions = Object.fromEntries([...settingEdits].map(([id, edit]) => [id, edit.version]));
@@ -17944,6 +18070,7 @@
         const data = await settingsRequest("/settings");
         if (request !== settingsReadVersion) return;
         hydrateSettings(data, versions);
+        refreshPodcastStorage();
         status.textContent = "";
       } catch (err) {
         if (request !== settingsReadVersion) return;
@@ -18933,8 +19060,20 @@
           ? shots.map(handoffShotHtml).join("")
           : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
       }
-      els.writingHandoffPopup.classList.remove("hidden");
+      if (els.writingHandoffPopup.classList.contains("hidden")) {
+        state.handoffFocusTarget = document.activeElement;
+        els.writingHandoffPopup.classList.remove("hidden");
+        focusFirstIn(els.writingHandoffPopup);
+      } else if (!els.writingHandoffPopup.contains(document.activeElement)) {
+        focusFirstIn(els.writingHandoffPopup);
+      }
       loadDetailFileImages();
+    }
+
+    function closeWritingHandoff() {
+      els.writingHandoffPopup.classList.add("hidden");
+      restoreFocus(state.handoffFocusTarget);
+      state.handoffFocusTarget = null;
     }
 
     function handoffShotHtml(shot) {
@@ -20217,6 +20356,7 @@
       usageSharing: ["usage_sharing", false],
       autoUpdateCheck: ["auto_update_check", false],
       suggestPodcastsToggle: ["suggest_podcasts", false],
+      keepPodcastAudio: ["keep_podcast_audio", true],
       screenshotCount: ["clipboard_screenshot_cap", 4],
       claimVerificationToggle: ["claim_verification_enabled", false],
       entityExtractionToggle: ["entity_extraction_enabled", false],
@@ -21051,6 +21191,10 @@
     }
 
     function bindSemanticSearch() {
+      const notice = document.getElementById("semanticNoticeDialog");
+      let opener;
+      notice.addEventListener("close", () => { restoreFocus(opener); opener = null; });
+      notice.addEventListener("keydown", event => trapModalFocus(event, notice, () => notice.close()));
       document.getElementById("semanticAccept").addEventListener("change", renderSemanticStatus);
       for (const [id, action] of [["semanticDownload", "download"], ["semanticPause", "pause"], ["semanticResume", "start"], ["semanticRemove", "remove"]]) {
         document.getElementById(id).addEventListener("click", () => semanticAction(action));
@@ -21061,7 +21205,8 @@
           const text = await readSettingsResource(link.getAttribute("href"), "text");
           document.getElementById("semanticNoticeTitle").textContent = link.textContent;
           document.getElementById("semanticNoticeText").textContent = text;
-          document.getElementById("semanticNoticeDialog").showModal();
+          opener = link;
+          notice.showModal();
         } catch (err) { document.getElementById("semanticStatus").textContent = settingError(err); }
       }));
     }
@@ -21703,6 +21848,12 @@
     }
 
     function wireSettingsAutosave() {
+      document.getElementById("deletePodcastAudio").addEventListener("click", deletePodcastAudio);
+      document.getElementById("stopPodcastCleanup").addEventListener("click", event => {
+        podcastCleanupStopped = true;
+        event.currentTarget.disabled = true;
+        event.currentTarget.textContent = "Stopping…";
+      });
       wireRelaySettings();
       bindSemanticSearch();
       bindTranscriptBackfill();
@@ -22090,7 +22241,13 @@
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
-      if (tab === "sources") renderSources();
+      if (tab === "sources") {
+        renderSources();
+        state.extensionBrowserRequest ||= authFetch("/extension/browser").then(browser => {
+          if (browser?.name) document.getElementById("extensionBrowserName").textContent = browser.name;
+          if (browser?.url) document.getElementById("extensionBrowserUrl").textContent = browser.url;
+        }).catch(() => { state.extensionBrowserRequest = null; });
+      }
       if (tab === "activity") refreshActivity();
       const settingsRead = tab === "settings" ? refreshSettings() : null;
       const back = tab === "library" && previousTab === "yoink" ? state.libraryScroll : null;
@@ -22374,7 +22531,8 @@
           showToast(translateMachineMessage(err.message, { url }));
         }
       });
-      document.getElementById("closeWritingHandoff").addEventListener("click", () => els.writingHandoffPopup.classList.add("hidden"));
+      document.getElementById("closeWritingHandoff").addEventListener("click", closeWritingHandoff);
+      els.writingHandoffPopup.addEventListener("keydown", (event) => trapModalFocus(event, els.writingHandoffPopup, closeWritingHandoff));
       document.getElementById("previewStyleAnchor").addEventListener("click", previewStyleAnchor);
       document.getElementById("addStyleAnchor").addEventListener("click", addStyleAnchor);
       document.getElementById("browseDefaultAnchors").addEventListener("click", openDefaultAnchorsModal);
@@ -22562,19 +22720,6 @@
       });
       els.hookExplainer.addEventListener("keydown", (event) => {
         trapModalFocus(event, els.hookExplainer, closeHookExplainer);
-      });
-      document.addEventListener("keydown", (event) => {
-        if (!isCardActivationKey(event)) return;
-        const card = event.target.closest(".uoink-card[role='button'], .insight-card[role='button']");
-        if (!card || event.target.closest("a, button, input, select, textarea, summary")) return;
-        if (!card.dataset.videoId && !card.dataset.folder) return;
-        event.preventDefault();
-        if (state.shelfSelect.on && card.closest("#libraryGrid")) {
-          toggleShelfPick(card.dataset.videoId);
-          return;
-        }
-        openYoinkDetail(rowFromCard(card));
-        focusReaderHeading();
       });
       document.getElementById("addPlaylist").addEventListener("click", addMobilePlaylist);
       document.getElementById("addPodcastFeed").addEventListener("click", addPodcastFeed);
@@ -22899,7 +23044,7 @@
         if (hookExplain) {
           // Before the card branch: hook badges live inside cards and must
           // open the explainer, not the detail view.
-          openHookExplainer(hookExplain.dataset.hookExplain || "");
+          openHookExplainer(hookExplain.dataset.hookExplain || "", hookExplain);
           return;
         }
         const healthOpen = event.target.closest("[data-health-open]");
@@ -22936,7 +23081,7 @@
         }
         const card = event.target.closest("[data-folder]");
         if (card && (card.dataset.videoId || card.dataset.folder)) {
-          if (event.target.closest("a")) return;
+          if (event.target.closest("a, button:not(.card-title):not(.insight-title), input, select, textarea, summary, label, [role=button], [role=link], [contenteditable]:not([contenteditable=false])")) return;
           openYoinkDetail(rowFromCard(card));
           focusReaderHeading();
           return;
@@ -23027,7 +23172,9 @@
         if (item && event.dataTransfer) {
           event.dataTransfer.setData("text/plain", item.path);
           state.writingUsedScreenshots.add(item.id);
-          setTimeout(() => renderWritingHandoff(selectedWritingScreenshots()), 80);
+          setTimeout(() => {
+            if (!els.writingHandoffPopup.classList.contains("hidden")) renderWritingHandoff(selectedWritingScreenshots());
+          }, 80);
         }
       });
       // Phase 3: Standing subscriptions & consent modal events
@@ -23059,6 +23206,7 @@
 
     function handleJobsStreamEvent(eventName, payload) {
       if (eventName === "snapshot") {
+        state.jobsStreamClient = payload.stream_id;
         const active = Array.isArray(payload.active) ? payload.active : [];
         const recent = Array.isArray(payload.recent) ? payload.recent : [];
         state.jobs = active.concat(recent);
@@ -23111,7 +23259,9 @@
 
     async function readJobsStream() {
       const token = await getToken();
-      const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
+      const headers = { "X-Uoink-Token": token };
+      if (state.jobsStreamClient) headers["X-Uoink-Stream"] = state.jobsStreamClient;
+      const res = await fetch("/jobs/stream", { headers });
       if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

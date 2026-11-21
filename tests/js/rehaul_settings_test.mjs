@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 const page = readFileSync(new URL('../../assets/dashboard/index.html', import.meta.url), 'utf8');
 const logic = page.slice(page.indexOf('    const SETTINGS_FIELDS'), page.indexOf('    async function postHelper'));
 const authLogic = page.slice(page.indexOf('    async function authFetch('), page.indexOf('    function prettyHook('));
-const refreshLogic = page.slice(page.indexOf('    async function refreshSettings()'), page.indexOf('    function diagnoseSummary('));
+const refreshLogic = page.slice(page.indexOf('    let podcastStorageVersion'), page.indexOf('    function diagnoseSummary('));
 const folderLogic = page.slice(page.indexOf('    async function pickOutputFolder()'), page.indexOf('    async function retryWithLiteMode('));
 const discoveryLogic = page.slice(page.indexOf('    const discoveryState ='), page.indexOf('    function renderSources()'));
 const tick = async () => { for (let i = 0; i < 8; i++) await new Promise(r => setImmediate(r)); };
