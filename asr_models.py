@@ -26,7 +26,7 @@ import shutil
 import subprocess
 import sys
 import threading
-from functools import lru_cache
+from pathlib import PurePosixPath
 from urllib.parse import urlsplit
 import time
 import urllib.error
@@ -151,17 +151,57 @@ def total_bytes(model_id: str) -> int:
 
 
 # ---- this computer ---------------------------------------------------------
-@lru_cache(maxsize=1)
+def _quota_limit(root):
+    """Read v2 or v1 CPU bandwidth at this cgroup and its ancestors."""
+    paths = {root, root / "cpu", root / "cpu,cpuacct"}
+    try:
+        for line in Path("/proc/self/cgroup").read_text().splitlines():
+            _, controllers, relative = line.split(":", 2)
+            sub = PurePosixPath(relative.lstrip("/"))
+            if ".." in sub.parts:
+                continue
+            bases = [root] if not controllers else [root / controllers, root / "cpu"]
+            if not controllers or "cpu" in controllers.split(","):
+                for base in bases:
+                    leaf = base / sub
+                    paths.update(p for p in (leaf, *leaf.parents) if p.is_relative_to(base))
+    except (OSError, ValueError):
+        pass
+    limits = []
+    for path in paths:
+        try:
+            if (path / "cpu.max").is_file():
+                quota, period = (path / "cpu.max").read_text().split()
+            else:
+                quota = (path / "cpu.cfs_quota_us").read_text()
+                period = (path / "cpu.cfs_period_us").read_text()
+            if int(quota) > 0 and int(period) > 0:
+                limits.append(max(1, int(quota) // int(period)))
+        except (OSError, ValueError):
+            continue
+    return min(limits) if limits else None
+
+
 def physical_cores() -> int:
-    logical = os.cpu_count() or 1
+    logical = (getattr(os, "process_cpu_count", os.cpu_count)() or os.cpu_count() or 1)
     try:
         if sys.platform == "win32":
             import ctypes
             count = ctypes.c_ulong()
-            query = ctypes.windll.kernel32.GetLogicalProcessorInformationEx
+            kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+            mask = ctypes.c_size_t()
+            system_mask = ctypes.c_size_t()
+            affinity = kernel.GetProcessAffinityMask
+            affinity.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t)]
+            affinity.restype = ctypes.c_int
+            if affinity(ctypes.c_void_p(-1), ctypes.byref(mask), ctypes.byref(system_mask)) and mask.value:
+                logical = min(logical, mask.value.bit_count())
+            query = kernel.GetLogicalProcessorInformationEx
+            query.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.POINTER(ctypes.c_ulong)]
+            query.restype = ctypes.c_int
             query(0, None, ctypes.byref(count))  # RelationProcessorCore
             buf = ctypes.create_string_buffer(count.value)
-            if query(0, buf, ctypes.byref(count)):
+            if count.value and query(0, buf, ctypes.byref(count)):
                 offset = cores = 0
                 while offset + 8 <= count.value:
                     size = int.from_bytes(buf[offset + 4:offset + 8], "little")
@@ -170,23 +210,28 @@ def physical_cores() -> int:
                     cores += 1
                     offset += size
                 if cores and offset == count.value:
-                    return cores
+                    return min(cores, logical)
         elif sys.platform == "darwin":
-            return max(1, int(subprocess.check_output(
-                ["/usr/sbin/sysctl", "-n", "hw.physicalcpu"], timeout=2)))
+            return min(logical, max(1, int(subprocess.check_output(
+                ["/usr/sbin/sysctl", "-n", "hw.physicalcpu"], timeout=2))))
         else:
             topology = Path("/sys/devices/system/cpu")
-            siblings = {p.read_text().strip() for p in topology.glob("cpu[0-9]*/topology/thread_siblings_list")}
+            affinity = os.sched_getaffinity(0) if hasattr(os, "sched_getaffinity") else None
+            quota = _quota_limit(Path("/sys/fs/cgroup"))
+            logical = min(logical, len(affinity) if affinity else logical, quota or logical)
+            siblings = {p.read_text().strip() for p in topology.glob("cpu[0-9]*/topology/thread_siblings_list")
+                        if affinity is None or int(p.parents[1].name[3:]) in affinity}
+            siblings.discard("")
             if siblings:
-                return len(siblings)
+                return min(len(siblings), logical)
     except (OSError, ValueError, AttributeError, subprocess.SubprocessError):
         pass
-    return max(1, logical // 2)
+    return max(1, logical)
 
 
 def cpu_threads(cores=None) -> int:
     cores = physical_cores() if cores is None else cores
-    return max(1, min(8, cores - max(1, cores // 4)))
+    return max(1, min(4, cores - 1))
 
 
 def machine() -> dict:
@@ -262,12 +307,24 @@ def _size(path: Path) -> int:
         return 0
 
 
+def _legacy_snapshot(model_id, root):
+    if model_id == "large-v3-turbo":
+        import uoink_reliability as rel
+        return rel._read_reliability_snapshot(root, model_id, legacy=True)
+    return None
+
+
 def state(model_id: str, root: Path) -> dict:
     """What is on disk for one model: ready (pinned revision complete with
     its marker), partial (some bytes kept for a resume) or missing. Cheap:
     sizes and the marker only, no hashing."""
     entry = get(model_id)
     root = Path(root)
+    legacy = _legacy_snapshot(model_id, root)
+    if legacy:
+        import uoink_reliability as rel
+        return {"state": "ready" if rel.is_model_ready(model_id, root) else "partial",
+                "bytes_on_disk": installed_bytes(model_id, root), "total_bytes": total_bytes(model_id)}
     snapshot, partial = _snapshot_dir(root, entry), _partial_dir(root, entry)
     have = 0
     complete = True
@@ -278,7 +335,11 @@ def state(model_id: str, root: Path) -> dict:
             continue
         complete = False
         part = partial / (name + ".part")
-        have += min(_size(part), size)
+        progress = _size(part)
+        if model_id == "large-v3-turbo":
+            old_part = _partial_dir(root, dict(entry, repo=LEGACY_TURBO_REPO)) / part.name
+            progress = max(progress, _size(old_part))
+        have += min(progress, size)
     ref = _repo_dir(root, entry) / "refs" / "main"
     try:
         pinned = ref.read_text(encoding="ascii").strip() == entry["revision"]
@@ -325,9 +386,8 @@ class ModelRedirectHandler(urllib.request.HTTPRedirectHandler):
         target = urlsplit(newurl)
         host = target.hostname or ""
         if (target.scheme != "https" or target.username is not None or target.port not in (None, 443)
-                or host not in {"huggingface.co", "cdn-lfs.huggingface.co", "cdn-lfs.hf.co",
-                                "cdn-lfs-us-1.hf.co", "cdn-lfs-eu-1.hf.co",
-                                "cas-bridge.xethub.hf.co", "transfer.xethub.hf.co"}):
+                or not (host == "huggingface.co" or host.endswith((".huggingface.co", ".hf.co")))):
+            # The pinned file hash verifies the bytes. The host check confines redirects.
             raise ValueError("The model download redirected outside Hugging Face.")
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
@@ -399,11 +459,23 @@ def download(model_id: str, root: str | Path, *, cancel_event: threading.Event |
         opener = urllib.request.build_opener(ModelRedirectHandler()).open
     lock = root / f".{entry['id']}.download.lock"
     with _exclusive(lock):
+        legacy = _legacy_snapshot(model_id, root)
+        if legacy:
+            _marker(root, entry).write_text(READY_TEXT, encoding="utf-8")
+            return {"ok": True, "model": model_id, "revision": legacy.name,
+                    "bytes": installed_bytes(model_id, root)}
         remaining = max(0, total - state(model_id, root)["bytes_on_disk"])
         if remaining and shutil.disk_usage(root).free < remaining + 16 * 1024**2:
             raise OSError("There is not enough free disk space for this model.")
         snapshot.mkdir(parents=True, exist_ok=True)
         partial.mkdir(parents=True, exist_ok=True)
+        if model_id == "large-v3-turbo":
+            old = _partial_dir(root, dict(entry, repo=LEGACY_TURBO_REPO))
+            for name, (size, _, _) in entry["files"].items():
+                src, dst = old / (name + ".part"), partial / (name + ".part")
+                if (src.resolve() == src.absolute() and dst.resolve() == dst.absolute()
+                        and _size(dst) < _size(src) <= size):
+                    os.replace(src, dst)
         done = [0]
 
         def report(delta: int) -> None:
@@ -432,7 +504,7 @@ def download(model_id: str, root: str | Path, *, cancel_event: threading.Event |
                 _fetch(url, part, size, cancel_event=cancel_event, on_bytes=report,
                        opener=opener, timeout=timeout)
             except OSError as exc:
-                if exc.errno != errno.ENOSPC:
+                if exc.errno not in (errno.ENOSPC, getattr(errno, "EDQUOT", -1)):
                     raise
                 part.unlink(missing_ok=True)
                 raise OSError("There is not enough free disk space for this model.") from exc

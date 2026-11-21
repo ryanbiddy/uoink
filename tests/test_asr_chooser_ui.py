@@ -148,3 +148,7 @@ def test_chooser_selection_updates_settings_and_off_tab_refresh_skips_network():
     """
     result = subprocess.run(["node", "-e", code], cwd=ROOT, text=True, capture_output=True)
     assert result.returncode == 0, result.stderr
+
+
+def test_download_card_patch_and_visibility_in_dom():
+    subprocess.run(["node", "tests/js/asr_chooser_test.mjs"], cwd=ROOT, check=True, timeout=10)

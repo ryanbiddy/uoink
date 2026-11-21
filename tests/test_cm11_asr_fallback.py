@@ -337,9 +337,8 @@ def test_transcribe_media_uses_cached_model_only(tmp_path, monkeypatch):
 
 
 def test_explicit_model_download_writes_readiness_marker(tmp_path, monkeypatch):
-    def install(model, root, **_kwargs):
-        (root / (model + ".pt")).write_text("ready")
-    monkeypatch.setattr(reliability.asr_models, "download", install)
+    from tests.test_asr_models import fixture_download
+    monkeypatch.setattr(reliability.asr_models, "download", fixture_download)
     result = reliability.ensure_model("tiny", tmp_path)
     marker = tmp_path / "tiny.pt"
     _assert(marker.is_file(),

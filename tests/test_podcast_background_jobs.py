@@ -333,3 +333,29 @@ def test_cancelling_queued_podcast_clears_episode_status(tmp_path, monkeypatch):
     assert not error and job["state"] == "cancelled"
     assert podcasts.get_episode(idx, episode)["transcript_status"] == "none"
     idx.close()
+
+
+def test_cancelled_worker_preserves_retry_badge(tmp_path, monkeypatch):
+    import queue
+    import pytest
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    episode = _seed_downloaded_episodes(idx, tmp_path, 1)[0]
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server.whisper_runner, "is_transcription_available", lambda: True)
+    monkeypatch.setattr(server.whisper_runner, "is_model_downloaded", lambda *_: True)
+    monkeypatch.setattr(server, "_ensure_podcast_transcription_worker", lambda: None)
+    jobs = queue.Queue()
+    monkeypatch.setattr(server, "_podcast_transcription_queue", jobs)
+    payload, _ = server._queue_podcast_transcription(episode)
+    def cancel_and_retry(*a, **kw):
+        server._cancel_playlist_job(payload["job_id"])
+        retry, status = server._queue_podcast_transcription(episode)
+        assert status == 202 and jobs.get_nowait() == retry["job_id"]
+        kw["checkpoint"]({})
+    monkeypatch.setattr(server.whisper_runner, "transcribe_audio", cancel_and_retry)
+    monkeypatch.setattr(jobs, "get", lambda *a, **kw: queue.Queue.get(jobs, block=False))
+    with pytest.raises(queue.Empty):
+        server._podcast_transcription_worker()
+    assert podcasts.get_episode(idx, episode)["transcript_status"] == "queued"
+    idx.close()

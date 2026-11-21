@@ -366,13 +366,21 @@ def _hf_token() -> str | None:
 DIARIZATION_MODEL = "pyannote/speaker-diarization-community-1"
 
 
+def _diarizer_class(whisperx):
+    pipeline = getattr(whisperx, "DiarizationPipeline", None)
+    if pipeline is None:
+        from whisperx.diarize import DiarizationPipeline
+        return DiarizationPipeline
+    return pipeline
+
+
 def _diarization_model_name(whisperx) -> str | None:
     """The diarization model this runtime will actually load, or None when
     the installed WhisperX does not accept an explicit model name (unknown
     values are recorded as null, never guessed)."""
     try:
-        params = inspect.signature(whisperx.DiarizationPipeline).parameters
-    except (TypeError, ValueError):
+        params = inspect.signature(_diarizer_class(whisperx)).parameters
+    except (ImportError, TypeError, ValueError):
         return None
     return DIARIZATION_MODEL if "model_name" in params else None
 
@@ -402,7 +410,7 @@ def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
     """Create a WhisperX diarizer across old/new constructor signatures."""
     kwargs: dict[str, Any] = {}
     try:
-        params = inspect.signature(whisperx.DiarizationPipeline).parameters
+        params = inspect.signature(_diarizer_class(whisperx)).parameters
     except (TypeError, ValueError):
         params = {}
     if "model_name" in params:
@@ -418,7 +426,7 @@ def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
     if "cache_dir" in params:
         kwargs["cache_dir"] = str(Path(data_root) / "diarization_models")
     kwargs["device"] = device
-    return whisperx.DiarizationPipeline(**kwargs)
+    return _diarizer_class(whisperx)(**kwargs)
 
 
 # ---- transcript helper -------------------------------------------------
@@ -429,12 +437,12 @@ def _shape_segments(segments) -> list[dict]:
     for s in segments or []:
         if not isinstance(s, dict):
             continue
-        row: dict[str, Any] = {
-            "start": float(s.get("start") or 0.0),
-            "end": float(s.get("end") or 0.0),
-            "text": (s.get("text") or "").strip(),
-        }
-        words = reliability._segment_words(s)
+        entries = reliability._transcript_entries_from_segments([s])
+        if not entries:
+            continue
+        start, end, text = entries[0]
+        row = {"start": start, "end": end, "text": text}
+        words = getattr(entries[0], "words", None)
         if words:
             row["words"] = words
         spk = s.get("speaker")
@@ -462,7 +470,7 @@ def plain_engine_for(diarize: bool) -> bool:
     has its own Silero voice detection, so a transcript-only job uses it.
     The gate is unchanged: some engine must be available, as before.
     """
-    if sys.platform != "win32" or diarize or transcription_engine() is None:
+    if sys.platform == "darwin" or diarize or transcription_engine() is None:
         return False
     try:
         return importlib.util.find_spec("faster_whisper") is not None
@@ -537,10 +545,19 @@ def transcribe_audio(audio_path: Path, *,
     model_size = normalize_model(model_size)
     fallback = None
     if reliability.is_english_only(model_size):
+        _platform.require_media()
         checker = _cached_model_snapshot(data_root, MODEL_BASE) or _bundled_snapshot(MODEL_BASE)
+        checker_name = MODEL_BASE
+        if checker is None:
+            for name in _MODELS:
+                if not reliability.is_english_only(name):
+                    checker = _cached_model_snapshot(data_root, name)
+                    if checker:
+                        checker_name = name
+                        break
         model_size, language, fallback = reliability._english_guard(
             audio_path, model_size, Path(data_root) / "models" / "whisper", language,
-            checker_path=checker, cancel_event=cancel_event)
+            checker_path=checker, checker_name=checker_name, cancel_event=cancel_event)
     if plain_engine_for(diarize):
         result = _transcribe_audio_plain(
             audio_path, data_root=data_root, model_size=normalize_model(model_size),
@@ -640,12 +657,22 @@ def transcribe_audio(audio_path: Path, *,
         def segment_progress(percent):
             if cancel_event is not None and cancel_event.is_set():
                 raise reliability._cancelled_error()
+            if progress is not None and percent is not None:
+                progress(percent, 100)
             if checkpoint is not None:
                 checkpoint({"percent": percent})
 
-        callbacks = {"progress_callback": segment_progress} if checkpoint or cancel_event else {}
-        # WhisperX exposes this callback after every decoded segment.
-        result = model.transcribe(audio_input, language=language, **callbacks)
+        def callbacks(fn):
+            if checkpoint or progress or cancel_event:
+                try:
+                    if "progress_callback" in inspect.signature(fn).parameters:
+                        return {"progress_callback": segment_progress}
+                except (ValueError, TypeError):
+                    pass
+            return {}
+
+        result = model.transcribe(audio_input, language=language, **callbacks(model.transcribe))
+        segment_progress(None)
         segments = result.get("segments") or []
         detected_lang = result.get("language") or language or "en"
 
@@ -670,13 +697,11 @@ def transcribe_audio(audio_path: Path, *,
                     language_code=detected_lang, device=device)
                 aligned = whisperx.align(
                     segments, align_model, align_meta,
-                    audio_input, device=device, **callbacks)
+                    audio_input, device=device, **callbacks(whisperx.align))
                 segment_progress(None)
                 diarize_pipeline = _diarization_pipeline(
                     whisperx, device=device, data_root=data_root)
-                params = inspect.signature(diarize_pipeline).parameters
-                diarize_segments = diarize_pipeline(
-                    audio_input, **(callbacks if "progress_callback" in params else {}))
+                diarize_segments = diarize_pipeline(audio_input, **callbacks(diarize_pipeline))
                 segment_progress(None)
                 aligned = whisperx.assign_word_speakers(
                     diarize_segments, aligned)

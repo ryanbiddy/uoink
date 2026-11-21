@@ -14,10 +14,9 @@ OS reclaims everything it loaded.
 Guarantees:
 - One model runs at a time: a thread slot in this process plus an OS file
   lock in the data folder, so the helper and an MCP server never run two.
-- A job with a ``checkpoint`` (podcast, replacement or backfill) pauses after each
-  segment while the caller's checkpoint runs. A paused job gives the slot
-  back. Its child stays parked while the capture runs in a separate child.
-  Each child's timeout and cancellation affect only its own job.
+- A foreground capture can evict a background decoder at a checkpoint. The
+  interrupted item restarts, without repeating caller checkpoints. After two
+  preemptions it reserves the engine until the item finishes.
 - Cancel stops the job at the next segment and keeps the child. If the
   child does not answer within ``STOP_GRACE_SECONDS`` it is killed.
 - A child crash (exit, out of memory, native fault) is a failed job with a
@@ -44,6 +43,7 @@ import atexit
 from contextlib import contextmanager, ExitStack
 from functools import wraps
 import json
+import math
 import os
 import queue
 import subprocess
@@ -59,6 +59,7 @@ HERE = Path(__file__).resolve().parent
 ENV_CHILD = "UOINK_ASR_CHILD"
 DEFAULT_IDLE_SECONDS = 120
 STOP_GRACE_SECONDS = 15.0
+HEARTBEAT_SECONDS = 15.0
 FRAME_LIMIT = 64 * 1024 * 1024
 LOG_NAME = "asr-worker.log"
 LOCK_NAME = "asr-worker.lock"
@@ -87,7 +88,7 @@ _proc: subprocess.Popen | None = None
 _routes: dict[str, queue.Queue] = {}  # job id -> its messages from the child
 _active: dict[str, dict] = {}         # job id -> {"op", "paused"}
 _idle_timer: threading.Timer | None = None
-_generation = 0
+# A child has one monitor for its entire lifetime, including checkpoint waits.
 _release_at: float | None = None
 _jobs_run = 0
 _last_exit: dict[str, Any] | None = None
@@ -148,7 +149,7 @@ def status() -> dict[str, Any]:
             "op": running[0] if running else None,
             "paused_jobs": paused,
             "idle_release_seconds": int(_config["idle_seconds"]) if _config else None,
-            "release_at": (datetime.fromtimestamp(_release_at, timezone.utc)
+            "release_at": (datetime.fromtimestamp(time.time() + _release_at - time.monotonic(), timezone.utc)
                            .replace(microsecond=0).isoformat().replace("+00:00", "Z")
                            if alive and _release_at and not _active else None),
             "jobs_run": _jobs_run,
@@ -193,12 +194,37 @@ def _try_os_lock(handle) -> bool:
         return False
 
 
+class _Lease:
+    def __init__(self, handle):
+        self.handle = handle
+
+    def close(self):
+        if self.handle.closed:
+            return
+        try:
+            if os.name == "nt":
+                import msvcrt
+                self.handle.seek(0)
+                msvcrt.locking(self.handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            self.handle.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
+
+
 def _try_file(path):
     path.parent.mkdir(parents=True, exist_ok=True)
     handle = path.open("a+b")
     # Both platforms can lock a byte past EOF. No initialization write races.
     if _try_os_lock(handle):
-        return handle
+        return _Lease(handle)
     handle.close()
     return None
 
@@ -217,20 +243,50 @@ def _role_file(root, background):
     return root / ("asr-background.lock" if background else "asr-foreground.lock")
 
 
+MAX_PREEMPTIONS = 2
+
+
+class _Preempted(BaseException):
+    """Restart this read-only decode after its child has released the model."""
+
+
 def _take_slot(job):
     global _compute_handle
     root = _config["lock_path"].parent
-    # A foreground waiter claims its role before waiting for the running
-    # segment. Background work must pass that gate on every resume.
-    with ExitStack() as gate:
-        if job.checkpoint:
-            gate.enter_context(_wait_file(_role_file(root, False), job.cancel_event))
-        while not _slot.acquire(timeout=0.05):
-            if job.cancel_event is not None and job.cancel_event.is_set():
-                raise TranscriptionCancelled("Cancelled while waiting for transcription.")
+    waiting_since = time.monotonic()
+    while True:
+        if job.cancel_event is not None and job.cancel_event.is_set():
+            raise TranscriptionCancelled("Cancelled while waiting for transcription.")
+        if job.checkpoint and not job.reservation and (
+                job.yields >= MAX_PREEMPTIONS or time.monotonic() - waiting_since >= 5):
+            job.reservation = _wait_file(root / "asr-finish.lock", job.cancel_event)
+        if not _slot.acquire(timeout=.025):
+            continue
         job.has_slot = True
-        if _compute_handle is None:
-            _compute_handle = _wait_file(_config["lock_path"], job.cancel_event)
+        with ExitStack() as gates:
+            if job.reservation:
+                eligible = True
+            else:
+                gate = _try_file(_role_file(root, False) if job.checkpoint else root / "asr-finish.lock")
+                eligible = gate is not None
+                if gate:
+                    gates.enter_context(gate)
+            with _state_lock:
+                paused = next((s for s in _active.values() if s["paused"] and s.get("proc") is _proc), None)
+                displace = paused is not None and (not job.checkpoint or not eligible)
+                if displace:
+                    paused["preempted"] = True
+            if displace:
+                _kill("preempted", _proc)
+                _drop_compute()
+            if eligible:
+                if _compute_handle is None:
+                    _compute_handle = _try_file(_config["lock_path"])
+                if _compute_handle is not None:
+                    return
+        job.has_slot = False
+        _slot.release()
+        time.sleep(.025)
 
 
 _local_work = threading.local()
@@ -249,31 +305,64 @@ def model_operation(function):
         checkpoint, cancel = kwargs.get("checkpoint"), kwargs.get("cancel_event")
         compute = root / LOCK_NAME
 
-        def acquire_compute():
-            with ExitStack() as gate:
-                if checkpoint:
-                    gate.enter_context(_wait_file(_role_file(root, False), cancel))
-                return _wait_file(compute, cancel)
-
-        with _wait_file(_role_file(root, checkpoint is not None), cancel):
-            lease = acquire_compute()
-            def yield_segment(segment):
-                nonlocal lease
-                lease.close()
-                _local_work.running = False
-                try:
-                    checkpoint(segment)
-                    lease = acquire_compute()
-                finally:
+        background = checkpoint is not None or function.__name__ == "transcribe_audio"
+        if not background:
+            with _wait_file(_role_file(root, False), cancel):
+                while True:
+                    with _wait_file(root / "asr-finish.lock", cancel):
+                        lease = _try_file(compute)
+                    if lease:
+                        break
+                    time.sleep(.025)
+                with lease:
                     _local_work.running = True
-            if checkpoint:
-                kwargs["checkpoint"] = yield_segment
-            try:
-                _local_work.running = True
-                return function(*args, **kwargs)
-            finally:
-                _local_work.running = False
-                lease.close()
+                    try:
+                        return function(*args, **kwargs)
+                    finally:
+                        _local_work.running = False
+
+        with _wait_file(_role_file(root, True), cancel), ExitStack() as reservation:
+            yields = reported = 0
+            waiting_since = time.monotonic()
+            while True:
+                protected = yields >= MAX_PREEMPTIONS or time.monotonic() - waiting_since >= 5
+                if protected:
+                    reservation.enter_context(_wait_file(root / "asr-finish.lock", cancel))
+                    lease = _wait_file(compute, cancel)
+                else:
+                    if cancel is not None and cancel.is_set():
+                        raise TranscriptionCancelled("Cancelled while waiting for transcription.")
+                    gate = _try_file(_role_file(root, False))
+                    lease = None
+                    if gate:
+                        with gate:
+                            lease = _try_file(compute)
+                    if not lease:
+                        time.sleep(.025)
+                        continue
+                with lease:
+                    position = 0
+                    def yield_segment(segment):
+                        nonlocal position, reported
+                        position += 1
+                        if checkpoint and position > reported:
+                            checkpoint(segment)
+                            reported = position
+                        if not protected:
+                            waiting = _try_file(_role_file(root, False))
+                            if waiting is None:
+                                raise _Preempted()
+                            waiting.close()
+                    kwargs["checkpoint"] = yield_segment
+                    try:
+                        _local_work.running = True
+                        return function(*args, **kwargs)
+                    except _Preempted:
+                        yields += 1
+                        waiting_since = time.monotonic()
+                    finally:
+                        _local_work.running = False
+
     return run
 
 
@@ -309,7 +398,7 @@ def _open_log() -> Any:
 
 
 def _spawn() -> subprocess.Popen:
-    global _proc
+    global _proc, _idle_timer
     try:
         import uoink_install_isolation as isolation
         extra_args = isolation.child_argv()
@@ -321,18 +410,34 @@ def _spawn() -> subprocess.Popen:
     env.update({ENV_CHILD: "1", "PYTHONUNBUFFERED": "1", "PYTHONIOENCODING": "utf-8"})
     log = _open_log()
     flags = (_CREATE_NO_WINDOW | _BELOW_NORMAL_PRIORITY_CLASS) if os.name == "nt" else 0
+    read_fd, write_fd = os.pipe()
     try:
+        if os.name == "nt":
+            import msvcrt
+            writer = msvcrt.get_osfhandle(write_fd)
+            os.set_handle_inheritable(writer, True)
+            startup = subprocess.STARTUPINFO()
+            startup.lpAttributeList = {"handle_list": [writer]}
+            inherit = {"startupinfo": startup}
+        else:
+            writer = write_fd
+            inherit = {"pass_fds": (writer,)}
+        env["UOINK_ASR_CHANNEL"] = str(writer)
         proc = subprocess.Popen(
             [*_python_command(), *extra_args], cwd=str(HERE), env=env,
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
-            creationflags=flags, close_fds=True)
-    except OSError as exc:
-        raise WorkerCrashed(f"Could not start the transcription process: {exc}") from exc
+            stdin=subprocess.PIPE, stdout=log, stderr=log,
+            creationflags=flags, close_fds=True, **inherit)
+    except BaseException as exc:
+        os.close(read_fd)
+        if isinstance(exc, OSError):
+            raise WorkerCrashed(f"Could not start the transcription process: {exc}") from exc
+        raise
     finally:
-        if log is not subprocess.DEVNULL:
+        os.close(write_fd)
+        if log != subprocess.DEVNULL:
             log.close()
 
-    def read(stream=proc.stdout, me=proc):
+    def read(stream=os.fdopen(read_fd, "rb"), me=proc):
         try:
             for message in _frames(stream):
                 if isinstance(message, dict):
@@ -342,6 +447,8 @@ def _spawn() -> subprocess.Popen:
                         route.put(message)
         except (OSError, ValueError):
             pass
+        finally:
+            stream.close()
         with _state_lock:
             routes = [_routes[k] for k, state in _active.items() if state.get("proc") is me]
             idle = _proc is me and not routes
@@ -355,7 +462,11 @@ def _spawn() -> subprocess.Popen:
             finally:
                 _slot.release()
 
-    _proc = proc
+    with _state_lock:
+        _proc = proc
+        _idle_timer = threading.Timer(0, _watch_child, args=(proc,))
+        _idle_timer.daemon = True
+        _idle_timer.start()
     threading.Thread(target=read, name="uoink-asr-reader", daemon=True).start()
     return proc
 
@@ -377,7 +488,7 @@ def _log_tail(limit: int = 4000) -> str:
 
 def _reap(reason: str, proc: subprocess.Popen | None = None) -> int | None:
     """Forget a child that has ended or that we stop now."""
-    global _proc, _release_at, _last_exit
+    global _proc, _release_at, _last_exit, _idle_timer
     with _state_lock:
         if proc is None:
             proc = _proc
@@ -385,6 +496,9 @@ def _reap(reason: str, proc: subprocess.Popen | None = None) -> int | None:
             return None
         if proc is _proc:
             _proc, _release_at = None, None
+            if _idle_timer:
+                _idle_timer.cancel()
+                _idle_timer = None
         routes = [_routes[k] for k, state in _active.items() if state.get("proc") is proc]
     try:
         if proc.stdin:
@@ -427,7 +541,18 @@ def _ensure_child() -> subprocess.Popen:
 
 
 def _write_frame(stream, message):
-    data = json.dumps(message, ensure_ascii=True, allow_nan=False).encode("ascii") + b"\n"
+    def finite(value):
+        if isinstance(value, float) and not math.isfinite(value):
+            return None
+        if isinstance(value, dict):
+            return {k: finite(v) for k, v in value.items()
+                    if not isinstance(k, float) or math.isfinite(k)}
+        if isinstance(value, (list, tuple)):
+            return [finite(v) for v in value]
+        return value
+
+    data = json.dumps(finite(message), ensure_ascii=True, allow_nan=False, default=str)
+    data = data.encode("ascii") + b"\n"
     if len(data) > FRAME_LIMIT:
         raise ValueError("The transcription result exceeds the worker message size limit.")
     remaining = memoryview(data)
@@ -545,6 +670,10 @@ class _Job:
         self.checkpoint = checkpoint
         self.route: queue.Queue = queue.Queue()
         self.has_slot = False
+        self.yields = 0
+        self.reservation = None
+        self.reported = 0
+        self.position = 0
 
     def pause(self, flag: bool) -> None:
         with _state_lock:
@@ -552,9 +681,9 @@ class _Job:
                 _active[self.id]["paused"] = flag
 
 
-def _inactivity_seconds(duration):
-    # Model startup and silent audio get five minutes, increasing to 30 for long files.
-    return min(1800, 300 + max(0, float(duration or 0)) / 8)
+def _inactivity_seconds(_duration):
+    # Twenty missed heartbeats. Media length does not affect process liveness.
+    return 300
 
 
 def _await(job: _Job, proc: subprocess.Popen):
@@ -610,44 +739,40 @@ def _run_checkpoint(job: _Job, proc: subprocess.Popen, message: dict) -> None:
             job.progress(message.get("end"), message.get("total"))
         except Exception:  # noqa: BLE001
             pass
-    global _proc, _compute_handle
-    job.pause(True)
-    _proc = None  # park this child; a preempting job gets its own failure boundary
-    _drop_compute()
-    job.has_slot = False
-    _slot.release()
+    job.position += 1
+    if not job.reservation:
+        job.pause(True)
+        job.has_slot = False
+        _slot.release()
     try:
-        job.checkpoint(segment)
-        _take_slot(job)
-        if job.cancel_event is not None and job.cancel_event.is_set():
-            raise TranscriptionCancelled("Transcription cancelled.")
-        if _proc is not None:
-            _reap("foreground finished")
-        _proc = proc
+        if job.position > job.reported:
+            job.checkpoint(segment)
+            job.reported = job.position
+        if not job.has_slot:
+            _take_slot(job)
+        if proc is not _proc:
+            with _state_lock:
+                if _active[job.id].pop("preempted", False):
+                    raise _Preempted()
+            raise WorkerCrashed("The transcription worker stopped while paused.")
         if not _send_quietly(proc, {"id": job.id, "control": "continue"}):
             job.route.put(_EOF)
+    except _Preempted:
+        raise
     except BaseException:
-        _stop_job(proc, job.route, job.id)
-        # The caller may stop a backfill at a checkpoint. Keep a healthy
-        # child warm only if we can reclaim the compute slot immediately.
-        if not job.has_slot and _slot.acquire(blocking=False):
-            job.has_slot = True
-            if _proc is None and _compute_handle is None:
-                _compute_handle = _try_file(_config["lock_path"])
-        if job.has_slot and _compute_handle and _proc is None and proc.poll() is None:
-            _proc = proc
-        elif proc is not _proc:
-            _reap("checkpoint stopped", proc)
+        if proc.poll() is None:
+            _stop_job(proc, job.route, job.id)
         raise
     finally:
         job.pause(False)
+
 
 
 def call(op: str, args: dict, *, cancel_event: threading.Event | None = None,
          progress: Callable[[Any, Any], None] | None = None,
          checkpoint: Callable[[dict], None] | None = None) -> Any:
     """Run one model job in the child and return its JSON result."""
-    global _jobs_run
+    global _jobs_run, _release_at
     if not offload_active():
         raise RuntimeError("model work is not offloaded in this process")
     job = _Job(op, cancel_event, progress, checkpoint, args.get("duration_seconds"))
@@ -656,25 +781,33 @@ def call(op: str, args: dict, *, cancel_event: threading.Event | None = None,
     role = _wait_file(_role_file(_config["lock_path"].parent, checkpoint is not None), cancel_event)
     try:
         _take_slot(job)
-        _cancel_idle_timer()
         with _state_lock:
+            _release_at = None
             _routes[job.id] = job.route
             _active[job.id] = {"op": op, "paused": False}
-        for attempt in (1, 2):
+        startup_failures = 0
+        while True:
             proc = _ensure_child()
             with _state_lock:
+                job.route = _routes[job.id] = queue.Queue()
                 _active[job.id]["proc"] = proc
             if not _send_job(proc, job, args):
                 _reap("exited", proc)
-                if attempt == 1:
+                outcome = _NOT_STARTED
+            else:
+                try:
+                    outcome = _await(job, proc)
+                except _Preempted:
+                    job.yields += 1
+                    job.position = 0
+                    # Re-enter admission with the new yield count before replaying.
+                    job.has_slot = False
+                    _slot.release()
+                    _take_slot(job)
                     continue
-                raise WorkerCrashed("Could not reach the transcription process.")
-            outcome = _await(job, proc)
             if outcome is _NOT_STARTED:
-                # It stopped before it read the job (idle exit race): retry once.
-                while not job.route.empty():
-                    job.route.get_nowait()
-                if attempt == 1:
+                startup_failures += 1
+                if startup_failures < 2:
                     continue
                 raise WorkerCrashed("The transcription process exited before it started.")
             _jobs_run += 1
@@ -684,67 +817,66 @@ def call(op: str, args: dict, *, cancel_event: threading.Event | None = None,
             _routes.pop(job.id, None)
             _active.pop(job.id, None)
         if job.has_slot:
-            if _active and _proc is not None:
-                _reap("foreground finished")
             if _proc is None:
                 _drop_compute()
             _slot.release()
+        if job.reservation:
+            job.reservation.close()
         role.close()
         _schedule_idle_stop()
 
 
-def _cancel_idle_timer() -> None:
-    global _idle_timer, _release_at
+def _schedule_idle_stop():
+    global _release_at
     with _state_lock:
-        if _idle_timer is not None:
-            _idle_timer.cancel()
-            _idle_timer = None
-        _release_at = None
+        if _config and _proc and not any(s.get("proc") is _proc for s in _active.values()):
+            _release_at = time.monotonic() + _config["idle_seconds"]
 
 
-def _schedule_idle_stop() -> None:
-    global _idle_timer, _generation, _release_at
-    with _state_lock:
-        if _config is None or _proc is None or _active:
-            return
-        _generation += 1
-        wait = _config["idle_seconds"]
-        timer = threading.Timer(min(wait, 0.25), _stop_if_idle, args=(_generation,))
-        timer.daemon = True
-        _idle_timer = timer
-        _release_at = time.time() + wait
-    timer.start()
-
-
-def _stop_if_idle(generation: int) -> None:
-    if not _slot.acquire(blocking=False):
-        return  # a job is running; it schedules the next stop when it ends
-    try:
-        with _state_lock:
-            if generation != _generation or _proc is None or _active:
-                return
-        remaining = (_release_at or 0) - time.time()
-        if remaining > 0:
-            with ExitStack() as locks:
-                for background in (False, True):
+def _watch_child(child):
+    """Reclaim one idle or paused child when another process needs the engine."""
+    timer = threading.current_thread()
+    while not timer.finished.wait(.2):
+        if not _slot.acquire(blocking=False):
+            continue
+        try:
+            with _state_lock:
+                if _proc is not child or timer.finished.is_set():
+                    return
+                job = next((s for s in _active.values() if s.get("proc") is child), None)
+                if job and not job["paused"]:
+                    continue
+                expired = _release_at is not None and time.monotonic() >= _release_at
+            if child.poll() is not None:
+                reason = "exited"
+            elif expired:
+                reason = "idle"
+            else:
+                # A paused background job owns its own background role lock.
+                roles = (False,) if job else (True, False)
+                for background in roles:
                     handle = _try_file(_role_file(_config["lock_path"].parent, background))
                     if handle is None:
                         break
-                    locks.enter_context(handle)
+                    handle.close()
                 else:
-                    timer = threading.Timer(min(remaining, 0.25), _stop_if_idle, args=(generation,))
-                    timer.daemon = True
-                    timer.start()
-                    return
-        _reap("idle")
-        _drop_compute()
-    finally:
-        _slot.release()
+                    continue
+                reason = "preempted" if job else "idle"
+            if reason == "preempted":
+                with _state_lock:
+                    job["preempted"] = True
+                _kill(reason, child)
+            else:
+                _reap(reason, child)
+            _drop_compute()
+            return
+        finally:
+            _slot.release()
+
 
 
 def shutdown() -> None:
     """Stop the child now (helper exit, or before deleting a model)."""
-    _cancel_idle_timer()
     with _state_lock:
         proc = _proc
     if proc is not None:
@@ -757,7 +889,7 @@ def shutdown() -> None:
 def deletion_slot(root):
     """Refuse while any process is transcribing, including a paused job."""
     busy = "A transcription is using the model. Try again when it finishes."
-    if not _slot.acquire(blocking=False):
+    if _active or not _slot.acquire(timeout=5):
         raise RuntimeError(busy)
     try:
         if _active:
@@ -765,13 +897,17 @@ def deletion_slot(root):
         with ExitStack() as locks:
             for background in (True, False):
                 handle = _try_file(_role_file(Path(root), background))
+                until = time.monotonic() + .3
+                while handle is None and time.monotonic() < until:
+                    time.sleep(.025)
+                    handle = _try_file(_role_file(Path(root), background))
                 if handle is None:
                     raise RuntimeError(busy)
                 locks.enter_context(handle)
             shutdown()
             # A warm idle child in another process observes our role locks
             # within a quarter second and closes its model.
-            deadline = time.monotonic() + 1
+            deadline = time.monotonic() + 5
             handle = _try_file(Path(root) / LOCK_NAME)
             while handle is None and time.monotonic() < deadline:
                 time.sleep(0.025)
@@ -892,11 +1028,14 @@ def _run_op(op: str, args: dict, progress: Callable[[Any, Any], None],
 
 
 def _child_main(argv: list[str]) -> int:
-    # The protocol owns the original stdout. Anything a library prints (and
-    # any native printf) goes to the log instead, so it cannot break a line.
-    channel = os.fdopen(os.dup(sys.stdout.fileno()), "wb", buffering=0)
-    os.dup2(sys.stderr.fileno(), sys.stdout.fileno())
-    sys.stdout = sys.stderr
+    # stdout and stderr have pointed to the log since process creation, even
+    # during interpreter startup. Only the framed writer gets this handle.
+    descriptor = int(os.environ.pop("UOINK_ASR_CHANNEL"))
+    if os.name == "nt":
+        import msvcrt
+        descriptor = msvcrt.open_osfhandle(descriptor, os.O_WRONLY | os.O_BINARY)
+    os.set_inheritable(descriptor, False)
+    channel = os.fdopen(descriptor, "wb", buffering=0)
     write_lock = threading.Lock()
 
     def emit(message: dict) -> None:
@@ -933,6 +1072,14 @@ def _child_main(argv: list[str]) -> int:
         stop = inbox.stop_event(job_id)
         controls = inbox.control_queue(job_id)
         emit({"id": job_id, "type": "started"})
+        finished = threading.Event()
+
+        def heartbeat():
+            while not finished.wait(HEARTBEAT_SECONDS):
+                emit({"id": job_id, "type": "heartbeat"})
+
+        pulse = threading.Thread(target=heartbeat, name="asr-heartbeat", daemon=True)
+        pulse.start()
         last = [0.0]
 
         def progress(done, total):
@@ -964,6 +1111,8 @@ def _child_main(argv: list[str]) -> int:
             emit({"id": job_id, "type": "error", "error_type": type(exc).__name__,
                   "message": str(exc)[:2000]})
         finally:
+            finished.set()
+            pulse.join()
             inbox.forget(job_id)
 
     threading.Thread(target=read, name="uoink-asr-input", daemon=True).start()

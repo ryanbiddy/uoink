@@ -421,11 +421,18 @@ def test_get_model_list_requires_helper_token(monkeypatch):
     assert sent == [403]
 
 
-def test_far_shorter_transcript_is_refused(saved, monkeypatch):
-    monkeypatch.setattr(server, "_resolve_video_transcript", lambda *a, **kw: ([(0, 1, "one")], "asr", {}))
-    with pytest.raises(ValueError, match="too little"):
-        server.retranscribe_item(VID, "small")
-    assert _unchanged(saved)
+def test_shorter_transcript_can_be_restored(saved, monkeypatch):
+    monkeypatch.setattr(server, "_resolve_video_transcript", lambda *a, **kw: ([(0, 1, "短")], "asr", {}))
+    result = server.retranscribe_item(VID, "small")
+    assert result["shorter"] and saved.files["plain"].read_text(encoding="utf-8") == "短"
+    side = json.loads(saved.files["sidecar"].read_bytes())
+    assert _post("/transcription/restore", {"video_id": VID, "backup": side["transcript_backup"]},
+                 token=False) is None
+    status, data = _post("/transcription/restore", {"video_id": VID, "backup": side["transcript_backup"]})
+    assert status == 200 and data["restored"]
+    assert saved.files["plain"].read_bytes() == saved.before["plain"]
+    assert saved.files["corpus"].read_bytes() == saved.before["corpus"]
+    assert saved.idx.search("old")[0]["video_id"] == VID
 
 
 def test_existing_edit_refused_before_audio_download(saved, monkeypatch):
@@ -461,16 +468,17 @@ def test_deletion_holds_slot_through_unlink(models_root, monkeypatch):
 
 
 
-def test_same_item_foreground_waiter_interrupts_before_publication(saved, monkeypatch):
+def test_same_item_foreground_can_capture_during_decode(saved, monkeypatch):
     def transcribe(*args, checkpoint, **kwargs):
         key = server._manual_capture_key("https://www.youtube.com/watch?v=" + VID)
         with server._manual_capture_intent(key):
-            checkpoint({"end": 1})
-        pytest.fail("A waiting capture did not get the item")
+            lock = server.source_subscriptions.CaptureLock.try_acquire(server.DATA_ROOT, key)
+            assert lock is not None
+            with lock:
+                checkpoint({"end": 1})
+        return [(0, 1, "finished replacement")], "asr", {}
     monkeypatch.setattr(server, "_resolve_video_transcript", transcribe)
-    with pytest.raises(ValueError, match="capture.*waiting"):
-        server.retranscribe_item(VID, "small")
-    assert _unchanged(saved)
+    assert server.retranscribe_item(VID, "small")["segments"] == 1
 
 
 def test_replacement_rebuilds_missing_search_row(saved):
@@ -480,3 +488,43 @@ def test_replacement_rebuilds_missing_search_row(saved):
     assert saved.idx.search("new")[0]["video_id"] == VID
     metadata, = saved.idx._conn.execute("SELECT metadata_json FROM yoinks WHERE video_id=?", (VID,)).fetchone()
     assert json.loads(metadata)["transcript_source"] == "asr"
+
+
+def test_plain_recheck_refuses_redirect_before_read(saved, monkeypatch):
+    plain = saved.files["plain"]
+    original = Path.is_symlink
+    def transcribe(*a, **kw):
+        monkeypatch.setattr(Path, "is_symlink", lambda p: p == plain or original(p))
+        return [(0, 2, "full replacement line here")], "asr", {}
+    monkeypatch.setattr(server, "_resolve_video_transcript", transcribe)
+    with pytest.raises(ValueError, match="moved"):
+        server.retranscribe_item(VID, "small")
+    assert _unchanged(saved)
+
+
+
+def test_delete_hands_off_another_process_warm_model(models_root, monkeypatch, tmp_path):
+    import subprocess
+    import os
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    script = ("import sys, asr_worker as w; w.enable_offload(log_dir=sys.argv[1], idle_seconds=30); "
+              "print(w.call('ping', {})['pid'], flush=True); sys.stdin.readline(); "
+              "print(w.status()['pid'], flush=True); w.shutdown()")
+    with subprocess.Popen([sys.executable, "-B", "-c", script, str(tmp_path)], cwd=ROOT,
+                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as owner:
+        try:
+            assert int(owner.stdout.readline()) > 0
+            assert server.delete_asr_model("tiny")[1] == 200
+        finally:
+            output, _ = owner.communicate("\n", timeout=10)
+        assert output.strip() == "None"
+
+
+def test_longer_cjk_replacement_has_no_shorter_warning(saved, monkeypatch):
+    replacement = "日本語の書き起こしです。" * 3
+    monkeypatch.setattr(server, "_resolve_video_transcript",
+                        lambda *a, **kw: ([(0, 2, replacement)], "asr", {}))
+    result = server.retranscribe_item(VID, "small")
+    assert not result["shorter"]
+    assert saved.files["plain"].read_text(encoding="utf-8") == replacement

@@ -10,6 +10,7 @@ import asr_models
 import asr_worker
 import uoink_reliability as reliability
 import ast
+import inspect
 from pathlib import Path
 import re
 import sys
@@ -45,7 +46,7 @@ def runner_functions(source):
     assert functions == {node.name for node in nodes if isinstance(node, ast.FunctionDef)}
     scope = {
         "asr_models": asr_models, "asr_worker": asr_worker, "reliability": reliability,
-        "Path": Path, "re": re, "sys": sys, "_WHISPERX_AVAILABLE": True,
+        "Path": Path, "re": re, "sys": sys, "inspect": inspect, "_WHISPERX_AVAILABLE": True,
         "_download_model_snapshot": blocked, "_runtime_device": lambda: "cpu",
         # These contracts cover the user's cache. The installer-bundled copy
         # has its own tests (test_bundled_whisper_model.py); none here.

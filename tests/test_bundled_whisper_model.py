@@ -195,10 +195,10 @@ def test_user_cache_load_keeps_name_and_download_root(roots, fake_model):
 def test_explicit_download_never_targets_the_bundle(roots, monkeypatch):
     stage_bundled(roots.bundled)
     before = tree(roots.bundled)
-    calls = []
-    monkeypatch.setattr(rel.asr_models, "download", lambda model, root, **kw: calls.append((model, root)))
+    from tests.test_asr_models import fixture_download
+    monkeypatch.setattr(rel.asr_models, "download", fixture_download)
     result = rel.ensure_model("base", roots.user)
-    assert calls == [("base", roots.user)]
+    assert result["model"] == "base" and Path(result["ready_marker"]).is_file()
     assert Path(result["ready_marker"]).parent == roots.user
     assert tree(roots.bundled) == before
 

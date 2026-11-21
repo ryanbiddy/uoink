@@ -3377,6 +3377,7 @@ def _resolve_video_transcript(
     # 3.18: an English-only model reports when the audio wasn't English and
     # the multilingual model ran instead (other models leave the call as is).
     chunk_details = []
+    spoken_fallbacks = []
     controls = {}
     if progress:
         controls["progress"] = progress
@@ -3464,8 +3465,10 @@ def _resolve_video_transcript(
                         **guard_kw, **controls,
                     )
                 _raise_if_cancelled(cancel_event)
+                detail = asr_info.get("english_fallback")
+                chunk_details.append(detail)
                 if local_entries:
-                    chunk_details.append(asr_info.get("english_fallback"))
+                    spoken_fallbacks.append(detail)
                 if media_chunks:
                     # ASR timestamps are local to each sampled section. Bound
                     # them to that section before linking to the source video.
@@ -3511,7 +3514,13 @@ def _resolve_video_transcript(
     }
     if media_chunks:
         completed["coverage"] = "sampled_sections"
-    fallback = chunk_details[0] if chunk_details and all(f == chunk_details[0] for f in chunk_details) else None
+    fallback = None
+    if spoken_fallbacks and all(isinstance(f, dict) for f in spoken_fallbacks):
+        models = {f.get("used_model") for f in spoken_fallbacks}
+        languages = {f.get("detected_language") for f in spoken_fallbacks}
+        if len(models) == 1:
+            fallback = {"used_model": models.pop(),
+                        "detected_language": languages.pop() if len(languages) == 1 else "mixed"}
     if media_chunks and any(chunk_details):
         completed["section_fallbacks"] = chunk_details
     if isinstance(fallback, dict):
@@ -11380,8 +11389,14 @@ def _podcast_transcription_worker() -> None:
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
         except (asr_worker.TranscriptionCancelled, PlaylistJobCancelled):
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id, status=whisper_runner.STATUS_NONE, model_used=model)
+            with _jobs_lock:
+                retrying = any(key != job_id and candidate.get("kind") == "podcast_transcribe"
+                               and candidate.get("episode_id") == episode_id
+                               and candidate.get("state") not in _JOB_TERMINAL_STATES
+                               for key, candidate in _jobs.items())
+                if not retrying:
+                    whisper_runner.update_episode_transcript_state(
+                        _get_index(), episode_id, status=whisper_runner.STATUS_NONE)
             _update_job(job_id, state="cancelled", current_video_phase=None,
                         completed_at=_now_iso(), message="Transcription cancelled.")
             _settle_source_capture(job_id, video_id=None, failure_code="cancelled")
@@ -12139,7 +12154,8 @@ def _run_retranscribe_job(job_id: str) -> None:
         result = retranscribe_item(video_id, model, cancel_event=cancel, progress=progress)
         _update_job(job_id, state="completed", current_video_phase=None, progress=100,
                     videos_done=1, completed_at=_now_iso(), result=result,
-                    message="New transcript saved.")
+                    message=("The new transcript is much shorter. You can restore the previous transcript "
+                             "from the saved item." if result.get("shorter") else "New transcript saved."))
     except (PlaylistJobCancelled, asr_worker.TranscriptionCancelled):
         with _jobs_lock:
             already = (_jobs.get(job_id) or {}).get("state") in _JOB_TERMINAL_STATES
@@ -12180,24 +12196,24 @@ def _item_capture_active(video_id, item):
     return False
 
 
-def retranscribe_item(video_id: str, model: str, *, cancel_event=None, progress=None) -> dict:
+def retranscribe_item(video_id: str, model: str, *, cancel_event=None, progress=None, restore=None) -> dict:
     _raise_if_cancelled(cancel_event)
     folder, item = _folder_for_video_id(video_id)
     if folder is None:
         raise ValueError("Saved item not found.")
     if _item_capture_active(video_id, item):
         raise ValueError("A capture of this item is running.")
-    import library_media
-    side = library_media.read_owned_sidecar(Path(item["sidecar_path"])) or {}
-    url = side.get("source_url") or side.get("url") or ""
-    lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, _manual_capture_key(url))
-    if lock is None:
-        raise ValueError("A capture of this item is running.")
-    with lock:
-        return _replace_transcript(video_id, model, folder, item, cancel_event, progress)
+    return _replace_transcript(video_id, model, folder, item, cancel_event, progress, restore)
 
 
-def _replace_transcript(video_id, model, folder, item, cancel_event, progress):
+def _plain_transcript_bytes(folder):
+    path = folder / "transcript.txt"
+    if path.is_symlink() or path.resolve().parent != folder.resolve():
+        raise ValueError("The transcript file has moved.")
+    return path.read_bytes() if path.exists() else None
+
+
+def _replace_transcript(video_id, model, folder, item, cancel_event, progress, restore):
     """Transcribe one saved video again and replace its transcript.
 
     The audio is fetched again and the whole new transcript is made first;
@@ -12232,53 +12248,85 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress):
     if not old or corpus.count(old) != 1:
         raise ValueError("The saved transcript section has changed. Your edits were kept.")
     plain = folder / "transcript.txt"
-    plain_before = None
-    if plain.exists() or plain.is_symlink():
-        if plain.is_symlink() or plain.resolve().parent != folder.resolve():
-            raise ValueError("The transcript file has moved.")
-        plain_before = plain.read_bytes()
+    plain_before = _plain_transcript_bytes(folder)
+    if plain_before is not None:
         saved_plain = plain_before.decode("utf-8", "replace").replace("\r\n", "\n").strip()
         old_plain = "\n".join(str(r.get("text") or "") for r in side.get("transcript") or []
                               if isinstance(r, dict)).strip()
         if saved_plain != old_plain:
             raise ValueError("transcript.txt was edited after saving. Your edits were kept.")
-    def checkpoint(_segment):
+    original = side_path.read_bytes()
+    original_id = hashlib.sha256(original).hexdigest()
+    backup_dir = folder / media.MEDIA_INPUTS_DIR
+    if backup_dir.is_symlink() or backup_dir.resolve().parent != folder.resolve():
+        raise ValueError("The transcript backup folder has moved.")
+    shorter = False
+    if restore is not None:
+        if (not isinstance(restore, str) or not re.fullmatch(r"[0-9a-f]{64}", restore)
+                or side.get("transcript_backup") != restore):
+            raise ValueError("This backup no longer matches the current transcript.")
+        archived = backup_dir / ("transcript-before-" + restore[:16] + ".json")
+        if archived.is_symlink() or not archived.is_file():
+            raise ValueError("The previous transcript is unavailable.")
+        raw = archived.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != restore:
+            raise ValueError("The previous transcript backup has changed.")
+        previous = json.loads(raw)
+        if previous.get("video_id") != video_id:
+            raise ValueError("The previous transcript belongs to another item.")
+        new_side = dict(side)
+        for key in ("transcript", "asr_fallback", "transcript_note", "transcript_source"):
+            new_side[key] = previous.get(key)
+        new_plain = _transcript_text_from_sidecar(previous).encode()
+        plain_hash = side.get("transcript_backup_plain")
+        if plain_hash:
+            if not isinstance(plain_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", plain_hash):
+                raise ValueError("The text backup is invalid.")
+            path = backup_dir / ("transcript-before-" + plain_hash + ".txt")
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("The text backup is unavailable.")
+            new_plain = path.read_bytes()
+            if hashlib.sha256(new_plain).hexdigest() != plain_hash:
+                raise ValueError("The text backup has changed.")
+        meta = new_side.get("asr_fallback") or {}
+        used = meta.get("model")
+    else:
+        settings = {**(_read_settings() or {}), "whisper_model": model, "asr_fallback_enabled": True,
+                    "long_video_mode": LONG_VIDEO_MODE_FULL}
+        with tempfile.TemporaryDirectory(prefix="uoink-retranscribe-", ignore_cleanup_errors=True) as tmp:
+            audio = _download_reliability_audio(url, Path(tmp), cancel_event)
+            _raise_if_cancelled(cancel_event)
+            entries, source, meta = _resolve_video_transcript(
+                [], audio, side.get("duration_seconds"), url=url, settings=settings,
+                cancel_event=cancel_event, progress=progress, checkpoint=lambda _: _raise_if_cancelled(cancel_event),
+                asr_titles=(side.get("channel"), side.get("title")))
         _raise_if_cancelled(cancel_event)
-        if _item_capture_active(video_id, item):
-            raise ValueError("A capture of this item is waiting. Your old transcript was kept.")
+        if source != "asr" or not entries:
+            if meta.get("status") == "no_speech":
+                raise ValueError("Whisper found no speech, so the transcript is unchanged.")
+            raise ValueError(meta.get("error") or meta.get("reason") or "Transcription failed.")
 
-    settings = {**(_read_settings() or {}), "whisper_model": model, "asr_fallback_enabled": True,
-                "long_video_mode": LONG_VIDEO_MODE_FULL}
-    with tempfile.TemporaryDirectory(prefix="uoink-retranscribe-", ignore_cleanup_errors=True) as tmp:
-        audio = _download_reliability_audio(url, Path(tmp), cancel_event)
-        _raise_if_cancelled(cancel_event)
-        entries, source, meta = _resolve_video_transcript(
-            [], audio, side.get("duration_seconds"), url=url, settings=settings,
-            cancel_event=cancel_event, progress=progress, checkpoint=checkpoint,
-            asr_titles=(side.get("channel"), side.get("title")))
-    _raise_if_cancelled(cancel_event)
-    if source != "asr" or not entries:
-        if meta.get("status") == "no_speech":
-            raise ValueError("Whisper found no speech, so the transcript is unchanged.")
-        raise ValueError(meta.get("error") or meta.get("reason") or "Transcription failed.")
-
-    words = sum(len(text.split()) for _, _, text in entries)
-    old_words = len(_transcript_text_from_sidecar(side).split())
-    if not words or words * 4 < old_words or meta.get("coverage") == "sampled_sections":
-        raise ValueError("The new transcript has too little speech. The old transcript was kept.")
-    if _item_capture_active(video_id, item):
-        raise ValueError("A capture of this item is running.")
+        chars = sum(len("".join(text.split())) for _, _, text in entries)
+        old_chars = len("".join(_transcript_text_from_sidecar(side).split()))
+        old_coverage = (side.get("asr_fallback") or {}).get("coverage")
+        if not chars or (meta.get("coverage") == "sampled_sections" and old_coverage != "sampled_sections"):
+            raise ValueError("The new transcript has too little speech. The old transcript was kept.")
+        shorter = chars * 4 < old_chars
+        used = meta.get("model") or model
+        note = f"Local Whisper transcript, transcribed again with the {used} model"
+        if meta.get("requested_model"):
+            note += f" (the language check selected it in place of {meta['requested_model']})"
+        new_side = dict(side, transcript=_transcript_entries_with_links(side, entries),
+                        transcript_source="asr", asr_fallback=meta, transcript_note=note)
+        new_plain = "\n".join(text for _, _, text in entries).encode()
+    new_side["transcript_backup"] = original_id if shorter else None
+    new_side["transcript_backup_plain"] = (
+        hashlib.sha256(plain_before).hexdigest() if shorter and plain_before is not None else None)
     binding = media.capture_sidecar_inputs(side)
-    used = meta.get("model") or model
-    note = f"Local Whisper transcript, transcribed again with the {used} model"
-    if meta.get("requested_model"):
-        note += f" (the language check selected it in place of {meta['requested_model']})"
-    new_side = dict(side, transcript=_transcript_entries_with_links(side, entries),
-                    transcript_source="asr", asr_fallback=meta, transcript_note=note)
     plan = _capture_media_plan(new_side, folder, item=item)
     if not plan:
         raise ValueError("The replacement transcript could not be prepared.")
-    if corpus_path.read_bytes() != corpus or (plain.read_bytes() if plain.exists() else None) != plain_before:
+    if corpus_path.read_bytes() != corpus or _plain_transcript_bytes(folder) != plain_before:
         raise ValueError("The transcript changed while transcribing. Your edits were kept.")
     new = plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
     corpus = corpus.replace(old, new, 1)
@@ -12286,6 +12334,10 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress):
     row = media._merge_item(item)
     revision = library_cards.build_card(row, clips.merge_cues(plan["cues"], row),
                                         corpus_text=head)["source_revision"]
+    if restore is not None:
+        record = json.loads(plan["artifact"])
+        record["restored_from"] = restore
+        plan["artifact"] = media.canonical_json(record).encode()
     block, digest = media.capture_snapshot(
         video_id=video_id, source_revision=revision, cues=plan["cues"], artifact_bytes=plan["artifact"],
         corpus_revision=hashlib.sha256(corpus).hexdigest(), playback=plan["playback"],
@@ -12294,28 +12346,42 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress):
     artifacts = {corpus_path: corpus,
                  folder / media.MEDIA_INPUTS_DIR / (digest + ".json"): plan["artifact"],
                  side_path: json.dumps(dict(new_side, media_depth=block), ensure_ascii=False).encode()}
-    artifacts[plain] = "\n".join(text for _s, _e, text in entries).encode("utf-8")
+    artifacts[plain] = new_plain
+    if new_side["transcript_backup_plain"]:
+        artifacts[backup_dir / ("transcript-before-" + new_side["transcript_backup_plain"] + ".txt")] = plain_before
     # Keep the exact old details file next to the media inputs, so the old
     # transcript can be recovered by hand. Retention prunes only <sha256>.json.
-    original = side_path.read_bytes()
-    backup = folder / media.MEDIA_INPUTS_DIR / (
+    backup = backup_dir / (
         "transcript-before-" + hashlib.sha256(original).hexdigest()[:16] + ".json")
     if backup.is_symlink() or (backup.exists() and backup.read_bytes() != original):
         raise ValueError("The transcript backup file has changed.")
     artifacts[backup] = original
     _raise_if_cancelled(cancel_event)
     try:
-        ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding)
-        if ticket.base_media_revision != old_block.get("media_revision"):
-            raise ValueError("A newer capture replaced this transcript.")
-        idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,
-                                   artifacts=artifacts, ticket=ticket)
+        # Leave the identity lock free during the download and decode.
+        while True:
+            _raise_if_cancelled(cancel_event)
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, _manual_capture_key(url))
+            if lock is not None:
+                break
+            if restore is not None:
+                raise ValueError("A capture of this item is running. Try restoring again when it finishes.")
+            time.sleep(0.1)
+        with lock:
+            if side_path.read_bytes() != original or _plain_transcript_bytes(folder) != plain_before:
+                raise ValueError("The transcript changed while transcribing. Your edits were kept.")
+            ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding)
+            if ticket.base_media_revision != old_block.get("media_revision"):
+                raise ValueError("A newer capture replaced this transcript.")
+            idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,
+                                       artifacts=artifacts, ticket=ticket)
     except media.MediaError as exc:
         reason = getattr(exc, "code", None) or str(exc)
         raise ValueError(f"The new transcript could not be saved ({reason}). "
                          "The old one was kept.") from exc
     return {"video_id": video_id, "model": used,
-            "requested_model": meta.get("requested_model"), "segments": len(entries),
+            "shorter": shorter, "restored": restore is not None,
+            "requested_model": meta.get("requested_model"), "segments": len(new_side["transcript"]),
             "word_timings": bool(meta.get("word_timings"))}
 
 
@@ -22910,7 +22976,7 @@ class Handler(BaseHTTPRequestHandler):
             "is_podcast", "is_live", "live_status",
             # UI re-haul Reader: meta line and the transcript-source note.
             "yoinked_at", "upload_date", "transcript_source", "comments_status",
-            "captions_skipped_reason",
+            "captions_skipped_reason", "transcript_backup",
             # Reader > AI analysis: the hook read and the worker states.
             "hook_type", "hook_type_confidence", "hook_type_status",
             "hook_explanation", "comment_intelligence_status",
@@ -23248,6 +23314,15 @@ class Handler(BaseHTTPRequestHandler):
                       "/asr/models/use": use_asr_model}[bare]
             payload, status = action((body or {}).get("model") if isinstance(body, dict) else None)
             return self._send_json(status, payload)
+        if bare == "/transcription/restore":
+            if (not isinstance(body, dict) or not isinstance(body.get("backup"), str)
+                    or not isinstance(body.get("video_id"), str)):
+                return self._send_json(400, {"error": "Choose a saved transcript backup."})
+            try:
+                restored = retranscribe_item(body["video_id"], "", restore=body["backup"])
+            except (ValueError, OSError) as exc:
+                return self._send_json(409, {"error": str(exc)})
+            return self._send_json(200, restored)
         if bare == "/transcription/retranscribe":
             payload, status = queue_retranscribe(body if isinstance(body, dict) else {})
             return self._send_json(status, payload)

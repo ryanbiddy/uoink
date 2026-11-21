@@ -6007,6 +6007,7 @@
                     <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
                     <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
                     <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
+                    <button class="button ghost" type="button" id="yoinkRestoreTranscript" hidden>New transcript is shorter. Restore previous transcript</button>
                     <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
                   </div>
                 </details>
@@ -9225,6 +9226,7 @@
       els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row) || isNote;
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
       renderYoinkWriteFrom();
+      document.getElementById("yoinkRestoreTranscript").hidden = !hasRow || !sidecar.transcript_backup;
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing || isNote;
       els.yoinkRetranscribe.textContent = state.retranscribing
         ? "Queuing..."
@@ -9603,6 +9605,24 @@
         target.focus({ preventScroll: true });
         target.scrollIntoView({ block: "start", behavior: scrollBehavior() });
       });
+    }
+
+    async function restorePreviousTranscript(event) {
+      const row = state.selectedYoink;
+      const backup = state.selectedYoinkSidecar?.transcript_backup;
+      if (!row || !backup) return;
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        await authFetch("/transcription/restore", {method: "POST",
+          body: JSON.stringify({video_id: videoIdOf(row), backup})});
+        if (row === state.selectedYoink) await openYoinkDetail(row);
+        showToast("Previous transcript restored.");
+      } catch (err) {
+        showToast(err?.data?.error || "Couldn't restore the previous transcript.");
+      } finally {
+        button.disabled = false;
+      }
     }
 
     async function requestRetranscription() {
@@ -16542,9 +16562,9 @@
           // Patch progress and status in place. Keep the actual focused button
           // in the DOM for the whole download.
           if (!card.querySelector(".asr-model-progress")) old.querySelector(".asr-model-progress")?.remove();
-          for (const child of Array.from(card.children)) {
+          for (const [index, child] of Array.from(card.children).entries()) {
             const previous = old.querySelector("." + child.classList[0]);
-            if (!previous) old.append(child);
+            if (!previous) old.insertBefore(child, old.children[index] || null);
             else if (previous.outerHTML !== child.outerHTML) {
               const focused = previous.contains(document.activeElement);
               previous.replaceWith(child);
@@ -20783,6 +20803,7 @@
       els.yoinkOpenMarkdown.addEventListener("click", openSelectedMarkdown);
       els.yoinkRetryCapture.addEventListener("click", retrySelectedYoinkCapture);
       els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
+      document.getElementById("yoinkRestoreTranscript").addEventListener("click", restorePreviousTranscript);
       els.yoinkWriteFrom.addEventListener("click", () => {
         if (!state.selectedYoink) return;
         const videoId = videoIdOf(state.selectedYoink);

@@ -194,7 +194,14 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
             # pass no download_root, so nothing is created or written there.
             return WhisperModel(str(bundled), **kwargs)
     if model_name in ("large-v3-turbo", "distil-large-v3.5"):
-        snapshot = _cached_reliability_snapshot(model_root, model_name) if model_root and local_files_only else None
+        lookup_root = model_root
+        if model_name == "large-v3-turbo" and local_files_only and lookup_root is None:
+            try:
+                from huggingface_hub.constants import HF_HUB_CACHE
+                lookup_root = HF_HUB_CACHE
+            except ImportError:
+                pass
+        snapshot = _cached_reliability_snapshot(lookup_root, model_name) if lookup_root and local_files_only else None
         model_name = str(snapshot) if snapshot else _MODEL_REPOSITORIES[model_name]
     if model_root:
         root = Path(model_root)
@@ -493,6 +500,8 @@ def _transcript_entries_from_segments(
         clean_text = str(get("text") or "").strip()
         if not clean_text:
             continue
+        if isinstance(get("start"), bool) or isinstance(get("end"), bool):
+            continue
         try:
             start_value = float(get("start") or 0.0)
             end_value = float(get("end") or start_value)
@@ -534,19 +543,44 @@ def _segment_words(segment) -> list[dict] | None:
 
 
 def drop_repetition_loops(entries: list, scores: list | None = None) -> list:
-    """Only suppress repetitive decoding when the acoustic evidence also indicates silence."""
+    """Keep ordinary repeats. Over likely silence, keep at most two consecutive
+    identical segments. Collapse four or more cycles of a short phrase covering
+    nearly the entire segment to one copy, or drop it for excessive compression.
+    Numeric counts and short emphatic speech are preserved regardless of timing.
+    """
     kept = []
+    previous, run = None, 0
+    counting = set("zero one two three four five six seven eight nine ten".split())
     for i, entry in enumerate(entries):
         ratio, silence = scores[i] if scores and i < len(scores) else (None, None)
-        if (isinstance(ratio, (int, float)) and ratio > DECODE_OPTIONS["compression_ratio_threshold"]
-                and isinstance(silence, (int, float)) and silence > DECODE_OPTIONS["no_speech_threshold"]):
-            tokens = entry[2].casefold().split()
-            # Keep short emphatic phrases, number lists and words with measured duration.
-            timed = any(w["end"] > w["start"] for w in (getattr(entry, "words", None) or []))
-            if (len(tokens) >= 9 and not timed and any(any(ch.isalpha() for ch in t) for t in tokens)
-                    and any(tokens == tokens[:n] * (len(tokens) // n)
-                            for n in range(1, min(8, len(tokens) // 3) + 1))):
+        tokens = re.findall(r"\w+", entry[2].casefold())
+        suspect = isinstance(silence, (float, int)) and silence > DECODE_OPTIONS["no_speech_threshold"]
+        if (not suspect or not tokens or all(t.isdecimal() or t in counting for t in tokens)
+                or (len(tokens) > 1 and len(set(tokens)) == 1)):
+            previous, run = None, 0
+            kept.append(entry)
+            continue
+        run = run + 1 if previous == tokens else 1
+        previous = tokens
+        if run > 2:
+            continue
+        phrase = None
+        for offset in range(min(2, len(tokens))):
+            for width in range(2, min(8, (len(tokens) - offset) // 4) + 1):
+                candidate = tokens[offset:offset + width]
+                if (len(set(candidate)) > 1 and
+                        all(t == candidate[j % width] for j, t in enumerate(tokens[offset:]))):
+                    phrase = (offset, width)
+                    break
+            if phrase:
+                break
+        if phrase:
+            if isinstance(ratio, (int, float)) and ratio > DECODE_OPTIONS["compression_ratio_threshold"]:
                 continue
+            start, width = phrase
+            words = list(re.finditer(r"\w+[^\w\s]*", entry[2]))
+            text = entry[2][words[start].start():words[start + width - 1].end()]
+            entry = (entry[0], entry[1], text)
         kept.append(entry)
     return kept
 
@@ -671,7 +705,7 @@ def transcribe_media(media_path: str | Path, *,
     return drop_repetition_loops(_transcript_entries_from_segments(segments, scores), scores)
 
 
-def _language_samples(media):
+def _language_samples(media, cancel_event=None):
     """Decode at most three 20-second mono windows, including the middle and end."""
     import av
     import numpy as np
@@ -681,12 +715,20 @@ def _language_samples(media):
         duration = float(stream.duration * stream.time_base) if stream.duration else (
             float(container.duration) / av.time_base if container.duration else 0)
         last = max(0, duration - 20)
-        for offset in sorted({0, last / 2, last} if duration > 40 else {0}):
+        for offset in sorted({0, last / 2, last}):
             if offset:
-                container.seek(int(offset / stream.time_base), stream=stream)
+                try:
+                    container.seek(int(offset / stream.time_base), stream=stream)
+                except Exception as exc:
+                    # PyAV uses different exception types for unsupported seeks.
+                    raise OSError("Cannot seek to a language sample.") from exc
             resampler = av.AudioResampler(format="fltp", layout="mono", rate=rate)
             parts, count = [], 0
-            for frame in container.decode(stream):
+            for number, frame in enumerate(container.decode(stream)):
+                if cancel_event is not None and cancel_event.is_set():
+                    raise _cancelled_error()
+                if number >= 4096:  # a seek without a usable index landed too far back
+                    break
                 if frame.time is not None and frame.time < offset - 0.1:
                     continue
                 for out in resampler.resample(frame):
@@ -698,7 +740,8 @@ def _language_samples(media):
                 yield np.concatenate(parts)[:rate * 20]
 
 
-def _english_guard(media: Path, model_name: str, model_root, language, *, checker_path=None, cancel_event=None):
+def _english_guard(media: Path, model_name: str, model_root, language, *, checker_path=None,
+                   checker_name=LANGUAGE_CHECK_MODEL, cancel_event=None):
     """Never run an English-only model on other languages.
 
     Returns (model to run, language to pass, fallback note or None). The
@@ -710,7 +753,7 @@ def _english_guard(media: Path, model_name: str, model_root, language, *, checke
         return model_name, language, None
     if language is not None and str(language).lower().split("-", 1)[0] == "en":
         return model_name, "en", None
-    check_model = LANGUAGE_CHECK_MODEL
+    check_model = checker_name
     if not checker_path and model_root and not any(resolve_model(check_model, model_root)):
         check_model = next((name for name in _MODEL_REPOSITORIES if not is_english_only(name)
                             and is_model_ready(name, model_root)), LANGUAGE_CHECK_MODEL)
@@ -724,13 +767,22 @@ def _english_guard(media: Path, model_name: str, model_root, language, *, checke
         except (RuntimeError, ValueError, OSError) as exc:
             raise ReliabilityUnavailableError("A local multilingual model is needed to check the language.") from exc
         seen = []
-        for sample in _language_samples(media):
-            if cancel_event is not None and cancel_event.is_set():
-                raise _cancelled_error()
-            _, found = checker.transcribe(sample, beam_size=1, best_of=1, vad_filter=False)
-            tag = str(found.language or "").lower().split("-", 1)[0]
-            confidence = float(found.language_probability or 0)
-            seen.append((tag, confidence if math.isfinite(confidence) else 0))
+        try:
+            for sample in _language_samples(media, cancel_event):
+                if cancel_event is not None and cancel_event.is_set():
+                    raise _cancelled_error()
+                try:
+                    _, found = checker.transcribe(sample, beam_size=1, best_of=1, vad_filter=True)
+                except (IndexError, ValueError):
+                    continue  # some runtimes cannot identify an empty VAD result
+                voiced = getattr(found, "duration_after_vad", 20)
+                tag = str(found.language or "").lower().split("-", 1)[0]
+                confidence = float(found.language_probability or 0)
+                if voiced < .25 or (voiced < 2 and confidence < ENGLISH_MIN_PROBABILITY):
+                    continue  # a weak guess over a brief sound is not evidence of another language
+                seen.append((tag, confidence if math.isfinite(confidence) else 0))
+        except (OSError, IndexError, TypeError, ValueError, EOFError):
+            seen.clear()  # no reliable probe for this stream
         if seen and all(tag == "en" and p >= ENGLISH_MIN_PROBABILITY for tag, p in seen):
             return model_name, "en", None
         detected, probability = min(seen, key=lambda pair: pair[1]) if seen else ("", 0)

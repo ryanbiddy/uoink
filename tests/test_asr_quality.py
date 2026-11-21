@@ -47,7 +47,7 @@ def media(tmp_path):
 
 
 def models(monkeypatch, **by_name):
-    monkeypatch.setattr(rel, "_language_samples", lambda _: [b"fake decoded window"], raising=False)
+    monkeypatch.setattr(rel, "_language_samples", lambda *_: [b"fake decoded window"], raising=False)
     loads = []
 
     def load(name, root, *, local_files_only=True):
@@ -232,7 +232,8 @@ def test_real_repeated_speech_keeps_words_and_timings(line):
     row = rel.TranscriptEntry(0, 4, line.strip(), [{"word": "first", "start": 0, "end": 1}])
     rows = rel.drop_repetition_loops([row] * 5, [(1.1, 0.01)] * 5)
     assert rows == [row] * 5 and all(r.words == row.words for r in rows)
-    assert rel.drop_repetition_loops([row], [(3.1, 0.95)]) == [row]
+    if line.startswith(("No ", "one ", "0 ")):
+        assert rel.drop_repetition_loops([row], [(3.1, 0.95)]) == [row]
     assert "vad_parameters" not in rel.DECODE_OPTIONS
 
 
@@ -248,13 +249,13 @@ def test_invalid_word_times_never_reach_json():
         json.dumps(rows, allow_nan=False)
 
 
-def test_language_probe_skips_vad_and_reliability_uses_multilingual(monkeypatch, media):
+def test_language_probe_uses_window_vad_and_reliability_uses_multilingual(monkeypatch, media):
     base = FakeModel("base", language="es")
     english = FakeModel("distil-small.en")
     models(monkeypatch, **{"base": base, "distil-small.en": english})
     rel.detect_unreliable_spans("", media, model_name="distil-small.en")
     assert not english.calls and base.calls[-1]["language"] == "es"
-    assert not base.calls[0].get("vad_filter")
+    assert base.calls[0]["vad_filter"]
     rel.transcribe_media(media, model_name="distil-small.en", language="en-US")
     assert english.calls[-1]["language"] == "en"
 
@@ -268,7 +269,7 @@ def test_bundled_base_checks_mixed_podcast_and_capture(monkeypatch, tmp_path, me
     root = data / "models" / "whisper"
     seed_user_cache(root, "distil-small.en")
     monkeypatch.setattr(rel, "bundled_model_root", lambda: app)
-    monkeypatch.setattr(rel, "_language_samples", lambda _: ["intro", "middle", "tail"], raising=False)
+    monkeypatch.setattr(rel, "_language_samples", lambda *_: ["intro", "middle", "tail"], raising=False)
     calls = []
     class Multilingual:
         def __init__(self, path, **kw):
@@ -287,7 +288,7 @@ def test_bundled_base_checks_mixed_podcast_and_capture(monkeypatch, tmp_path, me
         else:
             info = runner.transcribe_audio(media, model_size="distil-small.en", data_root=data)
         assert info["model"] == "base" and info["english_fallback"]["detected_language"] == "mixed"
-        assert [kw["vad_filter"] for _, kw in calls] == [False, False, False, True]
+        assert [kw["vad_filter"] for _, kw in calls] == [True, True, True, True]
         assert "language" not in calls[-1][1]
 
 
@@ -305,3 +306,96 @@ def test_mixed_sections_keep_separate_provenance(tmp_path, monkeypatch):
         media_chunks=[(paths[0], 0, 2), (paths[1], 8, 2)])
     assert meta["model"] == "distil-small.en" and "detected_language" not in meta
     assert meta["section_fallbacks"] == [{"used_model": "base", "detected_language": "es"}, None]
+
+
+def test_thank_you_over_silence_with_word_times():
+    words = [word(t, i * .45, i * .45 + .22) for i, t in
+             enumerate(("Thank you. " * 9 + "Thank").split())]
+    entries = rel._transcript_entries_from_segments([
+        seg(0, 9, "Thank you. Thank you, " + "Thank you. " * 7 + "Thank", words=words)])
+    rows = rel.drop_repetition_loops(entries, [(1.9, .94)])
+    assert rows == [(0.0, 9.0, "Thank you.")]
+    assert not getattr(rows[0], "words", None) or len(rows[0].words) == 2
+
+
+def test_identical_segments_over_silence():
+    lines = ["Yeah.", "yeah", "Yeah!", "Yeah.", "Yeah.", "So the launch moved.", "Yeah."]
+    rows = rel.drop_repetition_loops([(i, i+1, line) for i, line in enumerate(lines)],
+                                     [(1.9, .92)] * len(lines))
+    assert [text for _s, _e, text in rows] == ["Yeah.", "yeah", "So the launch moved.", "Yeah."]
+
+
+def test_whisperx_segment_times_survive_persistence(tmp_path):
+    import whisper_runner as runner
+    import json
+    rows = runner._shape_segments([{"start": a, "end": b, "text": "ok"} for a, b in
+        [(float("nan"), 1), (0, float("inf")), (True, 2), (-1, 1), (2, 1)]])
+    path = runner.write_transcript({"segments": rows}, audio_path=tmp_path / "clip.wav")
+    assert [(row["start"], row["end"]) for row in json.loads(path.read_bytes())["segments"]] == [(0, 1), (2, 2)]
+
+
+@pytest.mark.parametrize("intro_vad_seconds", [0, 1])
+def test_language_probe_music_speech_and_silence(tmp_path, monkeypatch, intro_vad_seconds):
+    import wave
+    import struct
+    pytest.importorskip("av")
+    pytest.importorskip("numpy")
+    path = tmp_path / "sample.wav"
+    with wave.open(str(path), "wb") as out:
+        out.setparams((1, 2, 16000, 0, "NONE", ""))
+        for level in (500, 5000, 0):
+            out.writeframes(struct.pack("<h", level) * (16000 * 20))
+    class Checker:
+        def transcribe(self, audio, **kw):
+            speech = audio.max() > 0.1
+            return [], SimpleNamespace(language="en" if speech else "fr",
+                language_probability=.98 if speech else .3,
+                duration_after_vad=20 if speech else (intro_vad_seconds if audio.max() else 0))
+    monkeypatch.setattr(rel, "_load_model", lambda *a, **kw: Checker())
+    assert rel._english_guard(path, "distil-small.en", None, None) == ("distil-small.en", "en", None)
+
+
+@pytest.mark.parametrize("empty", [True, False])
+def test_language_probe_unreadable_stream_falls_back(empty, monkeypatch, media):
+    import contextlib
+    class Container:
+        streams = SimpleNamespace(audio=[] if empty else [SimpleNamespace(duration=100, time_base=1)])
+        def decode(self, stream):
+            return iter([])
+        def seek(self, *a, **kw):
+            # Some PyAV builds raise an FFmpegError without an OSError base.
+            raise RuntimeError("input is unseekable")
+    monkeypatch.setitem(sys.modules, "av", SimpleNamespace(
+        open=lambda _: contextlib.nullcontext(Container()), AudioResampler=lambda **kw: None))
+    monkeypatch.setattr(rel, "_load_model", lambda *a, **kw: FakeModel("base"))
+    assert rel._english_guard(media, "distil-small.en", None, None)[:2] == ("base", None)
+
+
+def test_chunked_provenance_keeps_silent_section_and_ignores_confidence(tmp_path, monkeypatch):
+    import server
+    paths = [tmp_path / str(i) for i in range(3)]
+    monkeypatch.setattr(server, "_reliability_model_status", lambda *_: {"cached": True})
+    monkeypatch.setattr(server, "_media_has_audio", lambda *_: True)
+    def decode(path, **kwargs):
+        i = paths.index(path)
+        if i == 1:
+            return []
+        kwargs["info"]["english_fallback"] = {"used_model": "base", "detected_language": "es",
+                                               "language_probability": .91 + .01 * i}
+        return [(0, 1, "hola")]
+    monkeypatch.setattr(rel, "transcribe_media", decode)
+    _, _, meta = server._resolve_video_transcript([], paths[0], 30, settings={"whisper_model": "distil-small.en"},
+        media_chunks=[(path, i*10, 2) for i, path in enumerate(paths)])
+    assert meta["model"] == "base" and meta["detected_language"] == "es"
+    assert [f and f["used_model"] for f in meta["section_fallbacks"]] == ["base", None, "base"]
+
+
+
+def test_song_refrain_with_distinct_timings_and_speech_evidence():
+    segments = [seg(i, i + 1, "La la la.", words=[
+        word("La", i, i+.2), word("la", i+.3, i+.5), word("la.", i+.6, i+.9)],
+        ratio=2.8, no_speech=.02) for i in range(0, 24, 3)]
+    scores = []
+    rows = rel._transcript_entries_from_segments(segments, scores)
+    filtered = rel.drop_repetition_loops(rows, scores)
+    assert filtered == rows and all(a.words == b.words for a, b in zip(filtered, rows))

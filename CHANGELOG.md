@@ -13,7 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - A capture can take its turn while a podcast or saved video is being transcribed. You can cancel either background job. If transcription stalls, the next capture can still run.
-- Transcribing a saved video again updates search immediately. An empty, much shorter or sampled transcript leaves the original in place.
+- Transcribing a saved video again updates search immediately. If the new transcript is much shorter, you can restore the previous one from the saved item. An empty result or a few sampled sections leave a full transcript in place.
+- Speaker labels work with the bundled WhisperX version. English-only models now check for speech across the recording, so an intro or outro with music can be skipped.
 - Local transcription leaves CPU cores free for other apps. Existing Turbo downloads still work after the model repository changed names.
 
 ### Added
