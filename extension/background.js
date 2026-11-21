@@ -469,7 +469,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         || !Array.isArray(msg.items) || msg.items.length < 1 || msg.items.length > 5000
         || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)
         || (msg.folder !== undefined && (msg.source !== "x_bookmarks" || typeof msg.folder !== "string"
-          || !msg.folder.trim() || msg.folder.length > 64 || /[\u0000-\u001f]/.test(msg.folder)))) {
+          || !msg.folder.trim() || msg.folder.length > 64 || /[\u0000-\u001f\u007f]/.test(msg.folder)
+          || !/[\p{L}\p{N}]/u.test(msg.folder)))) {
       sendResponse({ ok: false, error: "Invalid saves request or page." });
       return;
     }

@@ -586,15 +586,26 @@ async function http() {
 async function folders() {
   const context = vm.createContext({ URL, __UOINK_SAVES_TEST__: true });
   vm.runInContext(readFileSync(join(EXT, "content-saves.js"), "utf8"), context);
-  const { cleanFolderName } = context.__UOINK_SAVES_HELPERS__;
+  const { cleanFolderName, folderNameFrom } = context.__UOINK_SAVES_HELPERS__;
   assert.equal(cleanFolderName("  Recipes\n to try "), "Recipes to try");
-  for (const bad of [null, 3, "", "   ", "Bookmarks", "x".repeat(65), "a\u0007b"])
+  for (const bad of [null, 3, "", "   ", "Bookmarks", "x".repeat(65), "a\u0007b", "a\u007fb", "///", "???"])
     assert.equal(cleanFolderName(bad), null, String(bad));
+  assert.equal(folderNameFrom([" Tools to try "], "Bookmarks"), "Tools to try");
+  assert.equal(folderNameFrom(["Marcadores"], "Marcadores"), null, "the generic title in any language");
+  assert.equal(folderNameFrom(["Tools to try", "A post title"], "Bookmarks"), null, "two names: no guess");
+  assert.equal(folderNameFrom([], "Bookmarks"), null);
+  assert.equal(folderNameFrom(["Tools to try", "Tools to try"], ""), "Tools to try");
 
-  const heading = '[data-testid="primaryColumn"] h2';
+  const heading = '[data-testid="primaryColumn"] h2[role="heading"]';
+  const headerOnly = (env, nodes) => {
+    const base = env.document.querySelectorAll.bind(env.document);
+    env.document.querySelectorAll = (selector) => (selector === heading ? nodes : base(selector));
+  };
   const folderPage = collectorEnv("https://x.com/i/bookmarks/1790000000000000001");
   folderPage.rows = [tweetRow("/author/status/321")];
-  folderPage.document._selectors[heading] = { textContent: " Tools to try " };
+  headerOnly(folderPage, [{ textContent: " Tools to try " },
+    { textContent: "A heading inside a post", closest: (sel) => (sel.includes("article") ? {} : null) }]);
+  folderPage.document._selectors['a[href="/i/bookmarks"]'] = { textContent: "Bookmarks" };
   folderPage.load("content-saves.js");
   assert.equal(folderPage.control("heading").textContent, "Uoink: 1 bookmarks found");
   folderPage.control("send").userClick();
@@ -604,7 +615,7 @@ async function folders() {
 
   const allBookmarks = collectorEnv("https://x.com/i/bookmarks");
   allBookmarks.rows = [tweetRow("/author/status/321")];
-  allBookmarks.document._selectors[heading] = { textContent: "Tools to try" };
+  headerOnly(allBookmarks, [{ textContent: "Tools to try" }]);
   allBookmarks.load("content-saves.js");
   allBookmarks.control("send").userClick();
   await settle();
@@ -620,7 +631,7 @@ async function folders() {
   const message = { type: "stcStageSaves", source: "x_bookmarks", items: ["https://x.com/a/status/1"] };
   assert.equal((await env.dispatch({ ...message, folder: "Tools to try" }, sender)).ok, true);
   assert.deepEqual(calls.at(-1), ["x_bookmarks", ["https://x.com/a/status/1"], null, "Tools to try"]);
-  for (const folder of [5, "", "  ", "x".repeat(65), "a\nb"])
+  for (const folder of [5, "", "  ", "x".repeat(65), "a\nb", "a\u007fb", "???"])
     assert.equal((await env.dispatch({ ...message, folder }, sender)).ok, false, JSON.stringify(folder));
   assert.equal(calls.length, 1, "a bad folder never reaches the helper");
 
