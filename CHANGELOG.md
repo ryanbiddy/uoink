@@ -13,7 +13,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - The helper waits until transcription needs WhisperX before loading it. Local search releases its embedding model after five idle minutes. Set `UOINK_MODEL_IDLE_SECONDS` to change the wait.
-- YouTube auto-captions now save as readable lines and keep repeated speech. Run `uoink repair-captions <id> --preview` to check an older capture for repeated display text. Applying a repair keeps a copy of the original sidecar with its text and timestamps.
 - `uoink --text get <id>` shows the saved item, including its shelf and available transcript. Other text commands show their result values.
 - Following a suggested podcast saves the show's name and schedules feed checks. Upgrading also resumes checks for untitled shows left unpolled by 3.17. Audio capture still requires separate consent.
 - The npm installer tells you when your installed version is newer and keeps it. Failed X video captures show the reason when X supplies one.

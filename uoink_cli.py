@@ -77,9 +77,6 @@ def parser():
     get = command("get", help="look up a saved item by ID, or read it in full with --text")
     get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
-    repair = command("repair-captions", help="remove rolling caption repeats from one saved YouTube video")
-    repair.add_argument("id", help="saved video id")
-    repair.add_argument("--preview", action="store_true", help="count repeated words without changing the video")
     imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
                       "Reddit thread or YouTube playlist (50 per batch)")
     imports.add_argument("url", help="list, thread or playlist link")
@@ -548,12 +545,6 @@ def human(payload, *, index=None):
         return error_text(payload)
     if "tools" in payload:
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
-    if "removed_words" in payload:
-        action = "Found" if payload["preview"] else "Removed"
-        message = f"{action} {payload['removed_words']} repeated caption words."
-        if not payload["preview"] and payload.get("original_sidecar"):
-            message += "\nOriginal transcript saved in " + terminal_label(payload["original_sidecar"])
-        return message
     if "data_dir" in payload:
         return (f"Uoink {payload['version']}\nData: {payload['data_dir']}\n"
                 f"Helper: {'running' if payload['helper_running'] else 'not running (open Uoink to start it)'}\n"
@@ -788,13 +779,7 @@ def main(argv=None):
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
-            if ns.command == "repair-captions":
-                import library_media
-                try:
-                    payload = server.repair_rolling_captions(ns.id, preview=ns.preview)
-                except library_media.MediaError as exc:
-                    raise ValueError(str(exc)) from exc
-            elif ns.command == "research":
+            if ns.command == "research":
                 payload = research_command(ns, server)
             elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,

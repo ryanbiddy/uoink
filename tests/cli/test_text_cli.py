@@ -42,12 +42,6 @@ def test_recent_text_uses_date_kind_source_and_canonical_id(samples, library):
         '2026-11-03 | note | Stack notes | Example author [note_123456789ab]')
 
 
-def test_caption_repair_text_locates_the_recoverable_original():
-    result = {"ok": True, "removed_words": 4, "original_sidecar": "capture/original.json"}
-    assert cli.human(dict(result, preview=True)) == "Found 4 repeated caption words."
-    assert cli.human(dict(result, preview=False)).endswith("Original transcript saved in capture/original.json")
-
-
 def test_quotes_are_not_json_escaped(samples):
     assert cli.human(samples["quoted_title"]) == (
         '1 result\n"Simple Made Easy" | Example channel | 0:01\u20131:05 [quotes00001]')

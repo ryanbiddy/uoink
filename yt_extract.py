@@ -18,13 +18,11 @@ Requirements:
 """
 
 import argparse
-import json
 import logging
 import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import NamedTuple
 
 
 # Windows reserved device names. As path segments these fail to open even
@@ -60,275 +58,120 @@ def fmt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
-_CUE_TIME = r"(?:\d+:)?\d{2}:\d{2}[,.]\d{3}"
-_CUE_RANGE = re.compile(rf"^({_CUE_TIME})\s+-->\s+({_CUE_TIME})(?:\s|$)")
-_WORD_TIME = re.compile(rf"<({_CUE_TIME})>")
+def _caption_norm(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
 
 
-def _seconds(stamp):
-    parts = stamp.replace(",", ".").split(":")
-    return sum(float(value) * 60 ** i for i, value in enumerate(reversed(parts)))
+def _caption_key(text: str) -> str:
+    return _caption_norm(text).casefold()
+
+
+def _suffix_prefix_overlap(prev: str, cur: str, *, min_chars: int = 12) -> int:
+    """Length of prev suffix that matches cur prefix, for rolling captions."""
+    max_len = min(len(prev), len(cur))
+    for n in range(max_len, min_chars - 1, -1):
+        if prev[-n:] == cur[:n]:
+            return n
+    return 0
+
+
+def _dedupe_srt_entries(entries: list[tuple[float, float, str]]):
+    """Collapse YouTube rolling auto-caption fragments conservatively.
+
+    Human captions usually arrive as distinct, non-overlapping sentences; they
+    pass through unchanged. Auto captions often emit a partial line, then a
+    more complete line a second later, and finally a trailing fragment. We keep
+    the latest complete wording rather than tripling the transcript.
+    """
+    out: list[tuple[float, float, str]] = []
+    for start, end, text in entries:
+        text = _caption_norm(text)
+        if not text:
+            continue
+        if not out:
+            out.append((start, end, text))
+            continue
+
+        prev_start, prev_end, prev_text = out[-1]
+        prev_key = _caption_key(prev_text)
+        cur_key = _caption_key(text)
+        starts_near_prev = start - prev_start <= 5.0 or start - prev_end <= 2.0
+
+        # Fully duplicated caption blocks within two seconds are common in
+        # both auto-caption exports and occasionally in translated captions.
+        if cur_key == prev_key and start - prev_start <= 2.0:
+            continue
+
+        if starts_near_prev:
+            if cur_key in prev_key:
+                # New line is just a trailing fragment already contained in
+                # the previous complete line. Exact repeats are only dropped
+                # inside the tighter duplicate window above.
+                if cur_key != prev_key:
+                    continue
+            if cur_key != prev_key and cur_key.startswith(prev_key):
+                # New line is a more complete rewrite of the previous line.
+                out[-1] = (prev_start, end, text)
+                continue
+            overlap = (
+                _suffix_prefix_overlap(prev_key, cur_key)
+                if cur_key != prev_key else 0
+            )
+            if overlap:
+                # Rolling continuation: "hello world" then "world today".
+                out[-1] = (prev_start, end, prev_text.rstrip() + text[overlap:])
+                continue
+
+        out.append((start, end, text))
+    return out
 
 
 def _clean_caption_text(text: str) -> str:
+    # YouTube writes the ASS hard space (\h), and censors a word as [\h__\h].
     text = re.sub(r"<[^>]+>", "", text).replace("\\h", " ")
     text = re.sub(r"\[\s*__\s*\]", "[__]", text)
-    return " ".join(text.split()) if text.isascii() else text.strip()
+    return re.sub(r"[ \t]{2,}", " ", text).strip()
 
 
-def caption_window_text(entries, *, automatic, stored=False):
-    """Remove display history only when clocks or neighboring shifts confirm it."""
-    windows = []
-    shifts = []
-    for i, (start, end, raw) in enumerate(entries):
-        lines = [line for line in (raw.splitlines() if stored else
-                 map(_clean_caption_text, raw.splitlines())) if line]
-        words = " ".join(lines).split()
-        skip = 0
-        ghost = timed_roll = False
-        clock = bool(_WORD_TIME.search(raw))
-        # Use the conservative whitespace heuristic only for ASCII speech.
-        if automatic and windows and raw.isascii() and entries[i-1][2].isascii():
-            plines, prior, pclock, bridge, _ = windows[-1]
-            pstart, pend, previous_raw = entries[i-1]
-            adjacent = abs(start - pend) <= .001
-            ghost = (not stored and adjacent and 0 <= end - start <= .020001
-                     and len(words) >= 2 and lines == plines[-len(lines):] and (len(plines) > 1 or pclock)
-                     and (not clock or set(_WORD_TIME.findall(raw)) <= set(_WORD_TIME.findall(previous_raw))))
-            if adjacent and len(lines) > 1 and plines and (clock or pclock or bridge):
-                # A carried display line may retain its old word clocks. Fresh
-                # clocks on the repeated line identify a new utterance.
-                carried_clocks = _WORD_TIME.findall(raw.splitlines()[0])
-                if (lines[0] == plines[-1] and lines[0] not in lines[1:]
-                        and (not carried_clocks or carried_clocks == _WORD_TIME.findall(previous_raw.splitlines()[-1]))):
-                    skip = len(lines[0].split())
-                    timed_roll = True
-            elif start > pstart and pend - start >= .1:
-                # Both windows must shift: old words leave and new words arrive.
-                for size in range(min(len(prior) - 1, len(words) - 1), 1, -1):
-                    if prior[-size:] == words[:size] and prior[:size] != words[:size]:
-                        skip = size
-                        break
-        shifts.append(skip if skip >= 2 else 0)
-        windows.append((lines, words, clock, ghost, timed_roll))
-    for i, (lines, words, _, ghost, timed_roll) in enumerate(windows):
-        if ghost:
+def parse_srt(srt_path: Path, duration: float | None = None):
+    """Yield (start_sec, end_sec, text) from an SRT file.
+
+    With a known ``duration``, cues that start at or after it are dropped and
+    end times are clamped: uploaders sometimes attach captions for a longer cut.
+    """
+    content = srt_path.read_text(encoding="utf-8", errors="ignore")
+    pattern = re.compile(
+        r"(\d+):(\d+):(\d+)[,.](\d+)\s+-->\s+(\d+):(\d+):(\d+)[,.](\d+)"
+    )
+    blocks = re.split(r"\n\s*\n", content.strip())
+    entries: list[tuple[float, float, str]] = []
+    for block in blocks:
+        lines = [ln for ln in block.splitlines() if ln.strip()]
+        if len(lines) < 2:
             continue
-        if shifts[i] and (timed_roll or (i and shifts[i-1]) or (i+1 < len(shifts) and shifts[i+1])):
-            yield i, " ".join(words[shifts[i]:])
-        elif words or stored:
-            raw = entries[i][2]
-            separator = " " if raw.isascii() else "\n"
-            yield i, raw if stored else separator.join(lines)
-
-
-class _JSON3Token(NamedTuple):
-    start: int
-    end: int | None
-    text: str
-    boundary: bool
-    spaced: bool
-
-
-def _json3_has_two_words(tokens):
-    # A word can span segments, and punctuation can have its own clock.
-    spoken = "".join((" " if token.spaced else "") + token.text for token in tokens)
-    return sum(any(char.isalnum() for char in word) for word in spoken.split()) >= 2
-
-
-def _json3_entries(content, *, automatic):
-    """Read clocks in source order. Never sort untimed fragments ahead of speech."""
-    data = json.loads(content)
-    if not isinstance(data, dict) or not isinstance(data.get("events"), list):
-        raise ValueError("Missing JSON3 events")
-    tokens = []
-    boundary = False
-    trailing_space = False
-    for event in data["events"]:
-        if not isinstance(event, dict):
-            raise ValueError("Invalid JSON3 event")
-        boundary |= bool(event.get("aAppend")) or not automatic
-        segs = event.get("segs")
-        if segs is None:
-            continue
-        base, duration = event.get("tStartMs"), event.get("dDurationMs")
-        if (not isinstance(segs, list) or type(base) is not int or base < 0
-                or (duration is not None and (type(duration) is not int or duration < 0))):
-            raise ValueError("Invalid JSON3 timing")
-        end = base + duration if duration else None
-        # Native JSON3 includes separators in utf8. Some producers instead
-        # supply a timed word list with no separators at all.
-        native_spacing = any(isinstance(seg, dict) and isinstance(seg.get("utf8"), str)
-                             and re.search(r"\s|\\h", seg["utf8"]) for seg in segs)
-        offset = 0
-        current = []
-        for index, seg in enumerate(segs):
-            if not isinstance(seg, dict) or not isinstance(seg.get("utf8"), str):
-                raise ValueError("Invalid JSON3 segment")
-            clock = seg.get("tOffsetMs")
-            if clock is not None:
-                if type(clock) is not int or clock < offset:
-                    raise ValueError("Invalid JSON3 offset")
-                offset = clock
-            start = base + offset
-            if end is not None and end < start:
-                raise ValueError("Invalid JSON3 duration")
-            if automatic and current and start - current[-1].start > 700:
-                boundary = True
-            for part, fragment in enumerate(seg["utf8"].split("\n")):
-                boundary |= part > 0
-                text = _clean_caption_text(fragment)
-                spaced = trailing_space or fragment[:1].isspace() or fragment.startswith("\\h")
-                trailing_space = fragment[-1:].isspace() or fragment.endswith("\\h")
-                if not text:
-                    if boundary:
-                        current.append(_JSON3Token(start, start, "", True, False))
-                    continue
-                word_start = index == 0 or (not native_spacing and clock is not None)
-                if word_start and text[0].isascii() and text[0].isalnum():
-                    spaced = True
-                current.append(_JSON3Token(start, end, text, boundary, spaced))
-                boundary = False
-        if automatic and not event.get("aAppend") and tokens and current and current[0].start <= tokens[-1].start:
-            # A replay must match the tail by both clock and text, leave new
-            # speech, and span at least two words with different clocks.
-            for size in range(min(len(current) - 1, len(tokens)), 1, -1):
-                if tokens[-size].start != current[0].start:
-                    continue
-                prefix = current[:size]
-                tail = tokens[-size:]
-                if (prefix[0].start < prefix[-1].start
-                        and any(token.text for token in current[size:])
-                        and all(a.text and a.text.isascii() and a.start == b.start and a.text == b.text
-                                for a, b in zip(prefix, tail))
-                        and _json3_has_two_words(prefix) and _json3_has_two_words(tail)):
-                    boundary_before_replay = current[0].boundary
-                    current = current[size:]
-                    if boundary_before_replay:
-                        current[0] = current[0]._replace(boundary=True)
+        m = pattern.search(lines[1] if pattern.search(lines[1] or "") else " ".join(lines[:2]))
+        if not m:
+            for ln in lines:
+                m = pattern.search(ln)
+                if m:
                     break
-        if current and tokens:
-            prior = tokens[-1]
-            if current[0].start < prior.start:
-                raise ValueError("Ambiguous JSON3 chronology")
-            previous_end = prior.end if prior.end is not None else prior.start
-            if automatic and current[0].start - previous_end > 700:
-                current[0] = current[0]._replace(boundary=True)
-        tokens.extend(current)
-
-    cue = ""
-    for i, (start, end, text, boundary, spaced) in enumerate(tokens):
-        if i + 1 < len(tokens):
-            following = tokens[i + 1].start
-            end = following if end is None else min(end, following)
-        if end is None:
-            end = start  # Open final append: retain speech up to its last known word clock.
-        exceeds_budget = cue and (start - cue_start >= 6000 or len(cue.split()) + len(text.split()) > 12)
-        if cue and (boundary or (automatic and exceeds_budget)):
-            yield cue_start / 1000, cue_end / 1000, cue
-            cue = ""
-        if not text:
+        if not m:
             continue
-        if not cue:
-            cue_start = start
-        cue += (" " if cue and spaced else "") + text
-        cue_end = end
-        if automatic and text.rstrip('"”’)').endswith((".", "!", "?", "。", "！", "？")):
-            yield cue_start / 1000, cue_end / 1000, cue
-            cue = ""
-    if cue:
-        yield cue_start / 1000, cue_end / 1000, cue
+        h1, m1, s1, ms1, h2, m2, s2, ms2 = (int(x) for x in m.groups())
+        start = h1 * 3600 + m1 * 60 + s1 + ms1 / 1000
+        end = h2 * 3600 + m2 * 60 + s2 + ms2 / 1000
+        text_lines = [ln for ln in lines if not pattern.search(ln) and not ln.isdigit()]
+        text = _clean_caption_text(" ".join(text_lines))
+        if text:
+            entries.append((start, end, text))
 
-
-def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False, fetch_text=None):
-    """Read native JSON3, VTT or SRT. Unknown and manual tracks retain every cue."""
-    content = srt_path.read_text(encoding="utf-8-sig", errors="replace")
-    if srt_path.suffix == ".json3":
-        try:
-            entries = list(_json3_entries(content, automatic=automatic))
-        except (ValueError, OverflowError, RecursionError):
-            entries = []
-        if not entries:
-            alternates = [srt_path.with_suffix(ext) for ext in (".vtt", ".srt")]
-            if fetch_text and not any(path.is_file() for path in alternates):
-                fetch_text()
-            for alternate in alternates:
-                if alternate.is_file():
-                    entries = list(parse_srt(alternate, duration, automatic=automatic))
-                    if entries:
-                        yield from entries
-                        return
-    else:
-        raw = []
-        for block in re.split(r"\n\s*\n", content.strip()):
-            lines = block.splitlines()
-            if lines and re.match(r"^(?:WEBVTT|NOTE|STYLE|REGION)(?:\s|$)", lines[0].strip()):
-                continue
-            for i, line in enumerate(lines[:2]):
-                match = _CUE_RANGE.match(line.strip())
-                if match:
-                    start, end = map(_seconds, match.groups())
-                    raw.append((start, end, "\n".join(lines[i+1:])))
-                    break
-        entries = [(raw[i][0], raw[i][1], text)
-                   for i, text in caption_window_text(raw, automatic=automatic)]
     if duration and duration > 0:
-        kept = [(s, min(e, duration), t) for s, e, t in entries if s < duration]
+        kept = [(start, min(end, duration), text) for start, end, text in entries if start < duration]
         if len(kept) < len(entries):
             logging.getLogger(__name__).info(
                 "dropped %d caption cue(s) past the %.0fs video", len(entries) - len(kept), duration)
         entries = kept
-    yield from entries
-
-
-_ENGLISH_KEYS = ("en", "en-US", "en-GB", "en-orig")
-
-
-def english_caption_track(metadata, youtube):
-    """Choose one known track so yt-dlp cannot silently substitute a manual one."""
-    if youtube:
-        for table, kind in (("subtitles", "captions"), ("automatic_captions", "auto_captions")):
-            keys = ("en-orig", "en", "en-US", "en-GB") if kind == "auto_captions" else _ENGLISH_KEYS
-            tracks = metadata.get(table) or {}
-            regional = (k for k in tracks if isinstance(k, str) and re.fullmatch(r"en(?:-[a-z0-9]{1,8})+", k, re.I))
-            for key in (*keys, *regional):
-                if tracks.get(key):
-                    return {"key": key, "kind": kind}
-    return None
-
-
-def video_caption_prefix(track):
-    # An older capture may still have video.en.srt of unknown origin.
-    return "video.auto" if track and track["kind"] == "auto_captions" else "video"
-
-
-def caption_args(track, *, text_only=False):
-    if track is None:
-        return ["--write-auto-subs", "--write-subs", "--sub-lang", ",".join(_ENGLISH_KEYS),
-                "--convert-subs", "srt"]
-    auto = track["kind"] == "auto_captions"
-    formats = ("vtt/srt" if text_only else "json3/vtt/srt") if auto else "vtt/srt/best"
-    return ["--write-auto-subs" if auto else "--write-subs", "--sub-lang", track["key"],
-            "--sub-format", formats,
-            *([] if auto else ["--convert-subs", "srt"])]
-
-
-def caption_file(folder, prefix, track, *, text_only=False):
-    if track:
-        formats = ("srt", "vtt")
-        if track["kind"] == "auto_captions":
-            formats = ("vtt", "srt") if text_only else ("json3", "vtt", "srt")
-        for ext in formats:
-            file = folder / f"{prefix}.{track['key']}.{ext}"
-            if file.is_file():
-                return file
-        return None
-    files = sorted(folder.glob(f"{prefix}*.srt"))
-    for key in _ENGLISH_KEYS:
-        file = folder / f"{prefix}.{key}.srt"
-        if file in files:
-            return file
-    return files[0] if files else None
+    yield from _dedupe_srt_entries(entries)
 
 
 def chapters_from_metadata(info) -> list[dict]:
@@ -375,10 +218,7 @@ def main():
     print("Fetching title...")
     ytdlp = ([sys.executable, "-m", "yt_dlp", *_platform.ytdlp_media_args()]
              if sys.platform == "darwin" else ["yt-dlp"])
-    metadata = json.loads(subprocess.check_output(
-        [*ytdlp, "--dump-single-json", "--skip-download", args.url], text=True, encoding="utf-8"))
-    title = metadata["title"]
-    track = english_caption_track(metadata, metadata.get("extractor_key") == "Youtube")
+    title = subprocess.check_output([*ytdlp, "--get-title", args.url], text=True).strip()
     folder = out_root / slugify(title)
     folder.mkdir(exist_ok=True)
     print(f"-> {folder}")
@@ -387,18 +227,20 @@ def main():
     subprocess.run(
         [
             *ytdlp,
-            *caption_args(track),
+            "--write-auto-subs",
+            "--write-subs",
+            "--sub-lang", "en,en-US,en-GB,en-orig",  # named tracks, not auto-translations
+            "--convert-subs", "srt",
             "-f", (_platform.video_format("worst[height>=360]/worst")
                    if sys.platform == "darwin" else "worst[height>=360]/worst"),
             "-o", str(folder / "video.%(ext)s"),
-            "-o", "subtitle:" + str(folder / (video_caption_prefix(track) + ".%(ext)s")),
             args.url,
         ],
         check=True,
     )
 
     video_files = [f for f in folder.glob("video.*") if f.suffix in (".mp4", ".webm", ".mkv")]
-    subtitle = caption_file(folder, video_caption_prefix(track), track)
+    srt_files = list(folder.glob("video*.srt"))
     if not video_files:
         sys.exit("No video file found.")
     video_file = video_files[0]
@@ -419,12 +261,7 @@ def main():
     )
     shots = sorted(shots_dir.glob("shot_*.jpg"))
 
-    def fetch_text():
-        subprocess.run([*ytdlp, "--skip-download", *caption_args(track, text_only=True),
-                        "-o", str(folder / (video_caption_prefix(track) + ".%(ext)s")), args.url], check=True)
-
-    entries = list(parse_srt(subtitle, automatic=bool(track and track["kind"] == "auto_captions"),
-                             fetch_text=fetch_text)) if subtitle else []
+    entries = list(parse_srt(srt_files[0])) if srt_files else []
 
     print("Writing transcript.txt and combined.md...")
     if entries:
