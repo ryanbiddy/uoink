@@ -207,7 +207,8 @@ def test_restart_resumes_only_persisted_opt_in(db, monkeypatch):
     engine._full = engine._warm = False
     engine.manager.terms_path.unlink()
     server._resume_local_search()
-    assert not calls and not engine._full
+    # Without accepted terms nothing resumes: restore() would set _warm.
+    assert not calls and not engine._full and not engine._warm
 
 
 def test_concurrent_search_reads_cached_sources_while_hit_details_load(db, monkeypatch):
