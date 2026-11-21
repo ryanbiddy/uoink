@@ -122,6 +122,7 @@ def helper(source_tree, tmp_path, monkeypatch):
         "_resolve_corpus_path": Mock(return_value=None),
         # 3.18: podcast publication passes the shelf router as its classifier.
         "_route_topic": lambda metadata, **k: "Uncategorized",
+        "_shelf_from_body": lambda body, **k: (None, None),  # 3.18: /extract checks a named shelf
         "_normalize_long_video_mode": Mock(return_value="auto"),
         "_manual_extraction_ownership": lambda url: nullcontext(SimpleNamespace(
             ok=True, conflict=None, completed_while_waiting=False)),
