@@ -239,24 +239,16 @@ function messageActiveTab(tabId, payload) {
   });
 }
 
-// 3.18.0: X's link copy of a long post stops near 280 characters. Ask the
-// open tab (content-x-article.js) for the post's own text. It goes only to
-// the local helper, which keeps it when it matches the post. Null when the
-// tab can't answer within a couple of seconds.
-async function readOpenXPost(url) {
-  let tab = null;
+// 3.18.0: X's link copy of a long post stops near 280 characters. The worker
+// asks the open tab (content-x-article.js) for the post's own text when it
+// runs the save, so the popup only passes the tab's id and never waits.
+// Null when the tab is unknown.
+async function activeTabId() {
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    tab = tabs && tabs[0];
-  } catch { tab = null; }
-  if (!tab || !tab.id) return null;
-  const answer = await Promise.race([
-    messageActiveTab(tab.id, { type: "uoinkReadXPost", url }),
-    new Promise((resolve) => setTimeout(() => resolve(null), 2500)),
-  ]);
-  const post = answer && answer.ok && answer.post;
-  if (!post || !post.ok || typeof post.text !== "string" || !/^\d+$/.test(String(post.id))) return null;
-  return { id: String(post.id), text: post.text.slice(0, 30000), show_more: !!post.show_more };
+    const tab = tabs && tabs[0];
+    return tab && Number.isInteger(tab.id) ? tab.id : null;
+  } catch { return null; }
 }
 
 async function captureXArticle(url) {
@@ -496,10 +488,11 @@ async function runPopupUoinkCurrent() {
     // The worker owns the text and optional video, including deduplication
     // against pasted links, after this popup closes.
     if (src.action === "x_video") {
-      // 3.18.0: the open tab's own text, so a long post saves whole.
-      const domPost = await readOpenXPost(src.canonical);
+      // 3.18.0: queue first. The worker reads the open tab's own text of the
+      // post while it saves, so closing the popup never drops the save.
+      const tabId = await activeTabId();
       await queueCapture(Object.assign({ route: "x_post", url: src.canonical, interval },
-        domPost ? { domPost } : {}));
+        tabId !== null ? { readTabId: tabId } : {}));
       return;
     }
     // X article: content-script DOM parse first, /extract/page as fallback.

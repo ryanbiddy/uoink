@@ -310,10 +310,26 @@
     return m ? m[1] : null;
   }
 
+  // A quoted post is drawn inside the post as a card with role="link" (a
+  // div, unlike the post's own links). Nothing in that card is the post's.
+  function _inQuoteCard(el, article) {
+    for (let node = el && el.parentNode; node && node !== article; node = node.parentNode) {
+      const role = node.getAttribute ? node.getAttribute("role") : null;
+      if (role === "link" && (node.tagName || "").toUpperCase() !== "A") return true;
+    }
+    return false;
+  }
+
+  // The post's own elements that match, in page order, quote cards left out.
+  function _own(article, selector) {
+    let all = [];
+    try { all = article.querySelectorAll(selector); } catch { all = []; }
+    return Array.from(all).filter((el) => !_inQuoteCard(el, article));
+  }
+
   // The post an <article> shows: its timestamp links to its own status.
   function _postIdOf(article) {
-    let links = [];
-    try { links = article.querySelectorAll('a[href*="/status/"]'); } catch { links = []; }
+    const links = _own(article, 'a[href*="/status/"]');
     for (const a of links) {
       let hasTime = false;
       try { hasTime = !!a.querySelector("time"); } catch { hasTime = false; }
@@ -335,7 +351,11 @@
       if (_postIdOf(article) === id) return { id, article };
     }
     // The open post itself sometimes has no timestamp link: X marks it as
-    // the one article that isn't in the tab order.
+    // the one article that isn't in the tab order. That only says which post
+    // it is when the tab is showing this status (X swaps pages in place).
+    const here = typeof location !== "undefined" && location && location.href
+      ? statusIdFromUrl(location.href) : id;
+    if (here !== id) return null;
     for (const article of articles) {
       if (article.getAttribute && article.getAttribute("tabindex") === "-1"
           && _postIdOf(article) === null) return { id, article };
@@ -376,8 +396,7 @@
   function showMoreButton(root, url) {
     const found = findXPost(root, url);
     if (!found) return null;
-    let el = null;
-    try { el = found.article.querySelector(SHOW_MORE_SELECTOR); } catch { el = null; }
+    const el = _own(found.article, SHOW_MORE_SELECTOR)[0] || null;
     return el && (el.tagName || "").toUpperCase() === "BUTTON" ? el : null;
   }
 
@@ -388,14 +407,12 @@
     if (!found) {
       return { ok: false, code: "no_post", error: "Couldn't find this post on the page." };
     }
-    let textEl = null;
-    try { textEl = found.article.querySelector(POST_TEXT_SELECTOR); } catch { textEl = null; }
+    const textEl = _own(found.article, POST_TEXT_SELECTOR)[0] || null;
     if (!textEl) {
       return { ok: false, code: "no_text", error: "This post has no text on the page." };
     }
     const text = _postText(textEl).replace(/[^\S\n]+\n/g, "\n").trim().slice(0, POST_TEXT_MAX);
-    let more = null;
-    try { more = found.article.querySelector(SHOW_MORE_SELECTOR); } catch { more = null; }
+    const more = _own(found.article, SHOW_MORE_SELECTOR)[0] || null;
     return { ok: !!text, id: found.id, text, show_more: !!more };
   }
 

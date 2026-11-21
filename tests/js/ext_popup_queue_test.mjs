@@ -437,16 +437,21 @@ async function handoff() {
     });
     const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
     const asked = [];
+    let popupAsked = 0;
     popup.ctx.chrome.tabs.query = async () => [{ id: 7 }];
-    popup.ctx.chrome.tabs.sendMessage = (tabId, msg, cb) => {
-      asked.push([tabId, msg]);
+    // Deliberately changed in review: the popup queues first and never waits
+    // on the tab. The worker asks the tab while it runs the save.
+    popup.ctx.chrome.tabs.sendMessage = () => { popupAsked++; };
+    base.worker.ctx.chrome.tabs.sendMessage = (tabId, msg, cb) => {
+      asked.push([tabId, msg, handedOff(popup)]);
       Promise.resolve().then(() => cb({ ok: true, post: {
         ok: true, id: "1720000000000000000", text: "The whole long post. FULL-TEXT-END", show_more: false } }));
     };
     await popup.ctx.runPopupUoinkCurrent();
     await settle();
+    check(popupAsked === 0, "the popup never waits on the tab");
     check(asked.length === 1 && asked[0][0] === 7 && asked[0][1].type === "uoinkReadXPost"
-      && asked[0][1].url === X_POST_URL, "the popup asks the open tab for the post once", asked);
+      && asked[0][1].url === X_POST_URL && asked[0][2], "the worker asks the open tab once, after the hand-off", asked);
     check(bodies.length === 1 && bodies[0].url === X_POST_URL && bodies[0].dom_post
       && bodies[0].dom_post.id === "1720000000000000000"
       && bodies[0].dom_post.text === "The whole long post. FULL-TEXT-END",
@@ -466,7 +471,7 @@ async function handoff() {
     });
     const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
     popup.ctx.chrome.tabs.query = async () => [{ id: 7 }];
-    popup.ctx.chrome.tabs.sendMessage = (_tabId, _msg, cb) => {
+    base.worker.ctx.chrome.tabs.sendMessage = (_tabId, _msg, cb) => {
       Promise.resolve().then(() => cb({ ok: false, post: { ok: false, code: "no_text" } }));
     };
     await popup.ctx.runPopupUoinkCurrent();

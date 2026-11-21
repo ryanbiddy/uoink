@@ -98,6 +98,35 @@ const collapsedLink = parseHTML(`<main>${post(FOCAL, "example_writer", "<span>St
 check(X.showMoreButton(collapsedLink, URL) === null, "a Show more link (opens a page) is never pressed");
 check(X.readXPost(collapsedLink, URL).show_more === true, "but it is still flagged");
 
+// ---- review fix: a quoted post's parts are never the open post's ---------------
+const quoteWithMore = `<div role="link" tabindex="0"><div data-testid="User-Name"><span>@example_quoter</span>
+  <a href="/example_quoter/status/${QUOTED}"><time datetime="2026-10-30T10:00:00.000Z">Oct 30</time></a></div>
+  <div data-testid="tweetText"><span>QUOTED-TEXT a long quoted post</span></div>
+  <button data-testid="tweet-text-show-more-link" type="button">Show more</button></div>`;
+// The open post is whole and quotes a long post that shows its own Show more.
+const quoting = parseHTML(`<main>${post(FOCAL, "example_writer", "<span>MY-WORDS short and whole.</span>", {
+  extra: quoteWithMore })}</main>`);
+const q = X.readXPost(quoting, URL);
+check(q.ok && q.text === "MY-WORDS short and whole." && q.show_more === false,
+  "a quoted post's Show more doesn't mark the open post", q);
+check(X.showMoreButton(quoting, URL) === null, "and the quoted post's Show more is never pressed");
+// A post with no words of its own, quoting one: the quote's text isn't taken.
+const quoteOnly = parseHTML(`<main><article data-testid="tweet" tabindex="-1">
+  <a href="/example_writer/status/${FOCAL}"><time>Nov 1</time></a>${quoteWithMore}</article></main>`);
+check(X.readXPost(quoteOnly, URL).code === "no_text", "a post with no text of its own doesn't read the quote");
+// The quote card's timestamp doesn't name the article it sits in.
+const quotedOnPage = parseHTML(`<main>${post(PARENT, "example_parent", "<span>PARENT-TEXT</span>", {
+  extra: quoteWithMore, timeLink: false })}</main>`);
+check(X.readXPost(quotedOnPage, `https://x.com/example_quoter/status/${QUOTED}`).ok === false,
+  "a quote card is not taken for the quoted post itself");
+
+// ---- review fix: X swapped the page in place --------------------------------------
+globalThis.location = { href: `https://x.com/example_other/status/${REPLY}` };
+check(X.readXPost(noLink, URL).ok === false, "the out-of-tab-order guess is off when the tab shows another post");
+globalThis.location = { href: URL };
+check(X.readXPost(noLink, URL).ok === true, "and on when the tab shows this post");
+delete globalThis.location;
+
 if (failures) {
   console.error(`\n${failures} check(s) failed`);
   process.exit(1);
