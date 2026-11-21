@@ -27,7 +27,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   wiki contents boxes and category bars stay out, and titles drop the site name.
 - A page that shows Uoink a sign-in, paywall preview or robot check, an empty app shell, or too
   little text now says so on its row, saves nothing, and offers Open page so you can save it
-  from your browser with Uoink this page.
+  from your browser with Uoink this page. A short article that only ends in a newsletter or
+  account box is saved, with a note that it may be a preview.
+- Tracking pixels are left out of saved pages, and lazy-loaded images keep their real picture.
+  Data tables keep cells that hold paragraphs, lists or code, and code inside lists and quotes
+  stays a code block.
+
+### Security
+
+- Saved page text is treated as hostile: raw HTML, unsafe link targets and broken code fences
+  from a page are neutralized in one linear pass before saving, and the reader links only to
+  web pages. A page Uoink read but could not save is reported as not saved.
+- Uoink this page checks the tab before reading it and never reads browser, store, extension,
+  file or PDF tabs, or a tab that moved to another page. Big or slow pages fall back to the
+  link fetch.
 
 ## [3.17.0] - 2026-11-12
 
