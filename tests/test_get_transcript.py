@@ -547,6 +547,32 @@ def test_unsafe_track_keys_from_metadata_are_never_passed_to_ytdlp(transcript):
     assert caption_keys(transcript) == ["en-orig"]
 
 
+@pytest.mark.parametrize("refused", [False, True])
+def test_unreadable_auto_track_retries_its_text_format(transcript, monkeypatch, refused):
+    transcript.metadata["subtitles"] = {}
+    formats = []
+    def fetch(cmd, **kwargs):
+        fmt = cmd[cmd.index("--sub-format") + 1]
+        assert cmd[cmd.index("--sub-lang") + 1] == "en-orig"
+        formats.append(fmt)
+        folder = Path(cmd[cmd.index("-o") + 1]).parent
+        if fmt == "json3/vtt/srt":
+            (folder / "captions.en-orig.json3").write_text('{"events":null}')
+        elif refused:
+            return subprocess.CompletedProcess(cmd, 0, b"", CAPTION_429.encode())
+        else:
+            (folder / "captions.en-orig.vtt").write_text("00:00.100 --> 00:01.200\nFull caption.")
+        return subprocess.CompletedProcess(cmd, 0, b"", b"")
+    monkeypatch.setattr(transcript.server, "_run_subprocess", fetch)
+    result = transcript.tools.get_transcript({"url":URL})
+    assert formats == ["json3/vtt/srt", "vtt/srt"]
+    if refused:
+        assert result["source"] == "whisper" and result["reason"] == "captions_rate_limited"
+    else:
+        assert result["source"] == "auto_captions" and result["transcript"] == "Full caption."
+        transcript.asr.assert_not_called()
+
+
 def test_caption_429_logged_as_warning_with_exit_zero_still_counts(transcript, monkeypatch):
     server = transcript.server
     calls = []

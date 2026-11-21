@@ -33,6 +33,7 @@ import _platform
 
 import index
 import uoink_usage
+from yt_extract import caption_args, video_caption_prefix
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -104,7 +105,7 @@ def helper(source_tree, tmp_path, monkeypatch):
     idx = Mock()
     idx.import_payload.return_value = {"style_anchors": {"imported": 1}}
     namespace = {
-        "uoink_usage": uoink_usage,
+        "uoink_usage": uoink_usage, "caption_args": caption_args, "video_caption_prefix": video_caption_prefix,
         "_platform": _platform, "sys": sys,
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,

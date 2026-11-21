@@ -192,8 +192,9 @@ def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
     feeds = [dict(r) for r in rows]
     if feeds and _subscriptions().tables_present(idx._conn):
         successes = dict(idx._conn.execute(
-            "SELECT s.legacy_feed_id, c.last_poll_success_ms FROM source_subscriptions s "
-            "JOIN source_detection_cursors c USING(source_id) WHERE s.legacy_feed_id IS NOT NULL"))
+            "SELECT s.legacy_feed_id, MAX(c.last_poll_success_ms) FROM source_subscriptions s "
+            "JOIN source_detection_cursors c USING(source_id) WHERE s.legacy_feed_id IS NOT NULL "
+            "AND c.last_poll_success_ms IS NOT NULL GROUP BY s.legacy_feed_id"))
         for feed in feeds:
             ms = successes.get(feed["id"])
             if ms is not None:

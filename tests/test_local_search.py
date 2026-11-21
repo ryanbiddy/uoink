@@ -9,6 +9,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
@@ -459,7 +460,7 @@ def test_close_keeps_the_saved_pause_choice_and_the_next_start_restores(engine, 
     assert ls.LocalSearch.settings_at(engine.root).get("paused") is not True
     with pytest.raises(ls.SearchUnavailable):
         engine.embedding_search("rust")
-    assert not engine.update_source("mars") or engine._worker is None
+    assert not engine.update_source("mars") and engine._worker is None
     events = []
     other = restarted(engine, index, events)
     assert not other._paused and other.restore() and other.wait(5)
@@ -531,6 +532,268 @@ def test_idle_release_leaves_a_model_in_use_and_rearms(engine, index):
     assert engine._model is model and engine._idle_timer is not None  # re-armed after use
     fire_idle_timer()
     assert engine._model is None and engine._idle_timer is None
+
+
+@pytest.mark.parametrize("action", ["idle", "pause", "idle_after_resume"])
+def test_changed_model_file_refused_before_factory(engine, index, action):
+    index.seed()
+    events = []
+    engine.model_factory = CountingFactory(engine.manager, events)
+    ready(engine)
+    if action == "idle":
+        engine._last_use = 0
+        engine._idle_timer.cancel()
+        engine._release_idle_model(engine._idle_generation)
+    else:
+        assert engine.pause(timeout=5)
+        if action == "idle_after_resume":
+            ready(engine)  # Saved vectors are current, so the model stays unloaded.
+    assert engine._model is None
+    (engine.manager.directory / ls.MODEL_FILES[0][0]).write_bytes(b"changed")
+    if action == "pause":
+        assert engine.start() and engine.wait(5)
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("mars")
+    assert events.count("load") == 1
+
+
+def test_timed_query_arriving_during_model_load_shares_the_session(engine, index):
+    index.seed()
+    ready(engine)
+    assert engine.pause(timeout=5)
+    ready(engine)
+    loading, release = threading.Event(), threading.Event()
+    loads = []
+
+    def factory(manager):
+        loads.append(manager)
+        loading.set()
+        assert release.wait(5)
+        return FakeModel(manager)
+
+    def query():
+        return engine.query_with_timeout(lambda: engine.embedding_search("rust"), 4)
+
+    engine.model_factory = factory
+    with ThreadPoolExecutor() as pool:
+        first = pool.submit(query)
+        try:
+            assert loading.wait(5)
+            second = pool.submit(query)
+            with pytest.raises(TimeoutError):
+                second.result(timeout=.15)
+        finally:
+            release.set()
+        assert [job.result(timeout=5)[0].source_id for job in (first, second)] == ["mars", "mars"]
+    assert loads == [engine.manager]
+
+
+@pytest.mark.parametrize("state", ["error", "unverified", "paused", "closed", "terms_needed", "downloading"])
+def test_invalid_state_precedes_factory(engine, state):
+    engine.enabled = True
+    engine._verified = state != "unverified"
+    engine._paused = state == "paused"
+    engine._closed = state == "closed"
+    engine._state = state if state in {"terms_needed", "downloading", "error"} else "ready"
+    loads = []
+    engine.model_factory = lambda manager: loads.append(manager)
+    with pytest.raises(ls.SearchUnavailable):
+        engine._embed(["query"])
+    assert loads == []
+
+
+@pytest.mark.parametrize("action", ["restore", "update_source", "status"])
+def test_state_lock_available_during_file_checks(engine, index, action, monkeypatch):
+    index.seed()
+    ready(engine)
+    entered, release = threading.Event(), threading.Event()
+    name = "present" if action == "update_source" else "acceptance"
+    original = getattr(engine.manager, name)
+    def held():
+        entered.set()
+        assert release.wait(5)
+        return original()
+    monkeypatch.setattr(engine.manager, name, held)
+    with ThreadPoolExecutor() as pool:
+        job = pool.submit(getattr(engine, action), *(["mars"] if action == "update_source" else []))
+        try:
+            assert entered.wait(5)
+            assert engine._state_lock.acquire(timeout=.2)
+            engine._state_lock.release()
+        finally:
+            release.set()
+        job.result(timeout=5)
+
+
+def test_concurrent_first_searches_share_warmup_and_model_load(engine, index):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    entered, release = threading.Event(), threading.Event()
+    loading, finish_load = threading.Event(), threading.Event()
+    verify, factory = other.manager.verify, other.model_factory
+    def held_verify():
+        entered.set()
+        assert release.wait(5)
+        return verify()
+    def held_factory(manager):
+        loading.set()
+        assert finish_load.wait(5)
+        return factory(manager)
+    other.manager.verify, other.model_factory = held_verify, held_factory
+    assert other.restore()
+    with ThreadPoolExecutor() as pool:
+        first = pool.submit(other.embedding_search, "rust")
+        try:
+            assert entered.wait(5)
+            second = pool.submit(other.embedding_search, "rust")
+            with pytest.raises(TimeoutError):
+                second.result(timeout=.1)
+            release.set()
+            assert loading.wait(5)
+            assert other._activity.acquire(timeout=.2)
+            other._activity.release()
+        finally:
+            release.set()
+            finish_load.set()
+        for query in (first, second):
+            assert query.result(timeout=5)[0].source_id == "mars"
+    assert other.close()
+
+
+def test_warm_waiter_can_finish_after_first_query_starts_inference(engine, index, monkeypatch):
+    from concurrent.futures import FIRST_COMPLETED, wait as wait_for_queries
+
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    assert other.restore()
+    in_model, release = threading.Event(), threading.Event()
+    verifying = threading.Event()
+    both_waiting = threading.Barrier(2, action=verifying.set)
+    wait = other._warm_ready.wait
+
+    def shared_wait(timeout):
+        turn = both_waiting.wait(timeout=3)
+        assert wait(timeout)
+        if turn:
+            assert in_model.wait(3)
+        return True
+
+    class SlowFirstQuery(FakeModel):
+        def embed(self, texts, *, wait=True):
+            in_model.set()
+            assert release.wait(3)
+            return super().embed(texts, wait=wait)
+
+    # Keep warm-up open until both requests have reached its event.
+    verify = other.manager.verify
+    def held_verify():
+        assert verifying.wait(3)
+        verify()
+
+    monkeypatch.setattr(other.manager, "verify", held_verify)
+    monkeypatch.setattr(other._warm_ready, "wait", shared_wait)
+    other.model_factory = SlowFirstQuery
+    try:
+        with ThreadPoolExecutor() as pool:
+            queries = [pool.submit(other.embedding_search, "rust") for _ in range(2)]
+            try:
+                assert in_model.wait(3)
+                done, _ = wait_for_queries(queries, timeout=.2, return_when=FIRST_COMPLETED)
+                assert not done
+            finally:
+                release.set()
+            assert all(query.result(timeout=3)[0].source_id == "mars" for query in queries)
+    finally:
+        assert other.close()
+
+
+def test_download_queued_during_index_model_load_is_serviced(engine, index):
+    index.seed()
+    loading, release = threading.Event(), threading.Event()
+    downloaded = []
+    def factory(manager):
+        loading.set()
+        assert release.wait(5)
+        return FakeModel(manager)
+    engine.model_factory = factory
+    engine.manager.download = lambda **kwargs: downloaded.append(True)
+    assert engine.start()
+    try:
+        assert loading.wait(5)
+        assert engine.download()
+    finally:
+        release.set()
+    assert engine.wait(5)
+    assert downloaded == [True] and engine.status()["state"] == "ready"
+
+
+def test_warmup_wait_has_a_five_second_deadline(engine, index):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    release = threading.Event()
+    original_verify = other.manager.verify
+    def slow_verify():
+        assert release.wait(9)
+        original_verify()
+    other.manager.verify = slow_verify
+    assert other.restore()
+    try:
+        with ThreadPoolExecutor() as pool:
+            query = pool.submit(other.embedding_search, "rust")
+            try:
+                with pytest.raises(ls.SearchUnavailable, match="Start local search"):
+                    query.result(timeout=7)
+                assert other._worker is not None and other._model is None
+            finally:
+                release.set()
+    finally:
+        assert other.close()
+
+
+@pytest.mark.parametrize("queued", ["update", "download"])
+def test_warm_search_finishes_while_queued_work_still_runs(engine, index, queued):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    entered, verified = threading.Event(), threading.Event()
+    working, finish = threading.Event(), threading.Event()
+    verify, sync = other.manager.verify, other._sync
+    def held_verify():
+        entered.set()
+        assert verified.wait(5)
+        verify()
+    def slow(*args, **kwargs):
+        working.set()
+        assert finish.wait(5)
+    def held_sync(*args, **kwargs):
+        if kwargs.get("embed", True):
+            slow()
+        return sync(*args, **kwargs)
+    other.manager.verify, other._sync = held_verify, held_sync
+    other.manager.download = slow
+    assert other.restore()
+    with ThreadPoolExecutor() as pool:
+        query = pool.submit(other.embedding_search, "rust")
+        try:
+            assert entered.wait(5)
+            if queued == "update":
+                assert other.update_source("mars")
+            else:
+                assert other.download()
+            verified.set()
+            assert working.wait(5)
+            if queued == "download":
+                with pytest.raises(ls.SearchUnavailable):
+                    query.result(timeout=1)
+            else:
+                assert query.result(timeout=1)[0].source_id == "mars"
+        finally:
+            verified.set()
+            finish.set()
+    assert other.close()
 
 
 def test_clip_spans_timestamps_max_per_source_and_metadata_changes(engine, index):

@@ -24,6 +24,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 
 # Windows reserved device names. As path segments these fail to open even
@@ -72,95 +73,197 @@ def _seconds(stamp):
 def _clean_caption_text(text: str) -> str:
     text = re.sub(r"<[^>]+>", "", text).replace("\\h", " ")
     text = re.sub(r"\[\s*__\s*\]", "[__]", text)
-    return " ".join(text.split())
+    return " ".join(text.split()) if text.isascii() else text.strip()
 
 
 def caption_window_text(entries, *, automatic, stored=False):
-    """Yield the original row number and its newly spoken text."""
-    previous = None
+    """Remove display history only when clocks or neighboring shifts confirm it."""
+    windows = []
+    shifts = []
     for i, (start, end, raw) in enumerate(entries):
-        lines = raw.splitlines() if stored else [_clean_caption_text(line) for line in raw.splitlines()]
-        lines = [line for line in lines if line]
-        if not lines:
-            if stored:
-                yield i, raw
-            continue
+        lines = [line for line in (raw.splitlines() if stored else
+                 map(_clean_caption_text, raw.splitlines())) if line]
         words = " ".join(lines).split()
         skip = 0
-        tags = set(_WORD_TIME.findall(raw))
-        if automatic and previous:
-            pstart, pend, plines, pwords, ptags, rolled = previous
-            # A roll-up moves the last displayed line to the top as a new
-            # line appears below it. A tiny bridge cue can repeat that line.
-            adjacent = pstart <= start <= pend + 0.001
-            ghost = 0 < end - start <= 0.015
-            if adjacent and lines[0] == plines[-1] and (
-                    (len(lines) >= 2 and lines != plines) or ghost):
-                skip = len(lines[0].split())
-            elif adjacent and (start < pend or ptags & tags):
-                for size in range(min(len(pwords), len(words)), 0, -1):
-                    if pwords[-size:] != words[:size]:
-                        continue
-                    # A whole line can be sung again even when the cues overlap.
-                    # A shared start or word clock identifies the same utterance.
-                    if start == pstart or ptags & tags or (size < len(pwords) and words != pwords):
+        ghost = timed_roll = False
+        clock = bool(_WORD_TIME.search(raw))
+        # Use the conservative whitespace heuristic only for ASCII speech.
+        if automatic and windows and raw.isascii() and entries[i-1][2].isascii():
+            plines, prior, pclock, bridge, _ = windows[-1]
+            pstart, pend, previous_raw = entries[i-1]
+            adjacent = abs(start - pend) <= .001
+            ghost = (not stored and adjacent and 0 <= end - start <= .020001
+                     and len(words) >= 2 and lines == plines[-len(lines):] and (len(plines) > 1 or pclock)
+                     and (not clock or set(_WORD_TIME.findall(raw)) <= set(_WORD_TIME.findall(previous_raw))))
+            if adjacent and len(lines) > 1 and plines and (clock or pclock or bridge):
+                # A carried display line may retain its old word clocks. Fresh
+                # clocks on the repeated line identify a new utterance.
+                carried_clocks = _WORD_TIME.findall(raw.splitlines()[0])
+                if (lines[0] == plines[-1] and lines[0] not in lines[1:]
+                        and (not carried_clocks or carried_clocks == _WORD_TIME.findall(previous_raw.splitlines()[-1]))):
+                    skip = len(lines[0].split())
+                    timed_roll = True
+            elif start > pstart and pend - start >= .1:
+                # Both windows must shift: old words leave and new words arrive.
+                for size in range(min(len(prior) - 1, len(words) - 1), 1, -1):
+                    if prior[-size:] == words[:size] and prior[:size] != words[:size]:
                         skip = size
-                    elif len(words) > size:
-                        # A single extended opening can be anaphora. Look for
-                        # another overlapping shift before treating it as a roll.
-                        continuing = False
-                        if i + 1 < len(entries):
-                            ns, _, next_raw = entries[i + 1]
-                            next_words = (next_raw if stored else _clean_caption_text(next_raw)).split()
-                            continuing = (start < ns < end and next_words != words and any(
-                                words[-n:] == next_words[:n] for n in range(2, min(len(words), len(next_words)) + 1)))
-                        if rolled or continuing:
-                            skip = size
-                    break
-        if skip < len(words):
-            yield i, raw if stored and not skip else " ".join(words[skip:])
-        previous = start, end, lines, words, tags, bool(skip)
+                        break
+        shifts.append(skip if skip >= 2 else 0)
+        windows.append((lines, words, clock, ghost, timed_roll))
+    for i, (lines, words, _, ghost, timed_roll) in enumerate(windows):
+        if ghost:
+            continue
+        if shifts[i] and (timed_roll or (i and shifts[i-1]) or (i+1 < len(shifts) and shifts[i+1])):
+            yield i, " ".join(words[shifts[i]:])
+        elif words or stored:
+            raw = entries[i][2]
+            separator = " " if raw.isascii() else "\n"
+            yield i, raw if stored else separator.join(lines)
+
+
+class _JSON3Token(NamedTuple):
+    start: int
+    end: int | None
+    text: str
+    boundary: bool
+    spaced: bool
+
+
+def _json3_has_two_words(tokens):
+    # A word can span segments, and punctuation can have its own clock.
+    spoken = "".join((" " if token.spaced else "") + token.text for token in tokens)
+    return sum(any(char.isalnum() for char in word) for word in spoken.split()) >= 2
 
 
 def _json3_entries(content, *, automatic):
-    """JSON3 timestamps identify displayed segments even when a window is replayed."""
-    from collections import Counter
-    seen = set()
-    timed = []
-    for event in json.loads(content).get("events", []):
-        if "tStartMs" not in event or not event.get("segs"):
+    """Read clocks in source order. Never sort untimed fragments ahead of speech."""
+    data = json.loads(content)
+    if not isinstance(data, dict) or not isinstance(data.get("events"), list):
+        raise ValueError("Missing JSON3 events")
+    tokens = []
+    boundary = False
+    trailing_space = False
+    for event in data["events"]:
+        if not isinstance(event, dict):
+            raise ValueError("Invalid JSON3 event")
+        boundary |= bool(event.get("aAppend")) or not automatic
+        segs = event.get("segs")
+        if segs is None:
             continue
-        base = event["tStartMs"]
-        end = base + event.get("dDurationMs", 0)
-        occurrences = Counter()
-        for seg in event["segs"]:
-            text = seg.get("utf8", "").strip()
-            if not text:
-                continue
-            start = base + seg.get("tOffsetMs", 0)
-            key = (start, text)
-            occurrences[key] += 1
-            identity = (*key, occurrences[key])
-            if automatic and identity in seen:
-                continue
-            seen.add(identity)
-            timed.append((start, max(start, end), text))
-    timed.sort(key=lambda row: row[0])
-    for i, (start, end, text) in enumerate(timed):
-        if i + 1 < len(timed) and timed[i + 1][0] > start:
-            end = min(end, timed[i + 1][0])
-        yield start / 1000, end / 1000, text
+        base, duration = event.get("tStartMs"), event.get("dDurationMs")
+        if (not isinstance(segs, list) or type(base) is not int or base < 0
+                or (duration is not None and (type(duration) is not int or duration < 0))):
+            raise ValueError("Invalid JSON3 timing")
+        end = base + duration if duration else None
+        # Native JSON3 includes separators in utf8. Some producers instead
+        # supply a timed word list with no separators at all.
+        native_spacing = any(isinstance(seg, dict) and isinstance(seg.get("utf8"), str)
+                             and re.search(r"\s|\\h", seg["utf8"]) for seg in segs)
+        offset = 0
+        current = []
+        for index, seg in enumerate(segs):
+            if not isinstance(seg, dict) or not isinstance(seg.get("utf8"), str):
+                raise ValueError("Invalid JSON3 segment")
+            clock = seg.get("tOffsetMs")
+            if clock is not None:
+                if type(clock) is not int or clock < offset:
+                    raise ValueError("Invalid JSON3 offset")
+                offset = clock
+            start = base + offset
+            if end is not None and end < start:
+                raise ValueError("Invalid JSON3 duration")
+            if automatic and current and start - current[-1].start > 700:
+                boundary = True
+            for part, fragment in enumerate(seg["utf8"].split("\n")):
+                boundary |= part > 0
+                text = _clean_caption_text(fragment)
+                spaced = trailing_space or fragment[:1].isspace() or fragment.startswith("\\h")
+                trailing_space = fragment[-1:].isspace() or fragment.endswith("\\h")
+                if not text:
+                    if boundary:
+                        current.append(_JSON3Token(start, start, "", True, False))
+                    continue
+                word_start = index == 0 or (not native_spacing and clock is not None)
+                if word_start and text[0].isascii() and text[0].isalnum():
+                    spaced = True
+                current.append(_JSON3Token(start, end, text, boundary, spaced))
+                boundary = False
+        if automatic and not event.get("aAppend") and tokens and current and current[0].start <= tokens[-1].start:
+            # A replay must match the tail by both clock and text, leave new
+            # speech, and span at least two words with different clocks.
+            for size in range(min(len(current) - 1, len(tokens)), 1, -1):
+                if tokens[-size].start != current[0].start:
+                    continue
+                prefix = current[:size]
+                tail = tokens[-size:]
+                if (prefix[0].start < prefix[-1].start
+                        and any(token.text for token in current[size:])
+                        and all(a.text and a.text.isascii() and a.start == b.start and a.text == b.text
+                                for a, b in zip(prefix, tail))
+                        and _json3_has_two_words(prefix) and _json3_has_two_words(tail)):
+                    boundary_before_replay = current[0].boundary
+                    current = current[size:]
+                    if boundary_before_replay:
+                        current[0] = current[0]._replace(boundary=True)
+                    break
+        if current and tokens:
+            prior = tokens[-1]
+            if current[0].start < prior.start:
+                raise ValueError("Ambiguous JSON3 chronology")
+            previous_end = prior.end if prior.end is not None else prior.start
+            if automatic and current[0].start - previous_end > 700:
+                current[0] = current[0]._replace(boundary=True)
+        tokens.extend(current)
+
+    cue = ""
+    for i, (start, end, text, boundary, spaced) in enumerate(tokens):
+        if i + 1 < len(tokens):
+            following = tokens[i + 1].start
+            end = following if end is None else min(end, following)
+        if end is None:
+            end = start  # Open final append: retain speech up to its last known word clock.
+        exceeds_budget = cue and (start - cue_start >= 6000 or len(cue.split()) + len(text.split()) > 12)
+        if cue and (boundary or (automatic and exceeds_budget)):
+            yield cue_start / 1000, cue_end / 1000, cue
+            cue = ""
+        if not text:
+            continue
+        if not cue:
+            cue_start = start
+        cue += (" " if cue and spaced else "") + text
+        cue_end = end
+        if automatic and text.rstrip('"”’)').endswith((".", "!", "?", "。", "！", "？")):
+            yield cue_start / 1000, cue_end / 1000, cue
+            cue = ""
+    if cue:
+        yield cue_start / 1000, cue_end / 1000, cue
 
 
-def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False):
+def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False, fetch_text=None):
     """Read native JSON3, VTT or SRT. Unknown and manual tracks retain every cue."""
     content = srt_path.read_text(encoding="utf-8-sig", errors="replace")
     if srt_path.suffix == ".json3":
-        entries = list(_json3_entries(content, automatic=automatic))
+        try:
+            entries = list(_json3_entries(content, automatic=automatic))
+        except (ValueError, OverflowError, RecursionError):
+            entries = []
+        if not entries:
+            alternates = [srt_path.with_suffix(ext) for ext in (".vtt", ".srt")]
+            if fetch_text and not any(path.is_file() for path in alternates):
+                fetch_text()
+            for alternate in alternates:
+                if alternate.is_file():
+                    entries = list(parse_srt(alternate, duration, automatic=automatic))
+                    if entries:
+                        yield from entries
+                        return
     else:
         raw = []
         for block in re.split(r"\n\s*\n", content.strip()):
             lines = block.splitlines()
+            if lines and re.match(r"^(?:WEBVTT|NOTE|STYLE|REGION)(?:\s|$)", lines[0].strip()):
+                continue
             for i, line in enumerate(lines[:2]):
                 match = _CUE_RANGE.match(line.strip())
                 if match:
@@ -186,8 +289,10 @@ def english_caption_track(metadata, youtube):
     if youtube:
         for table, kind in (("subtitles", "captions"), ("automatic_captions", "auto_captions")):
             keys = ("en-orig", "en", "en-US", "en-GB") if kind == "auto_captions" else _ENGLISH_KEYS
-            for key in keys:
-                if (metadata.get(table) or {}).get(key):
+            tracks = metadata.get(table) or {}
+            regional = (k for k in tracks if isinstance(k, str) and re.fullmatch(r"en(?:-[a-z0-9]{1,8})+", k, re.I))
+            for key in (*keys, *regional):
+                if tracks.get(key):
                     return {"key": key, "kind": kind}
     return None
 
@@ -197,19 +302,22 @@ def video_caption_prefix(track):
     return "video.auto" if track and track["kind"] == "auto_captions" else "video"
 
 
-def caption_args(track):
+def caption_args(track, *, text_only=False):
     if track is None:
         return ["--write-auto-subs", "--write-subs", "--sub-lang", ",".join(_ENGLISH_KEYS),
                 "--convert-subs", "srt"]
     auto = track["kind"] == "auto_captions"
+    formats = ("vtt/srt" if text_only else "json3/vtt/srt") if auto else "vtt/srt/best"
     return ["--write-auto-subs" if auto else "--write-subs", "--sub-lang", track["key"],
-            "--sub-format", "json3/vtt/srt" if auto else "vtt/srt/best",
+            "--sub-format", formats,
             *([] if auto else ["--convert-subs", "srt"])]
 
 
-def caption_file(folder, prefix, track):
+def caption_file(folder, prefix, track, *, text_only=False):
     if track:
-        formats = ("json3", "vtt", "srt") if track["kind"] == "auto_captions" else ("srt", "vtt")
+        formats = ("srt", "vtt")
+        if track["kind"] == "auto_captions":
+            formats = ("vtt", "srt") if text_only else ("json3", "vtt", "srt")
         for ext in formats:
             file = folder / f"{prefix}.{track['key']}.{ext}"
             if file.is_file():
@@ -311,7 +419,12 @@ def main():
     )
     shots = sorted(shots_dir.glob("shot_*.jpg"))
 
-    entries = list(parse_srt(subtitle, automatic=bool(track and track["kind"] == "auto_captions"))) if subtitle else []
+    def fetch_text():
+        subprocess.run([*ytdlp, "--skip-download", *caption_args(track, text_only=True),
+                        "-o", str(folder / (video_caption_prefix(track) + ".%(ext)s")), args.url], check=True)
+
+    entries = list(parse_srt(subtitle, automatic=bool(track and track["kind"] == "auto_captions"),
+                             fetch_text=fetch_text)) if subtitle else []
 
     print("Writing transcript.txt and combined.md...")
     if entries:

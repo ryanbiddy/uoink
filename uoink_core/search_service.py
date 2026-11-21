@@ -63,7 +63,7 @@ def select_mode(index, mode, *, filters=None):
                 reason = "Accept the current Gemma terms in Settings first."
             elif status["paused"]:
                 reason = "Semantic search is paused. Resume it in Settings."
-            elif status["state"] != "ready" and not engine.retry_ready():
+            elif status["state"] != "ready" and not status.get("warming") and not engine.retry_ready():
                 reason = "Semantic search is not ready (" + status["state"] + ")."
             else:
                 return ("hybrid" if mode == "auto" else mode), None

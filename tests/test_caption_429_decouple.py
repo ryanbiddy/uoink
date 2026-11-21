@@ -671,17 +671,34 @@ def test_uploaded_english_captions_win_over_auto_captions(extraction, extract_ha
 def test_auto_capture_selects_json3_and_records_track_kind(extraction):
     extraction.metadata["automatic_captions"] = {"en-orig": [{"ext": "json3"}]}
     extraction.native_captions["video.auto.en-orig.json3"] = json.dumps({"events": [
-        {"tStartMs": 0, "dDurationMs": 3000, "segs": [{"utf8": "hello"}, {"utf8": "again", "tOffsetMs": 1000}]},
-        {"tStartMs": 1000, "dDurationMs": 2000, "segs": [{"utf8": "again"}, {"utf8": "again", "tOffsetMs": 1000}]},
+        {"tStartMs": 0, "dDurationMs": 3000, "segs": [{"utf8": "hello"}, {"utf8": " there", "tOffsetMs": 150}, {"utf8": " again", "tOffsetMs": 300}]},
+        {"tStartMs": 150, "dDurationMs": 1000, "segs": [{"utf8": "there"}, {"utf8": " again", "tOffsetMs": 150},
+                                                          {"utf8": " again", "tOffsetMs": 450}]},
     ]})
     result = extraction.run()
-    assert result["caption_count"] == 3
-    assert (extraction.folder / "transcript.txt").read_text() == "hello\nagain\nagain"
+    assert result["caption_count"] == 1
+    assert (extraction.folder / "transcript.txt").read_text() == "hello there again again"
     cmd = extraction.calls[1][0]
     assert cmd[cmd.index("--sub-format") + 1] == "json3/vtt/srt"
     assert "--write-subs" not in cmd
     side = json.loads((extraction.folder / f"{extraction.folder.name}.json").read_text(encoding="utf-8"))
     assert side["caption_track_kind"] == "auto_captions" and side["caption_windows_cleaned"]
+
+
+def test_invalid_json_refetches_same_track_in_vtt(extraction, monkeypatch):
+    extraction.metadata["automatic_captions"] = {"en-orig": [{"ext": "json3"}, {"ext": "vtt"}]}
+    extraction.native_captions["video.auto.en-orig.json3"] = '{"events":[null]}'
+    original = server._run_subprocess
+    def fetch(cmd, **kwargs):
+        if "--sub-format" in cmd and cmd[cmd.index("--sub-format") + 1] == "vtt/srt":
+            assert "--skip-download" in cmd and "--write-auto-subs" in cmd
+            assert cmd[cmd.index("--sub-lang") + 1] == "en-orig"
+            extraction.native_captions["video.auto.en-orig.vtt"] = "00:00.100 --> 00:01.000\nwhole track"
+        return original(cmd, **kwargs)
+    monkeypatch.setattr(server, "_run_subprocess", fetch)
+    assert extraction.run()["caption_count"] == 1
+    assert (extraction.folder / "transcript.txt").read_text() == "whole track"
+    extraction.asr.assert_not_called()
 
 
 def test_media_failure_still_propagates(extraction):

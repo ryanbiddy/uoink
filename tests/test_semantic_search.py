@@ -203,11 +203,71 @@ def test_restart_resumes_only_persisted_opt_in(db, monkeypatch):
     monkeypatch.setattr(engine, "_launch", lambda: calls.append("launch"))
     server._resume_local_search()
     # The first query opens the saved vectors. Startup launches no worker.
-    assert not calls and engine._full and engine._warm
+    assert not calls and engine._warm and not engine._warm_ready.is_set()
     engine._full = engine._warm = False
     engine.manager.terms_path.unlink()
     server._resume_local_search()
     assert not calls and not engine._full
+
+
+def test_concurrent_search_reads_cached_sources_while_hit_details_load(db, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    idx, engine, _ = db
+    seed(idx, "mars", "Mars has rusty red soil")
+    ready(db)
+    entered, release = Event(), Event()
+    snapshot = engine.sources._snapshot
+    def held(**kwargs):
+        if kwargs.get("cache") is False:  # request-local read of the matched passage
+            entered.set()
+            assert release.wait(5)
+        return snapshot(**kwargs)
+    monkeypatch.setattr(engine.sources, "_snapshot", held)
+    with ThreadPoolExecutor() as pool:
+        first = pool.submit(idx.search_mode, "rusty", mode="semantic")
+        try:
+            assert entered.wait(5)
+            assert engine.embedding_search("rusty")[0].source_id == "mars"
+        finally:
+            release.set()
+        assert first.result(timeout=5)["search_mode"] == "semantic"
+
+
+def test_public_query_during_restore_waits_for_verification(db, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError
+    from threading import Event
+
+    idx, original, _ = db
+    seed(idx, "mars", "Mars has rusty red soil")
+    ready(db)
+    replacement = ls.LocalSearch(original.root, idx, model_factory=FakeModel)
+    monkeypatch.setattr(idx, "_local_search", replacement)
+    entered, release = Event(), Event()
+    verify = replacement.manager.verify
+    def held():
+        entered.set()
+        assert release.wait(5)
+        verify()
+    monkeypatch.setattr(replacement.manager, "verify", held)
+    assert replacement.restore()
+    try:
+        with ThreadPoolExecutor() as pool:
+            first = pool.submit(idx.search_mode, "rusty", mode="semantic")
+            try:
+                assert entered.wait(5)
+                second = pool.submit(idx.search_mode, "rusty", mode="semantic")
+                with pytest.raises(TimeoutError):
+                    second.result(timeout=.15)
+            finally:
+                release.set()
+            for task in (first, second):
+                result = task.result(timeout=5)
+                assert result["search_mode"] == "semantic"
+                assert result["results"][0]["video_id"] == "mars"
+    finally:
+        replacement.close()
 
 
 def test_first_public_semantic_request_uses_persisted_vectors(db, monkeypatch):

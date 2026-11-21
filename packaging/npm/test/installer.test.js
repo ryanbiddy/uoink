@@ -137,6 +137,8 @@ test('prerelease precedence and installer asset names', () => {
   assert.equal(cmpVersion('3.18.2-rc.1', '3.18.2-rc.1'), 0);
   const name = 'Uoink-Setup-3.18.2-rc.1.exe';
   assert.equal(pickAsset('win32', 'x64', [[name, 'hash']]).version, '3.18.2-rc.1');
+  const dmg = 'Uoink-3.18.2-rc.1-macos-arm64.dmg';
+  assert.equal(pickAsset('darwin', 'arm64', [[dmg, 'hash']]).version, '3.18.2-rc.1');
 });
 
 test('Linux and Intel Mac get a docs link and exit 0 without any network', async (t) => {

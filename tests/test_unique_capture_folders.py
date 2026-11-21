@@ -30,6 +30,7 @@ import urllib.request
 import pytest
 import _platform
 import uoink_usage
+from yt_extract import caption_file, english_caption_track, parse_srt, video_caption_prefix
 from provenance import clamp_title
 
 
@@ -140,6 +141,8 @@ def capture(tmp_path, monkeypatch):
         "_screenshot_interval_for": lambda d, i: i,
         "_estimated_screenshot_count": lambda ds, i: 1,
         "_ytdlp_timeout_for": lambda d: 10, "_ffmpeg_timeout_for": lambda d: 10,
+        "english_caption_track": english_caption_track, "video_caption_prefix": video_caption_prefix,
+        "caption_file": caption_file, "parse_srt": parse_srt,
         "_run_subprocess": fake_subprocess, "_fetch_video_subtitles": lambda *a, **k: None,
         "_download_thumbnail": Mock(), "_fetch_channel_context": lambda *a, **k: {},
         "_screenshot_ffmpeg_command": lambda v, i, p: ["ffmpeg", str(p)],
