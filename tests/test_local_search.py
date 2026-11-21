@@ -9,6 +9,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
@@ -793,6 +794,98 @@ def test_warm_search_finishes_while_queued_work_still_runs(engine, index, queued
         finally:
             verified.set()
             finish.set()
+    assert other.close()
+
+
+@pytest.mark.parametrize("path", ["start", "restore_then_update"])
+def test_model_changed_after_unloaded_verification_is_hashed_before_load(engine, index, path):
+    """A fresh engine can verify the files and leave the model unloaded because
+    every saved vector is current. A later change to the files must be caught
+    before the first load, not trusted from that earlier hash."""
+    index.seed()
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)  # CountingFactory does not verify by itself
+    if path == "start":
+        assert other.start() and other.wait(5)
+    else:
+        assert other.restore() and other.update_source("mars") and other.wait(5)
+    assert other.status()["state"] == "ready" and other._model is None and events == ["verify"]
+    (other.manager.directory / ls.MODEL_FILES[0][0]).write_bytes(b"changed")
+    with pytest.raises(ls.SearchUnavailable):
+        other.embedding_search("mars")
+    assert "load" not in events
+    assert other.pause(timeout=5)
+
+
+def test_download_after_restore_replaces_bad_files_instead_of_failing_on_them(engine, index, tiny_files):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    assert other.restore()
+    target = other.manager.directory / ls.MODEL_FILES[0][0]
+    target.write_bytes(b"x" * len(tiny_files))  # damaged: same size, wrong hash
+    warming_during_download = []
+
+    def download(**kwargs):
+        warming_during_download.append(other.status()["warming"])
+        target.write_bytes(tiny_files)
+
+    other.manager.download = download
+    assert other.download() and other.wait(5)
+    assert warming_during_download == [False]
+    assert other.status()["state"] == "ready" and not other.status()["warming"]
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert other.pause(timeout=5)
+
+
+def test_remove_after_restore_is_never_reported_as_warming(engine, index):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    assert other.restore() and other.status()["warming"]
+    other.remove()
+    assert not other._warm and other._warm_ready.is_set() and other._worker is None
+    assert not other.status()["warming"] and other.status()["state"] == "not_installed"
+
+
+def test_direct_search_never_waits_on_a_slow_model_load(engine, index, monkeypatch):
+    """Warm-up plus a slow load stays inside one search budget. The search says
+    not ready in time and the load finishes in the background for the next one."""
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    monkeypatch.setattr(ls, "QUERY_WAIT_SECONDS", 1.0)
+    verify = other.manager.verify
+    loading, release = threading.Event(), threading.Event()
+    loads = []
+
+    def slow_verify():
+        time.sleep(.6)  # warm-up spends most of the budget
+        verify()
+
+    def slow_factory(manager):
+        loads.append(manager)
+        loading.set()
+        assert release.wait(10)
+        return FakeModel(manager)
+
+    other.manager.verify, other.model_factory = slow_verify, slow_factory
+    assert other.restore()
+    try:
+        with ThreadPoolExecutor() as pool:
+            started = time.monotonic()
+            query = pool.submit(other.embedding_search, "rust")
+            with pytest.raises(ls.SearchUnavailable, match="Start local search"):
+                query.result(timeout=4)
+            assert time.monotonic() - started < 1.6
+            assert loading.wait(2)
+    finally:
+        release.set()
+    with other._model_lock:
+        assert other._model_lock.wait_for(lambda: other._model is not None and not other._loading, 5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert loads == [other.manager]
     assert other.close()
 
 

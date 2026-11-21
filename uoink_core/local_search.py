@@ -40,6 +40,7 @@ DIMENSIONS = 768
 BATCH_SIZE = 8
 MAX_THREADS = 2
 QUERY_PREFIX = "task: search result | query: "
+QUERY_WAIT_SECONDS = 5  # Longest a search waits for warm-up or a model load before "not ready".
 FILTERS = frozenset({"channel", "topic", "hook_type", "platform", "source_type", "author", "date_from", "date_to"})
 _CACHE_VERSION = "clips-or-windows-v1:" + MODEL_REVISION
 
@@ -599,6 +600,7 @@ class LocalSearch:
         # inference, so an idle release cannot make a search look busy.
         self._model_lock = threading.Condition()
         self._loading = False
+        self._load_error = None  # A background load's failure, raised to the next search.
         self._verify_reload = False
         self._users = 0
         self._idle_timer = None
@@ -608,6 +610,8 @@ class LocalSearch:
         # only after manager.verify(). Download, pause and removal clear it.
         # An idle eviction also requires a fresh hash before the next load.
         self._verified = False
+        # File identity when they were last hashed. A load hashes again if it differs.
+        self._verified_stamp = None
         self._owed = False
         self._closed = False
         self._state_lock = threading.RLock()
@@ -723,6 +727,11 @@ class LocalSearch:
                 self._full = True
                 self._owed = False
                 self._download = self._download or download
+                if download:
+                    # A download replaces the files. A pending restore warm-up
+                    # would first verify the old ones and stop on damaged files.
+                    self._warm = False
+                    self._warm_ready.set()
                 self._error = ""
                 self._retry_at = 0.0
                 self._retry_delay = 1.0
@@ -884,6 +893,7 @@ class LocalSearch:
             # Resume may verify saved vectors and leave the session unloaded
             # until a much later query. Check the files again at that load.
             self._verify_reload = True
+            self._load_error = None
         if timer is not None:
             timer.cancel()
         del model
@@ -898,16 +908,97 @@ class LocalSearch:
                     or self._state not in ("ready", "indexing", "retrying")):
                 raise SearchUnavailable("Semantic search is unavailable")
 
+    def _model_stamp(self):
+        stamp = []
+        for name, _, _ in MODEL_FILES:
+            try:
+                info = (self.manager.directory / name).stat(follow_symlinks=False)
+                stamp.append((info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_ino))
+            except OSError:
+                stamp.append(None)
+        return tuple(stamp)
+
+    def _verify_files(self):
+        # Stat first: a change during hashing leaves a stale stamp, so the next load hashes again.
+        stamp = self._model_stamp()
+        self.manager.verify()
+        return stamp
+
+    def _load(self, verify_reload):
+        """Hash the files if they changed since their last hash, then create a session."""
+        with self._state_lock:
+            verified_stamp = self._verified_stamp
+        try:
+            if verify_reload or self._model_stamp() != verified_stamp:
+                stamp = self._verify_files()
+                with self._state_lock:
+                    self._verified_stamp = stamp
+            self._check_embed_state()
+            model = self.model_factory(self.manager)
+            self._check_embed_state()
+            return model
+        except IntegrityError as exc:
+            self._set("error", error=str(exc))
+            raise SearchUnavailable(str(exc)) from exc
+
+    def _finish_load_locked(self, model, error=None):
+        # Caller holds _model_lock and set _loading for this load.
+        if model is not None:
+            self._model = model
+            self._verify_reload = False
+        self._load_error = error
+        self._loading = False
+        self._model_lock.notify_all()
+
+    def _release_locked(self):
+        # Caller holds _model_lock and owns one reservation.
+        self._users -= 1
+        self._last_use = time.monotonic()
+        if self._stop.is_set():
+            self._model = None
+        elif self._model is not None and self._idle_timer is None:
+            self._schedule_release_locked(self._idle_seconds)
+        self._model_lock.notify_all()
+
+    def _background_load(self, verify_reload):
+        model = error = None
+        try:
+            model = self._load(verify_reload)
+        except Exception as exc:
+            error = exc
+        with self._model_lock:
+            self._finish_load_locked(model, error)
+            self._release_locked()
+
     def _embed(self, texts, *, wait=True, warm_deadline=None):
-        # Reserve the session under the condition. The loader performs disk I/O
-        # outside it, and pause/download drain reservations before replacing files.
+        # Reserve the session under the condition. Loads perform disk I/O outside
+        # it, and pause/download drain reservations before replacing files.
         with self._model_lock:
             self._check_embed_state()
             if warm_deadline is None and self._model is None:
-                warm_deadline = time.monotonic() + 5
+                warm_deadline = time.monotonic() + QUERY_WAIT_SECONDS
+            if not wait and self._model is None and not self._loading:
+                if self._load_error is not None:
+                    # The last background load failed after its search gave up.
+                    error, self._load_error = self._load_error, None
+                    raise error
+                # A search never loads on its own thread. When its time runs
+                # out it answers not ready, and the load serves the next search.
+                self._loading = True
+                self._users += 1
+                try:
+                    threading.Thread(target=self._background_load, args=(self._verify_reload,),
+                                     name="embeddinggemma-load", daemon=True).start()
+                except Exception:
+                    self._finish_load_locked(None)
+                    self._release_locked()
+                    raise
             if self._loading and not self._model_lock.wait_for(
                     lambda: not self._loading, max(0, warm_deadline - time.monotonic())):
                 raise SearchUnavailable("Start local search before querying")
+            if not wait and self._model is None:
+                error, self._load_error = self._load_error, None
+                raise error or SearchUnavailable("Start local search before querying")
             self._check_embed_state()
             model = self._model
             loading = model is None
@@ -916,16 +1007,14 @@ class LocalSearch:
             verify_reload = self._verify_reload
         try:
             if loading:
-                if verify_reload:
-                    self.manager.verify()
-                self._check_embed_state()
-                model = self.model_factory(self.manager)
-                self._check_embed_state()
-                with self._model_lock:
-                    self._model = model
-                    self._verify_reload = False
-                    self._loading = loading = False
-                    self._model_lock.notify_all()
+                # Background work (indexing) may wait for its own load.
+                loaded = None
+                try:
+                    model = loaded = self._load(verify_reload)
+                finally:
+                    with self._model_lock:
+                        self._finish_load_locked(loaded)
+                        loading = False
             timeout = max(0, warm_deadline - time.monotonic()) if warm_deadline is not None else 0
             if not self._activity.acquire(timeout=-1 if wait else timeout):
                 raise SearchUnavailable("The search model is busy; use keyword search")
@@ -934,20 +1023,9 @@ class LocalSearch:
                 return model.embed(texts, wait=wait)
             finally:
                 self._activity.release()
-        except IntegrityError as exc:
-            self._set("error", error=str(exc))
-            raise SearchUnavailable(str(exc)) from exc
         finally:
             with self._model_lock:
-                if loading:
-                    self._loading = False
-                self._users -= 1
-                self._last_use = time.monotonic()
-                if self._stop.is_set():
-                    self._model = None
-                elif self._model is not None and self._idle_timer is None:
-                    self._schedule_release_locked(self._idle_seconds)
-                self._model_lock.notify_all()
+                self._release_locked()
 
     def _sync(self, identities, *, embed=True):
         documents = self.sources.snapshot() if identities is None else self.sources.snapshot(source_ids=sorted(identities))
@@ -1026,10 +1104,11 @@ class LocalSearch:
                     self.manager.download(progress=self._download_progress, checkpoint=self._checkpoint)
                 if not verified:
                     self._set("verifying")
-                    self.manager.verify()
+                    stamp = self._verify_files()
                     with self._state_lock:
                         self._checkpoint()
                         self._verified = True
+                        self._verified_stamp = stamp
                 owed = self._sync(None if full else identities, embed=not warm)
                 with self._state_lock:
                     if warm:
@@ -1105,8 +1184,8 @@ class LocalSearch:
             warming = not self._warm_ready.is_set() and not self._paused and not self._closed
             if warming:
                 self._launch()
-        warm_deadline = time.monotonic() + 5 if warming else None
-        if warming and not self._warm_ready.wait(timeout=5):
+        warm_deadline = time.monotonic() + QUERY_WAIT_SECONDS if warming else None
+        if warming and not self._warm_ready.wait(timeout=QUERY_WAIT_SECONDS):
             raise SearchUnavailable("Start local search before querying")
         try:
             with self._state_lock:
