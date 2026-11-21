@@ -144,6 +144,7 @@ def test_saved_rows_hold_a_thumbnail_title_source_line_and_one_state_line():
                    '<button class="card-title" type="button" title="${title}"','<div class="card-source">${author} &middot; ${platformLabel}',
                    '<div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>'):
         assert marker in card
+    assert re.search(r'<button class="card-title"[^\n]+>\$\{title\}</button>', card)
     detail = _between(SCRIPT, "function savedRowDetail(row)", "function savedStateLine(row)")
     assert "captions`" in detail and '"transcript by Whisper"' in detail
     # The state is a word; the dot only repeats it.

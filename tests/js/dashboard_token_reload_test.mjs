@@ -17,6 +17,25 @@ test("concurrent dashboard requests share one retry after a busy helper", async 
   assert.equal(calls, 2);
 });
 
+test("a rate-limited dashboard waits through the helper window", async () => {
+  let elapsed = 0;
+  const ctx = vm.createContext({state: {}, setTimeout(fn, ms) { elapsed += ms; fn(); },
+    fetch: async () => elapsed < 60000
+      ? {ok: false, status: 429, json: async () => ({retry_after_seconds: 60})}
+      : {ok: true, status: 200, json: async () => ({ok: true, token: "fixture"})}});
+  vm.runInContext(code, ctx);
+  assert.equal(await ctx.getToken(), "fixture");
+});
+
+test("the page presents the one-use bootstrap id from its HTML", async () => {
+  let headers;
+  const ctx = vm.createContext({state: {}, document: {querySelector: () => ({content: "fixture-load"})},
+    fetch: async (_, options) => { headers = options.headers; return {ok: true, json: async () => ({ok: true, token: "fixture"})}; }});
+  vm.runInContext(code, ctx);
+  await ctx.getToken();
+  assert.equal(headers["X-Uoink-Dashboard-Load"], "fixture-load");
+});
+
 test("persistent 429 stops after two delays with a readable connection error", async () => {
   const delays = [];
   const ctx = vm.createContext({state: {}, setTimeout(fn, ms) { delays.push(ms); fn(); },

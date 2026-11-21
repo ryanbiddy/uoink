@@ -9,6 +9,7 @@ to the same handlers) -- log text is unchanged.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -24,12 +25,39 @@ log = logging.getLogger("uoink.storage")
 _FORBIDDEN_PATH_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 
-def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None:
+COMMENTS_START_MARK = "<!-- yoink:comments-start -->"
+COMMENTS_END_MARK = "<!-- yoink:comments-end -->"
+_PENDING_COMMENT = "*Fetching comments... they'll appear here when ready.*"
+_LITE_COMMENT = "*Lite captures skip comments.*"
+
+
+def normalize_export_comments(path: Path, text: str) -> str:
+    if _PENDING_COMMENT not in text:
+        return text
+    sidecar = path.parent / (path.parent.name + ".json")
+    try:
+        metadata = json.loads(sidecar.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return text
+    if (isinstance(metadata, dict) and metadata.get("long_video_mode") == "lite"
+            and metadata.get("comments_status") == "skipped"):
+        for newline in ("\n", "\r\n"):
+            old = newline.join((COMMENTS_START_MARK, _PENDING_COMMENT, COMMENTS_END_MARK))
+            if old in text:
+                return text.replace(old, old.replace(_PENDING_COMMENT, _LITE_COMMENT), 1)
+    return text
+
+
+def read_export_markdown(path: Path) -> str:
+    return normalize_export_comments(path, path.read_text(encoding="utf-8"))
+
+
+def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8", newline: str | None = None) -> None:
     """Write text via temp file + replace so crashy exits don't leave partial files."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
     try:
-        tmp.write_text(text, encoding=encoding)
+        tmp.write_text(text, encoding=encoding, newline=newline)
         # Path.replace() can raise PermissionError when the destination file
         # is momentarily held open by OneDrive sync -- and the default
         # DESKTOP_ROOT lives under OneDrive. Retry with short backoff before

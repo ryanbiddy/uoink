@@ -74,7 +74,7 @@ check(PAGE.includes("data-reader-more"), "long transcripts get a Show more butto
 check(PAGE.includes("Intl.Collator(undefined, { numeric: true"), "topics sort naturally");
 check(!PAGE.includes("segments.slice(0, 120)"), "the speaker timeline no longer drops segments after 120");
 
-check(PAGE.includes('<button class="card-title" type="button" title="${title}"'), "the Library card title carries the full title as a tooltip");
+check(/<button class="card-title" type="button" title="\$\{title\}"[^\n]+>\$\{title\}<\/button>/.test(PAGE), "the Library card title carries the full title as a tooltip");
 check(PAGE.includes('id="noteTitleInput" type="text" maxlength="300"'), "the note title box matches the 300 character title limit");
 check(/@media \(max-width: 620px\) \{[\s\S]*?\.uoink-card \.row-actions \{\s*opacity: 1;/.test(PAGE), "single-column cards show their actions instead of leaving a hidden blank row");
 

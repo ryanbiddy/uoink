@@ -16,7 +16,7 @@ Endpoints:
 """
 
 import contextlib
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import CancelledError, ThreadPoolExecutor
 import errno
 import hashlib
 import json
@@ -158,7 +158,8 @@ def _extract_page_to_prose(url: str) -> str | None:
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
-    _atomic_write_text,
+    _atomic_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
+    COMMENTS_START_MARK, COMMENTS_END_MARK,
     _is_writable_dir,
     _path_under_any,
     _topic_folder_name,
@@ -636,6 +637,7 @@ _TOKEN_RATE_LIMIT = 10
 _TOKEN_RATE_WINDOW_SEC = 60.0
 _token_request_times: list[float] = []
 _dashboard_token_times: list[float] = []
+_dashboard_loads: dict[str, float] = {}
 _token_rate_lock = threading.Lock()
 # Canonical client-identification header value. The legacy "yoink-extension"
 # value is still accepted through the v2.x alias window so a not-yet-updated
@@ -644,17 +646,30 @@ _UOINK_CLIENT_HEADER_VALUE = "uoink-extension"
 _YOINK_CLIENT_HEADER_VALUE = "yoink-extension"
 
 
-def _check_token_rate_limit(*, dashboard=False) -> bool:
+def _dashboard_load_id() -> str:
+    identity = secrets.token_urlsafe(24)
+    with _token_rate_lock:
+        # Dict insertion order gives a bounded FIFO for abandoned page loads.
+        if len(_dashboard_loads) >= 256:
+            del _dashboard_loads[next(iter(_dashboard_loads))]
+        _dashboard_loads[identity] = time.monotonic() + 300
+    return identity
+
+
+def _check_token_rate_limit(*, load_id=None) -> bool:
     import time
     now = time.monotonic()
     with _token_rate_lock:
         # Drop stale entries (older than the window) and decide.
         cutoff = now - _TOKEN_RATE_WINDOW_SEC
+        dashboard = _dashboard_loads.get(load_id, 0) > now
         times = _dashboard_token_times if dashboard else _token_request_times
         kept = [t for t in times if t > cutoff]
         if len(kept) >= (120 if dashboard else _TOKEN_RATE_LIMIT):
             times[:] = kept
             return False
+        if dashboard:
+            del _dashboard_loads[load_id]
         kept.append(now)
         times[:] = kept
     return True
@@ -4760,8 +4775,6 @@ def _run_phase2_author_backfill_once() -> None:
 
 # Markers in yoink.md so the comments section can be replaced after the
 # background fetch finishes. HTML comments are invisible in rendered markdown.
-COMMENTS_START_MARK = "<!-- yoink:comments-start -->"
-COMMENTS_END_MARK = "<!-- yoink:comments-end -->"
 CI_START_MARK = "<!-- yoink:comment-intelligence-start -->"
 CI_END_MARK = "<!-- yoink:comment-intelligence-end -->"
 HOOK_START_MARK = "<!-- HOOK_START -->"
@@ -9652,7 +9665,7 @@ def _generate_paste_corpus(folder: Path) -> str:
     corpus_path = _resolve_corpus_path(folder)
     if corpus_path is None:
         return ""
-    md = corpus_path.read_text(encoding="utf-8")
+    md = _read_export_markdown(corpus_path)
 
     try:
         from PIL import Image  # noqa: F401  -- import probe
@@ -11305,7 +11318,7 @@ def _podcast_transcription_worker() -> None:
                         "%d after error: %s", episode_id, corpus_error)
             try:
                 if not _read_settings().get("keep_podcast_audio", True):
-                    podcasts.delete_transcribed_audio(_get_index(), DATA_ROOT, episode_id)
+                    _delete_podcast_audio(episode_id, finished_job=job_id)
             except Exception:
                 # Storage cleanup cannot undo a completed transcription.
                 log.warning("Could not remove podcast audio for episode %s", episode_id)
@@ -11385,11 +11398,108 @@ def _podcast_initial_prompt(episode_id: int) -> str | None:
         return None
 
 
-def _podcast_capture_key(episode_id: int) -> str | None:
+def _protected_podcast_episodes(idx, *, finished_job=None):
+    with _jobs_lock:
+        jobs = [dict(job) for jid, job in _jobs.items() if jid != finished_job
+                and job.get("kind") == "podcast_transcribe" and job.get("state") not in _JOB_TERMINAL_STATES]
+    # A stdio MCP process can queue jobs against the same index.
+    with idx.read_snapshot() as db:
+        states = tuple(_JOB_TERMINAL_STATES)
+        stored = db.execute(
+            "SELECT job_id, metadata_json FROM jobs WHERE kind='podcast_transcribe' AND status NOT IN (" +
+            ",".join("?" for _ in states) + ")", states)
+        for row in stored:
+            if row["job_id"] == finished_job:
+                continue
+            job = json.loads(row["metadata_json"] or "null")
+            if not isinstance(job, dict) or not (job.get("episode_id") or job.get("audio_path")):
+                raise ValueError("An active podcast job has no audio identity")
+            jobs.append(job)
+        active = {job.get("episode_id") for job in jobs}
+        paths = {Path(job["audio_path"]).resolve() for job in jobs if job.get("audio_path")}
+        if paths:
+            active.update(row["id"] for row in db.execute(
+                "SELECT id,audio_local_path FROM podcast_episodes WHERE audio_local_path IS NOT NULL")
+                          if Path(row["audio_local_path"]).resolve() in paths)
+    runs_lock = globals().get("_show_podcast_runs_lock")
+    if runs_lock is not None:
+        with runs_lock:
+            active.update(episode_id for episode_id, run in globals()["_show_podcast_runs"].items()
+                          if run.get("state") in ("downloading", "queued"))
+    # Durable show runs include episodes waiting for download,
+    # before the transcription queue assigns them a job or even a database id.
+    shows = globals().get("show_capture")
+    with shows._lock if shows else contextlib.nullcontext():
+        show_jobs = shows.list_jobs(DATA_ROOT) if shows else ()
+    for show in show_jobs:
+        if show.get("kind") != "podcast_feed":
+            continue
+        with idx.read_snapshot() as db:
+            rows = db.execute("SELECT e.id,e.guid,e.audio_url,e.title FROM podcast_episodes e "
+                              "JOIN podcast_feeds f ON f.id=e.feed_id WHERE f.feed_url=?",
+                              (show.get("url"),)).fetchall()
+        waiting = [ep for ep in show.get("episodes", ()) if ep.get("finishing") or (
+            show.get("state") in ("running", "waiting", "paused") and ep.get("state") in ("queued", "running"))]
+        active.update(ep.get("episode_id") for ep in waiting)
+        for column in ("guid", "audio_url", "title"):
+            values = {ep[column] for ep in waiting if ep.get(column)}
+            active.update(row["id"] for row in rows if row[column] in values)
+    return active
+
+
+def _delete_podcast_audio(episode_id, *, finished_job=None):
+    global _podcast_storage_scan
+    idx = _get_index()
+    shows = globals().get("show_capture")
+    with contextlib.ExitStack() as held:
+        if shows:
+            held.enter_context(shows._lock)
+        keys = [f"podcast-queue:{episode_id}"]
+        if finished_job is None:
+            capture = _podcast_capture_key(episode_id)
+            if not capture:
+                return False
+            keys.append(capture)
+        for key in keys:
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+            if lock is None:
+                return False
+            held.enter_context(lock)
+        if episode_id in _protected_podcast_episodes(idx, finished_job=finished_job):
+            return False
+        removed = podcasts.delete_transcribed_audio(idx, DATA_ROOT, episode_id)
+    if removed:
+        with _podcast_storage_lock:
+            if _podcast_storage_scan:
+                _podcast_storage_scan.cancel()
+            _podcast_storage_scan = None
+    return removed
+
+
+def _scan_podcast_storage(idx, root):
+    protected = _protected_podcast_episodes(idx)
+
+    def available(row, path):
+        capture = _podcast_capture_key(row["id"], row=row)
+        if not capture:
+            return False
+        for key in (capture, f"podcast-queue:{row['id']}", podcasts._audio_lock_key(path)):
+            if Path(source_subscriptions.CaptureLock.path_for(root, key)).exists():
+                lock = source_subscriptions.CaptureLock.try_acquire(root, key)
+                if lock is None:
+                    return False
+                lock.release()
+        return True
+
+    return podcasts.audio_storage(idx, root, protected, available=available)
+
+
+def _podcast_capture_key(episode_id: int, *, row=None) -> str | None:
     """Canonical capture identity of a podcast episode (normalized feed URL
     plus GUID), the key both dispatchers lock on (AS-03)."""
     try:
-        row = podcasts.get_episode_with_feed(_get_index(), int(episode_id))
+        if row is None:
+            row = podcasts.get_episode_with_feed(_get_index(), int(episode_id))
     except Exception:
         return None
     if not row or not row.get("feed_url") or not row.get("guid"):
@@ -11738,7 +11848,15 @@ def _ensure_podcast_transcription_worker() -> threading.Thread:
         return thread
 
 
-def _queue_podcast_transcription(
+def _queue_podcast_transcription(episode_id: int, **options):
+    lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, f"podcast-queue:{episode_id}", timeout=5)
+    if lock is None:
+        return {"ok": False, "error": "Episode audio is busy. Try again."}, 409
+    with lock:
+        return _admit_podcast_transcription(episode_id, **options)
+
+
+def _admit_podcast_transcription(
         episode_id: int, *, model: str | None = None,
         language: str | None = None, diarize: bool = False,
         consent_given: bool = False,
@@ -12790,15 +12908,20 @@ def _run_podcast_suggestion_save(sid: str, item: dict) -> None:
             suggestions.mark_saved(DATA_ROOT, sid)
             return _podcast_suggestion_set_state(sid, "saved", "Already in your library.")
         episode_id = int(episode["id"])
-        downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
-        if not downloaded.get("ok"):
-            return fail("Couldn't download the audio. Try again later.")
-        settings = _read_settings() or {}
-        queued, status = _queue_podcast_transcription(
-            episode_id,
-            model=whisper_runner.normalize_model(settings.get("whisper_model")),
-            diarize=bool(settings.get("diarization_default")),
-            consent_given=False, publish_to_corpus=True)
+        key = _podcast_capture_key(episode_id)
+        lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key) if key else None
+        if lock is None:
+            return fail("Another capture is using this episode. Try again.")
+        with lock:
+            downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+            if not downloaded.get("ok"):
+                return fail("Couldn't download the audio. Try again later.")
+            settings = _read_settings() or {}
+            queued, status = _queue_podcast_transcription(
+                episode_id,
+                model=whisper_runner.normalize_model(settings.get("whisper_model")),
+                diarize=bool(settings.get("diarization_default")),
+                consent_given=False, publish_to_corpus=True)
         if status == 412:
             return fail("Set up transcription in Settings first, then save it again.")
         if not queued.get("ok"):
@@ -13588,7 +13711,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
         if item.get("ok") or item.get("status") == "saved_with_errors":
             md_path = item.get("md_path")
             try:
-                body = Path(md_path).read_text(encoding="utf-8")
+                body = _read_export_markdown(Path(md_path))
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 body = re.sub(r"^(\*\*[^*]+:\*\*[^\n]*\n)+", "", body)
                 if text_only:
@@ -17292,11 +17415,14 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
 
-    def _send_file(self, path: Path, mime: str):
+    def _send_file(self, path: Path, mime: str, *, dashboard_load=False):
         try:
             body = path.read_bytes()
         except OSError:
             return self._send_json(404, {"ok": False, "error": "file not found"})
+        marker = b'<meta name="uoink-dashboard-load" content="">'
+        if dashboard_load and marker in body:
+            body = body.replace(marker, marker.replace(b'""', b'"' + _dashboard_load_id().encode("ascii") + b'"'), 1)
         if sys.platform == "darwin" and path == DASHBOARD_PATH:
             from helper.mac_ui import dashboard_html
             body = dashboard_html(body)
@@ -17522,7 +17648,7 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/settings":
             return self._handle_settings_get()
         if bare == "/extension/browser":
-            from uoink_splash import _preferred_browser
+            from uoink_browser import _preferred_browser
             browser = _preferred_browser()
             return self._send_json(200, {"ok": True, "name": browser["name"], "url": browser["url"]})
         if bare == "/research" or bare.startswith("/research/"):
@@ -17750,17 +17876,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
         # The origin gate above only admits an originless GET from the
         # loopback dashboard with same-origin fetch metadata.
-        dashboard = self.command == "GET" and self.headers.get("Origin") is None
-        if not _check_token_rate_limit(dashboard=dashboard):
+        dashboard_page = "http://" + self.headers.get("Host", "") + "/dashboard"
+        referrer = self.headers.get("Referer", "").partition("?")[0]
+        dashboard = (self.command == "GET" and self.headers.get("Origin") is None
+                     and referrer in (dashboard_page, dashboard_page + "/"))
+        load_id = self.headers.get("X-Uoink-Dashboard-Load") if dashboard else None
+        if not _check_token_rate_limit(load_id=load_id):
             log.info("%s /token rate-limited", self.command)
-            return self._send_json(429, {"ok": False, "error": "too many requests"})
+            return self._send_json(429, {"ok": False, "error": "too many requests",
+                                         "retry_after_seconds": _TOKEN_RATE_WINDOW_SEC})
         self._send_json(200, {"ok": True, "token": TOKEN})
 
     # ---- /dashboard ----
     def _handle_dashboard(self):
         return self._send_file(
             DASHBOARD_PATH,
-            "text/html; charset=utf-8",
+            "text/html; charset=utf-8", dashboard_load=True,
         )
 
     def _handle_brand_font(self, bare: str):
@@ -19188,14 +19319,18 @@ class Handler(BaseHTTPRequestHandler):
         global _podcast_storage_scan
         refresh = parse_qs(urlparse(self.path).query).get("refresh") == ["1"]
         with _podcast_storage_lock:
-            if _podcast_storage_scan is None or (refresh and _podcast_storage_scan.done()):
-                _podcast_storage_scan = _podcast_storage_pool.submit(podcasts.audio_storage, _get_index(), DATA_ROOT)
+            if refresh and _podcast_storage_scan is not None:
+                _podcast_storage_scan.cancel()
+            if refresh or _podcast_storage_scan is None:
+                _podcast_storage_scan = _podcast_storage_pool.submit(_scan_podcast_storage, _get_index(), DATA_ROOT)
             scan = _podcast_storage_scan
         if not scan.done():
             return self._send_json(202, {"ok": True, "pending": True})
         try:
             result = scan.result()
-        except (OSError, sqlite3.Error):
+        except CancelledError:
+            return self._send_json(202, {"ok": True, "pending": True})
+        except (OSError, ValueError, sqlite3.Error):
             return self._send_json(503, {"ok": False, "error": "Couldn’t check podcast storage."})
         return self._send_json(200, {"ok": True, **result})
 
@@ -22318,7 +22453,7 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
-            text = path.read_text(encoding="utf-8")
+            text = _read_export_markdown(path)
         except OSError as e:
             log.warning("/yoinks/%s/markdown read failed: %s", video_id, e)
             return self._send_json(500, {"ok": False,
@@ -22341,6 +22476,17 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
+            # An external viewer reads the original path. Repair only the file
+            # explicitly opened, under the same lock as the comments writer.
+            try:
+                with _corpus_update_lock:
+                    with path.open(encoding="utf-8", newline="") as source:
+                        original = source.read()
+                    normalized = normalize_export_comments(path, original)
+                    if original != normalized:
+                        _atomic_write_text(path, normalized, newline="")
+            except (UnicodeError, OSError) as exc:
+                log.debug("Could not update Lite comment status on open: %s", exc)
             _platform.open_in_os(path)
         except Exception as e:  # noqa: BLE001
             return self._send_json(200, {"ok": False, "error": str(e)})
@@ -22875,7 +23021,10 @@ class Handler(BaseHTTPRequestHandler):
             episode_id = body.get("episode_id")
             if body.get("confirmed") is not True or type(episode_id) is not int or not 0 < episode_id < 2**63:
                 return self._send_json(400, {"ok": False, "error": "Confirm an episode to delete its audio."})
-            removed = podcasts.delete_transcribed_audio(_get_index(), DATA_ROOT, episode_id)
+            try:
+                removed = _delete_podcast_audio(episode_id)
+            except (OSError, ValueError, sqlite3.Error):
+                return self._send_json(503, {"ok": False, "error": "Couldn’t check whether this audio is in use."})
             return self._send_json(200, {"ok": True, "removed": removed})
         if bare == "/podcasts/episodes/transcribe":
             return self._handle_podcasts_episode_transcribe(body)
@@ -23140,11 +23289,13 @@ class Handler(BaseHTTPRequestHandler):
         process on shutdown, since worker threads are daemonic."""
         if not self._require_token():
             return
-        client = self.headers.get("X-Uoink-Stream", "")
-        key = ((self.headers.get("Origin", ""), client) if re.fullmatch(r"[\w-]{1,64}", client)
-               else self.connection)
+        origin = self.headers.get("Origin") or ("http://" + self.headers.get("Host", ""))
+        key = (origin, self.headers.get("X-Uoink-Stream", ""))
         with _sse_count_lock:
             previous = _sse_active.get(key)
+            if previous is None:
+                # Issue the replacement capability only to this response.
+                key = (origin, secrets.token_hex(16))
             admitted = previous is not None or len(_sse_active) < _SSE_MAX_STREAMS
             if admitted:
                 _sse_active[key] = self.connection
@@ -23166,7 +23317,7 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.close_connection = True  # don't reuse the socket after we return
 
-            self._sse_emit("snapshot", self._jobs_snapshot())
+            self._sse_emit("snapshot", {**self._jobs_snapshot(), "stream_id": key[1]})
             last_jobs = self._jobs_map()
             last_queue = self._queue_snapshot()
             last_beat = time.monotonic()
@@ -23190,7 +23341,7 @@ class Handler(BaseHTTPRequestHandler):
                     self.wfile.write(b": heartbeat\n\n")
                     self.wfile.flush()
                     last_beat = now
-        except (BrokenPipeError, ConnectionResetError, OSError):
+        except (OSError, ValueError):
             pass  # client went away -- reap this stream
         finally:
             with _sse_count_lock:

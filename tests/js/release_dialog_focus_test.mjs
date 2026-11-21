@@ -10,7 +10,7 @@ function source(name) {
 
 test("hook guide traps focus immediately and restores it even during loading", async () => {
   const document = {};
-  const control = () => ({ focus() { document.activeElement = this; } });
+  const control = () => ({ isConnected: true, closest: () => null, focus() { document.activeElement = this; } });
   const opener = control(), close = control();
   const modal = { classList: { add() {}, remove() {} } };
   const els = {hookExplainer: modal, hookExplainerClose: close,

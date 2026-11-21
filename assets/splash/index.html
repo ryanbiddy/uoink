@@ -508,14 +508,15 @@
         pill: status?.manifest_exists ? "Extension folder ready" : "Extension folder missing",
         headline: `Load the Uoink button in ${escapeHtml(browserName)} (60 sec)`,
         copy: "Uoink is tested in Chrome. Other Chromium browsers may work.",
-        primary: { text: `Open ${browserName} extensions`, action: "extension-open" },
+        primary: { text: "Open extensions page", action: "extension-open" },
         secondary: { text: "Copy path", action: "copy-path" },
         tertiary: { text: "I've loaded it - done", action: "extension-done" },
       });
       els.steps.innerHTML = `
-        <li>Open ${escapeHtml(browserName)} extensions (or paste ${escapeHtml(extensionUrl)} in its address bar)</li>
+        <li>Open <code>${escapeHtml(extensionUrl)}</code> in ${escapeHtml(browserName)}.</li>
         <li>Turn on "Developer mode"</li>
-        <li>Click "Load unpacked", then select this folder:</li>
+        <li>Click "Load unpacked", then select the folder shown below.</li>
+        <li>Open the Extensions menu in the toolbar and pin <strong>Uoink</strong>.</li>
       `;
       els.steps.hidden = false;
       els.extensionPath.textContent = extensionPath || "Extension folder unavailable";

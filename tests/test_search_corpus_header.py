@@ -38,6 +38,49 @@ def test_no_captions_search_previews_description(tmp_path, monkeypatch, query):
         assert description == content[passage["char_start"]:passage["char_end"]]
 
 
+@pytest.mark.parametrize("header", ["URL", "Source"])
+@pytest.mark.parametrize("has_body", [True, False])
+def test_repeated_title_term_returns_exact_body_passage(tmp_path, header, has_body):
+    description = "background " * 46 + "office acoustics " + "resonance " * 37
+    content = f"# Office\n\n**{header}:** https://example.test\n**Platform:** example\n"
+    if has_body:
+        content += "\n## Description\n\n" + description
+    content += "\n## Transcript\n\n_No transcript available (site did not expose subtitles / yt-dlp could not parse)._"
+    with index.Index.open(tmp_path / "index.db") as idx:
+        item = seed_yoink_item(idx, tmp_path, video_id="office", slug="office", title="Office", corpus_text=content)
+        idx.upsert_yoink(item, content=content)
+        row, = idx.search("office")
+    assert row["passage_verified"] is has_body
+    if has_body:
+        p = row["passage"]
+        start, end = p["char_start"], p["char_end"]
+        assert row["_snippet"] == p["text"] == content[start:end]
+        assert "office acoustics" in p["text"]
+        assert content[start - 1].isspace() and content[end].isspace()
+    else:
+        assert row["_snippet"] == "Office"
+
+
+def test_empty_clip_cannot_quote_the_header(tmp_path):
+    content = "# Café\n\n**URL:** https://example.test\n\n## Description\n\nOur café has cork walls."
+    with index.Index.open(tmp_path / "index.db") as idx:
+        marked = index._MATCH_START + "Café" + index._MATCH_END
+        row = idx._search_passage({"video_id": "fixture", "_content": content, "_snippet": "# " + marked,
+                                   "_matched_clip": {"clip_id": 1, "text": ""}}, "cafe", "forgiving")
+    assert row["_snippet"] == row["passage"]["text"] == "Our café has cork walls."
+    assert row["passage_verified"] and row["passage"]["char_start"] == content.index("Our")
+
+
+def test_verified_clip_keeps_full_citation_and_short_whole_word_preview(tmp_path):
+    text = "acoustics " * 80
+    content = "# Acoustics\n\n**URL:** https://example.test\n\n## Transcript\n\n" + text
+    with index.Index.open(tmp_path / "index.db") as idx:
+        row = idx._search_passage({"video_id": "fixture", "_content": content, "_snippet": "",
+                                   "_matched_clip": {"clip_id": 1, "text": text}}, "acoustics", "forgiving")
+    assert row["passage"]["text"] == text
+    assert row["_snippet"].endswith("acoustics") and len(row["_snippet"]) <= 250
+
+
 def test_semantic_chunks_keep_original_word_and_character_offsets():
     content = ("# Example\n\n**URL:** https://example.test\n\n## Description\n\nA small lab.\n"
                "\n## Top Comments\n\n**Viewer** (1 like)\n> Cork walls made the room quiet.")

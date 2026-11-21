@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import uoink_usage
 
+from collections import Counter
+from contextlib import ExitStack
 import hashlib
 import json
 import logging
@@ -1151,7 +1153,7 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
 
 
 def _podcast_root(data_root: Path) -> Path:
-    root = Path(data_root) / "Podcasts"
+    root = Path(data_root).resolve() / "Podcasts"
     root.mkdir(parents=True, exist_ok=True)
     return root
 
@@ -1306,62 +1308,132 @@ def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
     return {"path": path, "transcript": normalized}
 
 
-def _owned_audio(data_root, value):
+def _owned_file(data_root, value):
     if not value:
         return None
     path = Path(value)
-    root = Path(data_root).resolve() / "Podcasts"
-    if (path.parent.parent != root or path.suffix.lower() not in (".mp3", ".wav")
-            or path.resolve() != path):
+    if not path.is_absolute() or ".." in path.parts or Path(path.parent.parent.name) != Path("Podcasts"):
         return None
-    return path
+    root = Path(data_root).resolve()
+    if path.parent.parent.parent.resolve() != root:
+        return None
+    canonical = root / "Podcasts" / path.parent.name / path.name
+    return canonical if path.resolve(strict=True) == canonical and canonical.is_file() else None
 
 
-def audio_storage(idx, data_root):
-    """Measure actual downloads, including files left by a removed feed."""
+def _audio_rows(db):
+    return db.execute(
+        "SELECT e.id, e.audio_local_path, e.transcript_local_path, e.transcript_status, e.status, e.guid, f.feed_url "
+        "FROM podcast_episodes e JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.audio_local_path IS NOT NULL").fetchall()
+
+
+def _audio_refs(rows):
+    try:
+        return Counter(Path(row["audio_local_path"]).resolve() for row in rows if row["audio_local_path"])
+    except (OSError, RuntimeError, ValueError):
+        # An unreadable alias cannot establish exclusive ownership.
+        return Counter()
+
+
+def _removable_audio(data_root, row, references):
+    if row["status"] == EPISODE_STATUS_QUEUED or row["transcript_status"] != "done":
+        return None
+    try:
+        path = _owned_file(data_root, row["audio_local_path"])
+        if not path or path.suffix.lower() not in (".mp3", ".wav") or references[path] != 1:
+            return None
+        transcript = _owned_file(data_root, row["transcript_local_path"])
+        if transcript != path.with_suffix(".transcript.json"):
+            return None
+        _load_transcript(transcript)
+        return path
+    except (OSError, ValueError, RuntimeError):
+        return None
+
+
+def audio_storage(idx, data_root, protected=(), *, available=None):
+    """Measure regular downloads under the library and validate removable pairs."""
     root = Path(data_root).resolve() / "Podcasts"
-    files = set()
-    size = 0
+    files = {}
     if root.is_dir() and root.resolve() == root:
         for folder in root.iterdir():
-            if not folder.is_dir() or folder.resolve() != folder:
+            try:
+                if not folder.is_dir() or folder.resolve() != folder:
+                    continue
+                for path in folder.iterdir():
+                    try:
+                        if path.suffix.lower() in (".mp3", ".wav") and _owned_file(data_root, path):
+                            files[path] = path.stat().st_size
+                    except (OSError, RuntimeError):
+                        continue
+            except OSError:
                 continue
-            for path in folder.iterdir():
-                if path.suffix.lower() not in (".mp3", ".wav") or not path.is_file() or path.resolve() != path:
-                    continue
-                try:
-                    size += path.stat().st_size
-                except FileNotFoundError:
-                    continue
-                files.add(path)
     with idx.read_snapshot() as db:
-        rows = db.execute(
-            "SELECT id, audio_local_path FROM podcast_episodes "
-            "WHERE transcript_status='done' AND audio_local_path IS NOT NULL").fetchall()
-    return {"bytes": size, "episodes": [r["id"] for r in rows if Path(r["audio_local_path"]) in files]}
+        rows = _audio_rows(db)
+    references = _audio_refs(rows)
+    removable = {}
+    for row in rows:
+        if row["id"] not in protected:
+            path = _removable_audio(data_root, row, references)
+            if path in files and (available is None or available(dict(row), path)):
+                removable[row["id"]] = files[path]
+    return {"bytes": sum(files.values()), "episodes": list(removable),
+            "deletable_bytes": sum(removable.values())}
+
+
+def _audio_lock_key(path):
+    return "podcast-audio:" + os.path.normcase(str(path.resolve()))
+
+
+def _unlink_download(root, path):
+    """Pin the library directories while removing a single file."""
+    with ExitStack() as held:
+        if os.name == "nt":
+            import _winapi
+            # Directory handles without FILE_SHARE_DELETE prevent a rename or a
+            # junction substitution between verification and the actual unlink.
+            share_read_write = 0x1 | 0x2
+            open_existing = 3
+            directory_no_follow = 0x02000000 | 0x00200000  # BACKUP_SEMANTICS | OPEN_REPARSE_POINT
+            for folder in (root, path.parent.parent, path.parent):
+                handle = _winapi.CreateFile(str(folder), 0, share_read_write, 0, open_existing,
+                                            directory_no_follow, 0)
+                held.callback(_winapi.CloseHandle, handle)
+                if folder.resolve(strict=True) != folder:
+                    return False
+            if path.resolve(strict=True) != path:
+                return False
+            path.unlink()
+        else:
+            flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+            fd = os.open(root, flags)
+            held.callback(os.close, fd)
+            for name in ("Podcasts", path.parent.name):
+                fd = os.open(name, flags, dir_fd=fd)
+                held.callback(os.close, fd)
+            os.unlink(path.name, dir_fd=fd)
+    return True
 
 
 def delete_transcribed_audio(idx, data_root, episode_id):
-    """Recheck ownership and the finished transcript at the point of removal."""
+    """Check both database references and download ownership at the unlink."""
     with idx.write_transaction() as db:
-        row = get_episode(idx, episode_id)
-        if not row or row["transcript_status"] != "done":
-            return False
-        path = _owned_audio(data_root, row["audio_local_path"])
-        transcript = Path(row["transcript_local_path"] or "")
-        if (not path or transcript != path.with_suffix(".transcript.json")
-                or transcript.resolve() != transcript):
-            return False
-        if db.execute("SELECT 1 FROM podcast_episodes WHERE audio_local_path = ? COLLATE NOCASE AND id != ?",
-                      (str(path), episode_id)).fetchone():
+        rows = _audio_rows(db)
+        row = next((item for item in rows if item["id"] == episode_id), None)
+        path = _removable_audio(data_root, row, _audio_refs(rows)) if row else None
+        if not path:
             return False
         try:
-            _load_transcript(transcript)
-            path.unlink(missing_ok=True)
+            lock = source_subscriptions.CaptureLock.try_acquire(data_root, _audio_lock_key(path))
+            if not lock:
+                return False
+            with lock:
+                if not _unlink_download(Path(data_root).resolve(), path):
+                    return False
+                db.execute("UPDATE podcast_episodes SET audio_local_path=NULL, audio_size_bytes=NULL, "
+                           "audio_downloaded_at=NULL WHERE id=?", (episode_id,))
         except (OSError, ValueError):
             return False
-        db.execute("UPDATE podcast_episodes SET audio_local_path=NULL, audio_size_bytes=NULL, "
-                   "audio_downloaded_at=NULL WHERE id=?", (episode_id,))
         return True
 
 
@@ -1753,7 +1825,6 @@ def download_episode_audio(idx, episode_id: int, *,
     path AND has non-zero size we mark status='downloaded' without
     re-downloading. Returns a structured result the endpoint surfaces.
     resolve_url is an explicit test injection for URL admission."""
-    import _platform
     episode = get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": f"episode not found: {episode_id}"}
@@ -1773,6 +1844,15 @@ def download_episode_audio(idx, episode_id: int, *,
         return {"ok": False, "error": "audio_url is not an http(s) URL"}
 
     out_path = _episode_audio_path(Path(data_root), feed, episode)
+    lock = source_subscriptions.CaptureLock.acquire(data_root, _audio_lock_key(out_path), timeout=5)
+    if lock is None:
+        return {"ok": False, "error": "Episode audio is busy. Try again."}
+    with lock:
+        return _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, timeout_sec, resolve_url)
+
+
+def _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, timeout_sec, resolve_url):
+    import _platform
     # Idempotent: inspect the final postprocessed path (WAV on Darwin,
     # MP3 elsewhere), rather than yt-dlp's intermediate download.
     if out_path.exists() and out_path.stat().st_size > 0:

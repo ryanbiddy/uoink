@@ -23,7 +23,10 @@ def test_dashboard_extension_steps_use_first_run_browser_and_finish_with_pin():
     support = "Uoink is tested in Chrome. Other Chromium browsers may work."
     assert support in card
     assert support in (ROOT / "assets/splash/index.html").read_text(encoding="utf-8")
+    assert 'edge://extensions' not in card and 'brave://extensions' not in card
     assert 'authFetch("/extension/browser")' in DASHBOARD
+    splash = (ROOT / "assets/splash/index.html").read_text(encoding="utf-8")
+    assert "Open extensions page" in splash and "pin <strong>Uoink</strong>" in splash
 
 
 def test_dashboard_empty_state_adds_the_uoink_button_to_chrome():

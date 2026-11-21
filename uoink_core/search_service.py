@@ -5,7 +5,8 @@ import re
 
 
 def is_video_corpus(text):
-    return text.startswith("# ") and "\n**URL:**" in text and "\n## Description" in text
+    return (text.startswith("# ") and ("\n**URL:**" in text or "\n**Source:**" in text)
+            and ("\n## Description" in text or "\n## Transcript" in text))
 
 
 def corpus_body_ranges(text):
@@ -24,7 +25,7 @@ def corpus_body_ranges(text):
         elif section not in {"description", "transcript"}:
             continue
         if (not value or value.startswith(("#", "![", "---")) or value == "*No description.*"
-                or (section == "transcript" and value.startswith("*"))):
+                or (section == "transcript" and (value.startswith("*") or value.startswith("_No transcript available")))):
             continue
         start = line.start() + line.group().index(value)
         end = start + len(value)

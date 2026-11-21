@@ -26,14 +26,23 @@ def test_card_path_and_mac_picker_hint_follow_the_platform():
 
 
 def test_dashboard_uses_first_run_browser_selection(monkeypatch):
-    import uoink_splash
+    import uoink_browser
     from tests.test_library_adapters import Probe
-    monkeypatch.setattr(uoink_splash, "_default_browser_prog_id", lambda: "MSEdgeHTM")
-    monkeypatch.setattr(uoink_splash, "_browser_executable", lambda browser: "")
+    monkeypatch.setattr(uoink_browser, "_default_browser_prog_id", lambda: "MSEdgeHTM")
+    monkeypatch.setattr(uoink_browser, "_browser_executable", lambda browser: "")
     request = Probe("GET", "/extension/browser")
     request.do_GET()
     assert request.status == 200
     assert request.payload == {"ok": True, "name": "Microsoft Edge", "url": "edge://extensions/"}
+
+
+def test_browser_route_works_without_importing_the_splash(monkeypatch):
+    import sys
+    from tests.test_library_adapters import Probe
+    monkeypatch.setitem(sys.modules, "uoink_splash", None)
+    request = Probe("GET", "/extension/browser")
+    request.do_GET()
+    assert request.status == 200 and request.payload["name"] and request.payload["url"]
 
 
 def test_popup_offline_hint_sends_mac_users_to_the_app():

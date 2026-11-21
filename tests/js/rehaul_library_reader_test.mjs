@@ -751,6 +751,8 @@ async function groupSplit() {
     const cards = ["vidR", "other"].map((id) => {
       const el = new FakeEl("", "ARTICLE");
       el.dataset.videoId = id;
+      el.titleButton = new FakeEl("", "BUTTON");
+      el.querySelector = selector => selector === ".card-title" ? el.titleButton : null;
       return el;
     });
     p.els.libraryGrid._children = cards;
@@ -758,10 +760,10 @@ async function groupSplit() {
     await p.page.openYoinkDetail(READER_ROW);
     check(p.els.librarySplit.classList.contains("reading"), "opening an item turns on the split");
     check(p.panels.get("tab-yoink").classList.contains("active"), "the reader is the active panel");
-    check(cards[0].getAttribute("aria-current") === "true" && cards[1].getAttribute("aria-current") === null, "the open item's row is marked", cards.map((c) => c.getAttribute("aria-current")));
+    check(cards[0].titleButton.getAttribute("aria-current") === "true" && cards[1].titleButton.getAttribute("aria-current") === null, "the open item's row is marked", cards.map((c) => c.getAttribute("aria-current")));
     p.page.switchTab("library");
     check(!p.els.librarySplit.classList.contains("reading"), "back on Library the split is off");
-    check(cards[0].getAttribute("aria-current") === null, "no row is marked once the reader closes", cards[0].getAttribute("aria-current"));
+    check(cards[0].titleButton.getAttribute("aria-current") === null, "no row is marked once the reader closes", cards[0].titleButton.getAttribute("aria-current"));
   });
 
   await scenario("the topic list shows beside Library and the reader only", async () => {

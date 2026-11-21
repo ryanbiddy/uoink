@@ -741,7 +741,20 @@ _MATCH_END = "\x02" + uuid.uuid4().hex + "\x02"
 
 def facet_column(name: str) -> str:
     """SQL for an internal library facet, including the shelf shown on cards."""
-    return "COALESCE(NULLIF(y.topic, ''), 'Uncategorized')" if name == "topic" else f"y.{name}"
+    if name == "topic":
+        # Match String.trim() in the dashboard, including Unicode spaces.
+        whitespace = "char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198," \
+                     "8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)"
+        return f"COALESCE(NULLIF(TRIM(y.topic, {whitespace}), ''), 'Uncategorized')"
+    return f"y.{name}"
+
+
+def _preview_end(text, start, stop, match_end=0):
+    end = min(stop, max(start + 240, match_end))
+    if end > start and not text[end - 1].isspace():
+        while end < stop and not text[end].isspace():
+            end += 1
+    return end
 
 
 def _plain_snippet(text: str) -> str:
@@ -1771,15 +1784,40 @@ class Index:
         # Never substitute the first clip or the opening of the content.
         clip = row.pop("_matched_clip", None)
         from uoink_core.search_service import citation_fields, corpus_body_ranges, is_video_corpus
-        body = corpus_body_ranges(content) if not clip else None
-        if body is not None:
-            row["_snippet"] = (content[body[0][0]:min(body[0][1], body[0][0] + 240)]
-                               if body else row.get("title") or "")
+        clip = clip if clip and (clip.get("text") or "").strip() else None
+        body = None if clip else corpus_body_ranges(content)
         if clip:
             if is_video_corpus(content):
-                row["_snippet"] = (clip.get("text") or row["_snippet"])[:240]
+                text = clip["text"]
+                row["_snippet"] = text[:_preview_end(text, 0, len(text))].rstrip()
             row["passage"] = {key: clip.get(key) for key in
                               ("video_id", "clip_id", "text", "start", "end", "timing")}
+        elif body is not None:
+            row["_snippet"] = row.get("title") or ""
+            terms = _search_terms(query, match)
+            patterns = [re.escape(t) + (r"\w*" if i == len(terms) - 1 else r"\b")
+                        for i, t in enumerate(terms)]
+            # FTS may fold accents that Python's regex does not. Its marked
+            # surface forms can verify the stored spelling inside the body.
+            for token in re.findall(re.escape(_MATCH_START) + "(.*?)" + re.escape(_MATCH_END), marked_snippet):
+                if token:
+                    patterns.append(re.escape(token) + r"\b")
+            pattern = re.compile(r"\b(?:" + "|".join(patterns) + ")", re.I) if patterns else None
+            for i, (lo, hi) in enumerate(body):
+                hit = pattern.search(content, lo, hi) if pattern else None
+                if i and not hit:
+                    continue
+                start = max(lo, hit.start() - 80) if hit else lo
+                while start > lo and not content[start - 1].isspace():
+                    start -= 1
+                end = _preview_end(content, start, hi, hit.end() if hit else start)
+                excerpt = content[start:end].rstrip()
+                row["_snippet"] = excerpt
+                if hit:
+                    row["passage"] = {"video_id": row["video_id"], "text": excerpt,
+                                      "char_start": start, "char_end": start + len(excerpt),
+                                      "field": "content", "timing": "not_timed"}
+                    break
         elif content:
             for chunk in sorted(marked_snippet.split("…"), key=len, reverse=True):
                 if _MATCH_START not in chunk or _MATCH_END not in chunk:
@@ -1789,18 +1827,6 @@ class Index:
                 start = content.find(excerpt) if excerpt else -1
                 if start < 0:
                     continue
-                if body is not None:
-                    # Only the FTS-marked positions can verify a citation.
-                    # A header-only match can still display the description.
-                    positions = [start + len(_plain_snippet(chunk[:m.start()]))
-                                 for m in re.finditer(_MATCH_START, chunk)]
-                    hit = next(((lo, hi, p) for lo, hi in body for p in positions if lo <= p < hi), None)
-                    if hit is None:
-                        continue
-                    lo, hi, position = hit
-                    start = max(lo, position - 80)
-                    excerpt = content[start:min(hi, start + 240)]
-                    row["_snippet"] = excerpt
                 row["passage"] = {"video_id": row["video_id"], "text": excerpt,
                                   "char_start": start, "char_end": start + len(excerpt),
                                   "field": "content", "timing": "not_timed"}
@@ -2698,7 +2724,7 @@ class Index:
             for col in facet_cols:
                 rows = self._conn.execute(
                     f"SELECT {facet_column(col)} AS v, COUNT(*) AS n FROM yoinks y "
-                    "WHERE deleted_at IS NULL AND v != '' GROUP BY v ORDER BY n DESC, v ASC",
+                    "WHERE deleted_at IS NULL GROUP BY v HAVING v != '' ORDER BY n DESC, v ASC",
                 ).fetchall()
                 out[col] = [{"value": r["v"], "count": int(r["n"])}
                             for r in rows]

@@ -790,8 +790,10 @@ async function pollQueueStatus() {
   renderCaptures();
 }
 
+let streamId;
 function handleSseEvent(event, data) {
   if (event === "snapshot") {
+    streamId = data.stream_id;
     jobsRevision++;
     captureData.jobs = [...(data.active || []), ...(data.recent || [])];
     loadRecentUoinks();
@@ -805,7 +807,7 @@ function handleSseEvent(event, data) {
 }
 const captureStream = PopupCaptures.stream({
   connect: async signal => (await UoinkUI.authedFetch("/jobs/stream", {
-    signal, headers: { "X-Uoink-Stream": "popup" },
+    signal, headers: streamId ? { "X-Uoink-Stream": streamId } : {},
   })).res,
   onEvent: handleSseEvent,
   onState: state => {

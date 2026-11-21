@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="uoink-dashboard-load" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Uoink Dashboard</title>
   <!-- Appearance: apply the saved theme before the first paint, so a forced
@@ -1058,8 +1059,8 @@
     }
 
     .uoink-card:hover,
-    .uoink-card:focus-visible,
-    .uoink-card[aria-current="true"] {
+    .uoink-card:focus-within,
+    .uoink-card:has(.card-title[aria-current="true"]) {
       background: var(--surface-sel);
     }
 
@@ -1304,6 +1305,11 @@
       font-weight: 600;
       line-height: 1.35;
       overflow-wrap: anywhere;
+    }
+
+    .card-title:focus-visible, .insight-title:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
     }
 
     .topic-chip {
@@ -1656,6 +1662,13 @@
       font-weight: 800;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+    }
+
+    button.insight-title {
+      background: transparent;
+      padding: 0;
+      border: 0;
+      text-align: start;
     }
 
     .insight-title {
@@ -6636,7 +6649,7 @@
           </section>
           <dialog id="semanticNoticeDialog" aria-labelledby="semanticNoticeTitle">
             <h2 id="semanticNoticeTitle">Gemma notice</h2>
-            <pre id="semanticNoticeText" style="white-space:pre-wrap;max-width:70ch;max-height:65vh;overflow:auto"></pre>
+            <pre id="semanticNoticeText" tabindex="0" style="white-space:pre-wrap;max-width:70ch;max-height:65vh;overflow:auto"></pre>
             <form method="dialog"><button class="button ghost" type="submit">Close</button></form>
           </dialog>
 
@@ -7016,7 +7029,7 @@
     </div>
     <p class="activity-meta" id="itemHealthNote"></p>
   </dialog>
-  <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
+  <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="true" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
         <div class="soft-note">Screenshot handoff</div>
@@ -7676,15 +7689,22 @@
     }
 
     async function requestDashboardToken() {
+      let retryAfter = 0;
       for (const delay of [0, 250, 750]) {
-        if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+        if (delay) await new Promise(resolve => setTimeout(resolve, Math.max(delay, retryAfter)));
+        retryAfter = 0;
         try {
-          const res = await fetch("/token", { headers: { "X-Uoink-Client": "uoink-extension" } });
+          const headers = { "X-Uoink-Client": "uoink-extension" };
+          const load = globalThis.document?.querySelector('meta[name="uoink-dashboard-load"]')?.content;
+          if (load) headers["X-Uoink-Dashboard-Load"] = load;
+          const res = await fetch("/token", {headers});
           if (res.ok) {
             const data = await res.json();
             if (data.ok && data.token) return (state.token = data.token);
           }
-          if (res.status !== 429 && res.status < 500) break;
+          if (res.status === 429) {
+            retryAfter = Math.min(60, Number((await res.json()).retry_after_seconds) || 0) * 1000;
+          } else if (res.status < 500) break;
         } catch (_) {}
       }
       throw new Error("Couldn’t connect to Uoink. Check that the helper is running, then try again.");
@@ -7821,10 +7841,6 @@
         event.preventDefault();
         first.focus();
       }
-    }
-
-    function isCardActivationKey(event) {
-      return event.key === "Enter" || event.key === " ";
     }
 
     function renderInlineMarkdown(value) {
@@ -11916,6 +11932,10 @@
       } finally {
         if (els.confirmSourceConsent) els.confirmSourceConsent.disabled = false;
         await loadStandingSubscriptions();
+        if (document.activeElement === document.body) {
+          restoreFocus(els.standingSubscriptionList.querySelector(
+            `.toggle-consent-btn[data-source-id="${CSS.escape(intent.source_id)}"]`) || els.refreshStandingSources);
+        }
       }
     }
 
@@ -12359,9 +12379,9 @@
         ? `<button class="button${lead ? " primary" : ""} insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(rowTitle(row))}">Write from this</button>`
         : "";
       return `
-        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
-          <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
+          <button type="button" class="insight-title" aria-label="Open ${htmlEscape(rowTitle(row))}">${htmlEscape(rowTitle(row))}</button>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
           <div class="insight-copy">${age >= 9000 ? "No activity on this one yet." : `${age} days since you last touched it.`}</div>
           ${scorePill}
@@ -12726,10 +12746,10 @@
       const image = row.thumbnail_path
         ? `<div class="insight-image" aria-hidden="true"><img alt="" class="hidden" data-card-thumb="${htmlEscape(row.thumbnail_path)}"></div>` : "";
       return `
-        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}">
           ${image}
           <div class="insight-kicker">${htmlEscape(origin.label || "imported")}${origin.list_title && origin.list_title !== origin.label ? ` &middot; ${htmlEscape(origin.list_title)}` : ""}</div>
-          <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
+          <button type="button" class="insight-title" aria-label="Open ${htmlEscape(rowTitle(row))}">${htmlEscape(rowTitle(row))}</button>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")}${row.topic ? ` | ${htmlEscape(row.topic)}` : ""}</div>
           ${origin.note ? `<div class="insight-note">${htmlEscape(origin.note)}</div>` : ""}
           ${scorePill}
@@ -14275,13 +14295,13 @@
       const current = state.activeTab === "yoink" && videoIdOf(state.selectedYoink) === String(row.video_id || row.slug || "")
         ? ' aria-current="true"' : "";
       return `
-        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}"${current}>
+        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}">
           <div class="row-thumb" aria-hidden="true">
             <img alt="" data-thumb-for="${id}" class="hidden">
             <span class="source-type-chip">${sourceType}</span>
           </div>
           <div class="row-body" title="${title}">
-            <button class="card-title" type="button" title="${title}" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}">${title}</button>
+            <button class="card-title" type="button" title="${title}" aria-label="Open ${title}${availabilityLabel ? `, ${availabilityLabel}, still in your library` : ""}"${current}>${title}</button>
             <div class="card-source">${author} &middot; ${platformLabel}${age ? ` &middot; ${htmlEscape(age)}` : ""}${row.import_origin && row.import_origin.label ? ` &middot; <span title="${htmlEscape(row.import_origin.note || "")}">from ${htmlEscape(row.import_origin.label)}</span>` : ""}</div>
             ${libraryMatchHtml(row)}
             <div class="row-state">${savedStateLine(row)}${healthException(row.health, row)}${sourceAvailabilityBadge(row)}</div>
@@ -15066,8 +15086,10 @@
       if (!grid || typeof grid.querySelectorAll !== "function") return;
       const open = state.activeTab === "yoink" ? videoIdOf(state.selectedYoink) : "";
       grid.querySelectorAll(".uoink-card").forEach((card) => {
-        if (open && card.dataset.videoId === open) card.setAttribute("aria-current", "true");
-        else card.removeAttribute("aria-current");
+        const title = card.querySelector(".card-title");
+        if (!title) return;
+        if (open && card.dataset.videoId === open) title.setAttribute("aria-current", "true");
+        else title.removeAttribute("aria-current");
       });
     }
 
@@ -15295,7 +15317,10 @@
 
     function closeHookExplainer() {
       els.hookExplainer.classList.add("hidden");
-      restoreFocus(state.hookFocusTarget);
+      const opener = state.hookFocusTarget;
+      const id = opener?.closest("[data-card-id]")?.dataset.cardId;
+      restoreFocus(opener?.isConnected ? opener :
+        (id && els.libraryGrid.querySelector(`[data-card-id="${CSS.escape(id)}"] [data-hook-explain]`)) || els.searchInput);
       state.hookFocusTarget = null;
     }
 
@@ -16455,9 +16480,10 @@
           result = await authFetch("/podcasts/audio-storage");
         }
         if (version !== podcastStorageVersion) return;
-        const {bytes, episodes} = result;
+        const {bytes, deletable_bytes, episodes} = result;
         podcastCleanupIds = episodes;
-        usage.textContent = bytes < 1048576 ? `${bytes.toLocaleString()} bytes on disk` : `${(bytes / 1048576).toLocaleString(undefined, {maximumFractionDigits: 2})} MiB on disk`;
+        const size = n => n < 1048576 ? `${n.toLocaleString()} bytes` : `${(n / 1048576).toLocaleString(undefined, {maximumFractionDigits: 2})} MiB`;
+        usage.textContent = `${size(bytes)} on disk. ${size(deletable_bytes)} can be removed. ${size(bytes - deletable_bytes)} will be kept.`;
         button.disabled = podcastCleanupRunning || !episodes.length;
       } catch (_) {
         if (version === podcastStorageVersion) usage.textContent = "Couldn’t check podcast storage. Reload Settings to try again.";
@@ -16472,21 +16498,25 @@
       podcastCleanupRunning = true;
       podcastCleanupStopped = false;
       document.getElementById("deletePodcastAudio").disabled = true;
+      stop.disabled = false;
+      stop.textContent = "Stop";
       stop.classList.remove("hidden");
+      const batch = podcastCleanupIds.slice();
       let count = 0, kept = 0;
+      const removed = () => `Removed ${count} audio ${count === 1 ? "file" : "files"}`;
       try {
-        for (const episode_id of podcastCleanupIds) {
+        for (const episode_id of batch) {
           if (podcastCleanupStopped) break;
           const result = await authFetch("/podcasts/audio-storage/delete", {
             method: "POST", body: JSON.stringify({episode_id, confirmed: true}),
           });
           if (result.removed) count++;
           else kept++;
-          status.textContent = `Removed ${count} audio files.`;
+          status.textContent = `${removed()}.`;
         }
-        status.textContent = `${podcastCleanupStopped ? "Stopped. " : ""}Removed ${count} audio files.${kept ? ` Kept ${kept} that could not be safely removed.` : ""}`;
+        status.textContent = `${podcastCleanupStopped && count + kept < batch.length ? "Stopped. " : ""}${removed()}.${kept ? ` Kept ${kept} that could not be safely removed.` : ""}`;
       } catch (_) {
-        status.textContent = `Removed ${count} audio files before cleanup stopped. Try again to continue.`;
+        status.textContent = `${removed()} before cleanup stopped. Try again to continue.`;
       } finally {
         stop.classList.add("hidden");
         podcastCleanupRunning = false;
@@ -19627,6 +19657,8 @@
 
     function bindSemanticSearch() {
       const notice = document.getElementById("semanticNoticeDialog");
+      let opener;
+      notice.addEventListener("close", () => { restoreFocus(opener); opener = null; });
       notice.addEventListener("keydown", event => trapModalFocus(event, notice, () => notice.close()));
       document.getElementById("semanticAccept").addEventListener("change", renderSemanticStatus);
       for (const [id, action] of [["semanticDownload", "download"], ["semanticPause", "pause"], ["semanticResume", "start"], ["semanticRemove", "remove"]]) {
@@ -19638,7 +19670,8 @@
           const text = await readSettingsResource(link.getAttribute("href"), "text");
           document.getElementById("semanticNoticeTitle").textContent = link.textContent;
           document.getElementById("semanticNoticeText").textContent = text;
-          document.getElementById("semanticNoticeDialog").showModal();
+          opener = link;
+          notice.showModal();
         } catch (err) { document.getElementById("semanticStatus").textContent = settingError(err); }
       }));
     }
@@ -19997,7 +20030,11 @@
 
     function wireSettingsAutosave() {
       document.getElementById("deletePodcastAudio").addEventListener("click", deletePodcastAudio);
-      document.getElementById("stopPodcastCleanup").addEventListener("click", () => { podcastCleanupStopped = true; });
+      document.getElementById("stopPodcastCleanup").addEventListener("click", event => {
+        podcastCleanupStopped = true;
+        event.currentTarget.disabled = true;
+        event.currentTarget.textContent = "Stopping…";
+      });
       wireRelaySettings();
       bindSemanticSearch();
       document.getElementById("reloadHookCorrections").addEventListener("click", loadHookCorrections);
@@ -20384,10 +20421,10 @@
       if (tab === "yoink") renderYoinkDetail();
       if (tab === "sources") {
         renderSources();
-        authFetch("/extension/browser").then(browser => {
-          document.getElementById("extensionBrowserName").textContent = browser.name;
-          document.getElementById("extensionBrowserUrl").textContent = browser.url;
-        }).catch(() => {});
+        state.extensionBrowserRequest ||= authFetch("/extension/browser").then(browser => {
+          if (browser?.name) document.getElementById("extensionBrowserName").textContent = browser.name;
+          if (browser?.url) document.getElementById("extensionBrowserUrl").textContent = browser.url;
+        }).catch(() => { state.extensionBrowserRequest = null; });
       }
       if (tab === "activity") refreshActivity();
       const settingsRead = tab === "settings" ? refreshSettings() : null;
@@ -20812,15 +20849,6 @@
       els.hookExplainer.addEventListener("keydown", (event) => {
         trapModalFocus(event, els.hookExplainer, closeHookExplainer);
       });
-      document.addEventListener("keydown", (event) => {
-        if (!isCardActivationKey(event)) return;
-        const card = event.target.closest(".insight-card[role='button']");
-        if (!card || event.target.closest("a, button, input, select, textarea, summary")) return;
-        if (!card.dataset.videoId && !card.dataset.folder) return;
-        event.preventDefault();
-        openYoinkDetail(rowFromCard(card));
-        focusReaderHeading();
-      });
       document.getElementById("addPlaylist").addEventListener("click", addMobilePlaylist);
       document.getElementById("addPodcastFeed").addEventListener("click", addPodcastFeed);
       document.getElementById("addChannel").addEventListener("click", addChannel);
@@ -21169,7 +21197,7 @@
         }
         const card = event.target.closest("[data-folder]");
         if (card && (card.dataset.videoId || card.dataset.folder)) {
-          if (event.target.closest("a")) return;
+          if (event.target.closest("a, button:not(.card-title):not(.insight-title), input, select, textarea, summary, label, [role=button], [role=link], [contenteditable]:not([contenteditable=false])")) return;
           openYoinkDetail(rowFromCard(card));
           focusReaderHeading();
           return;
@@ -21294,6 +21322,7 @@
 
     function handleJobsStreamEvent(eventName, payload) {
       if (eventName === "snapshot") {
+        state.jobsStreamClient = payload.stream_id;
         const active = Array.isArray(payload.active) ? payload.active : [];
         const recent = Array.isArray(payload.recent) ? payload.recent : [];
         state.jobs = active.concat(recent);
@@ -21347,15 +21376,7 @@
     async function readJobsStream() {
       const token = await getToken();
       const headers = { "X-Uoink-Token": token };
-      try {
-        if (!state.jobsStreamClient) {
-          // A newly opened tab can inherit a copy of its opener's storage.
-          const reload = performance.getEntriesByType("navigation")[0]?.type === "reload";
-          state.jobsStreamClient = (reload && sessionStorage.getItem("uoink-jobs-stream")) || crypto.randomUUID();
-          sessionStorage.setItem("uoink-jobs-stream", state.jobsStreamClient);
-        }
-        headers["X-Uoink-Stream"] = state.jobsStreamClient;
-      } catch (_) {}
+      if (state.jobsStreamClient) headers["X-Uoink-Stream"] = state.jobsStreamClient;
       const res = await fetch("/jobs/stream", { headers });
       if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
       const reader = res.body.getReader();
