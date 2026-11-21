@@ -381,9 +381,15 @@ def run_extension_all(fixtures):
     out = {}
     for fixture in fixtures:
         name = fixture["gold"]["name"]
-        capture = captures.get(name) or {"ok": False}
+        capture = captures.get(name) or {"ok": False, "code": "missing"}
+        if capture.get("mutated") or capture.get("net_calls"):
+            # Reading must never change the user's page or touch the network.
+            out[name] = {"outcome": "error", "markdown": "", "title": "", "metadata": {},
+                         "raw": {"error": f"mutated={capture.get('mutated')} net_calls={capture.get('net_calls')}"}}
+            continue
         if not capture.get("ok"):
-            out[name] = {"outcome": capture.get("page_state") or "thin", "markdown": "", "title": "",
+            # A crash is an error, never a thin page.
+            out[name] = {"outcome": _outcome_from_failure(capture), "markdown": "", "title": "",
                          "metadata": {}, "raw": capture}
             continue
         result = page_dom_capture.build_extract_result(capture.get("payload") or {})

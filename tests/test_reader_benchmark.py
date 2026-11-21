@@ -129,3 +129,17 @@ def test_a_missing_jsdom_never_hides_behind_a_green_job(monkeypatch):
     mac = (ROOT / ".github/workflows/mac-qualify.yml").read_text(encoding="utf-8")
     assert 'UOINK_READER_BENCH_REQUIRED: "1"' in ci and "npm ci --prefix tests/js/reader" in ci
     assert "UOINK_READER_BENCH_SKIP:" in mac
+
+
+def test_a_capture_that_changes_the_page_calls_out_or_crashes_scores_as_an_error(monkeypatch):
+    import types
+    names = ["short-post", "spanish-article", "recipe"]
+    fake = {"results": {
+        "short-post": {"ok": True, "mutated": True, "net_calls": 0, "payload": {}},
+        "spanish-article": {"ok": False, "code": "reader_failed", "error": "boom"},
+        "recipe": {"ok": True, "mutated": False, "net_calls": 2, "payload": {}}}}
+    monkeypatch.setattr(bench.shutil, "which", lambda _name: "node")
+    monkeypatch.setattr(bench.subprocess, "run", lambda *_a, **_k: types.SimpleNamespace(
+        returncode=0, stdout=json.dumps(fake), stderr=""))
+    out = bench.run_extension_all(bench.load_fixtures(names))
+    assert {name: row["outcome"] for name, row in out.items()} == dict.fromkeys(names, "error")
