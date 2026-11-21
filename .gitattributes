@@ -29,6 +29,7 @@ scripts/run_phase5_az5g2_union.py -text
 vendor/nltk-pathsec/** -text
 # Defuddle is vendored byte for byte; tests/test_page_dom_capture.py pins its sha256.
 extension/lib/defuddle.js -text
+extension/lib/defuddle-LICENSE.txt -text
 # The reader benchmark scores these bytes; keep them identical on every platform.
 tests/fixtures/reader/* text eol=lf
 
