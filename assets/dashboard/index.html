@@ -973,6 +973,14 @@
       font-size: 12px;
     }
 
+    #searchInput::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+      width: 1em;
+      height: 1em;
+      background: var(--text-2);
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 3 10 10M13 3 3 13' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
     .field-error {
       margin: -6px 0 14px;
       color: var(--acid);
@@ -1151,6 +1159,7 @@
     }
 
     .state-word.done .state-dot { background: var(--ok); }
+    .state-word.saved .state-dot { background: var(--text-2); }
     .state-word.now .state-dot { background: var(--step-now); }
     .state-word.fail .state-dot { background: var(--fail); }
 
@@ -2678,9 +2687,11 @@
       }
     }
 
-    .summary-line .hook-help-link + .hook-help-link,
-    .summary-line .hook-help-link + .facet-status {
-      margin-left: 10px;
+    .library-summary-actions {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
     }
 
     .tidy-card {
@@ -6101,7 +6112,7 @@
             <span id="resultSummary" aria-live="polite">Loading library...</span>
             <span class="library-count hidden" id="searchModeLabel" role="status"></span>
             <div class="library-filter-chips hidden" id="activeFilters" aria-live="polite"></div>
-            <span><button class="hook-help-link library-tidy-entry hidden" type="button" id="libraryTidyEntry" data-tidy-open title="Find shelves for the saves on Uncategorized">Tidy Uncategorized</button> <button class="hook-help-link" type="button" id="librarySelectToggle" aria-pressed="false" title="Pick saves and move them to a shelf">Select</button> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
+            <span class="library-summary-actions"><button class="hook-help-link library-tidy-entry hidden" type="button" id="libraryTidyEntry" data-tidy-open title="Find shelves for the saves on Uncategorized">Tidy Uncategorized</button> <button class="hook-help-link hidden" type="button" id="librarySelectToggle" aria-pressed="false" title="Pick saves and move them to a shelf">Select</button> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
             <span class="health-legend" title="A row names its state in words; the dot only repeats it.">
               <span class="warn"><i></i>still working</span>
               <span class="fail"><i></i>needs attention</span>
@@ -7128,7 +7139,7 @@
                   <button class="button ghost hidden" id="backfillPause" type="button">Pause</button>
                   <button class="button ghost hidden" id="backfillResume" type="button">Resume</button>
                 </div>
-                <p class="setting-copy" id="backfillCost">It uses this computer's CPU, roughly 10 to 15 minutes for each hour of video. Saves with no copy here are downloaded again from where you saved them. Nothing else leaves this computer. It waits while you capture, and you can pause any time.</p>
+                <p class="setting-copy" id="backfillCost">It uses this computer's CPU. <span id="backfillEstimate"></span> Saves with no copy here are downloaded again from where you saved them. Nothing else leaves this computer. It waits while you capture, and you can pause any time.</p>
               </div>
               <div class="health-repair hidden" id="halfCaptures" aria-labelledby="halfCapturesTitle">
                 <h3 id="halfCapturesTitle">Captures that did not finish</h3>
@@ -15350,6 +15361,7 @@
       const corpusTotal = Number(state.corpusTotal || 0);
       const navTotal = corpusTotal || state.total;
       const libraryState = state.libraryState || (rows.length ? "matches" : "empty_corpus");
+      els.librarySelectToggle.classList.toggle("hidden", libraryState === "empty_corpus");
       if (libraryState === "unavailable") {
         renderLibraryUnavailable();
         return;
@@ -18179,6 +18191,9 @@
       if (!list) return;
       const machine = document.getElementById("asrModelMachine");
       const rows = Array.isArray(data && data.models) ? data.models : [];
+      const estimate = document.getElementById("backfillEstimate");
+      const speed = rows.find(row => row.selected)?.speed;
+      if (estimate) estimate.textContent = speed ? speed + "." : "";
       if (machine) machine.textContent = rows.length ? asrMachineCopy(data.machine) : "";
       clearTimeout(asrModelPollTimer);
       if (!rows.length) {

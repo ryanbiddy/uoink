@@ -46,7 +46,7 @@ LEGACY_TURBO_REPO = "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
 # the loader uses; relative model costs come from encoder/decoder sizes.
 BASE_MINUTES_PER_HOUR = 4.0
 _REFERENCE_THREADS = 4
-RECOMMEND_MAX_MINUTES = 30
+RECOMMEND_MAX_MINUTES = 10
 
 S, G = "sha256", "git_sha1"
 
@@ -254,11 +254,13 @@ def speed_copy(minutes: int) -> str:
     return f"About {minutes / 60:.1f} hours per hour of audio"
 
 
-def recommended_english(cores: int) -> str:
+def recommended_english(cores: int, bundled_model: str | None = "base") -> str:
     """'Best for English on this computer': the most accurate English model
     that still finishes an hour of audio in RECOMMEND_MAX_MINUTES."""
-    best = "distil-large-v3.5"
-    return best if minutes_per_hour(best, cores) <= RECOMMEND_MAX_MINUTES else "distil-small.en"
+    for model in ("distil-large-v3.5", "distil-small.en"):
+        if minutes_per_hour(model, cores) <= RECOMMEND_MAX_MINUTES:
+            return model
+    return bundled_model or "base"
 
 
 # ---- files on disk ---------------------------------------------------------
@@ -553,7 +555,7 @@ def listing(root: str | Path, *, bundled_model: str | None, selected: str | None
     """Everything the chooser shows, for this computer."""
     info = info or machine()
     cores = info["cpu_cores"]
-    pick = recommended_english(cores)
+    pick = recommended_english(cores, bundled_model)
     models = []
     for entry in CATALOG:
         disk = state(entry["id"], root)

@@ -1072,7 +1072,10 @@ def models_command(ns, server):
     """`uoink models`: the same catalog, checks and files as Settings and
     the helper's /asr/models routes. A download here runs in this terminal."""
     if ns.action == "list":
-        return server.asr_models_payload()
+        payload = server.asr_models_payload()
+        # This command reads local files and cannot see the helper's live worker.
+        payload["engine"] = "The Uoink helper transcribes in a separate process that closes when idle."
+        return payload
     if not ns.model:
         raise UsageError(f"name a model: uoink models {ns.action} <model>")
     if ns.action == "delete":

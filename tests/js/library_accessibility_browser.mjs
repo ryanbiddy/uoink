@@ -22,6 +22,14 @@ test("library cards keep their layout and dialogs retain keyboard focus", async 
       return route.fulfill({json: {ok: true, token: "fixture", hooks: []}});
     });
     await page.goto("http://fixture.test/dashboard");
+    await t.test("the styled native clear button still clears the library search", async () => {
+      await page.locator("#tab-library").evaluate(el => el.classList.add("active"));
+      const search = page.locator("#searchInput");
+      await search.fill("sample");
+      const box = await search.boundingBox();
+      await search.click({position: {x: box.width - 22, y: box.height / 2}});
+      assert.equal(await search.inputValue(), "");
+    });
     await page.evaluate(() => { wireEvents(); wireLibraryActivityEvents(); });
     for (const width of [390, 1280]) {
       await page.setViewportSize({width, height: 900});
@@ -30,12 +38,21 @@ test("library cards keep their layout and dialogs retain keyboard focus", async 
         const result = await page.evaluate(() => {
           const grid = els.libraryGrid;
           document.getElementById("tab-library").classList.add("active");
+          state.library = [];
+          state.libraryState = "empty_corpus";
+          renderLibrary();
+          const select = els.librarySelectToggle;
+          const emptySelectHidden = !select.getClientRects().length;
           grid.replaceChildren();
           const emptyFits = document.documentElement.scrollWidth <= innerWidth;
           state.library = Array.from({length: 1000}, (_, i) => ({
             video_id: String(i), title: i === 1 ? "Short" : "Example ".repeat(20), channel: "Example channel", hook_type: "other",
           }));
-          grid.innerHTML = state.library.map(cardHtml).join("");
+          state.libraryState = "matches";
+          renderLibrary();
+          const selectBox = select.getBoundingClientRect();
+          const helpBox = select.parentElement.querySelector("[data-hook-explain]").getBoundingClientRect();
+          const linkGap = helpBox.left - selectBox.right;
           const geometry = [...grid.children].slice(0, 2).map(card => {
             const button = card.querySelector(".card-title");
             const box = el => [el.offsetWidth, el.offsetHeight, el.offsetTop, el.offsetLeft];
@@ -48,10 +65,12 @@ test("library cards keep their layout and dialogs retain keyboard focus", async 
             previous.replaceWith(button);
             return {current, original};
           });
-          return {emptyFits, fits: document.documentElement.scrollWidth <= innerWidth,
+          return {emptyFits, emptySelectHidden, selectWidth: selectBox.width, linkGap, fits: document.documentElement.scrollWidth <= innerWidth,
             count: grid.childElementCount, geometry, nested: grid.querySelectorAll("[role=button] button, button button").length};
         });
         assert.ok(result.emptyFits && result.fits, `${scheme} at ${width}px`);
+        assert.ok(result.emptySelectHidden);
+        assert.ok(result.selectWidth > 0 && result.linkGap >= 10, `summary gap ${result.linkGap}px at ${width}px`);
         assert.equal(result.count, 1000);
         assert.equal(result.nested, 0);
         await t.test(`card geometry in ${scheme} at ${width}px`, () => {

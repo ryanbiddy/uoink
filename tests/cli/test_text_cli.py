@@ -12,6 +12,14 @@ import uoink_cli as cli
 from tests.cli.test_research_cli import FakeTools, run
 
 
+def test_model_list_describes_helper_without_claiming_its_live_state():
+    import server
+    payload = cli.models_command(SimpleNamespace(action="list"), server)
+    line = next(line for line in cli.human(payload).splitlines() if line.startswith("Engine:"))
+    assert "helper" in line and "separate process" in line
+    assert line.count(":") == 1
+
+
 @pytest.fixture
 def samples():
     return json.loads((Path(__file__).parents[1] / "fixtures/cli_text.json").read_text(encoding="utf-8"))

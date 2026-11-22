@@ -56,20 +56,26 @@ def test_speed_and_recommendation_follow_this_computer():
     assert asr_models.minutes_per_hour("base", 32) == 4      # four threads at the ceiling
     order = [asr_models.minutes_per_hour(i, 4) for i in ("tiny", "base", "small", "large")]
     assert order == sorted(order)
-    assert asr_models.recommended_english(8) == "distil-large-v3.5"
-    assert asr_models.recommended_english(1) == "distil-small.en"
+    assert asr_models.recommended_english(8) == "distil-small.en"
+    assert asr_models.recommended_english(1) == "base"
     assert asr_models.speed_copy(22) == "About 22 min per hour of audio"
     assert asr_models.speed_copy(112) == "About 1.9 hours per hour of audio"
+
+
+def test_fast_estimate_at_cutoff_prefers_more_accurate_english(monkeypatch):
+    monkeypatch.setattr(asr_models, "BASE_MINUTES_PER_HOUR", 1.8)
+    assert asr_models.minutes_per_hour("distil-large-v3.5", 8) == 10
+    assert asr_models.recommended_english(8) == "distil-large-v3.5"
 
 
 def test_listing_marks_bundled_recommended_and_selected(tmp_path):
     data = asr_models.listing(tmp_path, bundled_model="base", selected="small",
                               info={"cpu_cores": 8, "gpu": False, "threads_used": 4})
     rows = {row["id"]: row for row in data["models"]}
-    assert data["source"] == "huggingface.co" and data["recommended"] == "distil-large-v3.5"
+    assert data["source"] == "huggingface.co" and data["recommended"] == "distil-small.en"
     assert rows["base"]["state"] == "bundled"
     assert rows["small"]["selected"] and rows["small"]["state"] == "missing"
-    assert rows["distil-large-v3.5"]["recommended"]
+    assert [key for key, row in rows.items() if row["recommended"]] == ["distil-small.en"]
     assert rows["distil-small.en"]["languages"] == "English only"
     assert rows["large"]["download_mb"] == 3091
 

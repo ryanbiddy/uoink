@@ -7,8 +7,10 @@ const page = fs.readFileSync("assets/dashboard/index.html", "utf8");
 const chooser = page.split("    // 3.18 transcription model chooser")[1].split("    async function refreshSettings")[0];
 const listener = page.split('const asrModelList = document.getElementById("asrModelList");').at(-1).split("if (asrModelList)")[0];
 const list = new Element("div"), timers = new Set();
+const estimate = {textContent: ""};
+assert.ok(/id="backfillCost">[^<]*<span id="backfillEstimate">/.test(page));
 const document = Object.assign(new EventTarget(), {
-  getElementById: id => id === "asrModelList" ? list : null,
+  getElementById: id => ({asrModelList: list, backfillEstimate: estimate})[id] || null,
   createElement: tag => new Element(tag), hidden: false, activeElement: null,
 });
 Element.prototype.focus = function() { document.activeElement = this; };
@@ -20,6 +22,17 @@ const ctx = vm.createContext({document, state: {activeTab: "settings"}, htmlEsca
   setTimeout() { const id = Symbol(); timers.add(id); return id; }, clearTimeout: id => timers.delete(id)});
 vm.runInContext(chooser.slice(chooser.indexOf("let asrModelPollTimer")) + listener, ctx);
 ctx.renderAsrModels(data);
+const other = {id: "large", state: "ready", speed: "About 1.9 hours per hour of audio"};
+model.speed = "About 4 min per hour of audio";
+data.models.push(other);
+for (const selected of [model, other]) {
+  for (const row of data.models) row.selected = row === selected;
+  ctx.renderAsrModels(data);
+  assert.equal(estimate.textContent, selected.speed + ".");
+}
+other.selected = false;
+ctx.renderAsrModels(data);
+assert.equal(estimate.textContent, "");
 const card = list.children[0];
 card.querySelector("button").focus();
 model.download = {state: "downloading", done: 1, total: 3};
