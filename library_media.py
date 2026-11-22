@@ -2441,6 +2441,18 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         _insert_citations(conn, video_id, cues, block)
         _write_media_rows(conn, block)
         _write_clips(conn, video_id, projected)
+        if corpus_path in owned:
+            # Rebuild from the same revision, including an item whose FTS row is missing.
+            conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
+            conn.execute(
+                "INSERT INTO yoinks_fts(video_id, slug, channel, title, topic, hook_type, content) "
+                "SELECT video_id, slug, channel, title, topic, hook_type, ? FROM yoinks WHERE video_id=?",
+                (owned[corpus_path].decode("utf-8"), video_id))
+            if sidecar.get("transcript_source"):
+                metadata = _metadata(item)
+                metadata["transcript_source"] = sidecar["transcript_source"]
+                conn.execute("UPDATE yoinks SET metadata_json=? WHERE video_id=?",
+                             (json.dumps(metadata, ensure_ascii=False), video_id))
         conn.commit()
         try:
             retention = prune_artifacts(conn, item)

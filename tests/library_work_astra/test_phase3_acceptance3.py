@@ -10,6 +10,7 @@ import json
 import re
 import threading
 import uuid
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -118,12 +119,14 @@ def test_as3_s14_two_service_instances_cannot_dispatch_one_start_twice(rig):
 
 def _load_manual_dispatch(ns):
     """Compile actual manual ownership and handler bodies; replace I/O only."""
+    import asr_worker
     import uoink_usage
+    ns["asr_worker"] = asr_worker
     ns["uoink_usage"] = uoink_usage
     path = ROOT / 'server.py'
     parsed = ast.parse(path.read_text(encoding='utf-8-sig'), filename=str(path))
     names = {
-        '_ManualOwnership', '_manual_capture_key', '_manual_extraction_ownership',
+        '_ManualOwnership', '_manual_capture_key', '_manual_capture_intent', '_manual_extraction_ownership',
         '_reports_live_extract', '_live_extract_begin', '_live_extract_phase',
         '_live_extract_end',
     }
@@ -141,7 +144,7 @@ def _load_manual_dispatch(ns):
     handler = next(node for node in parsed.body if getattr(node, 'name', None) == 'Handler')
     nodes.append(next(node for node in handler.body if getattr(node, 'name', None) == '_handle_extract'))
     assert len(nodes) == len(names) + len(constants) + 1
-    ns.update(contextlib=contextlib, re=re, uuid=uuid,
+    ns.update(contextlib=contextlib, re=re, uuid=uuid, Path=Path,
               # 3.18: /extract reads an optional shelf; these requests name none.
               _shelf_from_body=lambda body, **k: (None, None))
     # Keep server_parts' dormant Thread while using real in-memory capture state.

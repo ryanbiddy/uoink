@@ -748,6 +748,8 @@ def podcast_job(helper, tmp_path):
         set_episode_status=Mock(), episode_to_corpus=Mock(return_value={"video_id": "v"}))
     helper.update(
         contextlib=contextlib, DATA_ROOT=tmp_path, whisper_runner=whisper, podcasts=podcasts,
+        RETRANSCRIBE_KIND="retranscribe", asr_worker=__import__("asr_worker"),
+        PlaylistJobCancelled=type("PlaylistJobCancelled", (Exception,), {}), _raise_if_cancelled=Mock(),
         _podcast_transcription_queue=SimpleNamespace(get=get, task_done=Mock()),
         _podcast_capture_key=lambda episode_id: None,
         _settle_source_capture=Mock(), maybe_toast=Mock(), _heartbeat_note_ingest=Mock())

@@ -6,8 +6,12 @@ temporary placeholder files. No model, decoder or download code is exercised.
 """
 from __future__ import annotations
 
+import asr_models
+import asr_worker
+import uoink_reliability as reliability
 import ast
 import logging
+import inspect
 from pathlib import Path
 import re
 import sys
@@ -26,7 +30,7 @@ def blocked(*args, **kwargs):
 def runner_functions(source):
     functions = {
         "normalize_model", "_model_cache_root", "_model_repo_root",
-        "_checked_model_snapshot", "_cached_model_snapshot", "is_model_downloaded",
+        "_checked_model_snapshot", "_cached_model_snapshot", "_read_model_snapshot", "is_model_downloaded",
         "_model_dir", "_prepare_model_snapshot", "transcribe_audio", "_shape_segments",
     }
     constants = {
@@ -42,13 +46,18 @@ def runner_functions(source):
     )]
     assert functions == {node.name for node in nodes if isinstance(node, ast.FunctionDef)}
     scope = {
-        "logging": logging, "Path": Path, "re": re, "sys": sys, "_WHISPERX_AVAILABLE": True,
+        "asr_models": asr_models, "asr_worker": asr_worker, "reliability": reliability,
+        "Path": Path, "re": re, "sys": sys, "inspect": inspect, "logging": logging, "_WHISPERX_AVAILABLE": True,
         "_download_model_snapshot": blocked, "_runtime_device": lambda: "cpu",
         # These contracts cover the user's cache. The installer-bundled copy
         # has its own tests (test_bundled_whisper_model.py); none here.
         "_bundled_snapshot": lambda model_size: None,
         "_compute_type": lambda device: "int8", "_now_iso": lambda: "synthetic-time",
         "transcription_engine": lambda: "whisperx" if scope["_WHISPERX_AVAILABLE"] else None,
+        # 3.18 seams: no child-process offload here, and these contracts cover
+        # the WhisperX engine (speaker labels), not the faster-whisper route.
+        "_asr_offload_active": lambda: False,
+        "plain_engine_for": lambda diarize: False,
     }
     future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
     module = ast.fix_missing_locations(ast.Module(body=[future, *nodes], type_ignores=[]))
@@ -138,7 +147,7 @@ class ProductGuardContracts(unittest.TestCase):
         (self.cached() / "tokenizer.json").write_bytes(b"")
         self.assertFalse(self.scope["is_model_downloaded"](self.root))
 
-    def test_all_six_current_model_options_reuse_cache_without_download(self):
+    def test_all_current_model_options_reuse_cache_without_download(self):
         self.assertEqual(set(self.scope["_MODEL_REPOSITORIES"]), set(self.scope["_MODELS"]))
         for model in self.scope["_MODELS"]:
             with self.subTest(model=model):

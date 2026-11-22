@@ -137,7 +137,7 @@ def test_server_starts_in_thread_under_simulated_darwin(startup, monkeypatch):
 
 
 @pytest.mark.parametrize("platform,reject,expected", [
-    ("darwin", False, 1), ("darwin", True, 1), ("win32", False, 0), ("linux", False, 0)])
+    ("darwin", False, 1), ("darwin", True, 1), ("win32", False, 0), ("linux", False, 1)])
 def test_main_thread_handler_and_subinterpreter_refusal(startup, monkeypatch, platform, reject, expected):
     server = startup
     server.sys.platform = platform

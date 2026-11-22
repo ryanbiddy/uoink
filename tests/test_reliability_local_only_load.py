@@ -87,14 +87,17 @@ def test_ensure_model_is_the_explicit_acquisition_path():
     _FakeModel.calls = []
     with tempfile.TemporaryDirectory() as raw:
         root = Path(raw) / "models"
-        with patch.object(rel, "_import_faster_whisper", return_value=_FakeModel):
+        from tests.test_asr_models import fixture_download
+        with (patch.object(rel.asr_models, "download", side_effect=fixture_download) as download,
+              patch.object(rel, "_import_faster_whisper", return_value=_FakeModel)):
             result = rel.ensure_model("small", root)
+        download.assert_called_once_with("small", root, cancel_event=None,
+                                         progress=rel.asr_worker.report_download_bytes)
         marker = root / "small.pt"
-        _assert(root.is_dir(), "explicit acquisition may create the download root")
-        _assert(marker.is_file(), f"consent marker missing: {result}")
+        _assert(root.is_dir(), "the explicit download creates its cache")
+        _assert(marker.is_file(), "the verified download creates the readiness marker")
         _assert(result["ready_marker"] == str(marker), result)
-    _assert(_FakeModel.calls[0]["local_files_only"] is False,
-            f"ensure_model must request acquisition: {_FakeModel.calls}")
+        _assert(not _FakeModel.calls, "acquisition does not construct a decoder")
     print("ok  ensure_model is the explicit download path")
 
 

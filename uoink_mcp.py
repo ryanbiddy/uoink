@@ -1442,11 +1442,20 @@ def main():
     argv = sys.argv[1:]
     if "--doctor" in argv or "--migrate-dry-run" in argv:
         raise SystemExit(server.run_cli(argv))
-    anyio.run(run_bounded_stdio_async)
+    # A stdio session can live for days: speech models run in a child process
+    # that exits when idle, never in this process (3.18).
+    server.asr_worker.enable_offload(log_dir=server.DATA_ROOT)
+    try:
+        anyio.run(run_bounded_stdio_async)
+    finally:
+        server.asr_worker.shutdown()
 
 
 _register_phase4_stdio()
 
 
 if __name__ == "__main__":
+    if os.name != "nt":
+        import signal
+        signal.signal(signal.SIGTERM, lambda signum, _: sys.exit(128 + signum))
     main()

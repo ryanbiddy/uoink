@@ -192,13 +192,13 @@ def test_user_cache_load_keeps_name_and_download_root(roots, fake_model):
     assert kwargs["local_files_only"] is True
 
 
-def test_explicit_download_never_targets_the_bundle(roots, fake_model):
+def test_explicit_download_never_targets_the_bundle(roots, monkeypatch):
     stage_bundled(roots.bundled)
     before = tree(roots.bundled)
+    from tests.test_asr_models import fixture_download
+    monkeypatch.setattr(rel.asr_models, "download", fixture_download)
     result = rel.ensure_model("base", roots.user)
-    (target, kwargs), = fake_model.calls
-    assert target == "base" and kwargs["local_files_only"] is False
-    assert kwargs["download_root"] == str(roots.user)
+    assert result["model"] == "base" and Path(result["ready_marker"]).is_file()
     assert Path(result["ready_marker"]).parent == roots.user
     assert tree(roots.bundled) == before
 

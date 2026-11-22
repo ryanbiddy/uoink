@@ -66,6 +66,8 @@ $requiredFiles = @(
     'images.py',
     'taste_scoring.py',
     'suggestions.py',
+    'asr_worker.py',
+    'asr_models.py',
     'uoink_store.py',
     # 3.18: every other top-level module, so the list matches build.ps1,
     # uoink.iss and scripts\mac\payload.json (tests\test_installer_files_complete.py).

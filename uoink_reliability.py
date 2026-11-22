@@ -20,6 +20,9 @@ downloaded still wins over the bundled copy.
 
 from __future__ import annotations
 
+import asr_worker
+import asr_models
+import math
 import json
 import re
 from dataclasses import asdict, dataclass
@@ -68,9 +71,18 @@ _MODEL_REPOSITORIES = {
     "small": "Systran/faster-whisper-small",
     "medium": "Systran/faster-whisper-medium",
     "large": "Systran/faster-whisper-large-v3",
-    "large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+    "large-v3-turbo": "dropbox-dash/faster-whisper-large-v3-turbo",
+    # 3.18: distilled English models, the same names faster-whisper 1.2.1
+    # maps (utils._MODELS). English only: see ENGLISH_ONLY_MODELS.
+    "distil-small.en": "Systran/faster-distil-whisper-small.en",
+    "distil-large-v3.5": "distil-whisper/distil-large-v3.5-ct2",
 }
 _RELIABILITY_CACHE_FILES = ("model.bin", "config.json", "tokenizer.json")
+# Models trained on English only. They never run on other languages: the
+# multilingual model detects the language first and takes over if needed.
+ENGLISH_ONLY_MODELS = frozenset({"distil-small.en", "distil-large-v3.5"})
+LANGUAGE_CHECK_MODEL = "base"   # bundled, multilingual, works offline
+ENGLISH_MIN_PROBABILITY = 0.8
 
 # Conservative rounded decimal MB estimates of advertised Hub file totals
 # captured 2026-09-13. These are advertised logical bytes of the current
@@ -83,7 +95,66 @@ _ESTIMATED_DOWNLOAD_MB = {
     "medium": 1540,
     "large": 3100,
     "large-v3-turbo": 1630,
+    "distil-small.en": 340,      # 335,542,354 bytes at the pinned revision
+    "distil-large-v3.5": 1520,   # 1,516,479,656 bytes at the pinned revision
 }
+
+# Decode settings for every local transcription (3.18). Whisper can loop on
+# silence or music, repeating one phrase. Not feeding the previous text back
+# breaks the loop; the thresholds are Whisper's own retry/skip limits made
+# explicit; voice detection stays on. Word timings are kept, and they let
+# faster-whisper skip hallucinated stretches inside long silences.
+DECODE_OPTIONS = {
+    "condition_on_previous_text": False,
+    "compression_ratio_threshold": 2.4,
+    "log_prob_threshold": -1.0,
+    "no_speech_threshold": 0.6,
+    "word_timestamps": True,
+    "hallucination_silence_threshold": 2.0,
+}
+
+
+def is_english_only(model_name: object) -> bool:
+    return str(model_name or "").strip().lower() in ENGLISH_ONLY_MODELS
+
+
+def _offload_active() -> bool:
+    """True in long-lived processes that send model work to a child process
+    (asr_worker.enable_offload). Never true inside that child or in tests."""
+    try:
+        import asr_worker
+    except ImportError:  # pragma: no cover - the module always ships
+        return False
+    return asr_worker.offload_active()
+
+
+def _cancelled_error():
+    import asr_worker
+    return asr_worker.TranscriptionCancelled("transcription cancelled")
+
+
+class TranscriptEntry(tuple):
+    """One transcript row, ``(start, end, text)``, that may also carry the
+    model's word timings in ``words``. It unpacks as three values and equals
+    the plain tuple, so every caller that reads rows is unchanged."""
+
+    def __new__(cls, start: float, end: float, text: str, words: list | None = None):
+        entry = super().__new__(cls, (start, end, text))
+        entry.words = words or None
+        return entry
+
+
+def entry_to_json(entry) -> list:
+    row = [entry[0], entry[1], entry[2]]
+    words = getattr(entry, "words", None)
+    if words:
+        row.append(words)
+    return row
+
+
+def entry_from_json(row) -> TranscriptEntry:
+    words = row[3] if len(row) > 3 and isinstance(row[3], list) else None
+    return TranscriptEntry(float(row[0]), float(row[1]), str(row[2]), words)
 
 
 def _import_faster_whisper():
@@ -106,13 +177,13 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
                 local_files_only: bool = True):
     """Construct WhisperModel. Ordinary callers stay local-only.
 
-    ``ensure_model`` is the only acquisition path and must pass
-    ``local_files_only=False``. A local load uses the user's downloaded
+    A local load uses the user's downloaded
     cache when it is ready, else the bundled copy of the same size.
     """
     WhisperModel = _import_faster_whisper()
     kwargs: dict[str, Any] = {
         "device": "cpu",
+        "cpu_threads": asr_models.cpu_threads(),
         "compute_type": _COMPUTE_TYPE,
         "local_files_only": bool(local_files_only),
     }
@@ -122,6 +193,16 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
             # Read-only app data: load the snapshot directory by path and
             # pass no download_root, so nothing is created or written there.
             return WhisperModel(str(bundled), **kwargs)
+    if model_name in ("large-v3-turbo", "distil-large-v3.5"):
+        lookup_root = model_root
+        if model_name == "large-v3-turbo" and local_files_only and lookup_root is None:
+            try:
+                from huggingface_hub.constants import HF_HUB_CACHE
+                lookup_root = HF_HUB_CACHE
+            except ImportError:
+                pass
+        snapshot = _cached_reliability_snapshot(lookup_root, model_name) if lookup_root and local_files_only else None
+        model_name = str(snapshot) if snapshot else _MODEL_REPOSITORIES[model_name]
     if model_root:
         root = Path(model_root)
         if not local_files_only:
@@ -131,27 +212,18 @@ def _load_model(model_name: str, model_root: str | Path | None, *,
 
 
 def ensure_model(model_name: str = DEFAULT_MODEL,
-                 model_root: str | Path | None = None) -> dict[str, Any]:
-    """Load the model once so faster-whisper downloads it if missing."""
-    _load_model(model_name, model_root, local_files_only=False)
-    ready_marker: Path | None = None
-    if model_root:
-        # The model itself is a Hugging Face snapshot directory managed by
-        # faster-whisper. This tiny sentinel is the explicit-consent signal
-        # consumed by readiness checks; it is written only after the
-        # user-triggered model load succeeds. A marker without the Hub
-        # snapshot files is not a ready cache.
-        ready_marker = Path(model_root) / f"{model_name}.pt"
-        ready_marker.write_text(
-            "Uoink faster-whisper model ready\n",
-            encoding="utf-8",
-        )
-    return {
-        "ok": True,
-        "model": model_name,
-        "model_root": str(model_root) if model_root else None,
-        "ready_marker": str(ready_marker) if ready_marker else None,
-    }
+                 model_root: str | Path | None = None, *, cancel_event=None) -> dict[str, Any]:
+    """Explicit acquisition uses the chooser's verified downloader and cache layout."""
+    if model_root is None:
+        from huggingface_hub.constants import HF_HUB_CACHE
+        root = Path(HF_HUB_CACHE)
+    else:
+        root = Path(model_root)
+    model = asr_models.get(model_name)["id"]
+    asr_models.download(model, root, cancel_event=cancel_event,
+                        progress=asr_worker.report_download_bytes)
+    return {"ok": True, "model": model, "model_root": str(model_root) if model_root else None,
+            "ready_marker": str(root / (model + ".pt")) if model_root else None}
 
 
 def _supported_model_name(model_name: object) -> str | None:
@@ -180,11 +252,11 @@ def _reliability_cache_root(model_root: str | Path) -> Path:
     return root
 
 
-def _reliability_repo_root(model_root: str | Path, model_name: str) -> Path:
+def _reliability_repo_root(model_root: str | Path, model_name: str, *, legacy=False) -> Path:
     name = _supported_model_name(model_name)
     if name is None:
         raise ValueError(f"unsupported reliability model: {model_name!r}")
-    repo_id = _MODEL_REPOSITORIES[name]
+    repo_id = asr_models.LEGACY_TURBO_REPO if legacy else _MODEL_REPOSITORIES[name]
     repo = _reliability_cache_root(model_root) / (
         "models--" + repo_id.replace("/", "--")
     )
@@ -195,10 +267,10 @@ def _reliability_repo_root(model_root: str | Path, model_name: str) -> Path:
 
 
 def _checked_reliability_snapshot(
-        model_root: str | Path, model_name: str, snapshot: Path) -> Path | None:
+        model_root: str | Path, model_name: str, snapshot: Path, *, legacy=False) -> Path | None:
     """Check minimum ASR cache structure, not model integrity or safety."""
     try:
-        repo = _reliability_repo_root(model_root, model_name)
+        repo = _reliability_repo_root(model_root, model_name, legacy=legacy)
         snapshot = Path(snapshot).absolute()
         if (snapshot.parent != repo / "snapshots"
                 or re.fullmatch(r"[0-9a-f]{40}", snapshot.name) is None
@@ -218,9 +290,17 @@ def _checked_reliability_snapshot(
 
 def _cached_reliability_snapshot(
         model_root: str | Path, model_name: str) -> Path | None:
+    snapshot = _read_reliability_snapshot(model_root, model_name)
+    if snapshot is None and model_name == "large-v3-turbo":
+        snapshot = _read_reliability_snapshot(model_root, model_name, legacy=True)
+    return snapshot
+
+
+def _read_reliability_snapshot(
+        model_root: str | Path, model_name: str, *, legacy=False) -> Path | None:
     """Read the Hub cache layout under the reliability root; never fetch or write."""
     try:
-        repo = _reliability_repo_root(model_root, model_name)
+        repo = _reliability_repo_root(model_root, model_name, legacy=legacy)
         reference = repo / "refs" / "main"
         if reference.resolve(strict=True) != reference or not reference.is_file():
             return None
@@ -232,7 +312,7 @@ def _cached_reliability_snapshot(
         if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
             return None
         return _checked_reliability_snapshot(
-            model_root, model_name, repo / "snapshots" / revision)
+            model_root, model_name, repo / "snapshots" / revision, legacy=legacy)
     except (OSError, RuntimeError, ValueError):
         return None
 
@@ -408,28 +488,102 @@ def reliability_model_status(model_name: object,
 
 
 def _transcript_entries_from_segments(
-        segments) -> list[tuple[float, float, str]]:
-    """Normalize faster-whisper segments into Uoink transcript entries."""
+        segments, scores: list | None = None) -> list[tuple[float, float, str]]:
+    """Normalize faster-whisper segments into Uoink transcript entries.
+
+    Pass a list as ``scores`` to collect (compression_ratio, no_speech_prob)
+    for each kept entry, for ``drop_repetition_loops``.
+    """
     entries: list[tuple[float, float, str]] = []
     for segment in segments:
-        if isinstance(segment, dict):
-            start = segment.get("start")
-            end = segment.get("end")
-            text = segment.get("text")
-        else:
-            start = getattr(segment, "start", None)
-            end = getattr(segment, "end", None)
-            text = getattr(segment, "text", None)
-        clean_text = str(text or "").strip()
+        get = segment.get if isinstance(segment, dict) else (
+            lambda key, s=segment: getattr(s, key, None))
+        clean_text = str(get("text") or "").strip()
         if not clean_text:
             continue
+        if isinstance(get("start"), bool) or isinstance(get("end"), bool):
+            continue
         try:
-            start_value = max(0.0, float(start or 0.0))
-            end_value = max(start_value, float(end or start_value))
+            start_value = float(get("start") or 0.0)
+            end_value = float(get("end") or start_value)
+            if not math.isfinite(start_value) or not math.isfinite(end_value):
+                continue
+            start_value = max(0.0, start_value)
+            end_value = max(start_value, end_value)
         except (TypeError, ValueError):
             continue
-        entries.append((start_value, end_value, clean_text))
+        words = _segment_words(segment)
+        entries.append(TranscriptEntry(start_value, end_value, clean_text, words)
+                       if words else (start_value, end_value, clean_text))
+        if scores is not None:
+            scores.append((get("compression_ratio"), get("no_speech_prob")))
     return entries
+
+
+def _segment_words(segment) -> list[dict] | None:
+    """Word timings from one segment, when the model gave them."""
+    raw = segment.get("words") if isinstance(segment, dict) else getattr(segment, "words", None)
+    if not raw:
+        return None
+    words = []
+    for word in raw:
+        get = word.get if isinstance(word, dict) else (lambda key, w=word: getattr(w, key, None))
+        text = str(get("word") or "").strip()
+        if isinstance(get("start"), bool) or isinstance(get("end"), bool):
+            continue
+        try:
+            start, end = float(get("start")), float(get("end"))
+        except (TypeError, ValueError):
+            continue
+        if text and math.isfinite(start) and math.isfinite(end) and min(start, end) >= 0:
+            end = max(start, end)
+            # Stored as is in the sidecar: centisecond times, no scores,
+            # about 40 bytes a word (roughly 0.4 MB per hour of speech).
+            words.append({"word": text, "start": round(start, 2), "end": round(end, 2)})
+    return words or None
+
+
+def drop_repetition_loops(entries: list, scores: list | None = None) -> list:
+    """Keep ordinary repeats. Over likely silence, keep at most two consecutive
+    identical segments. Collapse four or more cycles of a short phrase covering
+    nearly the entire segment to one copy, or drop it for excessive compression.
+    Numeric counts and short emphatic speech are preserved regardless of timing.
+    """
+    kept = []
+    previous, run = None, 0
+    counting = set("zero one two three four five six seven eight nine ten".split())
+    for i, entry in enumerate(entries):
+        ratio, silence = scores[i] if scores and i < len(scores) else (None, None)
+        tokens = re.findall(r"\w+", entry[2].casefold())
+        suspect = isinstance(silence, (float, int)) and silence > DECODE_OPTIONS["no_speech_threshold"]
+        if (not suspect or not tokens or all(t.isdecimal() or t in counting for t in tokens)
+                or (len(tokens) > 1 and len(set(tokens)) == 1)):
+            previous, run = None, 0
+            kept.append(entry)
+            continue
+        run = run + 1 if previous == tokens else 1
+        previous = tokens
+        if run > 2:
+            continue
+        phrase = None
+        for offset in range(min(2, len(tokens))):
+            for width in range(2, min(8, (len(tokens) - offset) // 4) + 1):
+                candidate = tokens[offset:offset + width]
+                if (len(set(candidate)) > 1 and
+                        all(t == candidate[j % width] for j, t in enumerate(tokens[offset:]))):
+                    phrase = (offset, width)
+                    break
+            if phrase:
+                break
+        if phrase:
+            if isinstance(ratio, (int, float)) and ratio > DECODE_OPTIONS["compression_ratio_threshold"]:
+                continue
+            start, width = phrase
+            words = list(re.finditer(r"\w+[^\w\s]*", entry[2]))
+            text = entry[2][words[start].start():words[start + width - 1].end()]
+            entry = (entry[0], entry[1], text)
+        kept.append(entry)
+    return kept
 
 
 INITIAL_PROMPT_MAX_CHARS = 200
@@ -451,6 +605,23 @@ def build_initial_prompt(*titles) -> str | None:
     return prompt or None
 
 
+def _watched_segments(segments, cancel_event=None, progress=None, total=None):
+    """Yield segments; stop between them on cancel and report how far along."""
+    if progress is not None and total:
+        asr_worker.report_phase("decode", duration_seconds=total)
+        progress(0, total)
+    for segment in segments:
+        if cancel_event is not None and cancel_event.is_set():
+            raise _cancelled_error()
+        yield segment
+        if progress is not None:
+            end = segment.get("end") if isinstance(segment, dict) else getattr(segment, "end", None)
+            try:
+                progress(end, total)
+            except Exception:  # noqa: BLE001 - a progress display never fails a job
+                pass
+
+
 def transcribe_media(media_path: str | Path, *,
                      model_name: str = DEFAULT_MODEL,
                      model_root: str | Path | None = None,
@@ -458,7 +629,9 @@ def transcribe_media(media_path: str | Path, *,
                      info: dict | None = None,
                      language: str | None = None,
                      initial_prompt: str | None = None,
-                     checkpoint=None) -> list[tuple[float, float, str]]:
+                     cancel_event=None,
+                     progress=None,
+                     checkpoint=None, duration_seconds=None) -> list[tuple[float, float, str]]:
     """Transcribe local media with a local faster-whisper model.
 
     Whisper detects the spoken language. Pass ``info`` (a dict) to receive it
@@ -474,27 +647,47 @@ def transcribe_media(media_path: str | Path, *,
     ``initial_prompt`` is a short plain-text vocabulary hint (titles) that
     steers Whisper toward niche spellings; it is never written to the output.
 
+    In the helper (``asr_worker.enable_offload``) the work runs in the
+    transcription child process; the return value and errors are the same.
+    ``cancel_event`` stops the job (``asr_worker.TranscriptionCancelled``);
+    ``progress(done_seconds, total_seconds)`` reports how far along it is.
+
     ``checkpoint(segment)`` runs after each decoded segment, before the next
-    one is decoded. The transcript backfill uses it to pause, or to wait
-    while the user captures something; an exception it raises stops here.
+    one is decoded. Backfill raises here to pause an item and release its engine.
     """
     media = Path(media_path)
     if not media.is_file():
         raise FileNotFoundError(f"media file not found: {media}")
 
+    if _transcribe is None and _offload_active():
+        result = asr_worker.call("transcribe_media", {
+            "media_path": str(media), "model_name": str(model_name),
+            "model_root": str(model_root) if model_root is not None else None,
+            "language": language, "initial_prompt": initial_prompt, "duration_seconds": duration_seconds,
+        }, cancel_event=cancel_event, progress=progress, checkpoint=checkpoint,
+            background=checkpoint is not None)
+        if info is not None:
+            info.update(result.get("info") or {})
+        return [entry_from_json(row) for row in result.get("entries") or []]
+
     if _transcribe is not None:
         segments = _transcribe(str(media))
     else:
+        run_model, language, fallback = _english_guard(media, model_name, model_root, language,
+                                                       cancel_event=cancel_event)
+        asr_worker.report_phase("model load")
         model = _load_model(
-            model_name,
+            run_model,
             model_root,
             local_files_only=True,
         )
+        asr_worker.report_phase("decode")
         segments, detected = model.transcribe(
             str(media),
             beam_size=1,
             best_of=1,
             vad_filter=True,
+            **DECODE_OPTIONS,
             **({"language": language} if language is not None else {}),
             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
         )
@@ -502,9 +695,116 @@ def transcribe_media(media_path: str | Path, *,
             info["language"] = getattr(detected, "language", None)
             info["language_probability"] = getattr(
                 detected, "language_probability", None)
+            if fallback:
+                info["model"] = run_model
+                info["english_fallback"] = fallback
+        segments = _watched_segments(
+            segments, cancel_event, progress, getattr(detected, "duration", None))
     if checkpoint is not None:
         segments = _with_checkpoint(segments, checkpoint)
-    return _transcript_entries_from_segments(segments)
+    scores: list = []
+    return drop_repetition_loops(_transcript_entries_from_segments(segments, scores), scores)
+
+
+def _language_samples(media, cancel_event=None):
+    """Decode at most three 20-second mono windows, including the middle and end."""
+    import av
+    import numpy as np
+    rate = 16000
+    with av.open(str(media)) as container:
+        stream = container.streams.audio[0]
+        duration = float(stream.duration * stream.time_base) if stream.duration else (
+            float(container.duration) / av.time_base if container.duration else 0)
+        last = max(0, duration - 20)
+        for offset in sorted({0, last / 2, last}):
+            if offset:
+                try:
+                    container.seek(int(offset / stream.time_base), stream=stream)
+                except Exception as exc:
+                    # PyAV uses different exception types for unsupported seeks.
+                    raise OSError("Cannot seek to a language sample.") from exc
+            resampler = av.AudioResampler(format="fltp", layout="mono", rate=rate)
+            parts, count = [], 0
+            for number, frame in enumerate(container.decode(stream)):
+                if cancel_event is not None and cancel_event.is_set():
+                    raise _cancelled_error()
+                if number >= 4096:  # a seek without a usable index landed too far back
+                    break
+                if frame.time is not None and frame.time < offset - 0.1:
+                    continue
+                for out in resampler.resample(frame):
+                    parts.append(out.to_ndarray().reshape(-1))
+                    count += out.samples
+                if count >= rate * 20:
+                    break
+            if parts:
+                yield np.concatenate(parts)[:rate * 20]
+
+
+def _english_guard(media: Path, model_name: str, model_root, language, *, checker_path=None,
+                   checker_name=LANGUAGE_CHECK_MODEL, cancel_event=None):
+    """Never run an English-only model on other languages.
+
+    Returns (model to run, language to pass, fallback note or None). The
+    bundled multilingual model detects the language first: transcribe()
+    detects before it decodes anything, and its segments are never read.
+    Anything but confident English runs on that multilingual model instead.
+    """
+    if not is_english_only(model_name):
+        return model_name, language, None
+    if language is not None and str(language).lower().split("-", 1)[0] == "en":
+        return model_name, "en", None
+    asr_worker.report_phase("language check")
+    check_model = checker_name
+    if not checker_path and model_root and not any(resolve_model(check_model, model_root)):
+        check_model = next((name for name in _MODEL_REPOSITORIES if not is_english_only(name)
+                            and is_model_ready(name, model_root)), LANGUAGE_CHECK_MODEL)
+    probability = None
+    if language is not None:
+        detected = str(language).lower().split("-", 1)[0]
+    else:
+        try:
+            checker = _load_model(str(checker_path) if checker_path else check_model,
+                                  None if checker_path else model_root, local_files_only=True)
+        except (RuntimeError, ValueError, OSError) as exc:
+            raise ReliabilityUnavailableError("A local multilingual model is needed to check the language.") from exc
+        seen = []
+        try:
+            for sample in _language_samples(media, cancel_event):
+                if cancel_event is not None and cancel_event.is_set():
+                    raise _cancelled_error()
+                try:
+                    _, found = checker.transcribe(sample, beam_size=1, best_of=1, vad_filter=True)
+                except (IndexError, ValueError):
+                    continue  # some runtimes cannot identify an empty VAD result
+                voiced = getattr(found, "duration_after_vad", 20)
+                tag = str(found.language or "").lower().split("-", 1)[0]
+                confidence = float(found.language_probability or 0)
+                if voiced < .25 or (voiced < 2 and confidence < ENGLISH_MIN_PROBABILITY):
+                    continue  # a weak guess over a brief sound is not evidence of another language
+                seen.append((tag, confidence if math.isfinite(confidence) else 0))
+        except (OSError, IndexError, TypeError, ValueError, EOFError):
+            seen.clear()  # no reliable probe for this stream
+        if seen and all(tag == "en" and p >= ENGLISH_MIN_PROBABILITY for tag, p in seen):
+            return model_name, "en", None
+        detected, probability = min(seen, key=lambda pair: pair[1]) if seen else ("", 0)
+        if len({tag for tag, _ in seen}) > 1:
+            detected, probability = "mixed", 0
+    sure = probability is None or (isinstance(probability, (int, float))
+                                   and probability >= ENGLISH_MIN_PROBABILITY)
+    return check_model, (detected if sure and detected else None), {
+        "requested_model": str(model_name), "used_model": check_model,
+        "detected_language": detected or None,
+        "language_probability": (round(float(probability), 3)
+                                 if isinstance(probability, (int, float)) else None),
+    }
+
+
+def _with_checkpoint(segments, checkpoint):
+    # faster-whisper decodes lazily, so blocking here holds the next segment.
+    for segment in segments:
+        checkpoint(segment)
+        yield segment
 
 
 def _with_checkpoint(segments, checkpoint):
@@ -610,7 +910,7 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
                             *,
                             model_name: str = DEFAULT_MODEL,
                             model_root: str | Path | None = None,
-                            _transcribe=None) -> list[Span]:
+                            _transcribe=None, cancel_event=None, progress=None) -> list[Span]:
     """Return clustered low-confidence word spans for an audio file.
 
     ``transcript_text`` is accepted for the public interface and future
@@ -626,13 +926,27 @@ def detect_unreliable_spans(transcript_text: str, audio_path: str | Path,
     if not audio.is_file():
         raise FileNotFoundError(f"audio file not found: {audio}")
 
+    if _transcribe is None and _offload_active():
+        rows = asr_worker.call("detect_unreliable_spans", {
+            "transcript_text": transcript_text, "audio_path": str(audio),
+            "threshold": threshold, "model_name": str(model_name),
+            "model_root": str(model_root) if model_root is not None else None},
+            cancel_event=cancel_event, progress=progress)
+        return [Span(**row) for row in rows or []]
+
     if _transcribe is not None:
         segments = _transcribe(str(audio))
     else:
+        model_name, language, _ = _english_guard(audio, model_name, model_root,
+                                                  None if is_english_only(model_name) else "en",
+                                                  cancel_event=cancel_event)
+        asr_worker.report_phase("model load")
         model = _load_model(model_name, model_root, local_files_only=True)
+        asr_worker.report_phase("decode")
         segments, _info = model.transcribe(
-            str(audio), language="en", word_timestamps=True,
+            str(audio), language=language, word_timestamps=True,
             beam_size=1, best_of=1)
 
+        segments = _watched_segments(segments, cancel_event, progress, getattr(_info, "duration", None))
     word_rows = _words_from_segments(segments)
     return _cluster_low_words(word_rows, threshold)

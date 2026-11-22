@@ -146,6 +146,18 @@ Success response: HTTP 200
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "transcription_engine": "whisperx",
+  "transcription_worker": {
+    "offloaded": true,
+    "state": "not_loaded",
+    "pid": null,
+    "op": null,
+    "idle_release_seconds": 120,
+    "release_at": null,
+    "jobs_run": 0,
+    "last_exit": null,
+    "line": "Transcription engine: idle (not loaded)."
+  },
   "heartbeat": {
     "last_tick_completed_at": "2026-09-04T16:30:00Z",
     "last_successful_tick_at": "2026-09-04T16:30:00Z",
@@ -200,6 +212,7 @@ Fields:
 | `migration_version` | integer | Newest SQLite schema migration opened by this helper process. |
 | `migration_pending` | boolean | `true` if the checkout contains a newer migration than the running helper opened. |
 | `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last source-scheduler pass in which no feed poll failed; `null` before the first such pass. |
+| `transcription_worker` | object | Reports `running` while either slot is busy, `loaded` while a model stays warm, and `not_loaded` after both children exit. |
 | `heartbeat` | object | Scheduler heartbeat with separate stamps: `last_tick_completed_at` (a pass finished, any outcome), `last_successful_tick_at` (zero failed polls), `last_successful_poll_at`, `last_failed_poll_at` + `last_poll_error` (a failed poll never advances a success stamp), `last_ingest_completed_at` (an episode was published into the corpus by the watch pipeline), `last_tick` and `counts` tallies, `tick_interval_sec`, and `freshness` (`state` is `never` / `fresh` / `stale`, with `age_sec` since the last completed pass and the `stale_after_sec` bound). `uoink doctor` reports the same block and fails on `stale`. |
 | `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
 | `whisper_model` | string | Normalized model selected in settings. |
@@ -402,9 +415,9 @@ Optional request body:
 }
 ```
 
-`model` may be `tiny`, `base`, `small`, `medium`, `large`, or
-`large-v3-turbo`. When it is
-omitted, Uoink uses the model selected in Settings.
+`model` may be `tiny`, `base`, `small`, `medium`, `large`, `large-v3-turbo`,
+`distil-small.en`, or `distil-large-v3.5`. When it is omitted, Uoink uses the
+model selected in Settings.
 
 Success response: HTTP 200
 

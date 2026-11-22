@@ -61,6 +61,9 @@ def test_whisperx_engine_passes_the_prompt_as_an_asr_option(tmp_path, monkeypatc
     monkeypatch.setattr(runner, "_WHISPERX_AVAILABLE", True)
     monkeypatch.setattr(runner, "_runtime_device", lambda: "cpu")
     monkeypatch.setattr(runner, "sys", SimpleNamespace(platform="linux"))
+    # 3.18: transcript-only jobs run on faster-whisper; this test is about the
+    # WhisperX engine (used for speaker labels), so it selects that engine.
+    monkeypatch.setattr(runner, "plain_engine_for", lambda diarize: False)
     loads = []
 
     class Model:

@@ -186,6 +186,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Closing the dashboard or extension popup frees its activity stream promptly. The dashboard retries when the helper is busy.
 - Lite captures explain that they skip comments. Settings shows the disk space used by podcast downloads and lets you remove audio after transcription or clean up existing downloads with a finished transcript.
 - The dashboard and first-run window show the extensions page for your detected browser and explain how to pin Uoink.
+- Long transcriptions keep running while they report progress, including while a model downloads. Transcription also works when Windows restricts how Uoink can manage its worker process.
+- You can save or re-transcribe a video while a podcast is transcribing. Both keep their progress. Cancelling a transcription also stops any audio decoder it started. If transcription stalls, the next capture can still run.
+- Transcribing a saved video again updates search immediately. If the new transcript is much shorter, you can restore the previous one from the saved item. An empty result or a few sampled sections leave a full transcript in place.
+- Speaker labels work with the bundled WhisperX version. English-only models now check for speech across the recording, so an intro or outro with music can be skipped.
+- Local transcription leaves CPU cores free for other apps. Existing Turbo downloads still work after the model repository changed names.
+
+### Added
+
+- Settings, Capture: a transcription model chooser. Each model shows its download size, a
+  rough speed on this computer (from its processor cores, no benchmark), its languages and a
+  one-line quality note, and one is marked "Best for English on this computer". Two new
+  English models: English, quick (distil-small.en, 336 MB) and English, best
+  (distil-large-v3.5, 1.5 GB). Downloads come from Hugging Face only when you click, show
+  progress, check every file against a pinned size and hash, resume after a stop, and can be
+  cancelled or deleted. Balanced still ships with Uoink and works offline.
+- An English-only model never runs on other languages: the bundled multilingual model checks
+  the language first and transcribes instead, and the transcript note says so.
+- The item's Re-transcribe button works (it posted to a route that did not exist) and names the
+  model: "Re-transcribe with <model>". It fetches the audio again and replaces the transcript only once the new one is complete. The old
+  details file is kept in `.media-inputs`. A failure, a cancel or an edited transcript leaves
+  everything as it was. New routes: `GET /asr/models`, `POST /asr/models/download|cancel|delete|use`
+  and `POST /transcription/retranscribe`. CLI: `uoink models [list|download|delete|use] <model>`.
+- Word timings are kept for local transcripts (video sidecar transcript rows and podcast
+  transcripts), about 0.5 MB per hour of speech. Older items without them read as before.
+
+### Changed
+
+- Captures and the Re-transcribe button share one transcription process. Podcasts and backfill
+  use a second process. Each frees its memory after two minutes idle. When both are busy,
+  there can be two models in memory. A process crash fails only its current job.
+  Settings, Diagnostics and `/health` show when the engine is working or holding a model.
+- Podcasts without speaker labels are transcribed with faster-whisper instead of WhisperX, which
+  no longer loads PyTorch for them. WhisperX is used only when speaker labels are on.
+- Fewer repeated-phrase loops in local transcripts: Whisper no longer conditions on its previous
+  text, uses explicit compression, log-probability and no-speech limits with voice detection on,
+  and a small filter drops the loops that still get through.
 
 ## [3.17.0] - 2026-11-12
 

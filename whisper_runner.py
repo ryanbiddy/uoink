@@ -38,6 +38,9 @@ but the endpoint can be wrapped in a thread by server.py."""
 
 from __future__ import annotations
 
+import asr_worker
+import asr_models
+import uoink_reliability as reliability
 import json
 import importlib.util
 import logging
@@ -96,7 +99,7 @@ MODEL_LARGE = "large"
 MODEL_LARGE_V3_TURBO = "large-v3-turbo"
 _MODELS = (
     MODEL_TINY, MODEL_BASE, MODEL_SMALL, MODEL_MEDIUM, MODEL_LARGE,
-    MODEL_LARGE_V3_TURBO,
+    MODEL_LARGE_V3_TURBO, "distil-small.en", "distil-large-v3.5",
 )
 
 
@@ -158,7 +161,8 @@ _MODEL_REPOSITORIES = {
     "small": "Systran/faster-whisper-small",
     "medium": "Systran/faster-whisper-medium",
     "large": "Systran/faster-whisper-large-v3",
-    "large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+    "large-v3-turbo": asr_models.get(MODEL_LARGE_V3_TURBO)["repo"],
+    **{name: asr_models.get(name)["repo"] for name in reliability.ENGLISH_ONLY_MODELS},
 }
 _ASR_CACHE_FILES = ("model.bin", "config.json", "tokenizer.json")
 
@@ -172,9 +176,9 @@ def _model_cache_root(data_root: Path, model_size: str) -> Path:
     return cache
 
 
-def _model_repo_root(data_root: Path, model_size: str) -> Path:
+def _model_repo_root(data_root: Path, model_size: str, *, legacy=False) -> Path:
     model_size = normalize_model(model_size)
-    repo_id = _MODEL_REPOSITORIES[model_size]
+    repo_id = asr_models.LEGACY_TURBO_REPO if legacy else _MODEL_REPOSITORIES[model_size]
     repo = _model_cache_root(data_root, model_size) / (
         "models--" + repo_id.replace("/", "--"))
     for directory in (repo, repo / "refs", repo / "snapshots", repo / "blobs"):
@@ -184,10 +188,10 @@ def _model_repo_root(data_root: Path, model_size: str) -> Path:
 
 
 def _checked_model_snapshot(data_root: Path, model_size: str,
-                            snapshot: Path) -> Path | None:
+                            snapshot: Path, *, legacy=False) -> Path | None:
     """Check minimum ASR cache structure, not model integrity or safety."""
     try:
-        repo = _model_repo_root(data_root, model_size)
+        repo = _model_repo_root(data_root, model_size, legacy=legacy)
         snapshot = Path(snapshot).absolute()
         if (snapshot.parent != repo / "snapshots"
                 or re.fullmatch(r"[0-9a-f]{40}", snapshot.name) is None
@@ -206,9 +210,19 @@ def _checked_model_snapshot(data_root: Path, model_size: str,
 
 
 def _cached_model_snapshot(data_root: Path, model_size: str) -> Path | None:
+    shared_root = Path(data_root) / "models" / "whisper"
+    if reliability.is_model_ready(model_size, shared_root):
+        return reliability._cached_reliability_snapshot(shared_root, model_size)
+    snapshot = _read_model_snapshot(data_root, model_size)
+    if snapshot is None and model_size == "large-v3-turbo":
+        snapshot = _read_model_snapshot(data_root, model_size, legacy=True)
+    return snapshot
+
+
+def _read_model_snapshot(data_root: Path, model_size: str, *, legacy=False) -> Path | None:
     """Read the pinned helper's default Hub cache layout; never fetch or write."""
     try:
-        repo = _model_repo_root(data_root, model_size)
+        repo = _model_repo_root(data_root, model_size, legacy=legacy)
         reference = repo / "refs" / "main"
         if reference.resolve(strict=True) != reference or not reference.is_file():
             return None
@@ -220,7 +234,7 @@ def _cached_model_snapshot(data_root: Path, model_size: str) -> Path | None:
         if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
             return None
         return _checked_model_snapshot(
-            data_root, model_size, repo / "snapshots" / revision)
+            data_root, model_size, repo / "snapshots" / revision, legacy=legacy)
     except (OSError, RuntimeError, ValueError):
         return None
 
@@ -259,14 +273,19 @@ def _model_dir(data_root: Path, model_size: str) -> Path:
     return p
 
 
-def _download_model_snapshot(model_size: str, cache_root: Path) -> Path:
-    """Use the existing helper and model scope only after explicit consent."""
-    from faster_whisper.utils import download_model
-    return Path(download_model(model_size, cache_dir=str(cache_root)))
+def _download_model_snapshot(model_size: str, cache_root: Path, *, cancel_event=None) -> Path:
+    """Use the chooser's pinned downloader within the podcast cache after consent."""
+    entry = asr_models.get(model_size)
+    try:
+        asr_models.download(model_size, cache_root, cancel_event=cancel_event,
+                            progress=asr_worker.report_download_bytes)
+    except asr_models.DownloadCancelled as exc:
+        raise asr_worker.TranscriptionCancelled("Transcription cancelled.") from exc
+    return asr_models._snapshot_dir(cache_root, entry)
 
 
 def _prepare_model_snapshot(data_root: Path, model_size: str, *,
-                            consent_given: bool) -> Path:
+                            consent_given: bool, cancel_event=None) -> Path:
     model_size = normalize_model(model_size)
     snapshot = _cached_model_snapshot(data_root, model_size)
     if snapshot is not None:
@@ -279,7 +298,8 @@ def _prepare_model_snapshot(data_root: Path, model_size: str, *,
             f"Whisper model '{model_size}' is not fully cached; "
             "explicit download consent is required.")
     cache_root = _model_dir(data_root, model_size)
-    snapshot = _download_model_snapshot(model_size, cache_root)
+    snapshot = _download_model_snapshot(model_size, cache_root,
+                                        **({"cancel_event": cancel_event} if cancel_event else {}))
     checked = _checked_model_snapshot(data_root, model_size, snapshot)
     if checked is None:
         raise RuntimeError(
@@ -330,13 +350,21 @@ def _hf_token() -> str | None:
 DIARIZATION_MODEL = "pyannote/speaker-diarization-community-1"
 
 
+def _diarizer_class(whisperx):
+    pipeline = getattr(whisperx, "DiarizationPipeline", None)
+    if pipeline is None:
+        from whisperx.diarize import DiarizationPipeline
+        return DiarizationPipeline
+    return pipeline
+
+
 def _diarization_model_name(whisperx) -> str | None:
     """The diarization model this runtime will actually load, or None when
     the installed WhisperX does not accept an explicit model name (unknown
     values are recorded as null, never guessed)."""
     try:
-        params = inspect.signature(whisperx.DiarizationPipeline).parameters
-    except (TypeError, ValueError):
+        params = inspect.signature(_diarizer_class(whisperx)).parameters
+    except (ImportError, TypeError, ValueError):
         return None
     return DIARIZATION_MODEL if "model_name" in params else None
 
@@ -366,7 +394,7 @@ def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
     """Create a WhisperX diarizer across old/new constructor signatures."""
     kwargs: dict[str, Any] = {}
     try:
-        params = inspect.signature(whisperx.DiarizationPipeline).parameters
+        params = inspect.signature(_diarizer_class(whisperx)).parameters
     except (TypeError, ValueError):
         params = {}
     if "model_name" in params:
@@ -382,29 +410,88 @@ def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
     if "cache_dir" in params:
         kwargs["cache_dir"] = str(Path(data_root) / "diarization_models")
     kwargs["device"] = device
-    return whisperx.DiarizationPipeline(**kwargs)
+    return _diarizer_class(whisperx)(**kwargs)
 
 
 # ---- transcript helper -------------------------------------------------
 def _shape_segments(segments) -> list[dict]:
     """Normalise whisperx's per-segment dicts to our schema. WhisperX
-    returns dicts with start/end/text and optional speaker after the
-    diarization step. We drop everything else (logprobs, timings) --
-    the dashboard never reads them."""
+    returns start/end/text and may also supply aligned words and a speaker."""
     out: list[dict] = []
     for s in segments or []:
         if not isinstance(s, dict):
             continue
-        row: dict[str, Any] = {
-            "start": float(s.get("start") or 0.0),
-            "end": float(s.get("end") or 0.0),
-            "text": (s.get("text") or "").strip(),
-        }
+        entries = reliability._transcript_entries_from_segments([s])
+        if not entries:
+            continue
+        start, end, text = entries[0]
+        row = {"start": start, "end": end, "text": text}
+        words = getattr(entries[0], "words", None)
+        if words:
+            row["words"] = words
         spk = s.get("speaker")
         if spk:
             row["speaker"] = str(spk)
         out.append(row)
     return out
+
+
+def _asr_offload_active() -> bool:
+    try:
+        import asr_worker
+    except ImportError:  # pragma: no cover - the module always ships
+        return False
+    return asr_worker.offload_active()
+
+
+def plain_engine_for(diarize: bool) -> bool:
+    """True when a job should skip WhisperX and run on faster-whisper alone.
+
+    WhisperX adds exactly one thing Uoink keeps: speaker labels (forced
+    alignment plus pyannote diarization). Without them its output is the same
+    faster-whisper text, but loading it pulls in torch, Lightning and a
+    pyannote voice-detection checkpoint (gigabytes of memory). faster-whisper
+    has its own Silero voice detection, so a transcript-only job uses it.
+    The gate is unchanged: some engine must be available, as before.
+    """
+    if sys.platform == "darwin" or diarize or transcription_engine() is None:
+        return False
+    try:
+        return importlib.util.find_spec("faster_whisper") is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def _transcribe_audio_plain(audio_path: Path, *, data_root: Path, model_size: str,
+                            language: str | None, consent_given: bool,
+                            initial_prompt: str | None, cancel_event=None, checkpoint=None, progress=None) -> dict:
+    """Transcript-only faster-whisper run on this cache/consent/bundle policy."""
+    import _platform
+    import uoink_reliability
+    _platform.require_media()
+    model_path = _prepare_model_snapshot(
+        data_root, model_size, consent_given=consent_given, cancel_event=cancel_event)
+    if (model_path != _bundled_snapshot(model_size)
+            and _cached_model_snapshot(data_root, model_size) != model_path):
+        raise RuntimeError("Local ASR snapshot changed before model construction")
+    info: dict[str, Any] = {}
+    entries = uoink_reliability.transcribe_media(
+        audio_path, model_name=str(model_path), language=language, info=info,
+        initial_prompt=initial_prompt,
+        **({"cancel_event": cancel_event} if cancel_event is not None else {}),
+        **({"checkpoint": checkpoint} if checkpoint else {}),
+        **({"progress": progress} if progress else {}))
+    return {
+        "model": model_size,
+        "language": info.get("language") or language or "en",
+        "diarization_ran": False,
+        # Word timings ride along when the model gave them (3.18).
+        "segments": [{"start": entry[0], "end": entry[1], "text": entry[2],
+                      **({"words": entry.words} if getattr(entry, "words", None) else {})}
+                     for entry in entries],
+        "generated_at": _now_iso(),
+        "engine": "faster-whisper",
+    }
 
 
 def transcribe_audio(audio_path: Path, *,
@@ -413,7 +500,8 @@ def transcribe_audio(audio_path: Path, *,
                       language: str | None = None,
                       diarize: bool = False,
                       consent_given: bool = False,
-                      initial_prompt: str | None = None) -> dict:
+                      initial_prompt: str | None = None, cancel_event=None, checkpoint=None,
+                      duration_seconds=None, progress=None) -> dict:
     """End-to-end transcription. Synchronous. Returns the structured
     transcript dict.
 
@@ -428,7 +516,40 @@ def transcribe_audio(audio_path: Path, *,
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")
+    if _asr_offload_active():
+        # The helper never loads a model: the transcription child does, and
+        # exits when idle so the OS gets the memory back (asr_worker).
+        return asr_worker.call("transcribe_audio", {
+            "audio_path": str(audio_path), "data_root": str(Path(data_root)),
+            "model_size": model_size, "language": language, "diarize": bool(diarize),
+            "consent_given": bool(consent_given), "initial_prompt": initial_prompt,
+            "duration_seconds": duration_seconds},
+            cancel_event=cancel_event, checkpoint=checkpoint, progress=progress, background=True)
     model_size = normalize_model(model_size)
+    fallback = None
+    if reliability.is_english_only(model_size):
+        _platform.require_media()
+        checker = _cached_model_snapshot(data_root, MODEL_BASE) or _bundled_snapshot(MODEL_BASE)
+        checker_name = MODEL_BASE
+        if checker is None:
+            for name in _MODELS:
+                if not reliability.is_english_only(name):
+                    checker = _cached_model_snapshot(data_root, name)
+                    if checker:
+                        checker_name = name
+                        break
+        model_size, language, fallback = reliability._english_guard(
+            audio_path, model_size, Path(data_root) / "models" / "whisper", language,
+            checker_path=checker, checker_name=checker_name, cancel_event=cancel_event)
+    asr_worker.report_phase("model load")
+    if asr_worker.in_child() and plain_engine_for(diarize):
+        result = _transcribe_audio_plain(
+            audio_path, data_root=data_root, model_size=normalize_model(model_size),
+            language=language, consent_given=consent_given, initial_prompt=initial_prompt,
+            cancel_event=cancel_event, checkpoint=checkpoint, progress=progress)
+        if fallback:
+            result["english_fallback"] = fallback
+        return result
     _platform.require_media()
     if sys.platform == "darwin":
         alignment = _platform.alignment_capability()
@@ -451,9 +572,9 @@ def transcribe_audio(audio_path: Path, *,
     if engine == "faster-whisper":
         import uoink_reliability
         model_path = _prepare_model_snapshot(
-            data_root, model_size, consent_given=consent_given)
+            data_root, model_size, consent_given=consent_given, cancel_event=cancel_event)
         if (model_path != _bundled_snapshot(model_size)
-                and _checked_model_snapshot(data_root, model_size, model_path) is None):
+                and _cached_model_snapshot(data_root, model_size) != model_path):
             raise RuntimeError("Local ASR snapshot changed before model construction")
         if diarize:
             log.warning("Diarization needs install.sh --with-whisperx; "
@@ -464,13 +585,18 @@ def transcribe_audio(audio_path: Path, *,
         # reuses reliability's local-only CPU/int8 loader without a cache write.
         entries = uoink_reliability.transcribe_media(
             audio_path, model_name=str(model_path), language=language, info=info,
-            initial_prompt=initial_prompt)
+            initial_prompt=initial_prompt,
+            **({"cancel_event": cancel_event} if cancel_event is not None else {}),
+            **({"checkpoint": checkpoint} if checkpoint else {}),
+            **({"progress": progress} if progress else {}))
         return {
+            **({"english_fallback": fallback} if fallback else {}),
             "model": model_size,
             "language": info.get("language") or language or "en",
             "diarization_ran": False,
-            "segments": [{"start": start, "end": end, "text": text}
-                         for start, end, text in entries],
+            "segments": [{"start": entry[0], "end": entry[1], "text": entry[2],
+                          **({"words": entry.words} if getattr(entry, "words", None) else {})}
+                         for entry in entries],
             "generated_at": _now_iso(),
             "engine": "faster-whisper",
         }
@@ -481,7 +607,14 @@ def transcribe_audio(audio_path: Path, *,
             "Reinstall Uoink so the bundled WhisperX runtime is restored. "
             "See the helper log for the underlying import error.")
     model_path = _prepare_model_snapshot(
-        data_root, model_size, consent_given=consent_given)
+        data_root, model_size, consent_given=consent_given, cancel_event=cancel_event)
+    try:
+        import whisperx  # type: ignore
+    except BaseException as e:  # noqa: BLE001 -- matches _probe_whisperx
+        raise RuntimeError(
+            f"whisperx import failed at transcribe time: "
+            f"{type(e).__name__}: {e}"
+        ) from e
 
     # whisperx exposes a load_model + transcribe + align + diarize chain.
     # Keep the call site narrow so a future WhisperX API rev doesn't
@@ -494,28 +627,65 @@ def transcribe_audio(audio_path: Path, *,
     diarization_run: dict[str, Any] | None = None
     try:
         if (model_path != _bundled_snapshot(model_size)
-                and _checked_model_snapshot(data_root, model_size, model_path) is None):
+                and _cached_model_snapshot(data_root, model_size) != model_path):
             raise RuntimeError('Local ASR snapshot changed before model construction')
+        # A previous transcript-only job may have left a faster-whisper model
+        # resident in this child. Release it before constructing the WhisperX model.
+        clear_cache = getattr(reliability._load_model, "cache_clear", None)
+        if asr_worker.in_child() and clear_cache:
+            clear_cache()
         model = whisperx.load_model(str(model_path), device=device,
                                       compute_type=_compute_type(device),
+                                      **({"threads": asr_models.cpu_threads()} if device == "cpu" else {}),
                                       download_root=str(_model_cache_root(data_root, model_size)),
                                       local_files_only=True,
                                       **({"asr_options": {"initial_prompt": initial_prompt}}
                                          if initial_prompt else {}))
         audio_input = str(audio_path)
-        if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
+        offloaded = asr_worker.in_child()
+        if offloaded or (sys.platform == "darwin" and _platform.mac_bundle_contents() is not None):
             # WhisperX's string loader invokes bare `ffmpeg`. Supply samples so
             # transcription, alignment and diarization all use our resolver.
             import numpy as np
             import subprocess
+            asr_worker.report_phase("ffmpeg")
             decoded = subprocess.run([
                 _platform.media_binary("ffmpeg"), "-nostdin", "-v", "error",
                 "-i", str(audio_path), "-vn", "-ac", "1", "-ar", "16000",
                 "-c:a", "pcm_f32le", "-f", "f32le", "pipe:1"],
-                check=True, capture_output=True, timeout=600)
+                check=True, capture_output=True, timeout=None if offloaded else 600,
+                **({"creationflags": subprocess.CREATE_NO_WINDOW} if offloaded and os.name == "nt" else {}))
             audio_input = np.frombuffer(decoded.stdout, dtype=np.float32).copy()
-        result = model.transcribe(audio_input,
-                                    language=language)
+            del decoded
+            duration_seconds = len(audio_input) / 16000
+
+        last_percent = None
+
+        def segment_progress(percent):
+            nonlocal last_percent
+            if cancel_event is not None and cancel_event.is_set():
+                raise reliability._cancelled_error()
+            if percent is not None and last_percent is not None and percent <= last_percent:
+                return
+            last_percent = percent
+            if progress is not None and percent is not None:
+                progress(percent, 100)
+            if checkpoint is not None:
+                checkpoint({"percent": percent})
+
+        def callbacks(fn):
+            if checkpoint or progress or cancel_event:
+                try:
+                    if "progress_callback" in inspect.signature(fn).parameters:
+                        return {"progress_callback": segment_progress}
+                except (ValueError, TypeError):
+                    pass
+            return {}
+
+        decode_callbacks = callbacks(model.transcribe)
+        asr_worker.report_phase("batch transcription", duration_seconds=duration_seconds)
+        result = model.transcribe(audio_input, language=language, **decode_callbacks)
+        segment_progress(None)
         segments = result.get("segments") or []
         detected_lang = result.get("language") or language or "en"
 
@@ -536,29 +706,38 @@ def transcribe_audio(audio_path: Path, *,
                 "parameters": {"language": detected_lang, "alignment_model": None},
             }
             try:
+                asr_worker.report_phase("alignment")
                 align_model, align_meta = whisperx.load_align_model(
                     language_code=detected_lang, device=device)
                 aligned = whisperx.align(
                     segments, align_model, align_meta,
-                    audio_input, device=device)
+                    audio_input, device=device, **callbacks(whisperx.align))
+                segment_progress(None)
+                asr_worker.report_phase("diarization")
                 diarize_pipeline = _diarization_pipeline(
                     whisperx, device=device, data_root=data_root)
-                diarize_segments = diarize_pipeline(audio_input)
+                diarize_segments = diarize_pipeline(audio_input, **callbacks(diarize_pipeline))
+                segment_progress(None)
                 aligned = whisperx.assign_word_speakers(
                     diarize_segments, aligned)
                 segments = aligned.get("segments") or segments
                 diarization_succeeded = True
                 diarization_run["status"] = "succeeded"
+            except asr_worker.TranscriptionCancelled:
+                raise
             except Exception as diar_err:
                 log.warning("diarization failed (degrading to "
                               "transcript-only): %s", diar_err)
             diarization_run["generated_at"] = _now_iso()
+    except asr_worker.TranscriptionCancelled:
+        raise
     except Exception as e:
         raise RuntimeError(f"whisperx transcribe failed: {e}") from e
 
     transcript: dict[str, Any] = {
         "model": model_size,
         "language": detected_lang,
+        **({"english_fallback": fallback} if fallback else {}),
         "diarization_ran": diarization_succeeded,
         "segments": _shape_segments(segments),
         "generated_at": _now_iso(),
@@ -590,7 +769,7 @@ def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
         run["artifact_sha256"] = hashlib.sha256(
             library_media.transcript_artifact_bytes(transcript)).hexdigest()
     out.write_text(
-        json.dumps(transcript, indent=2, ensure_ascii=False),
+        json.dumps(transcript, indent=2, ensure_ascii=False, allow_nan=False),
         encoding="utf-8")
     return out
 

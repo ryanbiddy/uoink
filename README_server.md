@@ -109,6 +109,18 @@ models, output-root recovery, and corpus state. The response shape is:
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "transcription_engine": "whisperx",
+  "transcription_worker": {
+    "offloaded": true,
+    "state": "not_loaded",
+    "pid": null,
+    "op": null,
+    "idle_release_seconds": 120,
+    "release_at": null,
+    "jobs_run": 0,
+    "last_exit": null,
+    "line": "Transcription engine: idle (not loaded)."
+  },
   "heartbeat": {
     "last_tick_completed_at": "2026-09-04T16:30:00Z",
     "last_successful_tick_at": "2026-09-04T16:30:00Z",

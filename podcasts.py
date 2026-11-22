@@ -24,6 +24,7 @@ import uoink_usage
 from collections import Counter
 from contextlib import ExitStack
 import hashlib
+import math
 import json
 import logging
 import os
@@ -1257,6 +1258,25 @@ def _source_deep_link(source_url: str, seconds: float | int | None) -> str:
     return f"{source_url.split('#', 1)[0]}#t={timestamp}"
 
 
+def _valid_words(raw) -> list[dict] | None:
+    """Word timings as stored ({word, start, end}); anything malformed is
+    dropped, never an error, so old and new transcripts both read."""
+    if not isinstance(raw, list):
+        return None
+    words = []
+    for word in raw:
+        if not isinstance(word, dict) or not isinstance(word.get("word"), str):
+            continue
+        start, end = word.get("start"), word.get("end")
+        if (isinstance(start, bool) or isinstance(end, bool)
+                or not isinstance(start, (int, float)) or not isinstance(end, (int, float))
+                or not math.isfinite(start) or not math.isfinite(end) or min(start, end) < 0):
+            continue
+        if word["word"].strip():
+            words.append({"word": word["word"].strip(), "start": start, "end": max(start, end)})
+    return words or None
+
+
 def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
     try:
         raw = json.loads(data.decode("utf-8"))
@@ -1288,6 +1308,9 @@ def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
                 raise ValueError(f"transcript segment {seq} speaker must be text")
             if speaker.strip():
                 item["speaker"] = speaker.strip()
+        words = _valid_words(segment.get("words"))
+        if words:
+            item["words"] = words
         shaped.append(item)
     if not shaped:
         raise ValueError("transcript segments array is empty")
@@ -1627,7 +1650,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
         transcript=transcript_raw, transcript_bytes=transcript_bytes,
         corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(), playback=playback)
     sidecar_transcript = []
-    for citation, annotation in zip(transcript_citations, media_block["cues"]):
+    for seq, (citation, annotation) in enumerate(zip(transcript_citations, media_block["cues"])):
         citation["speaker"] = annotation["speaker"]
         citation["speaker_provenance_json"] = (
             _media_mod.canonical_json(annotation["speaker_provenance"])
@@ -1639,6 +1662,8 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
             "source_url": citation["source_url"],
             "source_deep_link": citation["source_deep_link"],
             "youtube_deep_link": None,
+            # 3.18: word timings from local Whisper, when the transcript has them.
+            **({"words": segments[seq]["words"]} if segments[seq].get("words") else {}),
         })
     sidecar = {
         "schema_version": 2,
