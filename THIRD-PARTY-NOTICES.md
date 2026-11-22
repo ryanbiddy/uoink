@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-The package versions below follow the installer lock. The installer regenerates this list from the installed packages with `scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-11-22; regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -30,12 +30,12 @@ The package versions below follow the installer lock. The installer regenerates 
 | defusedxml | 0.7.1 | Python Software Foundation License | https://github.com/tiran/defusedxml |
 | einops | 0.8.2 | MIT License | https://github.com/arogozhnikov/einops |
 | faster-whisper | 1.2.1 | MIT License | https://github.com/SYSTRAN/faster-whisper |
-| filelock | 4.2.10 | MIT | https://github.com/tox-dev/py-filelock |
+| filelock | 4.2.10 | MIT | https://github.com/tox-dev/filelock |
 | flatbuffers | 25.12.19 | Apache Software License | https://google.github.io/flatbuffers/ |
 | fonttools | 4.63.0 | MIT | http://github.com/fonttools/fonttools |
 | frozenlist | 1.8.0 | Apache-2.0 | https://github.com/aio-libs/frozenlist |
 | fsspec | 2026.6.0 | BSD-3-Clause | https://github.com/fsspec/filesystem_spec |
-| googleapis-common-protos | 1.76.0 | Apache Software License | https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos |
+| googleapis-common-protos | 1.76.0 | Apache-2.0 | https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos |
 | greenlet | 3.5.4 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
 | grpcio | 1.85.1 | Apache-2.0 | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
