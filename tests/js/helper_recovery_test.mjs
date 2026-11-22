@@ -10,7 +10,8 @@ const recovery = {available: true, status: 'crash_loop', last_exit_code: 7, rest
   last_start_at: '2026-10-24T20:00:00Z', last_stop_at: '2026-10-24T20:00:01Z',
   reason: 'Helper exited with code 7. <img onerror="unsafe">', action: 'Run uoink doctor, then open Uoink.'};
 const context = vm.createContext({els, state: {}, navigator: {platform: 'Win32'},
-  renderLibrarianStatus() {}, window: {pywebview: {api: {helper_recovery: async () => recovery}}},
+  renderLibrarianStatus() {}, renderTranscriptionEngineStatus() {},
+  window: {pywebview: {api: {helper_recovery: async () => recovery}}},
   fetch: async () => {throw Error('offline');}});
 vm.runInContext(code, context);
 await vm.runInContext('refreshHealth()', context);

@@ -45,6 +45,7 @@ import re
 import urllib.error
 import urllib.request
 from datetime import datetime
+from functools import partial
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -87,6 +88,7 @@ DEFAULT_ALLOW_SEEDS = ("youtube.com", "youtu.be", "x.com", "twitter.com")
 
 # Source-type tag persisted on the yoink row.
 SOURCE_TYPE_PAGE = "page"
+DOM_CAPTURE_SOURCE = "browser_dom"
 
 # ---- Phase 2 source-agnostic taxonomy -------------------------------------
 # The `platform` column stores one clean tag per source network. These are
@@ -801,8 +803,19 @@ def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None, html=
 
 
 # ---- persist as a yoink row -------------------------------------------
+def _same_thumbnail_site(page_host: str, image_url: str) -> bool:
+    image_host = (urlparse(image_url).hostname or "").rstrip(".")
+    if image_host == page_host:
+        return True
+    # Approximate the registrable domain with the last two DNS labels.
+    # Single-label hosts and IP addresses require an exact match.
+    labels = page_host.split(".")
+    return (len(labels) >= 2 and not labels[-1].isdigit()
+            and image_host.split(".")[-2:] == labels[-2:])
+
+
 def _save_page_thumbnail(image_url: str, page_url: str, folder: Path, *,
-                         http_open=None) -> Path | None:
+                         same_site_only: bool = False, http_open=None) -> Path | None:
     """Best-effort Library thumbnail from the page's lead image (og:image,
     then twitter:image, then image_src) at <folder>/thumbnail.jpg, where a
     video capture keeps its own. Reuses the public-network fetch policy and
@@ -814,12 +827,19 @@ def _save_page_thumbnail(image_url: str, page_url: str, folder: Path, *,
     url = article_extractor.safe_link((image_url or "").strip(), page_url)
     if not url:
         return None
+    options = {}
+    if same_site_only:
+        page_host = (urlparse(page_url).hostname or "").rstrip(".")
+        allowed = partial(_same_thumbnail_site, page_host)
+        if not allowed(url):
+            return None
+        options["redirect_allowed"] = allowed
     raw_path = folder / "thumbnail.raw"
     thumb_path = folder / "thumbnail.jpg"
     try:
         with (http_open or source_subscriptions.public_http_open)(
                 url, headers={"User-Agent": _USER_AGENT},
-                timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
+                timeout=_PAGE_FETCH_TIMEOUT_SEC, **options) as resp:
             if resp.status != 200:
                 return None
             data = resp.read(images.MAX_IMAGE_BYTES + 1)
@@ -953,7 +973,8 @@ def persist_page_yoink(idx, extract_result: dict, *,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
         if source_type == SOURCE_TYPE_PAGE and isinstance(metadata.get("image"), str):
             _save_page_thumbnail(metadata["image"], extract_result.get("fetched_url") or url,
-                                 folder, http_open=http_open)
+                                 folder, same_site_only=metadata.get("capture_source") == DOM_CAPTURE_SOURCE,
+                                 http_open=http_open)
 
     import json as _json
     metadata_json = _json.dumps({

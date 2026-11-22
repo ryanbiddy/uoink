@@ -72,6 +72,7 @@ const context = vm.createContext({
   registryToolError: (_, result) => Object.assign(new Error(result?.error?.message || "tool failed"), { data: result }),
   NAV_OWNER: {}, els: {}, pageScrollPosition: () => ({}), setPageScrollPosition() {},
   markOpenLibraryRow() {}, syncSidebarTopics() {}, loadLibraryAvailability() {}, loadLibraryActivity() {},
+  stopAsrModelPolling() {},
   startLibraryActivityTimer() {}, stopLibraryActivityTimer() {}, renderShelfBar() {}, syncReaderCrumbs() {}, pushRoute() {}, routeForTab() {},
 });
 const evaluate = (code) => vm.runInContext(code, context);

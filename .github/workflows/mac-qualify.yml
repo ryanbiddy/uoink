@@ -229,7 +229,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/whisper-model
           key: whisper-model-${{ hashFiles('scripts/whisper_model_pin.json') }}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/embed-model
           key: embed-model-${{ hashFiles('scripts/embed_model_pin.json') }}

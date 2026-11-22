@@ -60,8 +60,10 @@ def test_readme_first_run_extension_steps_match_the_splash() -> None:
     assert "one-time setup splash" in readme
     assert "open your browser's extensions page" in readme
     assert "copy the installed extension path" in readme
-    assert 'primary: { text: `Open ${browserName} extensions`' in splash
-    assert 'secondary: { text: "Copy path"' in splash
+    for button, label, action in (("primary", "Open extensions page", "extension-open"),
+                                  ("secondary", "Copy path", "copy-path")):
+        assert f"**{label}**" in readme
+        assert f'{button}: {{ text: "{label}", action: "{action}"' in splash
 
 
 def test_readme_mcp_client_claim_matches_the_compatibility_matrix() -> None:

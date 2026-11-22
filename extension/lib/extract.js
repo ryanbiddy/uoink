@@ -1378,7 +1378,8 @@
   }
 
   // 3.18: the page as the user's tab shows it, already read by
-  // lib/page-capture.js. The helper saves it without fetching anything.
+  // lib/page-capture.js. The helper only fetches a same-site lead image
+  // for the Library thumbnail. The page text comes from the tab.
   async function postExtractPageDom(capture) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 60 * 1000);

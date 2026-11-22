@@ -5,8 +5,9 @@ user clicked (after JavaScript ran, with the user's own session), and posts
 {url, title, author, published, site, markdown, ...} to /extract/page/dom.
 This module owns the helper half: validate and bound that payload, refuse a
 wall or an empty tab honestly, and shape an extract_result that
-page_extractor.persist_page_yoink saves like any other web page. No network
-happens here; the page text never leaves this computer.
+page_extractor.persist_page_yoink saves like any other web page. The page
+text stays on this computer. The helper only fetches a thumbnail when the
+lead image and any redirects stay on the page's site.
 
 Transport (route, token, allowlist gate, body cap) is owned by server.py.
 """
@@ -21,7 +22,7 @@ import page_extractor
 
 ENGINE = "defuddle"
 ENGINE_VERSION = "0.19.6"
-CAPTURE_SOURCE = "browser_dom"
+CAPTURE_SOURCE = page_extractor.DOM_CAPTURE_SOURCE
 MAX_BODY_BYTES = 2 * 1024 * 1024
 MAX_MARKDOWN = 400_000
 

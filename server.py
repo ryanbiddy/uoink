@@ -23680,7 +23680,8 @@ class Handler(BaseHTTPRequestHandler):
         """POST /extract/page/dom {url, title, markdown, author?, published?,
         site?, ...}: the page the user sees, already read in their tab by the
         extension (Defuddle). Same site allowlist and Library save as
-        /extract/page; the helper fetches nothing."""
+        /extract/page. The tab supplies the text. The helper can fetch a
+        same-site lead image for the Library thumbnail."""
         url = page_extractor.normalize_page_url(str((body or {}).get("url") or ""))
         if url and not page_extractor.host_is_allowed(_get_index(), url):
             return self._send_json(403, page_extractor.host_not_allowed_result(url))

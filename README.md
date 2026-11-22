@@ -101,7 +101,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 1. **Download the installer.** Download `Uoink-Setup-3.18.0.exe` from the [v3.18.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.18.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 <!-- store-install:start -->
-3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
+3. **Load the bundled extension.** On the one-time setup splash, click **Open extensions page** to open your browser's extensions page. If you get a blank tab, enter the address shown on the splash. Click **Copy path** on the splash to copy the installed extension path. Turn on **Developer mode**, click **Load unpacked**, and select that folder. Pin **Uoink** from the browser's Extensions menu.
 <!-- store-install:end -->
 
 **On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.18.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).

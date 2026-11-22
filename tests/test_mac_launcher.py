@@ -50,6 +50,8 @@ def startup(monkeypatch, tmp_path):
     monkeypatch.setattr(server, "_TOKEN_OWNED", False)  # main() claims it; restore after.
     # This loop outlives main() and would sync consent into later tests' stores.
     monkeypatch.setattr(server.uoink_usage, "start_sender", lambda *_: None)
+    # A simulated launch must not route later tests' fake models to a stopped worker.
+    monkeypatch.setattr(server.asr_worker, "enable_offload", lambda **kwargs: None)
     for name in ("_existing_server_responds", "_is_installed_layout", "_apply_output_root_fallback",
                  "_migrate_plaintext_anthropic_key", "_migrate_jobs_json_to_index",
                  "_migrate_taxonomy_json_to_index", "_seed_default_style_anchors",

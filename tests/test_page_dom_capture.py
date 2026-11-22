@@ -4,7 +4,10 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFUDDLE = ROOT / "extension" / "lib" / "defuddle.js"
@@ -24,6 +27,18 @@ def test_vendored_defuddle_is_the_pinned_upstream_file():
         data = path.read_bytes()
         assert hashlib.sha256(data).hexdigest() == LICENSE_SHA256, path
         assert data.startswith(b"MIT License") and b"Steph Ango" in data
+
+
+def test_defuddle_capture_only_uses_synchronous_parse_and_refuses_fetch():
+    script = (ROOT / "extension/lib/page-capture.js").read_text(encoding="utf-8")
+    assert "parseAsync" not in script
+    calls = re.findall(r"new\s+Defuddle\s*\([^;]*?\{([^{}]*)\}\s*\)\s*\.parse\s*\(", script)
+    assert len(calls) == script.count("new Defuddle(") == 1
+    options = [option.strip() for option in calls[0].split(",")]
+    assert "useAsync: false" in options
+    assert "fetch: noFetch" in options
+    assert re.search(r'function\s+noFetch\(\)\s*\{\s*return Promise\.reject\('
+                     r'new Error\("[^"]*"\)\);\s*\}', script)
 
 
 def test_defuddle_notice_ships_everywhere_the_extension_does():
@@ -118,6 +133,41 @@ def test_oversized_capture_is_cut_and_flagged():
 
 
 # ---- route ----------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def thumbnail_transport(monkeypatch):
+    """Exercise the real redirect policy with in-memory DNS and HTTPS responses."""
+    from email.message import Message
+    import io
+    from urllib.response import addinfourl
+    from PIL import Image
+    import source_subscriptions as net
+
+    image = io.BytesIO()
+    Image.new("RGB", (8, 8)).save(image, "PNG")
+    resolved, requested = [], []
+
+    def resolve(host):
+        resolved.append(host)
+        return ["192.0.2.1"]
+
+    def open_image(handler, request):
+        url = request.full_url
+        requested.append(url)
+        headers = Message()
+        if url.endswith("/redirect"):
+            headers["Location"] = "https://images.other.test/lead.png"
+        elif url.endswith("/moved"):
+            headers["Location"] = "https://cdn.example.org/lead.png"
+        code = 302 if "Location" in headers else 200
+        response = addinfourl(io.BytesIO(image.getvalue()), headers, url, code)
+        response.msg = "Found" if code == 302 else "OK"
+        return response
+
+    monkeypatch.setattr(net, "_check_resolved_host", resolve)
+    monkeypatch.setattr(net._PinnedHTTPSHandler, "https_open", open_image)
+    return resolved, requested
+
+
 def _route(settings_allow=("news.example.org",)):
     import index as index_mod
     import page_extractor
@@ -162,6 +212,28 @@ def _route(settings_allow=("news.example.org",)):
                 server._get_index, server.DESKTOP_ROOT = saved
                 idx.close()
     return running()
+
+
+@pytest.mark.parametrize("image, expected, saved", [
+    ("https://news.example.org/lead.png", ["https://news.example.org/lead.png"], True),
+    ("https://cdn.example.org/lead.png", ["https://cdn.example.org/lead.png"], True),
+    ("https://notexample.org/lead.png", [], False),
+    ("https://news.example.org.other.test/lead.png", [], False),
+    ("https://news.example.org/moved", ["https://news.example.org/moved", "https://cdn.example.org/lead.png"], True),
+    ("https://news.example.org/redirect", ["https://news.example.org/redirect"], False),
+])
+def test_dom_thumbnail_stays_on_the_page_site(thumbnail_transport, image, expected, saved):
+    from urllib.parse import urlsplit
+
+    with _route() as (post, idx, _root):
+        status, result = post("/extract/page/dom", payload(image=image))
+        assert status == 200 and result["ok"]
+        corpus = Path(idx.get_yoink(result["video_id"])["corpus_path"])
+        assert corpus.is_file()
+        assert corpus.with_name("thumbnail.jpg").is_file() is saved
+    resolved, requested = thumbnail_transport
+    assert resolved == [urlsplit(url).hostname for url in expected]
+    assert requested == expected
 
 
 def test_route_saves_a_large_tab_capture_under_the_output_root():
