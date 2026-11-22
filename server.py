@@ -12302,7 +12302,13 @@ def _focus_youtube_window() -> bool:
 
 
 def _session_folder(slug: str) -> Path:
-    return SESSIONS_ROOT / slug
+    # Session ids are already limited to [A-Za-z0-9_-]; this keeps the folder
+    # inside the sessions root even if a caller ever skips that check.
+    root = os.path.normpath(str(SESSIONS_ROOT))
+    full = os.path.normpath(os.path.join(root, slug))
+    if not full.startswith(root + os.sep):
+        raise ValueError("session folder outside the sessions root")
+    return Path(full)
 
 
 def _read_session(slug: str) -> dict | None:

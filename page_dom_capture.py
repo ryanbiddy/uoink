@@ -226,12 +226,18 @@ _PROSE_IMAGE = re.compile(r"!\[[^\[\]\n]*\]")
 _PROSE_MARKS = re.compile(r"\[\^[^\s\[\]]*\]:?|[\[\]*_`~|\\]+")
 
 
+def _is_rule_line(line: str) -> bool:
+    """A table or thematic rule: only whitespace, |, : and -, with "---" in it.
+    Checked in linear time; a regex here was cubic on a long run of dashes."""
+    return "---" in line and all(c.isspace() or c in "|:-" for c in line)
+
+
 def prose(markdown: str) -> str:
     """The words a reader sees, one block per line: link text without its URL,
     no image, fence line or table rule. Input for the wall and thin checks."""
     lines = []
     for line in markdown.split("\n"):
-        if _TOP_FENCE.match(line) or re.fullmatch(r"[\s|:-]*-{3,}[\s|:-]*", line):
+        if _TOP_FENCE.match(line) or _is_rule_line(line):
             continue
         text = _PROSE_IMAGE.sub(" ", _PROSE_TAIL.sub("]", line))
         lines.append(unescape(_PROSE_MARKS.sub(" ", text)).strip())

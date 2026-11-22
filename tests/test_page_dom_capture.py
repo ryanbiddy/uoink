@@ -291,3 +291,17 @@ def test_a_refused_recapture_never_replaces_a_good_save():
         status, res = post("/extract/page/dom", payload(markdown="Menu"))
         assert status == 400
         assert corpus.read_bytes() == before and idx.get_yoink(first["video_id"])["title"] == "The ferry ramp is rebuilt"
+
+
+def test_a_long_run_of_dashes_in_a_code_block_cannot_stall_the_helper():
+    """A hostile page's <pre> of dashes once took minutes in a regex (CodeQL #212)."""
+    import time
+    line = "-" * 20000 + "x"
+    started = time.perf_counter()
+    assert dom._is_rule_line(line) is False
+    dom.prose("```\n" + line + "\n```\n\nReal words here.\n" + "---\t" * 4000)
+    assert time.perf_counter() - started < 1.0
+    assert dom._is_rule_line("| --- | :---: |") is True
+    assert dom._is_rule_line("-----") is True
+    assert dom._is_rule_line("--") is False
+    assert dom._is_rule_line("a --- b") is False

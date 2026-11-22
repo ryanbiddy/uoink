@@ -1254,7 +1254,7 @@ def url_key(url: Any) -> str | None:
         match = re.search(r"/status(?:es)?/([0-9]+)", path)
         if match:
             return "x:" + match.group(1)
-    if host.endswith("reddit.com"):
+    if host == "reddit.com" or host.endswith(".reddit.com"):
         match = re.search(r"/comments/([A-Za-z0-9]+)", path)
         if match:
             return "reddit:" + match.group(1).lower()
