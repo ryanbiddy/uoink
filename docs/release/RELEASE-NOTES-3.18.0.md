@@ -59,7 +59,7 @@ Your library stays in place. Upgrading from 3.17.0 applies migrations 0037, 0038
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `Uoink-Setup-3.18.0.exe` | WIN_EXE_SIZE B | `WIN_EXE_SHA256` |
-| `uoink-3.18.0.mcpb` | WIN_MCPB_SIZE B | `WIN_MCPB_SHA256` |
-| `Uoink-3.18.0-macos-arm64.dmg` | MAC_DMG_SIZE B | `MAC_DMG_SHA256` |
-| `uoink-3.18.0-macos.mcpb` | MAC_MCPB_SIZE B | `MAC_MCPB_SHA256` |
+| `Uoink-Setup-3.18.0.exe` | 577,568,664 B | `2b2cd9d423935432cdf74076bc49f1a39fdd5b6e4a12e6c55d1c481f2d14d160` |
+| `uoink-3.18.0.mcpb` | 121,468 B | `f9868fca1d57c9d2dc5b0b0304c7e2862f69ec22bdde6213a2f2adbf2623e092` |
+| `Uoink-3.18.0-macos-arm64.dmg` | 542,603,875 B | `5e1c656dacee1b928f559148c4c3492bf6a6c0fc392b1cb4592eb4afceb87be6` |
+| `uoink-3.18.0-macos.mcpb` | 117,917 B | `29ed2b4bd30236563b9f3f8e4e266025582f86c9126a9daf4a6bfbd0f364eb64` |
