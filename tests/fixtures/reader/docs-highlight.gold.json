@@ -1,0 +1,62 @@
+{
+ "name": "docs-highlight",
+ "url": "https://guide.example.dev/caching/layers",
+ "layout": "docs, syntax-highlight spans, line-number tables, prism toolbars",
+ "title": "Caching layers explained",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Example Dev Guide"
+ },
+ "keep": [
+  "Caching layers explained",
+  "A brittle release script is easy to miss, so the release team now deprecate it every month and write the result down. Costs rose after the code sprint, mostly because the test runner at the docs site had to be profiled by hand. Old photographs of the CLI show a optional retry queue, long before anyone benchmarked the release script. The plan was to pin the plugin hook, merge the config loader, and keep the CLI open for the release team. Nobody expected the freeze to refactor the release script so quickly, yet first-time contributors had to rename it again.",
+  "A small read-through cache",
+  "const cache = new Map(); async function getUser(id) { if (cache.has(id)) return cache.get(id); const user = await fetchUser(id); cache.set(id, user); return user; }",
+  "The plan was to deprecate the error budget, split the build step, and keep the nightly build open for plugin authors. Nobody expected a security report to merge the log rotation so quickly, yet the maintainers had to split it again.",
+  "Expiring entries",
+  "def expired(entry, now): return now - entry.stored_at > entry.ttl",
+  "Plugin authors still argue about whether the schema check should be pinned or left stable for another year. The release script at the staging cluster was split by the release team after the freeze, and the work took three weeks. Each season, the maintainers walk past the main branch to deprecate the config loader and check the schema check.",
+  "Configuration",
+  "cache: layers: [memory, disk] ttl_seconds: 600",
+  "The build step at the CLI was benchmarked by the maintainers after a large migration, and the work took four weeks. Costs rose after the last release, mostly because the retry queue at the CLI had to be refactored by hand. Costs rose after the code sprint, mostly because the lock file at the CLI had to be deprecated by hand."
+ ],
+ "junk": [
+  "Guides Reference Changelog Support",
+  "Example Dev Guide. Content licensed for reuse with attribution.",
+  "Chapter 1 Chapter 2 Chapter 3"
+ ],
+ "structure": {
+  "headings": [
+   "Caching layers explained",
+   "A small read-through cache",
+   "Expiring entries",
+   "Configuration"
+  ],
+  "list_items": [],
+  "code": [
+   {
+    "text": "const cache = new Map();\n\nasync function getUser(id) {\n  if (cache.has(id)) return cache.get(id);\n  const user = await fetchUser(id);\n  cache.set(id, user);\n  return user;\n}",
+    "lang": "js"
+   },
+   {
+    "text": "def expired(entry, now):\n    return now - entry.stored_at > entry.ttl",
+    "lang": "python"
+   },
+   {
+    "text": "cache:\n  layers: [memory, disk]\n  ttl_seconds: 600",
+    "lang": "yaml"
+   }
+  ],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

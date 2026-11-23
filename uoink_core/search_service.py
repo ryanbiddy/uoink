@@ -1,6 +1,40 @@
 """Shared search mode selection. Search never starts model work or downloads."""
 from __future__ import annotations
 
+import re
+
+
+def is_video_corpus(text):
+    return (text.startswith("# ") and ("\n**URL:**" in text or "\n**Source:**" in text)
+            and ("\n## Description" in text or "\n## Transcript" in text))
+
+
+def corpus_body_ranges(text):
+    """Readable spans in a generated corpus file, using original character offsets."""
+    if not is_video_corpus(text):
+        return None
+    ranges = []
+    section = ""
+    for line in re.finditer(r"[^\r\n]+", text):
+        value = line.group().strip()
+        if value.startswith("## "):
+            section = value[3:].casefold()
+            continue
+        if section == "top comments" and value.startswith("> "):
+            value = value[2:].strip()
+        elif section not in {"description", "transcript"}:
+            continue
+        if (not value or value.startswith(("#", "![", "---")) or value == "*No description.*"
+                or (section == "transcript" and (value.startswith("*") or value.startswith("_No transcript available")))):
+            continue
+        start = line.start() + line.group().index(value)
+        end = start + len(value)
+        if ranges and text[ranges[-1][1]:start].isspace():
+            start = ranges.pop()[0]
+        ranges.append((start, end))
+    return ranges
+
+
 MODES = ("auto", "keyword", "semantic", "hybrid")
 MODE_SCHEMA = {"type": "string", "enum": list(MODES), "default": "auto",
                "description": "Auto uses hybrid when the local semantic index is ready, otherwise keyword."}
@@ -53,6 +87,8 @@ def select_mode(index, mode, *, filters=None):
         return "keyword", None
     if (filters or {}).get("availability"):
         return "keyword", "Availability filtering uses keyword search."
+    if (filters or {}).get("published_from") or (filters or {}).get("published_to"):
+        return "keyword", "Publish date filtering uses keyword search."
     engine = getattr(index, "_local_search", None)
     try:
         if engine is None or not engine.enabled:
@@ -63,7 +99,7 @@ def select_mode(index, mode, *, filters=None):
                 reason = "Accept the current Gemma terms in Settings first."
             elif status["paused"]:
                 reason = "Semantic search is paused. Resume it in Settings."
-            elif status["state"] != "ready" and not engine.retry_ready():
+            elif status["state"] != "ready" and not status.get("warming") and not engine.retry_ready():
                 reason = "Semantic search is not ready (" + status["state"] + ")."
             else:
                 return ("hybrid" if mode == "auto" else mode), None

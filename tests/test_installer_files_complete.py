@@ -2,13 +2,19 @@
 from __future__ import annotations
 
 import ast
+import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ISS = (ROOT / "installer" / "uoink.iss").read_text(encoding="utf-8")
 BUILD = (ROOT / "build.ps1").read_text(encoding="utf-8")
+VERIFY = (ROOT / "installer" / "verify_install.ps1").read_text(encoding="utf-8")
+PAYLOAD = json.loads((ROOT / "scripts" / "mac" / "payload.json").read_text(encoding="utf-8"))
 ENTRYPOINTS = ("server", "index", "uoink_mcp", "uoink_mcp_tools", "uoink_cli")
+# (top-level file, list) pairs that are deliberately left out, with the reason.
+# Empty today: every .py in the repo root ships in all four lists.
+EXEMPT: dict[tuple[str, str], str] = {}
 
 
 def reachable_modules(root: Path, entrypoints=ENTRYPOINTS) -> set[Path]:
@@ -50,6 +56,49 @@ def installed_sources() -> set[str]:
     files_section = ISS.split("[Files]", 1)[1].split("\n[", 1)[0]
     return {name.replace("\\", "/") for name in re.findall(
         r'^Source: "staging\\([^"]+)";', files_section, re.M)}
+
+
+def verified_files() -> set[str]:
+    """installer/verify_install.ps1 $requiredFiles, checked after every install."""
+    block = VERIFY.split("$requiredFiles = @(", 1)[1].split("\n)", 1)[0]
+    return {name.replace("\\", "/") for name in re.findall(r"(?m)^\s*'([^']+)',?\s*$", block)}
+
+
+def mac_payload() -> set[str]:
+    return set(PAYLOAD["paths"]) | set(PAYLOAD.get("mac_files", []))
+
+
+def four_lists() -> dict[str, set[str]]:
+    return {"build.ps1": staged_sources(), "installer/uoink.iss": installed_sources(),
+            "installer/verify_install.ps1": verified_files(),
+            "scripts/mac/payload.json": mac_payload()}
+
+
+def test_every_top_level_module_is_in_all_four_lists():
+    """A module left out of the installer has shipped before (x_extractor in
+    3.2.6). Every .py in the repo root is part of the app: the helper imports
+    it, or a launcher, the tray or an MCP client starts it by path."""
+    missing = [f"{path.name} missing from {label}"
+               for path in sorted(ROOT.glob("*.py"))
+               for label, listed in four_lists().items()
+               if path.name not in listed and (path.name, label) not in EXEMPT]
+    assert not missing, "\n".join(missing)
+
+
+def test_every_reachable_top_level_module_is_a_root_file():
+    # The four-list check above covers these by name; packages ship as folders.
+    top_level = {path.name for path in reachable_modules(ROOT) if len(path.parts) == 1}
+    assert top_level <= {path.name for path in ROOT.glob("*.py")}
+    assert {"server.py", "uoink_tray.py", "uoink_supervisor.py"} <= top_level
+
+
+def test_install_check_names_only_files_that_ship():
+    # A stale name here fails every install's file check with a warning box.
+    installed = installed_sources()
+    stale = [name for name in sorted(verified_files()) if name.endswith(".py")
+             and name not in installed
+             and not any(parent.as_posix() + "/*" in installed for parent in Path(name).parents)]
+    assert not stale, stale
 
 
 def test_every_server_import_is_in_installer_and_staging():

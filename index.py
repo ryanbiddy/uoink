@@ -39,6 +39,7 @@ import threading
 import time
 import unicodedata
 import uuid
+from collections import deque
 from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -98,6 +99,17 @@ ENGAGEMENT_METADATA_FIELDS = (
     "channel_follower_count",
 )
 
+# 3.18 shelves: the helper installs this (set_explicit_shelf_hook). Given a
+# record about to be written, it says whether the record's topic is a shelf
+# the user named for this capture, which may replace a shelf set by hand.
+_explicit_shelf_hook = None
+
+
+def set_explicit_shelf_hook(check) -> None:
+    global _explicit_shelf_hook
+    _explicit_shelf_hook = check
+
+
 _YOINK_COLUMNS = (
     "video_id", "slug", "channel", "title", "topic", "hook_type",
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
@@ -148,6 +160,121 @@ def capture_time_sql(column: str = "yoinked_at") -> str:
     return (f"(CASE WHEN {column} GLOB '*Z' OR {column} GLOB '*[+-][0-9][0-9]:[0-9][0-9]' "
             f"THEN COALESCE(strftime('%Y-%m-%dT%H:%M:%S', {column}, 'localtime'), {column}) "
             f"ELSE {column} END)")
+
+
+# Original publish (air) date, separate from the capture time. Sources write it
+# in different shapes: yt-dlp's upload_date is YYYYMMDD, RSS pubDate is RFC
+# 2822, newer captures store an ISO published_at. published_day() reads any of
+# them as one UTC calendar day (YYYY-MM-DD) or None. Migration 0038 stores it
+# in yoinks.published_day (indexed) for the search filters.
+_PUBLISHED_KEYS = ("published_at", "published", "upload_date", "release_date")
+_DAY_RE = re.compile(r"(\d{4})-(\d{2})-(\d{2})|(\d{4})(\d{2})(\d{2})")
+_ISO_TIME_RE = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]")
+PUBLISHED_DAY_MIGRATION = 38
+
+
+def published_day(value) -> str | None:
+    """One stored publish date (any common shape) as YYYY-MM-DD, or None.
+    A time with an offset counts in UTC, the same as an RSS pubDate, so
+    23:30 at -08:00 is the next day. Trailing text that isn't part of the
+    date or time makes it unreadable, not truncated."""
+    from datetime import timezone as _tz
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            return datetime.fromtimestamp(float(value), _tz.utc).strftime("%Y-%m-%d")
+        except (OverflowError, OSError, ValueError):
+            return None
+    text = str(value).strip()
+    if not text:
+        return None
+    match = _DAY_RE.fullmatch(text)
+    if match:
+        year, month, day = (int(part) for part in match.groups() if part is not None)
+        try:
+            return datetime(year, month, day).strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    if _ISO_TIME_RE.match(text):
+        try:
+            moment = datetime.fromisoformat(text[:-1] + "+00:00" if text[-1] in "Zz" else text)
+        except ValueError:
+            return None
+        if moment.tzinfo is not None:
+            moment = moment.astimezone(_tz.utc)
+        return moment.strftime("%Y-%m-%d")
+    try:
+        from email.utils import parsedate_to_datetime
+        moment = parsedate_to_datetime(text)
+    except (TypeError, ValueError, IndexError):
+        return None
+    if moment is None:
+        return None
+    if moment.tzinfo is not None:
+        moment = moment.astimezone(_tz.utc)
+    return moment.strftime("%Y-%m-%d")
+
+
+def published_day_from_metadata(metadata_json) -> str | None:
+    """The publish day stored in a row's metadata_json, or None."""
+    if not metadata_json:
+        return None
+    try:
+        data = json.loads(metadata_json) if isinstance(metadata_json, str) else metadata_json
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    for key in _PUBLISHED_KEYS:
+        day = published_day(data.get(key))
+        if day:
+            return day
+    return None
+
+
+def published_filter_sql(column: str, published_from: str | None,
+                         published_to: str | None) -> tuple[list[str], list[str]]:
+    """WHERE clauses for inclusive YYYY-MM-DD publish-date bounds on
+    ``column`` (from Index.published_day_sql). A bound that is not a real
+    date is ignored with a log line, like date_to."""
+    clauses: list[str] = []
+    params: list[str] = []
+    for value, op in ((published_from, ">="), (published_to, "<=")):
+        if not value:
+            continue
+        try:
+            day = datetime.strptime(str(value), "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError:
+            log.warning("search: bad publish date %r ignored", value)
+            continue
+        clauses.append(f"{column} {op} ?")
+        params.append(day)
+    return clauses, params
+
+
+def use_published_day(conn) -> None:
+    """Register uoink_published_day() on ``conn`` before a query that filters
+    by publish date. Only an index opened read-only before migration 0038
+    ran uses it; everything else reads the indexed column."""
+    conn.create_function("uoink_published_day", 1, published_day_from_metadata, deterministic=True)
+
+
+def _backfill_published_day(conn: sqlite3.Connection) -> int:
+    """Fill yoinks.published_day for every row (migration 0038), a page of
+    rows at a time so a large library is never held in memory at once."""
+    filled, last = 0, 0
+    while True:
+        rows = conn.execute(
+            "SELECT rowid, video_id, metadata_json FROM yoinks WHERE rowid > ? "
+            "ORDER BY rowid LIMIT 500", (last,)).fetchall()
+        if not rows:
+            return filled
+        last = rows[-1][0]
+        updates = [(day, row[1]) for row in rows
+                   if (day := published_day_from_metadata(row[2]))]
+        conn.executemany("UPDATE yoinks SET published_day=? WHERE video_id=?", updates)
+        filled += len(updates)
 
 
 class PublicationRetryQueue:
@@ -585,6 +712,9 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
                             m.group("column"), m.group("type"))
                     else:
                         conn.execute(stmt)
+                if version == PUBLISHED_DAY_MIGRATION:
+                    # Parsing every shape of date needs Python, not SQL.
+                    _backfill_published_day(conn)
                 conn.execute(
                     "INSERT INTO schema_version (version, applied_at) "
                     "VALUES (?, ?)", (version, _now_iso()),
@@ -696,8 +826,8 @@ SEARCH_STOPWORDS = frozenset(
 
 
 def _search_terms(raw: str, match: str = "forgiving") -> list[str]:
-    if match not in ("forgiving", "strict"):
-        raise ValueError("match must be forgiving or strict")
+    if match not in ("forgiving", "strict", "exact"):
+        raise ValueError("match must be forgiving, strict or exact")
     terms = _fts_terms(raw)
     if match == "forgiving":
         return [t for t in terms if t.casefold() not in SEARCH_STOPWORDS] or terms
@@ -711,10 +841,12 @@ def _fts_query(raw: str, match: str = "forgiving") -> str:
     and a raw user string can be a syntax error. We extract bare word
     tokens and quote each one. Forgiving search drops common English words
     and ORs the rest; strict search preserves the original AND expression.
-    The last term always uses prefix matching."""
+    Exact search uses a phrase. Other modes prefix-match the last term."""
     terms = _search_terms(raw, match)
     if not terms:
         return ""
+    if match == "exact":
+        return '"' + " ".join(terms) + '"'
     quoted = [f'"{t}"' for t in terms]
     # Prefix-match the final term so "hook" matches "hooks".
     quoted[-1] = quoted[-1][:-1] + '"*'
@@ -737,6 +869,122 @@ def _entity_keyword_score(name: str, query: str) -> int:
 # Private FTS markers distinguish matched body text from title-only snippets.
 _MATCH_START = "\x01" + uuid.uuid4().hex + "\x01"
 _MATCH_END = "\x02" + uuid.uuid4().hex + "\x02"
+
+
+def facet_column(name: str) -> str:
+    """SQL for an internal library facet, including the shelf shown on cards."""
+    if name == "topic":
+        # Match String.trim() in the dashboard, including Unicode spaces.
+        whitespace = "char(9,10,11,12,13,32,160,5760,8192,8193,8194,8195,8196,8197,8198," \
+                     "8199,8200,8201,8202,8232,8233,8239,8287,12288,65279)"
+        return f"COALESCE(NULLIF(TRIM(y.topic, {whitespace}), ''), 'Uncategorized')"
+    return f"y.{name}"
+
+
+_PASSAGE_SCAN_CHARS = 65536
+_PREVIEW_CHARS = 240
+_WORD_SNAP = 32
+
+
+def _preview_span(text, lo, hi, anchor, match_end=0):
+    earliest = max(lo, match_end - _PREVIEW_CHARS)
+    start = max(earliest, anchor - 80)
+    for position in range(start, max(earliest, start - _WORD_SNAP) - 1, -1):
+        if position == lo or text[position - 1].isspace():
+            start = position
+            break
+    end = min(start + _PREVIEW_CHARS, hi)
+    if end > start and not text[end - 1].isspace():
+        for position in range(end, min(hi, end + _WORD_SNAP) + 1):
+            if position == hi or text[position].isspace():
+                end = position
+                break
+    return start, end
+
+
+def _quoted_search(query):
+    raw = (query or "").strip()
+    return len(raw) >= 2 and raw[0] == raw[-1] == '"'
+
+
+def _passage_pattern(query, match, marked):
+    """Keep quoted phrases and punctuation-bearing terms literal in citations."""
+    raw = query.strip()
+    quoted = _quoted_search(raw)
+    phrase = match == "exact" or quoted
+    if phrase:
+        terms = [raw[1:-1] if quoted else raw]
+    else:
+        words = set(_search_terms(raw, match))
+        terms = []
+        for word in raw.split():
+            parts = _fts_terms(word)
+            if parts and (not word[0].isalnum() or not word[-1].isalnum()):
+                terms.append(word)
+            else:
+                terms.extend(part for part in parts if part in words)
+    terms = list(dict.fromkeys(term.casefold() for term in terms if term))
+    # Accent-folded FTS hits carry the spelling that actually occurs in the
+    # source. Associate those variants only with the corresponding query word.
+    surface = re.findall(re.escape(_MATCH_START) + "(.*?)" + re.escape(_MATCH_END), marked)
+    patterns = []
+    for i, term in enumerate(terms):
+        prefix = not phrase and i == len(terms) - 1 and term.isalnum()
+        variants = [term]
+        if not phrase and term.isalnum():
+            for token in surface:
+                folded = "".join(c for c in unicodedata.normalize("NFD", token.casefold())
+                                 if not unicodedata.combining(c))
+                if folded == term:
+                    variants.append(token)
+        literal = "(?:" + "|".join(map(re.escape, variants)) + ")"
+        left = r"(?<!\w)" if re.match(r"\w", term[0]) else ""
+        right = r"(?!\w)" if not prefix and re.match(r"\w", term[-1]) else ""
+        patterns.append(f"(?P<t{i}>{left}{literal}{right})")
+    return (re.compile("|".join(patterns), re.I) if patterns else None), len(terms)
+
+
+def _best_passage(text, ranges, pattern, term_count):
+    """Find the most distinct terms that fit together in one preview."""
+    best = None
+    coverage = 0
+    if pattern is None:
+        return best, coverage
+    for lo, hi in ranges:
+        recent = deque()
+        counts = {}
+        for hit in pattern.finditer(text, lo, hi):
+            if hit.end() == hi and hi < len(text) and (text[hi].isalnum() or text[hi] == "_"):
+                # A scan or FTS excerpt ending mid-word is not a word boundary.
+                continue
+            recent.append(hit)
+            key = hit.lastgroup
+            counts[key] = counts.get(key, 0) + 1
+            while recent and hit.end() - recent[0].start() > _PREVIEW_CHARS:
+                oldest = recent.popleft().lastgroup
+                counts[oldest] -= 1
+                if not counts[oldest]:
+                    del counts[oldest]
+            if len(counts) > coverage:
+                best = _preview_span(text, lo, hi, recent[0].start(), hit.end())
+                coverage = len(counts)
+                if coverage == term_count:
+                    return best, coverage
+    return best, coverage
+
+
+def _ranked_passage_ranges(content, ranges, marked):
+    """Search FTS's preferred excerpts first, within readable source spans."""
+    for chunk in marked.split("…"):
+        if _MATCH_START not in chunk or _MATCH_END not in chunk:
+            continue
+        excerpt = _plain_snippet(chunk).strip()
+        if excerpt:
+            for lo, hi in ranges:
+                pos = content.find(excerpt, lo, hi)
+                if pos >= 0:
+                    yield pos, pos + len(excerpt)
+    yield from ranges
 
 
 def _plain_snippet(text: str) -> str:
@@ -793,7 +1041,7 @@ def _fts_hits(table: str, query: str, match: str, weights: str = "", *,
     base = (f"SELECT {table}.rowid{identity}, {rank} AS _score FROM {source} "
             f"WHERE {restriction}{table} MATCH ?")
     params.append(expression)
-    if match == "strict":
+    if match in ("strict", "exact"):
         return f"WITH {scoped}search_hits AS MATERIALIZED ({base}) ", params
     if table == "clips_fts":
         # Exact-title priority is constant within each source, so it cannot
@@ -1317,6 +1565,11 @@ class Index:
         # allowlist; a set filter is routed to keyword by search_service.
         if clips_only or not filters.get("availability"):
             filters.pop("availability", None)
+        # Publish-date bounds are whole-item filters; clips and an unset bound
+        # never reach the clip or semantic engines.
+        for bound in ("published_from", "published_to"):
+            if clips_only or not filters.get(bound):
+                filters.pop(bound, None)
         if keyword is None:
             def keyword(count, start, override):
                 if clips_only:
@@ -1362,18 +1615,43 @@ class Index:
         if isinstance(record.get("title"), str):
             # One title limit for every source; truncates, never rejects.
             record = {**record, "title": _clamp_title(record["title"])}
-        values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(
             f"{col}=excluded.{col}" for col in _YOINK_COLUMNS if col != "video_id"
         )
+        # 3.18 shelves: this is the one write every capture path shares, so
+        # a shelf the user set by hand is kept here. Only the user's own
+        # choice for this write (record["shelf_by_hand"], or the helper's
+        # explicit shelf hook) may change it.
+        explicit = bool(record.get("shelf_by_hand")) or self._explicit_shelf(record)
+        kept_shelf = None
         with self._lock, self._rollback_on_error():
+            try:
+                hand = self._conn.execute(
+                    "SELECT y.topic FROM shelf_by_hand h JOIN yoinks y ON y.video_id=h.video_id "
+                    "WHERE h.video_id=?", (video_id,)).fetchone()
+            except sqlite3.OperationalError:
+                hand = None  # an index opened before migration 0037
+            if hand is not None and hand[0] and not explicit and record.get("topic") != hand[0]:
+                kept_shelf = hand[0]
+                record = {**record, "topic": kept_shelf}
+            values = [record.get(col) for col in _YOINK_COLUMNS]
             self._conn.execute(
                 f"INSERT INTO yoinks ({', '.join(_YOINK_COLUMNS)}) "
                 f"VALUES ({placeholders}) "
                 f"ON CONFLICT(video_id) DO UPDATE SET {update_set}",
                 values,
             )
+            # Migration 0038's indexed publish day, from the metadata. Checked,
+            # not assumed: an index on an older schema has no such column.
+            ready = getattr(self, "_published_day_ready", None)
+            if ready is None or ready[0] is not self._conn:
+                ready = self._published_day_ready = (self._conn, "published_day" in {
+                    row[1] for row in self._conn.execute("PRAGMA table_xinfo(yoinks)")})
+            if ready[1]:
+                self._conn.execute(
+                    "UPDATE yoinks SET published_day=? WHERE video_id=?",
+                    (published_day_from_metadata(record.get("metadata_json")), video_id))
             # FTS5 has no UPSERT; delete-then-insert keeps it in sync.
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.execute(
@@ -1397,9 +1675,66 @@ class Index:
                 import logging
                 logging.getLogger("uoink.index").warning(
                     "self-channel recognition skipped: %s", e)
+            if explicit and record.get("topic") and (hand is None or hand[0] != record.get("topic")):
+                try:
+                    self._mark_shelf_by_hand(video_id)
+                except sqlite3.OperationalError:
+                    pass
             self._conn.commit()
+        if kept_shelf is not None:
+            self._sync_kept_shelf(record, kept_shelf)
         self._invalidate_library_sources([video_id])
         self._notify_source_changed(video_id)
+
+    def published_day_sql(self, alias: str = "y") -> str:
+        """SQL for a row's publish day: migration 0038's indexed column, or
+        the metadata function (use_published_day) on an index opened
+        read-only before that migration ran."""
+        with self._lock:
+            ready = getattr(self, "_published_day_ready", None)
+            if ready is None or ready[0] is not self._conn:
+                ready = self._published_day_ready = (self._conn, "published_day" in {
+                    row[1] for row in self._conn.execute("PRAGMA table_xinfo(yoinks)")})
+        return f"{alias}.published_day" if ready[1] else f"uoink_published_day({alias}.metadata_json)"
+
+    def _explicit_shelf(self, record: dict) -> bool:
+        check = _explicit_shelf_hook
+        if check is None or not record.get("topic"):
+            return False
+        try:
+            return bool(check(record))
+        except Exception:  # pragma: no cover -- a hint lookup never blocks a save
+            return False
+
+    def _mark_shelf_by_hand(self, video_id: str, seq: int | None = None) -> int:
+        """Record a hand placement (inside the caller's transaction). seq
+        defaults to one more than the save's last hand move."""
+        if seq is None:
+            row = self._conn.execute(
+                "SELECT seq FROM shelf_by_hand WHERE video_id=?", (video_id,)).fetchone()
+            seq = (int(row[0]) if row else 0) + 1
+        self._conn.execute(
+            "INSERT INTO shelf_by_hand (video_id, seq, set_at) VALUES (?, ?, ?) "
+            "ON CONFLICT(video_id) DO UPDATE SET seq=excluded.seq, set_at=excluded.set_at",
+            (video_id, int(seq), _now_iso()))
+        return int(seq)
+
+    def _sync_kept_shelf(self, record: dict, shelf: str) -> None:
+        """A capture just rewrote the save's files with its own guess; put
+        the user's shelf back in them."""
+        try:
+            from shelf_router import sync_files
+            sync_files(record.get("sidecar_path"), record.get("corpus_path"), shelf, by_hand=True)
+        except Exception as e:  # pragma: no cover -- the index already holds the shelf
+            import logging
+            logging.getLogger("uoink.index").warning("kept shelf not written to files: %s", e)
+
+    def shelf_hand_seq(self, video_id: str) -> int:
+        """0 when routing placed the save, else its hand-move count."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT seq FROM shelf_by_hand WHERE video_id=?", (video_id,)).fetchone()
+        return int(row[0]) if row else 0
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
@@ -1759,29 +2094,50 @@ class Index:
         optional passage is the verbatim text an agent can quote instead.
         """
         row.pop("_fts_rowid", None)
+        from uoink_core.search_service import citation_fields, corpus_body_ranges
+
         content = row.pop("_content", "") or ""
-        marked_snippet = row.get("_snippet") or ""
-        row["_snippet"] = _plain_snippet(marked_snippet)
-        # A source can match metadata or text outside its stored clips.
-        # Never substitute the first clip or the opening of the content.
         clip = row.pop("_matched_clip", None)
-        if clip:
+        clip_text = (clip.get("text") or "") if clip else ""
+        marked = row.get("_snippet") or ""
+        # FTS limits tokens, not characters. A single URL can fill the snippet.
+        marked = marked if len(marked) <= 4096 else ""
+        row["_snippet"] = _plain_snippet(marked)[:_PREVIEW_CHARS]
+        row.pop("passage", None)
+        prefix = content[:_PASSAGE_SCAN_CHARS]
+        body = corpus_body_ranges(prefix)
+        if body is None and len(prefix) < len(content) and prefix.startswith("# "):
+            # A long metadata header can push the first readable section
+            # beyond the scan. Treat it as header-only until verified.
+            body = []
+        pattern, terms = _passage_pattern(query, match, marked)
+        clip_span, clip_score = _best_passage(
+            clip_text, [(0, min(len(clip_text), _PASSAGE_SCAN_CHARS))], pattern, terms)
+        span, score = None, 0
+        if clip_score < terms:
+            ranges = body if body is not None else [(0, len(prefix))]
+            span, score = _best_passage(content, _ranked_passage_ranges(content, ranges, marked),
+                                        pattern, terms)
+
+        if clip_score and clip_score >= score:
+            lo, hi = clip_span
+            row["_snippet"] = clip_text[lo:hi].rstrip()
             row["passage"] = {key: clip.get(key) for key in
                               ("video_id", "clip_id", "text", "start", "end", "timing")}
-        elif content:
-            for chunk in sorted(marked_snippet.split("…"), key=len, reverse=True):
-                if _MATCH_START not in chunk or _MATCH_END not in chunk:
-                    continue
-                excerpt = _plain_snippet(chunk).strip()
-                start = content.find(excerpt) if excerpt else -1
-                if start < 0:
-                    continue
-                row["passage"] = {"video_id": row["video_id"], "text": excerpt,
-                                  "char_start": start, "char_end": start + len(excerpt),
-                                  "field": "content", "timing": "not_timed"}
-                break
+        elif span:
+            lo, hi = span
+            excerpt = content[lo:hi].rstrip()
+            row["_snippet"] = excerpt
+            row["passage"] = {"video_id": row["video_id"], "text": excerpt,
+                              "char_start": lo, "char_end": lo + len(excerpt),
+                              "field": "content", "timing": "not_timed"}
+        elif body is not None:
+            row["_snippet"] = row.get("title") or ""
+            if body:
+                lo, hi = body[0]
+                start, end = _preview_span(content, lo, hi, lo)
+                row["_snippet"] = content[start:end].rstrip()
         row["passage_verified"] = bool(row.get("passage"))
-        from uoink_core.search_service import citation_fields
         return citation_fields(row)
 
     # ---- clips (living library phase 1; see clips.py) --------------------
@@ -1975,6 +2331,8 @@ class Index:
                      match: str = "forgiving", group_sources: bool = False,
                      _video_ids=None, _snippets=True) -> list[dict]:
         """Rank clip IDs first, then load only the returned page's passages."""
+        if _quoted_search(query):
+            match = "exact"
         if not _fts_query(query, match):
             return []
         limit = max(1, int(limit))
@@ -2170,6 +2528,46 @@ class Index:
                 "sidecar_path FROM yoinks WHERE deleted_at IS NULL"
             ).fetchall()
         return [dict(r) for r in rows]
+
+    def x_text_rows(self) -> list[dict]:
+        """Live X saves (videos, posts) for the cut-off text repair
+        (x_text_repair). Read-only; the job decides what to touch."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, slug, title, source_type, platform, yoinked_at, "
+                "corpus_path, sidecar_path, metadata_json FROM yoinks "
+                "WHERE deleted_at IS NULL AND (platform IN ('x', 'twitter') "
+                "OR source_type IN ('x_thread'))"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def update_corpus_text(self, video_id: str, *, content: str,
+                           metadata_json: str | None = None) -> bool:
+        """Refresh one row's searchable corpus text (and, when given, its
+        metadata_json) after its corpus file was repaired in place. Every
+        other column and every table that hangs off the row (shelves, tags,
+        opens, clips) is left as it is. False when the row is gone."""
+        with self._lock, self._rollback_on_error():
+            row = self._conn.execute(
+                "SELECT slug, channel, title, topic, hook_type FROM yoinks "
+                "WHERE video_id=? AND deleted_at IS NULL", (video_id,)).fetchone()
+            if row is None:
+                return False
+            if metadata_json is not None:
+                self._conn.execute("UPDATE yoinks SET metadata_json=? WHERE video_id=?",
+                                   (metadata_json, video_id))
+            self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
+            self._conn.execute(
+                "INSERT INTO yoinks_fts "
+                "(video_id, slug, channel, title, topic, hook_type, content) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (video_id, row["slug"], row["channel"], row["title"], row["topic"],
+                 row["hook_type"], content or ""),
+            )
+            self._conn.commit()
+        self._invalidate_library_sources([video_id])
+        self._notify_source_changed(video_id)
+        return True
 
     def update_taxonomy(self, video_id: str, *, platform: str | None,
                         author: str | None, channel: str | None) -> None:
@@ -2590,6 +2988,25 @@ class Index:
             self._conn.commit()  # C-03: facets must survive a kill
         return len(pairs)
 
+    def set_shelf(self, video_id: str, topic: str | None, *, hand_seq: int | None = None) -> bool:
+        """Move one save to a shelf (its topic), keeping the full-text row's
+        topic column in step. None clears it. hand_seq records how it got
+        there: a number above 0 is a hand move (see shelf_by_hand), 0 means
+        routing placed it, None leaves that as it was. Returns True when a
+        row changed."""
+        with self._lock, self._rollback_on_error():
+            changed = self._conn.execute(
+                "UPDATE yoinks SET topic=? WHERE video_id=?", (topic, video_id)).rowcount
+            if changed:
+                self._conn.execute(
+                    "UPDATE yoinks_fts SET topic=? WHERE video_id=?", (topic, video_id))
+                if hand_seq is not None and hand_seq > 0:
+                    self._mark_shelf_by_hand(video_id, hand_seq)
+                elif hand_seq is not None:
+                    self._conn.execute("DELETE FROM shelf_by_hand WHERE video_id=?", (video_id,))
+            self._conn.commit()
+        return bool(changed)
+
     def add_tags(self, video_id: str, tags, *, source: str = "agent") -> int:
         """Append free-form tags to a yoink (idempotent via the (video_id, tag)
         PK). Empty/whitespace tags are dropped; tags are lower-cased on store
@@ -2635,7 +3052,7 @@ class Index:
                          ("topic", topic),
                          ("length_bucket", length_bucket)):
             if val:
-                wheres.append(f"y.{col}=?")
+                wheres.append(f"{facet_column(col)}=?")
                 params.append(val)
         if tag:
             wheres.append("EXISTS (SELECT 1 FROM yoink_tags t "
@@ -2673,10 +3090,8 @@ class Index:
         with self._lock:
             for col in facet_cols:
                 rows = self._conn.execute(
-                    f"SELECT {col} AS v, COUNT(*) AS n FROM yoinks "
-                    f"WHERE deleted_at IS NULL AND {col} IS NOT NULL "
-                    f"AND {col} != '' "
-                    f"GROUP BY {col} ORDER BY n DESC, v ASC",
+                    f"SELECT {facet_column(col)} AS v, COUNT(*) AS n FROM yoinks y "
+                    "WHERE deleted_at IS NULL GROUP BY v HAVING v != '' ORDER BY n DESC, v ASC",
                 ).fetchall()
                 out[col] = [{"value": r["v"], "count": int(r["n"])}
                             for r in rows]
@@ -2772,7 +3187,9 @@ class Index:
                                  availability: str | None = None,
                                  limit: int = 50,
                                  offset: int = 0,
-                                 match: str = "forgiving", passages: bool = True) -> dict:
+                                 match: str = "forgiving", passages: bool = True,
+                                 published_from: str | None = None,
+                                 published_to: str | None = None) -> dict:
         """Filtered query backing the memory page. All filters are optional
         and combinable. Returns ``{total, results}`` where ``total`` is the
         match count before limit/offset (for pagination). Soft-deleted rows
@@ -2780,7 +3197,9 @@ class Index:
 
         With ``q`` the rows are ranked by FTS5 bm25; without it they are
         ordered newest-first. ``date_from`` / ``date_to`` are inclusive
-        YYYY-MM-DD bounds on yoinked_at."""
+        YYYY-MM-DD bounds on yoinked_at. ``published_from`` /
+        ``published_to`` are inclusive YYYY-MM-DD bounds on the original
+        publish date; items with no known publish date never match them."""
         limit = max(1, min(200, int(limit)))
         offset = max(0, int(offset))
 
@@ -2804,7 +3223,7 @@ class Index:
             clauses.append("y.author = ?")
             params.append(author)
         if topic:
-            clauses.append("y.topic = ?")
+            clauses.append(f"{facet_column('topic')} = ?")
             params.append(topic)
         if hook_type:
             clauses.append("y.hook_type = ?")
@@ -2825,10 +3244,16 @@ class Index:
                 params.append(nxt)
             except ValueError:
                 log.warning("memory search: bad date_to %r ignored", date_to)
+        published_clauses, published_params = published_filter_sql(
+            self.published_day_sql("y"), published_from, published_to)
+        clauses.extend(published_clauses)
+        params.extend(published_params)
         where = " AND ".join(clauses)
 
         expression = _fts_query(q, match)
         with self.search_read() as db:
+            if published_clauses:
+                use_published_day(db)
             try:
                 if expression:
                     prefix, search_params = _fts_hits(

@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-11-10; regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-11-22; regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -11,38 +11,38 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | alembic | 1.18.5 | MIT | https://alembic.sqlalchemy.org |
 | annotated-types | 0.7.0 | MIT License | https://github.com/annotated-types/annotated-types |
 | antlr4-python3-runtime | 4.9.3 | BSD | http://www.antlr.org |
-| anyio | 4.14.2 | MIT | https://anyio.readthedocs.io/en/stable/versionhistory.html |
+| anyio | 4.16.0 | MIT | https://anyio.readthedocs.io/en/stable/versionhistory.html |
 | asteroid-filterbanks | 0.4.0 | MIT License | https://github.com/asteroid-team/asteroid-filterbanks |
 | attrs | 26.1.0 | MIT | https://www.attrs.org/en/stable/changelog.html |
 | av | 18.0.0 | BSD-3-Clause | https://pyav.basswood.io |
 | bottle | 0.13.4 | MIT License | http://bottlepy.org/ |
 | certifi | 2026.10.23 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
 | cffi | 2.1.0 | MIT-0 | https://cffi.readthedocs.io/en/latest/whatsnew.html |
-| charset-normalizer | 3.4.9 | MIT | https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md |
-| click | 8.4.2 | BSD-3-Clause | https://github.com/pallets/click/ |
+| charset-normalizer | 3.5.2 | MIT | https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md |
+| click | 8.5.1 | BSD-3-Clause | https://github.com/pallets/click/ |
 | clr_loader | 0.2.10 | MIT License | UNKNOWN |
 | colorama | 0.4.6 | BSD License | https://github.com/tartley/colorama |
 | colorlog | 6.11.0 | MIT License | https://github.com/borntyping/python-colorlog |
 | contourpy | 1.3.3 | BSD License | https://github.com/contourpy/contourpy |
-| cryptography | 50.0.1 | Apache-2.0 OR BSD-3-Clause | https://github.com/pyca/cryptography |
+| cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause | https://github.com/pyca/cryptography |
 | ctranslate2 | 4.8.1 | MIT | https://opennmt.net |
 | cycler | 0.12.1 | BSD License | https://matplotlib.org/cycler/ |
 | defusedxml | 0.7.1 | Python Software Foundation License | https://github.com/tiran/defusedxml |
 | einops | 0.8.2 | MIT License | https://github.com/arogozhnikov/einops |
 | faster-whisper | 1.2.1 | MIT License | https://github.com/SYSTRAN/faster-whisper |
-| filelock | 4.2.1 | MIT | https://github.com/tox-dev/py-filelock |
+| filelock | 4.2.10 | MIT | https://github.com/tox-dev/filelock |
 | flatbuffers | 25.12.19 | Apache Software License | https://google.github.io/flatbuffers/ |
 | fonttools | 4.63.0 | MIT | http://github.com/fonttools/fonttools |
 | frozenlist | 1.8.0 | Apache-2.0 | https://github.com/aio-libs/frozenlist |
 | fsspec | 2026.6.0 | BSD-3-Clause | https://github.com/fsspec/filesystem_spec |
-| googleapis-common-protos | 1.75.0 | Apache Software License | https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos |
+| googleapis-common-protos | 1.76.0 | Apache-2.0 | https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos |
 | greenlet | 3.5.4 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
-| grpcio | 1.82.1 | Apache-2.0 | https://grpc.io |
+| grpcio | 1.85.1 | Apache-2.0 | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
 | httpcore2 | 2.16.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
 | httpx2 | 2.16.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
 | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
-| idna | 3.18 | BSD-3-Clause | https://github.com/kjd/idna |
+| idna | 3.20 | BSD-3-Clause | https://github.com/kjd/idna |
 | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
 | jaraco.context | 6.1.2 | MIT | https://github.com/jaraco/jaraco.context |
 | jaraco.functools | 4.6.0 | MIT | https://github.com/jaraco/jaraco.functools |
@@ -57,7 +57,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | lightning-utilities | 0.15.3 | Apache-2.0 | https://github.com/Lightning-AI/utilities |
 | Mako | 1.4.3 | MIT | https://www.makotemplates.org/ |
 | markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
-| MarkupSafe | 3.0.3 | BSD-3-Clause | https://github.com/pallets/markupsafe/ |
+| MarkupSafe | 3.0.4 | BSD-3-Clause | https://github.com/pallets/markupsafe/ |
 | matplotlib | 3.11.1 | Python Software Foundation License | https://matplotlib.org |
 | mcp | 2.3.0 | MIT License | https://modelcontextprotocol.io |
 | mcp-types | 2.3.0 | MIT License | https://modelcontextprotocol.io |
@@ -71,23 +71,23 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | numpy | 2.4.6 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
 | onnxruntime | 1.27.0 | MIT License | https://onnxruntime.ai |
-| opentelemetry-api | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api |
-| opentelemetry-exporter-http-transport | 0.66b1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport |
-| opentelemetry-exporter-otlp | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp |
-| opentelemetry-exporter-otlp-common | 0.66b1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common |
-| opentelemetry-exporter-otlp-proto-common | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common |
-| opentelemetry-exporter-otlp-proto-grpc | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-grpc |
-| opentelemetry-exporter-otlp-proto-http | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http |
-| opentelemetry-proto | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto |
-| opentelemetry-sdk | 1.45.1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk |
-| opentelemetry-semantic-conventions | 0.66b1 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions |
+| opentelemetry-api | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api |
+| opentelemetry-exporter-http-transport | 0.66b2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport |
+| opentelemetry-exporter-otlp | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp |
+| opentelemetry-exporter-otlp-common | 0.66b2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common |
+| opentelemetry-exporter-otlp-proto-common | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common |
+| opentelemetry-exporter-otlp-proto-grpc | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-grpc |
+| opentelemetry-exporter-otlp-proto-http | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http |
+| opentelemetry-proto | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto |
+| opentelemetry-sdk | 1.45.2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk |
+| opentelemetry-semantic-conventions | 0.66b2 | Apache-2.0 | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions |
 | optuna | 4.9.0 | MIT License | https://optuna.org/ |
-| packaging | 26.2 | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging |
+| packaging | 26.3 | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging |
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
 | pillow | 13.0.0 | MIT-CMU | https://python-pillow.org |
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
 | propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
-| protobuf | 7.35.1 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
+| protobuf | 7.36.2 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
 | proxy_tools | 0.1.0 | MIT License (metadata; see upstream conflict below) | http://github.com/jtushman/proxy_tools |
 | pyannote-audio | 4.0.7 | UNKNOWN | UNKNOWN |
 | pyannote-core | 6.0.1 | UNKNOWN | UNKNOWN |
@@ -96,14 +96,14 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pyannote-pipeline | 4.0.0 | UNKNOWN | UNKNOWN |
 | pyannoteai-sdk | 0.4.0 | UNKNOWN | UNKNOWN |
 | pycparser | 3.0 | BSD-3-Clause | https://github.com/eliben/pycparser |
-| pydantic | 2.13.4 | MIT | https://github.com/pydantic/pydantic |
-| pydantic_core | 2.46.4 | MIT | https://github.com/pydantic/pydantic |
-| Pygments | 2.20.0 | BSD-2-Clause | https://pygments.org |
+| pydantic | 2.14.3 | MIT | https://github.com/pydantic/pydantic |
+| pydantic_core | 2.50.4 | MIT | https://github.com/pydantic/pydantic |
+| Pygments | 2.21.0 | BSD-2-Clause | https://pygments.org |
 | PyJWT | 2.15.1 | MIT | https://github.com/jpadilla/pyjwt |
 | pyparsing | 3.3.2 | MIT | https://github.com/pyparsing/pyparsing/ |
 | pystray | 0.19.5 | GNU Lesser General Public License v3 (LGPLv3) | https://github.com/moses-palmer/pystray |
 | python-dateutil | 2.9.0.post0 | Apache Software License; BSD License | https://github.com/dateutil/dateutil |
-| python-multipart | 0.0.32 | Apache-2.0 | https://github.com/Kludex/python-multipart |
+| python-multipart | 0.0.33 | Apache-2.0 | https://github.com/Kludex/python-multipart |
 | pythonnet | 3.0.5 | MIT License | https://pythonnet.github.io/ |
 | pytorch-lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | pytorch-metric-learning | 2.9.0 | MIT License | https://github.com/KevinMusgrave/pytorch-metric-learning |
@@ -112,7 +112,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pywin32-ctypes | 0.2.3 | BSD-3-Clause | https://github.com/enthought/pywin32-ctypes |
 | PyYAML | 6.0.3 | MIT License | https://pyyaml.org/ |
 | referencing | 0.37.0 | MIT | https://github.com/python-jsonschema/referencing |
-| regex | 2026.7.19 | Apache-2.0 AND CNRI-Python | https://github.com/mrabarnett/mrab-regex |
+| regex | 2026.11.9 | Apache-2.0 AND CNRI-Python | https://github.com/mrabarnett/mrab-regex |
 | requests | 2.34.2 | Apache Software License | https://github.com/psf/requests |
 | rich | 15.0.0 | MIT License | https://github.com/Textualize/rich |
 | rpds-py | 2026.6.3 | MIT | https://github.com/crate-py/rpds |
@@ -123,8 +123,8 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | six | 1.17.0 | MIT License | https://github.com/benjaminp/six |
 | sortedcontainers | 2.4.0 | Apache Software License | http://www.grantjenks.com/docs/sortedcontainers/ |
 | SQLAlchemy | 2.0.51 | MIT | https://www.sqlalchemy.org |
-| sse-starlette | 3.4.6 | BSD-3-Clause | https://github.com/sysid/sse-starlette |
-| starlette | 1.3.1 | BSD-3-Clause | https://github.com/Kludex/starlette |
+| sse-starlette | 3.7.0 | BSD-3-Clause | https://github.com/sysid/sse-starlette |
+| starlette | 1.10.0 | BSD-3-Clause | https://github.com/Kludex/starlette |
 | sympy | 1.14.0 | BSD License | https://sympy.org |
 | threadpoolctl | 3.6.0 | BSD License | https://github.com/joblib/threadpoolctl |
 | tokenizers | 0.22.2 | Apache Software License | https://github.com/huggingface/tokenizers |
@@ -135,17 +135,17 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | torchcodec | 0.7.0 | UNKNOWN | UNKNOWN |
 | torchmetrics | 1.9.0 | Apache Software License | https://github.com/Lightning-AI/torchmetrics |
 | torchvision | 0.23.0 | BSD | https://github.com/pytorch/vision |
-| tqdm | 4.69.0 | MPL-2.0 AND MIT | https://tqdm.github.io |
+| tqdm | 4.70.1 | MPL-2.0 AND MIT | https://tqdm.github.io |
 | transformers | 4.57.6 | Apache Software License | https://github.com/huggingface/transformers |
 | truststore | 0.10.5 | MIT | https://github.com/sethmlarson/truststore |
-| typing-inspection | 0.4.2 | MIT | https://github.com/pydantic/typing-inspection |
+| typing-inspection | 0.4.5 | MIT | https://github.com/pydantic/typing-inspection |
 | typing_extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions |
-| tzdata | 2026.3 | Apache-2.0 | https://github.com/python/tzdata |
+| tzdata | 2026.6 | Apache-2.0 | https://github.com/python/tzdata |
 | urllib3 | 2.8.0 | MIT | https://github.com/urllib3/urllib3/blob/main/CHANGES.rst |
-| uvicorn | 0.51.0 | BSD-3-Clause | https://uvicorn.dev/ |
+| uvicorn | 0.54.0 | BSD-3-Clause | https://uvicorn.dev/ |
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
 | yarl | 1.25.1 | Apache-2.0 | https://github.com/aio-libs/yarl |
-| yt-dlp | 2026.10.21 | Unlicense | https://github.com/yt-dlp/yt-dlp |
+| yt-dlp | 2026.10.26 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 | yt-dlp-ejs | 0.8.0 | Unlicense AND MIT AND ISC | https://github.com/yt-dlp/ejs |
 
 ## Supplemental upstream notices
@@ -252,6 +252,24 @@ the upstream JavaScript implementation. See the
   [model notice](third-party-notices/faster-whisper-base-NOTICE.md).
 
 
+## Bundled text-embedding model (not a Python package)
+
+- **Component:** potion-base-8M, a Model2Vec static embedding model by
+  MinishLab, distilled from baai/bge-base-en-v1.5:
+  https://huggingface.co/minishlab/potion-base-8M at pinned revision
+  `bf8b056651a2c21b8d2565580b8569da283cab23`. Installed read-only at
+  `models/embed-bundled/potion-base-8m/` (macOS: `Contents/Resources/models/embed-bundled/potion-base-8m/`).
+  Uoink reads it with its own code; the model2vec package is not shipped.
+- **License:** MIT. The model card declares `license: mit`; the Model2Vec
+  project's MIT License is Copyright (c) 2024 Thomas van Dongen.
+- **Files** (the build refuses any size or hash mismatch):
+  - `config.json`: 202 bytes, SHA-256 `2a6ac0e9aaa356a68a5688070db78fc3a464fefe85d2f06a1905ce3718687553`
+  - `model.safetensors`: 30,236,760 bytes, SHA-256 `f65d0f325faadc1e121c319e2faa41170d3fa07d8c89abd48ca5358d9a223de2`
+  - `tokenizer.json`: 683,666 bytes, SHA-256 `e67e803f624fb4d67dea1c730d06e1067e1b14d830e2c2202569e3ef0f70bb50`
+- Provenance and the full license text:
+  [model notice](third-party-notices/potion-base-8m-NOTICE.md).
+
+
 ## Bundled fonts (not Python packages)
 
 The dashboard and the Chrome extension ship their own copies of three
@@ -280,4 +298,11 @@ The dashboard's phone-inbox setup draws its QR code on this computer with
 (MIT), copyright (c) 2009 Kazuhiko Arase, shipped unchanged as
 `assets/dashboard/qrcode.js`. No outside QR service is used.
 See the [MIT license](third-party-notices/qrcode-generator-1.4.4-MIT-LICENSE.txt).
+
+The Chrome extension's Uoink this page reads the open tab with
+[Defuddle 0.19.6](https://github.com/kepano/defuddle) (MIT), copyright (c) 2025
+Steph Ango (@kepano), shipped unchanged as `extension/lib/defuddle.js` after a
+header comment, with its license beside it as `extension/lib/defuddle-LICENSE.txt`.
+It runs only in the tab you clicked and the text goes only to the helper on this computer.
+See the [MIT license](third-party-notices/defuddle-0.19.6-MIT-LICENSE.txt).
 

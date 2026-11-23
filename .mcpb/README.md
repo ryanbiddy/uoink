@@ -69,7 +69,7 @@ and is not what this bundle launches.
 The committed [manifest](manifest.json) lists all 99 names. The 36 core
 remain first in `tools/list`. Set `UOINK_MCP_TOOLSET=core` for clients with tool
 caps, including Cursor. Unknown values warn on stderr and use full.
-Claude Desktop users should reinstall the 3.17.0 `.mcpb` and restart Desktop
+Claude Desktop users should reinstall the 3.18.0 `.mcpb` and restart Desktop
 to get the expanded inventory. Consent gates are unchanged.
 
 Resources and prompts are advertised on **stdio** (templates under
@@ -273,8 +273,9 @@ section 4. They are not a Claude Code CLI acceptance claim.
 
 Corpora, screenshots, podcast audio, transcripts, the library index and logs
 stay on your computer. Capture fetches the source you request; enabled podcast
-watches poll feeds and Auto-ingest can download episodes. Truncated X posts may
-use FxTwitter to retrieve full text. Transcription can download models with
+watches poll feeds and Auto-ingest can download episodes. Long X posts that X
+cuts short use FxTwitter only if you turn that switch on (off by default).
+Transcription can download models with
 consent; **Check now** contacts GitHub.
 
 Optional Anthropic features require your own key and send relevant source text.

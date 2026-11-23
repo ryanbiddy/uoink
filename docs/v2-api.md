@@ -146,6 +146,18 @@ Success response: HTTP 200
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "transcription_engine": "whisperx",
+  "transcription_worker": {
+    "offloaded": true,
+    "state": "not_loaded",
+    "pid": null,
+    "op": null,
+    "idle_release_seconds": 120,
+    "release_at": null,
+    "jobs_run": 0,
+    "last_exit": null,
+    "line": "Transcription engine: idle (not loaded)."
+  },
   "heartbeat": {
     "last_tick_completed_at": "2026-09-04T16:30:00Z",
     "last_successful_tick_at": "2026-09-04T16:30:00Z",
@@ -200,6 +212,7 @@ Fields:
 | `migration_version` | integer | Newest SQLite schema migration opened by this helper process. |
 | `migration_pending` | boolean | `true` if the checkout contains a newer migration than the running helper opened. |
 | `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last source-scheduler pass in which no feed poll failed; `null` before the first such pass. |
+| `transcription_worker` | object | Reports `running` while either slot is busy, `loaded` while a model stays warm, and `not_loaded` after both children exit. |
 | `heartbeat` | object | Scheduler heartbeat with separate stamps: `last_tick_completed_at` (a pass finished, any outcome), `last_successful_tick_at` (zero failed polls), `last_successful_poll_at`, `last_failed_poll_at` + `last_poll_error` (a failed poll never advances a success stamp), `last_ingest_completed_at` (an episode was published into the corpus by the watch pipeline), `last_tick` and `counts` tallies, `tick_interval_sec`, and `freshness` (`state` is `never` / `fresh` / `stale`, with `age_sec` since the last completed pass and the `stale_after_sec` bound). `uoink doctor` reports the same block and fails on `stale`. |
 | `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
 | `whisper_model` | string | Normalized model selected in settings. |
@@ -402,9 +415,9 @@ Optional request body:
 }
 ```
 
-`model` may be `tiny`, `base`, `small`, `medium`, `large`, or
-`large-v3-turbo`. When it is
-omitted, Uoink uses the model selected in Settings.
+`model` may be `tiny`, `base`, `small`, `medium`, `large`, `large-v3-turbo`,
+`distil-small.en`, or `distil-large-v3.5`. When it is omitted, Uoink uses the
+model selected in Settings.
 
 Success response: HTTP 200
 
@@ -1155,10 +1168,13 @@ Query parameters:
 | `hook_type` | string | no | One of the 9 Hook Type categories. |
 | `date_from` | string | no | Inclusive lower bound, `YYYY-MM-DD`. |
 | `date_to` | string | no | Inclusive upper bound, `YYYY-MM-DD`. Internally implemented as `< next day`. |
+| `published_from` | string | no | Inclusive lower bound on the original publish date (not the capture date), `YYYY-MM-DD`. Items with no known publish date never match. |
+| `published_to` | string | no | Inclusive upper bound on the original publish date, `YYYY-MM-DD`. A `published_from` after `published_to` returns 400 with `state: "invalid_range"`. |
 | `limit` | integer | no | Defaults to 50. Clamped to 1-200. |
 | `offset` | integer | no | Defaults to 0. Must be 0 or greater. |
 
 Filters combine with AND logic. With `q`, rows are ranked by FTS5 `bm25`; without `q`, rows sort by `yoinked_at DESC`.
+A publish-date bound uses keyword search (semantic and hybrid requests fall back with `fallback_reason`). Library rows carry `published_at` (`YYYY-MM-DD` or null), read from the stored `published_at` or yt-dlp `upload_date` (YYYYMMDD) or an RSS `pubDate`.
 
 Success response: HTTP 200
 
@@ -2273,6 +2289,53 @@ and `original_thumbnail_path`. With the `card_image` setting at `middle` (the
 default; the other value is `thumbnail`), `thumbnail_path` points at the saved
 screenshot nearest the middle of a video, within 20% of its duration, when
 one exists.
+
+### Save a whole show: /shows
+
+Save every episode of a YouTube channel, a YouTube playlist, a podcast RSS
+feed or a pasted list of YouTube links as transcripts only. Every route needs
+`X-Uoink-Token`. Runs live in `show-captures/<id>.json` in the data folder,
+one state per episode (`queued`, `running`, `done`, `failed` with a reason,
+`skipped` with a reason), written after every change.
+
+| Method | Path | Does |
+|---|---|---|
+| POST | `/shows/preview` `{"text": "..."}` | Classifies the paste and lists every episode in the background (202). Saves nothing. |
+| GET | `/shows` | Every run, newest first, each with `counts`, `estimate` and up to 50 `failures`. |
+| GET | `/shows/<id>` | One run. `?episodes=1` adds every episode. |
+| POST | `/shows/<id>/start` `{"asr": false}` | Starts a listed run. `asr: true` lets videos without captions be transcribed locally. Podcast feeds need `asr: true`. |
+| POST | `/shows/<id>/pause`, `/resume`, `/cancel` | Pause keeps the episode in flight and starts no more. Cancel removes a queued episode from the download queue. |
+| POST | `/shows/<id>/retry-failed` `{"asr": true}` | Queues the failed episodes again (`asr` optional). |
+| POST | `/shows/<id>/dismiss` | Removes a finished, cancelled or never-started run from the list. Saved items stay. |
+
+Run states: `listing`, `ready`, `running`, `waiting` (YouTube's bot-check
+cooldown or a queued episode waiting out a bot check or a 429, with
+`wait_until`), `paused` (with `reason` when a setup problem stopped it),
+`done`, `cancelled`, `failed` (listing failed, with `reason`). Errors are
+`{ok: false, code, error}`: 400 `empty`, `invalid_url`, `unsupported`,
+`invalid`; 404 `not_found`; 409 `invalid_state`, `needs_asr`,
+`asr_unavailable`.
+
+Listing reuses the list import's `yt-dlp --flat-playlist` window (500 at a
+time, up to 5,000 episodes; live and upcoming streams are left out) and the
+podcast feed parser. Each YouTube episode is one row on the download queue
+(`pending_yoinks`) with `long_video_mode` `transcript` or `transcript_asr`,
+so the queue's own 429 and bot-check back-off apply. A run adds one episode
+only when the queue has no other work due, no capture is running and the
+bot-check cooldown is off, so a single capture always goes first. A podcast
+episode is registered under its feed (the show is not followed) and goes
+through the normal podcast download and transcription job. Example payloads:
+[`docs/integrations/timed-cues.md`](integrations/timed-cues.md).
+
+A transcript-only capture saves captions first (the uploaded track wins over
+YouTube's automatic one), skips the video download, screenshots, comments,
+entity extraction and channel details, and keeps the thumbnail. Without
+captions, `transcript` saves nothing and fails with a reason; `transcript_asr`
+downloads the audio alone, runs local Whisper, and deletes the audio. It never
+replaces an item already in the library. Every save, transcript-only or not,
+now records the original publish date (`published_at`) and the description
+in its sidecar, apart from the capture time, plus `caption_kind`
+(`captions` or `auto_captions`) when captions were used.
 
 ## Job state machine
 

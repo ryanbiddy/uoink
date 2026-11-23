@@ -9,6 +9,8 @@ import sqlite3
 import subprocess
 import sys
 import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
@@ -231,8 +233,660 @@ def test_edit_soft_delete_hard_delete_restore_and_restart(engine, index):
     assert set(engine.store.fingerprints()) == {"bread"}
     other = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
     ready(other)
-    assert other._model.calls == []  # unchanged sources reuse persisted vectors
+    assert other._model is None  # unchanged sources reuse vectors without loading ONNX
     assert other.embedding_search("bread")[0].source_id == "bread"
+
+
+def test_model_released_after_idle_and_reloaded_for_query(engine, index, monkeypatch):
+    released = threading.Event()
+
+    class ObservedModel(FakeModel):
+        def __del__(self):
+            released.set()
+
+    monkeypatch.setattr(engine, "_idle_seconds", 0.02)
+    engine.model_factory = ObservedModel
+    index.seed()
+    ready(engine)
+    assert released.wait(5) and engine._model is None
+    assert engine.embedding_search("mars")[0].source_id == "mars"
+
+
+class CountingFactory:
+    """Records model loads and verification order. It does not verify by
+    itself, so only LocalSearch can guarantee that verification came first."""
+
+    def __init__(self, manager, events):
+        self.events = events
+        original = manager.verify
+
+        def verify():
+            original()
+            events.append("verify")
+
+        manager.verify = verify
+
+    def __call__(self, manager):
+        self.events.append("load")
+        model = FakeModel.__new__(FakeModel)
+        model.calls = []
+        return model
+
+
+def restarted(engine, index, events):
+    other = ls.LocalSearch(engine.root, index)
+    other.model_factory = CountingFactory(other.manager, events)
+    return other
+
+
+def test_restart_with_saved_vectors_answers_the_first_search_without_a_startup_model(engine, index):
+    index.seed()
+    index.seed("bread", "Knead sourdough bread", topic="food")
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)
+    other.restore()
+    assert other._worker is None and other._model is None and events == []
+    assert [hit.source_id for hit in other.embedding_search("rust")] == ["mars", "bread"]
+    assert events == ["verify", "load"]
+    assert other._worker is None  # nothing was owed, so the search started no indexing
+    assert other.pause(timeout=5)
+
+
+def test_restart_with_unindexed_changes_answers_from_saved_vectors_then_indexes(engine, index):
+    index.seed()
+    ready(engine)
+    index.seed("rusty", "A rusty gate", topic="home")  # saved while search was not running
+    events = []
+    other = restarted(engine, index, events)
+    assert other.restore()
+    assert other.wait(5)
+    assert other.status()["state"] == "ready" and other._model is None and events == []
+    assert set(other.store.fingerprints()) == {"mars"}
+    assert [hit.source_id for hit in other.embedding_search("rust")] == ["mars"]
+    # First use indexes what startup skipped.
+    assert other.wait(5)
+    assert set(other.store.fingerprints()) == {"mars", "rusty"}
+    assert {hit.source_id for hit in other.embedding_search("rust")} == {"mars", "rusty"}
+    assert events.index("verify") < events.index("load")
+    assert other.pause(timeout=5)
+
+
+def test_restore_does_nothing_when_paused_off_or_without_terms(engine, index):
+    index.seed()
+    ready(engine)
+    assert engine.pause(timeout=5)
+    paused = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
+    assert not paused.restore() and paused._worker is None
+    engine.start()
+    assert engine.wait(5)
+    engine.manager.terms_path.unlink()
+    unaccepted = ls.LocalSearch(engine.root, index, model_factory=FakeModel)
+    assert not unaccepted.restore() and unaccepted._worker is None
+
+
+def test_no_search_runs_inference_before_verification(engine, index):
+    """The window between a worker launch and manager.verify() admits no search."""
+    index.seed()
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)
+    before_verify, release = threading.Event(), threading.Event()
+    original_checkpoint = other._checkpoint
+
+    def held_checkpoint():
+        if not before_verify.is_set():
+            before_verify.set()
+            assert release.wait(5)
+        original_checkpoint()
+
+    # A published snapshot is available to a second search while the worker
+    # is starting; a cold cache would conceal the verification race.
+    other.store.refresh()
+    other.sources.snapshot()
+    other._checkpoint = held_checkpoint
+    try:
+        assert other.start()
+        assert before_verify.wait(5)  # worker launched, verification not started
+        other.update_source("mars")  # state can now say indexing
+        with pytest.raises(ls.SearchUnavailable):
+            other.embedding_search("rust")
+        assert "load" not in events
+    finally:
+        release.set()
+    assert other.wait(5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert events.index("verify") < events.index("load")
+    assert other.pause(timeout=5)
+
+
+def test_search_during_verification_is_refused(engine, index):
+    index.seed()
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)
+    verifying, release = threading.Event(), threading.Event()
+    counted = other.manager.verify
+
+    def slow_verify():
+        verifying.set()
+        assert release.wait(5)
+        counted()
+
+    other.manager.verify = slow_verify
+    try:
+        assert other.start()
+        assert verifying.wait(5)
+        with pytest.raises(ls.SearchUnavailable):
+            other.embedding_search("rust")
+        assert events == []
+    finally:
+        release.set()
+    assert other.wait(5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert other.pause(timeout=5)
+
+
+def test_error_state_blocks_inference(engine, index):
+    index.seed()
+    ready(engine)
+    engine._model.calls.clear()
+    engine._set("error", error="Local search failed. Retry setup or rebuild the derived index.")
+    engine.update_source("mars")
+    assert engine.status()["state"] == "error"
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    assert engine._model.calls == []
+
+
+def test_pause_waits_for_a_search_in_flight_and_no_inference_follows(engine, index):
+    index.seed()
+    ready(engine)
+    order, checked, release = [], threading.Event(), threading.Event()
+    model = engine._model
+    original_embed = model.embed
+
+    def recording_embed(texts, **kwargs):
+        checked.set()  # inference is already using the model
+        assert release.wait(5)
+        order.append("inference")
+        return original_embed(texts, **kwargs)
+
+    model.embed = recording_embed
+    errors = []
+
+    def search():
+        try:
+            engine.embedding_search("rust")
+        except ls.SearchUnavailable as exc:
+            errors.append(exc)
+
+    searcher = threading.Thread(target=search)
+    searcher.start()
+    assert checked.wait(5)
+    paused = []
+    pauser = threading.Thread(target=lambda: (paused.append(engine.pause(timeout=5)), order.append("paused")))
+    pauser.start()
+    try:
+        # pause() cannot finish while the search that passed its checks runs.
+        assert engine._stop.wait(5)  # the pauser has reached its stop barrier
+    finally:
+        release.set()
+    searcher.join(5)
+    pauser.join(5)
+    assert not errors and paused == [True]
+    assert order == ["inference", "paused"]
+    assert engine._model is None and engine._idle_timer is None
+    with pytest.raises(ls.SearchUnavailable, match="paused"):
+        engine.embedding_search("rust")
+    assert order == ["inference", "paused"]
+
+
+@pytest.mark.parametrize("action", ["pause", "remove", "close"])
+def test_pause_remove_and_close_cancel_the_idle_timer(engine, index, action):
+    index.seed()
+    ready(engine)
+    timer = engine._idle_timer
+    assert timer is not None and timer.is_alive() and engine._model is not None
+    getattr(engine, action)()
+    timer.join(5)
+    assert not timer.is_alive()
+    assert engine._idle_timer is None and engine._model is None
+
+
+def test_close_keeps_the_saved_pause_choice_and_the_next_start_restores(engine, index):
+    index.seed()
+    ready(engine)
+    assert engine.close()
+    assert ls.LocalSearch.settings_at(engine.root).get("paused") is not True
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("rust")
+    assert not engine.update_source("mars") and engine._worker is None
+    events = []
+    other = restarted(engine, index, events)
+    assert not other._paused and other.restore() and other.wait(5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert other.pause(timeout=5)
+
+
+def test_helper_shutdown_closes_search_without_saving_a_pause():
+    source = (Path(__file__).resolve().parents[1] / "server.py").read_text(encoding="utf-8")
+    assert "_local_search_singleton.close()" in source
+    assert "_local_search_singleton.pause()" not in source
+
+
+def test_idle_release_does_not_make_a_search_busy(engine, index, monkeypatch):
+    """Freeing the old session can be slow. A search arriving meanwhile proceeds."""
+    releasing, finish = threading.Event(), threading.Event()
+
+    class SlowToFree(FakeModel):
+        slow = True
+
+        def __del__(self):
+            if SlowToFree.slow:
+                SlowToFree.slow = False
+                releasing.set()
+                finish.wait(5)
+
+    engine.model_factory = SlowToFree
+    engine._idle_seconds = 0.05
+    index.seed()
+    try:
+        ready(engine)
+        assert releasing.wait(5)  # the idle timer is freeing the first session
+        assert engine.embedding_search("rust")[0].source_id == "mars"
+    finally:
+        finish.set()
+
+
+def test_idle_release_leaves_a_model_in_use_and_rearms(engine, index):
+    index.seed()
+    ready(engine)
+    model = engine._model
+    inside, release = threading.Event(), threading.Event()
+    original = model.embed
+
+    def held(texts, **kwargs):
+        inside.set()
+        assert release.wait(5)
+        return original(texts, **kwargs)
+
+    model.embed = held
+
+    def fire_idle_timer():
+        # Run the current timer's callback now, as if the idle wait had passed.
+        with engine._model_lock:
+            timer, generation = engine._idle_timer, engine._idle_generation
+            engine._last_use = 0.0
+        timer.cancel()
+        engine._release_idle_model(generation)
+
+    searcher = threading.Thread(target=lambda: engine.embedding_search("rust"))
+    searcher.start()
+    try:
+        assert inside.wait(5)
+        fire_idle_timer()  # returns at once: it neither waits for nor drops the model
+        assert engine._model is model
+    finally:
+        release.set()
+    searcher.join(5)
+    assert engine._model is model and engine._idle_timer is not None  # re-armed after use
+    fire_idle_timer()
+    assert engine._model is None and engine._idle_timer is None
+
+
+@pytest.mark.parametrize("action", ["idle", "pause", "idle_after_resume"])
+def test_changed_model_file_refused_before_factory(engine, index, action):
+    index.seed()
+    events = []
+    engine.model_factory = CountingFactory(engine.manager, events)
+    ready(engine)
+    if action == "idle":
+        engine._last_use = 0
+        engine._idle_timer.cancel()
+        engine._release_idle_model(engine._idle_generation)
+    else:
+        assert engine.pause(timeout=5)
+        if action == "idle_after_resume":
+            ready(engine)  # Saved vectors are current, so the model stays unloaded.
+    assert engine._model is None
+    (engine.manager.directory / ls.MODEL_FILES[0][0]).write_bytes(b"changed")
+    if action == "pause":
+        assert engine.start() and engine.wait(5)
+    with pytest.raises(ls.SearchUnavailable):
+        engine.embedding_search("mars")
+    assert events.count("load") == 1
+
+
+def test_timed_query_arriving_during_model_load_shares_the_session(engine, index):
+    index.seed()
+    ready(engine)
+    assert engine.pause(timeout=5)
+    ready(engine)
+    loading, release = threading.Event(), threading.Event()
+    loads = []
+
+    def factory(manager):
+        loads.append(manager)
+        loading.set()
+        assert release.wait(5)
+        return FakeModel(manager)
+
+    def query():
+        return engine.query_with_timeout(lambda: engine.embedding_search("rust"), 4)
+
+    engine.model_factory = factory
+    with ThreadPoolExecutor() as pool:
+        first = pool.submit(query)
+        try:
+            assert loading.wait(5)
+            second = pool.submit(query)
+            with pytest.raises(TimeoutError):
+                second.result(timeout=.15)
+        finally:
+            release.set()
+        assert [job.result(timeout=5)[0].source_id for job in (first, second)] == ["mars", "mars"]
+    assert loads == [engine.manager]
+
+
+@pytest.mark.parametrize("state", ["error", "unverified", "paused", "closed", "terms_needed", "downloading"])
+def test_invalid_state_precedes_factory(engine, state):
+    engine.enabled = True
+    engine._verified = state != "unverified"
+    engine._paused = state == "paused"
+    engine._closed = state == "closed"
+    engine._state = state if state in {"terms_needed", "downloading", "error"} else "ready"
+    loads = []
+    engine.model_factory = lambda manager: loads.append(manager)
+    with pytest.raises(ls.SearchUnavailable):
+        engine._embed(["query"])
+    assert loads == []
+
+
+@pytest.mark.parametrize("action", ["restore", "update_source", "status"])
+def test_state_lock_available_during_file_checks(engine, index, action, monkeypatch):
+    index.seed()
+    ready(engine)
+    entered, release = threading.Event(), threading.Event()
+    name = "present" if action == "update_source" else "acceptance"
+    original = getattr(engine.manager, name)
+    def held():
+        entered.set()
+        assert release.wait(5)
+        return original()
+    monkeypatch.setattr(engine.manager, name, held)
+    with ThreadPoolExecutor() as pool:
+        job = pool.submit(getattr(engine, action), *(["mars"] if action == "update_source" else []))
+        try:
+            assert entered.wait(5)
+            assert engine._state_lock.acquire(timeout=.2)
+            engine._state_lock.release()
+        finally:
+            release.set()
+        job.result(timeout=5)
+
+
+def test_concurrent_first_searches_share_warmup_and_model_load(engine, index):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    entered, release = threading.Event(), threading.Event()
+    loading, finish_load = threading.Event(), threading.Event()
+    verify, factory = other.manager.verify, other.model_factory
+    def held_verify():
+        entered.set()
+        assert release.wait(5)
+        return verify()
+    def held_factory(manager):
+        loading.set()
+        assert finish_load.wait(5)
+        return factory(manager)
+    other.manager.verify, other.model_factory = held_verify, held_factory
+    assert other.restore()
+    with ThreadPoolExecutor() as pool:
+        first = pool.submit(other.embedding_search, "rust")
+        try:
+            assert entered.wait(5)
+            second = pool.submit(other.embedding_search, "rust")
+            with pytest.raises(TimeoutError):
+                second.result(timeout=.1)
+            release.set()
+            assert loading.wait(5)
+            assert other._activity.acquire(timeout=.2)
+            other._activity.release()
+        finally:
+            release.set()
+            finish_load.set()
+        for query in (first, second):
+            assert query.result(timeout=5)[0].source_id == "mars"
+    assert other.close()
+
+
+def test_warm_waiter_can_finish_after_first_query_starts_inference(engine, index, monkeypatch):
+    from concurrent.futures import FIRST_COMPLETED, wait as wait_for_queries
+
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    assert other.restore()
+    in_model, release = threading.Event(), threading.Event()
+    verifying = threading.Event()
+    both_waiting = threading.Barrier(2, action=verifying.set)
+    wait = other._warm_ready.wait
+
+    def shared_wait(timeout):
+        turn = both_waiting.wait(timeout=3)
+        assert wait(timeout)
+        if turn:
+            assert in_model.wait(3)
+        return True
+
+    class SlowFirstQuery(FakeModel):
+        def embed(self, texts, *, wait=True):
+            in_model.set()
+            assert release.wait(3)
+            return super().embed(texts, wait=wait)
+
+    # Keep warm-up open until both requests have reached its event.
+    verify = other.manager.verify
+    def held_verify():
+        assert verifying.wait(3)
+        verify()
+
+    monkeypatch.setattr(other.manager, "verify", held_verify)
+    monkeypatch.setattr(other._warm_ready, "wait", shared_wait)
+    other.model_factory = SlowFirstQuery
+    try:
+        with ThreadPoolExecutor() as pool:
+            queries = [pool.submit(other.embedding_search, "rust") for _ in range(2)]
+            try:
+                assert in_model.wait(3)
+                done, _ = wait_for_queries(queries, timeout=.2, return_when=FIRST_COMPLETED)
+                assert not done
+            finally:
+                release.set()
+            assert all(query.result(timeout=3)[0].source_id == "mars" for query in queries)
+    finally:
+        assert other.close()
+
+
+def test_download_queued_during_index_model_load_is_serviced(engine, index):
+    index.seed()
+    loading, release = threading.Event(), threading.Event()
+    downloaded = []
+    def factory(manager):
+        loading.set()
+        assert release.wait(5)
+        return FakeModel(manager)
+    engine.model_factory = factory
+    engine.manager.download = lambda **kwargs: downloaded.append(True)
+    assert engine.start()
+    try:
+        assert loading.wait(5)
+        assert engine.download()
+    finally:
+        release.set()
+    assert engine.wait(5)
+    assert downloaded == [True] and engine.status()["state"] == "ready"
+
+
+def test_warmup_wait_has_a_five_second_deadline(engine, index):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    release = threading.Event()
+    original_verify = other.manager.verify
+    def slow_verify():
+        assert release.wait(9)
+        original_verify()
+    other.manager.verify = slow_verify
+    assert other.restore()
+    try:
+        with ThreadPoolExecutor() as pool:
+            query = pool.submit(other.embedding_search, "rust")
+            try:
+                with pytest.raises(ls.SearchUnavailable, match="Start local search"):
+                    query.result(timeout=7)
+                assert other._worker is not None and other._model is None
+            finally:
+                release.set()
+    finally:
+        assert other.close()
+
+
+@pytest.mark.parametrize("queued", ["update", "download"])
+def test_warm_search_finishes_while_queued_work_still_runs(engine, index, queued):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    entered, verified = threading.Event(), threading.Event()
+    working, finish = threading.Event(), threading.Event()
+    verify, sync = other.manager.verify, other._sync
+    def held_verify():
+        entered.set()
+        assert verified.wait(5)
+        verify()
+    def slow(*args, **kwargs):
+        working.set()
+        assert finish.wait(5)
+    def held_sync(*args, **kwargs):
+        if kwargs.get("embed", True):
+            slow()
+        return sync(*args, **kwargs)
+    other.manager.verify, other._sync = held_verify, held_sync
+    other.manager.download = slow
+    assert other.restore()
+    with ThreadPoolExecutor() as pool:
+        query = pool.submit(other.embedding_search, "rust")
+        try:
+            assert entered.wait(5)
+            if queued == "update":
+                assert other.update_source("mars")
+            else:
+                assert other.download()
+            verified.set()
+            assert working.wait(5)
+            if queued == "download":
+                with pytest.raises(ls.SearchUnavailable):
+                    query.result(timeout=1)
+            else:
+                assert query.result(timeout=1)[0].source_id == "mars"
+        finally:
+            verified.set()
+            finish.set()
+    assert other.close()
+
+
+@pytest.mark.parametrize("path", ["start", "restore_then_update"])
+def test_model_changed_after_unloaded_verification_is_hashed_before_load(engine, index, path):
+    """A fresh engine can verify the files and leave the model unloaded because
+    every saved vector is current. A later change to the files must be caught
+    before the first load, not trusted from that earlier hash."""
+    index.seed()
+    ready(engine)
+    events = []
+    other = restarted(engine, index, events)  # CountingFactory does not verify by itself
+    if path == "start":
+        assert other.start() and other.wait(5)
+    else:
+        assert other.restore() and other.update_source("mars") and other.wait(5)
+    assert other.status()["state"] == "ready" and other._model is None and events == ["verify"]
+    (other.manager.directory / ls.MODEL_FILES[0][0]).write_bytes(b"changed")
+    with pytest.raises(ls.SearchUnavailable):
+        other.embedding_search("mars")
+    assert "load" not in events
+    assert other.pause(timeout=5)
+
+
+def test_download_after_restore_replaces_bad_files_instead_of_failing_on_them(engine, index, tiny_files):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    assert other.restore()
+    target = other.manager.directory / ls.MODEL_FILES[0][0]
+    target.write_bytes(b"x" * len(tiny_files))  # damaged: same size, wrong hash
+    warming_during_download = []
+
+    def download(**kwargs):
+        warming_during_download.append(other.status()["warming"])
+        target.write_bytes(tiny_files)
+
+    other.manager.download = download
+    assert other.download() and other.wait(5)
+    assert warming_during_download == [False]
+    assert other.status()["state"] == "ready" and not other.status()["warming"]
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert other.pause(timeout=5)
+
+
+def test_remove_after_restore_is_never_reported_as_warming(engine, index):
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    assert other.restore() and other.status()["warming"]
+    other.remove()
+    assert not other._warm and other._warm_ready.is_set() and other._worker is None
+    assert not other.status()["warming"] and other.status()["state"] == "not_installed"
+
+
+def test_direct_search_never_waits_on_a_slow_model_load(engine, index, monkeypatch):
+    """Warm-up plus a slow load stays inside one search budget. The search says
+    not ready in time and the load finishes in the background for the next one."""
+    index.seed()
+    ready(engine)
+    other = restarted(engine, index, [])
+    monkeypatch.setattr(ls, "QUERY_WAIT_SECONDS", 1.0)
+    verify = other.manager.verify
+    loading, release = threading.Event(), threading.Event()
+    loads = []
+
+    def slow_verify():
+        time.sleep(.6)  # warm-up spends most of the budget
+        verify()
+
+    def slow_factory(manager):
+        loads.append(manager)
+        loading.set()
+        assert release.wait(10)
+        return FakeModel(manager)
+
+    other.manager.verify, other.model_factory = slow_verify, slow_factory
+    assert other.restore()
+    try:
+        with ThreadPoolExecutor() as pool:
+            started = time.monotonic()
+            query = pool.submit(other.embedding_search, "rust")
+            with pytest.raises(ls.SearchUnavailable, match="Start local search"):
+                query.result(timeout=4)
+            assert time.monotonic() - started < 1.6
+            assert loading.wait(2)
+    finally:
+        release.set()
+    with other._model_lock:
+        assert other._model_lock.wait_for(lambda: other._model is not None and not other._loading, 5)
+    assert other.embedding_search("rust")[0].source_id == "mars"
+    assert loads == [other.manager]
+    assert other.close()
 
 
 def test_clip_spans_timestamps_max_per_source_and_metadata_changes(engine, index):

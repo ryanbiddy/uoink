@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import ast
 import builtins
+from contextlib import nullcontext
 import copy
 import hashlib
 import importlib
@@ -1486,6 +1487,8 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     audio_placeholder = env.root / "never-decoded.mp3"
     audio_placeholder.write_bytes(b"synthetic placeholder; not an audio fixture")
     admission_globals = {
+        "source_subscriptions": SimpleNamespace(CaptureLock=SimpleNamespace(
+            acquire=lambda root, key, timeout: nullcontext())),
         "_platform": _platform,
         "Path": Path, "_get_index": lambda: None,
         "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
@@ -1501,6 +1504,7 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
         "_podcast_transcription_queue": SimpleNamespace(put=_blocked),
         "_make_job_id": lambda: "synthetic-job", "_now_iso": lambda: STAMP,
     }
+    _function("server.py", "_admit_podcast_transcription", admission_globals)
     admission = _function("server.py", "_queue_podcast_transcription", admission_globals)
     for diarize in (False, True):
         body, status = admission(42, diarize=diarize, consent_given=False)

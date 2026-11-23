@@ -7,6 +7,7 @@ pin sys.path for Python's embedded ._pth mode.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from contextlib import redirect_stdout
 import json
 import math
@@ -29,11 +30,13 @@ import uoink_install_isolation as isolation  # noqa: E402
 # Mirrors uoink_mcp_tools.STDIO_TOOLSETS without importing the registry at parse time.
 HELP_DESCRIPTION = (
     "Search your Uoink library, capture links and connect AI agents.\n"
-    "Every command prints JSON. Add --text for a short readable version.\n"
+    "Add --text to read command results in your terminal.\n"
     "Run 'uoink <command> --help' for one command."
 )
 
 TOOLSETS = ("full", "core", "search", "research")
+BACKFILL_ACTIONS = ("status", "start", "pause", "resume")
+BACKFILL_ROUTE = "/library/transcript-backfill"
 
 
 class UsageError(ValueError):
@@ -51,31 +54,45 @@ class Parser(argparse.ArgumentParser):
 def parser():
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--text", dest="text_output", action="store_true", default=argparse.SUPPRESS,
-                        help="short human rendering instead of JSON")
+                        help="print results as readable text")
     root = Parser(prog="uoink", parents=[common], description=HELP_DESCRIPTION,
                   formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = root.add_subparsers(dest="command", metavar="<command>")
     def command(name, **kw):
         return sub.add_parser(name, parents=[common], **kw)
-    listing = command("tools", help="list registry tools")
+    listing = command("tools", help="list available tools")
     listing.add_argument("--toolset", choices=TOOLSETS, default="full", help="which tools to list (default full)")
     listing.add_argument("--json", action="store_true", help="include client input schemas")
-    call = command("call", help="call any registry tool")
+    call = command("call", help="run a tool by name")
     call.add_argument("tool", help="tool name; run 'uoink tools --text' to list them")
     source = call.add_mutually_exclusive_group()
     source.add_argument("--args", help="tool arguments as one JSON object")
     source.add_argument("--args-file", type=Path, help="read the JSON arguments from a file")
     call.add_argument("pairs", nargs="*", metavar="key=value", help="one argument, repeatable")
-    search = command("search", help="bounded library search with stored timing")
+    search = command("search", help="search saved items and show matching timestamps")
     search.add_argument("query", help="words to look for in your library")
     search.add_argument("--limit", type=int, default=5, help="most results to show (default 5)")
-    capture = command("capture", help="route a URL through existing capture tools")
+    capture = command("capture", help="save a video, playlist, post or page")
     capture.add_argument("url", help="video, playlist, post or page link")
+    capture.add_argument("--shelf", help="put the save on this shelf instead of picking one")
     recent = command("recent", help="list the newest items in your library")
     recent.add_argument("--limit", type=int, default=20, help="most items to show (default 20)")
-    get = command("get", help="get a bounded library card by item id")
+    get = command("get", help="look up a saved item by ID, or read it in full with --text")
     get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
+    cues = command("cues", help="timed transcript cues for one item, or list items by show "
+                   "and publish date")
+    cues.add_argument("id", nargs="?", help="item id from search or recent; omit to list items")
+    cues.add_argument("--start", type=float, help="only cues from this second")
+    cues.add_argument("--end", type=float, help="only cues up to this second")
+    cues.add_argument("--channel", help="list: only this show or channel (exact name)")
+    cues.add_argument("--from", dest="published_from", help="list: published on or after YYYY-MM-DD")
+    cues.add_argument("--to", dest="published_to", help="list: published on or before YYYY-MM-DD")
+    cues.add_argument("--words", dest="q", help="list: words to search for")
+    cues.add_argument("--limit", type=int, help="most items (list: 1-200, default 50) or cues "
+                      "(item: 1-5000, default 1000)")
+    cues.add_argument("--offset", type=int,
+                      help="start position; use the printed next_offset for the next page")
     imports = command("import-list", help="queue every video in a HackerTube list, HN thread, "
                       "Reddit thread or YouTube playlist (50 per batch)")
     imports.add_argument("url", help="list, thread or playlist link")
@@ -90,6 +107,23 @@ def parser():
     saves.add_argument("--limit", type=int, default=50, help="items per batch, 1-50 (default 50)")
     saves.add_argument("--offset", type=int, default=0, help="start position in the staged list")
     saves.add_argument("--preview", action="store_true", help="count without queueing")
+    shelves = command("shelves", help="tidy Uncategorized: see proposed shelves, move saves, undo",
+                      formatter_class=argparse.RawDescriptionHelpFormatter,
+                      description="Nothing moves until you run apply or move, and undo puts the last move back.\n"
+                                  "Moves change the shelf in the library, the search index and the saved\n"
+                                  "notes. Folders on disk stay where they are.")
+    shelves_sub = shelves.add_subparsers(dest="shelves_command", required=True, metavar="<action>")
+    tidy = shelves_sub.add_parser("tidy", parents=[common],
+                                  help="propose a shelf and a reason for each save on Uncategorized")
+    tidy.add_argument("--limit", type=int, default=2000, help="most saves to look at, 1-5000 (default 2000)")
+    accept = shelves_sub.add_parser("apply", parents=[common], help="accept one proposed group from tidy")
+    accept.add_argument("shelf", help="the group's shelf name, as tidy printed it")
+    accept.add_argument("--only", nargs="+", metavar="ID", help="move only these items from the group")
+    move = shelves_sub.add_parser("move", parents=[common], help="move items to a shelf (new or existing)")
+    move.add_argument("shelf", help="shelf name, 1-64 characters")
+    move.add_argument("ids", nargs="+", metavar="ID", help="item ids from search, recent or tidy")
+    undo = shelves_sub.add_parser("undo", parents=[common], help="put the last move back")
+    undo.add_argument("batch_id", nargs="?", help="a specific move to undo (default: the latest)")
     research = command("research", help="discover sources, capture evidence and publish a research report")
     research.add_argument("words", nargs="+", metavar="WORDS",
                           help="a question to research, or status, publish, open or list")
@@ -106,7 +140,23 @@ def parser():
     note = command("note", help="save a note to your library")
     note.add_argument("text", help="the note text")
     note.add_argument("--title", help="a title for the note")
+    models = command("models", help="list, download, delete or choose local transcription models",
+                     description="Speech models for videos with no captions. Downloads come from "
+                                 "Hugging Face, are checked file by file and resume after a stop. "
+                                 "Ctrl+C stops a download here; run it again to resume.")
+    models.add_argument("action", nargs="?", default="list", choices=("list", "download", "delete", "use"),
+                        help="list (default), download, delete or use")
+    models.add_argument("model", nargs="?", help="model id from 'uoink models', for example distil-small.en")
     command("status", help="show the version, data folder and whether the helper is running")
+    backfill = command("backfill", help="transcribe saves that have video but no words (runs in the helper)",
+                       description="Find saves that have video but no transcript and transcribe them with "
+                                   "the local model, one at a time, longest first. It runs inside the "
+                                   "helper, so it keeps going after this command ends and pauses while "
+                                   "you capture. Nothing leaves this computer except fetching media again "
+                                   "from where it was saved.")
+    backfill.add_argument("action", choices=BACKFILL_ACTIONS, help="status, start, pause or resume")
+    backfill.add_argument("--order", choices=("longest", "newest"),
+                          help="with start: longest first (default) or newest saved first")
     connect = command("connect", help="print local connection recipes; never writes client files")
     connect.add_argument("client", nargs="?", help="client name; use --list to see them")
     connect.add_argument("--list", action="store_true", help="list the supported clients")
@@ -119,7 +169,7 @@ def parser():
     install = skill_sub.add_parser("install", help="copy the skill into an agent's skills folder")
     install.add_argument("--to", type=Path, required=True, help="parent skills directory; copies into <dir>/uoink")
     install.add_argument("--force", action="store_true", help="replace an existing copy")
-    serve = command("serve", help="run the original helper CLI; remaining args pass through",
+    serve = command("serve", help="run a helper command in this terminal",
                     description="Run the Uoink helper in this terminal. Other words and flags go to "
                                 "the helper, for example: uoink serve doctor")
     serve.add_argument("server_args", nargs=argparse.REMAINDER)
@@ -227,7 +277,330 @@ def friendly_call(ns, server):
     if not route.get("ok") or route["source"] not in CAPTURE_TOOLS:
         raise UsageError(route.get("note") or "unsupported capture URL")
     name, key = CAPTURE_TOOLS[route["source"]]
+    if getattr(ns, "shelf", None):
+        if route["source"] in ("youtube_playlist", "podcast_feed"):
+            raise UsageError("--shelf works for one save at a time, not a playlist or podcast feed")
+        # The capture tools route through server._route_topic, which reads
+        # this hint first, so the save lands on the named shelf. It is the
+        # user's own pick, so it also replaces a shelf they set before.
+        import shelf_router
+        shelf_router.remember_hints(server.DATA_ROOT, [(route["canonical"], ns.shelf),
+                                                       (ns.url, ns.shelf)], by_hand=True)
     return name, {key: route["canonical"]}
+
+
+def backfill_command(ns, server, *, running=None):
+    """Ask the running helper; the backfill lives there, not in this process."""
+    import urllib.error
+    import urllib.request
+    if ns.order and ns.action != "start":
+        raise UsageError("--order goes with start")
+    if running is None:
+        import uoink_agent_runtime as runtime
+        running = runtime.helper_running(server)
+    if not running:
+        return {"ok": False, "error": "The Uoink helper is not running. Open Uoink, then try again."}
+    path = BACKFILL_ROUTE if ns.action == "status" else f"{BACKFILL_ROUTE}/{ns.action}"
+    body = {"order": ns.order} if ns.order else {}
+    request = urllib.request.Request(
+        f"http://{server.HOST}:{server.PORT}{path}",
+        data=None if ns.action == "status" else json.dumps(body).encode("utf-8"),
+        headers={"X-Uoink-Token": server._current_token(),
+                 **({} if ns.action == "status" else {"Content-Type": "application/json"})},
+        method="GET" if ns.action == "status" else "POST")
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            raw = response.read()
+    except urllib.error.HTTPError as exc:
+        raw = exc.read()
+        try:
+            payload = json.loads(raw.decode("utf-8", errors="replace"))
+        except ValueError:
+            payload = None
+        if isinstance(payload, dict):
+            return payload
+        return {"ok": False, "error": f"The helper answered HTTP {exc.code}."}
+    except (OSError, urllib.error.URLError):
+        return {"ok": False, "error": "Could not reach the Uoink helper. Open Uoink, then try again."}
+    try:
+        payload = json.loads(raw.decode("utf-8", errors="replace"))
+    except ValueError:
+        return {"ok": False, "error": "The helper sent an answer this command could not read."}
+    return payload if isinstance(payload, dict) else {"ok": False, "error": "unexpected helper answer"}
+
+
+def text_duration(seconds):
+    seconds = int(seconds or 0)
+    if seconds < 90:
+        return "about a minute"
+    minutes = round(seconds / 60)
+    if minutes < 60:
+        return f"about {minutes} min"
+    hours, minutes = divmod(minutes, 60)
+    return f"about {hours} h {minutes} min" if minutes else f"about {hours} h"
+
+
+def backfill_text(payload):
+    def plural(n, one, many=None):
+        return f"{n} {one if n == 1 else (many or one + 's')}"
+    count, progress = int(payload.get("count") or 0), payload.get("progress") or {}
+    state = payload.get("state")
+    lines = []
+    if count:
+        lines.append(f"{plural(count, 'save has', 'saves have')} video but no transcript "
+                     f"({payload.get('on_disk', 0)} on this computer, "
+                     f"{payload.get('download', 0)} to fetch again).")
+    else:
+        lines.append("Every save with video has its words.")
+    if state == "running":
+        lines.append(f"Running: {progress.get('done', 0)} done, {progress.get('left', 0)} left, "
+                     f"{text_duration(progress.get('eta_seconds'))} to go.")
+    elif state == "paused":
+        lines.append(("Pausing at the next safe point. The save in hand starts over on resume."
+                      if payload.get("pausing") else "Paused.")
+                     + f" {progress.get('done', 0)} done, {progress.get('left', 0)} left. "
+                     "Run 'uoink backfill resume' to carry on.")
+    elif state == "done" and progress.get("done"):
+        lines.append(f"Last run: {progress.get('transcribed', 0)} transcribed, "
+                     f"{progress.get('no_words', 0)} had no speech, {progress.get('gone', 0)} gone, "
+                     f"{progress.get('failed', 0)} did not work.")
+    current = payload.get("current")
+    if isinstance(current, dict) and current.get("title"):
+        share = current.get("fraction")
+        lines.append(f"Now: {terminal_label(current['title'])[:120]}"
+                     + (f" ({int(share * 100)}%)" if isinstance(share, (int, float)) else ""))
+        if current.get("waiting_for_capture"):
+            lines.append("Waiting while your capture finishes.")
+    for host, wait in (payload.get("backoff") or {}).items():
+        site = {"youtube": "YouTube", "x": "X"}.get(host, "One site")
+        lines.append(f"{site} asked Uoink to slow down. Trying again in "
+                     f"{text_duration(wait.get('seconds_left')).replace('about ', '')}.")
+    if payload.get("message"):
+        lines.append(terminal_label(payload["message"]))
+    if payload.get("gone"):
+        lines.append(f"{plural(int(payload['gone']), 'save')} can't be transcribed because "
+                     "the video is gone and no copy is on this computer.")
+    if payload.get("half_capture_count"):
+        lines.append(f"{plural(int(payload['half_capture_count']), 'capture')} did not finish. "
+                     "Finish them in Uoink under Settings, Library health.")
+    if (payload.get("model_ready") is False and payload.get("model_message")
+            and (count or payload.get("half_capture_count"))):
+        lines.append(terminal_label(payload["model_message"]))
+    if state in ("idle", "done") and count:
+        lines.append("Run 'uoink backfill start' to transcribe them. It uses this computer's CPU "
+                     "and may fetch videos again.")
+    return "\n".join(lines)
+
+
+def cues_command(ns, server):
+    """`uoink cues`: the timed cues read contract (timed_cues.py) in-process,
+    the same envelopes GET /api/cues/v1/items returns. Local reads only."""
+    import timed_cues
+    item_flags = {"start": ns.start, "end": ns.end}
+    list_flags = {"channel": ns.channel, "published_from": ns.published_from,
+                  "published_to": ns.published_to, "q": ns.q}
+    page_flags = {"limit": ns.limit, "offset": ns.offset}
+    if ns.id:
+        if any(value is not None for value in list_flags.values()):
+            raise UsageError("--channel, --from, --to and --words list items; drop the id")
+        flags, operation = {**item_flags, **page_flags}, "get"
+    else:
+        if any(value is not None for value in item_flags.values()):
+            raise UsageError("--start and --end need an item id")
+        flags, operation = {**list_flags, **page_flags}, "search"
+    query = {k: [str(v)] for k, v in flags.items() if v is not None}
+    try:
+        idx = server._get_index()
+        data = (timed_cues.get_item(idx, ns.id, query) if operation == "get"
+                else timed_cues.search(idx, query))
+    except timed_cues.CuesError as error:
+        return timed_cues.error_envelope(operation, error)
+    return timed_cues.envelope(operation, data)
+
+
+def cues_text(payload):
+    data = payload["data"]
+    if payload.get("operation") == "search":
+        items = data.get("items") or []
+        if not items:
+            return "No saved items match. Try a wider date range or another show name."
+        lines = [f"{data['page']['total']} {'item' if data['page']['total'] == 1 else 'items'}"]
+        for item in items:
+            date = terminal_label(str(item.get("published_at") or "")[:10]) or "date unknown"
+            lines.append(f"{date} | {terminal_label(item.get('title') or '')} | "
+                         f"{terminal_label(item.get('channel') or 'source unknown')} "
+                         f"[{terminal_label(item.get('id') or '')}]")
+        if data["page"].get("next_offset") is not None:
+            lines.append(f"More items: add --offset {data['page']['next_offset']}.")
+        return "\n".join(lines)
+    item, timing, cues = data["item"], data["timing"], data["cues"]
+    source = {"captions": "uploaded captions", "auto_captions": "automatic captions",
+              "local_asr": "local transcription"}.get(timing.get("source"), "no transcript")
+    head = [terminal_label(item.get("title") or item.get("id") or "Item"),
+            f"Published: {terminal_label(item.get('published_at') or 'unknown')} | "
+            f"Timing: {source} | {len(cues)} cues"]
+    rows = [f"{text_timestamp(c['start'])}–{text_timestamp(c['end'])}  {text_excerpt(c['text'])}"
+            for c in cues[:40]]
+    if len(cues) > 40:
+        rows.append("More cues in JSON output.")
+    next_offset = (data.get("page") or {}).get("next_offset")
+    if next_offset is not None:
+        rows.append(f"More cues after these: add --offset {next_offset}.")
+    return "\n".join(head + rows)
+def shelves_check(ns):
+    """Usage errors for shelf options, before the backend or storage loads."""
+    import shelf_router
+    if ns.command == "capture" and ns.shelf is not None and not shelf_router.clean_shelf_name(ns.shelf):
+        raise UsageError("--shelf must be 1-64 characters that also work as a folder name")
+    if ns.command != "shelves":
+        return
+    if ns.shelves_command == "tidy" and not 1 <= ns.limit <= 5000:
+        raise UsageError("--limit must be from 1 to 5000")
+    if ns.shelves_command == "move":
+        if not shelf_router.clean_shelf_name(ns.shelf):
+            raise UsageError("the shelf name must be 1-64 characters that also work as a folder name")
+        if len(ns.ids) > shelf_router.MAX_MOVES:
+            raise UsageError(f"move at most {shelf_router.MAX_MOVES} items at a time")
+
+
+SHELF_BODY_BYTES = 56 * 1024  # the helper refuses a body over 64 KB
+
+
+def _helper_shelves(server, path, body):
+    """POST one /library/shelves route to the running helper. Raises OSError
+    when it can't be reached."""
+    import urllib.error
+    import urllib.request
+    request = urllib.request.Request(
+        f"http://{server.HOST}:{server.PORT}{path}", data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json", "X-Uoink-Token": server._current_token()},
+        method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            payload = json.loads(exc.read().decode("utf-8"))
+        except ValueError:
+            payload = None
+        return payload if isinstance(payload, dict) else {"ok": False, "error": f"helper returned HTTP {exc.code}"}
+
+
+def _move_parts(moves):
+    """Moves in parts that each fit under the helper's body cap."""
+    part, size = [], 0
+    for move in moves:
+        n = len(json.dumps(move, ensure_ascii=False).encode("utf-8")) + 1
+        if part and size + n > SHELF_BODY_BYTES:
+            yield part
+            part, size = [], 0
+        part.append(move)
+        size += n
+    if part:
+        yield part
+
+
+def _helper_apply(server, moves, label, *, source=None):
+    """One undoable move on the running helper, sent in parts."""
+    total = {"ok": True, "moved": 0, "skipped": [], "moves": [], "batch_id": None}
+    for part in _move_parts(moves):
+        body = {"moves": part, "label": label, **({"source": source} if source else {}),
+                **({"append_to": total["batch_id"]} if total["batch_id"] else {})}
+        result = _helper_shelves(server, "/library/shelves/apply", body)
+        if not result.get("ok"):
+            # What moved stays moved and can be undone; say what did not.
+            return {**total, **result, "moved": total["moved"], "batch_id": total["batch_id"],
+                    "not_moved": len(moves) - total["moved"] - len(total["skipped"])}
+        total["batch_id"] = result.get("batch_id") or total["batch_id"]
+        total["moved"] += int(result.get("moved") or 0)
+        total["skipped"] += result.get("skipped") or []
+        total["moves"] += result.get("moves") or []
+        if result.get("files_not_updated"):
+            total.setdefault("files_not_updated", []).extend(result["files_not_updated"])
+    return total
+
+
+def shelves_command(ns, server):
+    """Tidy Uncategorized through the same helpers as the dashboard. When
+    Uoink is running, moves and undo go to it, so its library stays current
+    and one process writes the move log; otherwise they run here, under the
+    same cross-process lock."""
+    import shelf_router
+    import uoink_agent_runtime as runtime
+    remote = ns.shelves_command != "tidy" and runtime.helper_running(server)
+    try:
+        return _shelves_run(ns, server, shelf_router, remote)
+    except OSError:
+        if not remote:
+            raise
+        # The helper stopped answering: do it here instead.
+        return _shelves_run(ns, server, shelf_router, False)
+
+
+def _shelves_run(ns, server, shelf_router, remote):
+    if ns.shelves_command == "tidy":
+        return server._shelf_proposals(limit=ns.limit)
+    if ns.shelves_command == "undo":
+        if remote:
+            return _helper_shelves(server, "/library/shelves/undo",
+                                   {"batch_id": ns.batch_id} if ns.batch_id else {})
+        return server._shelf_undo(ns.batch_id)
+    if ns.shelves_command == "move":
+        shelf = shelf_router.clean_shelf_name(ns.shelf)
+        ids = list(dict.fromkeys(ns.ids))
+        if remote:
+            return _helper_apply(server, [{"video_id": item, "shelf": shelf} for item in ids], "Move")
+        return server._reshelve([(item, shelf) for item in ids], label="Move")
+    proposals = server._shelf_proposals(limit=shelf_router.MAX_MOVES)
+    wanted = shelf_router.shelf_key(" ".join(ns.shelf.split()))
+    group = next((g for g in proposals.get("groups") or [] if shelf_router.shelf_key(g["shelf"]) == wanted), None)
+    if group is None:
+        return {"ok": False, "error": f"No proposed group is called {ns.shelf}. "
+                                      "Run 'uoink shelves tidy --text' to see the groups."}
+    ids = [item["video_id"] for item in group["items"]]
+    if ns.only:
+        missing = [item for item in ns.only if item not in ids]
+        if missing:
+            return {"ok": False, "error": "Not in that group: " + ", ".join(missing)}
+        ids = [item for item in ids if item in set(ns.only)]
+    fallback = proposals.get("fallback") or "Uncategorized"
+    if remote:
+        return _helper_apply(server, [{"video_id": item, "shelf": group["shelf"], "from": fallback} for item in ids],
+                             "Tidy", source="tidy")
+    return server._reshelve([(item, group["shelf"]) for item in ids], label="Tidy",
+                            expect={item: fallback for item in ids}, skip_by_hand=True)
+
+
+def shelves_text(payload):
+    def label(value):
+        return terminal_label(value)[:240]
+    if "groups" in payload:
+        moving = sum(group["count"] for group in payload["groups"])
+        lines = [f"Uncategorized: {payload['total']} saves. {moving} have a proposed shelf, "
+                 f"{payload['stays']} stay where they are."]
+        if payload.get("more"):
+            lines.append("There are more saves on Uncategorized; run tidy again after moving these.")
+        for group in payload["groups"]:
+            lines.append(f"\n{label(group['shelf'])} ({'new shelf, ' if group['new'] else ''}{group['count']})")
+            for item in group["items"][:5]:
+                lines.append(f"  {label(item.get('title') or item['video_id'])} [{label(item['video_id'])}]"
+                             f"\n    {label(item.get('reason') or '')}")
+            if group["count"] > 5:
+                lines.append(f"  and {group['count'] - 5} more")
+        if payload["groups"]:
+            lines.append(f'\nMove a group: uoink shelves apply "{label(payload["groups"][0]["shelf"])}"')
+        return "\n".join(lines)
+    if "moved" in payload:
+        text = f"Moved {payload['moved']} {'save' if payload['moved'] == 1 else 'saves'}."
+        if payload.get("skipped"):
+            text += f" Left {len(payload['skipped'])} as they were."
+        if payload.get("batch_id"):
+            text += f"\nUndo: uoink shelves undo {label(payload['batch_id'])}"
+        return text
+    text = f"Put back {payload['restored']} {'save' if payload['restored'] == 1 else 'saves'}."
+    if payload.get("skipped"):
+        text += f" {len(payload['skipped'])} moved again since, or are gone, so they stay."
+    return text
 
 
 def error_text(payload):
@@ -493,6 +866,42 @@ def research_command(ns, server, *, call_tool=None, sleep=None, clock=None,
         sleep(min(10, remaining))
 
 
+def text_item(payload, index):
+    card = payload["card"]
+    identity = payload["item_id"]
+    lines = [terminal_label(card.get("title") or identity), "ID: " + terminal_label(identity)]
+    for name, value in (("Source", card.get("channel")), ("URL", card.get("url")),
+                        ("Saved", card.get("yoinked_at")), ("Topic", card.get("topic"))):
+        if value:
+            lines.append(f"{name}: {terminal_label(value)}")
+    row = index.get_yoink(identity) if index is not None else None
+    if row and not row.get("deleted_at"):
+        with index.detached_snapshot() as db:
+            shelves = db.execute(
+                "SELECT n.name FROM item_shelves s JOIN shelf_nodes n USING(version_id,shelf_id) "
+                "WHERE s.video_id=? AND n.retired=0 ORDER BY s.is_primary DESC, n.name", (identity,))
+            lines.append("Shelf: " + (", ".join(terminal_label(r[0]) for r in shelves) or "Unshelved"))
+        admission = payload.get("corpus_admission") or {}
+        if admission.get("ok") and row.get("corpus_path"):
+            import library_resources
+            size = admission["total_bytes"]
+            try:
+                with Path(row["corpus_path"]).open("rb") as handle:
+                    raw = handle.read(size + 1)
+                if len(raw) == size and hashlib.sha256(raw).hexdigest() == admission["corpus_revision"]:
+                    reader = library_resources.LibraryReader(index, data_root=index._path.parent)
+                    body, _ = reader._redact(raw.decode("utf-8-sig"), row)
+                    lines.extend(["", *(terminal_label(line) for line in body.splitlines())])
+                    return "\n".join(lines)
+            except (OSError, UnicodeError):
+                pass
+    lines.append("Full saved text unavailable.")
+    for excerpt in card.get("excerpts") or []:
+        timecode = text_timestamp(excerpt.get("start"))
+        lines.append((timecode + " " if timecode else "") + terminal_label(excerpt.get("text") or ""))
+    return "\n".join(lines)
+
+
 def human(payload, *, index=None):
     if "prompt" in payload and "run_id" in payload:
         lines = [f"Research run: {payload['run_id']}"]
@@ -506,6 +915,13 @@ def human(payload, *, index=None):
         return "\n\n".join(lines)
     if payload.get("ok") is not True:
         return error_text(payload)
+    if "half_capture_count" in payload and "progress" in payload:
+        return backfill_text(payload)
+    if payload.get("contract") == "uoink.cues.read":
+        return cues_text(payload)
+    if ("groups" in payload and "stays" in payload) or "restored" in payload or (
+            "moved" in payload and "undo" in payload):
+        return shelves_text(payload)
     if "tools" in payload:
         return "\n".join(f"{tool['name']}: {tool['description']}" for tool in payload["tools"])
     if "data_dir" in payload:
@@ -571,14 +987,17 @@ def human(payload, *, index=None):
                 quote = text_quote(row)
                 if quote:
                     lines.append(f'  "{quote}"')
+                elif row.get("evidence_kind") == "discovery_hint":
+                    preview = row.get("preview") or {}
+                    if preview.get("text") and preview["text"] != row.get("title"):
+                        lines.append("  " + text_excerpt(preview["text"], truncated=preview.get("truncated")))
         if len(rows) > 10:
             lines.append("More results in JSON output.")
         return "\n".join(lines)
-    if "card" in payload:
-        card = payload["card"]
-        return (f"{label(card.get('title') or payload.get('item_id', 'Item'))}\n"
-                f"ID: {label(payload.get('item_id', ''))}\nUse JSON output for excerpts and source revisions."
-                + capture_limits(card))
+    if isinstance(payload.get("card"), dict) and payload.get("item_id"):
+        return text_item(payload, index) + capture_limits(payload["card"])
+    if "corpus_md" in payload:
+        return "\n".join(terminal_label(line) for line in payload["corpus_md"].splitlines())
     if "video_id" in payload and "title" in payload:
         return (f"Saved: {label(payload['title'])} [{label(payload['video_id'])}]"
                 + capture_limits(payload.get("metadata") or payload))
@@ -586,8 +1005,9 @@ def human(payload, *, index=None):
         return label(payload["path"])
     if "job_id" in payload:
         return f"Job: {label(payload['job_id'])}. Use get_job_status to check completion."
-    fields = ", ".join(key for key in payload if key != "ok")
-    return f"OK ({fields}). Use JSON output for the full result." if fields else "OK"
+    return "\n".join(f"{terminal_label(k.replace('_', ' ').capitalize())}: "
+                     + (terminal_label(v) if isinstance(v, str) else json.dumps(v, ensure_ascii=True))
+                     for k, v in payload.items() if k != "ok") or "OK"
 
 
 def emit(payload, text=False, *, index=None):
@@ -648,6 +1068,48 @@ def serve_mcp():
     return 0
 
 
+def models_command(ns, server):
+    """`uoink models`: the same catalog, checks and files as Settings and
+    the helper's /asr/models routes. A download here runs in this terminal."""
+    if ns.action == "list":
+        payload = server.asr_models_payload()
+        # This command reads local files and cannot see the helper's live worker.
+        payload["engine"] = "The Uoink helper transcribes in a separate process that closes when idle."
+        return payload
+    if not ns.model:
+        raise UsageError(f"name a model: uoink models {ns.action} <model>")
+    if ns.action == "delete":
+        return server.delete_asr_model(ns.model)[0]
+    if ns.action == "use":
+        return server.use_asr_model(ns.model)[0]
+    import http.client
+    asr_models = server.asr_models
+    try:
+        entry = asr_models.get(ns.model)
+    except ValueError as exc:
+        raise UsageError(str(exc)) from exc
+    shown = [0]
+
+    def progress(done, total):
+        step = max(1, total // 50)
+        if done - shown[0] >= step or done == total:
+            shown[0] = done
+            print(f"Downloaded {done // 1_000_000} MB of {total // 1_000_000} MB", file=sys.stderr)
+
+    print(f"Downloading {entry['id']} from huggingface.co ({asr_models.total_bytes(entry['id']) // 1_000_000} MB). "
+          "Ctrl+C stops it; run the same command to resume.", file=sys.stderr)
+    cancel = threading.Event()
+    try:
+        return asr_models.download(entry["id"], server.RELIABILITY_MODEL_ROOT, cancel_event=cancel,
+                                   progress=progress)
+    except KeyboardInterrupt:
+        cancel.set()
+        return {"ok": False, "model": entry["id"],
+                "error": "Download stopped. Run the same command to resume it."}
+    except (asr_models.DownloadBusy, asr_models.DownloadCancelled, http.client.HTTPException, OSError, ValueError) as exc:
+        return {"ok": False, "model": entry["id"], "error": str(exc)}
+
+
 def finish_call_work(server, name, payload, existing_threads):
     if name == "transcribe_podcast_episode" and payload.get("ok") is True:
         server._podcast_transcription_queue.join()
@@ -666,6 +1128,7 @@ def finish_call_work(server, name, payload, existing_threads):
 def main(argv=None):
     raw = list(sys.argv[1:] if argv is None else argv)
     mcp_session = False
+    text_mode = False
     try:
         isolation.apply_from_process(raw)
         clean = isolation.strip_cli(raw)
@@ -738,11 +1201,18 @@ def main(argv=None):
         call_args = arguments(ns) if ns.command == "call" else None
         if ns.command == "research":
             research_action(ns)
+        shelves_check(ns)
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
             if ns.command == "research":
                 payload = research_command(ns, server)
+            elif ns.command == "cues":
+                payload = cues_command(ns, server)
+            elif ns.command == "shelves":
+                payload = shelves_command(ns, server)
+            elif ns.command == "models":
+                payload = models_command(ns, server)
             elif ns.command == "status":
                 payload = {"ok": True, "version": server.VERSION,
                            "data_dir": str(server.DATA_ROOT.resolve()),
@@ -752,13 +1222,15 @@ def main(argv=None):
                     payload["capabilities"] = server._platform.platform_capabilities()
                 if sys.platform.startswith("linux"):
                     payload["reliability_model"] = server._reliability_model_status()
+            elif ns.command == "backfill":
+                payload = backfill_command(ns, server)
             else:
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)
                 existing_threads = set(threading.enumerate())
                 payload = runtime.call_tool(name, args, server)
                 finish_call_work(server, name, payload, existing_threads)
         return emit(payload, text_mode, index=(server._get_index() if text_mode
-                    and ("hits" in payload or "yoinks" in payload) else None))
+                    and ("hits" in payload or "yoinks" in payload or "card" in payload) else None))
     except UsageError as exc:
         print(f"uoink: {exc}", file=sys.stderr)
         return 2
@@ -766,7 +1238,7 @@ def main(argv=None):
         if mcp_session:
             # Stdout is the JSON-RPC transport. Fail on stderr, as uoink_mcp.py does.
             raise
-        return emit({"ok": False, "error": str(exc)})
+        return emit({"ok": False, "error": str(exc)}, text_mode)
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ def test_installer_lock_is_complete_and_exact() -> None:
     locked = verify.read_lock(LOCK)
 
     assert len(locked) >= 100
-    assert locked["yt-dlp"] == "2026.10.21"
+    assert locked["yt-dlp"] == "2026.10.26"
     assert locked["pillow"] == "13.0.0"
     assert locked["mcp"] == "2.3.0"
     assert locked["mcp-types"] == "2.3.0"
@@ -37,13 +37,13 @@ def test_installer_lock_is_complete_and_exact() -> None:
 def test_installer_lock_matches_the_committed_notice_inventory() -> None:
     locked = verify.read_lock(LOCK)
     notice = (ROOT / "THIRD-PARTY-NOTICES.md").read_text(encoding="utf-8")
-    noticed = {
-        verify.canonical_name(line.split("|")[1].strip())
-        for line in notice.splitlines()
-        if line.startswith("| ") and not line.startswith("| Package ")
-    }
+    noticed = {}
+    for line in notice.splitlines():
+        if line.startswith("| ") and not line.startswith("| Package "):
+            name, version = line.split("|")[1:3]
+            noticed[verify.canonical_name(name.strip())] = version.strip()
 
-    assert noticed == set(locked)
+    assert noticed == locked
 
 
 def test_installer_lock_parser_rejects_ranges_and_duplicates(

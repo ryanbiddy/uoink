@@ -12,6 +12,14 @@ import uoink_cli as cli
 from tests.cli.test_research_cli import FakeTools, run
 
 
+def test_model_list_describes_helper_without_claiming_its_live_state():
+    import server
+    payload = cli.models_command(SimpleNamespace(action="list"), server)
+    line = next(line for line in cli.human(payload).splitlines() if line.startswith("Engine:"))
+    assert "helper" in line and "separate process" in line
+    assert line.count(":") == 1
+
+
 @pytest.fixture
 def samples():
     return json.loads((Path(__file__).parents[1] / "fixtures/cli_text.json").read_text(encoding="utf-8"))
@@ -202,3 +210,23 @@ def test_help_names_every_command_and_serve_help_does_not_start_the_helper(capsy
 def test_unknown_command_points_at_help(capsys):
     assert cli.main(["bogus"]) == 2
     assert "Run 'uoink --help'" in capsys.readouterr().err
+
+
+def test_get_text_prints_full_admitted_item(tmp_path, monkeypatch, capsys):
+    import index
+    from tests.phase4_fixtures import seed_shelf, seed_yoink_item
+
+    vid = "talk0000001"
+    body = "**Uploaded:** 2026-10-02\n\n## Description\n\nCloud notes\n\n## Transcript\n\n" + "rain " * 200 + "last word"
+    db = index.Index.open(tmp_path / "index.db")
+    seed_yoink_item(db, tmp_path, video_id=vid, slug="clouds", title="Clouds", corpus_text=body,
+                    channel="Sky club", url="https://example.test/clouds", topic="Weather", yoinked_at="2026-11-01")
+    seed_shelf(db, name="Field notes", member_video_ids=[vid])
+    backend = SimpleNamespace(DATA_ROOT=tmp_path, _get_index=lambda: db)
+    monkeypatch.setattr(cli, "backend", lambda: backend)
+    monkeypatch.setattr(runtime.registry, "_backend", backend)
+    assert cli.main(["--text", "get", vid]) == 0
+    output = capsys.readouterr().out
+    assert all(x in output for x in ("Clouds", vid, "Sky club", "2026-11-01", "Shelf: Field notes", "Weather",
+                                     "https://example.test/clouds", "2026-10-02", "Cloud notes", "last word"))
+    db.close()

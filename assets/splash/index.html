@@ -55,6 +55,13 @@
       cursor: pointer;
     }
 
+    /* Between a click on X and the window closing. */
+    .splash.closing {
+      opacity: 0.6;
+      pointer-events: none;
+      transition: opacity 120ms ease;
+    }
+
     .splash.failure {
       background:
         radial-gradient(circle at 100% 0%, rgba(255, 61, 0, 0.16), transparent 14rem),
@@ -358,12 +365,29 @@
       return native[name](...args);
     }
 
+    // True inside the splash window (WebView2 on Windows, WebKit on the Mac)
+    // even before pywebview has added its API. False in a plain browser tab.
+    function inNativeWindow() {
+      return Boolean(window.pywebview
+        || (window.chrome && window.chrome.webview)
+        || (window.webkit && window.webkit.messageHandlers));
+    }
+
+    // pywebview fires pywebviewready on window (webview/js/finish.js), and an
+    // event on window never reaches document. Listen on both, stop at the first.
     function waitForNativeApi(timeoutMs = 1500) {
       if (nativeApi()) return Promise.resolve(nativeApi());
       return new Promise((resolve) => {
-        const done = () => resolve(nativeApi());
-        document.addEventListener("pywebviewready", done, { once: true });
-        window.setTimeout(done, timeoutMs);
+        let timer = 0;
+        const done = () => {
+          window.clearTimeout(timer);
+          window.removeEventListener("pywebviewready", done);
+          document.removeEventListener("pywebviewready", done);
+          resolve(nativeApi());
+        };
+        window.addEventListener("pywebviewready", done);
+        document.addEventListener("pywebviewready", done);
+        timer = window.setTimeout(done, timeoutMs);
       });
     }
 
@@ -507,15 +531,16 @@
         eyebrow: "One-time setup",
         pill: status?.manifest_exists ? "Extension folder ready" : "Extension folder missing",
         headline: `Load the Uoink button in ${escapeHtml(browserName)} (60 sec)`,
-        copy: `${browserName} needs one manual approval for unpacked extensions.`,
-        primary: { text: `Open ${browserName} extensions`, action: "extension-open" },
+        copy: "Uoink is tested in Chrome. Other Chromium browsers may work.",
+        primary: { text: "Open extensions page", action: "extension-open" },
         secondary: { text: "Copy path", action: "copy-path" },
         tertiary: { text: "I've loaded it - done", action: "extension-done" },
       });
       els.steps.innerHTML = `
-        <li>Open ${escapeHtml(browserName)} extensions (or paste ${escapeHtml(extensionUrl)} in its address bar)</li>
-        <li>Turn ON "Developer mode" (top-right toggle)</li>
-        <li>Click "Load unpacked", then select this folder:</li>
+        <li>Open <code>${escapeHtml(extensionUrl)}</code> in ${escapeHtml(browserName)}.</li>
+        <li>Turn on "Developer mode"</li>
+        <li>Click "Load unpacked", then select the folder shown below.</li>
+        <li>Open the Extensions menu in the toolbar and pin <strong>Uoink</strong>.</li>
       `;
       els.steps.hidden = false;
       els.extensionPath.textContent = extensionPath || "Extension folder unavailable";
@@ -599,20 +624,45 @@
       location.href = "/dashboard#settings/byo-key";
     }
 
-    function dismiss() {
-      const native = nativeApi();
-      if (native && native.close) {
-        native.close();
+    // Close requests made before pywebview's API was ready.
+    let closeRequested = false;
+    let closeWaiting = false;
+    const CLOSE_WAIT_MS = 5000;
+
+    async function dismiss() {
+      if (!inNativeWindow()) {
+        // A plain browser tab has no window to close: hide the page.
         splash.style.display = "none";
         return;
       }
-      if (native && native.minimize) {
-        native.minimize();
-        splash.style.display = "none";
-        return;
-      }
-      splash.style.display = "none";
+      if (closeWaiting) return;
+      // The X or Escape can come before pywebview has added its API (a slow
+      // first start of WebView2). Keep the page on screen, dimmed, and close
+      // as soon as the API is ready. Hiding it left an empty window on top.
+      // If the API never comes, the splash process closes the window itself
+      // after its linger (uoink_splash.py), since hold-open needs the API.
+      closeRequested = true;
+      closeWaiting = true;
+      splash.classList.add("closing");
+      const native = nativeApi() || await waitForNativeApi(CLOSE_WAIT_MS);
+      closeWaiting = false;
+      if (!closeNativeWindow(native)) splash.classList.remove("closing");
     }
+
+    function closeNativeWindow(native) {
+      if (native && native.close) native.close();
+      else if (native && native.minimize) native.minimize();
+      else return false;
+      // Still on screen a moment later? Let the X be tried again.
+      window.setTimeout(() => splash.classList.remove("closing"), 4000);
+      return true;
+    }
+
+    // An API that arrives after the wait still closes a window the user
+    // already asked to close.
+    window.addEventListener("pywebviewready", () => {
+      if (closeRequested && !closeWaiting) closeNativeWindow(nativeApi());
+    });
 
     async function openLastYoutube() {
       try {

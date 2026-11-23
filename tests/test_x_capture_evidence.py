@@ -35,6 +35,8 @@ def no_network(monkeypatch):
     def forbidden(*args, **kwargs):
         pytest.fail("X evidence tests must use saved fixtures")
     monkeypatch.setattr(x_extractor.urllib.request, "urlopen", forbidden)
+    # 3.18.0: x_extractor's own requests go through _urlopen.
+    monkeypatch.setattr(x_extractor, "_urlopen", forbidden)
 
 
 def extract(name):
@@ -155,15 +157,20 @@ def test_supplement_transport_failure_keeps_text_and_marks_it(monkeypatch, failu
     class Response:
         def __enter__(self): return self
         def __exit__(self, *args): return False
-        def read(self): return json.dumps(fixture["syndication"]).encode()
+        def read(self, amount=-1): return json.dumps(fixture["syndication"]).encode()
     calls = []
-    def urlopen(request, **kwargs):
+    def urlopen(request, timeout=None, **kwargs):
         calls.append(request.full_url)
         if len(calls) == 1:
             return Response()
         raise failure("fixture failure")
-    monkeypatch.setattr(x_extractor.urllib.request, "urlopen", urlopen)
-    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"])
+    # 3.18.0: x_extractor's own opener, and the user's FxTwitter switch on.
+    monkeypatch.setattr(x_extractor, "_urlopen", urlopen)
+    monkeypatch.setattr(x_extractor, "_fxtwitter_gate", lambda: True)
+    # 3.18.0: deliberately changed. FxTwitter only runs when the user turns
+    # it on, so the test opts in (cache and cool-down start empty).
+    x_extractor.reset_fxtwitter_state()
+    payload = x_extractor.fetch_tweet_json(fixture["tweet_id"], fxtwitter=True)
     evidence = payload["_uoink_x_evidence"]
     assert len(calls) == 2
     assert evidence["text"] == fixture["syndication"]["text"]

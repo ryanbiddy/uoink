@@ -94,7 +94,8 @@
             "length_bucket": "short",
             "source_type": "youtube",
             "platform": "youtube",
-            "author": "Synthetic Creator"
+            "author": "Synthetic Creator",
+            "published_day": null
           },
           "source_credit": {
             "tweet": "via Synthetic Creator",

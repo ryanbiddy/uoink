@@ -133,6 +133,8 @@ def test_s05_before_started_commit_holds_write_lock_and_has_no_side_effect(rig):
     sid = rig.enrolled()
     reservation = rig.reserve(sid)
     other_idx, other = rig.open()
+    # This case deliberately holds the writer until the competitor reports busy.
+    other_idx._conn.execute('PRAGMA busy_timeout=250')
     request = rig.operation(sid, 'off')
     rig.faults.pause_at = 'before_started_commit'
     with ThreadPoolExecutor(max_workers=1) as pool:

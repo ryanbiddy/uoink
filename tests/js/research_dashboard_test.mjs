@@ -72,7 +72,8 @@ const context = vm.createContext({
   registryToolError: (_, result) => Object.assign(new Error(result?.error?.message || "tool failed"), { data: result }),
   NAV_OWNER: {}, els: {}, pageScrollPosition: () => ({}), setPageScrollPosition() {},
   markOpenLibraryRow() {}, syncSidebarTopics() {}, loadLibraryAvailability() {}, loadLibraryActivity() {},
-  startLibraryActivityTimer() {}, stopLibraryActivityTimer() {}, syncReaderCrumbs() {}, pushRoute() {}, routeForTab() {},
+  stopAsrModelPolling() {},
+  startLibraryActivityTimer() {}, stopLibraryActivityTimer() {}, renderShelfBar() {}, syncReaderCrumbs() {}, pushRoute() {}, routeForTab() {},
 });
 const evaluate = (code) => vm.runInContext(code, context);
 evaluate("const settingEdits = new Map(); let settingsWriteQueue = Promise.resolve(); const SETTINGS_FIELDS = {};"

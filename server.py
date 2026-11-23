@@ -16,6 +16,7 @@ Endpoints:
 """
 
 import contextlib
+from concurrent.futures import CancelledError, ThreadPoolExecutor
 import errno
 import hashlib
 import json
@@ -30,6 +31,7 @@ import re
 import secrets
 import shutil
 import socket
+import selectors
 import sqlite3
 import subprocess
 import sys
@@ -99,6 +101,8 @@ import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
+import asr_worker  # noqa: E402  -- 3.18 models run in a child process that exits when idle
+import asr_models  # noqa: E402  -- 3.18 pinned speech model catalog + downloader
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
@@ -115,6 +119,8 @@ import source_availability  # noqa: E402  -- bounded source availability checks
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import suggestions  # noqa: E402  -- 3.17 podcast suggestions (opt-in, topic words only)
 import list_imports  # noqa: E402  -- Import a list (HackerTube, HN, Reddit, playlists)
+import show_capture  # noqa: E402  -- Save a whole show (transcript-only, resumable)
+import timed_cues  # noqa: E402  -- Timed cues read contract v1 (uoink.cues.read)
 import research  # noqa: E402  -- Research run storage and source discovery
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
@@ -124,6 +130,8 @@ import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
+import x_text_repair  # noqa: E402  -- 3.18.0 fix cut-off X posts job
+import page_dom_capture  # noqa: E402  -- 3.18 Uoink this page from the tab's DOM
 import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
 import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
@@ -156,7 +164,8 @@ def _extract_page_to_prose(url: str) -> str | None:
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
-    _atomic_write_text,
+    _atomic_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
+    COMMENTS_START_MARK, COMMENTS_END_MARK,
     _is_writable_dir,
     _path_under_any,
     _topic_folder_name,
@@ -425,6 +434,32 @@ LONG_VIDEO_MODE_CHUNKED = "chunked"
 LONG_VIDEO_MODE_LITE = "lite"
 LONG_VIDEO_MODES = (LONG_VIDEO_MODE_FULL, LONG_VIDEO_MODE_CHUNKED,
                     LONG_VIDEO_MODE_LITE)
+# Whole-show capture (show_capture.py): transcript only. Captions first and no
+# media download, screenshots, comments or channel context. "transcript" saves
+# nothing for a video without captions; "transcript_asr" downloads the audio
+# alone and runs local Whisper for it (the user opts in per run). Queue-only
+# modes: the show job puts them on pending_yoinks rows, never the /extract API.
+LONG_VIDEO_MODE_TRANSCRIPT = "transcript"
+LONG_VIDEO_MODE_TRANSCRIPT_ASR = "transcript_asr"
+TRANSCRIPT_ONLY_MODES = (LONG_VIDEO_MODE_TRANSCRIPT, LONG_VIDEO_MODE_TRANSCRIPT_ASR)
+# The failure text a transcript-only capture leaves on its queue row when a
+# video has no captions and local transcription is off for the run.
+TRANSCRIPT_NO_CAPTIONS_MESSAGE = (
+    "No captions for this video, and local transcription is off for this save.")
+TRANSCRIPT_NO_SPEECH_MESSAGE = (
+    "No captions for this video, and local transcription found no words.")
+TRANSCRIPT_NO_MODEL_MESSAGE = (
+    "No captions for this video, and the local transcription model is not downloaded yet.")
+TRANSCRIPT_CAPTIONS_FAILED_MESSAGE = "Uoink couldn't download the captions for this video."
+TRANSCRIPT_ALREADY_SAVED_MESSAGE = (
+    "Already in your library, so this transcript-only save left it as it was.")
+TRANSCRIPT_REMOVED_MESSAGE = (
+    "You removed this one from your library, so this transcript-only save left it out.")
+TRANSCRIPT_UNFINISHED_MESSAGE = (
+    "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
+# What a transcript-only attempt itself leaves in a folder (captions, a
+# partial download); these never count as a saved capture.
+_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".part", ".ytdl", ".json", ".tmp")
 # Lite mode forces the screenshot interval to at least this (1 per 5 min), so
 # a 2-hour video yields a couple dozen frames instead of hundreds.
 LITE_SHOT_INTERVAL_SEC = 5 * 60
@@ -633,6 +668,8 @@ def _current_token() -> str:
 _TOKEN_RATE_LIMIT = 10
 _TOKEN_RATE_WINDOW_SEC = 60.0
 _token_request_times: list[float] = []
+_dashboard_token_times: list[float] = []
+_dashboard_loads: dict[str, float] = {}
 _token_rate_lock = threading.Lock()
 # Canonical client-identification header value. The legacy "yoink-extension"
 # value is still accepted through the v2.x alias window so a not-yet-updated
@@ -641,19 +678,36 @@ _UOINK_CLIENT_HEADER_VALUE = "uoink-extension"
 _YOINK_CLIENT_HEADER_VALUE = "yoink-extension"
 
 
-def _check_token_rate_limit() -> bool:
-    import time
-    now = time.monotonic()
+def _dashboard_load_id() -> str:
+    identity = secrets.token_urlsafe(24)
     with _token_rate_lock:
+        now = time.monotonic()
+        for expired in [key for key, end in _dashboard_loads.items() if end <= now]:
+            del _dashboard_loads[expired]
+        # Dict insertion order gives a bounded FIFO for abandoned page loads.
+        if len(_dashboard_loads) >= 256:
+            del _dashboard_loads[next(iter(_dashboard_loads))]
+        _dashboard_loads[identity] = now + 300
+    return identity
+
+
+def _check_token_rate_limit(*, load_id=None) -> int:
+    """Consume one request. Return seconds until a slot opens, or zero."""
+    with _token_rate_lock:
+        now = time.monotonic()
         # Drop stale entries (older than the window) and decide.
         cutoff = now - _TOKEN_RATE_WINDOW_SEC
-        kept = [t for t in _token_request_times if t > cutoff]
-        if len(kept) >= _TOKEN_RATE_LIMIT:
-            _token_request_times[:] = kept
-            return False
+        dashboard = _dashboard_loads.get(load_id, 0) > now
+        times = _dashboard_token_times if dashboard else _token_request_times
+        kept = [t for t in times if t > cutoff]
+        if len(kept) >= (120 if dashboard else _TOKEN_RATE_LIMIT):
+            times[:] = kept
+            return max(1, math.ceil(kept[0] + _TOKEN_RATE_WINDOW_SEC - now))
+        if dashboard:
+            del _dashboard_loads[load_id]
         kept.append(now)
-        _token_request_times[:] = kept
-    return True
+        times[:] = kept
+    return 0
 
 
 # POST /taxonomy/correct rate limit (Sprint 17). Corrections are
@@ -941,6 +995,8 @@ CARD_IMAGE_THUMBNAIL = "thumbnail"
 _CARD_IMAGES = (CARD_IMAGE_MIDDLE, CARD_IMAGE_THUMBNAIL)
 _WHISPER_MODELS = (
     "tiny", "base", "small", "medium", "large", "large-v3-turbo",
+    # 3.18: distilled English models (asr_models.CATALOG has the pins).
+    "distil-small.en", "distil-large-v3.5",
 )
 
 # How long to wait between live-stream retry attempts. Conservative -- a
@@ -1077,6 +1133,10 @@ def _default_settings() -> dict:
         # honors the key, so a user who sets it False falls back to the
         # video-only path in the extension.
         "x_text_capture_enabled": True,
+        # 3.18.0: FxTwitter (api.fxtwitter.com, a third-party service) is
+        # asked for X text only when the user turns this on. Long posts come
+        # from X's own logged-out endpoints either way (x_fulltext).
+        "fxtwitter_enrichment_enabled": False,
         # E-1 (Zing enabler): keep the downloaded media file for short-video
         # captures instead of deleting it after extraction, so a downstream
         # director tool (Zing) can analyze the actual clip (cuts / captions /
@@ -1084,6 +1144,7 @@ def _default_settings() -> dict:
         # source_type='short_video' ONLY; long-form captures always delete
         # their media regardless of this flag.
         "keep_media": False,
+        "keep_podcast_audio": True,
         # Dashboard appearance: "system" follows the OS (prefers-color-scheme);
         # "light" or "dark" forces it. Stored here, not per browser, so the
         # Uoink window and a browser tab show the same theme.
@@ -1289,7 +1350,9 @@ def _normalize_settings(data: dict) -> dict:
     clean["x_text_capture_enabled"] = bool(
         clean.get("x_text_capture_enabled", True)
     )
+    clean["fxtwitter_enrichment_enabled"] = clean.get("fxtwitter_enrichment_enabled") is True
     clean["keep_media"] = bool(clean.get("keep_media"))
+    clean["keep_podcast_audio"] = bool(clean.get("keep_podcast_audio", True))
     theme = str(clean.get("dashboard_theme") or "system").strip().lower()
     clean["dashboard_theme"] = theme if theme in _DASHBOARD_THEMES else "system"
     card_image = str(clean.get("card_image") or CARD_IMAGE_MIDDLE).strip().lower()
@@ -2091,9 +2154,11 @@ def _public_settings(data: dict | None = None) -> dict:
         ),
         "auto_update_check": data.get("auto_update_check") is True,
         "suggest_podcasts": data.get("suggest_podcasts") is True,
+        "fxtwitter_enrichment_enabled": data.get("fxtwitter_enrichment_enabled") is True,
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
+        "keep_podcast_audio": bool(data.get("keep_podcast_audio", True)),
         # Settings > App > Appearance: system, light or dark.
         "dashboard_theme": (data.get("dashboard_theme")
                             if data.get("dashboard_theme") in _DASHBOARD_THEMES else "system"),
@@ -2951,6 +3016,11 @@ _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 # at a time, on a below-normal-priority worker thread. Queue state is mirrored
 # into the durable jobs table through the ordinary job helpers below.
 _podcast_transcription_queue: queue.Queue[str] = queue.Queue()
+_podcast_storage_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="podcast-storage")
+_podcast_storage_lock = threading.Lock()
+_podcast_storage_scan = None
+_retranscribe_queue: queue.Queue[str] = queue.Queue()
+_retranscribe_worker_thread: threading.Thread | None = None
 _podcast_transcription_worker_lock = threading.Lock()
 _podcast_transcription_worker_thread: threading.Thread | None = None
 # Feed HTTP polls are short compared with media work, but a manual refresh can
@@ -2970,7 +3040,7 @@ _SSE_MAX_STREAMS = 8          # cap concurrent streams (local single-user helper
 _SSE_TICK_SEC = 1.0           # poll job/queue state this often
 _SSE_HEARTBEAT_SEC = 15.0     # keepalive comment cadence
 _sse_count_lock = threading.Lock()
-_sse_active = [0]
+_sse_active = {}
 
 _settings_lock = threading.RLock()
 _corpus_update_lock = threading.Lock()
@@ -3072,9 +3142,7 @@ def _resume_local_search():
     from uoink_core.local_search import LocalSearch
     if LocalSearch.enabled_at(DATA_ROOT):
         try:
-            engine = _get_local_search()
-            if engine.manager.acceptance() and not engine.status()["paused"]:
-                engine.start()
+            _get_local_search().restore()
         except Exception:
             log.warning("Semantic search could not resume; keyword search is available")
 
@@ -3256,6 +3324,9 @@ def compute_health(sidecar: dict) -> dict:
     if sidecar.get("extraction_mode") == "generic":
         # /extract/any saves a transcript only; no screenshots by design.
         skipped.add("screenshots")
+    if sidecar.get("long_video_mode") in TRANSCRIPT_ONLY_MODES:
+        # A transcript-only save (whole-show capture) has no screenshots by design.
+        skipped.add("screenshots")
     for key in skipped:
         health[key] = "skipped"
     return health
@@ -3337,7 +3408,7 @@ def _resolve_video_transcript(
         captions_refused: bool = False,
         media_chunks: list[tuple[Path, float, float]] | None = None,
         cancel_event: threading.Event | None = None,
-        asr_titles: tuple = (),
+        asr_titles: tuple = (), progress=None, checkpoint=None, asr_checkpoint=None,
 ) -> tuple[list[tuple[float, float, str]], str | None, dict]:
     """Prefer platform captions, then try cache-only local ASR.
 
@@ -3346,8 +3417,12 @@ def _resolve_video_transcript(
     caption-less capture still succeeds without pretending it has words.
     Chunk inputs carry source offsets and durations; ASR covers only those
     downloaded sections, including when separate source audio is needed.
+    ``asr_checkpoint`` (the transcript backfill) runs between ASR segments;
+    it pauses or yields by raising PlaylistJobCancelled.
     """
     _raise_if_cancelled(cancel_event)
+    if checkpoint is None:
+        checkpoint = asr_checkpoint
     if caption_entries:
         return list(caption_entries), "captions", {"status": "not_needed"}
 
@@ -3370,6 +3445,17 @@ def _resolve_video_transcript(
             **expectation,
         }
 
+    # 3.18: an English-only model reports when the audio wasn't English and
+    # the multilingual model ran instead (other models leave the call as is).
+    chunk_details = []
+    spoken_fallbacks = []
+    controls = {}
+    if progress:
+        controls["progress"] = progress
+    if checkpoint:
+        controls["checkpoint"] = checkpoint
+    if asr_worker.offload_active():
+        controls["duration_seconds"] = expectation.get("duration_seconds")
     try:
         with contextlib.ExitStack() as cleanup:
             entries = []
@@ -3377,6 +3463,8 @@ def _resolve_video_transcript(
             for number, (path, offset, length) in enumerate(
                     media_chunks or [(media_path, 0.0, None)]):
                 _raise_if_cancelled(cancel_event)
+                asr_info = {}
+                guard_kw = {"info": asr_info} if uoink_reliability.is_english_only(model_name) else {}
                 has_audio = _media_has_audio(path, cancel_event)
                 _raise_if_cancelled(cancel_event)
                 needs_source_audio = has_audio is False
@@ -3387,6 +3475,8 @@ def _resolve_video_transcript(
                             model_name=model_name,
                             model_root=RELIABILITY_MODEL_ROOT,
                             **({"initial_prompt": initial_prompt} if initial_prompt else {}),
+                            **({"cancel_event": cancel_event} if cancel_event is not None else {}),
+                            **guard_kw, **controls,
                         )
                     except IndexError:
                         if has_audio is True:
@@ -3442,8 +3532,14 @@ def _resolve_video_transcript(
                         model_name=model_name,
                         model_root=RELIABILITY_MODEL_ROOT,
                         **({"initial_prompt": initial_prompt} if initial_prompt else {}),
+                        **({"cancel_event": cancel_event} if cancel_event is not None else {}),
+                        **guard_kw, **controls,
                     )
                 _raise_if_cancelled(cancel_event)
+                detail = asr_info.get("english_fallback")
+                chunk_details.append(detail)
+                if local_entries:
+                    spoken_fallbacks.append(detail)
                 if media_chunks:
                     # ASR timestamps are local to each sampled section. Bound
                     # them to that section before linking to the source video.
@@ -3457,6 +3553,7 @@ def _resolve_video_transcript(
     except PlaylistJobCancelled:
         raise
     except Exception as e:
+        _raise_if_cancelled(cancel_event)  # a cancel that stopped the model is a cancel
         log.warning("local ASR fallback failed: %s", e)
         return [], None, {
             "status": "failed",
@@ -3488,6 +3585,21 @@ def _resolve_video_transcript(
     }
     if media_chunks:
         completed["coverage"] = "sampled_sections"
+    fallback = None
+    if spoken_fallbacks and all(isinstance(f, dict) for f in spoken_fallbacks):
+        models = {f.get("used_model") for f in spoken_fallbacks}
+        languages = {f.get("detected_language") for f in spoken_fallbacks}
+        if len(models) == 1:
+            fallback = {"used_model": models.pop(),
+                        "detected_language": languages.pop() if len(languages) == 1 else "mixed"}
+    if media_chunks and any(chunk_details):
+        completed["section_fallbacks"] = chunk_details
+    if isinstance(fallback, dict):
+        completed["model"] = fallback.get("used_model") or completed["model"]
+        completed["requested_model"] = model_name
+        completed["detected_language"] = fallback.get("detected_language")
+    if any(getattr(entry, "words", None) for entry in entries):
+        completed["word_timings"] = True
     if not entries:
         # Whisper ran, and its voice filter kept nothing: music or silence.
         completed["status"] = "no_speech"
@@ -3748,6 +3860,8 @@ def _is_youtube_bot_check(e: BaseException) -> bool:
     if not isinstance(e, subprocess.CalledProcessError):
         return False
     text = _subprocess_output(e).lower()
+    if _source_name_from_error(text + "\n" + str(e.cmd)) == "X":
+        return False
     return "not a bot" in text or "confirm you" in text
 
 
@@ -4057,6 +4171,7 @@ def _compute_transcript_reliability(
     threshold: float = RELIABILITY_DEFAULT_THRESHOLD,
     allow_model_download: bool = False,
     force: bool = False,
+    cancel_event=None,
 ) -> dict:
     """Compute/cache transcript reliability for one saved yoink.
 
@@ -4116,6 +4231,7 @@ def _compute_transcript_reliability(
             threshold=threshold,
             model_name=reliability_model,
             model_root=RELIABILITY_MODEL_ROOT,
+            **({"cancel_event": cancel_event} if cancel_event is not None else {}),
         )
         return {
             "status": "completed",
@@ -4195,10 +4311,17 @@ def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
     ``youtube_deep_link``, null when the source is not YouTube)."""
     links = _sidecar_link_builder(sidecar)
     out = []
-    for s, e, t in entries:
+    for entry in entries:
+        s, e, t = entry
         youtube_link, citation_source, deep_link = links(s)
-        out.append({"start": s, "end": e, "text": t, "source_url": citation_source,
-                    "source_deep_link": deep_link, "youtube_deep_link": youtube_link})
+        row = {"start": s, "end": e, "text": t, "source_url": citation_source,
+               "source_deep_link": deep_link, "youtube_deep_link": youtube_link}
+        # 3.18: local Whisper's word timings ({word, start, end}), for tools
+        # that cut on a word. Captions and older items have none.
+        words = getattr(entry, "words", None)
+        if words:
+            row["words"] = words
+        out.append(row)
     return out
 
 
@@ -4423,6 +4546,7 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         "author": _author,
         "title": sidecar.get("title"),
         "topic": sidecar.get("topic"),
+        "shelf_by_hand": sidecar.get("shelf_by_hand") is True,
         "hook_type": sidecar.get("hook_type"),
         "yoinked_at": sidecar.get("yoinked_at") or _now_iso(),
         "corpus_path": str(corpus_path) if corpus_path else "",
@@ -4446,6 +4570,9 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             "comment_count": sidecar.get("comment_count"),
             "channel_follower_count": sidecar.get("channel_follower_count"),
             "upload_date": sidecar.get("upload_date"),
+            # Original publish date (ISO 8601, or upload_date's YYYYMMDD on an
+            # older sidecar), separate from yoinked_at. Search reads either.
+            "published_at": sidecar.get("published_at") or sidecar.get("upload_date"),
         }, ensure_ascii=False),
     }
     idx = _get_index()
@@ -4648,6 +4775,811 @@ def _start_backfill_thread() -> None:
     threading.Thread(target=_runner, name="index-backfill", daemon=True).start()
 
 
+# ---------------------------------------------------------------------------
+# 3.18 transcript backfill: "Transcribe saves that have no words"
+# ---------------------------------------------------------------------------
+# transcript_backfill.py owns the order, progress file, pause/resume and
+# back-off. These helpers find the saves (index rows, sidecars, corpus
+# Markdown and folders a capture never finished) and transcribe one through
+# the capture's own caption fetch, audio download, local ASR, corpus renderer
+# and index publication. Nothing here deletes a user's file.
+# _run_extraction writes this file (by name) when a first capture claims its
+# folder and removes it once the sidecar and the index row are both written;
+# one left behind means the capture stopped midway.
+CAPTURE_INCOMPLETE_NAME = "capture-not-finished.txt"
+_TRANSCRIPT_BACKFILL_MEDIA_SUFFIXES = (".mp4", ".webm", ".mkv", ".mov", ".m4a",
+                                       ".mp3", ".aac", ".opus", ".ogg", ".wav")
+_TRANSCRIPT_WORDS_LINE = re.compile(r"(?m)^(?:\[\d{1,2}:\d{2}(?::\d{2})?\]|### \[)")
+_TRANSCRIPT_SECTION_HEADING = re.compile(r"(?m)^## (?:Chapters|Transcript)\n")
+_TRANSCRIPT_BACKFILL_SKIP_TYPES = {"episode", "note", "image", "page", "x_article"}
+_TRANSCRIPT_BACKFILL_GONE_TEXT = (
+    "video unavailable", "video is unavailable", "video is not available",
+    "video has been removed", "no longer available", "this video is private",
+    "private video", "account has been terminated", "this post is unavailable",
+    "post was deleted", "has been deleted", "http error 404", "http error 410",
+    "not all metadata or media", "unable to download json metadata",
+    "account is suspended", "does not exist",
+)
+_transcript_backfill_instance = None
+_transcript_backfill_instance_lock = threading.Lock()
+
+
+def _capture_incomplete_record(folder: Path) -> dict:
+    """The url and start time _run_extraction wrote in capture-not-finished.txt."""
+    try:
+        text = (folder / CAPTURE_INCOMPLETE_NAME).read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return {}
+    record = {}
+    for line in text.splitlines():
+        name, sep, value = line.partition(": ")
+        if sep and name in ("url", "started"):
+            record[name] = value.strip()
+    return record
+
+
+def _transcript_backfill_host(url: str | None) -> str:
+    platform = _detect_platform_from_url(url or "") if url else ""
+    return {PLATFORM_YOUTUBE: "youtube", PLATFORM_TWITTER: "x"}.get(platform, "other")
+
+
+def _transcript_backfill_media_file(folder: Path, sidecar: dict | None = None) -> Path | None:
+    """A full media file the capture kept (or left behind), never a .part."""
+    candidates = []
+    named = (sidecar or {}).get("media_file")
+    if isinstance(named, str) and named and Path(named).name == named:
+        candidates.append(folder / named)
+    try:
+        candidates.extend(sorted(p for p in folder.iterdir()
+                                 if p.name.startswith(("video.", "audio."))))
+    except OSError:
+        return None
+    for path in candidates:
+        try:
+            if (path.suffix.lower() in _TRANSCRIPT_BACKFILL_MEDIA_SUFFIXES
+                    and not path.is_symlink() and path.is_file() and path.stat().st_size > 0):
+                return path
+        except OSError:
+            continue
+    return None
+
+
+def _sidecar_has_words(sidecar: dict) -> bool:
+    return any(isinstance(e, dict) and str(e.get("text") or "").strip()
+               for e in (sidecar.get("transcript") or []))
+
+
+def _corpus_transcript_bounds(md: str) -> tuple[int, int] | None:
+    """Start and end of the corpus transcript section(s), up to its rule."""
+    tags = md.find("\n## Tags\n")
+    heading = _TRANSCRIPT_SECTION_HEADING.search(md, max(tags, 0))
+    if heading is None:
+        return None
+    start = heading.start()
+    end = md.find("\n---\n\n## Screenshots", start)
+    if end < 0:
+        end = md.find("\n---\n", start)
+    return start, (end + 1 if end >= 0 else len(md))
+
+
+def _corpus_has_words(md: str) -> bool:
+    bounds = _corpus_transcript_bounds(md)
+    return bool(bounds and _TRANSCRIPT_WORDS_LINE.search(md, bounds[0], bounds[1]))
+
+
+def _transcript_backfill_scan() -> dict:
+    """Every save with (or able to fetch again) media but no transcript.
+
+    Signals, cheapest first: the index health snapshot ("ok" has words,
+    "skipped" is a text save), then the sidecar the capture wrote (video-path
+    keys, transcript rows, asr_fallback), then the corpus transcript section
+    for old saves that kept words only in Markdown. Folders a capture never
+    finished are found on disk; they have no sidecar and no index row.
+    """
+    idx = _get_index()
+    with idx.read_snapshot() as db:
+        rows = [dict(r) for r in db.execute(
+            "SELECT video_id, slug, title, source_type, platform, yoinked_at, corpus_path, "
+            "sidecar_path, health_score_json, metadata_json FROM yoinks WHERE deleted_at IS NULL")]
+    items: list[dict] = []
+    no_words = 0
+    indexed_folders = set()
+    for row in rows:
+        for column in ("sidecar_path", "corpus_path"):
+            if row.get(column):
+                indexed_folders.add(os.path.normcase(str(Path(row[column]).parent)))
+        if str(row.get("source_type") or "") in _TRANSCRIPT_BACKFILL_SKIP_TYPES:
+            continue
+        try:
+            health = json.loads(row.get("health_score_json") or "null")
+        except (TypeError, ValueError):
+            health = None
+        state = health.get("transcript") if isinstance(health, dict) else None
+        if state in ("ok", "skipped"):
+            continue
+        if state == "no speech":
+            no_words += 1
+            continue
+        sidecar_path = Path(row.get("sidecar_path") or "")
+        if not (row.get("sidecar_path") and _transcript_backfill_inside_library(sidecar_path)):
+            continue  # a stale or outside path is never written to
+        try:
+            sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(sidecar, dict):
+            continue
+        marker = sidecar.get("transcript_backfill")
+        repair = isinstance(marker, dict) and marker.get("status") == "saving"
+        if not repair:
+            if not ("transcript_source" in sidecar or "interval_seconds" in sidecar
+                    or row.get("source_type") in ("video", "short_video")):
+                continue
+            if _sidecar_has_words(sidecar):
+                continue
+            asr = sidecar.get("asr_fallback") if isinstance(sidecar.get("asr_fallback"), dict) else {}
+            if asr.get("status") == "no_speech" or (
+                    asr.get("status") == "no_audio" and not asr.get("error")):
+                no_words += 1
+                continue
+            corpus_path = Path(row.get("corpus_path") or "")
+            if row.get("corpus_path") and corpus_path.exists():
+                if not _transcript_backfill_inside_library(corpus_path):
+                    continue
+                try:
+                    if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+                        continue
+                except (OSError, UnicodeError):
+                    continue  # unreadable is "do not touch", never "no words"
+        folder = sidecar_path.parent
+        url = sidecar.get("source_url") or sidecar.get("url")
+        url = url if isinstance(url, str) and url.startswith(("http://", "https://")) else None
+        media_path = _transcript_backfill_media_file(folder, sidecar)
+        try:
+            meta = json.loads(row.get("metadata_json") or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        duration = sidecar.get("duration_seconds") or (
+            meta.get("duration_seconds") if isinstance(meta, dict) else None)
+        items.append({
+            "key": row["video_id"], "title": row.get("title") or sidecar.get("title") or row["slug"],
+            "duration": duration, "saved_at": row.get("yoinked_at"), "url": url,
+            "host": _transcript_backfill_host(url), "folder": str(folder),
+            "sidecar_path": str(sidecar_path), "corpus_path": row.get("corpus_path") or "",
+            "media_path": str(media_path) if media_path else None,
+            "media": "on_disk" if (media_path or repair) else ("download" if url else "gone"),
+            "repair": repair, "half": False,
+        })
+    try:
+        gone = {vid for vid, rec in idx.availability_for(
+            [i["key"] for i in items if i["media"] == "download"]).items()
+            if rec.get("status") in source_availability.GONE}
+    except Exception:
+        gone = set()
+    for item in items:
+        if item["key"] in gone:
+            item["media"] = "gone"
+    items.extend(_transcript_backfill_half_captures(indexed_folders))
+    return {"items": items, "no_words": no_words}
+
+
+def _transcript_backfill_half_captures(indexed_folders: set) -> list[dict]:
+    """Capture folders that never got a sidecar: the capture stopped midway."""
+    root = DESKTOP_ROOT
+    out: list[dict] = []
+    if not root.is_dir():
+        return out
+    trash = os.path.normcase(str(_trash_root()))
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.normcase(dirpath) == trash:
+            dirnames[:] = []
+            continue
+        folder = Path(dirpath)
+        names = set(filenames)
+        claimed = ".capture-source.json" in names or CAPTURE_INCOMPLETE_NAME in names
+        legacy = "metadata.json" in names and (
+            "screenshots" in dirnames or any(n.startswith(("video.", "thumbnail.")) for n in names))
+        if not (claimed or legacy):
+            dirnames[:] = [d for d in dirnames if not d.startswith(".") and d != "screenshots"]
+            continue
+        dirnames[:] = []
+        if (f"{folder.name}.json" in names or f"{folder.name}.md" in names or "yoink.md" in names
+                or os.path.normcase(str(folder)) in indexed_folders):
+            continue
+        item = _transcript_backfill_half_item(folder, names)
+        if item is not None:
+            out.append(item)
+    return out
+
+
+def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
+    def read(name):
+        if name not in names:
+            return {}
+        try:
+            value = json.loads((folder / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        return value if isinstance(value, dict) else {}
+    claim, metadata = read(".capture-source.json"), read("metadata.json")
+    marker = _capture_incomplete_record(folder)
+    url = next((u for u in (marker.get("url"), claim.get("url"), metadata.get("webpage_url"),
+                            metadata.get("original_url"))
+                if isinstance(u, str) and u.startswith(("http://", "https://"))), None)
+    if url is None:
+        return None
+    # The note's url is the exact one the capture locked on (its identity key).
+    if _transcript_backfill_identity_busy(url):
+        return None  # a capture is writing this folder right now
+    media_path = _transcript_backfill_media_file(folder)
+    # Finish reuses only a full video file (what _run_extraction reuses);
+    # anything else is fetched again, so it is listed as a download.
+    try:
+        reusable = any(
+            p.name.lower().startswith("video.") and p.suffix.lower() in (".mp4", ".webm", ".mkv")
+            and not p.is_symlink() and p.is_file() and p.stat().st_size > 0
+            for p in folder.iterdir())
+    except OSError:
+        reusable = False
+    try:
+        saved_at = marker.get("started") or datetime.fromtimestamp(
+            folder.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
+        rel = folder.relative_to(DESKTOP_ROOT).as_posix()
+    except (OSError, ValueError):
+        return None
+    return {
+        "key": "folder:" + rel, "title": metadata.get("title") or folder.name,
+        "duration": metadata.get("duration"), "saved_at": saved_at, "url": url,
+        "host": _transcript_backfill_host(url), "folder": str(folder),
+        "folder_name": folder.name, "media_path": str(media_path) if media_path else None,
+        # Finishing needs the saved metadata as well as the media to stay offline.
+        "media": "on_disk" if (reusable and metadata) else "download",
+        "has_metadata": bool(metadata), "half": True, "repair": False,
+    }
+
+
+def _transcript_backfill_keys(url: str | None, extra=()) -> list[str]:
+    keys = {k for k in extra if k}
+    try:
+        canonical = _normalize_video_url(url)[0] if url else None
+    except Exception:
+        canonical = None  # one odd link never breaks the whole scan
+    for value in (url, canonical):
+        if value:
+            try:
+                keys.add(_manual_capture_key(value))
+            except Exception:
+                continue
+    return sorted(keys)
+
+
+# Capture identity keys the backfill itself holds right now (a Finish or an
+# apply). Guarded by _ServerCaptureBackend._identity_condition.
+_transcript_backfill_held_keys: set = set()
+
+
+def _transcript_backfill_identity_busy(url: str | None) -> bool:
+    """Read-only: is a capture (not the backfill itself) writing this save?
+
+    Never registers the identity, so a capture starting now does not wait on
+    a status read, and the save the backfill is finishing stays listed."""
+    for key in _transcript_backfill_keys(url):
+        with _ServerCaptureBackend._identity_condition:
+            if key in _ServerCaptureBackend._local_identities:
+                if key in _transcript_backfill_held_keys:
+                    continue
+                return True
+        # A status scan and the worker can inspect this folder concurrently.
+        # Taking its lock here would make the other scan see a phantom capture.
+        if source_subscriptions.CaptureLock.in_use(DATA_ROOT, key):
+            return True
+    return False
+
+
+def _transcript_backfill_hold_identity(url: str | None):
+    """Take the capture identity lock without waiting, or None when a capture holds it.
+
+    Lock order (one order everywhere): a capture registers itself, then waits
+    for this identity, then the extraction slot. So the backfill takes this
+    only while no capture runs, and while it holds it never waits for one:
+    its ASR checkpoint lets go instead (_transcript_backfill_checkpoint)."""
+    held = []
+    try:
+        for key in _transcript_backfill_keys(url):
+            with _ServerCaptureBackend._identity_condition:
+                if key in _ServerCaptureBackend._local_identities:
+                    _transcript_backfill_release_identity(held)
+                    return None
+                lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+                if lock is None:
+                    _transcript_backfill_release_identity(held)
+                    return None
+                _ServerCaptureBackend._local_identities[key] = lock
+                _transcript_backfill_held_keys.add(key)
+            held.append((key, lock))
+    except OSError:
+        _transcript_backfill_release_identity(held)
+        return None
+    return held
+
+
+def _transcript_backfill_release_identity(held) -> None:
+    for key, lock in held or ():
+        with _ServerCaptureBackend._identity_condition:
+            _transcript_backfill_held_keys.discard(key)
+        _ServerCaptureBackend.release_identity(key, lock)
+
+
+def _transcript_backfill_inside_library(path) -> bool:
+    """True for a real folder or file inside the library (not its trash)."""
+    try:
+        candidate = Path(path)
+        if candidate.is_symlink():
+            return False
+        root = DESKTOP_ROOT.resolve()
+        resolved = candidate.resolve()
+        trash = _trash_root().resolve()
+    except (OSError, ValueError, TypeError):
+        return False
+    return (resolved != root and resolved.is_relative_to(root)
+            and not resolved.is_relative_to(trash))
+
+
+def _transcript_backfill_capture_busy() -> bool:
+    """True while the user captures something: the backfill waits its turn."""
+    if _extract_lock.locked():
+        return True
+    with _live_extracts_lock:
+        if _live_extracts:
+            return True
+    with _jobs_lock:
+        return any(job.get("state") == "running"
+                   and job.get("kind") in ("playlist", "single", "podcast_transcribe")
+                   for job in _jobs.values())
+
+
+def _transcript_backfill_wanted_elsewhere(url: str | None) -> bool:
+    """A capture of this same source is waiting: give it the save."""
+    if not url:
+        return False
+    try:
+        source = _video_capture_source(url)
+    except ValueError:
+        return False
+    with _live_extracts_lock:
+        others = [entry.get("source_url") for entry in _live_extracts.values()]
+    for other in others:
+        try:
+            if other and _video_capture_source(other) == source:
+                return True
+        except ValueError:
+            continue
+    return False
+
+
+def _transcript_backfill_model_ready() -> tuple[bool, str]:
+    model = _selected_reliability_model()
+    if _reliability_model_status(model).get("cached"):
+        return True, ""
+    return False, ("The transcription model is not on this computer yet. "
+                   "Download it in Settings, then start again.")
+
+
+def _transcript_backfill_failure(error) -> tuple[str, str]:
+    """(kind, plain reason) for a failed fetch: rate_limited, bot_check, gone or failed."""
+    if isinstance(error, subprocess.CalledProcessError):
+        text = _subprocess_output(error)
+    elif isinstance(error, subprocess.TimeoutExpired):
+        return "failed", "The download timed out."
+    else:
+        text = str(error or "")
+    lower = text.lower()
+    if (re.search(r"\b429\b", text) or "too many requests" in lower
+            or "rate limit" in lower or "rate-limit" in lower):
+        return "rate_limited", "The site is limiting requests right now."
+    if "not a bot" in lower or "confirm you" in lower or "captcha" in lower or "bot check" in lower:
+        return "bot_check", "The site asked for a bot check."
+    if any(phrase in lower for phrase in _TRANSCRIPT_BACKFILL_GONE_TEXT):
+        return "gone", "The video is no longer at the link it was saved from."
+    return "failed", _plain_error_from_text(text) if text else "The media could not be fetched."
+
+
+def _transcript_backfill_note(sidecar: dict, source, asr: dict, url, captions_reason=None):
+    """The same transcript note a fresh capture writes."""
+    if source == "captions":
+        return None
+    skipped = captions_reason or sidecar.get("captions_skipped_reason")
+    if skipped == CAPTIONS_RATE_LIMITED:
+        caption_note = "YouTube refused captions"
+    elif skipped in (CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
+        caption_note = "YouTube asked for a bot check"
+    elif _detect_platform_from_url(url or "") == PLATFORM_YOUTUBE:
+        caption_note = "YouTube captions unavailable"
+    else:
+        caption_note = "captions unavailable"
+    status = (asr or {}).get("status")
+    if source == "asr":
+        return f"Local Whisper transcript: {caption_note}"
+    if status == "no_audio":
+        return f"No transcript: {asr.get('reason')}"
+    if status == "no_speech":
+        return f"No transcript: {caption_note}, and Whisper found no speech"
+    return f"No transcript: {caption_note}"
+
+
+def _transcript_backfill_render(folder: Path, sidecar: dict) -> tuple[str, str | None]:
+    """The transcript section and header line, from the capture's own renderer."""
+    entries = []
+    for entry in sidecar.get("transcript") or []:
+        if isinstance(entry, dict) and str(entry.get("text") or "").strip():
+            entries.append((_as_float(entry.get("start")) or 0.0,
+                            _as_float(entry.get("end")) or 0.0, str(entry["text"])))
+    media_sections = None
+    try:
+        plan = _capture_media_plan(sidecar, folder, item={"metadata_json": json.dumps(
+            {"duration_seconds": sidecar.get("duration_seconds")})})
+        if plan is not None:
+            media_sections = plan["markdown"]
+    except Exception as e:
+        log.warning("transcript backfill: media sections skipped for %s: %s", folder, e)
+    chapters = sidecar.get("source_chapters") if isinstance(sidecar.get("source_chapters"), list) else []
+    rendered = _build_yoink_md(
+        metadata={"title": sidecar.get("title") or "", "chapters": chapters}, url="",
+        entries=entries, shots=[], interval=30, channel_ctx={}, yoinked_at="", topic="",
+        media_sections=media_sections, transcript_note=sidecar.get("transcript_note"))
+    start, end = _corpus_transcript_bounds(rendered)
+    header = next((line for line in rendered.split("\n---\n", 1)[0].splitlines()
+                   if line.startswith("**Transcript:** ")), None)
+    return rendered[start:end], header
+
+
+def _splice_transcript_markdown(md: str, block: str, header: str | None) -> str:
+    """Replace only the transcript section and its header line."""
+    bounds = _corpus_transcript_bounds(md)
+    if bounds is None:
+        anchor = md.find("\n## Screenshots")
+        if anchor >= 0:
+            md = md[:anchor + 1] + block + "---\n\n" + md[anchor + 1:]
+        else:
+            md = md.rstrip("\n") + "\n\n" + block
+    else:
+        md = md[:bounds[0]] + block + md[bounds[1]:]
+    head, sep, rest = md.partition("\n---\n")
+    if not sep:
+        return md
+    lines = [line for line in head.split("\n") if not line.startswith("**Transcript:** ")]
+    if header:
+        at = max((i for i, line in enumerate(lines) if line.startswith("**")), default=len(lines) - 1)
+        lines.insert(at + 1, header)
+    return "\n".join(lines) + sep + rest
+
+
+def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
+                               captions_reason=None) -> str:
+    """Save new words into the sidecar, transcript.txt, corpus and index.
+
+    The sidecar is written first with a "saving" mark and cleared last, so a
+    helper stopped in between is found and finished by the next scan. With
+    ``entries`` None this only finishes such an interrupted save. Returns
+    "applied", "skipped" (it has words now, or changed) or "busy".
+    """
+    folder = Path(item["folder"])
+    sidecar_path = Path(item["sidecar_path"])
+    corpus_path = Path(item["corpus_path"]) if item.get("corpus_path") else _resolve_corpus_path(folder)
+    if not (_transcript_backfill_inside_library(folder) and sidecar_path.parent == folder
+            and _transcript_backfill_inside_library(sidecar_path)
+            and (corpus_path is None or not corpus_path.exists()
+                 or _transcript_backfill_inside_library(corpus_path))):
+        return "skipped"  # only files inside the library are ever written
+    held = _transcript_backfill_hold_identity(item.get("url"))
+    if held is None:
+        return "busy"
+    try:
+        with _sidecar_update_lock:
+            try:
+                sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return "skipped"
+            if not isinstance(sidecar, dict):
+                return "skipped"
+            marker = sidecar.get("transcript_backfill")
+            saving = isinstance(marker, dict) and marker.get("status") == "saving"
+            if entries is None:
+                if not saving:
+                    return "skipped"
+            else:
+                if _sidecar_has_words(sidecar) and not saving:
+                    return "skipped"  # never touch a save that has words
+                if not saving and corpus_path is not None and corpus_path.exists():
+                    try:
+                        if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
+                            return "skipped"  # words only in the Markdown still count
+                    except (OSError, UnicodeError):
+                        return "skipped"  # unreadable: do not touch
+                if "source_chapters" not in sidecar:
+                    try:
+                        held_meta = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+                        chapters = held_meta.get("chapters") if isinstance(held_meta, dict) else None
+                    except (OSError, ValueError):
+                        chapters = None
+                    if isinstance(chapters, list) and chapters:
+                        sidecar["source_chapters"] = chapters
+                sidecar["transcript"] = _transcript_entries_with_links(sidecar, entries)
+                sidecar["transcript_source"] = source
+                sidecar["asr_fallback"] = asr or {"status": "not_needed"}
+                if captions_reason:
+                    sidecar["captions_skipped_reason"] = captions_reason
+                sidecar["transcript_note"] = _transcript_backfill_note(
+                    sidecar, source, asr or {}, sidecar.get("source_url") or sidecar.get("url"),
+                    captions_reason)
+                sidecar["transcript_backfill"] = {
+                    "status": "saving", "at": _now_iso(), "version": VERSION,
+                    "result": source or (asr or {}).get("status")}
+                # The file keeps its old health until the save is done: if
+                # anything reindexes it meanwhile (a tag edit, a rebuild), the
+                # index still says "no words" and the next scan finishes it.
+                _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
+        text = _transcript_text_from_sidecar(sidecar)
+        if text:
+            _atomic_write_text(folder / "transcript.txt", text)
+        if corpus_path is not None and corpus_path.is_file():
+            with _corpus_update_lock:
+                md = corpus_path.read_text(encoding="utf-8")
+                block, header = _transcript_backfill_render(folder, sidecar)
+                updated = _splice_transcript_markdown(md, block, header)
+                if updated != md:
+                    _atomic_write_text(corpus_path, updated)
+        with _sidecar_update_lock:
+            # Index what is on disk now, with any edit made meanwhile.
+            try:
+                latest = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                latest = None
+        latest = latest if isinstance(latest, dict) else sidecar
+        if _index_yoink(folder, dict(latest, health=compute_health(latest)),
+                        corpus_path, sidecar_path) is False:
+            raise RuntimeError("the library index did not take the new transcript")
+        with _sidecar_update_lock:
+            try:
+                current = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                current = None
+            marker = current.get("transcript_backfill") if isinstance(current, dict) else None
+            if isinstance(marker, dict) and marker.get("status") == "saving":
+                marker["status"] = "done"
+                current["health"] = compute_health(current)
+                _atomic_write_text(sidecar_path, json.dumps(current, ensure_ascii=False, indent=2))
+        return "applied"
+    finally:
+        _transcript_backfill_release_identity(held)
+
+
+def _transcript_backfill_checkpoint(checkpoint, url, *, holding: bool = False):
+    """ASR checkpoint: hand the save to a capture that wants it, else yield or pause.
+
+    ``holding``: the caller holds this save's capture lock (Finish). Then it
+    never waits for a capture, which may be waiting for that lock: it lets
+    go and the item is tried again once the capture is done."""
+    import transcript_backfill as backfill_mod
+
+    def check(segment=None):
+        if _transcript_backfill_wanted_elsewhere(url):
+            raise _TranscriptBackfillYield("a capture of this save is waiting")
+        position = (segment.get("end") if isinstance(segment, dict)
+                    else getattr(segment, "end", None))
+        try:
+            checkpoint(position, wait=not holding)
+        except backfill_mod.Paused:
+            raise PlaylistJobCancelled("transcript backfill paused") from None
+        except backfill_mod.YieldToCapture:
+            raise _TranscriptBackfillYield("a capture started") from None
+    return check
+
+
+def _transcript_backfill_work(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    """Transcribe one save. Outcomes are documented in transcript_backfill."""
+    import transcript_backfill as backfill_mod
+    ready, why = _transcript_backfill_model_ready()
+    if not ready:
+        return {"outcome": "blocked", "reason": why}
+    try:
+        if item.get("half"):
+            return _transcript_backfill_finish(item, checkpoint, stop_event, network_ok)
+        return _transcript_backfill_item(item, checkpoint, stop_event, network_ok)
+    except PlaylistJobCancelled as exc:
+        if stop_event.is_set():
+            raise backfill_mod.Paused() from None
+        return {"outcome": "yielded" if isinstance(exc, _TranscriptBackfillYield) else "busy"}
+
+
+def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    folder = Path(item["folder"])
+    if not _transcript_backfill_inside_library(folder):
+        return {"outcome": "skipped", "reason": "The save is not inside the library folder."}
+    if item.get("repair"):
+        result = _transcript_backfill_apply(item)
+        if result != "applied":
+            return {"outcome": result}
+        try:
+            saved = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+            stored = (saved.get("transcript_backfill") or {}).get("result")
+        except (OSError, ValueError, AttributeError):
+            stored = None
+        # The interrupted save finished with what it had found: words, or none.
+        return {"outcome": stored if stored in ("no_speech", "no_audio") else "transcribed"}
+    url, host, duration = item.get("url"), item.get("host") or "other", item.get("duration")
+    network_hosts = []
+    try:
+        sidecar = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"outcome": "skipped", "reason": "The save was moved or removed."}
+    if not isinstance(sidecar, dict) or _sidecar_has_words(sidecar):
+        return {"outcome": "skipped"}
+    settings = dict(_read_settings(), asr_fallback_enabled=True)
+    asr_check = _transcript_backfill_checkpoint(checkpoint, url)
+    asr_check()
+    refused = None
+    captions_reason = None
+    entries, source, asr = [], None, None
+    for stale in folder.glob(".asr-*"):
+        # Audio a stopped run left behind (Uoink's own temporary files only).
+        try:
+            if stale.is_dir() and not stale.is_symlink() and time.time() - stale.stat().st_mtime > 3600:
+                shutil.rmtree(stale)
+        except OSError:
+            pass
+    with tempfile.TemporaryDirectory(prefix=".asr-", dir=folder, ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        if host == "youtube" and url and network_ok("youtube"):
+            # Captions first: no CPU, and the best words when they exist.
+            reason = _fetch_video_subtitles(url, tmp, long_video_mode=LONG_VIDEO_MODE_FULL,
+                                            cancel_event=stop_event)
+            if reason is None:
+                network_hosts.append("youtube")
+                order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
+                srts = sorted(tmp.glob("video*.srt"), key=lambda p: (
+                    order.index(p.name) if p.name in order else len(order), p.name))
+                if srts:
+                    entries = list(parse_srt(srts[0], duration=duration))
+            elif reason in (CAPTIONS_RATE_LIMITED, CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
+                captions_reason = reason
+                refused = {"host": "youtube",
+                           "kind": "rate_limited" if reason == CAPTIONS_RATE_LIMITED else "bot_check"}
+                if item.get("media") != "on_disk":
+                    return {"outcome": "backoff", **refused}
+        if entries:
+            source, asr = "captions", {"status": "not_needed"}
+        else:
+            media = Path(item["media_path"]) if item.get("media_path") else None
+            if media is None or not media.is_file():
+                if not url:
+                    return {"outcome": "gone", "reason": "No copy on this computer and no link to fetch."}
+                if not network_ok(host):
+                    return {"outcome": "wait_network", "host": host}
+                try:
+                    media = _download_reliability_audio(url, tmp, cancel_event=stop_event)
+                except PlaylistJobCancelled:
+                    raise
+                except Exception as e:
+                    kind, why = _transcript_backfill_failure(e)
+                    if kind in ("rate_limited", "bot_check"):
+                        return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
+                    return {"outcome": "gone" if kind == "gone" else "failed", "reason": why}
+                network_hosts.append(host)
+            # The ASR fetches source audio only when the file on disk has no
+            # audio track. While the site rests it gets no link to fetch.
+            online = bool(url) and network_ok(host) and refused is None
+            entries, source, asr = _resolve_video_transcript(
+                [], media, duration, url=url if online else None, settings=settings,
+                captions_refused=captions_reason == CAPTIONS_RATE_LIMITED,
+                cancel_event=stop_event,
+                asr_titles=(sidecar.get("channel"), sidecar.get("title")),
+                asr_checkpoint=asr_check)
+            if (url and not online and source is None
+                    and (asr or {}).get("status") == "no_audio" and not asr.get("error")):
+                return {"outcome": "wait_network", "host": host}
+    status = (asr or {}).get("status")
+    if source is None and status == "no_audio" and asr.get("error"):
+        kind, why = _transcript_backfill_failure(asr.get("error"))
+        if kind in ("rate_limited", "bot_check"):
+            return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
+        return {"outcome": "gone" if kind == "gone" else "failed", "reason": why}
+    if status == "model_not_downloaded":
+        return {"outcome": "blocked", "reason": _transcript_backfill_model_ready()[1]}
+    if source is None and status not in ("no_speech", "no_audio"):
+        return {"outcome": "failed",
+                "reason": (asr or {}).get("error") or "The transcript step did not work."}
+    applied = _transcript_backfill_apply(item, entries, source, asr, captions_reason)
+    if applied != "applied":
+        return {"outcome": applied}
+    outcome = "transcribed" if source else status
+    return {"outcome": outcome, "media_seconds": duration if source != "captions" else None,
+            "network_ok": network_hosts, **({"refused": refused} if refused else {})}
+
+
+def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) -> dict:
+    """Finish a capture that stopped midway, reusing what it left on disk."""
+    folder = Path(item["folder"])
+    url, host = item["url"], item.get("host") or "other"
+    if not _transcript_backfill_inside_library(folder):
+        return {"outcome": "skipped", "reason": "The capture is not inside the library folder."}
+    if not network_ok(host):
+        # Finishing still asks the site for small things (captions, the
+        # channel), so it waits out a back-off like a download does.
+        return {"outcome": "wait_network", "host": host}
+    held = _transcript_backfill_hold_identity(url)
+    if held is None:
+        return {"outcome": "busy"}
+    try:
+        if (folder / f"{folder.name}.json").exists() or _resolve_corpus_path(folder):
+            return {"outcome": "skipped", "reason": "This capture already finished."}
+        try:
+            metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            metadata = None
+        if not isinstance(metadata, dict) or not metadata.get("title"):
+            metadata = _fetch_metadata(url, cancel_event=stop_event)
+        # Keep the topic folder the capture already lives in.
+        topic = (folder.parent.name if folder.parent.resolve() != DESKTOP_ROOT.resolve()
+                 else _classify_topic(metadata))
+        result = _run_extraction(
+            url, 30, folder, notify=False, metadata=metadata,
+            topic=topic, generate_paste=False,
+            cancel_event=stop_event, refresh_existing=False, finish_on_disk=True,
+            asr_checkpoint=_transcript_backfill_checkpoint(checkpoint, url, holding=True))
+    except PlaylistJobCancelled:
+        raise
+    except Exception as e:
+        kind, why = _transcript_backfill_failure(e)
+        if kind in ("rate_limited", "bot_check"):
+            return {"outcome": "backoff", "host": host, "kind": kind, "reason": why}
+        if kind == "gone" and not _transcript_backfill_media_file(folder):
+            return {"outcome": "gone", "reason": why}
+        return {"outcome": "failed", "reason": friendly_error(e)}
+    finally:
+        _transcript_backfill_release_identity(held)
+    status = (result.get("asr_fallback") or {}).get("status")
+    answered = [host] if item.get("media") == "download" else []
+    if result.get("transcript_source"):
+        return {"outcome": "transcribed", "media_seconds": item.get("duration"),
+                "network_ok": answered}
+    if status in ("no_speech", "no_audio"):
+        return {"outcome": status, "network_ok": answered}
+    return {"outcome": "failed",
+            "reason": "The capture finished, but its transcript step did not work."}
+
+
+def _transcript_backfill():
+    """The one backfill for this library (its state lives next to index.db)."""
+    global _transcript_backfill_instance
+    import transcript_backfill as backfill_mod
+    with _transcript_backfill_instance_lock:
+        instance = _transcript_backfill_instance
+        if instance is None or instance.path.parent != Path(DATA_ROOT):
+            instance = backfill_mod.TranscriptBackfill(
+                DATA_ROOT, scan=_transcript_backfill_scan, work=_transcript_backfill_work,
+                capture_busy=_transcript_backfill_capture_busy,
+                model_ready=_transcript_backfill_model_ready,
+                lower_priority=whisper_runner.set_current_thread_below_normal)
+            _transcript_backfill_instance = instance
+        return instance
+
+
+def _transcript_backfill_status() -> dict:
+    status = _transcript_backfill().status()
+    ready, why = _transcript_backfill_model_ready()
+    return {"ok": True, "model_ready": ready, **({"model_message": why} if why else {}), **status}
+
+
+def _resume_transcript_backfill_at_boot() -> None:
+    """Carry on a backfill the user started before the helper stopped."""
+    try:
+        if _transcript_backfill().resume_after_restart():
+            log.info("transcript backfill: resumed the run started before restart")
+    except Exception:
+        log.exception("transcript backfill: could not resume")
+
+
 _PHASE2_BACKFILL_KEY = "phase2_author_backfill_done"
 
 _ENGAGEMENT_BACKFILL_MAX_BYTES = 32 * 1024 * 1024
@@ -4750,8 +5682,6 @@ def _run_phase2_author_backfill_once() -> None:
 
 # Markers in yoink.md so the comments section can be replaced after the
 # background fetch finishes. HTML comments are invisible in rendered markdown.
-COMMENTS_START_MARK = "<!-- yoink:comments-start -->"
-COMMENTS_END_MARK = "<!-- yoink:comments-end -->"
 CI_START_MARK = "<!-- yoink:comment-intelligence-start -->"
 CI_END_MARK = "<!-- yoink:comment-intelligence-end -->"
 HOOK_START_MARK = "<!-- HOOK_START -->"
@@ -4904,10 +5834,649 @@ def _classify_topic(metadata: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Shelf routing (3.18): a save's own words, the user's folders and the
+# shelves already in the library. The logic lives in shelf_router.py; these
+# helpers feed it from this helper's index, data folder and local model.
+# ---------------------------------------------------------------------------
+_shelf_library_lock = threading.Lock()
+_shelf_library_cache: dict = {"key": None, "at": 0.0, "library": None}
+_shelf_generation = [0]
+SHELF_LIBRARY_ROWS = 5000
+SHELF_LIBRARY_TTL = 600.0
+SHELF_TRANSCRIPT_WORDS = 3000
+SHELF_ID_CHUNK = 500
+
+
+def _shelf_fallback() -> str:
+    return (_load_topics().get("fallback") or "Uncategorized").strip() or "Uncategorized"
+
+
+def _shelf_rows(idx, *, only_fallback: bool = False, limit: int = SHELF_LIBRARY_ROWS) -> list[dict]:
+    """Saves as shelf evidence: title, author, topic, tags, length and a
+    short excerpt of the saved text (metadata lines removed). by_hand says
+    the user placed the save."""
+    import shelf_router
+    fallback = _shelf_fallback()
+    where = ""
+    params: list = []
+    if only_fallback:
+        where = " AND (y.topic IS NULL OR TRIM(y.topic) = '' OR LOWER(TRIM(y.topic)) = LOWER(?))"
+        params.append(fallback)
+    captured = index.capture_time_sql("y.yoinked_at")
+    with idx.detached_snapshot() as db:
+        rows = db.execute(
+            "SELECT y.video_id, y.title, y.topic, y.author, y.channel, y.platform, y.source_type, "
+            "y.metadata_json, y.corpus_path, y.sidecar_path, "
+            "EXISTS(SELECT 1 FROM shelf_by_hand h WHERE h.video_id = y.video_id) AS by_hand "
+            "FROM yoinks y WHERE y.deleted_at IS NULL"
+            + where + f" ORDER BY {captured} DESC LIMIT ?", (*params, int(limit))).fetchall()
+        ids = [row["video_id"] for row in rows]
+        excerpts: dict = {}
+        tags: dict = {}
+        # Only the chosen saves' text and tags, not the whole library's.
+        for at in range(0, len(ids), SHELF_ID_CHUNK):
+            part = ids[at:at + SHELF_ID_CHUNK]
+            marks = ",".join("?" * len(part))
+            for r in db.execute("SELECT video_id, substr(content, 1, 2400) FROM yoinks_fts "
+                                f"WHERE video_id IN ({marks})", part):
+                excerpts[r[0]] = r[1] or ""
+            for r in db.execute("SELECT video_id, tag FROM yoink_tags "
+                                f"WHERE source != 'list_import' AND video_id IN ({marks})", part):
+                tags.setdefault(r[0], []).append(r[1])
+    out = []
+    for row in rows:
+        try:
+            meta = json.loads(row["metadata_json"] or "{}")
+        except (TypeError, ValueError):
+            meta = {}
+        meta = meta if isinstance(meta, dict) else {}
+        text = "\n".join(line for line in excerpts.get(row["video_id"], "").splitlines()
+                         if not re.match(r"^\s*(?:\*\*[^*]{1,40}:\*\*|#\s|!\[|>)", line))
+        out.append({"video_id": row["video_id"], "title": row["title"] or "", "topic": row["topic"],
+                    "author": row["author"] or row["channel"] or "", "platform": row["platform"] or "",
+                    "source_type": row["source_type"] or "", "text": text[:1500],
+                    "tags": tags.get(row["video_id"], [])[:20],
+                    "duration_seconds": meta.get("duration_seconds"),
+                    "is_fallback": shelf_router.is_fallback(row["topic"], fallback),
+                    "by_hand": bool(row["by_hand"]), "url": meta.get("url"),
+                    "corpus_path": row["corpus_path"], "sidecar_path": row["sidecar_path"]})
+    return out
+
+
+def _shelf_vectors(ids=None) -> dict:
+    """Stored meaning vectors per save, when local search is on and ready."""
+    engine = _local_search_singleton
+    if engine is None:
+        return {}
+    try:
+        return engine.source_vectors(ids)
+    except Exception:
+        log.debug("shelf routing: vectors unavailable", exc_info=True)
+        return {}
+
+
+def _index_data_version(idx):
+    """Changes whenever another process (the CLI, an MCP server) commits to
+    the index, so a shelf move made there is seen here at once."""
+    try:
+        with idx._lock:
+            return idx._conn.execute("PRAGMA data_version").fetchone()[0]
+    except Exception:
+        return None
+
+
+def _shelf_library():
+    """The user's shelves as routing evidence, cached until the library
+    changes here or in another process (or ten minutes pass)."""
+    idx = _get_index()
+    with idx.detached_snapshot() as db:
+        count, last = db.execute("SELECT COUNT(*), MAX(rowid) FROM yoinks WHERE deleted_at IS NULL").fetchone()
+    key = (str(INDEX_PATH), count, last, _shelf_generation[0], _index_data_version(idx),
+           _local_search_singleton is not None, _static_embed_available())
+    now = time.monotonic()
+    with _shelf_library_lock:
+        cached = _shelf_library_cache
+        if cached["key"] == key and now - cached["at"] < SHELF_LIBRARY_TTL and cached["library"] is not None:
+            return cached["library"]
+    library = _shelf_build_library(_shelf_rows(idx))
+    with _shelf_library_lock:
+        _shelf_library_cache.update(key=key, at=now, library=library)
+    return library
+
+
+def _static_embed_available() -> bool:
+    try:
+        import local_embed
+        return local_embed.is_available()
+    except Exception:
+        return False
+
+
+def _static_embed(texts: list) -> list:
+    """Unit vectors from the bundled static model (local_embed), or [] when
+    it is not installed. A row of zeros becomes None."""
+    if not texts or not _static_embed_available():
+        return []
+    try:
+        import local_embed
+        return [row if row.any() else None for row in local_embed.embed(texts)]
+    except Exception:
+        log.debug("shelf routing: static embeddings unavailable", exc_info=True)
+        return []
+
+
+# Static-model vectors for texts already seen, so a rebuild after each
+# capture embeds only what is new. Keyed by the weights' identity (folder,
+# sizes, modified times), bounded, and dropped when the model is.
+_static_vector_lock = threading.Lock()
+_static_vector_cache: dict = {}  # insertion order is the use order
+STATIC_VECTOR_CACHE_MAX = 20000
+
+
+def _clear_static_vectors() -> None:
+    with _static_vector_lock:
+        _static_vector_cache.clear()
+
+
+def _static_cached_vectors(texts: list) -> list | None:
+    """One vector (or None) per text, or None when the model can't run."""
+    import local_embed
+    ident = local_embed.identity()
+    if ident is None:
+        return None
+    local_embed.on_release(_clear_static_vectors)
+    keys = [(ident, hashlib.blake2b(t.encode("utf-8", "replace"), digest_size=16).digest()) for t in texts]
+    with _static_vector_lock:
+        known = {k: _static_vector_cache[k] for k in keys if k in _static_vector_cache}
+    missing = list(dict.fromkeys(k for k in keys if k not in known))
+    if missing:
+        first = {k: i for i, k in reversed(list(enumerate(keys)))}
+        found = _static_embed([texts[first[k]] for k in missing])
+        if not found:
+            return None
+        known.update(zip(missing, found))
+    with _static_vector_lock:
+        for k in keys:
+            _static_vector_cache.pop(k, None)
+            _static_vector_cache[k] = known.get(k)
+        while len(_static_vector_cache) > STATIC_VECTOR_CACHE_MAX:
+            _static_vector_cache.pop(next(iter(_static_vector_cache)))
+    return [known.get(k) for k in keys]
+
+
+def _shelf_build_library(rows: list):
+    """Library evidence for routing. Meaning comes from the optional search
+    model when it gives every shelf a profile, else from the bundled static
+    model, else only words, authors and neighbours count."""
+    import shelf_router
+    fallback = _shelf_fallback()
+    placed = [r for r in rows if not shelf_router.is_fallback(r.get("topic"), fallback)]
+    vectors = _shelf_vectors([r["video_id"] for r in placed])
+    if vectors:
+        library = shelf_router.Library(rows, fallback=fallback, vectors=vectors, tier="gemma")
+        if library.has_vectors():
+            return library
+        # Too few saves have search vectors to profile a shelf yet.
+    if not _static_embed_available():
+        return shelf_router.Library(rows, fallback=fallback)
+    names = shelf_router.shelf_name_texts(sorted({r.get("topic") for r in placed if r.get("topic")}),
+                                          _load_topics())
+    texts = [shelf_router.row_meaning_text(r) for r in placed] + list(names.values())
+    embedded = _static_cached_vectors(texts)
+    if embedded is None:
+        return shelf_router.Library(rows, fallback=fallback)
+    static = {r["video_id"]: vec for r, vec in zip(placed, embedded) if vec is not None}
+    name_vectors = {name: vec for name, vec in zip(names, embedded[len(placed):]) if vec is not None}
+    return shelf_router.Library(rows, fallback=fallback, vectors=static, names=name_vectors, tier="static")
+
+
+def _static_query_vectors(sigs: list) -> list:
+    """One static-model vector (or None) per save (shelf_router.Signals)."""
+    import shelf_router
+    found = _static_embed([shelf_router.meaning_text(s) for s in sigs])
+    return found or [None] * len(sigs)
+
+
+def _shelf_hint_urls(metadata: dict, url: str | None = None) -> list:
+    urls = [url, metadata.get("url"), metadata.get("webpage_url"), metadata.get("original_url")]
+    if str(metadata.get("extractor_key") or "").lower() == "youtube" and metadata.get("id"):
+        urls.append(str(metadata["id"]))
+    return [u for u in urls if u]
+
+
+def _shelf_hint(metadata: dict, url: str | None = None) -> str | None:
+    """A shelf the user or an agent picked for this URL before it was captured."""
+    import shelf_router
+    try:
+        return shelf_router.hint_for(DATA_ROOT, *_shelf_hint_urls(metadata, url))
+    except Exception:
+        log.debug("shelf hint lookup failed", exc_info=True)
+        return None
+
+
+def _explicit_shelf_hint(metadata: dict, url: str | None = None) -> str | None:
+    """The shelf the user named for this capture (capture --shelf, a shelf
+    picked in the extension), not an import folder."""
+    import shelf_router
+    try:
+        entry = shelf_router.hint_entry(DATA_ROOT, *_shelf_hint_urls(metadata, url))
+    except Exception:
+        log.debug("shelf hint lookup failed", exc_info=True)
+        return None
+    return entry["shelf"] if entry and entry["by_hand"] else None
+
+
+def _explicit_shelf_for_record(record: dict) -> bool:
+    """index.upsert_yoink's hook: this write's shelf is one the user named
+    for this capture, so it may replace a shelf set by hand."""
+    import shelf_router
+    try:
+        meta = json.loads(record.get("metadata_json") or "{}")
+    except (TypeError, ValueError):
+        meta = {}
+    meta = meta if isinstance(meta, dict) else {}
+    urls = [meta.get("url")]
+    if str(record.get("platform") or meta.get("platform") or "").lower() == "youtube":
+        urls.append(record.get("video_id"))
+    try:
+        entry = shelf_router.hint_entry(DATA_ROOT, *[u for u in urls if u])
+    except Exception:
+        return False
+    shelf = entry["shelf"] if entry and entry["by_hand"] else None
+    return bool(shelf) and shelf_router.shelf_key(shelf) == shelf_router.shelf_key(record.get("topic"))
+
+
+index.set_explicit_shelf_hook(_explicit_shelf_for_record)
+
+
+def _known_shelves() -> list:
+    """Shelf names in the library and in topics.json."""
+    names = [t.get("name") for t in _load_topics().get("topics") or [] if isinstance(t, dict)]
+    try:
+        idx = _get_index()
+        with idx.detached_snapshot() as db:
+            names += [r[0] for r in db.execute(
+                "SELECT DISTINCT topic FROM yoinks WHERE deleted_at IS NULL AND topic IS NOT NULL")]
+    except Exception:
+        log.debug("shelf names unavailable", exc_info=True)
+    return [n for n in names if isinstance(n, str) and n.strip()]
+
+
+def _canonical_shelf(name: str | None, known=None) -> str | None:
+    """An existing shelf's spelling for name ("cooking" lands on "Cooking",
+    NFD "Café" on NFC "Café"), so case and Unicode form never split a shelf."""
+    import shelf_router
+    if not name:
+        return name
+    return shelf_router.canonical_shelf(name, _known_shelves() if known is None else known)
+
+
+def _shelf_decision(metadata: dict, *, url: str | None = None, hint: str | None = None,
+                    source_type: str | None = None, transcript: str | None = None):
+    """The full routing decision for a new save (see shelf_router.route)."""
+    import shelf_router
+    metadata = metadata if isinstance(metadata, dict) else {}
+    url = url or metadata.get("url") or metadata.get("webpage_url")
+    source_type = source_type or metadata.get("source_type")
+    if not transcript and isinstance(metadata.get("transcript"), str):
+        transcript = metadata["transcript"]  # podcasts pass it in the metadata
+    keyword = _classify_topic(metadata)
+    hint = _canonical_shelf(hint or _shelf_hint(metadata, url))
+    library = vector = None
+    if not hint:
+        try:
+            library = _shelf_library()
+        except Exception:
+            log.warning("shelf routing: library evidence unavailable", exc_info=True)
+        if library is not None and library.has_vectors():
+            if library.tier == "static":
+                sig = shelf_router.signals_from_metadata(metadata, transcript=transcript,
+                                                         source_type=source_type, url=url)
+                vector = _static_query_vectors([sig])[0]
+            elif _local_search_singleton is not None:
+                try:
+                    vector = _local_search_singleton.document_vector(
+                        metadata.get("title") or "", " ".join([metadata.get("description") or "", transcript or ""]))
+                except Exception:
+                    vector = None
+    return shelf_router.route(metadata, topics=_load_topics(), library=library, keyword_topic=keyword,
+                              hint=hint, transcript=transcript, vector=vector,
+                              source_type=source_type, url=url)
+
+
+def _route_topic(metadata: dict, *, url: str | None = None, hint: str | None = None,
+                 source_type: str | None = None, transcript: str | None = None) -> str:
+    """Shelf for a new save. Same contract as _classify_topic (a dict in, a
+    shelf name out), so it also works as persist_page_yoink's classifier.
+    Never fails a capture: any routing error falls back to the keywords."""
+    try:
+        return _shelf_decision(metadata, url=url, hint=hint, source_type=source_type,
+                               transcript=transcript).shelf
+    except Exception:
+        log.warning("shelf routing failed; using topic words only", exc_info=True)
+        return _classify_topic(metadata)
+
+
+def _clean_shelf(value) -> str | None:
+    import shelf_router
+    return shelf_router.clean_shelf_name(value)
+
+
+def _remember_capture_shelf(url: str, shelf: str, *, by_hand: bool) -> None:
+    import shelf_router
+    try:
+        shelf_router.remember_hints(DATA_ROOT, [(url, shelf)], by_hand=by_hand)
+    except OSError as exc:
+        log.warning("shelf hint not saved: %s", exc)
+
+
+def _shelf_from_body(body, *, remember_url: str | None = None) -> tuple[str | None, str | None]:
+    """The optional shelf a capture request names ("shelf", or "folder" for
+    imports). Returns (name, None), (None, None) or (None, error). A "shelf"
+    is the user's own pick and must be a valid name; a "folder" comes from
+    another app and is tidied into one. With remember_url the choice is also
+    kept for a capture that waits in a queue, and a "shelf" pick there may
+    replace a shelf set by hand earlier."""
+    import shelf_router
+    if not isinstance(body, dict):
+        return None, None
+    by_hand = body.get("shelf") is not None
+    raw = body.get("shelf") if by_hand else body.get("folder")
+    if raw is None or (isinstance(raw, str) and not raw.strip()):
+        return None, None
+    name = shelf_router.clean_shelf_name(raw) if by_hand else shelf_router.folder_shelf_name(raw)
+    if not name:
+        return None, "shelf must be a name of 1 to 64 characters that also works as a folder name"
+    name = _canonical_shelf(name)
+    if remember_url:
+        _remember_capture_shelf(remember_url, name, by_hand=by_hand)
+    return name, None
+
+
+def _shelf_is_default(topic) -> bool:
+    import shelf_router
+    return (shelf_router.is_fallback(topic, _shelf_fallback())
+            or str(topic or "").strip() == shelf_router.CLIPS_SHELF)
+
+
+def _keep_placed_shelf(topic: str, existing: dict | None, *, explicit: str | None = None) -> str:
+    """Saving a link again keeps the shelf the save already sits on (the
+    user may have moved it), unless the caller named a shelf this time. The
+    index write keeps a shelf set by hand either way (index.upsert_yoink)."""
+    if explicit or not existing:
+        return explicit or topic
+    try:
+        idx = _get_index()
+        row = idx.get_yoink(existing["video_id"])
+    except Exception:
+        return topic
+    try:
+        by_hand = idx.shelf_hand_seq(existing["video_id"]) > 0
+    except Exception:
+        by_hand = False
+    current = (row or {}).get("topic")
+    return current if current and (by_hand or not _shelf_is_default(current)) else topic
+
+
+def _shelf_transcript_text(entries, limit: int = SHELF_TRANSCRIPT_WORDS) -> str:
+    """The first words of a transcript, without joining a multi-hour one."""
+    words: list = []
+    for entry in entries or []:
+        if isinstance(entry, dict):
+            words.extend(str(entry.get("text") or "").split())
+            if len(words) >= limit:
+                break
+    return " ".join(words[:limit])
+
+
+def _reroute_with_transcript(topic: str, metadata: dict, entries, *, url: str,
+                             existing: dict | None = None) -> str:
+    """One more routing pass once the transcript exists. Only a save still on
+    a default shelf (Uncategorized or Clips) that nobody placed by hand moves."""
+    if not _shelf_is_default(topic):
+        return topic
+    if existing and not _shelf_is_default(existing.get("topic")):
+        return existing.get("topic")
+    if _shelf_hint(metadata, url):
+        return topic
+    text = _shelf_transcript_text(entries)
+    if len(text.split()) < 20:
+        return topic
+    try:
+        decision = _shelf_decision(metadata, url=url, transcript=text)
+    except Exception:
+        log.warning("transcript re-route failed", exc_info=True)
+        return topic
+    if decision.source in ("fallback", "clip"):
+        return topic
+    log.info("shelf: the transcript moved %s from %s to %s (%s)", url, topic, decision.shelf, decision.source)
+    return decision.shelf
+
+
+def _shelf_sync_one(row: dict | None, shelf: str | None, by_hand: bool | None) -> bool:
+    """The save's sidecar and note follow its index row. False when a file
+    could not be written."""
+    import shelf_router
+    if not row:
+        return True
+    try:
+        shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"),
+                                shelf or _shelf_fallback(), by_hand=by_hand)
+        return True
+    except OSError as exc:
+        log.warning("shelf files for %s not updated (%s)", row.get("video_id"), exc)
+        return False
+
+
+def _shelf_recover() -> list:
+    """Finish what a stopped move or undo left half done, from the move log.
+    The index is the truth: files are brought in step with it, a move batch
+    keeps the moves that happened, and a stopped undo is finished. Returns
+    the batch ids it touched."""
+    import shelf_router
+    touched = []
+    with shelf_router.locked(DATA_ROOT):
+        for batch in shelf_router.unfinished_batches(DATA_ROOT):
+            if batch.get("undoing"):
+                _shelf_undo_moves(batch)
+                shelf_router.mark_undone(DATA_ROOT, batch["id"])
+                touched.append(batch["id"])
+                continue
+            idx = _get_index()
+            done = []
+            for move in batch.get("pending") or []:
+                row = idx.get_yoink(move.get("video_id") or "")
+                if (row and row.get("topic") == move.get("to")
+                        and idx.shelf_hand_seq(row["video_id"]) == move.get("seq")):
+                    _shelf_sync_one(row, move.get("to"), True)
+                    done.append(move)
+            shelf_router.finish_batch(DATA_ROOT, batch["id"], done)
+            touched.append(batch["id"])
+        if touched:
+            _shelf_generation[0] += 1
+    if touched:
+        log.info("shelves: finished %d stopped move(s) from the log", len(touched))
+    return touched
+
+
+def _reshelve(moves, *, record: bool = True, label: str = "", append_to: str | None = None,
+              expect: dict | None = None, skip_by_hand: bool = False, by_hand: bool = True) -> dict:
+    """Move saves to shelves the way a manual re-shelve does: the index row
+    (and its search entry), the sidecar's topic and the note's Topic line all
+    change together, and the save counts as placed by hand. Folders stay
+    where they are.
+
+    The planned moves are written to the move log first, so a move that
+    stops halfway is finished by _shelf_recover. Each batch can be undone;
+    append_to joins the newest batch, for a big move sent in parts. expect
+    maps a video_id to the shelf it should still be on (a Tidy suggestion
+    made earlier); skip_by_hand leaves saves the user placed (Tidy)."""
+    import shelf_router
+    idx = _get_index()
+    done, skipped, planned, files_behind = [], [], [], []
+    with shelf_router.locked(DATA_ROOT):
+        _shelf_recover()
+        if append_to:
+            log_batches = shelf_router.batches(DATA_ROOT)
+            last = log_batches[-1] if log_batches else None
+            if (not last or last.get("id") != append_to or last.get("undone")
+                    or len(last.get("moves") or []) + len(moves) > shelf_router.MAX_MOVES):
+                return {"ok": False, "code": "stale_batch",
+                        "error": "That move changed since it started. Check the shelves and try again."}
+        known = _known_shelves()
+        fallback = _shelf_fallback()
+        rows = {}
+        for video_id, shelf in moves:
+            name = shelf_router.clean_shelf_name(shelf)
+            row = idx.get_yoink(video_id) if isinstance(video_id, str) and video_id else None
+            if not name:
+                skipped.append({"video_id": video_id, "reason": "That shelf name can't be used."})
+                continue
+            if not row or row.get("deleted_at"):
+                skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
+                continue
+            if video_id in rows:
+                skipped.append({"video_id": video_id, "reason": "Listed twice, moved once."})
+                continue
+            name = shelf_router.canonical_shelf(name, known)
+            known.append(name)
+            previous = row.get("topic")
+            seq = idx.shelf_hand_seq(video_id)
+            if expect is not None and video_id in expect and not (
+                    previous == expect[video_id] or (shelf_router.is_fallback(previous, fallback)
+                                                     and shelf_router.is_fallback(expect[video_id], fallback))):
+                skipped.append({"video_id": video_id, "reason": "Moved since Tidy looked, so it stays."})
+                continue
+            if skip_by_hand and seq:
+                skipped.append({"video_id": video_id, "reason": "You put it there yourself, so it stays."})
+                continue
+            if previous == name:
+                skipped.append({"video_id": video_id, "reason": "Already on that shelf."})
+                continue
+            rows[video_id] = row
+            planned.append({"video_id": video_id, "from": previous, "to": name,
+                            "from_seq": seq, "seq": seq + 1 if by_hand else seq})
+        batch = None
+        if record and planned:
+            batch = shelf_router.begin_batch(DATA_ROOT, planned, label=label, append_to=append_to)
+            if batch is None:
+                return {"ok": False, "code": "stale_batch",
+                        "error": "That move changed since it started. Check the shelves and try again."}
+        for move in planned:
+            idx.set_shelf(move["video_id"], move["to"], hand_seq=move["seq"] if by_hand else None)
+            done.append(move)
+            if not _shelf_sync_one(rows[move["video_id"]], move["to"], True if by_hand else None):
+                files_behind.append(move["video_id"])
+        if done:
+            try:
+                shelf_router.forget_hints(DATA_ROOT, [_row_url(r) for r in rows.values()])
+            except OSError as exc:
+                log.warning("old shelf hints not cleared: %s", exc)
+        _shelf_generation[0] += 1
+        if batch is not None:
+            batch = shelf_router.finish_batch(DATA_ROOT, batch["id"], done) or batch
+        elif append_to and record:
+            batch = shelf_router.find_batch(DATA_ROOT, append_to)
+    result = {"ok": True, "moved": len(done), "skipped": skipped,
+              "moves": [{"video_id": m["video_id"], "from": m["from"], "to": m["to"]} for m in done],
+              "batch_id": batch["id"] if batch else None, "undo": shelf_router.batch_summary(batch)}
+    if files_behind:
+        result["files_not_updated"] = files_behind
+    return result
+
+
+def _row_url(row: dict) -> str | None:
+    try:
+        meta = json.loads(row.get("metadata_json") or "{}")
+    except (TypeError, ValueError):
+        return None
+    return meta.get("url") if isinstance(meta, dict) else None
+
+
+def _shelf_undo_moves(batch: dict) -> tuple[int, list]:
+    """Put a batch's moves back, newest first. A save moved again since
+    (by hand, in another batch or by an agent) stays where it is now."""
+    idx = _get_index()
+    restored, skipped = 0, []
+    for move in reversed(batch.get("moves") or []):
+        video_id = move.get("video_id") or ""
+        row = idx.get_yoink(video_id)
+        if not row or row.get("deleted_at"):
+            skipped.append({"video_id": video_id, "reason": "Not in your library any more."})
+            continue
+        seq = idx.shelf_hand_seq(video_id)
+        if row.get("topic") != move.get("to") or ("seq" in move and seq != move.get("seq")):
+            skipped.append({"video_id": video_id, "reason": "Moved again since, so it stays."})
+            continue
+        previous = move.get("from")
+        before = int(move.get("from_seq") or 0)
+        idx.set_shelf(video_id, previous, hand_seq=before if "seq" in move else None)
+        _shelf_sync_one(row, previous, bool(before))
+        restored += 1
+    return restored, skipped
+
+
+def _shelf_undo(batch_id: str | None = None) -> dict:
+    """Put a batch of moves back, unless a save was moved again since."""
+    import shelf_router
+    with shelf_router.locked(DATA_ROOT):
+        _shelf_recover()
+        batch = shelf_router.find_batch(DATA_ROOT, batch_id)
+        if not batch:
+            return {"ok": False, "error": "Nothing to undo.", "code": "not_found"}
+        if batch.get("undone"):
+            return {"ok": False, "error": "That move was already undone.", "code": "already_undone"}
+        shelf_router.mark_undoing(DATA_ROOT, batch["id"])
+        restored, skipped = _shelf_undo_moves(batch)
+        shelf_router.mark_undone(DATA_ROOT, batch["id"])
+        _shelf_generation[0] += 1
+    return {"ok": True, "batch_id": batch["id"], "restored": restored, "skipped": skipped}
+
+
+def _shelf_last_undo() -> dict | None:
+    """The newest move that can still be undone, for the dashboard's Undo."""
+    import shelf_router
+    return shelf_router.batch_summary(shelf_router.find_batch(DATA_ROOT, None))
+
+
+def _shelf_proposals(*, limit: int = 2000) -> dict:
+    """Tidy Uncategorized: a proposed shelf and a reason for each save there.
+    Reads only; nothing moves until the user accepts. A save the user put on
+    Uncategorized by hand is left out."""
+    import shelf_router
+    idx = _get_index()
+    _shelf_recover()
+    candidates = [c for c in _shelf_rows(idx, only_fallback=True, limit=limit + 1) if not c.get("by_hand")]
+    more = len(candidates) > limit
+    candidates = candidates[:limit]
+    library = _shelf_library()
+    vectors = {}
+    if library.has_vectors() and library.tier == "static":
+        found = _static_query_vectors([shelf_router._doc_text(c) for c in candidates])
+        vectors = {c["video_id"]: vec for c, vec in zip(candidates, found) if vec is not None}
+    elif library.has_vectors():
+        vectors = _shelf_vectors([c["video_id"] for c in candidates])
+    shelves = [f["value"] for f in (idx.corpus_facets().get("topic") or [])
+               if not shelf_router.is_fallback(f.get("value"), library.fallback)]
+    result = shelf_router.propose(candidates, topics=_load_topics(), library=library,
+                                  vectors=vectors, existing_shelves=shelves)
+    return {"ok": True, **result, "more": more,
+            "shelves": sorted(set(shelves) | set(library.shelves), key=str.lower),
+            "meaning": "on" if library.has_vectors() else "off",
+            "meaning_model": library.tier if library.has_vectors() else None,
+            "fallback": library.fallback,
+            "undo": _shelf_last_undo()}
+
+
+# ---------------------------------------------------------------------------
 # Metadata, thumbnail, channel context, comments
 # ---------------------------------------------------------------------------
 class PlaylistJobCancelled(Exception):
     """Raised inside a playlist worker when the user cancels the job."""
+
+
+class _TranscriptBackfillYield(PlaylistJobCancelled):
+    """3.18: the transcript backfill lets go of a save so a capture can run."""
 
 
 class ExtractionPhaseError(RuntimeError):
@@ -4968,7 +6537,9 @@ def _normalize_long_video_mode(value) -> str:
     if not isinstance(value, str):
         raise ValueError(f"long_video_mode must be {_valid}")
     mode = value.strip().lower()
-    if mode not in LONG_VIDEO_MODES:
+    # The transcript-only modes are internal: a whole-show save puts them on
+    # queue rows, and an Activity retry of one of its episodes sends one back.
+    if mode not in LONG_VIDEO_MODES and mode not in TRANSCRIPT_ONLY_MODES:
         raise ValueError(f"long_video_mode must be {_valid}")
     return mode
 
@@ -6753,7 +8324,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
                     cap_warning: str | None = None,
                     shot_times: list[int] | None = None,
                     media_sections: str | None = None,
-                    transcript_note: str | None = None) -> str:
+                    transcript_note: str | None = None, skip_comments: bool = False) -> str:
     """Produce the v1 corpus markdown. Comments section is a placeholder
     that the background worker rewrites once the fetch completes.
     ``media_sections`` (Phase 6 BC-2) is the shared media renderer's
@@ -6869,7 +8440,8 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("## Top Comments")
     parts.append("")
     parts.append(COMMENTS_START_MARK)
-    parts.append("*Fetching comments... they'll appear here when ready.*")
+    parts.append("*Lite captures skip comments.*" if skip_comments else
+                 "*Fetching comments... they'll appear here when ready.*")
     parts.append(COMMENTS_END_MARK)
     parts.append("")
     parts.append("---")
@@ -7018,6 +8590,144 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         log.warning("%s subtitle fetch unavailable: %s", long_video_mode, reason)
         return reason
     return None
+
+
+# ---------------------------------------------------------------------------
+# Transcript-only saves (whole-show capture, show_capture.py)
+# ---------------------------------------------------------------------------
+_SOURCE_DESCRIPTION_MAX_CHARS = 5000
+
+
+def _transcript_block_error(reason: str) -> subprocess.CalledProcessError:
+    """A caption refusal in a transcript-only save, shaped like the yt-dlp
+    failure the retry worker already classifies, so the queue row waits
+    with the existing bot-check or 429 back-off instead of failing."""
+    if reason == CAPTIONS_RATE_LIMITED:
+        line = "ERROR: HTTP Error 429: Too Many Requests"
+    else:
+        line = "ERROR: [youtube] Sign in to confirm you're not a bot"
+    return subprocess.CalledProcessError(
+        1, ["yt-dlp", "--skip-download"], output=b"", stderr=line.encode("utf-8"))
+
+
+def _transcript_only_entries(url: str, asset_folder: Path, mode: str,
+                             caption_entries: list, duration: float, *,
+                             captions_skipped_reason: str | None,
+                             cancel_event: threading.Event | None = None,
+                             asr_titles: tuple = ()) -> tuple[list, str | None, dict]:
+    """Captions first. Without them, ``transcript_asr`` downloads the audio
+    alone and runs local Whisper (the user opted in for this run), and
+    ``transcript`` fails with a plain reason so nothing empty is saved."""
+    if caption_entries:
+        return list(caption_entries), "captions", {"status": "not_needed"}
+    if captions_skipped_reason in (CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN,
+                                   CAPTIONS_RATE_LIMITED):
+        # Never fall through to an audio download while YouTube is refusing.
+        raise _transcript_block_error(captions_skipped_reason)
+    # Phase messages stay literal at each raise (the security tests render
+    # every ExtractionPhaseError message from source). They equal the
+    # TRANSCRIPT_*_MESSAGE constants, which the transcript tests pin.
+    if mode != LONG_VIDEO_MODE_TRANSCRIPT_ASR and captions_skipped_reason == CAPTIONS_FAILED:
+        raise ExtractionPhaseError(
+            "transcript", "Uoink couldn't download the captions for this video.")
+    if mode != LONG_VIDEO_MODE_TRANSCRIPT_ASR:
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and local transcription is off for this save.")
+    settings = dict(_read_settings() or {})
+    settings["asr_fallback_enabled"] = True
+    if not _reliability_model_status(_selected_reliability_model(settings)).get("cached"):
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and the local transcription model is not downloaded yet.")
+    # ".asr-" keeps the audio out of a refresh's published files; it is
+    # removed on success, failure and cancellation.
+    tmp_dir = Path(tempfile.mkdtemp(prefix=".asr-", dir=asset_folder))
+    try:
+        audio_path = _download_reliability_audio(url, tmp_dir, cancel_event)
+        _raise_if_cancelled(cancel_event)
+        entries, source, fallback = _resolve_video_transcript(
+            [], audio_path, duration, url=url, settings=settings,
+            cancel_event=cancel_event, asr_titles=asr_titles)
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+    if not entries and (fallback or {}).get("status") == "model_not_downloaded":
+        raise ExtractionPhaseError(
+            "transcript",
+            "No captions for this video, and the local transcription model is not downloaded yet.")
+    if not entries:
+        raise ExtractionPhaseError(
+            "transcript", "No captions for this video, and local transcription found no words.")
+    return entries, source, fallback
+
+
+def _clear_transcript_leftovers(folder: Path) -> None:
+    """Before a transcript-only attempt: remove what an earlier attempt that
+    never finished left (its captions, metadata and thumbnail). The folder
+    and its ownership claim stay."""
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt"):
+        for path in folder.glob(pattern):
+            if path.is_file() and not path.is_symlink():
+                with contextlib.suppress(OSError):
+                    path.unlink()
+
+
+def _discard_transcript_attempt(folder: Path) -> None:
+    """Remove what a failed transcript-only attempt wrote into its own fresh
+    folder, so a show with many caption-less videos leaves no empty shells.
+    Only the attempt's known files go; anything else keeps the folder."""
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt",
+                    ".capture-source.json", "capture-not-finished.txt"):
+        for path in folder.glob(pattern):
+            if path.is_file() and not path.is_symlink():
+                with contextlib.suppress(OSError):
+                    path.unlink()
+    with contextlib.suppress(OSError):
+        folder.rmdir()
+
+
+def _caption_kind_for(metadata: dict, srt_path: Path) -> str | None:
+    """'captions' when the saved track was uploaded by the creator,
+    'auto_captions' when it is YouTube's automatic one, None when unknown.
+    yt-dlp writes the uploaded track for a language when both exist."""
+    name = srt_path.name
+    if not (name.startswith("video.") and name.endswith(".srt")):
+        return None
+    lang = name[len("video."):-len(".srt")]
+    uploaded = metadata.get("subtitles")
+    automatic = metadata.get("automatic_captions")
+    if isinstance(uploaded, dict) and lang in uploaded:
+        return "captions"
+    if isinstance(automatic, dict) and lang in automatic:
+        return "auto_captions"
+    return None
+
+
+def _source_published_at(metadata: dict) -> str | None:
+    """The source's own publish date as ISO 8601 (UTC): a full timestamp
+    when the source gives one, else the calendar day."""
+    for key in ("release_timestamp", "timestamp"):
+        value = metadata.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0:
+            try:
+                return datetime.fromtimestamp(float(value), timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ")
+            except (OverflowError, OSError, ValueError):
+                pass
+    for key in ("release_date", "upload_date"):
+        day = index.published_day(metadata.get(key))
+        if day:
+            return day
+    return None
+
+
+def _source_facts(metadata: dict) -> dict:
+    """{published_at, description} for a capture's sidecar, from the
+    source's own metadata. Either is None when the source does not give it."""
+    text = metadata.get("description")
+    description = (text.strip()[:_SOURCE_DESCRIPTION_MAX_CHARS]
+                   if isinstance(text, str) and text.strip() else None)
+    return {"published_at": _source_published_at(metadata), "description": description}
 
 
 def _video_capture_source(url: str) -> str:
@@ -7240,8 +8950,9 @@ def _finish_publication_retry(folder: Path, sidecar: dict, corpus_path: Path, re
             })
         except Exception as exc:
             log.warning("incremental index call site failed: %s", exc)
-    _start_entity_extraction_thread(folder, sidecar.get("video_id"), sidecar)
-    if sidecar.get("long_video_mode") != LONG_VIDEO_MODE_LITE:
+    if sidecar.get("long_video_mode") not in TRANSCRIPT_ONLY_MODES:
+        _start_entity_extraction_thread(folder, sidecar.get("video_id"), sidecar)
+    if sidecar.get("long_video_mode") not in (LONG_VIDEO_MODE_LITE, *TRANSCRIPT_ONLY_MODES):
         _start_comments_thread(sidecar["url"], folder, corpus_path, metadata, record.get("entries"))
     # A failed save preserves downloads. Only a successful publication may
     # remove the exact unretained inputs; never glob or touch changed files.
@@ -7470,8 +9181,16 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None,
                     pending_id: int | None = None,
-                    refresh_existing: bool = True) -> dict:
+                    refresh_existing: bool = True,
+                    finish_on_disk: bool = False,
+                    asr_checkpoint=None,
+                    shelf_hint: str | None = None) -> dict:
     """Yoink a single video into output_folder.
+
+    ``finish_on_disk`` (3.18) finishes a capture that stopped midway: the
+    folder has no corpus or sidecar yet, so this runs as a first capture
+    that reuses the media, captions, thumbnail and screenshots already
+    there, and keeps that media. ``asr_checkpoint`` goes to the local ASR.
 
     Steps:
       1. Fetch metadata (cached without format/caption tables) — already done if the
@@ -7494,17 +9213,76 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if phase_callback:
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
+    # 3.18.0: an X video's Description is the post's whole text (X only).
+    if isinstance(metadata, dict) and str(
+            metadata.get("extractor") or metadata.get("extractor_key") or "").lower().startswith("twitter"):
+        metadata = _enrich_x_video_metadata(url, metadata)
+    shelf_hint = shelf_hint or _explicit_shelf_hint(metadata, url)
+    if shelf_hint:
+        topic = shelf_hint
     if topic is None:
-        topic = _classify_topic(metadata)
+        topic = _route_topic(metadata, url=url, source_type=source_type)
 
     title = metadata.get("title") or "Untitled"
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES:
+        # A transcript-only save never replaces or reduces a library item.
+        # Any indexed row for this video ends it here, before a folder is
+        # claimed, even when that item's folder has moved (the folder lookup
+        # below then finds nothing and would start a new one).
+        saved = _get_index().get_yoink(_video_capture_id(url, metadata))
+        if saved is not None and saved.get("deleted_at"):
+            raise ExtractionPhaseError(
+                "metadata",
+                "You removed this one from your library, so this transcript-only save left it out.")
+        if saved is not None:
+            raise ExtractionPhaseError(
+                "metadata", "Already in your library, so this transcript-only save left it as it was.")
     output_folder, existing = _prepare_video_capture_folder(
         output_folder, url, metadata, refresh_existing=refresh_existing)
     # A new capture has only its ownership claim. Refreshes keep previous
     # artifacts until generation and the file swap have succeeded.
     refreshing = any(p.name != ".capture-source.json" for p in output_folder.iterdir())
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and existing is not None:
+        raise ExtractionPhaseError(
+            "metadata", "Already in your library, so this transcript-only save left it as it was.")
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and (
+            any(output_folder.glob("screenshots/*.jpg"))
+            or any(p.suffix.lower() not in _TRANSCRIPT_ATTEMPT_SUFFIXES
+                   for p in output_folder.glob("video.*"))):
+        # Video files or screenshots with no library item: a full save that
+        # is unfinished. Captions left by an earlier transcript attempt
+        # don't count, so a crashed attempt is simply tried again.
+        raise ExtractionPhaseError(
+            "metadata",
+            "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
+    if requested_long_video_mode in TRANSCRIPT_ONLY_MODES and refreshing:
+        # Only an earlier attempt's own files can be here (saved items and
+        # unfinished full saves ended above). Start clean, not as a refresh.
+        _clear_transcript_leftovers(output_folder)
+        refreshing = False
+    if finish_on_disk:
+        if (_resolve_corpus_path(output_folder)
+                or (output_folder / f"{output_folder.name}.json").exists()):
+            raise ExtractionPhaseError("save", "This capture already finished.")
+        refreshing = False
+    if not refreshing:
+        # 3.18: until the sidecar and the index row are written the folder
+        # says it is not finished, so a capture that stops midway never looks
+        # done. A refresh of a folder an earlier capture left like that keeps
+        # its note and clears it once indexed. The name
+        # is spelled out (CAPTURE_INCOMPLETE_NAME) because tests load this
+        # function on its own.
+        try:
+            _atomic_write_text(output_folder / "capture-not-finished.txt", (
+                "Uoink has not finished saving this capture yet. If this file is still "
+                "here after the capture is over, it stopped midway. Open Uoink, go to "
+                "Settings, Library health, and press Finish to complete it from the "
+                f"files already here.\n\nurl: {url}\nstarted: {_now_iso()}\n"))
+        except OSError as e:
+            log.warning("could not mark the capture as in progress: %s", e)
     video_slug = output_folder.name
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
+    topic = _keep_placed_shelf(topic, existing, explicit=shelf_hint)
     log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
@@ -7521,6 +9299,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # comments are skipped below. Done before the estimate/cap math so the
     # capped-interval note reflects the real interval used.
     is_lite = requested_long_video_mode == LONG_VIDEO_MODE_LITE
+    # Whole-show capture: captions (or local ASR on the audio alone) and no
+    # media download, screenshots, comments or channel context.
+    transcript_only = requested_long_video_mode in TRANSCRIPT_ONLY_MODES
     if is_lite:
         interval = max(interval, LITE_SHOT_INTERVAL_SEC)
     long_video_chunks = (
@@ -7532,6 +9313,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         effective_long_video_mode = LONG_VIDEO_MODE_CHUNKED
     elif is_lite:
         effective_long_video_mode = LONG_VIDEO_MODE_LITE
+    elif transcript_only:
+        effective_long_video_mode = requested_long_video_mode
     else:
         effective_long_video_mode = LONG_VIDEO_MODE_FULL
     work_durations = (
@@ -7541,7 +9324,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     )
     processed_media_seconds = int(sum(work_durations))
     clamped_interval = _screenshot_interval_for(duration, interval)
-    if clamped_interval < interval:
+    if clamped_interval < interval and not transcript_only:
         notes.append(
             f"Screenshot interval lowered from {interval}s to "
             f"{clamped_interval}s so this source can yield about "
@@ -7565,9 +9348,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             f"about every {spacing}, and skipped the comments "
             "fetch. Re-yoink in full mode for dense screenshots and comments."
         )
+    if transcript_only:
+        notes.append("Transcript-only save: no video download, screenshots, "
+                     "comments or channel details.")
 
     estimate = _estimated_screenshot_count(work_durations, interval)
-    if estimate > MAX_SCREENSHOTS:
+    if estimate > MAX_SCREENSHOTS and not transcript_only:
         new_interval = interval
         while _estimated_screenshot_count(work_durations, new_interval) > MAX_SCREENSHOTS:
             new_interval += 1
@@ -7585,6 +9371,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     _raise_if_cancelled(cancel_event)
     keep_media = (
         source_type == SOURCE_TYPE_SHORT_VIDEO
+        and not transcript_only
         and bool(_read_settings().get("keep_media"))
     )
     stage_root = None
@@ -7694,7 +9481,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 raise
 
         # Thumbnail (best-effort; absence shouldn't fail the extraction).
-        _download_thumbnail(metadata, asset_folder, cancel_event=cancel_event)
+        if not (finish_on_disk and any(asset_folder.glob("thumbnail.*"))):
+            _download_thumbnail(metadata, asset_folder, cancel_event=cancel_event)
 
         # Full mode downloads one low-res media file; chunked mode downloads
         # representative sections. Both fetch optional subtitles separately so
@@ -7733,19 +9521,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
             else "video.*"
         )
+        # Finishing a stopped capture reuses the full video it already has.
+        reused_media = [
+            p for p in sorted(asset_folder.glob(media_glob))
+            if p.suffix.lower() in (".mp4", ".webm", ".mkv") and not p.is_symlink()
+            and p.is_file() and p.stat().st_size > 0
+        ] if finish_on_disk and effective_long_video_mode == LONG_VIDEO_MODE_FULL else []
         try:
             if phase_callback:
                 phase_callback("download")
             media_before_download = set(asset_folder.glob(media_glob))
             try:
-                _run_subprocess(
-                    media_cmd,
-                    cancel_event=cancel_event,
-                    check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    timeout=download_timeout,
-                )
+                if not reused_media and not transcript_only:
+                    _run_subprocess(
+                        media_cmd,
+                        cancel_event=cancel_event,
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        timeout=download_timeout,
+                    )
             finally:
                 if not refreshing:
                     # Record only new, regular download outputs. Remember their
@@ -7777,11 +9572,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if phase_callback:
             phase_callback("transcript")
-        captions_skipped_reason = _fetch_video_subtitles(
-            url, asset_folder,
-            long_video_mode=effective_long_video_mode,
-            cancel_event=cancel_event,
-        )
+        if reused_media and any(asset_folder.glob("video*.srt")):
+            captions_skipped_reason = None
+        else:
+            captions_skipped_reason = _fetch_video_subtitles(
+                url, asset_folder,
+                long_video_mode=effective_long_video_mode,
+                cancel_event=cancel_event,
+            )
         # Only a captions 429 counts as "refused" for the ASR fallback and the
         # retry pacing; a bot check or cooldown is recorded by its own reason.
         captions_refused = captions_skipped_reason == CAPTIONS_RATE_LIMITED
@@ -7793,7 +9591,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         srt_order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
         srt_files = sorted(asset_folder.glob("video*.srt"), key=lambda p: (
             srt_order.index(p.name) if p.name in srt_order else len(srt_order), p.name))
-        if not video_files:
+        if not video_files and not transcript_only:
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
                 raise ExtractionPhaseError(
                     "download",
@@ -7809,7 +9607,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             )
 
         shots_dir = asset_folder / "screenshots"
-        shots_dir.mkdir(exist_ok=True)
+        if not transcript_only:
+            shots_dir.mkdir(exist_ok=True)
 
         shot_times: list[int] = []
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
@@ -7852,23 +9651,24 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                         int(chunk["start_seconds"] + (local_i * interval))
                     )
                     shot_number += 1
-        else:
+        elif not transcript_only:
             video_file = video_files[0]
             try:
                 if phase_callback:
                     phase_callback("screenshots")
-                _run_subprocess(
-                    _screenshot_ffmpeg_command(
-                        video_file,
-                        interval,
-                        shots_dir / "shot_%04d.jpg",
-                    ),
-                    cancel_event=cancel_event,
-                    check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    timeout=_ffmpeg_timeout_for(duration),
-                )
+                if not (reused_media and any(shots_dir.glob("shot_*.jpg"))):
+                    _run_subprocess(
+                        _screenshot_ffmpeg_command(
+                            video_file,
+                            interval,
+                            shots_dir / "shot_%04d.jpg",
+                        ),
+                        cancel_event=cancel_event,
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        timeout=_ffmpeg_timeout_for(duration),
+                    )
             except subprocess.TimeoutExpired:
                 log.error(
                     "ffmpeg screenshot extraction timed out after %ds "
@@ -7889,19 +9689,44 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         platform_caption_count = len(entries)
         if not entries and phase_callback:
             phase_callback("transcript")
-        entries, transcript_source, asr_fallback = _resolve_video_transcript(
-            entries,
-            video_files[0],
-            duration,
-            url=url,
-            captions_refused=captions_refused,
-            media_chunks=[
-                (path, chunk["start_seconds"], chunk["duration_seconds"])
-                for path, chunk in zip(video_files, long_video_chunks)
-            ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
-            cancel_event=cancel_event,
-            asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
-        )
+        if transcript_only:
+            try:
+                entries, transcript_source, asr_fallback = _transcript_only_entries(
+                    url, asset_folder, effective_long_video_mode, entries, duration,
+                    captions_skipped_reason=captions_skipped_reason,
+                    cancel_event=cancel_event,
+                    asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
+                )
+            except BaseException:
+                if not refreshing:
+                    _discard_transcript_attempt(output_folder)
+                raise
+        else:
+            entries, transcript_source, asr_fallback = _resolve_video_transcript(
+                entries,
+                video_files[0],
+                duration,
+                url=url,
+                captions_refused=captions_refused,
+                media_chunks=[
+                    (path, chunk["start_seconds"], chunk["duration_seconds"])
+                    for path, chunk in zip(video_files, long_video_chunks)
+                ] if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else None,
+                cancel_event=cancel_event,
+                asr_titles=(metadata.get("channel") or metadata.get("uploader"), metadata.get("title")),
+                **({"asr_checkpoint": asr_checkpoint} if asr_checkpoint is not None else {}),
+                # The user pressed Finish (or started the backfill) to get words:
+                # local ASR runs for this one save. A copy, never saved.
+                **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
+                   if finish_on_disk else {}),
+            )
+        # Uploaded captions or YouTube's automatic ones, when the source's
+        # caption tables say which track the saved file came from.
+        caption_kind = (_caption_kind_for(metadata, srt_files[0])
+                        if srt_files and transcript_source == "captions" else None)
+        if not shelf_hint:
+            # One more routing pass now that the words spoken are known.
+            topic = _reroute_with_transcript(topic, metadata, entries, url=url)
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
             caption_coverage = (
                 " while retaining the full available subtitle track"
@@ -7927,6 +9752,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 coverage = (" of sampled sections"
                             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED else "")
                 transcript_note = f"Local Whisper transcript{coverage}: {caption_note}"
+                if asr_fallback and asr_fallback.get("requested_model"):
+                    transcript_note += (
+                        f" (the language check selected the multilingual "
+                        f"{asr_fallback.get('model')} model ran instead of "
+                        f"{asr_fallback['requested_model']})")
+                elif asr_fallback and asr_fallback.get("section_fallbacks"):
+                    transcript_note += " (some sections used a multilingual model)"
             elif asr_fallback and asr_fallback.get("status") == "no_audio":
                 transcript_note = f"No transcript: {asr_fallback['reason']}"
             elif asr_fallback and asr_fallback.get("status") == "no_speech":
@@ -7946,6 +9778,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                        or metadata.get("uploader_url")
                        or "")
         if str(metadata.get("extractor") or "").lower().startswith("twitter"):
+            channel_url = ""
+        if transcript_only:
+            # One fewer YouTube request per episode in a whole-show save.
             channel_url = ""
         channel_ctx = _fetch_channel_context(channel_url, cancel_event=cancel_event)
 
@@ -7985,7 +9820,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             shot_times=shot_times,
             media_sections=media_sections,
             transcript_note=transcript_note,
+            skip_comments=effective_long_video_mode == LONG_VIDEO_MODE_LITE,
         )
+        if transcript_only:
+            # No comments worker runs for this save, so say so instead of
+            # promising comments that never arrive.
+            yoink_md = yoink_md.replace(
+                "*Fetching comments... they'll appear here when ready.*",
+                "*Skipped for a transcript-only save.*", 1)
         # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
         # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
         # outside its folder.
@@ -8027,6 +9869,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "source_type": source_type,
                 "title": title,
                 "topic": topic,
+                # 3.18: the user named this shelf; a rebuild keeps it as theirs.
+                **({"shelf_by_hand": True} if shelf_hint else {}),
                 "yoinked_at": yoinked_at,
                 "interval_seconds": interval,
                 "requested_interval_seconds": requested_interval,
@@ -8043,10 +9887,15 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                             or metadata.get("creator")),
                 "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
                 "upload_date": metadata.get("upload_date"),
+                # The source's own publish (air) date, ISO 8601 in UTC, and its
+                # description: separate from yoinked_at, the capture time.
+                **_source_facts(metadata),
                 "view_count": metadata.get("view_count"),
                 "like_count": metadata.get("like_count"),
                 "comment_count": metadata.get("comment_count"),
                 "channel_follower_count": metadata.get("channel_follower_count"),
+                # 3.18.0: whether an X video's post text is whole (x_text_repair).
+                "x_text": metadata.get("x_text"),
                 "video_id": video_id,
                 # Phase 6 (BC-2): every transcript row carries its actual stored
                 # link values, and the held chapter metadata travels with the
@@ -8061,6 +9910,9 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # fetched): captions_bot_check, captions_rate_limited,
                 # captions_bot_check_cooldown or captions_failed.
                 "captions_skipped_reason": captions_skipped_reason,
+                # "captions" (uploaded) or "auto_captions" (YouTube's automatic
+                # track) when transcript_source is captions, else None.
+                "caption_kind": caption_kind,
                 "asr_fallback": asr_fallback,
                 "transcript_note": transcript_note,
                 # Structured shape: timestamp + relative path + bare filename so
@@ -8080,6 +9932,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "comments_status": (
                     "skipped"
                     if effective_long_video_mode == LONG_VIDEO_MODE_LITE
+                    or transcript_only
                     else "pending"
                 ),
                 # Hook Type runs inside the comments worker, so lite mode (which
@@ -8089,6 +9942,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     "pending"
                     if hook_type_pending
                     and effective_long_video_mode != LONG_VIDEO_MODE_LITE
+                    and not transcript_only
                     else "skipped"
                 ),
                 "hook_type": None,
@@ -8105,6 +9959,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "entity_extraction_status": (
                     "pending"
                     if _anthropic_key_for_feature("entity_extraction_enabled")
+                    and not transcript_only
                     else "skipped"
                 ),
                 "entity_extraction_error": None,
@@ -8210,6 +10065,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             except Exception as e:
                 publication_failed(e)
                 raise
+            # 3.18: saved and indexed. A note an earlier stopped capture left
+            # in this folder is now out of date.
+            try:
+                (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+            except OSError as e:
+                log.warning("could not clear the capture-in-progress note: %s", e)
 
         # v2.5 A1: optional local transcript reliability detection. It runs only
         # when the user has opted in and the Whisper model is already cached; the
@@ -8222,7 +10083,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 rel = _compute_transcript_reliability(
                     sidecar.get("video_id") or metadata.get("id") or "",
                     folder=output_folder,
-                    audio_path=video_files[0],
+                    audio_path=video_files[0], cancel_event=cancel_event,
                     threshold=RELIABILITY_DEFAULT_THRESHOLD,
                     allow_model_download=False,
                 )
@@ -8234,7 +10095,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         # Refresh downloads stay in staging until cleanup. Preserve the
         # first-capture cleanup and partial-artifact recovery behavior.
-        if not refreshing and not keep_media:
+        if not refreshing and not keep_media and not reused_media:
             for video_file in video_files:
                 video_file.unlink(missing_ok=True)
 
@@ -8371,15 +10232,23 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         except Exception as e:
             publication_failed(e)
             raise
+        # 3.18: the sidecar and the index row are both written, so the
+        # capture is finished (the note lives from the claim until here).
+        try:
+            (output_folder / "capture-not-finished.txt").unlink(missing_ok=True)
+        except OSError as e:
+            log.warning("could not clear the capture-in-progress note: %s", e)
 
     # Sprint 16 (A2): extract named entities off the transcript in the
     # background, in parallel with the comments / Comment Intelligence
     # pipeline (it does not wait on either). Started after _index_yoink so
     # the yoinks row exists for the entity_mentions foreign key. Best-effort
-    # -- a failure never fails an otherwise-successful extraction.
-    _start_entity_extraction_thread(
-        output_folder, sidecar.get("video_id"), sidecar
-    )
+    # -- a failure never fails an otherwise-successful extraction. A
+    # transcript-only save (whole-show capture) sends nothing to a model.
+    if not transcript_only:
+        _start_entity_extraction_thread(
+            output_folder, sidecar.get("video_id"), sidecar
+        )
 
     # Build the clipboard / paste version once we know the on-disk md is
     # final. Session adds skip this -- the session corpus is built at
@@ -8397,8 +10266,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # Type waits for this comments worker to finish so it can include the top
     # comment when one is available. Lite recovery (A-01) skips it: comments
     # are the fragile/expensive tail this mode exists to shed.
-    if effective_long_video_mode == LONG_VIDEO_MODE_LITE:
-        log.info("lite mode: skipping comments fetch for %s", url)
+    if effective_long_video_mode == LONG_VIDEO_MODE_LITE or transcript_only:
+        log.info("%s mode: skipping comments fetch for %s", effective_long_video_mode, url)
     else:
         if phase_callback:
             phase_callback("comments")
@@ -8454,6 +10323,9 @@ def _youtube_429_endpoints(e: BaseException) -> set[str]:
         return set()
     stderr = (e.stderr.decode("utf-8", errors="ignore")
               if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    if re.search(r"\[twitter(?:\]|:)|https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/",
+                 stderr + "\n" + str(e.cmd), re.IGNORECASE):
+        return set()
     endpoints = set()
     for line in stderr.splitlines():
         if not re.search(r"\b429\b", line):
@@ -8632,10 +10504,11 @@ def _error_summary(e: BaseException) -> str:
 
 def _source_name_from_error(text: str) -> str:
     lower = text.lower()
+    if any(marker in lower for marker in ("[twitter]", "[twitter:", "//x.com/", "//www.x.com/", "//mobile.x.com/",
+                                          "//twitter.com/", "//www.twitter.com/", "//mobile.twitter.com/")):
+        return "X"
     if "youtube" in lower or "youtu.be" in lower:
         return "YouTube"
-    if "x.com" in lower or "twitter" in lower:
-        return "X"
     if "tiktok" in lower:
         return "TikTok"
     if "instagram" in lower:
@@ -8651,6 +10524,23 @@ def _plain_error_from_text(text: str) -> str:
               if line.strip().upper().startswith("ERROR:")]
     lower = (errors[-1] if errors else text).lower()
     source = _source_name_from_error(text)
+    if source == "X":
+        for signals, message in (
+            (("tweet was deleted", "post was deleted", "tweet has been deleted", "post has been deleted", "deleted this tweet", "deleted this post"),
+             "X says this post was deleted."),
+            (("protected tweet", "protected post", "protected account"),
+             "The post is from a protected X account."),
+            (("nsfw tweet requires authentication", "age-restricted", "age restricted", "age verification", "age-gated"),
+             "X restricts this video by age."),
+            (("not available in your country", "unavailable in your country", "not available in your region", "withheld in", "geo-restricted", "geoblocked"),
+             "X restricts this video in your region."),
+            (("no video could be found in this tweet", "no video in this post", "does not contain a video"),
+             "This X post has no video to save."),
+            (("too many requests", "http error 429", "rate-limit", "rate limit"),
+             "X is limiting requests. Wait a few minutes and try again."),
+        ):
+            if any(signal in lower for signal in signals):
+                return message
     if ("too many requests" in lower or "http error 429" in lower
             or "rate-limit" in lower or "rate limit" in lower):
         # Terminal contexts store this string, so it can't promise a retry
@@ -9640,7 +11530,7 @@ def _generate_paste_corpus(folder: Path) -> str:
     corpus_path = _resolve_corpus_path(folder)
     if corpus_path is None:
         return ""
-    md = corpus_path.read_text(encoding="utf-8")
+    md = _read_export_markdown(corpus_path)
 
     try:
         from PIL import Image  # noqa: F401  -- import probe
@@ -9773,7 +11663,7 @@ def _render_index(entries: list[dict]) -> str:
     ]
 
     if not entries:
-        parts.append("_No uoinks yet. Click the rust U under any YouTube video to start._")
+        parts.append("_No uoinks yet. Click the Uoink button under any YouTube video to start._")
         parts.append("")
         return "\n".join(parts)
 
@@ -10412,7 +12302,13 @@ def _focus_youtube_window() -> bool:
 
 
 def _session_folder(slug: str) -> Path:
-    return SESSIONS_ROOT / slug
+    # Session ids are already limited to [A-Za-z0-9_-]; this keeps the folder
+    # inside the sessions root even if a caller ever skips that check.
+    root = os.path.normpath(str(SESSIONS_ROOT))
+    full = os.path.normpath(os.path.join(root, slug))
+    if not full.startswith(root + os.sep):
+        raise ValueError("session folder outside the sessions root")
+    return Path(full)
 
 
 def _read_session(slug: str) -> dict | None:
@@ -10712,6 +12608,9 @@ def _public_job(job: dict) -> dict:
             # token never enters the public projection or the jobs table.
             "source_start_id": job.get("source_start_id"),
         })
+    if kind == "retranscribe":
+        public.update({"video_id": job.get("video_id"), "model": job.get("model"),
+                       "progress": job.get("progress")})
     return public
 
 
@@ -10792,14 +12691,16 @@ def _validate_persisted_job(raw: dict) -> dict | None:
         "single",
         "podcast_transcribe",
         "notification",
+        "retranscribe",
     ):
         return None
     if state not in ("queued", "running", "completed", "cancelled", "failed"):
         return None
 
     job = _public_job(raw)
-    if job["state"] not in _JOB_TERMINAL_STATES and kind == "podcast_transcribe":
+    if job["state"] not in _JOB_TERMINAL_STATES and kind in ("podcast_transcribe", "retranscribe"):
         now = _now_iso()
+        job["_cancel_event"] = threading.Event()
         job.update({
             "state": "queued",
             "current_video_phase": "queued",
@@ -11198,6 +13099,7 @@ def _podcast_transcription_worker() -> None:
                 # disk) resumes only as the verified owner of its start.
                 continue
             model = whisper_runner.normalize_model(job.get("model"))
+            _raise_if_cancelled(job.get("_cancel_event"))
             audio_path = Path(job["audio_path"])
             reusable = None
             try:
@@ -11239,7 +13141,10 @@ def _podcast_transcription_worker() -> None:
                         language=job.get("language"),
                         diarize=bool(job.get("diarize")),
                         consent_given=bool(job.get("consent_given")),
-                        initial_prompt=vocabulary_hint)
+                        initial_prompt=vocabulary_hint, cancel_event=job.get("_cancel_event"),
+                        duration_seconds=job.get("duration_seconds"),
+                        checkpoint=lambda _: _raise_if_cancelled(job.get("_cancel_event")))
+                _raise_if_cancelled(job.get("_cancel_event"))
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
@@ -11273,7 +13178,7 @@ def _podcast_transcription_worker() -> None:
                                 "standing start no longer executed by this process")
                     usage_publish_attempted = True
                     corpus_result = podcasts.episode_to_corpus(
-                        _get_index(), episode_id, data_root=DATA_ROOT)
+                        _get_index(), episode_id, data_root=DATA_ROOT, topic_classifier=_route_topic)
                     _heartbeat_note_ingest()
                     maybe_toast(
                         "Podcast added to Uoink",
@@ -11291,6 +13196,12 @@ def _podcast_transcription_worker() -> None:
                     log.warning(
                         "podcast watch: deferred corpus publish for episode "
                         "%d after error: %s", episode_id, corpus_error)
+            try:
+                if not _read_settings().get("keep_podcast_audio", True):
+                    _delete_podcast_audio(episode_id, finished_job=job_id)
+            except Exception:
+                # Storage cleanup cannot undo a completed transcription.
+                log.warning("Could not remove podcast audio for episode %s", episode_id)
             now = _now_iso()
             _update_job(
                 job_id, state="completed", current_video_phase=None,
@@ -11312,13 +13223,25 @@ def _podcast_transcription_worker() -> None:
                     "Podcast transcription complete; corpus publish will retry."
                     if corpus_error else
                     "Podcast transcription complete."))
-            # Phase 3: a standing capture completes its ledger row only after
+            # A standing capture completes its ledger row only after
             # publication committed; a deferred publish is a failed attempt
             # (the charge stays; the item may retry under its counters).
             _settle_source_capture(
                 job_id, video_id=(corpus_result or {}).get("video_id"),
                 failure_code=None if corpus_result else (
                     "publish_failed" if corpus_error else "publish_not_requested"))
+        except (asr_worker.TranscriptionCancelled, PlaylistJobCancelled):
+            with _jobs_lock:
+                retrying = any(key != job_id and candidate.get("kind") == "podcast_transcribe"
+                               and candidate.get("episode_id") == episode_id
+                               and candidate.get("state") not in _JOB_TERMINAL_STATES
+                               for key, candidate in _jobs.items())
+                if not retrying:
+                    whisper_runner.update_episode_transcript_state(
+                        _get_index(), episode_id, status=whisper_runner.STATUS_NONE)
+            _update_job(job_id, state="cancelled", current_video_phase=None,
+                        completed_at=_now_iso(), message="Transcription cancelled.")
+            _settle_source_capture(job_id, video_id=None, failure_code="cancelled")
         except BaseException as exc:  # keep the one long-lived worker alive
             if not usage_publish_attempted and isinstance(job, dict) and job.get("publish_to_corpus"):
                 try:
@@ -11367,11 +13290,104 @@ def _podcast_initial_prompt(episode_id: int) -> str | None:
         return None
 
 
-def _podcast_capture_key(episode_id: int) -> str | None:
+def _protected_podcast_episodes(idx, show_jobs, *, finished_job=None):
+    with _jobs_lock:
+        jobs = [dict(job) for jid, job in _jobs.items() if jid != finished_job
+                and job.get("kind") == "podcast_transcribe" and job.get("state") not in _JOB_TERMINAL_STATES]
+    # A stdio MCP process can queue jobs against the same index.
+    with idx.read_snapshot() as db:
+        states = tuple(_JOB_TERMINAL_STATES)
+        stored = db.execute(
+            "SELECT job_id, metadata_json FROM jobs WHERE kind='podcast_transcribe' AND status NOT IN (" +
+            ",".join("?" for _ in states) + ")", states)
+        for row in stored:
+            if row["job_id"] == finished_job:
+                continue
+            job = json.loads(row["metadata_json"] or "null")
+            if not isinstance(job, dict) or not (job.get("episode_id") or job.get("audio_path")):
+                raise ValueError("An active podcast job has no audio identity")
+            jobs.append(job)
+        active = {job.get("episode_id") for job in jobs}
+        paths = {Path(job["audio_path"]).resolve() for job in jobs if job.get("audio_path")}
+        if paths:
+            active.update(row["id"] for row in db.execute(
+                "SELECT id,audio_local_path FROM podcast_episodes WHERE audio_local_path IS NOT NULL")
+                          if Path(row["audio_local_path"]).resolve() in paths)
+    runs_lock = globals().get("_show_podcast_runs_lock")
+    if runs_lock is not None:
+        with runs_lock:
+            active.update(episode_id for episode_id, run in globals()["_show_podcast_runs"].items()
+                          if run.get("state") in ("downloading", "queued"))
+    # Durable show runs include episodes waiting for download,
+    # before the transcription queue assigns them a job or even a database id.
+    for show in show_jobs:
+        if show.get("kind") != "podcast_feed":
+            continue
+        with idx.read_snapshot() as db:
+            rows = db.execute("SELECT e.id,e.guid,e.audio_url,e.title FROM podcast_episodes e "
+                              "JOIN podcast_feeds f ON f.id=e.feed_id WHERE f.feed_url=?",
+                              (show.get("url"),)).fetchall()
+        waiting = [ep for ep in show.get("episodes", ()) if ep.get("finishing") or (
+            show.get("state") in ("running", "waiting", "paused") and ep.get("state") in ("queued", "running"))]
+        active.update(ep.get("episode_id") for ep in waiting)
+        for column in ("guid", "audio_url", "title"):
+            values = {ep[column] for ep in waiting if ep.get(column)}
+            active.update(row["id"] for row in rows if row[column] in values)
+    return active
+
+
+def _delete_podcast_audio(episode_id, *, finished_job=None):
+    global _podcast_storage_scan
+    idx = _get_index()
+    shows = globals().get("show_capture")
+    with contextlib.ExitStack() as held:
+        if shows:
+            held.enter_context(shows._lock)
+        keys = [f"podcast-queue:{episode_id}"]
+        if finished_job is None:
+            capture = _podcast_capture_key(episode_id)
+            if not capture:
+                return False
+            keys.append(capture)
+        for key in keys:
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key)
+            if lock is None:
+                return False
+            held.enter_context(lock)
+        show_jobs = shows.list_jobs(DATA_ROOT) if shows else ()
+        if episode_id in _protected_podcast_episodes(idx, show_jobs, finished_job=finished_job):
+            return False
+        removed = podcasts.delete_transcribed_audio(idx, DATA_ROOT, episode_id)
+    if removed:
+        with _podcast_storage_lock:
+            if _podcast_storage_scan:
+                _podcast_storage_scan.cancel()
+            _podcast_storage_scan = None
+    return removed
+
+
+def _scan_podcast_storage(idx, root):
+    shows = globals().get("show_capture")
+    with shows._lock if shows else contextlib.nullcontext():
+        show_jobs = shows.list_jobs(root) if shows else ()
+    protected = _protected_podcast_episodes(idx, show_jobs)
+
+    def available(row, path):
+        capture = _podcast_capture_key(row["id"], row=row)
+        if not capture:
+            return False
+        return not any(source_subscriptions.CaptureLock.in_use(root, key) for key in
+                       (capture, f"podcast-queue:{row['id']}", podcasts._audio_lock_key(path)))
+
+    return podcasts.audio_storage(idx, root, protected, available=available)
+
+
+def _podcast_capture_key(episode_id: int, *, row=None) -> str | None:
     """Canonical capture identity of a podcast episode (normalized feed URL
     plus GUID), the key both dispatchers lock on (AS-03)."""
     try:
-        row = podcasts.get_episode_with_feed(_get_index(), int(episode_id))
+        if row is None:
+            row = podcasts.get_episode_with_feed(_get_index(), int(episode_id))
     except Exception:
         return None
     if not row or not row.get("feed_url") or not row.get("guid"):
@@ -11634,7 +13650,12 @@ def _manual_extraction_ownership(url: str):
     # Never wait on an identity while holding the process slot: its owner may
     # be queued for YouTube and need that slot back to finish publication.
     try:
-        ownership.lock = _ServerCaptureBackend.acquire_identity(key)
+        intent = _manual_capture_intent(key)
+        try:
+            ownership.lock = _ServerCaptureBackend.acquire_identity(key)
+        finally:
+            if intent is not None:
+                intent.close()
     except OSError as exc:
         log.exception("capture identity lock unavailable for manual extraction")
         ownership.error = (f"capture ownership unavailable ({type(exc).__name__}); "
@@ -11720,7 +13741,15 @@ def _ensure_podcast_transcription_worker() -> threading.Thread:
         return thread
 
 
-def _queue_podcast_transcription(
+def _queue_podcast_transcription(episode_id: int, **options):
+    lock = source_subscriptions.CaptureLock.acquire(DATA_ROOT, f"podcast-queue:{episode_id}", timeout=5)
+    if lock is None:
+        return {"ok": False, "error": "Episode audio is busy. Try again."}, 409
+    with lock:
+        return _admit_podcast_transcription(episode_id, **options)
+
+
+def _admit_podcast_transcription(
         episode_id: int, *, model: str | None = None,
         language: str | None = None, diarize: bool = False,
         consent_given: bool = False,
@@ -11807,6 +13836,7 @@ def _queue_podcast_transcription(
     job = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
         "artwork_url": podcasts.episode_artwork_url(_get_index(), episode_id),
+        "duration_seconds": episode.get("duration_seconds"),
         "source_url": episode.get("episode_page_url"),
         "title": episode.get("title") or "Untitled episode",
         "playlist_title": None, "session_folder": None,
@@ -11815,7 +13845,7 @@ def _queue_podcast_transcription(
         "current_video_phase": "queued", "started_at": None,
         "updated_at": now, "completed_at": None, "error": None,
         "error_detail": None, "result": None, "warnings": [],
-        "message": "Podcast transcription queued.",
+        "message": "Podcast transcription queued.", "_cancel_event": threading.Event(),
         "episode_id": episode_id, "model": selected_model,
         "language": language, "diarize": bool(diarize),
         "consent_given": bool(consent_given), "audio_path": str(audio_path),
@@ -11845,7 +13875,471 @@ def _resume_podcast_transcription_jobs() -> int:
         _podcast_transcription_queue.put(job_id)
     if job_ids:
         _ensure_podcast_transcription_worker()
+    return len(job_ids) + _resume_retranscribe_jobs()
+
+
+# ---------------------------------------------------------------------------
+# 3.18 speech models: the chooser, pinned downloads, "Transcribe again with"
+# ---------------------------------------------------------------------------
+_asr_download_lock = threading.Lock()
+_asr_downloads: dict[str, dict] = {}   # model id -> live download state
+
+
+def _asr_download_public(record: dict | None) -> dict | None:
+    if not record:
+        return None
+    return {key: value for key, value in record.items() if key != "cancel"}
+
+
+def asr_models_payload() -> dict:
+    """The Settings chooser: every model with size, rough speed on this
+    computer, languages, a quality note, what is on disk and any download."""
+    settings = _read_settings() or {}
+    shipped = uoink_reliability.bundled_model_info()
+    data = asr_models.listing(
+        RELIABILITY_MODEL_ROOT, bundled_model=shipped["model"] if shipped else None,
+        selected=_selected_reliability_model(settings))
+    with _asr_download_lock:
+        live = {key: _asr_download_public(value) for key, value in _asr_downloads.items()}
+    for row in data["models"]:
+        if live.get(row["id"]):
+            row["download"] = live[row["id"]]
+        # A copy fetched by the older download path counts as ready too.
+        if row["state"] in ("missing", "partial") and uoink_reliability.is_model_ready(
+                row["id"], RELIABILITY_MODEL_ROOT):
+            row["state"] = "ready"
+            row["bytes_on_disk"] = asr_models.installed_bytes(row["id"], RELIABILITY_MODEL_ROOT)
+    data["engine"] = asr_worker.status_line()
+    return {"ok": True, **data}
+
+
+def start_asr_model_download(model: object) -> tuple[dict, int]:
+    """Start one user-asked download in the background (never on its own)."""
+    try:
+        entry = asr_models.get(model)
+    except ValueError:
+        return {"ok": False, "error": f"model must be one of {asr_models.ids()}"}, 400
+    model_id = entry["id"]
+    with _asr_download_lock:
+        current = _asr_downloads.get(model_id)
+        if current and current["state"] in ("downloading", "cancelling"):
+            return {"ok": True, "model": model_id, "already_running": True,
+                    "download": _asr_download_public(current)}, 202
+        cancel = threading.Event()
+        record = {"state": "downloading", "done": 0, "total": asr_models.total_bytes(model_id),
+                  "error": None, "started_at": _now_iso(), "finished_at": None, "cancel": cancel}
+        _asr_downloads[model_id] = record
+        initial = _asr_download_public(record)
+
+    def update(**values):
+        with _asr_download_lock:
+            record.update(values)
+
+    def run() -> None:
+        try:
+            asr_models.download(model_id, RELIABILITY_MODEL_ROOT, cancel_event=cancel,
+                                progress=lambda done, total: update(done=done, total=total))
+            update(state="done", done=record["total"], finished_at=_now_iso())
+        except asr_models.DownloadCancelled:
+            update(state="cancelled", finished_at=_now_iso())
+        except Exception as exc:  # noqa: BLE001 - reported to the person, kept for resume
+            log.warning("model download %s failed: %s", model_id, exc)
+            update(state="failed", error=_sanitize_error(str(exc)), finished_at=_now_iso())
+
+    threading.Thread(target=run, name=f"uoink-model-download-{model_id}", daemon=True).start()
+    return {"ok": True, "model": model_id, "download": initial}, 202
+
+
+def cancel_asr_model_download(model: object) -> tuple[dict, int]:
+    try:
+        model_id = asr_models.get(model)["id"]
+    except ValueError:
+        return {"ok": False, "error": f"model must be one of {asr_models.ids()}"}, 400
+    with _asr_download_lock:
+        record = _asr_downloads.get(model_id)
+        if not record or record["state"] != "downloading":
+            return {"ok": True, "model": model_id, "cancelled": False}, 200
+        record["state"] = "cancelling"
+        record["cancel"].set()
+    return {"ok": True, "model": model_id, "cancelled": True}, 200
+
+
+def delete_asr_model(model: object) -> tuple[dict, int]:
+    try:
+        model_id = asr_models.get(model)["id"]
+    except ValueError:
+        return {"ok": False, "error": f"model must be one of {asr_models.ids()}"}, 400
+    with _asr_download_lock:
+        record = _asr_downloads.get(model_id)
+        if record and record["state"] in ("downloading", "cancelling"):
+            return {"ok": False, "error": "Cancel the download first."}, 409
+    # A loaded model keeps its files open on Windows: stop an idle engine first.
+    try:
+        with asr_worker.deletion_slot(DATA_ROOT):
+            result = asr_models.delete(model_id, RELIABILITY_MODEL_ROOT)
+    except (RuntimeError, asr_models.DownloadBusy) as exc:
+        return {"ok": False, "error": str(exc)}, 409
+    except OSError as exc:
+        return {"ok": False, "error": _sanitize_error(str(exc))}, 500
+    with _asr_download_lock:
+        _asr_downloads.pop(model_id, None)
+    # Deleting the chosen model would leave new captures without one: go back
+    # to the model that ships with Uoink.
+    if _selected_reliability_model() == model_id and not _reliability_model_status(model_id).get("cached"):
+        with _settings_lock:
+            data = _read_stored_settings()
+            data["whisper_model"] = RELIABILITY_MODEL_NAME
+            _write_settings(data)
+        result["selected_reset_to"] = RELIABILITY_MODEL_NAME
+    return result, 200
+
+
+def use_asr_model(model: object) -> tuple[dict, int]:
+    """Choose the model for new transcripts (the same field Settings saves)."""
+    try:
+        model_id = asr_models.get(model)["id"]
+    except ValueError:
+        return {"ok": False, "error": f"model must be one of {asr_models.ids()}"}, 400
+    if not _reliability_model_status(model_id).get("cached"):
+        return {"ok": False, "model": model_id, "model_missing": True,
+                "error": "Download this model first."}, 409
+    with _settings_lock:
+        data = _read_stored_settings()
+        data["whisper_model"] = model_id
+        _write_settings(data)
+    return {"ok": True, "model": model_id, "selected": True}, 200
+
+
+RETRANSCRIBE_KIND = "retranscribe"
+
+
+def queue_retranscribe(body: dict) -> tuple[dict, int]:
+    """Queue a saved video for foreground transcription."""
+    video_id = str((body or {}).get("video_id") or "").strip()
+    folder, item = _folder_for_video_id(video_id) if video_id else (None, None)
+    if folder is None:
+        return {"ok": False, "error": "Saved item not found."}, 404
+    if (item.get("source_type") == "episode" or item.get("platform") == "podcast"):
+        return {"ok": False, "error": "Podcast episodes are transcribed from the episode itself."}, 409
+    model = str((body or {}).get("model") or _selected_reliability_model()).strip().lower()
+    if model not in _WHISPER_MODELS:
+        return {"ok": False, "error": f"model must be one of {list(_WHISPER_MODELS)}"}, 400
+    if not _reliability_model_status(model).get("cached"):
+        return {"ok": False, "model": model, "model_missing": True,
+                "error": "Download this model in Settings first."}, 409
+    if _item_capture_active(video_id, item):
+        return {"ok": False, "error": "A capture of this item is running."}, 409
+    now = _now_iso()
+    job = {
+        "id": _make_job_id(), "kind": RETRANSCRIBE_KIND, "state": "queued",
+        "source_url": (body or {}).get("source_url") if isinstance((body or {}).get("source_url"), str) else None,
+        "title": item.get("title") or "Saved video",
+        "playlist_title": None, "session_folder": None,
+        "videos_total": 1, "videos_done": 0, "videos_failed": 0,
+        "current_video": item.get("title"), "current_video_phase": "queued",
+        "started_at": None, "updated_at": now, "completed_at": None,
+        "error": None, "error_detail": None, "result": None, "warnings": [],
+        "message": "Queued to transcribe again.", "video_id": video_id, "model": model,
+        "progress": 0, "_cancel_event": threading.Event(),
+    }
+    existing = None
+
+    def already_queued():
+        nonlocal existing
+        existing = next((_public_job(other) for other in _jobs.values()
+                         if other.get("kind") == RETRANSCRIBE_KIND and other.get("video_id") == video_id
+                         and other.get("state") not in _JOB_TERMINAL_STATES), None)
+        return existing is not None
+
+    public = _add_job_record(job, unless=already_queued)
+    if existing is not None:
+        return {"ok": True, "job_id": existing["id"], "job": existing, "reused_existing": True}, 202
+    _enqueue_retranscribe(job["id"])
+    return {"ok": True, "job_id": job["id"], "job": public}, 202
+
+
+def _resume_retranscribe_jobs() -> int:
+    with _jobs_lock:
+        job_ids = [job_id for job_id, job in _jobs.items()
+                   if job.get("kind") == RETRANSCRIBE_KIND and job.get("state") == "queued"]
+    for job_id in job_ids:
+        _enqueue_retranscribe(job_id)
     return len(job_ids)
+
+
+def _enqueue_retranscribe(job_id):
+    global _retranscribe_worker_thread
+    with _podcast_transcription_worker_lock:
+        _retranscribe_queue.put(job_id)
+        if _retranscribe_worker_thread is None or not _retranscribe_worker_thread.is_alive():
+            _retranscribe_worker_thread = threading.Thread(
+                target=_retranscribe_worker, name="uoink-retranscribe", daemon=True)
+            _retranscribe_worker_thread.start()
+
+
+def _retranscribe_worker():
+    while True:
+        job_id = _retranscribe_queue.get()
+        try:
+            _run_retranscribe_job(job_id)
+        finally:
+            _retranscribe_queue.task_done()
+
+
+def _run_retranscribe_job(job_id: str) -> None:
+    """One queued "Transcribe again" job. Never raises: the queue worker
+    keeps running, and the old transcript stays unless the new one is saved."""
+    with _jobs_lock:
+        job = _jobs.get(job_id)
+        if not job or job.get("state") in _JOB_TERMINAL_STATES:
+            return
+        cancel = job.get("_cancel_event")
+        if not isinstance(cancel, threading.Event):
+            cancel = job["_cancel_event"] = threading.Event()   # restored after a restart
+        video_id, model = job.get("video_id"), job.get("model")
+    _update_job(job_id, state="running", started_at=_now_iso(), current_video_phase="transcribing",
+                message="Transcribing again. The current transcript stays until the new one is saved.")
+    try:
+        last = 0
+        def progress(done, total):
+            nonlocal last
+            if done is not None and total and total > 0:
+                percent = min(99, int(100 * done / total))
+                if percent > last:
+                    last = percent
+                    _update_job(job_id, progress=percent)
+        result = retranscribe_item(video_id, model, cancel_event=cancel, progress=progress)
+        _update_job(job_id, state="completed", current_video_phase=None, progress=100,
+                    videos_done=1, completed_at=_now_iso(), result=result,
+                    message=("The new transcript is much shorter. You can restore the previous transcript "
+                             "from the saved item." if result.get("shorter") else "New transcript saved."))
+    except (PlaylistJobCancelled, asr_worker.TranscriptionCancelled):
+        with _jobs_lock:
+            already = (_jobs.get(job_id) or {}).get("state") in _JOB_TERMINAL_STATES
+        if not already:
+            _update_job(job_id, state="cancelled", current_video_phase=None,
+                        completed_at=_now_iso(), message="Cancelled. The transcript is unchanged.")
+    except Exception as exc:  # noqa: BLE001 - the old transcript is kept
+        _error_detail_log.exception("retranscribe job %s failed", job_id)
+        _update_job(job_id, state="failed", current_video_phase=None, videos_failed=1,
+                    completed_at=_now_iso(), error=_error_summary(exc),
+                    message="Transcribing again did not finish. The transcript is unchanged.")
+
+
+def _manual_capture_intent(key):
+    # Signal before waiting on the identity lock held by a replacement.
+    name = source_subscriptions.sha256_text(key)[:40] + ".foreground"
+    return asr_worker._try_file(Path(DATA_ROOT) / "capture_locks" / name)
+
+
+def _item_capture_active(video_id, item):
+    import library_media
+    with _jobs_lock:
+        active = [dict(job) for job in _jobs.values() if job.get("kind") in ("single", "playlist")
+                  and job.get("state") not in _JOB_TERMINAL_STATES]
+    target = item.get("source_url") or library_media._item_url(item)
+    if target:
+        intent = _manual_capture_intent(_manual_capture_key(target))
+        if intent is None:
+            return True
+        intent.close()
+    for capture in active + _live_extracts_public():
+        current = capture.get("current_video")
+        urls = [capture.get("source_url"), current.get("url") if isinstance(current, dict) else None]
+        if capture.get("video_id") == video_id or any(
+                u and (u == target or source_subscriptions.SourceSubscriptionService._youtube_id_from_url(u) == video_id)
+                for u in urls):
+            return True
+    return False
+
+
+def retranscribe_item(video_id: str, model: str, *, cancel_event=None, progress=None, restore=None) -> dict:
+    _raise_if_cancelled(cancel_event)
+    folder, item = _folder_for_video_id(video_id)
+    if folder is None:
+        raise ValueError("Saved item not found.")
+    if _item_capture_active(video_id, item):
+        raise ValueError("A capture of this item is running.")
+    return _replace_transcript(video_id, model, folder, item, cancel_event, progress, restore)
+
+
+def _plain_transcript_bytes(folder):
+    path = folder / "transcript.txt"
+    if path.is_symlink() or path.resolve().parent != folder.resolve():
+        raise ValueError("The transcript file has moved.")
+    return path.read_bytes() if path.exists() else None
+
+
+def _replace_transcript(video_id, model, folder, item, cancel_event, progress, restore):
+    """Transcribe one saved video again and replace its transcript.
+
+    The audio is fetched again and the whole new transcript is made first;
+    only then are the sidecar, transcript.txt, the Markdown transcript
+    section and the published cues replaced, in one fenced publication
+    (the same ownership checks as every capture). Any failure before that
+    leaves every saved file as it was.
+    """
+    import clips
+    import library_cards
+    import library_media as media
+
+    idx = _get_index()
+    side_path = Path(item["sidecar_path"])
+    side = media.read_owned_sidecar(side_path)
+    if not side or side.get("video_id") != video_id:
+        raise ValueError("This save's details file is missing.")
+    url = side.get("source_url") or side.get("url")
+    if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+        raise ValueError("This save has no source link to fetch its audio from.")
+    item = {**item, "source_url": url}
+    old_block = side.get("media_depth") or {}
+    if old_block.get("diarization_state") not in (None, "not_requested"):
+        raise ValueError("This transcript has speaker labels, so Uoink left it as is.")
+    old_plan = _capture_media_plan(side, folder, item=item)
+    if not old_plan or not old_block:
+        raise ValueError("This save predates the transcript history needed to replace it safely.")
+    corpus_path = Path(item["corpus_path"])
+    corpus = corpus_path.read_bytes()
+    newline = b"\r\n" if b"\r\n" in corpus else b"\n"
+    old = old_plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
+    if not old or corpus.count(old) != 1:
+        raise ValueError("The saved transcript section has changed. Your edits were kept.")
+    plain = folder / "transcript.txt"
+    plain_before = _plain_transcript_bytes(folder)
+    if plain_before is not None:
+        saved_plain = plain_before.decode("utf-8", "replace").replace("\r\n", "\n").strip()
+        old_plain = "\n".join(str(r.get("text") or "") for r in side.get("transcript") or []
+                              if isinstance(r, dict)).strip()
+        if saved_plain != old_plain:
+            raise ValueError("transcript.txt was edited after saving. Your edits were kept.")
+    original = side_path.read_bytes()
+    original_id = hashlib.sha256(original).hexdigest()
+    backup_dir = folder / media.MEDIA_INPUTS_DIR
+    if backup_dir.is_symlink() or backup_dir.resolve().parent != folder.resolve():
+        raise ValueError("The transcript backup folder has moved.")
+    shorter = False
+    if restore is not None:
+        if (not isinstance(restore, str) or not re.fullmatch(r"[0-9a-f]{64}", restore)
+                or side.get("transcript_backup") != restore):
+            raise ValueError("This backup no longer matches the current transcript.")
+        archived = backup_dir / ("transcript-before-" + restore[:16] + ".json")
+        if archived.is_symlink() or not archived.is_file():
+            raise ValueError("The previous transcript is unavailable.")
+        raw = archived.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != restore:
+            raise ValueError("The previous transcript backup has changed.")
+        previous = json.loads(raw)
+        if previous.get("video_id") != video_id:
+            raise ValueError("The previous transcript belongs to another item.")
+        new_side = dict(side)
+        for key in ("transcript", "asr_fallback", "transcript_note", "transcript_source"):
+            new_side[key] = previous.get(key)
+        new_plain = _transcript_text_from_sidecar(previous).encode()
+        plain_hash = side.get("transcript_backup_plain")
+        if plain_hash:
+            if not isinstance(plain_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", plain_hash):
+                raise ValueError("The text backup is invalid.")
+            path = backup_dir / ("transcript-before-" + plain_hash + ".txt")
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("The text backup is unavailable.")
+            new_plain = path.read_bytes()
+            if hashlib.sha256(new_plain).hexdigest() != plain_hash:
+                raise ValueError("The text backup has changed.")
+        meta = new_side.get("asr_fallback") or {}
+        used = meta.get("model")
+    else:
+        settings = {**(_read_settings() or {}), "whisper_model": model, "asr_fallback_enabled": True,
+                    "long_video_mode": LONG_VIDEO_MODE_FULL}
+        with tempfile.TemporaryDirectory(prefix="uoink-retranscribe-", ignore_cleanup_errors=True) as tmp:
+            audio = _download_reliability_audio(url, Path(tmp), cancel_event)
+            _raise_if_cancelled(cancel_event)
+            entries, source, meta = _resolve_video_transcript(
+                [], audio, side.get("duration_seconds"), url=url, settings=settings,
+                cancel_event=cancel_event, progress=progress,
+                asr_titles=(side.get("channel"), side.get("title")))
+        _raise_if_cancelled(cancel_event)
+        if source != "asr" or not entries:
+            if meta.get("status") == "no_speech":
+                raise ValueError("Whisper found no speech, so the transcript is unchanged.")
+            raise ValueError(meta.get("error") or meta.get("reason") or "Transcription failed.")
+
+        chars = sum(len("".join(text.split())) for _, _, text in entries)
+        old_chars = len("".join(_transcript_text_from_sidecar(side).split()))
+        old_coverage = (side.get("asr_fallback") or {}).get("coverage")
+        if not chars or (meta.get("coverage") == "sampled_sections" and old_coverage != "sampled_sections"):
+            raise ValueError("The new transcript has too little speech. The old transcript was kept.")
+        shorter = chars * 4 < old_chars
+        used = meta.get("model") or model
+        note = f"Local Whisper transcript, transcribed again with the {used} model"
+        if meta.get("requested_model"):
+            note += f" (the language check selected it in place of {meta['requested_model']})"
+        new_side = dict(side, transcript=_transcript_entries_with_links(side, entries),
+                        transcript_source="asr", asr_fallback=meta, transcript_note=note)
+        new_plain = "\n".join(text for _, _, text in entries).encode()
+    new_side["transcript_backup"] = original_id if shorter else None
+    new_side["transcript_backup_plain"] = (
+        hashlib.sha256(plain_before).hexdigest() if shorter and plain_before is not None else None)
+    binding = media.capture_sidecar_inputs(side)
+    plan = _capture_media_plan(new_side, folder, item=item)
+    if not plan:
+        raise ValueError("The replacement transcript could not be prepared.")
+    if corpus_path.read_bytes() != corpus or _plain_transcript_bytes(folder) != plain_before:
+        raise ValueError("The transcript changed while transcribing. Your edits were kept.")
+    new = plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
+    corpus = corpus.replace(old, new, 1)
+    head = corpus[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
+    row = media._merge_item(item)
+    revision = library_cards.build_card(row, clips.merge_cues(plan["cues"], row),
+                                        corpus_text=head)["source_revision"]
+    if restore is not None:
+        record = json.loads(plan["artifact"])
+        record["restored_from"] = restore
+        plan["artifact"] = media.canonical_json(record).encode()
+    block, digest = media.capture_snapshot(
+        video_id=video_id, source_revision=revision, cues=plan["cues"], artifact_bytes=plan["artifact"],
+        corpus_revision=hashlib.sha256(corpus).hexdigest(), playback=plan["playback"],
+        transcript_kind=plan["transcript_kind"], transcript_provider=plan["transcript_provider"],
+        chapter_rows=plan["chapter_rows"], recorded_at=side.get("yoinked_at"), item=item)
+    artifacts = {corpus_path: corpus,
+                 folder / media.MEDIA_INPUTS_DIR / (digest + ".json"): plan["artifact"],
+                 side_path: json.dumps(dict(new_side, media_depth=block), ensure_ascii=False).encode()}
+    artifacts[plain] = new_plain
+    if new_side["transcript_backup_plain"]:
+        artifacts[backup_dir / ("transcript-before-" + new_side["transcript_backup_plain"] + ".txt")] = plain_before
+    # Keep the exact old details file next to the media inputs, so the old
+    # transcript can be recovered by hand. Retention prunes only <sha256>.json.
+    backup = backup_dir / (
+        "transcript-before-" + hashlib.sha256(original).hexdigest()[:16] + ".json")
+    if backup.is_symlink() or (backup.exists() and backup.read_bytes() != original):
+        raise ValueError("The transcript backup file has changed.")
+    artifacts[backup] = original
+    _raise_if_cancelled(cancel_event)
+    try:
+        # Leave the identity lock free during the download and decode.
+        while True:
+            _raise_if_cancelled(cancel_event)
+            lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, _manual_capture_key(url))
+            if lock is not None:
+                break
+            if restore is not None:
+                raise ValueError("A capture of this item is running. Try restoring again when it finishes.")
+            time.sleep(0.1)
+        with lock:
+            if side_path.read_bytes() != original or _plain_transcript_bytes(folder) != plain_before:
+                raise ValueError("The transcript changed while transcribing. Your edits were kept.")
+            ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding)
+            if ticket.base_media_revision != old_block.get("media_revision"):
+                raise ValueError("A newer capture replaced this transcript.")
+            idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,
+                                       artifacts=artifacts, ticket=ticket)
+    except media.MediaError as exc:
+        reason = getattr(exc, "code", None) or str(exc)
+        raise ValueError(f"The new transcript could not be saved ({reason}). "
+                         "The old one was kept.") from exc
+    return {"video_id": video_id, "model": used,
+            "shorter": shorter, "restored": restore is not None,
+            "requested_model": meta.get("requested_model"), "segments": len(new_side["transcript"]),
+            "word_timings": bool(meta.get("word_timings"))}
 
 
 # ---------------------------------------------------------------------------
@@ -12269,7 +14763,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 with source_subscriptions.capture_context(start_id, incarnation):
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
+                    topic = _route_topic(metadata, url=url)
                     folder = _video_capture_folder(
                         DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
                     if not self.holds_execution(start):
@@ -12512,7 +15006,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
                 or not episode.get("transcript_local_path"):
             return False
         try:
-            podcasts.episode_to_corpus(_get_index(), episode_id, data_root=DATA_ROOT)
+            podcasts.episode_to_corpus(_get_index(), episode_id, data_root=DATA_ROOT,
+                                      topic_classifier=_route_topic)
         except podcasts.CorpusIdentityConflict as exc:
             log.warning("standing capture %s: publication identity conflict: %s",
                         start["start_id"], exc)
@@ -12726,14 +15221,8 @@ def _register_suggested_episode(idx, feed_url: str, item: dict) -> dict:
     under its real GUID. Otherwise the row gets a marked stand-in GUID that a
     later poll of the feed swaps for the real one (podcasts.upsert_episodes,
     source_subscriptions.project_podcast_episode)."""
-    existed = any(f.get("feed_url") == feed_url for f in podcasts.list_feeds(idx))
-    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False, enabled=False, title=item.get("show"))
     feed_id = int(feed["id"])
-    if not existed:
-        podcasts.set_feed_enabled(idx, feed_id, False)
-        podcasts.record_feed_meta(
-            idx, feed_id, title=item.get("show") or None, description=None,
-            homepage=None, etag=None, last_modified=None, ok=True)
     same = podcasts.find_feed_episode(
         idx, feed_id, audio_url=item.get("episode_url"), title=item.get("title"),
         published=item.get("released") or None)
@@ -12772,15 +15261,20 @@ def _run_podcast_suggestion_save(sid: str, item: dict) -> None:
             suggestions.mark_saved(DATA_ROOT, sid)
             return _podcast_suggestion_set_state(sid, "saved", "Already in your library.")
         episode_id = int(episode["id"])
-        downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
-        if not downloaded.get("ok"):
-            return fail("Couldn't download the audio. Try again later.")
-        settings = _read_settings() or {}
-        queued, status = _queue_podcast_transcription(
-            episode_id,
-            model=whisper_runner.normalize_model(settings.get("whisper_model")),
-            diarize=bool(settings.get("diarization_default")),
-            consent_given=False, publish_to_corpus=True)
+        key = _podcast_capture_key(episode_id)
+        lock = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, key) if key else None
+        if lock is None:
+            return fail("Another capture is using this episode. Try again.")
+        with lock:
+            downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+            if not downloaded.get("ok"):
+                return fail("Couldn't download the audio. Try again later.")
+            settings = _read_settings() or {}
+            queued, status = _queue_podcast_transcription(
+                episode_id,
+                model=whisper_runner.normalize_model(settings.get("whisper_model")),
+                diarize=bool(settings.get("diarization_default")),
+                consent_given=False, publish_to_corpus=True)
         if status == 412:
             return fail("Set up transcription in Settings first, then save it again.")
         if not queued.get("ok"):
@@ -13517,6 +16011,10 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
         event = job.get("_cancel_event")
         if not isinstance(event, threading.Event):
             return None, "job cancel failed", 200
+        if job.get("kind") == "podcast_transcribe" and job.get("state") == "queued":
+            # The queue skips terminal jobs. Clear the episode badge before a retry can enqueue.
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), job["episode_id"], status=whisper_runner.STATUS_NONE)
         event.set()
         now = _now_iso()
         job.update({
@@ -13526,7 +16024,8 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
             "completed_at": now,
             "error": None,
             "result": None,
-            "message": "Playlist job cancelled. Partial outputs were left on disk.",
+            "message": ("Transcription cancelled." if job.get("kind") in ("podcast_transcribe", "retranscribe")
+                        else "Playlist job cancelled. Partial outputs were left on disk."),
             "updated_at": now,
         })
         _persist_jobs_locked(job)
@@ -13570,7 +16069,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
         if item.get("ok") or item.get("status") == "saved_with_errors":
             md_path = item.get("md_path")
             try:
-                body = Path(md_path).read_text(encoding="utf-8")
+                body = _read_export_markdown(Path(md_path))
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 body = re.sub(r"^(\*\*[^*]+:\*\*[^\n]*\n)+", "", body)
                 if text_only:
@@ -15055,7 +17554,7 @@ def _retry_pending_one() -> bool:
                                 log.exception("retry worker: deferring live broadcast failed")
                             return True
                     title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
+                    topic = _route_topic(metadata, url=url)
                     folder = _video_capture_folder(
                         DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
@@ -15339,6 +17838,10 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 
     # 1. helper_responsive -- we are answering this request.
     add("helper_responsive", "ok", None)
+    # 1b. transcription_engine (3.18): models run in a child process that
+    # exits when idle; this says whether one holds memory right now.
+    import asr_worker as _asr  # local: works in any caller scope, already cached
+    add("transcription_engine", "ok", _asr.status_line())
 
     # 2. platform (Sprint 19.5 Stage 1). The popup uses this to surface
     # platform-appropriate install / recovery hints rather than the
@@ -15581,7 +18084,7 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
     for column in ("channel", "platform", "source_type", "author", "topic", "hook_type"):
         value = filters.get(column)
         if value:
-            clauses.append(f"y.{column} = ?")
+            clauses.append(f"{index.facet_column(column)} = ?")
             params.append(value)
     types = _LIBRARY_KINDS.get(kind or "", ())
     if types:
@@ -15600,6 +18103,11 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         nxt = (datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
         clauses.append(f"{captured} < ?")
         params.append(nxt)
+    # Original publish (air) date bounds, separate from the capture date.
+    published_clauses, published_params = index.published_filter_sql(
+        idx.published_day_sql("y"), filters.get("published_from"), filters.get("published_to"))
+    clauses.extend(published_clauses)
+    params.extend(published_params)
     where = " AND ".join(clauses)
     order = {
         "oldest": f"{captured} ASC, y.video_id ASC",
@@ -15620,6 +18128,8 @@ def _library_search(idx, *, q: str | None, filters: dict, kind: str | None,
         tail = "FROM yoinks y WHERE " + where
         args = params
     with idx.search_read() as db:
+        if published_clauses:
+            index.use_published_day(db)
         try:
             rows = (idx._ranked_source_page(db, q, limit, offset, where, params)
                     if expression and match == "forgiving" and sort == "relevance" else None)
@@ -15874,6 +18384,11 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "captions_skipped_reason": captions_skipped if isinstance(captions_skipped, str) else None,
             "asr_fallback_status": asr_status if isinstance(asr_status, str) else None,
             "has_transcript": bool(transcript),
+            # Original publish (air) date as YYYY-MM-DD, separate from yoinked_at.
+            "published_at": (index.published_day(live.get("published_at"))
+                             or index.published_day(live.get("upload_date"))
+                             or index.published_day_from_metadata(metadata)),
+            **({"snippet": r["_snippet"]} if r.get("_snippet") else {}),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
         })
     return podcasts.repair_corpus_titles(idx, out, data_root=DATA_ROOT)
@@ -15892,18 +18407,160 @@ _SAVES_BACKOFF = (60, 300, 900)
 _saves_capture_lock = threading.Lock()
 
 
-def _persist_x_thread(result: dict):
+def _persist_x_thread(result: dict, *, topic: str | None = None):
     return page_extractor.persist_page_yoink(
-        _get_index(), result, data_root=DESKTOP_ROOT,
+        _get_index(), result, topic=topic, data_root=DESKTOP_ROOT,
         source_type=x_extractor.SOURCE_TYPE, subfolder="X", slug_prefix="x",
-        topic_classifier=_classify_topic)
+        topic_classifier=_route_topic)
 
 
-def _persist_reddit_thread(result: dict):
+def _persist_x_article(result: dict, *, topic: str | None = None):
     return page_extractor.persist_page_yoink(
-        _get_index(), result, data_root=DESKTOP_ROOT,
+        _get_index(), result, topic=topic, data_root=DESKTOP_ROOT,
+        source_type=x_article_extractor.SOURCE_TYPE, subfolder="X", slug_prefix="x-article",
+        topic_classifier=_route_topic)
+
+
+# ---- 3.18.0: full X post text ------------------------------------------------
+def _x_fxtwitter_kwargs(settings: dict) -> dict:
+    """FxTwitter (a third-party service) is the user's opt-in. The call
+    stays bare when it is off, so the default path never names it."""
+    return {"fxtwitter": True} if settings.get("fxtwitter_enrichment_enabled") is True else {}
+
+
+def _fxtwitter_switch_on() -> bool:
+    """The user's FxTwitter switch, read fresh from settings."""
+    try:
+        return (_read_settings() or {}).get("fxtwitter_enrichment_enabled") is True
+    except Exception:
+        return False
+
+
+# x_extractor reads this before every FxTwitter request, whatever its
+# caller asked for, so turning the switch off stops requests at once.
+x_extractor.set_fxtwitter_gate(_fxtwitter_switch_on)
+
+
+def _clean_dom_post(value) -> dict | None:
+    """The extension's read of the open X tab: {id, text, show_more}. Kept
+    small and typed; anything else is dropped."""
+    if not isinstance(value, dict):
+        return None
+    post_id, text = str(value.get("id") or ""), value.get("text")
+    if not x_extractor.is_post_id(post_id) or not isinstance(text, str) or not text.strip():
+        return None
+    return {"id": post_id, "text": text[:100000], "show_more": value.get("show_more") is True}
+
+
+# The open tab's text of a post, in memory for half an hour, so the video
+# half of the same "Uoink this post" (queued right after) gets it too.
+_X_DOM_POSTS: dict = {}
+_X_DOM_POSTS_LOCK = threading.Lock()
+_X_DOM_POST_TTL_SEC = 1800
+
+
+def _remember_dom_post(dom_post: dict | None) -> None:
+    if not dom_post:
+        return
+    now = time.monotonic()
+    with _X_DOM_POSTS_LOCK:
+        for key in [k for k, (at, _post) in _X_DOM_POSTS.items() if now - at > _X_DOM_POST_TTL_SEC]:
+            _X_DOM_POSTS.pop(key, None)
+        _X_DOM_POSTS[dom_post["id"]] = (now, dom_post)
+        while len(_X_DOM_POSTS) > 64:
+            _X_DOM_POSTS.pop(next(iter(_X_DOM_POSTS)))
+
+
+def _recent_dom_post(tweet_id: str) -> dict | None:
+    with _X_DOM_POSTS_LOCK:
+        hit = _X_DOM_POSTS.get(str(tweet_id))
+    if hit and time.monotonic() - hit[0] <= _X_DOM_POST_TTL_SEC:
+        return hit[1]
+    return None
+
+
+def _enrich_x_video_metadata(url: str, metadata: dict) -> dict:
+    """An X video's Description gets the post's text with its links
+    expanded and the quoted post, and the whole long post when the user's
+    FxTwitter opt-in is on. yt-dlp reads X's syndication copy, which stops
+    long posts near 280 characters; ``x_text`` records whether this one is
+    cut off so the repair view can count it. Best effort and X-only: any
+    failure keeps yt-dlp's description."""
+    if not isinstance(metadata, dict):
+        return metadata
+    extractor = str(metadata.get("extractor") or metadata.get("extractor_key") or "").lower()
+    tweet_id = (x_extractor.tweet_id_from_url(url)
+                or x_extractor.tweet_id_from_url(str(metadata.get("webpage_url") or "")))
+    if not extractor.startswith("twitter") or not tweet_id:
+        return metadata
+    marker = metadata.get("x_text")
+    if isinstance(marker, dict) and marker.get("text_completeness") == "complete":
+        return metadata  # a retry or refresh reusing this capture's metadata
+    try:
+        record = x_extractor.post_text_record(
+            tweet_id, timeout=10, dom_post=_recent_dom_post(tweet_id),
+            **_x_fxtwitter_kwargs(_read_settings() or {}))
+    except Exception as exc:  # the video capture never waits on this
+        log.info("X post text lookup skipped for %s: %s", tweet_id, type(exc).__name__)
+        return metadata
+    if not (record.get("description") or "").strip():
+        return metadata
+    enriched = dict(metadata)
+    enriched["description"] = record["description"]
+    enriched["x_text"] = x_text_repair.text_marker(record)
+    return enriched
+
+
+_X_OPEN_URL_RE = re.compile(r"^https://(?:x|twitter)\.com/[A-Za-z0-9_/]+$")
+
+
+def _x_cut_off_detail(sidecar: dict) -> dict | None:
+    """{reason, open_url, title?} when an X save holds only part of the
+    text: "long_post" (X cut it) or "article" (the post only links to an
+    X Article). The reader offers the FxTwitter switch or the open-tab
+    save. None once it is whole or the Article was saved on its own."""
+    if not isinstance(sidecar, dict):
+        return None
+    meta = sidecar.get("metadata") if isinstance(sidecar.get("metadata"), dict) else {}
+    cut = meta.get("text_cut_off")
+    if isinstance(cut, dict):
+        open_url = cut.get("open_url")
+        if cut.get("saved_as") or not isinstance(open_url, str) or not _X_OPEN_URL_RE.match(open_url):
+            return None
+        out = {"reason": "article" if cut.get("reason") == "article" else "long_post", "open_url": open_url}
+        title = cut.get("title")
+        if isinstance(title, str) and title.strip():
+            out["title"] = title.strip()[:200]
+        return out
+    marker = sidecar.get("x_text")
+    if isinstance(marker, dict) and (
+            (marker.get("long_post") and marker.get("text_completeness") != "complete")
+            or marker.get("quote_complete") is False):
+        tweet_id = x_extractor.tweet_id_from_url(str(sidecar.get("url") or ""))
+        if tweet_id:
+            return {"reason": "long_post", "open_url": f"https://x.com/i/status/{tweet_id}"}
+    return None
+
+
+_x_text_repair_job = None
+_x_text_repair_job_lock = threading.Lock()
+
+
+def _get_x_text_repair_job():
+    global _x_text_repair_job
+    with _x_text_repair_job_lock:
+        if _x_text_repair_job is None:
+            _x_text_repair_job = x_text_repair.RepairJob(
+                data_root=DATA_ROOT, index_getter=_get_index, fxtwitter_getter=_fxtwitter_switch_on,
+                corpus_lock=_corpus_update_lock, persist_article=_persist_x_article)
+        return _x_text_repair_job
+
+
+def _persist_reddit_thread(result: dict, *, topic: str | None = None):
+    return page_extractor.persist_page_yoink(
+        _get_index(), result, topic=topic, data_root=DESKTOP_ROOT,
         source_type=reddit_extractor.SOURCE_TYPE, subfolder="Reddit", slug_prefix="reddit",
-        topic_classifier=_classify_topic)
+        topic_classifier=_route_topic)
 
 
 def _saves_capture_one(now=None) -> bool:
@@ -15932,10 +18589,23 @@ def _saves_capture_one(now=None) -> bool:
         error = None
         video_id = None
         try:
+            # The user's own folder (an X bookmark folder, a Reddit or
+            # Watch Later list name) is the shelf when the import kept one.
+            folder = _clean_shelf(item.get("folder"))
             if item["source"] == list_imports.SOURCE_X_BOOKMARKS:
-                result = x_extractor.extract_x_thread(item["url"])
-                if result.get("ok"):
-                    video_id = _persist_x_thread(result)
+                # A bookmarked post that is cut off, or only links to an X
+                # Article, keeps what X gave (marked cut off) unless the
+                # FxTwitter opt-in can fetch the rest.
+                result = x_extractor.extract_x_thread(
+                    item["url"], **_x_fxtwitter_kwargs(_read_settings() or {}))
+                if result.get("ok") and result.get("source_type") == x_article_extractor.SOURCE_TYPE:
+                    video_id = page_extractor.persist_page_yoink(
+                        _get_index(), result, data_root=DESKTOP_ROOT,
+                        source_type=x_article_extractor.SOURCE_TYPE,
+                        subfolder="X", slug_prefix="x-article",
+                        topic=folder, topic_classifier=_route_topic)
+                elif result.get("ok"):
+                    video_id = _persist_x_thread(result, topic=folder)
                     if video_id:
                         _save_x_video_poster(video_id, result)
                 else:
@@ -15943,7 +18613,7 @@ def _saves_capture_one(now=None) -> bool:
             elif item["source"] == list_imports.SOURCE_REDDIT_SAVED:
                 result = reddit_extractor.extract_reddit_thread(item["url"])
                 if result.get("ok"):
-                    video_id = _persist_reddit_thread(result)
+                    video_id = _persist_reddit_thread(result, topic=folder)
                 else:
                     error = result.get("code") or "capture_failed"
             else:
@@ -16244,6 +18914,14 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
         pending_id, inserted = idx.enqueue_pending_once(url, interval, _now_iso())
         queued.append({**item, "pending_id": pending_id, "already_queued": not inserted})
     receipt = list_imports.record_import(DATA_ROOT, preview, queued) if queued else {}
+    hints = [(q["url"], q["folder"]) for q in queued if q.get("folder") and q.get("kind") != "post"]
+    if hints:
+        # Videos go through the normal queue; the folder rides along as a hint.
+        import shelf_router
+        try:
+            shelf_router.remember_hints(DATA_ROOT, hints)
+        except OSError as exc:
+            log.warning("import folders not remembered: %s", exc)
     skipped += sum(bool(q.get("in_library")) for q in queued)
     queued = [q for q in queued if not q.get("in_library")]
     fresh = sum(1 for q in queued if not q["already_queued"])
@@ -16267,10 +18945,431 @@ def _list_import_start(text, offset=0, limit=list_imports.DEFAULT_LIMIT, *,
         "message": message,
         "videos": [
             {k: q.get(k) for k in ("video_id", "kind", "item_key", "url", "title", "channel", "pending_id",
-                                   "already_queued")}
+                                   "already_queued", "folder")}
             for q in queued
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Save a whole show (show_capture.py). Listing reuses the list import's
+# yt-dlp window and the podcast feed parser; each YouTube episode is one
+# transcript-only row on the download queue, and each podcast episode goes
+# through the podcast download and transcription job. Nothing starts until
+# the user presses Start; one episode is in flight at a time.
+# ---------------------------------------------------------------------------
+_SHOW_CAPTURE_POLL_SEC = 15
+_SHOW_QUEUE_INTERVAL_SEC = 30
+_show_capture_wake = threading.Event()
+# Podcast episodes a show run is downloading or has handed to transcription,
+# by episode id: {"state": downloading | queued | failed | retry | cancelled,
+# "cancel": Event, ...}. Entries go once the run has recorded the outcome.
+_show_podcast_runs: dict[int, dict] = {}
+_show_podcast_runs_lock = threading.Lock()
+# A download error that means "the host is busy or unreachable for now":
+# back off and try again. Anything else (a 404, a refused address) fails
+# the episode and still counts toward the run's failures in a row.
+_SHOW_HOST_BUSY = re.compile(
+    r"HTTP Error (?:429|5\d\d)|Too Many Requests|Service Unavailable|timed out|^timeout$"
+    r"|temporar|Connection (?:reset|refused|aborted)|getaddrinfo|Remote end closed",
+    re.IGNORECASE)
+
+
+def _show_spawn(target, *args) -> None:
+    threading.Thread(target=target, args=args, name="show-podcast", daemon=True).start()
+_SHOW_ERROR_STATUS = {"empty": 400, "invalid_url": 400, "unsupported": 400, "invalid": 400,
+                      "not_found": 404, "unreadable": 500, "invalid_state": 409,
+                      "needs_asr": 409, "asr_unavailable": 409}
+
+
+def _show_youtube_waiting() -> dict:
+    """Is YouTube asking Uoink to slow down? The bot-check cooldown, or a
+    queued capture that is waiting out a bot check or a 429."""
+    status = _youtube_bot_check_status()
+    if status.get("active"):
+        return {**status, "reason": "bot_check"}
+    now = datetime.now(timezone.utc)
+    latest = now
+    reason = "bot_check"
+    for row in _get_index().list_pending(limit=200):
+        error = str(row.get("last_error") or "")
+        if row.get("status") != "pending" or not error.startswith(("youtube_bot_check", "youtube_rate_limit")):
+            continue
+        retry_after = show_capture._parse_iso(row.get("retry_after"))
+        if retry_after is not None and retry_after > latest:
+            latest = retry_after
+            reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
+    if latest == now:
+        return {"active": False}
+    left = int((latest - now).total_seconds())
+    return {"active": left > 0, "seconds_left": max(0, left), "reason": reason}
+
+
+def _show_reason_from_pending(row: dict) -> str:
+    """The user-facing line of a failed queue row's last error."""
+    error = str(row.get("last_error") or "").strip()
+    if not error:
+        return "Uoink couldn't save this one."
+    line = error.splitlines()[-1].strip()
+    if line.startswith(("youtube_bot_check", "youtube_rate_limit")):
+        return "YouTube kept refusing this one. Try it again later."
+    return line[:300]
+
+
+def _show_podcast_feed(idx, feed_url: str):
+    canonical = podcasts._validate_feed_url(feed_url)
+    if not canonical:
+        return None
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT * FROM podcast_feeds WHERE feed_url=?", (canonical,)).fetchone()
+    return dict(row) if row else None
+
+
+def _show_podcast_linked_id(idx, feed_url: str, episode: dict) -> str | None:
+    """The library id a feed episode is linked to (saved, or saved and then
+    removed by the user), or None."""
+    feed = _show_podcast_feed(idx, feed_url)
+    if feed is None:
+        return None
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT yoink_video_id FROM podcast_episodes WHERE feed_id=? AND guid=? "
+            "AND yoink_video_id IS NOT NULL", (int(feed["id"]), episode.get("guid") or "")).fetchone()
+    if row is None:
+        same = podcasts.find_feed_episode(
+            idx, int(feed["id"]), audio_url=episode.get("audio_url"),
+            title=episode.get("title"), published=episode.get("published_at"))
+        video_id = (same or {}).get("yoink_video_id")
+    else:
+        video_id = row["yoink_video_id"]
+    if not video_id:
+        return None
+    return video_id if idx.get_yoink(video_id) is not None else None
+
+
+def _register_show_episode(idx, feed_url: str, show_title, episode: dict) -> dict:
+    """Put one feed episode in the podcast tables under its real GUID
+    without following the show (the same rule as a suggestion save: a show
+    not already followed is added switched off, so nothing polls it)."""
+    existed = _show_podcast_feed(idx, feed_url) is not None
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed_id = int(feed["id"])
+    if not existed:
+        podcasts.set_feed_enabled(idx, feed_id, False)
+        podcasts.record_feed_meta(
+            idx, feed_id, title=show_title or None, description=None,
+            homepage=None, etag=None, last_modified=None, ok=True)
+    same = podcasts.find_feed_episode(
+        idx, feed_id, audio_url=episode.get("audio_url"), title=episode.get("title"),
+        published=episode.get("published_at"))
+    if same is not None:
+        return same
+    podcasts.upsert_episodes(idx, feed_id, [{
+        "guid": episode.get("guid"), "title": episode.get("title"),
+        "audio_url": episode.get("audio_url"),
+        "episode_page_url": episode.get("episode_page_url"),
+        "duration_seconds": episode.get("duration_seconds"),
+        "published_at": episode.get("published_at"),
+        "description": episode.get("description")}])
+    # One indexed lookup (feed_id, guid), not a scan of the feed's episodes.
+    with idx._lock:
+        row = idx._conn.execute(
+            "SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=? LIMIT 1",
+            (feed_id, episode.get("guid") or "")).fetchone()
+    found = podcasts.get_episode(idx, int(row["id"])) if row else None
+    if found is None:
+        raise show_capture.EpisodeError("Uoink couldn't add this episode.")
+    return found
+
+
+def _show_podcast_note(episode_id: int, **state) -> None:
+    """Record what the episode's thread is doing, keeping its cancel flag."""
+    with _show_podcast_runs_lock:
+        entry = _show_podcast_runs.setdefault(episode_id, {})
+        cancel = entry.get("cancel")
+        entry.clear()
+        entry.update(state)
+        if cancel is not None:
+            entry["cancel"] = cancel
+
+
+def _show_podcast_cancelled(episode_id: int) -> bool:
+    with _show_podcast_runs_lock:
+        event = (_show_podcast_runs.get(episode_id) or {}).get("cancel")
+    return bool(event is not None and event.is_set())
+
+
+def _show_podcast_run(episode_id: int) -> None:
+    """Download one episode, then queue the normal podcast transcription
+    that publishes it into the library. Runs on its own thread. Cancelling
+    the run stops it before transcription (a download already under way
+    finishes and its audio stays with the episode)."""
+    def note(**state):
+        _show_podcast_note(episode_id, **state)
+
+    try:
+        if _show_podcast_cancelled(episode_id):
+            return note(state="cancelled")
+        idx = _get_index()
+        downloaded = podcasts.download_episode_audio(idx, episode_id, data_root=DATA_ROOT)
+        if _show_podcast_cancelled(episode_id):
+            return note(state="cancelled")
+        if not downloaded.get("ok"):
+            error = str(downloaded.get("error") or "")
+            if _SHOW_HOST_BUSY.search(error):
+                return note(state="retry")
+            return note(state="failed", host_failure=True,
+                        reason="Couldn't download the audio from the show's host.")
+        settings = _read_settings() or {}
+        queued, status = _queue_podcast_transcription(
+            episode_id, model=whisper_runner.normalize_model(settings.get("whisper_model")),
+            diarize=bool(settings.get("diarization_default")),
+            consent_given=False, publish_to_corpus=True)
+        if not queued.get("ok"):
+            reason = (_SUGGESTION_SETUP_MESSAGE if status in (412, 503)
+                      else "Transcription is not available right now.")
+            return note(state="failed", reason=reason)
+        note(state="queued", job_id=queued.get("job_id"))
+    except Exception:
+        log.exception("show capture: podcast episode %s failed to start", episode_id)
+        note(state="failed", reason="Uoink couldn't save this episode.")
+
+
+class _ServerShowBackend:
+    """show_capture.Backend over the helper's real queue, index and tools."""
+
+    def list_youtube(self, url, start, end):
+        try:
+            return _list_import_ytdlp(url, start, end)
+        except list_imports.ImportListError as exc:
+            message = ("yt-dlp couldn't list that channel or playlist. Check that it is public."
+                       if exc.code == "fetch_failed" else str(exc))
+            raise show_capture.ShowCaptureError(message, exc.code) from None
+
+    def fetch_feed(self, url):
+        try:
+            body, _headers = podcasts.fetch_feed({"feed_url": url})
+        except Exception:
+            raise show_capture.ShowCaptureError(
+                "Uoink couldn't open that feed. Check the link.", "fetch_failed") from None
+        if not body:
+            raise show_capture.ShowCaptureError("That feed came back empty.", "fetch_failed")
+        return body
+
+    def in_library(self, job, episode):
+        if episode.get("video_id"):
+            row = _get_index().get_yoink(episode["video_id"])
+            if row is not None and row.get("deleted_at"):
+                return show_capture.REASON_REMOVED
+            return row is not None
+        if job.get("kind") == show_capture.KIND_PODCAST:
+            idx = _get_index()
+            linked = _show_podcast_linked_id(idx, job.get("url") or "", episode)
+            row = idx.get_yoink(linked) if linked else None
+            if row is not None and row.get("deleted_at"):
+                return show_capture.REASON_REMOVED
+            return row is not None
+        return False
+
+    def queue_busy(self):
+        if _extract_lock.locked():
+            return True
+        with _show_podcast_runs_lock:
+            # A cancelled run's download still finishing counts too.
+            if any(run.get("state") == "downloading" for run in _show_podcast_runs.values()):
+                return True
+        soon = (datetime.now() + timedelta(seconds=60)).strftime("%Y-%m-%dT%H:%M:%S")
+        for row in _get_index().list_pending(limit=200):
+            if row.get("status") in ("running", "publishing"):
+                return True
+            if row.get("status") == "pending" and str(row.get("retry_after") or "") <= soon:
+                return True
+        with _jobs_lock:
+            return any(job.get("kind") in ("playlist", "podcast_transcribe")
+                       and job.get("state") not in _JOB_TERMINAL_STATES
+                       for job in _jobs.values())
+
+    def bot_check(self):
+        return _show_youtube_waiting()
+
+    def asr_problem(self, kind):
+        if kind == show_capture.KIND_PODCAST:
+            return _podcast_suggestion_setup_problem()
+        try:
+            if not _platform.media_capability().get("available"):
+                return "Local transcription needs the media tools. Set them up in Settings first."
+            if not _reliability_model_status().get("cached"):
+                return TRANSCRIPT_NO_MODEL_MESSAGE
+        except Exception:
+            log.exception("show capture: ASR check failed")
+            return TRANSCRIPT_NO_MODEL_MESSAGE
+        return None
+
+    def start_episode(self, job, episode):
+        idx = _get_index()
+        if job.get("kind") == show_capture.KIND_PODCAST:
+            problem = _podcast_suggestion_setup_problem()
+            if problem:
+                raise show_capture.RunBlocked(problem)
+            row = _register_show_episode(idx, job.get("url") or "", job.get("title"), episode)
+            episode_id = int(row["id"])
+            with _show_podcast_runs_lock:
+                _show_podcast_runs[episode_id] = {"state": "downloading",
+                                                  "cancel": threading.Event()}
+            _show_spawn(_show_podcast_run, episode_id)
+            return {"episode_id": episode_id}
+        url = _normalize_youtube_url(episode["url"]) or episode["url"]
+        mode = LONG_VIDEO_MODE_TRANSCRIPT_ASR if job.get("asr") else LONG_VIDEO_MODE_TRANSCRIPT
+        pending_id, _inserted = idx.enqueue_pending_once(
+            url, _SHOW_QUEUE_INTERVAL_SEC, _now_iso(), mode)
+        return {"pending_id": pending_id}
+
+    def episode_status(self, job, episode):
+        idx = _get_index()
+        if job.get("kind") == show_capture.KIND_PODCAST:
+            return self._podcast_status(idx, episode)
+        pending_id = episode.get("pending_id")
+        row = idx.get_pending(int(pending_id)) if pending_id is not None else None
+        if row is None:
+            if episode.get("video_id") and _list_import_in_library(episode["video_id"]):
+                return {"state": "done", "video_id": episode["video_id"]}
+            return {"state": "lost"}
+        status = row.get("status")
+        if status == "succeeded":
+            return {"state": "done", "video_id": episode.get("video_id")}
+        if status == "cancelled":
+            return {"state": "failed", "reason": show_capture.REASON_CANCELLED_IN_QUEUE}
+        if status == "failed":
+            if TRANSCRIPT_ALREADY_SAVED_MESSAGE in str(row.get("last_error") or ""):
+                return {"state": "skipped", "reason": show_capture.REASON_ALREADY_SAVED}
+            if TRANSCRIPT_REMOVED_MESSAGE in str(row.get("last_error") or ""):
+                return {"state": "skipped", "reason": show_capture.REASON_REMOVED}
+            return {"state": "failed", "reason": _show_reason_from_pending(row)}
+        error = str(row.get("last_error") or "")
+        retry_after = str(row.get("retry_after") or "")
+        if (status == "pending" and retry_after > _now_iso()
+                and error.startswith(("youtube_bot_check", "youtube_rate_limit"))):
+            try:
+                until = datetime.fromisoformat(retry_after).astimezone(timezone.utc)
+                until_text = until.strftime("%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                until_text = None
+            reason = "bot_check" if error.startswith("youtube_bot_check") else "rate_limited"
+            return {"state": "waiting", "reason": reason, "until": until_text}
+        later = (datetime.now() + timedelta(seconds=60)).strftime("%Y-%m-%dT%H:%M:%S")
+        if status == "pending" and not error and retry_after > later:
+            # The queue defers a live or upcoming stream every few minutes
+            # until it ends. A show save moves on instead of waiting on it.
+            idx.cancel_pending(int(pending_id))
+            return {"state": "failed", "reason": show_capture.REASON_LIVE}
+        return {"state": "running"}
+
+    def _podcast_status(self, idx, episode):
+        episode_id = episode.get("episode_id")
+        if episode_id is None:
+            return {"state": "lost"}
+        episode_id = int(episode_id)
+        row = podcasts.get_episode(idx, episode_id)
+        if row is None:
+            self._forget_podcast_run(episode_id)
+            return {"state": "lost"}
+        if row.get("yoink_video_id"):
+            saved = idx.get_yoink(row["yoink_video_id"])
+            if saved is not None and not saved.get("deleted_at"):
+                self._forget_podcast_run(episode_id)
+                return {"state": "done", "video_id": row["yoink_video_id"]}
+        with _show_podcast_runs_lock:
+            run = dict(_show_podcast_runs.get(episode_id) or {})
+        if run.get("state") == "failed":
+            self._forget_podcast_run(episode_id)
+            return {"state": "failed", "reason": run.get("reason"),
+                    "host_failure": bool(run.get("host_failure"))}
+        if run.get("state") == "retry":
+            self._forget_podcast_run(episode_id)
+            return {"state": "retry", "reason": "host_busy"}
+        if run.get("state") == "cancelled":
+            self._forget_podcast_run(episode_id)
+            return {"state": "failed", "reason": "Cancelled before it was transcribed."}
+        if run.get("state") == "downloading":
+            return {"state": "running"}
+        with _jobs_lock:
+            jobs = [dict(j) for j in _jobs.values()
+                    if j.get("kind") == "podcast_transcribe" and j.get("episode_id") == episode_id]
+        if run.get("job_id"):
+            jobs = [j for j in jobs if j.get("id") == run["job_id"]] or jobs
+        if not jobs:
+            self._forget_podcast_run(episode_id)
+            return {"state": "lost"}
+        job = max(jobs, key=lambda j: str(j.get("updated_at") or ""))
+        if job.get("state") not in _JOB_TERMINAL_STATES:
+            return {"state": "running"}
+        self._forget_podcast_run(episode_id)
+        if job.get("state") == "completed":
+            # Publishing links the episode to its library row before the job
+            # completes, so a completed job without that link means the
+            # transcript is on disk but publishing it failed.
+            return {"state": "failed",
+                    "reason": "Transcribed, but adding it to your library failed."}
+        if job.get("state") == "cancelled":
+            return {"state": "failed", "reason": "The transcription was cancelled."}
+        return {"state": "failed", "reason": str(job.get("error") or "Transcription failed.")[:300]}
+
+    @staticmethod
+    def _forget_podcast_run(episode_id: int) -> None:
+        with _show_podcast_runs_lock:
+            run = _show_podcast_runs.get(episode_id)
+            if run is not None and run.get("state") != "downloading":
+                _show_podcast_runs.pop(episode_id, None)
+
+    def cancel_episode(self, job, episode):
+        """Stop one in-flight episode. False when it can't be stopped and
+        will finish on its own (a row already publishing, a podcast
+        transcription already queued or running: those jobs have no cancel)."""
+        if episode.get("pending_id") is not None:
+            return _get_index().cancel_pending(int(episode["pending_id"]))
+        episode_id = episode.get("episode_id")
+        if episode_id is None:
+            return True
+        episode_id = int(episode_id)
+        with _show_podcast_runs_lock:
+            run = _show_podcast_runs.get(episode_id)
+            if run is not None and run.get("state") == "downloading":
+                # The download under way ends on its own; nothing after it runs.
+                event = run.get("cancel")
+                if isinstance(event, threading.Event):
+                    event.set()
+                return True
+        with _jobs_lock:
+            transcribing = any(
+                j.get("kind") == "podcast_transcribe" and j.get("episode_id") == episode_id
+                and j.get("state") not in _JOB_TERMINAL_STATES for j in _jobs.values())
+        return not transcribing
+
+
+_show_backend = _ServerShowBackend()
+
+
+def _show_capture_tick() -> None:
+    show_capture.tick(DATA_ROOT, _show_backend)
+
+
+def _start_show_capture_thread() -> None:
+    """Started only by helper startup. A pass never starts a run by itself:
+    it lists what the user pasted and feeds runs the user started."""
+    if "pytest" in sys.modules:
+        return
+
+    def _runner():
+        while True:
+            try:
+                _show_capture_tick()
+            except Exception:
+                log.exception("show capture pass crashed")
+            _show_capture_wake.wait(_SHOW_CAPTURE_POLL_SEC)
+            _show_capture_wake.clear()
+
+    threading.Thread(target=_runner, name="show-capture", daemon=True).start()
 
 
 _IMPORTS_FOR_YOU_POOL = 300
@@ -17088,7 +20187,7 @@ class Handler(BaseHTTPRequestHandler):
             # stay in the allow-list through the v2.x alias window so a
             # not-yet-updated extension build keeps working.
             self.send_header("Access-Control-Allow-Headers",
-                             "Content-Type, X-Uoink-Token, X-Uoink-Client, "
+                             "Content-Type, X-Uoink-Token, X-Uoink-Client, X-Uoink-Stream, "
                              "X-Yoink-Token, X-Yoink-Client")
             self.send_header("Access-Control-Max-Age", "600")
             # Private Network Access: Chrome requires this header when a public
@@ -17273,11 +20372,19 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
 
-    def _send_file(self, path: Path, mime: str):
+    def _send_file(self, path: Path, mime: str, *, dashboard_load=False):
         try:
             body = path.read_bytes()
         except OSError:
             return self._send_json(404, {"ok": False, "error": "file not found"})
+        marker = b'<meta name="uoink-dashboard-load" content="">'
+        if dashboard_load and marker in body:
+            origin = "http://" + self.headers.get("Host", "")
+            referrer = self.headers.get("Referer", "")
+            if (self.headers.get("Origin", origin) == origin
+                    and self.headers.get("Sec-Fetch-Site") in (None, "none", "same-origin")
+                    and (not referrer or referrer.startswith(origin + "/"))):
+                body = body.replace(marker, marker.replace(b'""', b'"' + _dashboard_load_id().encode("ascii") + b'"'), 1)
         if sys.platform == "darwin" and path == DASHBOARD_PATH:
             from helper.mac_ui import dashboard_html
             body = dashboard_html(body)
@@ -17303,7 +20410,7 @@ class Handler(BaseHTTPRequestHandler):
             self.status = status
             self.message = message
 
-    def _read_json_body(self, *, strict: bool = False) -> dict:
+    def _read_json_body(self, *, strict: bool = False, limit: int = MAX_BODY_BYTES) -> dict:
         # P1-3: bound everything we trust from the network. Without these
         # checks Content-Length was unbounded (memory exhaustion via large
         # POST), Content-Type was unchecked (HTML form posts could trigger
@@ -17324,8 +20431,8 @@ class Handler(BaseHTTPRequestHandler):
             raise Handler._BodyError(400, "Bad Content-Length")
         if length < 0:
             raise Handler._BodyError(400, "Bad Content-Length")
-        if length > MAX_BODY_BYTES:
-            raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
+        if length > limit:
+            raise Handler._BodyError(413, f"Body too large (>{limit} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
         self._body_consumed = True
         try:
@@ -17366,6 +20473,7 @@ class Handler(BaseHTTPRequestHandler):
         bare = self.path.split("?", 1)[0]
         if bare == "/ping" or bare == "/health":
             import uoink_supervisor
+            import asr_worker as _asr
             # Public liveness probe -- intentionally unauthenticated.
             log.debug("GET %s from %s -> ok", bare, self.client_address[0])
             settings = _read_settings() or {}
@@ -17393,6 +20501,9 @@ class Handler(BaseHTTPRequestHandler):
                 "whisper_model": whisper_model,
                 "whisperx_model_loaded": whisper_runner.is_model_downloaded(
                     DATA_ROOT, whisper_model),
+                # 3.18: whether a transcription process holds model memory now
+                # (state not_loaded / loaded / running) and when it frees it.
+                "transcription_worker": {**_asr.status(), "line": _asr.status_line()},
                 # True while a corrupt index.db is being rebuilt from disk.
                 "index_recovering": _index_recovering,
                 # True when the active output root has been swapped from
@@ -17502,10 +20613,24 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/extension/browser":
+            from uoink_browser import _preferred_browser
+            browser = _preferred_browser()
+            return self._send_json(200, {"ok": True, "name": browser["name"], "url": browser["url"]})
+        if bare == "/asr/models":   # 3.18 model chooser
+            return self._send_json(200, asr_models_payload())
         if bare == "/research" or bare.startswith("/research/"):
             return self._handle_research_get(bare)
         if bare == "/relay/status":
             return self._send_json(200, _relay_status_payload())
+        if bare == "/library/x-text-repair":
+            # ?video_id= adds where the reader's one-save fix stands.
+            job = _get_x_text_repair_job()
+            reply = job.status()
+            video_id = (parse_qs(urlparse(self.path).query).get("video_id") or [""])[0].strip()
+            if video_id:
+                reply["item"] = job.item_status(video_id[:200])
+            return self._send_json(200, reply)
         if bare == "/search/status":
             return self._handle_search_control("status")
         if bare.startswith("/search/notices/"):
@@ -17527,6 +20652,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/podcasts/audio-storage":
+            return self._handle_podcast_storage()
         if bare == "/suggestions/podcasts":
             return self._handle_podcast_suggestions_list()
         if bare == "/sources":
@@ -17537,6 +20664,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {"ok": True, **source_subscriptions.tool_manifest()})
         if bare == "/transcribe/status":
             return self._handle_transcribe_status_get()
+        if bare == "/library/transcript-backfill":
+            return self._handle_transcript_backfill("status")
         if bare == "/playlists/monitored":
             return self._handle_monitored_playlists_list()
         if bare == "/playlists/monitored/events":
@@ -17576,6 +20705,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_resume()
         if bare.startswith("/api/suite/v1/capture/"):
             return self._handle_suite_capture_job(bare)
+        if bare == timed_cues.ITEM_PREFIX or bare.startswith(timed_cues.ITEM_PREFIX + "/"):
+            return self._handle_timed_cues(bare)
+        if bare == "/shows" or bare.startswith("/shows/"):
+            return self._handle_shows_get(bare)
         if bare == "/api/corpus/v1/search":
             return self._handle_corpus_v1_search()
         if bare == "/api/corpus/v1/facets":
@@ -17592,6 +20725,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_corpus_v1_get(bare)
         if bare == "/library/facets":
             return self._handle_library_facets()
+        if bare == "/library/shelves/tidy":
+            return self._handle_shelves_tidy()
+        if bare == "/library/shelves/undo":
+            return self._handle_shelves_last_undo()
         if bare == "/library/availability":
             return self._handle_library_availability()
         if bare == "/corpus/channels":
@@ -17723,16 +20860,25 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(413, {"ok": False, "error": "Body too large"})
             if length:
                 return self._send_json(400, {"ok": False, "error": "Token request must be bodyless"})
-        if not _check_token_rate_limit():
+        # The origin gate above only admits an originless GET from the
+        # loopback dashboard with same-origin fetch metadata.
+        dashboard_page = "http://" + self.headers.get("Host", "") + "/dashboard"
+        referrer = self.headers.get("Referer", "").partition("?")[0]
+        dashboard = (self.command == "GET" and self.headers.get("Origin") is None
+                     and referrer in (dashboard_page, dashboard_page + "/"))
+        load_id = self.headers.get("X-Uoink-Dashboard-Load") if dashboard else None
+        retry_after = _check_token_rate_limit(load_id=load_id)
+        if retry_after:
             log.info("%s /token rate-limited", self.command)
-            return self._send_json(429, {"ok": False, "error": "too many requests"})
+            return self._send_json(429, {"ok": False, "error": "too many requests",
+                                         "retry_after_seconds": retry_after})
         self._send_json(200, {"ok": True, "token": TOKEN})
 
     # ---- /dashboard ----
     def _handle_dashboard(self):
         return self._send_file(
             DASHBOARD_PATH,
-            "text/html; charset=utf-8",
+            "text/html; charset=utf-8", dashboard_load=True,
         )
 
     def _handle_brand_font(self, bare: str):
@@ -17820,6 +20966,36 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False, "error": "Accept the current Gemma terms with accepted: true first."})
         except Exception:
             return self._send_json(503, {"ok": False, "error": "Semantic search is unavailable. Keyword search still works. Try again in Settings."})
+
+    def _handle_transcript_backfill(self, action, body=None):
+        """GET status; POST start (order longest|newest), pause, resume, finish (key)."""
+        body = body if isinstance(body, dict) else {}
+        try:
+            job = _transcript_backfill()
+            if action == "status":
+                return self._send_json(200, _transcript_backfill_status())
+            if action == "start":
+                order = body.get("order")
+                if order is not None and order not in ("longest", "newest"):
+                    return self._send_json(400, {"ok": False, "error": "order must be longest or newest"})
+                result = job.start(order)
+            elif action == "pause":
+                result = job.pause()
+            elif action == "resume":
+                result = job.resume()
+            elif action == "finish":
+                key = body.get("key")
+                if not isinstance(key, str) or not key.strip():
+                    return self._send_json(400, {"ok": False, "error": "key is required"})
+                result = job.finish(key.strip())
+            else:
+                return self._send_json(404, {"ok": False, "error": "unknown transcript backfill action"})
+        except Exception:
+            log.exception("transcript backfill %s failed", action)
+            return self._send_json(503, {"ok": False, "error": "The transcript backfill is unavailable right now. Try again in a moment."})
+        ready, why = _transcript_backfill_model_ready()
+        payload = {**result, "model_ready": ready, **({"model_message": why} if why else {})}
+        return self._send_json(200 if payload.get("ok") else 409, payload)
 
     def _handle_settings_get(self):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
@@ -18127,6 +21303,99 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_corpus_v1_error(operation, error)
         return self._send_json(200, payload)
 
+    # -- Timed cues read contract v1 (timed_cues.py) --------------------------
+    # Separate from corpus read v1: its own prefix, contract name and
+    # envelopes. Local reads only (index row + sidecar), never paths.
+    def _handle_timed_cues(self, bare: str):
+        from urllib.parse import unquote
+        query = parse_qs(urlparse(self.path).query, keep_blank_values=True)
+        tail = bare[len(timed_cues.ITEM_PREFIX):].strip("/")
+        operation = "get" if tail else "search"
+        try:
+            idx = _get_index()
+            data = (timed_cues.get_item(idx, unquote(tail), query) if tail
+                    else timed_cues.search(idx, query))
+        except timed_cues.CuesError as error:
+            return self._send_json(error.status, timed_cues.error_envelope(operation, error))
+        except Exception:
+            log.exception("timed cues %s failed", operation)
+            error = timed_cues.CuesError("unavailable", f"cues {operation} is unavailable", 503)
+            return self._send_json(503, timed_cues.error_envelope(operation, error))
+        return self._send_json(200, timed_cues.envelope(operation, data))
+
+    def _send_show_error(self, error: "show_capture.ShowCaptureError"):
+        return self._send_json(_SHOW_ERROR_STATUS.get(error.code, 400),
+                               {"ok": False, "code": error.code, "error": str(error)})
+
+    def _handle_shows_get(self, bare: str):
+        """GET /shows lists every whole-show run, newest first, with up to
+        50 failures each. GET /shows/<id> is one run; ?episodes=1 adds its
+        episodes, the first N with &episodes_limit=N."""
+        try:
+            if bare.rstrip("/") == "/shows":
+                runs = [show_capture.view(job, failures_limit=50)
+                        for job in reversed(show_capture.list_jobs(DATA_ROOT))]
+                return self._send_json(200, {"ok": True, "runs": runs})
+            query = parse_qs(urlparse(self.path).query)
+            every = (query.get("episodes") or [""])[0] in ("1", "true")
+            raw_limit = (query.get("episodes_limit") or [""])[0]
+            if raw_limit and not (raw_limit.isdigit() and 1 <= int(raw_limit) <= show_capture.MAX_EPISODES):
+                raise show_capture.ShowCaptureError(
+                    f"episodes_limit is 1 to {show_capture.MAX_EPISODES}.", "invalid")
+            job = show_capture.load(DATA_ROOT, bare[len("/shows/"):].strip("/"))
+            return self._send_json(200, {"ok": True, "run": show_capture.view(
+                job, episodes=every, episodes_limit=int(raw_limit) if raw_limit else None)})
+        except show_capture.ShowCaptureError as error:
+            return self._send_show_error(error)
+        except Exception:
+            log.exception("GET /shows failed")
+            return self._send_json(500, {"ok": False, "code": "internal",
+                                          "error": "Uoink couldn't read your show saves."})
+
+    def _handle_shows_post(self, bare: str, body):
+        """POST /shows/preview {text} lists a source in the background and
+        saves nothing. POST /shows/<id>/start {asr}, /pause, /resume,
+        /cancel, /retry-failed {asr?} and /dismiss act on one run."""
+        body = body if isinstance(body, dict) else {}
+        try:
+            if bare == "/shows/preview":
+                text = body.get("text")
+                if not isinstance(text, str):
+                    raise show_capture.ShowCaptureError("text must be a string.", "invalid")
+                job = show_capture.create(DATA_ROOT, text)
+                show_capture.ensure_listing(DATA_ROOT, job["id"], _show_backend)
+                return self._send_json(202, {"ok": True, "run": show_capture.view(job)})
+            parts = bare[len("/shows/"):].strip("/").split("/")
+            if len(parts) != 2:
+                raise show_capture.ShowCaptureError("That run doesn't exist.", "not_found")
+            job_id, action = parts
+            asr = body.get("asr")
+            if asr is not None and not isinstance(asr, bool):
+                raise show_capture.ShowCaptureError("asr must be true or false.", "invalid")
+            if action == "start":
+                job = show_capture.start(DATA_ROOT, job_id, _show_backend, asr=bool(asr))
+            elif action == "pause":
+                job = show_capture.pause(DATA_ROOT, job_id)
+            elif action == "resume":
+                job = show_capture.resume(DATA_ROOT, job_id)
+            elif action == "cancel":
+                job = show_capture.cancel(DATA_ROOT, job_id, _show_backend)
+            elif action == "retry-failed":
+                job = show_capture.retry_failed(DATA_ROOT, job_id, _show_backend, asr=asr)
+            elif action == "dismiss":
+                show_capture.dismiss(DATA_ROOT, job_id)
+                return self._send_json(200, {"ok": True})
+            else:
+                raise show_capture.ShowCaptureError("That action doesn't exist.", "not_found")
+        except show_capture.ShowCaptureError as error:
+            return self._send_show_error(error)
+        except Exception:
+            log.exception("POST %s failed", bare)
+            return self._send_json(500, {"ok": False, "code": "internal",
+                                          "error": "Uoink couldn't change that show save."})
+        _show_capture_wake.set()
+        return self._send_json(200, {"ok": True, "run": show_capture.view(job)})
+
     def _handle_corpus_v1_search(self):
         query = parse_qs(urlparse(self.path).query)
         try:
@@ -18262,6 +21531,88 @@ class Handler(BaseHTTPRequestHandler):
             "date_bounds": facets.get("date_bounds", {"min": None, "max": None}),
         })
 
+    def _handle_shelves_tidy(self):
+        """GET /library/shelves/tidy[?limit=N] -- Tidy Uncategorized: a
+        proposed shelf and a short reason for each save on Uncategorized,
+        grouped by shelf. Reads only; nothing moves until apply."""
+        if not self._require_token():
+            return
+        query = parse_qs(urlparse(self.path).query)
+        try:
+            limit = max(1, min(5000, int((query.get("limit") or ["2000"])[0])))
+        except ValueError:
+            return self._send_json(400, {"ok": False, "error": "limit must be a number"})
+        try:
+            return self._send_json(200, _shelf_proposals(limit=limit))
+        except Exception:
+            log.exception("/library/shelves/tidy failed")
+            return self._send_json(503, {"ok": False, "error": "Couldn't read the library just now."})
+
+    def _handle_shelves_last_undo(self):
+        """GET /library/shelves/undo -- the newest move that can still be
+        undone (or null), and the fallback shelf's name."""
+        if not self._require_token():
+            return
+        try:
+            return self._send_json(200, {"ok": True, "undo": _shelf_last_undo(),
+                                         "fallback": _shelf_fallback()})
+        except Exception:
+            log.exception("/library/shelves/undo failed")
+            return self._send_json(503, {"ok": False, "error": "Couldn't read the move log just now."})
+
+    def _handle_shelves_post(self, bare: str, body):
+        """POST /library/shelves/apply {moves: [{video_id, shelf}]},
+        /library/shelves/move {video_ids: [...], shelf} and
+        /library/shelves/undo {batch_id?}. Every apply or move is one undo
+        batch. A POST body is at most 64 KB (about 1,500 moves), so a bigger
+        move comes in parts: later parts pass append_to=<batch_id> and join
+        the same undo. Token gate cleared by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        tidy, expect = False, None
+        if bare == "/library/shelves/undo":
+            batch_id = body.get("batch_id")
+            if batch_id is not None and not isinstance(batch_id, str):
+                return self._send_json(400, {"ok": False, "error": "batch_id must be text"})
+            result = _shelf_undo(batch_id or None)
+            return self._send_json(200 if result.get("ok") else 404 if result.get("code") == "not_found"
+                                   else 409, result)
+        if bare == "/library/shelves/move":
+            ids, shelf = body.get("video_ids"), body.get("shelf")
+            if not isinstance(ids, list) or not ids or not all(isinstance(v, str) and v for v in ids):
+                return self._send_json(400, {"ok": False, "error": "video_ids must be a list of ids"})
+            moves = [(video_id, shelf) for video_id in dict.fromkeys(ids)]
+            label = "Move"
+        else:
+            raw = body.get("moves")
+            if not isinstance(raw, list) or not raw or not all(
+                    isinstance(m, dict) and isinstance(m.get("video_id"), str)
+                    and (m.get("from") is None or isinstance(m.get("from"), str)) for m in raw):
+                return self._send_json(400, {"ok": False, "error": "moves must be a list of {video_id, shelf}"})
+            moves = [(m["video_id"], m.get("shelf")) for m in raw]
+            label = "Tidy"
+            if body.get("source") == "tidy":
+                tidy = True
+                expect = {m["video_id"]: m.get("from") for m in raw if "from" in m}
+        import shelf_router
+        if len(moves) > shelf_router.MAX_MOVES:
+            return self._send_json(400, {"ok": False,
+                                         "error": f"Move at most {shelf_router.MAX_MOVES} saves at a time."})
+        if any(not shelf_router.clean_shelf_name(shelf) for _, shelf in moves):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "shelf must be a name of 1 to 64 characters that also works as a folder name"})
+        append_to = body.get("append_to")
+        if append_to is not None and not (isinstance(append_to, str) and append_to):
+            return self._send_json(400, {"ok": False, "error": "append_to must be a batch id"})
+        try:
+            result = _reshelve(moves, label=str(body.get("label") or label), append_to=append_to,
+                               expect=expect, skip_by_hand=tidy)
+        except Exception:
+            log.exception("%s failed", bare)
+            return self._send_json(500, {"ok": False, "error": "Couldn't move those saves."})
+        return self._send_json(200 if result.get("ok") else 409, result)
+
     def _handle_facets_classify(self, body: dict):
         """Persist an agent-classified facet set + tags for a video. Model-
         agnostic: the calling agent does the LLM work; this just validates +
@@ -18297,12 +21648,29 @@ class Handler(BaseHTTPRequestHandler):
                         meta.get("duration_seconds") or meta.get("duration"))
                     if lb:
                         clean["length_bucket"] = lb
+        topic_kept = None
+        if clean.get("topic"):
+            import shelf_router
+            shelf = _canonical_shelf(shelf_router.folder_shelf_name(clean["topic"]))
+            if not shelf:
+                return self._send_json(400, {"ok": False, "error": "topic must be a shelf name"})
+            clean["topic"] = shelf
+            if idx.shelf_hand_seq(video_id):
+                # The user's own shelf wins over an agent's guess.
+                topic_kept = (idx.get_yoink(video_id) or {}).get("topic")
+                clean.pop("topic")
+            else:
+                # A topic is a shelf: keep the search row, sidecar and note in step.
+                try:
+                    _reshelve([(video_id, shelf)], record=False, by_hand=False)
+                except Exception as exc:
+                    log.warning("/facets/classify: shelf files not updated: %s", exc)
         facets_set = idx.set_facets(video_id, **clean)
         tags_added = idx.add_tags(video_id, tags or [], source="agent") if tags else 0
         self._send_json(200, {
             "ok": True, "video_id": video_id,
             "facets_set": facets_set, "tags_added": tags_added,
-            "facets": clean,
+            "facets": clean, **({"topic_kept": topic_kept} if topic_kept else {}),
         })
 
     def _handle_facets_backfill(self):
@@ -19156,6 +22524,25 @@ class Handler(BaseHTTPRequestHandler):
         status = 200 if result.get("ok") else 400
         return self._send_json(status, result)
 
+    def _handle_podcast_storage(self):
+        global _podcast_storage_scan
+        refresh = parse_qs(urlparse(self.path).query).get("refresh") == ["1"]
+        with _podcast_storage_lock:
+            if refresh and _podcast_storage_scan is not None:
+                _podcast_storage_scan.cancel()
+            if refresh or _podcast_storage_scan is None:
+                _podcast_storage_scan = _podcast_storage_pool.submit(_scan_podcast_storage, _get_index(), DATA_ROOT)
+            scan = _podcast_storage_scan
+        if not scan.done():
+            return self._send_json(202, {"ok": True, "pending": True})
+        try:
+            result = scan.result()
+        except CancelledError:
+            return self._send_json(202, {"ok": True, "pending": True})
+        except (OSError, RuntimeError, ValueError, sqlite3.Error):
+            return self._send_json(503, {"ok": False, "error": "Couldn’t check podcast storage."})
+        return self._send_json(200, {"ok": True, **result})
+
     def _handle_podcasts_episodes_list(self):
         if not self._require_token():
             return
@@ -19357,9 +22744,23 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(409, {"ok": False, "error": "Suggest podcasts is off."})
         try:
             feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
-            row = podcasts.add_feed(_get_index(), feed_url)
-            if not row.get("enabled", 1):
-                podcasts.set_feed_enabled(_get_index(), int(row["id"]), True)
+            item = suggestions.get_item(DATA_ROOT, sid) or {}
+            title = (str(item.get("show") or "").strip() or urlparse(feed_url).hostname or "")[:200]
+            register = _source_service().register_source(_source_operator_context(), {
+                "kind": "podcast_rss", "url": feed_url, "display_name": title})
+            if not register.get("ok"):
+                raise ValueError("This feed could not be scheduled for checks.")
+            source = register["source"]
+            feed_id = source["legacy"]["feed_id"]
+            with _get_index().write_transaction() as conn:
+                if not feed_id or not conn.execute(
+                        "UPDATE source_subscriptions SET detection_enabled=1, follow_feed=1, "
+                        "display_name=coalesce(nullif(trim(display_name),''), ?) "
+                        "WHERE source_id=? AND archived=0 AND legacy_feed_id=?",
+                        (title, source["source_id"], feed_id)).rowcount:
+                    raise ValueError("This feed could not be scheduled for checks.")
+                conn.execute("UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''), ?) "
+                             "WHERE id=?", (title, feed_id))
         except suggestions.SuggestionError as exc:
             status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
             return self._send_json(status, {"ok": False, "error": str(exc)})
@@ -19368,7 +22769,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             log.exception("/suggestions/podcasts/follow failed")
             return self._send_json(500, {"ok": False, "error": "Couldn't follow this show."})
-        return self._send_json(200, {"ok": True, "id": sid, "feed_id": row.get("id"),
+        return self._send_json(200, {"ok": True, "id": sid, "feed_id": feed_id,
                                      "message": "Following. New episodes show up under Podcasts."})
 
     def _handle_podcasts_episode_to_corpus(self, body):
@@ -19383,7 +22784,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": "episode_id (integer) required"})
         try:
             result = podcasts.episode_to_corpus(
-                _get_index(), episode_id, data_root=DATA_ROOT)
+                _get_index(), episode_id, data_root=DATA_ROOT, topic_classifier=_route_topic)
         except LookupError as exc:
             return self._send_json(404, {"ok": False, "error": str(exc)})
         except FileNotFoundError as exc:
@@ -19518,12 +22919,15 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     if not isinstance(body["items"], list):
                         raise list_imports.ImportListError("items must be an array.", "invalid_items")
+                    folder = body.get("folder")
+                    if folder is not None and not (isinstance(folder, str) and folder.strip()):
+                        raise list_imports.ImportListError("folder must be a name.", "invalid_items")
                     if "append_to" in body:
                         staged = list_imports.append_stage_items(
-                            DATA_ROOT, body["append_to"], body.get("source"), body["items"])
+                            DATA_ROOT, body["append_to"], body.get("source"), body["items"], folder=folder)
                     else:
                         staged = list_imports.stage_saves(
-                            DATA_ROOT, body.get("source"), body["items"], filename=filename)
+                            DATA_ROOT, body.get("source"), body["items"], filename=filename, folder=folder)
                 result = {"ok": True, **staged, "label": list_imports.SOURCE_LABELS[staged["source"]]}
             elif start:
                 result = _list_import_start(url, body.get("offset"), body.get("limit"))
@@ -20228,6 +23632,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False,
                 "error": "follow_links_depth must be an integer"})
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url or None)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
 
         try:
             result = page_extractor.extract_page(
@@ -20262,13 +23669,40 @@ class Handler(BaseHTTPRequestHandler):
         # of a split with %LOCALAPPDATA%.
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT,
-                topic_classifier=_classify_topic)
+                _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
+                topic_classifier=_route_topic)
             result["video_id"] = video_id
         except Exception as e:
             log.warning("/extract/page persist failed: %s", e)
-            result["video_id"] = None
+            video_id = None
+        if not video_id:
+            # An unsaved page is never reported as saved.
+            return self._send_json(500, page_extractor.persist_failed_result(url))
+        result["video_id"] = video_id
+        return self._send_json(200, result)
 
+    @uoink_usage.capture("page", response=True)
+    def _handle_extract_page_dom(self, body):
+        """POST /extract/page/dom {url, title, markdown, author?, published?,
+        site?, ...}: the page the user sees, already read in their tab by the
+        extension (Defuddle). Same site allowlist and Library save as
+        /extract/page. The tab supplies the text. The helper can fetch a
+        same-site lead image for the Library thumbnail."""
+        url = page_extractor.normalize_page_url(str((body or {}).get("url") or ""))
+        if url and not page_extractor.host_is_allowed(_get_index(), url):
+            return self._send_json(403, page_extractor.host_not_allowed_result(url))
+        result = page_dom_capture.build_extract_result(body)
+        if not result.get("ok"):
+            return self._send_json(400, result)
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DESKTOP_ROOT, topic_classifier=_route_topic)
+        except Exception as e:
+            log.warning("/extract/page/dom persist failed: %s", e)
+            video_id = None
+        if not video_id:
+            return self._send_json(500, page_extractor.persist_failed_result(result["url"]))
+        result["video_id"] = video_id
         return self._send_json(200, result)
 
     def _handle_settings_mcp_config(self):
@@ -20443,6 +23877,8 @@ class Handler(BaseHTTPRequestHandler):
             "usage_sharing_prompt_seen",
             "auto_update_check",            # daily GitHub release check (default OFF)
             "suggest_podcasts",             # 3.17 podcast suggestions (default OFF)
+            "fxtwitter_enrichment_enabled",  # 3.18 FxTwitter for X text (default OFF)
+            "keep_podcast_audio",
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -20970,6 +24406,19 @@ class Handler(BaseHTTPRequestHandler):
                 "error": "date_from is after date_to",
                 "state": "invalid_range",
             })
+        # Original publish (air) date bounds, separate from the capture date.
+        published_from = _one("published_from")
+        published_to = _one("published_to")
+        for label, value in (("published_from", published_from), ("published_to", published_to)):
+            if value and not _valid_iso_date(value):
+                return self._send_json(
+                    400, {"ok": False, "error": f"{label} must be YYYY-MM-DD"})
+        if published_from and published_to and published_from > published_to:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "published_from is after published_to",
+                "state": "invalid_range",
+            })
         try:
             limit = max(1, min(200, int(_one("limit") or "50")))
             offset = max(0, int(_one("offset") or "0"))
@@ -21011,6 +24460,7 @@ class Handler(BaseHTTPRequestHandler):
                         "source_type": _one("source_type"), "author": _one("author"),
                         "date_from": date_from, "date_to": date_to,
                         "availability": availability,
+                        "published_from": published_from, "published_to": published_to,
                     },
                     limit=limit, offset=offset,
                 )
@@ -21021,7 +24471,8 @@ class Handler(BaseHTTPRequestHandler):
                              "hook_type": hook_type, "platform": _one("platform"),
                              "source_type": _one("source_type"), "author": _one("author"),
                              "date_from": date_from, "date_to": date_to,
-                             "availability": availability},
+                             "availability": availability,
+                             "published_from": published_from, "published_to": published_to},
                 )
             corpus_total = idx.count_corpus()
         except Exception as e:
@@ -21205,14 +24656,30 @@ class Handler(BaseHTTPRequestHandler):
         url = (body.get("url") or "").strip()
         if not url:
             return self._send_json(400, {"ok": False, "error": "url required"})
-        result = x_extractor.extract_x_thread(url)
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
+        # 3.18.0: the extension may send the post text it read from the open
+        # X tab (dom_post). It is only used when it extends X's own copy.
+        options = dict(_x_fxtwitter_kwargs(settings))
+        dom_post = _clean_dom_post(body.get("dom_post"))
+        if dom_post:
+            options["dom_post"] = dom_post
+            _remember_dom_post(dom_post)
+        result = x_extractor.extract_x_thread(url, **options)
         if not result.get("ok"):
             log.info("POST /extract/x -> %s", result.get("code"))
             return self._send_json(200, {
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
+        if result.get("source_type") == x_article_extractor.SOURCE_TYPE:
+            # A post that only links to an X Article, read with the user's
+            # FxTwitter opt-in: it lands like an extension Article capture.
+            if shelf:
+                _remember_capture_shelf(result["url"], shelf, by_hand=body.get("shelf") is not None)
+            return self._handle_extract_x_article_result(result, shelf)
         try:
-            video_id = _persist_x_thread(result)
+            video_id = _persist_x_thread(result, topic=shelf)
         except Exception:
             log.exception("/extract/x persist failed")
             return self._send_json(500, {
@@ -21224,13 +24691,17 @@ class Handler(BaseHTTPRequestHandler):
         _save_x_video_poster(video_id, result)
         log.info("POST /extract/x -> ok (%s, %d posts)",
                  video_id, result.get("tweets_captured", 0))
-        return self._send_json(200, {
+        reply = {
             "ok": True,
             "video_id": video_id,
             "title": result["title"],
             "tweets_captured": result.get("tweets_captured", 0),
             "metadata": result.get("metadata", {}),
-        })
+        }
+        if result.get("text_cut_off"):
+            # Saved what X gave. The caller shows the two ways to get the rest.
+            reply["text_cut_off"] = result["text_cut_off"]
+        return self._send_json(200, reply)
 
     @uoink_usage.capture("x", response=True)
     def _handle_extract_x_article(self, body: dict):
@@ -21244,18 +24715,24 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                          "error": "json object required"})
+        article_url = body.get("url") if isinstance(body.get("url"), str) else ""
+        shelf, shelf_error = _shelf_from_body(
+            body, remember_url=x_article_extractor.canonical_article_url(article_url))
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
         result = x_article_extractor.build_extract_result(body)
         if not result.get("ok"):
             log.info("POST /extract/x-article -> %s", result.get("code"))
             return self._send_json(200, {
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
+        return self._handle_extract_x_article_result(result, shelf)
+
+    def _handle_extract_x_article_result(self, result: dict, shelf: str | None):
+        """Persist an ok x_article extract_result (extension DOM, or the
+        FxTwitter opt-in) and answer the capture request."""
         try:
-            video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT,
-                source_type=x_article_extractor.SOURCE_TYPE,
-                subfolder="X", slug_prefix="x-article",
-                topic_classifier=_classify_topic)
+            video_id = _persist_x_article(result, topic=shelf)
         except Exception:
             log.exception("/extract/x-article persist failed")
             return self._send_json(500, {
@@ -21297,7 +24774,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             video_id = notes.persist_note(
                 _get_index(), note, data_root=DESKTOP_ROOT,
-                topic_classifier=_classify_topic)
+                topic_classifier=_route_topic)
         except Exception:
             log.exception("/notes persist failed")
             return self._send_json(500, {
@@ -21376,7 +24853,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             video_id = images.persist_image(
                 _get_index(), built, image_bytes, data_root=DESKTOP_ROOT,
-                topic_classifier=_classify_topic)
+                topic_classifier=_route_topic)
         except Exception:
             log.exception("/images persist failed")
             return self._send_json(500, {
@@ -21419,6 +24896,9 @@ class Handler(BaseHTTPRequestHandler):
                          reddit_extractor.DEFAULT_DEPTH_LIMIT, 0, 10)
         score = _bounded(body.get("score_threshold"),
                          reddit_extractor.DEFAULT_SCORE_THRESHOLD, -100, 100000)
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
         result = reddit_extractor.extract_reddit_thread(
             url, depth_limit=depth, score_threshold=score)
         if not result.get("ok"):
@@ -21427,7 +24907,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": result.get("error"),
                 "code": result.get("code")})
         try:
-            video_id = _persist_reddit_thread(result)
+            video_id = _persist_reddit_thread(result, topic=shelf)
         except Exception:
             log.exception("/extract/reddit persist failed")
             return self._send_json(500, {
@@ -21451,7 +24931,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             tools = _mcp_tools_module()
             spec = openapi_bridge.build_spec(
-                base, tool_registry=tools.TOOL_REGISTRY, version=VERSION)
+                base, tool_registry=tools.TOOL_REGISTRY, version=VERSION,
+                extra_paths=timed_cues.openapi_paths())
         except Exception:
             log.exception("/openapi/v1/spec.json build failed")
             return self._send_json(
@@ -22274,7 +25755,7 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
-            text = path.read_text(encoding="utf-8")
+            text = _read_export_markdown(path)
         except OSError as e:
             log.warning("/yoinks/%s/markdown read failed: %s", video_id, e)
             return self._send_json(500, {"ok": False,
@@ -22297,6 +25778,17 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
+            # An external viewer reads the original path. Repair only the file
+            # explicitly opened, under the same lock as the comments writer.
+            try:
+                with _corpus_update_lock:
+                    with path.open(encoding="utf-8", newline="") as source:
+                        original = source.read()
+                    normalized = normalize_export_comments(path, original)
+                    if original != normalized:
+                        _atomic_write_text(path, normalized, newline="")
+            except (UnicodeError, OSError) as exc:
+                log.debug("Could not update Lite comment status on open: %s", exc)
             _platform.open_in_os(path)
         except Exception as e:  # noqa: BLE001
             return self._send_json(200, {"ok": False, "error": str(e)})
@@ -22424,7 +25916,7 @@ class Handler(BaseHTTPRequestHandler):
             "is_podcast", "is_live", "live_status",
             # UI re-haul Reader: meta line and the transcript-source note.
             "yoinked_at", "upload_date", "transcript_source", "comments_status",
-            "captions_skipped_reason",
+            "captions_skipped_reason", "transcript_backup",
             # Reader > AI analysis: the hook read and the worker states.
             "hook_type", "hook_type_confidence", "hook_type_status",
             "hook_explanation", "comment_intelligence_status",
@@ -22594,6 +26086,11 @@ class Handler(BaseHTTPRequestHandler):
                 clean_diar["segments"] = clean_diar_segs
             filtered["diarization"] = clean_diar
 
+        # 3.18.0: an X save that holds only part of the post's text.
+        cut_off = _x_cut_off_detail(data)
+        if cut_off:
+            filtered["x_text_cut_off"] = cut_off
+
         return self._send_json(200, {
             "ok": True,
             "video_id": video_id,
@@ -22639,7 +26136,9 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/images":
             return self._handle_create_image()
         try:
-            body = self._read_json_body(strict=_strict_json_route(bare))
+            # A page read in the user's tab can be far larger than 64KB of JSON.
+            body = self._read_json_body(strict=_strict_json_route(bare), limit=(
+                page_dom_capture.MAX_BODY_BYTES if bare == "/extract/page/dom" else MAX_BODY_BYTES))
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
@@ -22714,6 +26213,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_any(body)
         if bare.startswith("/yoinks/") and bare.endswith("/reyoink"):
             return self._handle_reyoink(bare)
+        if bare.startswith("/library/transcript-backfill/"):
+            action = bare[len("/library/transcript-backfill/"):]
+            return self._handle_transcript_backfill(action if "/" not in action else "", body)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
         if bare == "/notes":
@@ -22721,6 +26223,8 @@ class Handler(BaseHTTPRequestHandler):
         if bare in ("/import-list/preview", "/import-list", "/import-list/stage"):
             return self._handle_import_list(body, start=bare == "/import-list",
                                             stage=bare == "/import-list/stage")
+        if bare.startswith("/shows/"):
+            return self._handle_shows_post(bare, body)
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:
@@ -22739,6 +26243,23 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_x(body)
         if bare == "/extract/x-article":
             return self._handle_extract_x_article(body)
+        if bare == "/library/x-text-repair":
+            # 3.18.0 fix cut-off X posts: {action: start|pause|stop|fix}. Only a
+            # person starts it; progress survives a helper restart.
+            action = (body or {}).get("action") if isinstance(body, dict) else None
+            job = _get_x_text_repair_job()
+            if action == "start":
+                return self._send_json(200, job.start())
+            if action == "pause":
+                return self._send_json(200, job.pause())
+            if action == "stop":
+                return self._send_json(200, job.stop())
+            if action == "fix":
+                video_id = str((body or {}).get("video_id") or "").strip()
+                if not video_id:
+                    return self._send_json(400, {"ok": False, "error": "video_id required"})
+                return self._send_json(200, job.fix_one(video_id))
+            return self._send_json(400, {"ok": False, "error": "action must be start, pause, stop or fix"})
         if bare.startswith("/tools/"):
             return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":
@@ -22750,10 +26271,32 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_memory_delete(body)
         if bare == "/library/opened":
             return self._handle_library_opened(body)
+        if bare in ("/library/shelves/apply", "/library/shelves/move", "/library/shelves/undo"):
+            return self._handle_shelves_post(bare, body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
         if bare == "/reliability/model/download":
             return self._handle_reliability_model_download(body)
+        if bare in ("/asr/models/download", "/asr/models/cancel", "/asr/models/delete",
+                    "/asr/models/use"):
+            action = {"/asr/models/download": start_asr_model_download,
+                      "/asr/models/cancel": cancel_asr_model_download,
+                      "/asr/models/delete": delete_asr_model,
+                      "/asr/models/use": use_asr_model}[bare]
+            payload, status = action((body or {}).get("model") if isinstance(body, dict) else None)
+            return self._send_json(status, payload)
+        if bare == "/transcription/restore":
+            if (not isinstance(body, dict) or not isinstance(body.get("backup"), str)
+                    or not isinstance(body.get("video_id"), str)):
+                return self._send_json(400, {"error": "Choose a saved transcript backup."})
+            try:
+                restored = retranscribe_item(body["video_id"], "", restore=body["backup"])
+            except (ValueError, OSError) as exc:
+                return self._send_json(409, {"error": str(exc)})
+            return self._send_json(200, restored)
+        if bare == "/transcription/retranscribe":
+            payload, status = queue_retranscribe(body if isinstance(body, dict) else {})
+            return self._send_json(status, payload)
         m = re.fullmatch(r"/reliability/([^/]+)/compute", bare)
         if m:
             return self._handle_reliability_compute(m.group(1), body)
@@ -22827,6 +26370,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_set_status(body)
         if bare == "/podcasts/episodes/download":
             return self._handle_podcasts_episode_download(body)
+        if bare == "/podcasts/audio-storage/delete":
+            episode_id = body.get("episode_id")
+            if body.get("confirmed") is not True or type(episode_id) is not int or not 0 < episode_id < 2**63:
+                return self._send_json(400, {"ok": False, "error": "Confirm an episode to delete its audio."})
+            try:
+                removed = _delete_podcast_audio(episode_id)
+            except (OSError, RuntimeError, ValueError, sqlite3.Error):
+                return self._send_json(503, {"ok": False, "error": "Couldn’t check whether this audio is in use."})
+            return self._send_json(200, {"ok": True, "removed": removed})
         if bare == "/podcasts/episodes/transcribe":
             return self._handle_podcasts_episode_transcribe(body)
         if bare == "/podcasts/episodes/to-corpus":
@@ -22867,6 +26419,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_writing_style_anchor_modify(bare, body)
         if bare == "/extract/page":
             return self._handle_extract_page(body)
+        if bare == "/extract/page/dom":
+            return self._handle_extract_page_dom(body)
         if bare == "/extract/page/allowlist":
             return self._handle_page_allowlist_modify(body)
 
@@ -23028,12 +26582,13 @@ class Handler(BaseHTTPRequestHandler):
             "single",
             "podcast_transcribe",
             "notification",
+            "retranscribe",
         ):
             return self._send_json(400, {
                 "ok": False,
                 "error": (
                     "kind must be playlist, single, podcast_transcribe, "
-                    "or notification"
+                    "notification or retranscribe"
                 ),
             })
         self._send_json(200, {
@@ -23086,14 +26641,27 @@ class Handler(BaseHTTPRequestHandler):
         X-Uoink-Token header rather than a URL (see _request_token). Emits one
         `snapshot`, then `job`/`queue` deltas on a 1s poll, plus a `: heartbeat`
         comment every 15s. One thread per connection (ThreadingHTTPServer);
-        exits when the client disconnects (write raises) -- and dies with the
+        exits when the peer closes its socket, and dies with the
         process on shutdown, since worker threads are daemonic."""
         if not self._require_token():
             return
+        origin = self.headers.get("Origin") or ("http://" + self.headers.get("Host", ""))
+        key = (origin, self.headers.get("X-Uoink-Stream", ""))
         with _sse_count_lock:
-            if _sse_active[0] >= _SSE_MAX_STREAMS:
-                return self._send_json(503, {"ok": False, "error": "too many streams"})
-            _sse_active[0] += 1
+            previous = _sse_active.get(key)
+            if previous is None:
+                # Issue the replacement capability only to this response.
+                key = (origin, secrets.token_hex(16))
+            admitted = previous is not None or len(_sse_active) < _SSE_MAX_STREAMS
+            if admitted:
+                _sse_active[key] = self.connection
+        if not admitted:
+            return self._send_json(503, {"ok": False, "error": "too many streams"})
+        if previous is not None:
+            try:
+                previous.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
         try:
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream; charset=utf-8")
@@ -23105,31 +26673,38 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.close_connection = True  # don't reuse the socket after we return
 
-            self._sse_emit("snapshot", self._jobs_snapshot())
+            self._sse_emit("snapshot", {**self._jobs_snapshot(), "stream_id": key[1]})
             last_jobs = self._jobs_map()
             last_queue = self._queue_snapshot()
             last_beat = time.monotonic()
-            while True:
-                time.sleep(_SSE_TICK_SEC)
-                cur = self._jobs_map()
-                for jid, jobj in cur.items():
-                    if last_jobs.get(jid) != jobj:
-                        self._sse_emit("job", jobj)
-                last_jobs = cur
-                queue = self._queue_snapshot()
-                if queue != last_queue:
-                    self._sse_emit("queue", queue)
-                    last_queue = queue
-                now = time.monotonic()
-                if now - last_beat >= _SSE_HEARTBEAT_SEC:
-                    self.wfile.write(b": heartbeat\n\n")
-                    self.wfile.flush()
-                    last_beat = now
-        except (BrokenPipeError, ConnectionResetError, OSError):
+            # A streaming GET has no more request bytes. Readability signals
+            # EOF (or unsolicited input), including during a quiet queue.
+            with selectors.DefaultSelector() as selector:
+                selector.register(self.connection, selectors.EVENT_READ)
+                while not selector.select(_SSE_TICK_SEC):
+                    with _sse_count_lock:
+                        if _sse_active.get(key) is not self.connection:
+                            break
+                    cur = self._jobs_map()
+                    for jid, jobj in cur.items():
+                        if last_jobs.get(jid) != jobj:
+                            self._sse_emit("job", jobj)
+                    last_jobs = cur
+                    queue = self._queue_snapshot()
+                    if queue != last_queue:
+                        self._sse_emit("queue", queue)
+                        last_queue = queue
+                    now = time.monotonic()
+                    if now - last_beat >= _SSE_HEARTBEAT_SEC:
+                        self.wfile.write(b": heartbeat\n\n")
+                        self.wfile.flush()
+                        last_beat = now
+        except (OSError, ValueError):
             pass  # client went away -- reap this stream
         finally:
             with _sse_count_lock:
-                _sse_active[0] -= 1
+                if _sse_active.get(key) is self.connection:
+                    del _sse_active[key]
 
     # ---- /taxonomy ----
     def _handle_taxonomy(self):
@@ -23493,6 +27068,8 @@ class Handler(BaseHTTPRequestHandler):
                 "error": ("URL must be http(s) with a valid hostname "
                           "(yt-dlp accepts 1,800+ sites; the helper "
                           "filters attacker-shaped inputs)")})
+        if _shelf_from_body(body, remember_url=canonical)[1]:
+            return self._send_json(400, {"ok": False, "error": _shelf_from_body(body)[1]})
         # If it's a known platform we already have a full pipeline for,
         # delegate. The downstream handler runs its own validation; we
         # pass the canonical so we don't double-normalise. Short-form
@@ -23539,7 +27116,8 @@ class Handler(BaseHTTPRequestHandler):
                 "url": canonical, "platform": platform})
 
         title = metadata.get("title") or "Untitled"
-        topic = _classify_topic(metadata)
+        shelf = _shelf_from_body(body)[0]
+        topic = shelf or _route_topic(metadata, url=canonical)
         folder = _video_capture_folder(
             DESKTOP_ROOT / _topic_folder_name(topic), canonical, metadata)
         try:
@@ -23547,10 +27125,13 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.exception("/extract/any (generic) destination unavailable")
             return self._send_json(500, {"ok": False, "error": str(e)})
+        topic = _keep_placed_shelf(topic, existing, explicit=shelf)
 
         # Best-effort transcript reconstruction from yt-dlp's
         # subtitles/automatic_captions map (when present).
         transcript_entries = _extract_generic_transcript(metadata)
+        if not shelf:
+            topic = _reroute_with_transcript(topic, metadata, transcript_entries, url=canonical)
 
         # Slim sidecar -- structurally compatible with the v2.5 reader,
         # all v3-only fields tagged.
@@ -23787,6 +27368,9 @@ class Handler(BaseHTTPRequestHandler):
                 body.get("long_video_mode"))
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
+        shelf, shelf_error = _shelf_from_body(body, remember_url=url)
+        if shelf_error:
+            return self._send_json(400, {"ok": False, "error": shelf_error})
 
         # Waiting for the capture lock until the `with` below takes it.
         refusal = _platform.capability_refusal(_platform.media_capability())
@@ -23832,7 +27416,7 @@ class Handler(BaseHTTPRequestHandler):
                             url, interval, live_state, metadata, long_video_mode):
                         return
                 title = metadata.get("title") or "Untitled"
-                topic = _classify_topic(metadata)
+                topic = shelf or _route_topic(metadata, url=url)
                 folder = _video_capture_folder(
                     DESKTOP_ROOT / _topic_folder_name(topic), url, metadata)
 
@@ -23845,7 +27429,8 @@ class Handler(BaseHTTPRequestHandler):
                                           metadata=metadata, topic=topic,
                                           source_type=body.get("__source_type"),
                                           long_video_mode=long_video_mode,
-                                          phase_callback=phase_cb)
+                                          phase_callback=phase_cb,
+                                          shelf_hint=shelf)
             except BaseException as e:
                 # Sprint 19 / C4: YouTube 429 or bot check -> queue for retry
                 # instead of surfacing an error. The retry worker takes over.
@@ -24009,7 +27594,7 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     metadata = _fetch_metadata(url)
                     title = metadata.get("title") or "Untitled"
-                    topic = _classify_topic(metadata)
+                    topic = _route_topic(metadata, url=url)
                     target = _video_capture_folder(sess_folder, url, metadata)
                     target = _create_video_entry_folder(target, url, metadata)
 
@@ -24464,6 +28049,10 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # This process owns the port, so its token is the one clients must read.
     _persist_token(TOKEN)
     _TOKEN_OWNED = True
+    # 3.18: the helper never loads a speech model itself. Each transcription
+    # runs in one child process that exits after a short idle period, so the
+    # memory torch / CTranslate2 / pyannote take always goes back to the OS.
+    asr_worker.enable_offload(log_dir=DATA_ROOT)
 
     _migrate_plaintext_anthropic_key()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt
@@ -24505,6 +28094,19 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # Backfill the index from disk in the background so a missing index
     # never delays the bind or /health.
     _start_backfill_thread()
+    # 3.18: a transcript backfill the user started carries on after a restart.
+    _resume_transcript_backfill_at_boot()
+    # 3.18.0: a "Fix cut-off X posts" run the person started picks up where
+    # it stopped. It never starts here on its own.
+    def _resume_x_text_repair_later():
+        time.sleep(30.0)
+        try:
+            _get_x_text_repair_job().resume_if_interrupted()
+        except Exception:
+            log.exception("x text repair resume failed")
+
+    threading.Thread(target=_resume_x_text_repair_later, daemon=True,
+                     name="x-text-repair-resume").start()
     # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
     # once at startup and every 24h after.
     _start_trash_purge_thread()
@@ -24520,6 +28122,7 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         log.warning("retry worker: reset_running_pending failed: %s", e)
     _start_retry_pending_thread()
     _start_saves_thread()
+    _start_show_capture_thread()
     # Podcast watch mode: registration polls metadata automatically; the
     # per-feed auto_ingest flag separately controls media work.
     _start_podcast_feed_scheduler_thread()
@@ -24688,10 +28291,10 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     elif not _maybe_post_migration_toast():
         maybe_toast(
             "Uoink is Active & Ready ✓",
-            "Click the rust U under any YouTube video to pull context. "
-            "Open the dashboard anytime from the magnet-U in your system tray.",
+            "Click the Uoink button under any YouTube video to save it. "
+            "Open the dashboard anytime from the Uoink icon in your system tray.",
         )
-    if sys.platform == "darwin" and threading.current_thread() is threading.main_thread():
+    if sys.platform != "win32" and threading.current_thread() is threading.main_thread():
         import signal
         # launchctl bootout and verified uninstall send SIGTERM. Let main return
         # so atexit removes the identity and owned-child lifelines close.
@@ -24707,13 +28310,16 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     except KeyboardInterrupt:
         log.info("Shutting down.")
     finally:
+        asr_worker.shutdown()
         _stop_relay_inbox_thread()
         if sys.platform == "darwin":
             from helper.mac_ui import close_children
             close_children()
         _remove_suite_lease()
         if _local_search_singleton is not None:
-            _local_search_singleton.pause()
+            # close(), not pause(): a pause here was saved and kept semantic
+            # search paused after every orderly restart.
+            _local_search_singleton.close()
         server.server_close()
 
 

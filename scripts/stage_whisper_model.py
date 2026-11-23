@@ -58,14 +58,16 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_pin(path: Path = PIN_PATH) -> dict:
-    """Read and validate the committed pin. Rejects anything ambiguous."""
+def load_pin(path: Path = PIN_PATH, *, required: tuple = REQUIRED_FILES,
+             label: str = "Whisper model") -> dict:
+    """Read and validate the committed pin. Rejects anything ambiguous.
+    ``required`` and ``label`` let another bundled model share this stager."""
     try:
         pin = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
-        raise StageError(f"Cannot read Whisper model pin {path}: {error}") from error
+        raise StageError(f"Cannot read {label} pin {path}: {error}") from error
     if not isinstance(pin, dict) or pin.get("schema_version") != 1:
-        raise StageError("Whisper model pin must be schema_version 1")
+        raise StageError(f"{label} pin must be schema_version 1")
     model, repo, revision = pin.get("model"), pin.get("repo"), pin.get("revision")
     if not isinstance(model, str) or re.fullmatch(r"[a-z0-9][a-z0-9.-]*", model) is None:
         raise StageError(f"Invalid pinned model name: {model!r}")
@@ -74,8 +76,8 @@ def load_pin(path: Path = PIN_PATH) -> dict:
     if not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None:
         raise StageError("The pinned revision must be a full 40-character commit, not a branch")
     files = pin.get("files")
-    if not isinstance(files, dict) or not set(REQUIRED_FILES) <= set(files):
-        raise StageError(f"The pin must list {', '.join(REQUIRED_FILES)}")
+    if not isinstance(files, dict) or not set(required) <= set(files):
+        raise StageError(f"The pin must list {', '.join(required)}")
     for name, meta in files.items():
         if (not isinstance(name, str) or name in {"", ".", "..", MANIFEST_NAME}
                 or re.fullmatch(r"[\w.-]+", name) is None):
@@ -114,7 +116,7 @@ def _download(url: str, target: Path, opener: Callable) -> None:
 
 
 def fetch(pin: dict, cache_root: Path, *, opener: Callable = urllib.request.urlopen,
-          log: Callable[[str], None] = print) -> Path:
+          log: Callable[[str], None] = print, label: str = "Whisper model") -> Path:
     """Fill the build cache from the pinned revision. Fails closed on mismatch."""
     folder = cache_dir_for(pin, cache_root)
     folder.mkdir(parents=True, exist_ok=True)
@@ -136,15 +138,15 @@ def fetch(pin: dict, cache_root: Path, *, opener: Callable = urllib.request.urlo
         if problem:
             # Do not ship it, and do not keep it: a re-run fetches fresh bytes.
             target.unlink()
-            raise StageError(f"Whisper model hash mismatch, cache file removed. {problem}")
+            raise StageError(f"{label} hash mismatch, cache file removed. {problem}")
         log(f"    {name} hash OK")
     return folder
 
 
 def stage(pin: dict, cache_root: Path, dest_root: Path, *, opener: Callable = urllib.request.urlopen,
-          log: Callable[[str], None] = print) -> Path:
+          log: Callable[[str], None] = print, label: str = "Whisper model") -> Path:
     """Copy verified files to <dest_root>/<model>/ and write the manifest."""
-    source = fetch(pin, cache_root, opener=opener, log=log)
+    source = fetch(pin, cache_root, opener=opener, log=log, label=label)
     dest = Path(dest_root) / pin["model"]
     if dest.exists() or dest.is_symlink():
         raise StageError(f"Staging target already exists: {dest}")

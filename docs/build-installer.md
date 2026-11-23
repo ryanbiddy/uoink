@@ -137,7 +137,7 @@ Python with the exact pip versions below.
 | Python embeddable | 3.13.15 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
 | ffmpeg | n8.1.2 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
 | FFmpeg shared runtime | n7.1.5 BtbN win64 LGPL shared | Locked in `build.ps1` | Seven DLLs in `bin/torchcodec`; required by TorchCodec 0.7's FFmpeg 7 ABI. |
-| yt-dlp | 2026.10.21 | (pip) | Pinned via `pip install yt-dlp==2026.10.21`. Bump after compatibility-testing a new release. |
+| yt-dlp | 2026.10.26 | (pip) | Pinned via `pip install yt-dlp==2026.10.26`. Bump after compatibility-testing a new release. |
 | yt-dlp-ejs | 0.8.0 | (pip, wheel hash in the lock) | Scripts yt-dlp runs in Deno. Must match yt-dlp's `pyproject.toml` at the pinned tag. |
 | Deno | 2.9.8 win-x64 | Locked in `build.ps1` | Official release zip; only `deno.exe` ships, in `bin`. yt-dlp's JavaScript runtime for YouTube. |
 | Pillow | 13.0.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==13.0.0`. |
@@ -321,7 +321,10 @@ Before updating the extension's download button for a new release:
    exact installer hash and has `signature_verified=true`. The separate security,
    acceptance and owner release gates still apply. Plain `.\build.ps1` produces
    an unsigned review artifact.
-2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
+2. **Smoke-test on a clean Windows VM** (see Testing matrix below). Before that,
+   run the one-command QA smoke from the source tree,
+   `python scripts/qa_smoke.py` (see [qa-smoke.md](qa-smoke.md)), and require
+   `RESULT: PASS`.
 3. **Set the approved version from the repository:** in PowerShell, run
    `$version = (Get-Content VERSION -Raw).Trim()` and confirm the approved
    release tag will be `v$version`. Tagging and pushing happen only after the

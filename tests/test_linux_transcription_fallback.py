@@ -1,5 +1,6 @@
 """Lean Linux podcast contracts, without a model, torch, or network access."""
 import json
+import builtins
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +13,20 @@ import server
 import uoink_mcp_tools
 import uoink_reliability
 import whisper_runner as runner
+
+
+def test_presence_probe_never_imports_runtime(monkeypatch):
+    original = builtins.__import__
+
+    def guarded(name, *args, **kwargs):
+        assert name not in ("whisperx", "torch", "faster_whisper")
+        return original(name, *args, **kwargs)
+
+    monkeypatch.setattr(_platform, "media_capability", lambda: {"available": True})
+    monkeypatch.setattr(_platform, "alignment_capability", lambda: {"available": True})
+    monkeypatch.setattr(runner.importlib.util, "find_spec", lambda name: object())
+    monkeypatch.setattr(builtins, "__import__", guarded)
+    assert runner._probe_whisperx()
 
 
 @pytest.mark.parametrize("platform", ["linux", "linux2", "win32", "darwin"])
@@ -153,11 +168,14 @@ def test_faster_whisper_transcript_uses_resolved_snapshot(
         def __init__(self, path, **kwargs):
             constructed.append(path)
             assert path == str(expected)
+            assert kwargs.pop("cpu_threads") == uoink_reliability.asr_models.cpu_threads()
             assert kwargs == {"device": "cpu", "compute_type": "int8", "local_files_only": True}
 
         def transcribe(self, path, **kwargs):
             assert path == str(audio)
+            # 3.18 (deliberate): the loop-breaking decode options are explicit.
             assert kwargs == {"beam_size": 1, "best_of": 1, "vad_filter": True,
+                              **uoink_reliability.DECODE_OPTIONS,
                               **({"language": language} if language else {})}
             return iter([SimpleNamespace(start=0.0, end=1.5, text=" Bonjour. ")]), SimpleNamespace(
                 language="fr", language_probability=0.99)
@@ -192,3 +210,15 @@ def test_fallback_refuses_unconsented_download(lean_linux, monkeypatch, tmp_path
     with pytest.raises(PermissionError, match="explicit download consent"):
         runner.transcribe_audio(audio, data_root=tmp_path / "data")
     assert not (tmp_path / "data").exists()
+
+
+def test_first_transcription_can_fall_back_from_a_broken_whisperx(lean_linux, monkeypatch, tmp_path):
+    import sys
+    monkeypatch.setattr(runner, "_WHISPERX_AVAILABLE", True)
+    monkeypatch.setitem(sys.modules, "whisperx", None)
+    monkeypatch.setattr(runner, "_bundled_snapshot", lambda size: tmp_path)
+    monkeypatch.setattr(runner, "_prepare_model_snapshot", lambda *args, **kwargs: tmp_path)
+    monkeypatch.setattr(uoink_reliability, "transcribe_media", lambda *args, **kwargs: [])
+    audio = tmp_path / "episode.mp3"
+    audio.touch()
+    assert runner.transcribe_audio(audio, data_root=tmp_path)["engine"] == "faster-whisper"

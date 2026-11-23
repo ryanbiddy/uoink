@@ -98,13 +98,13 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.17.0.exe` from the [v3.17.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.17.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.18.0.exe` from the [v3.18.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.18.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 <!-- store-install:start -->
-3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder.
+3. **Load the bundled extension.** On the one-time setup splash, click **Open extensions page** to open your browser's extensions page. If you get a blank tab, enter the address shown on the splash. Click **Copy path** on the splash to copy the installed extension path. Turn on **Developer mode**, click **Load unpacked**, and select that folder. Pin **Uoink** from the browser's Extensions menu.
 <!-- store-install:end -->
 
-**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.17.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
+**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.18.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
 
 The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
 
@@ -175,8 +175,9 @@ sent history. UOINK_USAGE_SHARING=0 forces it off.
 See the [usage payload and counting design](docs/usage-sharing.md).
 
 Capture fetches the source you ask for. Podcast watches poll feeds you enable;
-Auto-ingest can also download new episodes. Truncated X posts may use the
-FxTwitter fallback to retrieve full text. Transcription can download models with
+Auto-ingest can also download new episodes. Long X posts and Articles that X
+cuts short use FxTwitter only if you turn that switch on (off by default).
+Transcription can download models with
 your consent, and **Check now** (or the daily update check, off by default) contacts GitHub
 for release information.
 

@@ -1,4 +1,4 @@
-# 3.17.0 submission checklist
+# 3.18.0 submission checklist
 
 The account, fee, upload and submission are the owner's actions. Start with
 [SUBMIT-NOW.md](SUBMIT-NOW.md) for the click sequence.
@@ -18,13 +18,13 @@ The account, fee, upload and submission are the owner's actions. Start with
 ## Owner's gates before Submit for review
 
 - [ ] Register/pay the one-time developer fee and enable 2-Step Verification.
-- [ ] Create the draft item by uploading `dist/uoink-extension-3.17.0-cws.zip`.
+- [ ] Create the draft item by uploading `dist/uoink-extension-3.18.0-cws.zip`.
 - [ ] **Paste the store ID here:** `extension/store-config.json`, value of
   `chrome_web_store_id`. Keep `chrome_web_store_url` empty until the link is live.
 - [ ] Release a helper containing that config and `uoink_store.py`.
   Public users must get a helper that recognizes the store ID without manual edits.
 - [ ] Confirm the helper download used by setup includes the store ID. The public
-  v3.17.0 installer and the setup page's download links are the ones to check.
+  v3.18.0 installer and the setup page's download links are the ones to check.
 - [ ] Verify a real capture and clipboard copy with the store identity in a
   disposable profile, using permitted source material.
 - [ ] Publish the Limited Use statement from `privacy-practices.md` on `/privacy`.

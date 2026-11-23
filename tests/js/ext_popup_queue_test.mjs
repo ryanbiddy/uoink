@@ -425,6 +425,62 @@ async function handoff() {
       "and the SW captures it once the status answers", base.worker.fetches);
   });
 
+  await scenario("X post from the open tab sends the tab's own text (3.18.0)", async () => {
+    const bodies = [];
+    const base = await makeWorker({
+      routes: {
+        "/extract/x": (_u, init) => {
+          bodies.push(JSON.parse(init.body));
+          return jsonResponse({ ok: true, tweets_captured: 1, metadata: {} });
+        },
+      },
+    });
+    const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
+    const asked = [];
+    let popupAsked = 0;
+    popup.ctx.chrome.tabs.query = async () => [{ id: 7 }];
+    // Deliberately changed in review: the popup queues first and never waits
+    // on the tab. The worker asks the tab while it runs the save.
+    popup.ctx.chrome.tabs.sendMessage = () => { popupAsked++; };
+    base.worker.ctx.chrome.tabs.sendMessage = (tabId, msg, cb) => {
+      asked.push([tabId, msg, handedOff(popup)]);
+      Promise.resolve().then(() => cb({ ok: true, post: {
+        ok: true, id: "1720000000000000000", text: "The whole long post. FULL-TEXT-END", show_more: false } }));
+    };
+    await popup.ctx.runPopupUoinkCurrent();
+    await settle();
+    check(popupAsked === 0, "the popup never waits on the tab");
+    check(asked.length === 1 && asked[0][0] === 7 && asked[0][1].type === "uoinkReadXPost"
+      && asked[0][1].url === X_POST_URL && asked[0][2], "the worker asks the open tab once, after the hand-off", asked);
+    check(bodies.length === 1 && bodies[0].url === X_POST_URL && bodies[0].dom_post
+      && bodies[0].dom_post.id === "1720000000000000000"
+      && bodies[0].dom_post.text === "The whole long post. FULL-TEXT-END",
+      "and the SW sends that text to the helper with the link", bodies);
+  });
+
+  await scenario("X post the tab can't read is saved from the link alone (3.18.0)", async () => {
+    const bodies = [];
+    const base = await makeWorker({
+      routes: {
+        "/extract/x": (_u, init) => {
+          bodies.push(JSON.parse(init.body));
+          return jsonResponse({ ok: true, tweets_captured: 1, metadata: {},
+            text_cut_off: { reason: "article", open_url: "https://x.com/i/article/1720000000000000001" } });
+        },
+      },
+    });
+    const popup = await makePopup(base, { url: X_POST_URL, title: "A post on X" });
+    popup.ctx.chrome.tabs.query = async () => [{ id: 7 }];
+    base.worker.ctx.chrome.tabs.sendMessage = (_tabId, _msg, cb) => {
+      Promise.resolve().then(() => cb({ ok: false, post: { ok: false, code: "no_text" } }));
+    };
+    await popup.ctx.runPopupUoinkCurrent();
+    await settle();
+    check(bodies.length === 1 && !("dom_post" in bodies[0]), "no tab text, no dom_post", bodies);
+    check(base.worker.notifications.some((n) => /links to an X Article/.test(n.message || "")),
+      "a post that only links to an Article says how to save the Article", base.worker.notifications);
+  });
+
   await scenario("X Article fallback", async () => {
     const answer = deferred();
     const base = await makeWorker({ routes: { "/extract/page": () => answer.promise } });
@@ -1282,6 +1338,29 @@ async function retry() {
       && records(base.store).some((f) => f.id === "f-other"),
       "E1: once the rerun goes through, the record the Retry came from is dropped",
       records(base.store));
+  });
+
+  await scenario("Allow this site and retry keeps the tab the page was read in", async () => {
+    const base = await makeWorker({ routes: { "/extract/page/allowlist": () => jsonResponse({ ok: true }) } });
+    const popup = await makePopup(base, { url: PAGE_URL, title: "A post" });
+    popup.ctx.currentSource.tabId = 5;
+    popup.runSource(popupSlice("function offerAllowRetry(", "\nasync function runAllowSiteAndRetry("),
+      "popup.js");
+    popup.ctx.offerAllowRetry(PAGE_URL, { route: "page", url: PAGE_URL, title: "A post" });
+    check(popup.ctx.pendingAllowCapture.tabId === 5, "the wall's page is this tab's page: its tab is kept",
+      popup.ctx.pendingAllowCapture);
+    popup.ctx.offerAllowRetry(PAGE_URL, { route: "page", url: PAGE_URL, tabId: 8 });
+    check(popup.ctx.pendingAllowCapture.tabId === 8, "the failed request's own tab wins",
+      popup.ctx.pendingAllowCapture);
+    popup.ctx.offerAllowRetry(OTHER_PAGE_URL, { route: "page", url: OTHER_PAGE_URL });
+    check(!("tabId" in popup.ctx.pendingAllowCapture), "another page never borrows this tab",
+      popup.ctx.pendingAllowCapture);
+    popup.ctx.offerAllowRetry(PAGE_URL, { route: "page", url: PAGE_URL });
+    await popup.ctx.runAllowSiteAndRetry();
+    await popup.tick();
+    const job = (handedOff(popup).at(-1) || {}).job || {};
+    check(job.route === "page" && job.url === PAGE_URL && job.tabId === 5,
+      "the rerun reads the page in the same tab", job);
   });
 }
 

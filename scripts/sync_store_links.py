@@ -12,9 +12,11 @@ from uoink_store import load_store_config
 
 START = "<!-- store-install:start -->"
 END = "<!-- store-install:end -->"
-SIDELOAD = ('On first launch, Uoink shows a one-time setup splash. Use it to open your browser\'s '
-            'extensions page and copy the installed extension path; then enable Developer mode, '
-            'click **Load unpacked**, and select that folder.')
+SIDELOAD = ('On the one-time setup splash, click **Open extensions page** to open your browser\'s '
+            'extensions page. If you get a blank tab, enter the address shown on the splash. Click '
+            '**Copy path** on the splash to copy the installed extension path. Turn on '
+            '**Developer mode**, click **Load unpacked**, and select that folder. Pin **Uoink** '
+            'from the browser\'s Extensions menu.')
 
 
 def readme_step(url: str) -> str:

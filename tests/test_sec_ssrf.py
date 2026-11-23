@@ -221,7 +221,9 @@ def consumers(network, monkeypatch, tmp_path):
                      YTDLP_CMD=["synthetic-yt-dlp"], COMMENTS_TIMEOUT_SEC=10,
                      PLATFORM_YOUTUBE="youtube", PLATFORM_TWITTER="twitter",
                      PLATFORM_TIKTOK="tiktok", PLATFORM_INSTAGRAM="instagram",
-                     PLATFORM_GENERIC="generic")
+                     PLATFORM_GENERIC="generic",
+                     # 3.18: /extract/any reads an optional shelf; these requests name none.
+                     _shelf_from_body=lambda body, **k: (None, None))
     # Host sets plus the strict platform validators' patterns.
     hosts = {"_YOUTUBE_HOSTS", "_TWITTER_HOSTS", "_TIKTOK_HOSTS", "_INSTAGRAM_HOSTS",
              "_PLATFORM_HOST_HINTS", "_VIDEO_ID_RE", "_TWITTER_STATUS_RE",

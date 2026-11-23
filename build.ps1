@@ -20,6 +20,8 @@
 #        models\whisper-bundled\<size>\  the pinned faster-whisper model
 #                  (scripts\whisper_model_pin.json; cached in
 #                  build\cache\whisper-model, hash-checked every build)
+#        models\embed-bundled\potion-base-8m\  the pinned static embedding
+#                  model (scripts\embed_model_pin.json; build\cache\embed-model)
 #   3. Run ISCC.exe against installer\uoink.iss to produce
 #      build\Uoink-Setup-<version>.exe
 #
@@ -118,7 +120,7 @@ $GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT
 $PIP_VERSION        = '26.1.2'
 $SETUPTOOLS_VERSION = '84.2.1'
 $WHEEL_VERSION      = '0.47.0'
-$PACKAGING_VERSION  = '26.2'
+$PACKAGING_VERSION  = '26.3'
 # C-02 (license compliance): ffmpeg is now BtbN's win64-LGPL build, not the
 # gyan.dev "essentials" GPLv3 build. The essentials build links GPL
 # components (x264/x265) and its GPL redistribution obligations (offer of
@@ -140,7 +142,7 @@ $FFMPEG_SHARED_VERSION = 'n7.1.5'
 $FFMPEG_SHARED_URL = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-07-31-14-10/ffmpeg-n7.1.5-12-g1fdbca85aa-win64-lgpl-shared-7.1.zip'
 $FFMPEG_SHARED_SHA256 = '0f376f96fb38554ccefb1b2ae9c7c6a7b351f0e60a372b38262c320e8392c5d0'
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
-$YTDLP_VERSION  = '2026.10.21'
+$YTDLP_VERSION  = '2026.10.26'
 # yt-dlp-ejs holds the scripts yt-dlp runs to solve YouTube's player challenges.
 # It must equal the version in yt-dlp's pyproject.toml (the `default` extra) at
 # the tag above, or yt-dlp ignores it. Bump the two together.
@@ -325,6 +327,7 @@ foreach ($f in @(
     'uoink_install_isolation.py',
     'uoink_usage.py',
     'uoink_store.py',
+    'uoink_browser.py',
     'extension\store-config.json',
     'migrate_install.py',
     'channels.py',
@@ -355,6 +358,8 @@ foreach ($f in @(
     'source_subscriptions.py',
     # Saved-source availability checks; server.py imports it at startup.
     'source_availability.py',
+    # 3.18 transcript backfill (Library health); server.py imports it lazily.
+    'transcript_backfill.py',
     'library_analysis.py',
     'library_resources.py',
     'library_prompts.py',
@@ -369,7 +374,14 @@ foreach ($f in @(
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
+    'x_fulltext.py',
+    'x_text_repair.py',
+    'page_dom_capture.py',
     'list_imports.py',
+    'show_capture.py',
+    'timed_cues.py',
+    'shelf_router.py',
+    'local_embed.py',
     'research.py',
     'research_verify.py',
     'research_report.py',
@@ -377,6 +389,8 @@ foreach ($f in @(
     'images.py',
     'taste_scoring.py',
     'suggestions.py',
+    'asr_worker.py',
+    'asr_models.py',
     'defaults\style_anchors.json',
     'yt_extract.py',
     'topics.json',
@@ -636,6 +650,7 @@ $noticePins = @{
     'proxy-tools-0.1.0-UPSTREAM-LICENSE.txt' = 'a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4'
     'deno-2.9.8-MIT-LICENSE.txt' = 'f62497fffecc0852960c8d3e6934b9db86d16396e9b604072e923892cae3a588'
     'yt-dlp-ejs-0.8.0-LICENSES.txt' = 'fa363489f159111e612b36c6e82677f8693ae8cdf7ab644160dbd0059bcf2880'
+    'defuddle-0.19.6-MIT-LICENSE.txt' = 'c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092'
 }
 $noticeLock = @(Get-Content -LiteralPath $InstallerLock | ForEach-Object { $_.Trim() })
 foreach ($noticePin in @('antlr4-python3-runtime==4.9.3', 'proxy_tools==0.1.0')) {
@@ -657,10 +672,12 @@ foreach ($noticeRelative in @('THIRD-PARTY-NOTICES.md', 'third-party-notices\REA
         'third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt',
         'third-party-notices\mozilla-readability-APACHE-2.0.txt',
         'third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt',
+        'third-party-notices\defuddle-0.19.6-MIT-LICENSE.txt',
         'third-party-notices\EmbeddingGemma-NOTICE.md',
         'third-party-notices\Gemma-Terms-of-Use.txt',
         'third-party-notices\Gemma-Prohibited-Use-Policy.txt',
-        'third-party-notices\faster-whisper-base-NOTICE.md')) {
+        'third-party-notices\faster-whisper-base-NOTICE.md',
+        'third-party-notices\potion-base-8m-NOTICE.md')) {
     $noticeSource = Join-Path $RepoRoot $noticeRelative
     $noticeTarget = Join-Path $StagingDir $noticeRelative
     $noticeHash = (Get-FileHash -LiteralPath $noticeSource -Algorithm SHA256).Hash
@@ -680,6 +697,7 @@ Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force
 # entrypoints (not at server import time), but must ship or the tray's
 # left-click + the first-run splash crash silently.
 Copy-Item (Join-Path $RepoRoot 'uoink_splash.py')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_browser.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_store.py')     $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_dashboard.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
@@ -693,6 +711,7 @@ Copy-Item (Join-Path $RepoRoot 'library_work.py')  $StagingDir -Force
 # Living Library Phase 3: standing capture service (consent, detection, start ledger).
 Copy-Item (Join-Path $RepoRoot 'source_subscriptions.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_availability.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'transcript_backfill.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
@@ -748,8 +767,21 @@ Copy-Item (Join-Path $RepoRoot 'reddit_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'x_extractor.py') $StagingDir -Force
 # V-2c X Article capture. server.py imports x_article_extractor at module top.
 Copy-Item (Join-Path $RepoRoot 'x_article_extractor.py') $StagingDir -Force
+# 3.18.0 full X post text and the cut-off repair job. x_extractor imports
+# x_fulltext and server.py imports x_text_repair at module top.
+Copy-Item (Join-Path $RepoRoot 'x_fulltext.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'x_text_repair.py') $StagingDir -Force
+# Uoink this page from the extension. server.py imports page_dom_capture at module top.
+Copy-Item (Join-Path $RepoRoot 'page_dom_capture.py') $StagingDir -Force
 # Import a list. server.py imports list_imports, so it must ship.
 Copy-Item (Join-Path $RepoRoot 'list_imports.py') $StagingDir -Force
+# Save a whole show and the timed cues read. server.py imports both.
+Copy-Item (Join-Path $RepoRoot 'show_capture.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'timed_cues.py') $StagingDir -Force
+# Shelf routing and Tidy Uncategorized. server.py imports shelf_router lazily on every capture.
+Copy-Item (Join-Path $RepoRoot 'shelf_router.py') $StagingDir -Force
+# 3.18: small local text embeddings from the bundled static model (shelving).
+Copy-Item (Join-Path $RepoRoot 'local_embed.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research_verify.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'research_report.py') $StagingDir -Force
@@ -764,6 +796,10 @@ Copy-Item (Join-Path $RepoRoot 'images.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'taste_scoring.py') $StagingDir -Force
 # 3.17.0 podcast suggestions. server.py imports suggestions at module top, so it must ship.
 Copy-Item (Join-Path $RepoRoot 'suggestions.py') $StagingDir -Force
+# 3.18: speech models run in this child process, which exits when idle. server.py imports it.
+Copy-Item (Join-Path $RepoRoot 'asr_worker.py') $StagingDir -Force
+# 3.18: the pinned speech model catalog and downloader. server.py imports it.
+Copy-Item (Join-Path $RepoRoot 'asr_models.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'memory_layer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'podcasts.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'mobile_playlists.py') $StagingDir -Force
@@ -835,6 +871,18 @@ Write-Step 'Staging bundled Whisper model'
     --dest (Join-Path $StagingDir 'models\whisper-bundled')
 if ($LASTEXITCODE -ne 0) { throw 'Bundled Whisper model staging failed; see the hash or download error above' }
 
+# ---- 2g-ter. Bundled text-embedding model (3.18) --------------------------
+# A 30 MB static embedding table (minishlab/potion-base-8M, MIT) that
+# local_embed.py reads to suggest shelves. Same stager, pin discipline and
+# cache rules as the Whisper model (scripts\embed_model_pin.json). It lands
+# in {app}\models\embed-bundled\potion-base-8m\. Without it the app still
+# shelves, from words alone.
+Write-Step 'Staging bundled embedding model'
+& $embedPython (Join-Path $RepoRoot 'scripts\stage_embed_model.py') `
+    --cache (Join-Path $CacheDir 'embed-model') `
+    --dest (Join-Path $StagingDir 'models\embed-bundled')
+if ($LASTEXITCODE -ne 0) { throw 'Bundled embedding model staging failed; see the hash or download error above' }
+
 # ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
 # Verifies the staged tree is actually runnable BEFORE ISCC packages it,
 # so the works-in-repo-breaks-in-installer drift class is caught here
@@ -843,7 +891,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py research.py research_verify.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py x_fulltext.py x_text_repair.py research.py research_verify.py page_dom_capture.py shelf_router.py local_embed.py uoink_browser.py asr_worker.py asr_models.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
@@ -905,6 +953,14 @@ after = sorted((p.name, p.stat().st_size) for p in pathlib.Path(info["path"]).it
 if before != after or user_cache.exists():
     raise SystemExit("smoke: loading the bundled model wrote files: %r -> %r" % (before, after))
 print("smoke: bundled Whisper %s @ %s loads read-only" % (info["model"], info["revision"][:12]))
+import local_embed
+embed_dir = local_embed.model_dir()
+if embed_dir is None or embed_dir.parent != pathlib.Path(__file__).resolve().parent / "models" / "embed-bundled":
+    raise SystemExit("smoke: bundled embedding model missing (got %r)" % (embed_dir,))
+vectors = local_embed.embed(["bread recipe", "sourdough loaf", ""])
+if vectors.shape[0] != 3 or not float(vectors[0] @ vectors[1]) > 0.2 or vectors[2].any():
+    raise SystemExit("smoke: bundled embedding model gives odd vectors")
+print("smoke: bundled embedding model %s loads, dim=%d" % (embed_dir.name, vectors.shape[1]))
 '@
     try {
         & '.\python\python.exe' $smokePy

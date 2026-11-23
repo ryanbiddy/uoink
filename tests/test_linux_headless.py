@@ -229,7 +229,7 @@ def test_installed_linux_boot_skips_tray_splash_and_ready_toast(linux_backend, m
                  "_start_backfill_thread", "_start_trash_purge_thread",
                  "_start_retry_pending_thread", "_start_podcast_feed_scheduler_thread",
                  "_start_relay_inbox_thread", "_stop_relay_inbox_thread", "_resume_local_search",
-                 "_start_saves_thread"):
+                 "_start_saves_thread", "_start_show_capture_thread"):
         monkeypatch.setattr(server, name, lambda *a, **k: None)
     monkeypatch.setattr(server, "_get_index", lambda: SimpleNamespace(
         schema_version=lambda: 1, reset_running_pending=lambda: 0))
@@ -237,6 +237,8 @@ def test_installed_linux_boot_skips_tray_splash_and_ready_toast(linux_backend, m
     monkeypatch.setattr(server.migrate_install, "run_migration", lambda **k: {})
     monkeypatch.setattr(server.suite_service, "write_runtime_lease", lambda **k: None)
     monkeypatch.setattr(server.uoink_usage, "start_sender", lambda *_: None)
+    # The mock server stops immediately. Keep its ASR configuration out of later tests.
+    monkeypatch.setattr(server.asr_worker, "enable_offload", lambda **kwargs: None)
     monkeypatch.setattr(server, "_YoinkHTTPServer", lambda *a: SimpleNamespace(
         serve_forever=lambda: None, server_close=lambda: None))
     monkeypatch.setattr(atexit, "register", lambda *a: None)

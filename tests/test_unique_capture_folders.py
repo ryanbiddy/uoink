@@ -31,6 +31,7 @@ import pytest
 import _platform
 import uoink_usage
 from provenance import clamp_title
+from uoink_core.storage import read_export_markdown
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -94,11 +95,14 @@ def capture(tmp_path, monkeypatch):
     # The AST loader copies methods without their module-level imports.
     index_scope = {"threading": threading, "unicodedata": unicodedata,
                    "contextmanager": contextmanager, "suppress": suppress,
-                   "_clamp_title": clamp_title}
+                   "_clamp_title": clamp_title,
+                   # 3.18: upsert_yoink keeps a shelf set by hand (no such
+                   # table in this schema, so it never applies here).
+                   "sqlite3": sqlite3, "_explicit_shelf_hook": None}
     _load(ROOT / "index.py", {"_search_title_key", "_entity_keyword_score", "_search_terms", "_fts_terms"},
           index_scope, constants={"_YOINK_COLUMNS", "CURRENT_YOINK_SCHEMA", "SEARCH_STOPWORDS"})
     _load(ROOT / "index.py", {"__init__", "upsert_yoink", "_rollback_on_error", "get_yoink", "get_by_slug",
-                              "_notify_source_changed"},
+                              "_notify_source_changed", "_explicit_shelf"},
           index_scope, class_name="Index")
     if "def list_capture_sources(" in (ROOT / "index.py").read_text(encoding="utf-8"):
         _load(ROOT / "index.py", {"list_capture_sources"}, index_scope, class_name="Index")
@@ -132,6 +136,8 @@ def capture(tmp_path, monkeypatch):
         "log": logging.getLogger(__name__), "index": SimpleNamespace(sqlite3=sqlite3),
         "LONG_VIDEO_MODE_FULL": "full", "LONG_VIDEO_MODE_LITE": "lite",
         "LONG_VIDEO_MODE_CHUNKED": "chunked", "LONG_VIDEO_SECONDS": 1800,
+        "TRANSCRIPT_ONLY_MODES": ("transcript", "transcript_asr"),
+        "_source_facts": lambda m: {"published_at": None, "description": None},
         "LITE_SHOT_INTERVAL_SEC": 120, "MAX_SCREENSHOTS": 100,
         "YTDLP_CMD": ["yt-dlp"], "YTDLP_MAX_FILESIZE_BYTES": 1024,
         "CURRENT_SIDECAR_SCHEMA": 2, "DESKTOP_ROOT": tmp_path / "library",
@@ -147,6 +153,7 @@ def capture(tmp_path, monkeypatch):
         "_transcript_entries_with_links": lambda *a: [],
         "_capture_media_plan": lambda *a, **k: None,
         "_build_yoink_md": lambda **k: f"# {k['metadata']['title']}\n\nBody for {k['url']}\n",
+        "_read_export_markdown": read_export_markdown,
         "_atomic_write_text": write_text, "_should_start_hook_type": lambda m: False,
         "_read_settings": lambda: {}, "_anthropic_key_for_feature": lambda f: None,
         "compute_health": lambda s: {}, "_now_iso": lambda: "2026-10-15T12:00:00",
@@ -155,6 +162,11 @@ def capture(tmp_path, monkeypatch):
         "maybe_toast": Mock(), "fmt_time": str, "_citations_from_sidecar": lambda *a: [],
         "_mirror_event": Mock(), "friendly_error": str, "machine_error_detail": str,
         "_topic_folder_name": lambda topic: topic,
+        # 3.18 shelving helpers that _run_extraction calls (loaded below).
+        "_shelf_is_default": lambda topic: topic in ("Uncategorized", "Clips"),
+        "_shelf_hint": lambda *a, **k: None, "_route_topic": lambda m, **k: "Test",
+        "_explicit_shelf_hint": lambda *a, **k: None,
+        "_shelf_from_body": lambda body, **k: (None, None),
         "page_extractor": SimpleNamespace(PLATFORM_YOUTUBE="youtube",
                                           platform_for=lambda *a: "youtube",
                                           author_for=lambda *a: "Example"),
@@ -170,6 +182,7 @@ def capture(tmp_path, monkeypatch):
         "_index_yoink", "_corpus_path", "_resolve_corpus_path", "_build_corpus", "_demote_headings",
         "_playlist_worker", "_unique_child_folder", "_write_failed_marker",
         "_build_playlist_corpus", "_strip_image_refs", "_raise_if_cancelled", "_finish_job_cancelled",
+        "_keep_placed_shelf", "_reroute_with_transcript",
     }, scope, constants={
         "_YOUTUBE_HOSTS", "_TWITTER_HOSTS", "_TIKTOK_HOSTS", "_INSTAGRAM_HOSTS",
         "_VIDEO_ID_RE", "_TWITTER_STATUS_RE", "_TWITTER_HANDLE_RE", "_INSTAGRAM_KIND_RE",
@@ -915,6 +928,7 @@ def test_mcp_capture_uses_the_source_derived_folder(tmp_path):
         _manual_extraction_ownership=ownership,
         _fetch_metadata=lambda _url: meta,
         _classify_topic=lambda _meta: "Test",
+        _route_topic=lambda _meta, **_k: "Test",  # 3.18: the capture paths route through this
         _topic_folder_name=lambda topic: topic,
         slugify=lambda text: text.replace(" ", "_"),
         _video_capture_folder=Mock(return_value=unique),

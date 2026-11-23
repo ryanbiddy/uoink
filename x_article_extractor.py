@@ -156,6 +156,59 @@ def build_extract_result(payload: dict) -> dict:
     }
 
 
+FULL_TEXT_SCOPE = "X Article body supplied by FxTwitter (opt-in)"
+OPEN_IN_BROWSER = (
+    "X only shows Articles to logged-in readers, so Uoink can't read this one "
+    "from a link. Open the Article in your browser and click Uoink this "
+    "article in the extension. It saves the full text from your own "
+    "logged-in page.")
+
+
+def build_full_text_result(payload: dict, *, provider: str) -> dict:
+    """An x_article extract_result from a service that returned the whole
+    Article body (FxTwitter, when the user turned it on). Same shape and
+    source_type as the extension's DOM capture, so both land alike."""
+    url = canonical_article_url(str(payload.get("url") or ""))
+    markdown = str(payload.get("markdown") or "").strip()
+    title = str(payload.get("title") or "").strip()
+    if not url or (len(_body_text(markdown)) < MIN_BODY_CHARS):
+        return {"ok": False, "code": "empty", "error": "The Article came back empty."}
+    author_name = str(payload.get("author_name") or "").strip()
+    author_handle = str(payload.get("author_handle") or "").strip().lstrip("@")
+    author = f"{author_name} (@{author_handle})" if author_name and author_handle else (
+        author_name or (f"@{author_handle}" if author_handle else ""))
+    images = _clean_images(payload.get("images"))
+    evidence = x_evidence.shape({
+        "id": url.rsplit("/", 1)[-1], "url": url, "text": markdown,
+        "author": {"name": author_name or None, "screen_name": author_handle},
+    }, provider)
+    post_url = x_evidence.safe_url(payload.get("post_url"))
+    published = payload.get("published")
+    published = " ".join(published.split())[:64] if isinstance(published, str) else ""
+    import x_fulltext  # lazy: x_fulltext stays free of extractor imports
+    header = [f"**Author:** {x_fulltext.md_text(' '.join(author.split()))}" if author else "",
+              f"**Published:** {x_fulltext.md_text(published)}" if published else "",
+              f"**Shared in:** {post_url}" if post_url else ""]
+    header = "\n\n".join(line for line in header if line)
+    return {
+        "ok": True,
+        "source_type": SOURCE_TYPE,
+        "url": url,
+        "title": title or (f"{author} on X" if author else "X Article"),
+        "markdown": (header + "\n\n" if header else "") + markdown
+                    + f"\n\nCapture limits: Text: {evidence['text_completeness']}. Provider: {provider}.\n",
+        "metadata": {
+            "author": author, "author_name": author_name, "author_handle": author_handle,
+            "image_count": len(images), "capture_scope": FULL_TEXT_SCOPE, "post_url": post_url,
+            "x_capture": {"schema_version": 1, "scope": FULL_TEXT_SCOPE, "posts": [evidence],
+                          "limits": [f"Article text from {provider}, a third-party service the user turned on."]},
+        },
+        "extraction_engine": "fxtwitter-article" if provider == "FxTwitter" else "x-article",
+        "extracted_at": _now_iso(),
+        "links": [], "images": images, "screenshot_path": None, "image_count": len(images),
+    }
+
+
 # NOTE: the pasted-URL fallback's honest login-wall handling lives in
 # page_extractor.extract_page (_is_x_login_wall), a single engine-agnostic
 # implementation shared by every /extract/page caller. It returns

@@ -283,14 +283,16 @@
   // The server owns the feature flag (x_text_capture_enabled) and the
   // honest failure copy, so this just relays the JSON body. 60s timeout:
   // worst case is a hop-capped ancestor walk, not a transcript job.
-  async function postExtractX(url) {
+  // 3.18.0: domPost is the open tab's own text of the post ({id, text,
+  // show_more}); the helper uses it only when it matches X's copy.
+  async function postExtractX(url, domPost) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 60 * 1000);
     try {
       const res = await _authedFetch("/extract/x", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(domPost ? { url, dom_post: domPost } : { url }),
         signal: controller.signal,
       });
       return withHttpStatus(await res.json(), res);
@@ -317,9 +319,9 @@
     }
   }
 
-  function postStageSaves(source, items, appendTo) {
+  function postStageSaves(source, items, appendTo, folder) {
     return postSavesRequest("/import-list/stage", {
-      source, items, ...(appendTo ? { append_to: appendTo } : {}),
+      source, items, ...(appendTo ? { append_to: appendTo } : {}), ...(folder ? { folder } : {}),
     });
   }
 
@@ -1375,6 +1377,30 @@
     }
   }
 
+  // 3.18: the page as the user's tab shows it, already read by
+  // lib/page-capture.js. The helper only fetches a same-site lead image
+  // for the Library thumbnail. The page text comes from the tab.
+  async function postExtractPageDom(capture) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60 * 1000);
+    try {
+      const res = await _authedFetch("/extract/page/dom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(capture || {}),
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      try {
+        return withHttpStatus(JSON.parse(text), res);
+      } catch {
+        return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   // One-click allowlist grant: POST /extract/page/allowlist {action:'add'}.
   // The server matches a bare hostname pattern against the host AND its
   // subdomains, so passing the tab's hostname is enough.
@@ -1469,6 +1495,7 @@
     postExtractXArticleViaBg,
     postExtractReddit,
     postExtractPage,
+    postExtractPageDom,
     addAllowedSite,
     postPodcastFeed,
     ping,

@@ -1,0 +1,48 @@
+{
+ "name": "js-shell",
+ "url": "https://app.example.net/notes/meteor-night",
+ "layout": "single-page app shell; content appears only after JavaScript",
+ "title": "Meteor night field notes",
+ "expect": {
+  "python": "shell",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Skylog"
+ },
+ "keep": [
+  "Records from October show that the outreach team tested the dewy observing deck near the club hut at least six times. Nobody expected the winter solstice to sketch the dew heater so quickly, yet two retired pilots had to rebalance it again. Night owls still argue about whether the power bank should be sketched or left faint for another year.",
+  "It helped that the light shield was borrowed, since the astronomy club could measure the refractor without waiting for the eclipse watch. Each week, the outreach team walk past the car park to mount the focus knob and check the dome shutter. Nobody expected the winter solstice to cover the dome shutter so quickly, yet the outreach team had to log it again. First-year members still argue about whether the camera mount should be mounted or left cold for another year. Costs rose after the open night, mostly because the filter wheel at the club hut had to be rebalanced by hand.",
+  "What the outreach team learned at the car park",
+  "By September, two retired pilots had sketched the camera mount twice, which left the light shield bright but usable. Nobody expected the eclipse watch to cover the refractor so quickly, yet night owls had to measure it again. A bright dew heater is easy to miss, so the astronomy club now calibrate it every week and write the result down. The plan was to replace the guide scope, calibrate the log book, and keep the car park open for night owls. A cold camera mount is easy to miss, so night owls now sketch it every season and write the result down.",
+  "Nobody expected the winter solstice to replace the dew heater so quickly, yet first-year members had to align it again. Old photographs of the car park show a borrowed observing deck, long before anyone tested the camera mount. Two retired pilots still argue about whether the dew heater should be rebalanced or left steady for another year. Some of the astronomy club wanted to calibrate the star chart at once, while others asked for five more days of notes.",
+  "The clear power bank",
+  "Night owls still argue about whether the filter wheel should be replaced or left careful for another year. Night owls still argue about whether the log book should be mounted or left shaky for another year. Each month, two retired pilots walk past the club hut to clean the dome shutter and check the guide scope. Nobody expected the eclipse watch to align the guide scope so quickly, yet the outreach team had to rebalance it again.",
+  "It helped that the dome shutter was steady, since the imaging group could cover the log book without waiting for the open night. By April, the astronomy club had sketched the filter wheel twice, which left the guide scope borrowed but usable. The light shield at the car park was cleaned by first-year members after the open night, and the work took eight days. Night owls aligned the dome shutter first, because the focus knob near Pinecrest looked too cold to trust. Nobody expected the winter solstice to cover the light shield so quickly, yet the astronomy club had to clean it again.",
+  "After the winter solstice",
+  "Old photographs of the library roof show a cold power bank, long before anyone measured the focus knob. A patient focus knob is easy to miss, so the outreach team now sketch it every morning and write the result down. The plan was to calibrate the refractor, replace the dome shutter, and keep the car park open for the imaging group. The light shield at Hollow Ridge was logged by first-year members after the open night, and the work took twelve weeks.",
+  "The light shield at Hollow Ridge was cleaned by two retired pilots after the eclipse watch, and the work took eight days. Each morning, two retired pilots walk past the car park to cover the dome shutter and check the star chart. First-year members still argue about whether the observing deck should be rebalanced or left dewy for another year. Each season, two retired pilots walk past Pinecrest to rebalance the observing deck and check the guide scope. When the winter solstice arrived, the dew heater held, although the focus knob beside it was aligned within six months.",
+  "Meteor night field notes"
+ ],
+ "junk": [
+  "Synced a moment ago"
+ ],
+ "structure": {
+  "headings": [
+   "What the outreach team learned at the car park",
+   "The clear power bank",
+   "After the winter solstice",
+   "Meteor night field notes"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": "js-shell.rendered.html"
+}

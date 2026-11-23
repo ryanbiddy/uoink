@@ -1,0 +1,532 @@
+"""Model routes and "Re-transcribe with <model>" (3.18).
+
+No real model, no network: transcription and the audio fetch are mocked and
+the downloads come from a local fake source. Run through safe.sh.
+"""
+from __future__ import annotations
+
+import functools
+import json
+import queue
+import sys
+import threading
+from types import SimpleNamespace
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+import server  # noqa: E402
+import uoink_reliability as rel  # noqa: E402
+from tests.phase4_fixtures import seed_yoink_item  # noqa: E402
+from tests.test_asr_models import FAKE, FakeHub  # noqa: E402
+
+VID = "talk0000001"
+OLD = [(0.0, 1.0, "old line one"), (1.0, 2.0, "old line two")]
+
+
+@pytest.fixture
+def settings_file(monkeypatch, tmp_path):
+    path = tmp_path / "settings.json"
+    monkeypatch.setattr(server, "_settings_path", lambda: path)
+    return path
+
+
+# ---- model routes ----------------------------------------------------------
+@pytest.fixture
+def models_root(monkeypatch, tmp_path, settings_file):
+    root = tmp_path / "models"
+    root.mkdir()
+    monkeypatch.setattr(server, "RELIABILITY_MODEL_ROOT", root)
+    monkeypatch.setitem(server.asr_models._BY_ID, "tiny", FAKE)
+    monkeypatch.setitem(rel._MODEL_REPOSITORIES, "tiny", FAKE["repo"])
+    monkeypatch.setattr(rel, "bundled_model_info", lambda *a, **k: {
+        "model": "base", "revision": "0" * 40, "path": str(tmp_path / "no-bundled-copy")})
+    monkeypatch.setattr(server, "_asr_downloads", {})
+    return root
+
+
+def _wait_for(model, states=("done", "failed", "cancelled")):
+    assert server.asr_models.wait_until(
+        lambda: (server._asr_downloads.get(model) or {}).get("state") in states, 20)
+    return server._asr_downloads[model]
+
+
+def test_download_use_and_delete_through_the_helper(models_root, monkeypatch):
+    hub = FakeHub()
+    try:
+        monkeypatch.setattr(server.asr_models, "download", functools.partial(
+            server.asr_models.download, base_url=hub.url, timeout=10))
+        rows = {row["id"]: row for row in server.asr_models_payload()["models"]}
+        assert rows["tiny"]["state"] == "missing" and rows["base"]["state"] == "bundled"
+        assert server.use_asr_model("tiny")[1] == 409          # not downloaded yet
+        payload, status = server.start_asr_model_download("tiny")
+        assert status == 202 and payload["download"]["state"] == "downloading"
+        assert "cancel" not in payload["download"]
+        assert _wait_for("tiny")["state"] == "done"
+        rows = {row["id"]: row for row in server.asr_models_payload()["models"]}
+        assert rows["tiny"]["state"] == "ready"
+        assert server.use_asr_model("tiny") == ({"ok": True, "model": "tiny", "selected": True}, 200)
+        assert server._read_settings()["whisper_model"] == "tiny"
+        result, status = server.delete_asr_model("tiny")
+        assert status == 200 and result["selected_reset_to"] == "base"
+        assert server._read_settings()["whisper_model"] == "base"
+        assert server.asr_models.state("tiny", models_root)["state"] == "missing"
+    finally:
+        hub.close()
+
+
+def test_cancel_stops_a_download_and_delete_waits_for_it(models_root, monkeypatch):
+    started = threading.Event()
+
+    def slow_download(model_id, root, *, cancel_event, progress, **_kw):
+        started.set()
+        progress(10, 100)
+        cancel_event.wait(10)
+        raise server.asr_models.DownloadCancelled("download cancelled")
+
+    monkeypatch.setattr(server.asr_models, "download", slow_download)
+    server.start_asr_model_download("tiny")
+    assert started.wait(5)
+    again, status = server.start_asr_model_download("tiny")
+    assert status == 202 and again["already_running"] is True
+    assert server.delete_asr_model("tiny")[1] == 409
+    assert server.cancel_asr_model_download("tiny")[0]["cancelled"] is True
+    assert _wait_for("tiny")["state"] == "cancelled"
+
+
+def _post(path, body, *, token=True):
+    import io
+    handler = object.__new__(server.Handler)
+    handler.path = path
+    handler._reject_bad_host = lambda: False
+    handler._send_json = lambda status, payload: (status, payload)
+    handler._require_token = lambda: token
+    raw = json.dumps(body).encode()
+    handler.headers = {"Content-Type": "application/json", "Content-Length": str(len(raw))}
+    handler.rfile = io.BytesIO(raw)
+    return handler.do_POST()
+
+
+def test_http_routes_are_token_gated_and_reach_the_same_functions(models_root, monkeypatch):
+    seen = []
+    for name in ("start_asr_model_download", "cancel_asr_model_download", "delete_asr_model", "use_asr_model"):
+        monkeypatch.setattr(server, name, lambda model, _n=name: (seen.append((_n, model)) or ({"ok": True}, 200)))
+    monkeypatch.setattr(server, "queue_retranscribe", lambda body: (seen.append(("queue", body["video_id"]))
+                                                                   or ({"ok": True}, 202)))
+    assert _post("/asr/models/download", {"model": "tiny"}, token=False) is None
+    assert seen == []
+    for action in ("download", "cancel", "delete", "use"):
+        assert _post(f"/asr/models/{action}", {"model": "tiny"}) == (200, {"ok": True})
+    assert _post("/transcription/retranscribe", {"video_id": VID}) == (202, {"ok": True})
+    assert seen == [("start_asr_model_download", "tiny"), ("cancel_asr_model_download", "tiny"),
+                    ("delete_asr_model", "tiny"), ("use_asr_model", "tiny"), ("queue", VID)]
+
+
+def test_cli_models_matches_the_helper(models_root, monkeypatch, capsys):
+    import uoink_cli as cli
+    hub = FakeHub()
+    try:
+        monkeypatch.setattr(server.asr_models, "download", functools.partial(
+            server.asr_models.download, base_url=hub.url, timeout=10))
+        assert cli.main(["models"]) == 0
+        listed = json.loads(capsys.readouterr().out)
+        assert listed["source"] == "huggingface.co" and {"tiny", "distil-small.en"} <= {
+            row["id"] for row in listed["models"]}
+        assert cli.main(["models", "use", "tiny"]) == 1          # not downloaded yet
+        assert json.loads(capsys.readouterr().out)["model_missing"] is True
+        assert cli.main(["models", "download", "tiny"]) == 0
+        captured = capsys.readouterr()
+        assert json.loads(captured.out)["ok"] and "huggingface.co" in captured.err
+        assert cli.main(["models", "use", "tiny"]) == 0
+        assert server._read_settings()["whisper_model"] == "tiny"
+        capsys.readouterr()
+        assert cli.main(["models", "delete", "tiny"]) == 0
+        assert json.loads(capsys.readouterr().out)["selected_reset_to"] == "base"
+        assert cli.main(["models", "download"]) == 2               # names no model
+    finally:
+        hub.close()
+
+
+def test_model_routes_refuse_unknown_models(models_root):
+    for action in (server.start_asr_model_download, server.cancel_asr_model_download,
+                   server.delete_asr_model, server.use_asr_model):
+        assert action("not-a-model")[1] == 400
+        assert action(None)[1] == 400
+
+
+# ---- Re-transcribe ---------------------------------------------------------
+@pytest.fixture
+def saved(monkeypatch, tmp_path, settings_file):
+    import index
+    idx = index.Index.open(tmp_path / "index.db")
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    item = seed_yoink_item(idx, tmp_path, video_id=VID, slug=VID, title="Daylight", channel="Example")
+    side = {"video_id": VID, "url": "https://www.youtube.com/watch?v=" + VID,
+            "transcript_source": "asr", "yoinked_at": "2026-01-01T00:00:00Z",
+            "duration_seconds": 9, "source_chapters": [], "title": "Daylight", "channel": "Example"}
+    side["transcript"] = server._transcript_entries_with_links(side, OLD)
+    corpus = Path(item["corpus_path"])
+    sidecar = Path(item["sidecar_path"])
+    corpus.write_text("Personal note\n" + server._capture_media_plan(side, tmp_path)["markdown"],
+                      encoding="utf-8")
+    sidecar.write_text(json.dumps(side), encoding="utf-8")
+    server._publish_capture_media(idx, tmp_path, side, corpus, sidecar)
+    plain = tmp_path / "transcript.txt"
+    plain.write_text("\n".join(t for _s, _e, t in OLD), encoding="utf-8")
+
+    def fake_audio(url, tmp_dir, cancel_event=None):
+        path = Path(tmp_dir) / "audio.m4a"
+        path.write_bytes(b"audio")
+        return path
+
+    calls = []
+
+    def fake_asr(path, **kwargs):
+        calls.append(kwargs)
+        return [rel.TranscriptEntry(0.0, 1.5, "new line one", [{"word": "new", "start": 0.0, "end": 0.4}]),
+                (1.5, 3.0, "new line two")]
+
+    monkeypatch.setattr(server, "_download_reliability_audio", fake_audio)
+    monkeypatch.setattr(server, "_media_has_audio", lambda path, cancel=None: True)
+    monkeypatch.setattr(server, "_reliability_model_status", lambda name=None: {"cached": True})
+    monkeypatch.setattr(server.uoink_reliability, "transcribe_media", fake_asr)
+    files = {"corpus": corpus, "sidecar": sidecar, "plain": plain}
+    before = {name: path.read_bytes() for name, path in files.items()}
+    return type("Saved", (), {"idx": idx, "files": files, "before": before, "calls": calls,
+                              "folder": tmp_path})
+
+
+def _unchanged(saved):
+    return {name: path.read_bytes() for name, path in saved.files.items()} == saved.before
+
+
+def test_a_new_transcript_replaces_the_old_one_with_word_timings(saved):
+    result = server.retranscribe_item(VID, "small")
+    assert result["segments"] == 2 and result["model"] == "small"
+    assert saved.calls[0]["model_name"] == "small"
+    side = json.loads(saved.files["sidecar"].read_text(encoding="utf-8"))
+    assert [row["text"] for row in side["transcript"]] == ["new line one", "new line two"]
+    assert side["transcript"][0]["words"] == [{"word": "new", "start": 0.0, "end": 0.4}]
+    assert "transcribed again with the small model" in side["transcript_note"]
+    assert saved.files["plain"].read_text(encoding="utf-8") == "new line one\nnew line two"
+    corpus = saved.files["corpus"].read_text(encoding="utf-8")
+    assert corpus.startswith("Personal note") and "new line one" in corpus and "old line one" not in corpus
+    backups = list((saved.folder / ".media-inputs").glob("transcript-before-*.json"))
+    assert len(backups) == 1 and json.loads(backups[0].read_bytes())["transcript"][0]["text"] == "old line one"
+
+
+def test_a_failed_transcription_keeps_the_old_transcript(saved, monkeypatch):
+    def broken(path, **kwargs):
+        raise RuntimeError("model crashed halfway")
+
+    monkeypatch.setattr(server.uoink_reliability, "transcribe_media", broken)
+    with pytest.raises(ValueError):
+        server.retranscribe_item(VID, "small")
+    assert _unchanged(saved)
+
+
+def test_a_failed_save_keeps_the_old_transcript(saved, monkeypatch):
+    import library_media
+
+    def refuse(*args, **kwargs):
+        raise library_media.MediaError("library_unavailable")
+
+    monkeypatch.setattr(saved.idx, "publish_media_snapshot", refuse)
+    with pytest.raises(ValueError, match="old one was kept"):
+        server.retranscribe_item(VID, "small")
+    assert _unchanged(saved)
+
+
+def test_an_edited_transcript_file_is_never_overwritten(saved):
+    saved.files["plain"].write_text("My own edit", encoding="utf-8")
+    saved.before["plain"] = saved.files["plain"].read_bytes()
+    with pytest.raises(ValueError, match="edits were kept"):
+        server.retranscribe_item(VID, "small")
+    assert _unchanged(saved)
+
+
+def test_cancel_before_saving_keeps_the_old_transcript(saved):
+    cancel = threading.Event()
+    cancel.set()
+    with pytest.raises(server.PlaylistJobCancelled):
+        server.retranscribe_item(VID, "small", cancel_event=cancel)
+    assert _unchanged(saved)
+
+
+@pytest.fixture
+def job_queue(monkeypatch):
+    jobs = queue.Queue()
+    monkeypatch.setattr(server, "_jobs", {})
+    monkeypatch.setattr(server, "_retranscribe_queue", jobs)
+    monkeypatch.setattr(server, "_retranscribe_worker_thread", SimpleNamespace(is_alive=lambda: True))
+    return jobs
+
+
+def test_the_button_route_queues_one_job_on_the_transcription_queue(saved, job_queue):
+    payload, status = server.queue_retranscribe({"video_id": VID, "model": "small", "diarize": False})
+    assert status == 202 and payload["job"]["kind"] == "retranscribe"
+    assert job_queue.get_nowait() == payload["job_id"]
+    again, status = server.queue_retranscribe({"video_id": VID, "model": "small"})
+    assert status == 202 and again["reused_existing"] and again["job_id"] == payload["job_id"]
+    server._run_retranscribe_job(payload["job_id"])
+    job = server._public_job(server._jobs[payload["job_id"]])
+    assert job["state"] == "completed" and job["model"] == "small" and job["video_id"] == VID
+    assert "new line one" in saved.files["plain"].read_text(encoding="utf-8")
+
+
+def test_a_failed_job_is_reported_and_keeps_the_transcript(saved, job_queue, monkeypatch):
+    monkeypatch.setattr(server.uoink_reliability, "transcribe_media",
+                        lambda path, **kw: (_ for _ in ()).throw(RuntimeError("child exited")))
+    payload, _status = server.queue_retranscribe({"video_id": VID, "model": "small"})
+    server._run_retranscribe_job(payload["job_id"])
+    job = server._jobs[payload["job_id"]]
+    assert job["state"] == "failed" and "unchanged" in job["message"]
+    assert _unchanged(saved)
+
+
+def test_the_route_refuses_missing_items_and_models(saved, job_queue, monkeypatch):
+    assert server.queue_retranscribe({"video_id": "nope0000000"})[1] == 404
+    assert server.queue_retranscribe({"video_id": VID, "model": "bogus"})[1] == 400
+    monkeypatch.setattr(server, "_reliability_model_status", lambda name=None: {"cached": False})
+    payload, status = server.queue_retranscribe({"video_id": VID, "model": "small"})
+    assert status == 409 and payload["model_missing"]
+    assert job_queue.empty()
+
+
+def test_a_queued_job_comes_back_after_a_restart():
+    restored = server._validate_persisted_job({
+        "id": "job-1", "kind": "retranscribe", "state": "running", "video_id": VID, "model": "small"})
+    assert restored["state"] == "queued" and restored["video_id"] == VID
+
+
+def test_the_button_dispatches_independently_of_the_podcast_queue(saved, job_queue, monkeypatch):
+    payload, _ = server.queue_retranscribe({"video_id": VID, "model": "small"})
+    monkeypatch.setattr(job_queue, "get", lambda: queue.Queue.get(job_queue, block=False))
+    with pytest.raises(queue.Empty):
+        server._retranscribe_worker()
+    assert server._jobs[payload["job_id"]]["state"] == "completed"
+
+
+def test_replacement_updates_search(saved):
+    saved.idx._conn.execute("UPDATE yoinks_fts SET content='old' WHERE video_id=?", (VID,))
+    saved.idx._conn.commit()
+    assert saved.idx.search("old")
+    server.retranscribe_item(VID, "small")
+    assert not saved.idx.search("old")
+    assert saved.idx.search("new")[0]["video_id"] == VID
+
+
+@pytest.mark.parametrize("rows,meta", [([(0, 1, "")], {}), ([(0, 1, "word")], {"coverage": "sampled_sections"})])
+def test_worse_replacement_keeps_every_file(saved, monkeypatch, rows, meta):
+    monkeypatch.setattr(server, "_resolve_video_transcript", lambda *a, **k: (rows, "asr", meta))
+    with pytest.raises(ValueError):
+        server.retranscribe_item(VID, "small")
+    assert _unchanged(saved)
+
+
+def test_capture_blocks_retranscribe_before_work(saved, job_queue):
+    server._live_extract_begin("https://www.youtube.com/watch?v=" + VID)
+    try:
+        assert server.queue_retranscribe({"video_id": VID, "model": "small"})[1] == 409
+        with pytest.raises(ValueError, match="capture"):
+            server.retranscribe_item(VID, "small")
+        assert not saved.calls
+    finally:
+        server._live_extract_end()
+
+
+def test_progress_reaches_the_queued_job(saved, job_queue, monkeypatch):
+    original = server.uoink_reliability.transcribe_media
+    payload, _ = server.queue_retranscribe({"video_id": VID, "model": "small"})
+    seen = []
+    def transcribe(*args, **kwargs):
+        kwargs["progress"](4, 9)
+        seen.append(server._jobs[payload["job_id"]]["progress"])
+        assert "checkpoint" not in kwargs and kwargs["cancel_event"] is not None
+        return original(*args, **kwargs)
+    monkeypatch.setattr(server.uoink_reliability, "transcribe_media", transcribe)
+    server._run_retranscribe_job(payload["job_id"])
+    assert seen and 0 < seen[0] < 100
+
+
+def test_cancelling_download_is_visible_until_read_returns(models_root, monkeypatch):
+    release = threading.Event()
+    def stalled(*args, **kw):
+        release.wait(5)
+        raise server.asr_models.DownloadCancelled()
+    monkeypatch.setattr(server.asr_models, "download", stalled)
+    server.start_asr_model_download("tiny")
+    try:
+        server.cancel_asr_model_download("tiny")
+        row = next(r for r in server.asr_models_payload()["models"] if r["id"] == "tiny")
+        assert row["download"]["state"] == "cancelling"
+        assert server.delete_asr_model("tiny")[1] == 409
+    finally:
+        release.set()
+        _wait_for("tiny")
+
+
+@pytest.mark.parametrize("err", [ValueError("checksum mismatch"), OSError("disk full")])
+def test_download_cli_reports_errors(models_root, monkeypatch, capsys, err):
+    import uoink_cli
+    def fail(*a, **kw):
+        raise err
+    monkeypatch.setattr(server.asr_models, "download", fail)
+    assert uoink_cli.main(["models", "download", "tiny"]) == 1
+    assert json.loads(capsys.readouterr().out)["error"] == str(err)
+
+
+def test_delete_refused_while_another_process_owns_worker(models_root, tmp_path, monkeypatch):
+    import subprocess
+    import os
+    worker = server.asr_worker
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    lock = tmp_path / "asr-foreground.request.lock"
+    script = ("import asr_worker as w, sys; from pathlib import Path; "
+              "f=Path(sys.argv[1]).open('a+b'); assert w._try_os_lock(f); "
+              "print('locked', flush=True); sys.stdin.readline()")
+    with subprocess.Popen([sys.executable, "-c", script, str(lock)], stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE, text=True, cwd=ROOT,
+                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as child:
+        try:
+            assert child.stdout.readline().strip() == "locked"
+            body, status = server.delete_asr_model("tiny")
+            assert status == 409 and "transcription" in body["error"].lower()
+        finally:
+            child.communicate("\n", timeout=5)
+
+
+def test_cli_http_protocol_error_is_plain(models_root, monkeypatch, capsys):
+    import http.client
+    import uoink_cli
+    def fail(*a, **kw):
+        raise http.client.IncompleteRead(b"", 20)
+    monkeypatch.setattr(server.asr_models, "download", fail)
+    assert uoink_cli.main(["models", "download", "tiny"]) == 1
+    assert json.loads(capsys.readouterr().out)["model"] == "tiny"
+
+
+def test_get_model_list_requires_helper_token(monkeypatch):
+    handler = object.__new__(server.Handler)
+    handler.path = "/asr/models"
+    handler.command = "GET"
+    handler._reject_bad_host = lambda: False
+    handler._check_token = lambda: False
+    sent = []
+    handler._send_json = lambda status, body: sent.append(status)
+    monkeypatch.setattr(server, "asr_models_payload", lambda: pytest.fail("read without token"))
+    handler.do_GET()
+    assert sent == [403]
+
+
+def test_shorter_transcript_can_be_restored(saved, monkeypatch):
+    monkeypatch.setattr(server, "_resolve_video_transcript", lambda *a, **kw: ([(0, 1, "短")], "asr", {}))
+    result = server.retranscribe_item(VID, "small")
+    assert result["shorter"] and saved.files["plain"].read_text(encoding="utf-8") == "短"
+    side = json.loads(saved.files["sidecar"].read_bytes())
+    assert _post("/transcription/restore", {"video_id": VID, "backup": side["transcript_backup"]},
+                 token=False) is None
+    status, data = _post("/transcription/restore", {"video_id": VID, "backup": side["transcript_backup"]})
+    assert status == 200 and data["restored"]
+    assert saved.files["plain"].read_bytes() == saved.before["plain"]
+    assert saved.files["corpus"].read_bytes() == saved.before["corpus"]
+    assert saved.idx.search("old")[0]["video_id"] == VID
+
+
+def test_existing_edit_refused_before_audio_download(saved, monkeypatch):
+    saved.files["plain"].write_text("hand edited", encoding="utf-8")
+    monkeypatch.setattr(server, "_download_reliability_audio", lambda *a: pytest.fail("fetched edited item"))
+    with pytest.raises(ValueError, match="edits were kept"):
+        server.retranscribe_item(VID, "small")
+
+
+def test_deleted_legacy_turbo_reports_real_size(models_root, monkeypatch):
+    from tests.test_asr_worker import _make_snapshot
+    old = "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    _make_snapshot(models_root, old)
+    (models_root / "large-v3-turbo.pt").touch()
+    row = next(r for r in server.asr_models_payload()["models"] if r["id"] == "large-v3-turbo")
+    assert row["state"] == "ready" and row["bytes_on_disk"] > 0
+    result, status = server.delete_asr_model("large-v3-turbo")
+    assert status == 200 and result["freed_bytes"] == row["bytes_on_disk"]
+    assert not (models_root / ("models--" + old.replace("/", "--"))).exists()
+
+
+def test_deletion_holds_slot_through_unlink(models_root, monkeypatch):
+    checked = []
+    def delete(model, root):
+        for role in ("foreground", "background"):
+            lease = server.asr_worker._try_file(Path(server.DATA_ROOT) / f"asr-{role}.model.lock")
+            checked.append(lease is None)
+            if lease:
+                lease.close()
+        return {"ok": True}
+    monkeypatch.setattr(server.asr_models, "delete", delete)
+    assert server.delete_asr_model("tiny")[1] == 200
+    assert checked == [True, True]
+
+
+
+def test_same_item_foreground_can_capture_during_decode(saved, monkeypatch):
+    def transcribe(*args, **kwargs):
+        key = server._manual_capture_key("https://www.youtube.com/watch?v=" + VID)
+        with server._manual_capture_intent(key):
+            lock = server.source_subscriptions.CaptureLock.try_acquire(server.DATA_ROOT, key)
+            assert lock is not None
+            with lock:
+                assert server.source_subscriptions.CaptureLock.try_acquire(server.DATA_ROOT, key) is None
+        return [(0, 1, "finished replacement")], "asr", {}
+    monkeypatch.setattr(server, "_resolve_video_transcript", transcribe)
+    assert server.retranscribe_item(VID, "small")["segments"] == 1
+
+
+def test_replacement_rebuilds_missing_search_row(saved):
+    saved.idx._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (VID,))
+    saved.idx._conn.commit()
+    server.retranscribe_item(VID, "small")
+    assert saved.idx.search("new")[0]["video_id"] == VID
+    metadata, = saved.idx._conn.execute("SELECT metadata_json FROM yoinks WHERE video_id=?", (VID,)).fetchone()
+    assert json.loads(metadata)["transcript_source"] == "asr"
+
+
+def test_plain_recheck_refuses_redirect_before_read(saved, monkeypatch):
+    plain = saved.files["plain"]
+    original = Path.is_symlink
+    def transcribe(*a, **kw):
+        monkeypatch.setattr(Path, "is_symlink", lambda p: p == plain or original(p))
+        return [(0, 2, "full replacement line here")], "asr", {}
+    monkeypatch.setattr(server, "_resolve_video_transcript", transcribe)
+    with pytest.raises(ValueError, match="moved"):
+        server.retranscribe_item(VID, "small")
+    assert _unchanged(saved)
+
+
+
+def test_delete_hands_off_another_process_warm_model(models_root, monkeypatch, tmp_path):
+    import subprocess
+    import os
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    script = ("import sys, asr_worker as w; w.enable_offload(log_dir=sys.argv[1], idle_seconds=30); "
+              "print(w.call('ping', {})['pid'], flush=True); sys.stdin.readline(); "
+              "print(w.status()['pid'], flush=True); w.shutdown()")
+    with subprocess.Popen([sys.executable, "-B", "-c", script, str(tmp_path)], cwd=ROOT,
+                          stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as owner:
+        try:
+            assert int(owner.stdout.readline()) > 0
+            assert server.delete_asr_model("tiny")[1] == 200
+        finally:
+            output, _ = owner.communicate("\n", timeout=10)
+        assert output.strip() == "None"
+
+
+def test_longer_cjk_replacement_has_no_shorter_warning(saved, monkeypatch):
+    replacement = "日本語の書き起こしです。" * 3
+    monkeypatch.setattr(server, "_resolve_video_transcript",
+                        lambda *a, **kw: ([(0, 2, replacement)], "asr", {}))
+    result = server.retranscribe_item(VID, "small")
+    assert not result["shorter"]
+    assert saved.files["plain"].read_text(encoding="utf-8") == replacement

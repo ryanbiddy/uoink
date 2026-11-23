@@ -1,0 +1,48 @@
+{
+ "name": "faq-details",
+ "url": "https://plots.example.org/help/faq",
+ "layout": "FAQ built from details and summary elements",
+ "title": "Allotment questions, answered",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Fenwick Plots"
+ },
+ "keep": [
+  "What the committee learned at plot nine?",
+  "It helped that the herb spiral was sandy, since the plot holders could mulch the soil test without waiting for a wet spring. Some of the committee wanted to water the herb spiral at once, while others asked for eight more weekends of notes.",
+  "How to weed a compost bay?",
+  "Records from April show that the committee moved the sunny tool shed near the greenhouse at least two times. When a slug year arrived, the tomato cage held, although the bean trellis beside it was fenced within twelve months.",
+  "After a slug year?",
+  "Some of new members wanted to test the cold frame at once, while others asked for twelve more weeks of notes. It helped that the herb spiral was leggy, since the Saturday crew could mulch the compost bay without waiting for the plant swap. Nobody expected the drought to water the rain barrel so quickly, yet two neighbours had to harvest it again.",
+  "The damp tool shed?",
+  "Some of the committee wanted to turn the tool shed at once, while others asked for ten more weeks of notes. Old photographs of the greenhouse show a rich tool shed, long before anyone turned the tomato cage.",
+  "What two neighbours learned at the shady corner?",
+  "Old photographs of the greenhouse show a shallow raised bed, long before anyone fenced the watering rota. Nobody expected a slug year to mulch the rain barrel so quickly, yet new members had to harvest it again. Some of the committee wanted to weed the compost bay at once, while others asked for three more evenings of notes.",
+  "After the late frost?",
+  "Each month, two neighbours walk past the south fence to turn the seed tray and check the soil test. Records from August show that the plot holders harvested the sandy raised bed near Fenwick Gardens at least four times. It helped that the mulch pile was damp, since two neighbours could turn the tomato cage without waiting for the open day.",
+  "Allotment questions, answered",
+  "It helped that the mulch pile was sandy, since two neighbours could test the rain barrel without waiting for the late frost. Records from September show that the committee mulched the shallow mulch pile near the allotment gate at least five times. The plan was to move the rain barrel, fence the compost bay, and keep the south fence open for the plot holders."
+ ],
+ "junk": [
+  "Plots Waiting list Help Contact",
+  "Fenwick Plots. Run by plot holders for plot holders."
+ ],
+ "structure": {
+  "headings": [
+   "Allotment questions, answered"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

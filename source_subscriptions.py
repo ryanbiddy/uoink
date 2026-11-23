@@ -666,13 +666,16 @@ class FetchResponse:
 class _BoundedRedirectHandler(urllib.request.HTTPRedirectHandler):
     """Validate every redirect target: http(s) only, no private addresses."""
 
-    def __init__(self, follow_redirects=True):
+    def __init__(self, follow_redirects=True, redirect_allowed=None):
         self.follow_redirects = follow_redirects
+        self.redirect_allowed = redirect_allowed
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         if not self.follow_redirects:
             return None
         try:
+            if self.redirect_allowed is not None and not self.redirect_allowed(newurl):
+                return None
             newurl, host, addresses = _admit_public_http_url(newurl)
             new = super().redirect_request(req, fp, code, msg, headers, newurl)
             if new is not None:
@@ -832,7 +835,8 @@ def _connection_host(url: str, parsed: urllib.parse.ParseResult) -> str:
 
 def public_http_open(url: str, *, headers: dict | None = None,
                      timeout: float = FEED_FETCH_TIMEOUT_SEC,
-                     method: str = "GET", follow_redirects: bool = True):
+                     method: str = "GET", follow_redirects: bool = True,
+                     redirect_allowed: Callable[[str], bool] | None = None):
     """Open HTTP(S) with the shared public-network and redirect policy.
 
     Callers own/close the response and keep their existing body budgets.
@@ -840,13 +844,14 @@ def public_http_open(url: str, *, headers: dict | None = None,
     there is no environment or settings switch to relax production checks.
     Every hop connects directly to the addresses checked for it: system and
     environment proxies are not used, since a proxy would resolve again.
+    An optional redirect predicate can refuse a host before DNS lookup.
     Callers with a request budget may disable automatic redirects and reopen
     each Location through this function, counting and pacing every hop.
     """
     url, host, addresses = _admit_public_http_url(url)
     opener = urllib.request.build_opener(
         urllib.request.ProxyHandler({}), _PinnedHTTPHandler(), _PinnedHTTPSHandler(),
-        _BoundedRedirectHandler(follow_redirects=follow_redirects))
+        _BoundedRedirectHandler(follow_redirects=follow_redirects, redirect_allowed=redirect_allowed))
     request = urllib.request.Request(url, headers=headers or {}, method=method)
     _pin_request(request, host, addresses)
     return opener.open(request, timeout=timeout)
@@ -1770,6 +1775,30 @@ class CaptureLock:
                             sha256_text(key)[:40] + ".lock")
 
     @classmethod
+    def in_use(cls, root, key: str) -> bool:
+        """Read-only storage estimate. Deletion must still acquire the lock."""
+        try:
+            with open(cls.path_for(root, key), "rb") as handle:
+                if os.name == "nt":
+                    # Windows rejects reads of the byte locked by a writer.
+                    handle.read(1)
+                    return False
+                # POSIX flock is advisory. The owner record after the lock
+                # byte lets readers also recognize a dead or reused pid.
+                handle.seek(1)
+                owner = handle.read(80)
+                if not owner:
+                    return False
+                pid, birth = json.loads(owner)
+                if type(pid) is not int or pid <= 0 or (birth is not None and type(birth) not in (int, float)):
+                    return True
+                return _process_alive(pid, birth) != "dead"
+        except FileNotFoundError:
+            return False
+        except (OSError, ValueError, TypeError):
+            return True
+
+    @classmethod
     def try_acquire(cls, root, key: str) -> "CaptureLock | None":
         path = cls.path_for(root, key)
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -1786,6 +1815,10 @@ class CaptureLock:
             else:
                 import fcntl
                 fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                handle.truncate(1)
+                owner = (os.getpid(), _current_process_created_ms())
+                handle.write(json.dumps(owner).encode("ascii"))
+                handle.flush()
         except OSError:
             handle.close()
             return None
@@ -1818,6 +1851,7 @@ class CaptureLock:
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 import fcntl
+                handle.truncate(1)
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
         except OSError:
             pass
@@ -3416,13 +3450,15 @@ class SourceSubscriptionService:
         sql = ("SELECT s.source_id FROM source_subscriptions s "
                "JOIN source_detection_cursors c ON c.source_id=s.source_id "
                "WHERE s.archived=0 AND s.detection_enabled=1 AND c.poll_owner_token IS NULL "
-               "AND (s.kind!='podcast_rss' OR s.consent_epoch>0) "
-               "AND c.next_poll_at_ms<=? ORDER BY c.next_poll_at_ms, s.source_id")
+               "AND c.next_poll_at_ms<=? ")
         params: list[Any] = [now]
-        if limit is not None:
-            sql += " LIMIT ?"
-            params.append(int(limit))
         with self.store.read() as conn:
+            follows = any(r[1] == "follow_feed" for r in conn.execute("PRAGMA table_info(source_subscriptions)"))
+            sql += "AND (s.kind!='podcast_rss' OR s.consent_epoch>0" + (" OR s.follow_feed=1" if follows else "") + ") "
+            sql += "ORDER BY c.next_poll_at_ms, s.source_id"
+            if limit is not None:
+                sql += " LIMIT ?"
+                params.append(int(limit))
             return [r[0] for r in conn.execute(sql, params).fetchall()]
 
     def claim_due_polls(self, now: int | None = None, *, limit: int | None = None) -> list[dict]:
@@ -3446,8 +3482,9 @@ class SourceSubscriptionService:
             cursor = self._cursor(conn, source_id)
             if source["archived"] or not source["detection_enabled"]:
                 return None
-            # Only a user's own refresh may read a podcast feed before consent.
-            if source["kind"] == "podcast_rss" and not source["consent_epoch"] and not manual:
+            # A follow permits scheduled RSS checks without approving audio capture.
+            if (source["kind"] == "podcast_rss" and not source["consent_epoch"]
+                    and not source.get("follow_feed") and not manual):
                 return None
             if cursor["poll_owner_token"] is not None and int(cursor["poll_lease_expires_ms"]) > now:
                 return None

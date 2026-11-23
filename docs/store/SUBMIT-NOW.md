@@ -1,12 +1,12 @@
-# Submit Uoink 3.17.0 to the Chrome Web Store
+# Submit Uoink 3.18.0 to the Chrome Web Store
 
-Allow about 15 minutes for the dashboard work. The zip, listing text,
-screenshots and reviewer notes are ready. Account verification and Google's
+Allow about 15 minutes for the dashboard work. Prepare the zip, listing text,
+screenshots and reviewer notes before uploading. Account verification and Google's
 review are extra. The owner does every account, payment, upload and submission
 step (every step below marked "owner" is theirs). Nothing in this repo publishes
 anything.
 
-Version: this package is Uoink 3.17.0. The zip name and the manifest version
+Version: this package is Uoink 3.18.0. The zip name and the manifest version
 both come from the repo's `VERSION` file through `python scripts/build_cws.py`.
 `tests/test_cws_release.py` fails if these docs name a different version, so
 rebuild and re-read the file names if `VERSION` changes.
@@ -23,7 +23,7 @@ are not part of this submission.
 
 Have these ready:
 
-- `dist/uoink-extension-3.17.0-cws.zip`, built with `python scripts/build_cws.py`.
+- `dist/uoink-extension-3.18.0-cws.zip`, built with `python scripts/build_cws.py`.
 - `listing.md`, `permissions-justification.md`, `privacy-practices.md` and
   `reviewer-test-instructions.md` from this folder.
 - The 1280x800 screenshots in `screenshots/`, listed in `SCREENSHOTS.md`
@@ -58,8 +58,8 @@ also references the $5 registration fee. Extra account checks can take longer.
 ## 2. Create the draft and copy its ID, about 2 minutes
 
 5. Click **Add new item** (or **New item**).
-6. Click **Browse files**, select `dist/uoink-extension-3.17.0-cws.zip`, then
-   upload it. Confirm the detected name is **Uoink**, version **3.17.0**, MV3.
+6. Click **Browse files**, select `dist/uoink-extension-3.18.0-cws.zip`, then
+   upload it. Confirm the detected name is **Uoink**, version **3.18.0**, MV3.
 7. Open **Package**. Copy the **Item ID**, a 32-letter string. It exists now,
    before review. **View public key** on this tab is for matching development
    installs to that item; do not replace Uoink's existing developer key.

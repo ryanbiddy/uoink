@@ -479,16 +479,22 @@ def capture(tmp_path, http_open, document=None):
         idx.close()
 
 
-def test_page_lead_image_becomes_the_library_thumbnail(tmp_path):
+@pytest.mark.parametrize("host", ["news.example.org", "images.other.test"])
+def test_page_lead_image_becomes_the_library_thumbnail(tmp_path, host):
     opened = []
     def http_open(url, **kwargs):
         opened.append((url, kwargs))
         return response(png())
-    row = capture(tmp_path, http_open)
+    path = "/media/thumb/harbor-lanterns-960.jpg"
+    url = f"https://{host}{path}"
+    document = html("wiki-skin")
+    if host != "news.example.org":
+        document = document.replace(path.encode(), url.encode())
+    row = capture(tmp_path, http_open, document)
     # The Library row and reader look for thumbnail.jpg beside the corpus file.
     folder = Path(row["corpus_path"]).parent
     assert (folder / "thumbnail.jpg").read_bytes().startswith(b"\xff\xd8\xff")
-    assert [url for url, _ in opened] == ["https://news.example.org/media/thumb/harbor-lanterns-960.jpg"]
+    assert [image_url for image_url, _ in opened] == [url]
     assert opened[0][1]["timeout"] == pages._PAGE_FETCH_TIMEOUT_SEC
     assert json.loads(row["metadata_json"])["image"] == opened[0][0]
     assert sorted(p.name for p in folder.iterdir()) == ["page.json", "page.md", "thumbnail.jpg"]

@@ -41,6 +41,15 @@ CTranslate2 conversion (model card: MIT), pinned to revision
 [model notice](faster-whisper-base-NOTICE.md) lists each file's size and
 SHA-256 and carries the full MIT license text.
 
+## Bundled potion-base-8M text-embedding model
+
+Since 3.18 the Windows installer and the macOS app ship a small static
+text-embedding model for shelf suggestions, read-only: MinishLab's
+potion-base-8M (model card: MIT), pinned to revision
+`bf8b056651a2c21b8d2565580b8569da283cab23`. The bundled
+[model notice](potion-base-8m-NOTICE.md) lists each file's size and SHA-256
+and carries the full MIT license text.
+
 ## Adapted documentation text
 
 **ScrapeCreators social media research skills.** Five of Uoink's six local research
@@ -70,3 +79,14 @@ covers this adaptation. Uoink uses a bounded stdlib Python parser and its own
 Markdown renderer, with shell detection and metadata extraction. No JavaScript
 or new runtime package is bundled. This is not a complete port of Mozilla's DOM
 implementation.
+
+**Defuddle.** The Chrome extension ships [Defuddle 0.19.6](https://github.com/kepano/defuddle)
+(MIT), copyright (c) 2025 Steph Ango (@kepano), as `extension/lib/defuddle.js`: the
+npm package's `dist/index.js`, byte for byte, after a header comment. Its
+[MIT license](defuddle-0.19.6-MIT-LICENSE.txt) also sits beside it as
+`extension/lib/defuddle-LICENSE.txt`. It runs only in the tab the user clicks
+Uoink this page in, and the page text goes only to the local helper.
+
+- npm tarball `defuddle-0.19.6.tgz`, SHA-256 `a911cacd4f3d2ceb256e19965a4a970efa861b2943b149c19888df9114cbd45f`.
+- `dist/index.js`: 340,738 bytes, SHA-256 `f40075dc7b7b0460c16f77b9486a0ee66907a19677d2984e198e94356116a1e8`.
+- License: 1,076 bytes, SHA-256 `c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092`.

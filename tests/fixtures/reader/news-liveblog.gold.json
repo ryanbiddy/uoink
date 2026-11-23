@@ -1,0 +1,53 @@
+{
+ "name": "news-liveblog",
+ "url": "https://live.example.net/river-flood-updates",
+ "layout": "live blog with timestamped entries",
+ "title": "River flood: live updates",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "published": "2026-03-14",
+  "site_name": "Valley Live"
+ },
+ "keep": [
+  "Why the volunteer map was planted",
+  "By July, the river keepers had reported the footbridge twice, which left the bank survey murky but usable. Some of school volunteers wanted to report the reed bed at once, while others asked for three more months of notes. It helped that the kayak launch was busy, since the paddling club could check the volunteer map without waiting for a pollution scare.",
+  "Why the footbridge was mapped",
+  "When a pollution scare arrived, the flow meter held, although the footbridge beside it was sampled within ten evenings. Records from June show that the river keepers photographed the murky volunteer map near the estuary path at least five times.",
+  "After the autumn rains",
+  "The bank survey at the lower meadow was photographed by local anglers after the fish count, and the work took three evenings. Old photographs of the old ford show a cold reed bed, long before anyone sampled the volunteer map. When a pollution scare arrived, the water report held, although the volunteer map beside it was mapped within six months.",
+  "What two ecologists learned at Alder Bend",
+  "Old photographs of the old ford show a swollen footbridge, long before anyone sampled the volunteer map. Each week, the paddling club walk past Alder Bend to rebuild the kayak launch and check the footbridge.",
+  "After the autumn rains",
+  "Nobody expected a pollution scare to report the flow meter so quickly, yet the paddling club had to plant it again. The paddling club planted the flow meter first, because the water report near Kestrel Bridge looked too quiet to trust.",
+  "River flood: live updates",
+  "Updates on the spring flood along Alder Bend and the lower meadow, newest first."
+ ],
+ "junk": [
+  "Live Local Traffic Weather",
+  "What nobody tells you about the celebrity kitchen Inside the strange rise of the smart speaker What nobody tells you about the streaming series The lottery winner everyone is talking about this weekend",
+  "Valley Live. Local news for the valley, all rights reserved."
+ ],
+ "structure": {
+  "headings": [
+   "Why the volunteer map was planted",
+   "Why the footbridge was mapped",
+   "After the autumn rains",
+   "What two ecologists learned at Alder Bend",
+   "After the autumn rains",
+   "River flood: live updates"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

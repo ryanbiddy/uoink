@@ -582,7 +582,68 @@ async function http() {
   assert.equal(env.timeouts.size, 0);
 }
 
-const groups = { parsers, collectors, scroll, requests, background, http };
+// 3.18 shelves: an X bookmark folder page sends its folder name with the saves.
+async function folders() {
+  const context = vm.createContext({ URL, __UOINK_SAVES_TEST__: true });
+  vm.runInContext(readFileSync(join(EXT, "content-saves.js"), "utf8"), context);
+  const { cleanFolderName, folderNameFrom } = context.__UOINK_SAVES_HELPERS__;
+  assert.equal(cleanFolderName("  Recipes\n to try "), "Recipes to try");
+  for (const bad of [null, 3, "", "   ", "Bookmarks", "x".repeat(65), "a\u0007b", "a\u007fb", "///", "???"])
+    assert.equal(cleanFolderName(bad), null, String(bad));
+  assert.equal(folderNameFrom([" Tools to try "], "Bookmarks"), "Tools to try");
+  assert.equal(folderNameFrom(["Marcadores"], "Marcadores"), null, "the generic title in any language");
+  assert.equal(folderNameFrom(["Tools to try", "A post title"], "Bookmarks"), null, "two names: no guess");
+  assert.equal(folderNameFrom([], "Bookmarks"), null);
+  assert.equal(folderNameFrom(["Tools to try", "Tools to try"], ""), "Tools to try");
+
+  const heading = '[data-testid="primaryColumn"] h2[role="heading"]';
+  const headerOnly = (env, nodes) => {
+    const base = env.document.querySelectorAll.bind(env.document);
+    env.document.querySelectorAll = (selector) => (selector === heading ? nodes : base(selector));
+  };
+  const folderPage = collectorEnv("https://x.com/i/bookmarks/1790000000000000001");
+  folderPage.rows = [tweetRow("/author/status/321")];
+  headerOnly(folderPage, [{ textContent: " Tools to try " },
+    { textContent: "A heading inside a post", closest: (sel) => (sel.includes("article") ? {} : null) }]);
+  folderPage.document._selectors['a[href="/i/bookmarks"]'] = { textContent: "Bookmarks" };
+  folderPage.load("content-saves.js");
+  assert.equal(folderPage.control("heading").textContent, "Uoink: 1 bookmarks found");
+  folderPage.control("send").userClick();
+  await settle();
+  assert.deepEqual(clone(folderPage.sent[0]), { type: "stcStageSaves", source: "x_bookmarks",
+    items: ["https://x.com/author/status/321"], folder: "Tools to try" });
+
+  const allBookmarks = collectorEnv("https://x.com/i/bookmarks");
+  allBookmarks.rows = [tweetRow("/author/status/321")];
+  headerOnly(allBookmarks, [{ textContent: "Tools to try" }]);
+  allBookmarks.load("content-saves.js");
+  allBookmarks.control("send").userClick();
+  await settle();
+  assert.equal(Object.hasOwn(allBookmarks.sent[0], "folder"), false, "the main list has no folder");
+
+  const env = makeEnv({ href: "https://x.com/i/bookmarks/1790000000000000001" });
+  env.load("background.js");
+  const calls = [];
+  env.ctx.STC.postStageSaves = async (...args) => { calls.push(clone(args)); return { ok: true, url: STAGED_URL, count: 1 }; };
+  env.ctx.STC.postImportList = async () => ({ ok: true, total: 1, found: 1 });
+  const url = "https://x.com/i/bookmarks/1790000000000000001";
+  const sender = { id: env.chrome.runtime.id, frameId: 0, url, origin: "https://x.com", tab: { id: 1, url } };
+  const message = { type: "stcStageSaves", source: "x_bookmarks", items: ["https://x.com/a/status/1"] };
+  assert.equal((await env.dispatch({ ...message, folder: "Tools to try" }, sender)).ok, true);
+  assert.deepEqual(calls.at(-1), ["x_bookmarks", ["https://x.com/a/status/1"], null, "Tools to try"]);
+  for (const folder of [5, "", "  ", "x".repeat(65), "a\nb", "a\u007fb", "???"])
+    assert.equal((await env.dispatch({ ...message, folder }, sender)).ok, false, JSON.stringify(folder));
+  assert.equal(calls.length, 1, "a bad folder never reaches the helper");
+
+  const requests = [];
+  const http = makeEnv({ store: { local: { yoink_token: "synthetic-helper-token" }, sync: {}, session: {} },
+    fetch: async (target, init) => { requests.push(JSON.parse(init.body)); return { ok: true, status: 200, json: async () => ({ ok: true }) }; } });
+  http.load("lib/extract.js");
+  await http.ctx.STC.postStageSaves("x_bookmarks", ["https://x.com/a/status/1"], undefined, "Tools to try");
+  assert.deepEqual(requests, [{ source: "x_bookmarks", items: ["https://x.com/a/status/1"], folder: "Tools to try" }]);
+}
+
+const groups = { parsers, collectors, scroll, requests, background, http, folders };
 const group = process.argv[2];
 assert.ok(group === undefined || Object.hasOwn(groups, group), `Unknown group ${group}`);
 for (const name of group ? [group] : Object.keys(groups)) {

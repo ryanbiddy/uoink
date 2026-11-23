@@ -508,9 +508,10 @@ def test_stage_http_route_auth_and_chunks_use_normal_reader(helper, monkeypatch,
     handler._require_token = lambda: True
     reads = []
     read = handler._read_json_body
-    def observe(*, strict=False):
+    def observe(*, strict=False, limit=server.MAX_BODY_BYTES):
+        assert limit == server.MAX_BODY_BYTES
         reads.append(strict)
-        return read(strict=strict)
+        return read(strict=strict, limit=limit)
     monkeypatch.setattr(handler, "_read_json_body", observe)
     raw = json.dumps({"csv_text": "Video ID,Time Added\nsave0000001,now\n", "done": False}).encode()
     handler.headers = {"Content-Type": "application/json", "Content-Length": str(len(raw))}

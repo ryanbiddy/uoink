@@ -50,13 +50,15 @@ def startup(monkeypatch, tmp_path):
     monkeypatch.setattr(server, "_TOKEN_OWNED", False)  # main() claims it; restore after.
     # This loop outlives main() and would sync consent into later tests' stores.
     monkeypatch.setattr(server.uoink_usage, "start_sender", lambda *_: None)
+    # A simulated launch must not route later tests' fake models to a stopped worker.
+    monkeypatch.setattr(server.asr_worker, "enable_offload", lambda **kwargs: None)
     for name in ("_existing_server_responds", "_is_installed_layout", "_apply_output_root_fallback",
                  "_migrate_plaintext_anthropic_key", "_migrate_jobs_json_to_index",
                  "_migrate_taxonomy_json_to_index", "_seed_default_style_anchors",
                  "_heal_stale_corpus_paths_at_boot", "_restore_jobs_from_disk",
                  "_source_startup_reconciliation", "_resume_podcast_transcription_jobs",
                  "_start_backfill_thread", "_start_trash_purge_thread",
-                 "_start_retry_pending_thread", "_start_saves_thread", "_start_podcast_feed_scheduler_thread",
+                 "_start_retry_pending_thread", "_start_saves_thread", "_start_show_capture_thread", "_start_podcast_feed_scheduler_thread",
                  "_start_relay_inbox_thread", "_stop_relay_inbox_thread", "maybe_toast"):
         monkeypatch.setattr(server, name, lambda *a, **k: None)
     monkeypatch.setattr(server, "_maybe_post_migration_toast", lambda: True)
@@ -137,7 +139,7 @@ def test_server_starts_in_thread_under_simulated_darwin(startup, monkeypatch):
 
 
 @pytest.mark.parametrize("platform,reject,expected", [
-    ("darwin", False, 1), ("darwin", True, 1), ("win32", False, 0), ("linux", False, 0)])
+    ("darwin", False, 1), ("darwin", True, 1), ("win32", False, 0), ("linux", False, 1)])
 def test_main_thread_handler_and_subinterpreter_refusal(startup, monkeypatch, platform, reject, expected):
     server = startup
     server.sys.platform = platform
@@ -325,7 +327,9 @@ def test_duplicate_windows_launch_still_spawns_dashboard_script(monkeypatch, tmp
 
 @pytest.mark.parametrize("platform,command_flag,first_args", [
     ("darwin", False, ["--show-dashboard"]),
-    ("win32", True, []),
+    # 3.18.0: Windows too. It passed the flag on every start, so each crash
+    # restart reopened the dashboard (tests/test_windows_reopen.py).
+    ("win32", False, ["--show-dashboard"]),
 ])
 def test_show_dashboard_reaches_only_the_first_darwin_helper(monkeypatch, tmp_path, platform, command_flag, first_args):
     import uoink_supervisor

@@ -1,0 +1,50 @@
+{
+ "name": "callouts-guide",
+ "url": "https://handbook.example.dev/ops/on-call",
+ "layout": "handbook with alert callouts and a glossary",
+ "title": "On-call handbook",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "site_name": "Example Handbook"
+ },
+ "keep": [
+  "On-call handbook",
+  "Each season, first-time contributors walk past the staging cluster to pin the retry queue and check the lock file. Records from October show that first-time contributors profiled the optional error budget near the staging cluster at least ten times. By June, the release team had documented the log rotation twice, which left the plugin hook optional but usable. Each morning, the triage rota walk past the staging cluster to refactor the test runner and check the cache layer. When the code sprint arrived, the worker pool held, although the log rotation beside it was renamed within two months.",
+  "Never restart the worker pool during a schema migration.",
+  "Before your shift",
+  "Costs rose after the freeze, mostly because the worker pool at the main branch had to be patched by hand. Old photographs of the staging cluster show a lazy worker pool, long before anyone benchmarked the config loader.",
+  "The pager rota is published every Friday at noon.",
+  "Glossary",
+  "Error budget",
+  "The share of failed requests a service may spend in a month.",
+  "Freeze",
+  "A period when only urgent fixes are merged.",
+  "Drain",
+  "Letting running jobs finish before a worker stops.",
+  "Write the incident timeline while it is fresh, not the next morning."
+ ],
+ "junk": [
+  "Handbook Runbooks Teams",
+  "Example Handbook. Internal style, public copy."
+ ],
+ "structure": {
+  "headings": [
+   "On-call handbook",
+   "Before your shift",
+   "Glossary"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}

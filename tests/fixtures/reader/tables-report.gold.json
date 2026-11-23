@@ -1,0 +1,114 @@
+{
+ "name": "tables-report",
+ "url": "https://data.example.org/reports/river-quality-2026",
+ "layout": "report with data tables, captions and notes",
+ "title": "River quality report, spring 2026",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "published": "2026-06-30",
+  "site_name": "Valley Water Data"
+ },
+ "keep": [
+  "River quality report, spring 2026",
+  "Costs rose after the fish count, mostly because the footbridge at the mill race had to be measured by hand. It helped that the flow meter was murky, since local anglers could rebuild the otter camera without waiting for the cleanup day. The paddling club planted the weir gate first, because the otter camera near the lower meadow looked too shallow to trust.",
+  "Site Nitrate (mg/l) Oxygen (%) Rating",
+  "Alder Bend 2.1 94 good",
+  "Mill race 3.8 81 fair",
+  "Kestrel Bridge 1.6 97 good",
+  "Old ford 4.4 72 poor",
+  "Table 1. Spring sampling results by site",
+  "Old photographs of Kestrel Bridge show a swollen water report, long before anyone checked the silt trap. It helped that the footbridge was clear, since the paddling club could check the water report without waiting for a dry August. A silty kayak launch is easy to miss, so school volunteers now measure it every morning and write the result down.",
+  "Changes since last year",
+  "Measure 2025 2026 Change",
+  "Sites rated good 5 7 +2",
+  "Sites rated poor 3 1 -2",
+  "Volunteer hours 410 530 +120",
+  "Table 2. Year on year",
+  "Costs rose after a pollution scare, mostly because the bank survey at Kestrel Bridge had to be cleared by hand. Old photographs of Alder Bend show a fragile flow meter, long before anyone planted the weir gate."
+ ],
+ "junk": [
+  "Reports Maps Methods Downloads",
+  "Valley Water Data. Figures may be revised as samples are rechecked."
+ ],
+ "structure": {
+  "headings": [
+   "River quality report, spring 2026",
+   "Changes since last year"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [
+   [
+    [
+     "Site",
+     "Nitrate (mg/l)",
+     "Oxygen (%)",
+     "Rating"
+    ],
+    [
+     "Alder Bend",
+     "2.1",
+     "94",
+     "good"
+    ],
+    [
+     "Mill race",
+     "3.8",
+     "81",
+     "fair"
+    ],
+    [
+     "Kestrel Bridge",
+     "1.6",
+     "97",
+     "good"
+    ],
+    [
+     "Old ford",
+     "4.4",
+     "72",
+     "poor"
+    ]
+   ],
+   [
+    [
+     "Measure",
+     "2025",
+     "2026",
+     "Change"
+    ],
+    [
+     "Sites rated good",
+     "5",
+     "7",
+     "+2"
+    ],
+    [
+     "Sites rated poor",
+     "3",
+     "1",
+     "-2"
+    ],
+    [
+     "Volunteer hours",
+     "410",
+     "530",
+     "+120"
+    ]
+   ]
+  ],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": [
+   "Table 1. Spring sampling results by site",
+   "Table 2. Year on year"
+  ]
+ },
+ "rendered": null
+}

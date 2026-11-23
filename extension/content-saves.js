@@ -35,10 +35,44 @@
       + (match[4] ? `${match[4]}/` : "");
   }
 
+  // A bookmark folder's name, as the page header shows it. Bookmarks itself
+  // is not a folder. The helper uses it as the shelf for these saves.
+  function cleanFolderName(value) {
+    if (typeof value !== "string") return null;
+    const text = value.replace(/\s+/g, " ").trim();
+    return text && text.length <= 64 && !/[\u0000-\u001f\u007f]/.test(text) && /[\p{L}\p{N}]/u.test(text)
+      && text.toLowerCase() !== "bookmarks" ? text : null;
+  }
+
+  // Fail safe: exactly one header name, and not the page's generic title in
+  // the reader's language (the Bookmarks link's own label). Anything else
+  // means no folder, so the saves get no hint rather than a wrong one.
+  function folderNameFrom(headings, genericLabel) {
+    const names = [...new Set((headings || []).map(cleanFolderName).filter(Boolean))];
+    if (names.length !== 1) return null;
+    const generic = typeof genericLabel === "string" ? genericLabel.replace(/\s+/g, " ").trim().toLowerCase() : "";
+    return generic && names[0].toLowerCase() === generic ? null : names[0];
+  }
+
   // Tests can exercise parsing without a DOM, extension APIs, or networking.
   if (globalThis.__UOINK_SAVES_TEST__ === true) {
-    globalThis.__UOINK_SAVES_HELPERS__ = { parseYouTubeId, normalizeXStatus, normalizeRedditPermalink };
+    globalThis.__UOINK_SAVES_HELPERS__ = {
+      parseYouTubeId, normalizeXStatus, normalizeRedditPermalink, cleanFolderName, folderNameFrom,
+    };
     return;
+  }
+
+  // Headings in the column's top bar, never one inside a post or article.
+  function folderHeadingTexts() {
+    const nodes = Array.from(document.querySelectorAll('[data-testid="primaryColumn"] h2[role="heading"]') || []);
+    return nodes.filter((node) => !(node.closest && node.closest('article, [data-testid="tweet"]')))
+      .map((node) => node.textContent || "");
+  }
+
+  function bookmarksLabel() {
+    const link = document.querySelector('a[href="/i/bookmarks"]');
+    if (!link) return "";
+    return (link.getAttribute && link.getAttribute("aria-label")) || link.textContent || "";
   }
 
   const MAX_ITEMS = 5000;
@@ -69,8 +103,11 @@
         && new URLSearchParams(search).get("list") === "WL") {
       return { source: "watch_later", label: "Watch Later videos", key: "watch_later" };
     }
-    if (["x.com", "twitter.com"].includes(hostname) && /^\/i\/bookmarks\/?$/.test(pathname)) {
-      return { source: "x_bookmarks", label: "bookmarks", key: "x_bookmarks" };
+    const bookmarks = ["x.com", "twitter.com"].includes(hostname)
+      && pathname.match(/^\/i\/bookmarks(?:\/([0-9]{1,25}))?\/?$/);
+    if (bookmarks) {
+      return { source: "x_bookmarks", label: "bookmarks", folderPage: !!bookmarks[1],
+        key: bookmarks[1] ? `x_bookmarks:${bookmarks[1]}` : "x_bookmarks" };
     }
     if (["www.reddit.com", "old.reddit.com"].includes(hostname)
         && /^\/user\/[A-Za-z0-9_-]+\/saved\/?$/i.test(pathname)) {
@@ -215,9 +252,10 @@
     const page = active;
     const offset = next ? batch.nextOffset : 0;
     const size = items.size;
+    const folder = page.folderPage ? folderNameFrom(folderHeadingTexts(), bookmarksLabel()) : null;
     const message = next || retry ? { type: "stcImportNext", url: batch.url, offset }
       : { type: "stcStageSaves", source: page.source,
-        items: Array.from(items.values()).slice(0, MAX_ITEMS) };
+        items: Array.from(items.values()).slice(0, MAX_ITEMS), ...(folder ? { folder } : {}) };
     busy = true;
     setText(controls.status, "Sending to Uoink...");
     render();

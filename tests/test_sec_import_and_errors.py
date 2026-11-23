@@ -120,6 +120,9 @@ def helper(source_tree, tmp_path, monkeypatch):
         "_JOB_TERMINAL_STATES": {"completed", "failed", "cancelled"},
         "_supersede_terminal_single_jobs_locked": Mock(),
         "_resolve_corpus_path": Mock(return_value=None),
+        # 3.18: podcast publication passes the shelf router as its classifier.
+        "_route_topic": lambda metadata, **k: "Uncategorized",
+        "_shelf_from_body": lambda body, **k: (None, None),  # 3.18: /extract checks a named shelf
         "_normalize_long_video_mode": Mock(return_value="auto"),
         "_manual_extraction_ownership": lambda url: nullcontext(SimpleNamespace(
             ok=True, conflict=None, completed_while_waiting=False)),
@@ -745,6 +748,8 @@ def podcast_job(helper, tmp_path):
         set_episode_status=Mock(), episode_to_corpus=Mock(return_value={"video_id": "v"}))
     helper.update(
         contextlib=contextlib, DATA_ROOT=tmp_path, whisper_runner=whisper, podcasts=podcasts,
+        RETRANSCRIBE_KIND="retranscribe", asr_worker=__import__("asr_worker"),
+        PlaylistJobCancelled=type("PlaylistJobCancelled", (Exception,), {}), _raise_if_cancelled=Mock(),
         _podcast_transcription_queue=SimpleNamespace(get=get, task_done=Mock()),
         _podcast_capture_key=lambda episode_id: None,
         _settle_source_capture=Mock(), maybe_toast=Mock(), _heartbeat_note_ingest=Mock())

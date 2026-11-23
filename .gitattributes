@@ -27,6 +27,11 @@ tests/fixtures/suite_integration_v1/*.json text eol=lf
 scripts/measure_phase5_az5g2.py -text
 scripts/run_phase5_az5g2_union.py -text
 vendor/nltk-pathsec/** -text
+# Defuddle is vendored byte for byte; tests/test_page_dom_capture.py pins its sha256.
+extension/lib/defuddle.js -text
+extension/lib/defuddle-LICENSE.txt -text
+# The reader benchmark scores these bytes; keep them identical on every platform.
+tests/fixtures/reader/* text eol=lf
 
 # The Deno entitlements plist is hash-pinned in scripts/mac/payload.json.
 scripts/mac/deno.entitlements.plist text eol=lf

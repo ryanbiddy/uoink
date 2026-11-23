@@ -127,15 +127,15 @@ def _run(payload: dict) -> dict:
     return json.loads(result.stdout)
 
 
-def test_one_label_function_covers_all_six_choices():
+def test_one_label_function_covers_every_choice():
     _assert(DASHBOARD.count("function transcriptModelLabel(") == 1,
             "dashboard must declare transcriptModelLabel once")
     _assert("function transcriptModelLabel(model)" in DASHBOARD,
             "G-25 label signature must remain")
     _assert("large-v3-turbo" in DASHBOARD, "turbo must be labeled")
-    _assert('FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo"]'
+    _assert('FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo", "distil-small.en", "distil-large-v3.5"]'
             in DASHBOARD,
-            "fallback list must include all six choices")
+            "fallback list must include all eight choices")
     _assert("It's about 150 MB and stays on this machine." not in DASHBOARD,
             "confirmation must not hardcode 150 MB")
     _assert("estimated_download_mb || 150" not in DASHBOARD,
@@ -147,13 +147,15 @@ def test_one_label_function_covers_all_six_choices():
         "medium": "Deep",
         "large": "Max accuracy",
         "large-v3-turbo": "Turbo",
+        "distil-small.en": "English, quick",
+        "distil-large-v3.5": "English, best",
     }
     for model, label in labels.items():
         got = _run({"action": "label", "model": model})["result"]
         _assert(got == label, f"{model} label: {got}")
     turbo = _run({"action": "label", "model": "large-v3-turbo"})["result"]
     _assert(turbo != "Balanced", f"turbo must not reuse Balanced: {turbo}")
-    print("ok  one label function covers six choices")
+    print("ok  one label function covers eight choices")
 
 
 def test_per_choice_sizes_and_unknown_metadata():

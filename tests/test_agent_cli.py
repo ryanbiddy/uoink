@@ -318,6 +318,7 @@ def test_legacy_launcher_unchanged_and_serve_forwards(monkeypatch):
     (["status"], "uoink_cli.py"), (["tools", "--toolset", "core"], "uoink_cli.py"),
     (["call", "search_library", "query=a & b"], "uoink_cli.py"),
     (["capture", "https://example.com/a"], "uoink_cli.py"), (["serve", "--doctor"], "uoink_cli.py"),
+    (["shelves", "tidy"], "uoink_cli.py"),
     (["--help"], "uoink_cli.py"), (["--text", "status"], "uoink_cli.py"),
     (["--isolated-profile", "p q", "--isolated-port", "18090", "status"], "uoink_cli.py"),
     (["--isolated-from-install-dir", "app", "recent"], "uoink_cli.py"),

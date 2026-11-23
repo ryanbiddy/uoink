@@ -793,6 +793,18 @@ def test_photo_overlays_use_the_scrim_pair():
                 assert props["color"] == "var(--on-scrim)", f"{rel}: {selector} text on the scrim"
 
 
+def test_library_clear_and_saved_dot_contrast():
+    page = "assets/dashboard/index.html"
+    parts = _merged_parts(page)
+    for selector in ("#searchInput::-webkit-search-cancel-button", ".state-word.saved .state-dot"):
+        props = parts[selector]
+        for table in _resolver(page).values():
+            for token in ("--surface", "--bg", "--surface-sel"):
+                ground = _colour(f"var({token})", table, "#FFFFFF")
+                fill = _colour(props["background"], table, ground)
+                assert _contrast(fill, ground) >= 3, (selector, token)
+
+
 def test_scripted_badge_and_link_colours_use_tokens():
     dashboard = DASHBOARD.read_text(encoding="utf-8")
     popup_js = (ROOT / "extension" / "popup.js").read_text(encoding="utf-8")

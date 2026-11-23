@@ -310,7 +310,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       notify("Queue full", "Wait a few minutes");
       return;
     }
-    await enqueue({ kind: "extract", url: pageUrl, usePage: true, addedAt: Date.now() });
+    await enqueue({ kind: "extract", url: pageUrl, usePage: true, tabId: tab && tab.id, addedAt: Date.now() });
     return;
   }
 
@@ -401,7 +401,8 @@ const SAVES_STAGE_CHUNK_MAX = 500;
 function savesPageSource(url) {
   if (SAVES_ORIGINS.watch_later.includes(url.origin) && /^\/playlist\/?$/.test(url.pathname)
       && url.searchParams.get("list") === "WL") return "watch_later";
-  if (SAVES_ORIGINS.x_bookmarks.includes(url.origin) && /^\/i\/bookmarks\/?$/.test(url.pathname)) {
+  // /i/bookmarks/<id> is one of the user's bookmark folders.
+  if (SAVES_ORIGINS.x_bookmarks.includes(url.origin) && /^\/i\/bookmarks(?:\/[0-9]{1,25})?\/?$/.test(url.pathname)) {
     return "x_bookmarks";
   }
   if (SAVES_ORIGINS.reddit_saved.includes(url.origin) && /^\/user\/[A-Za-z0-9_-]+\/saved\/?$/i.test(url.pathname)) {
@@ -426,19 +427,20 @@ function allowedSavesSender(sender, source) {
   }
 }
 
-async function stageSavesInChunks(source, items) {
+async function stageSavesInChunks(source, items, folder) {
   let staged;
   let url;
   for (let offset = 0; offset < items.length;) {
     const chunk = [];
     while (offset < items.length && chunk.length < SAVES_STAGE_CHUNK_MAX) {
       const candidate = [...chunk, items[offset]];
-      const body = { source, items: candidate, ...(url ? { append_to: url } : {}) };
+      const body = { source, items: candidate, ...(url ? { append_to: url } : {}), ...(folder ? { folder } : {}) };
       if (JSON.stringify(body).length >= SAVES_STAGE_BODY_MAX) break;
       chunk.push(items[offset++]);
     }
     // Each validated item is at most 300 characters, so one always fits.
-    staged = await STC.postStageSaves(source, chunk, url);
+    staged = await (folder ? STC.postStageSaves(source, chunk, url, folder)
+      : STC.postStageSaves(source, chunk, url));
     if (!staged || !staged.ok) return staged || { ok: false, error: "Uoink couldn't stage these saves." };
     if (typeof staged.url !== "string" || !SAVES_URL_RE.test(staged.url) || (url && staged.url !== url)) {
       return { ok: false, error: "Uoink returned an invalid saves list." };
@@ -465,14 +467,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (typeof msg.source !== "string" || !Object.hasOwn(SAVES_ORIGINS, msg.source)
         || !allowedSavesSender(sender, msg.source)
         || !Array.isArray(msg.items) || msg.items.length < 1 || msg.items.length > 5000
-        || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)) {
+        || !Array.from(msg.items).every((item) => typeof item === "string" && item.length <= 300)
+        || (msg.folder !== undefined && (msg.source !== "x_bookmarks" || typeof msg.folder !== "string"
+          || !msg.folder.trim() || msg.folder.length > 64 || /[\u0000-\u001f\u007f]/.test(msg.folder)
+          || !/[\p{L}\p{N}]/u.test(msg.folder)))) {
       sendResponse({ ok: false, error: "Invalid saves request or page." });
       return;
     }
     (async () => {
       let staged;
       try {
-        staged = await stageSavesInChunks(msg.source, msg.items);
+        staged = await stageSavesInChunks(msg.source, msg.items, msg.folder);
         if (!staged || !staged.ok) {
           sendResponse(staged || { ok: false, error: "Uoink couldn't stage these saves." });
           return;
@@ -1172,10 +1177,16 @@ function enqueuePopupCapture(req) {
       title: typeof req.title === "string" ? req.title.slice(0, 300) : "",
     };
     if (req.route === "page") job.usePage = true;
+    if (req.route === "page" && Number.isInteger(req.tabId)) job.tabId = req.tabId;
     if (req.route === "reddit") job.useReddit = true;
     if (req.route === "playlist") job.usePlaylist = true;
     if (req.route === "podcast") job.usePodcast = true;
-    if (req.route === "x_post") job.useXPost = true;
+    if (req.route === "x_post") {
+      job.useXPost = true;
+      // 3.18.0: the open tab to ask for this post's own text, when the job
+      // runs (the popup may be gone by then).
+      if (Number.isInteger(req.readTabId) && req.readTabId >= 0) job.readTabId = req.readTabId;
+    }
     // The popup used to check the helper's queue before a video; that
     // check now runs in runExtractJob so the popup never waits on it.
     if (req.route === "video") job.checkRoom = true;
@@ -1374,7 +1385,7 @@ async function runExtractJob(job) {
       // The helper validates the feed; URL hints only classify pasted links.
       data = await STC.postPodcastFeed(job.url);
     } else if (job.useXPost) {
-      data = await STC.postExtractX(job.url);
+      data = await STC.postExtractX(job.url, await readXPostFromTab(job.readTabId, job.url));
       if (!data || data.code === "disabled" || data.code === "empty") {
         // A video-only post keeps the same queue-room guard as a video.
         if (!(await serverQueueHasRoomWithin(QUEUE_ROOM_WAIT_MS))) {
@@ -1386,7 +1397,7 @@ async function runExtractJob(job) {
         data = await STC.postExtract(job.url, job.interval);
       } else savedXPosts = !!data.ok;
     } else if (job.usePage) {
-      data = await STC.postExtractPage(job.url);
+      data = await capturePage(job);
     } else if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
     } else if (job.useReddit) {
@@ -1458,6 +1469,13 @@ async function runExtractJob(job) {
     const count = Number(data.tweets_captured) || 1;
     const saved = `Saved ${count} post${count === 1 ? "" : "s"}`;
     let message = `${saved} to your library.`;
+    // 3.18.0: X gave only part of the text. Say how to get the rest.
+    const cut = data.text_cut_off;
+    if (cut && cut.reason === "article") {
+      message = `${saved}. It links to an X Article. Open the Article and click Uoink this article to save its text.`;
+    } else if (cut) {
+      message = `${saved}, but X cut the text short. Open the post on X and Uoink it from the page to save all of it.`;
+    }
     let followUp = null;
     if (data.metadata && data.metadata.has_video) {
       try {
@@ -1621,6 +1639,23 @@ function messageTab(tabId, payload) {
   });
 }
 
+// 3.18.0: the open tab's own text of an X post ({id, text, show_more}), for
+// the helper to check against X's copy. Null when there is no tab, the tab
+// moved on, or it doesn't answer within a couple of seconds: the save then
+// goes ahead from the link alone.
+async function readXPostFromTab(tabId, url) {
+  if (!Number.isInteger(tabId)) return null;
+  const answer = await Promise.race([
+    messageTab(tabId, { type: "uoinkReadXPost", url }),
+    new Promise((resolve) => setTimeout(() => resolve(null), 2500)),
+  ]);
+  const resp = answer && answer.resp;
+  const post = resp && resp.ok && resp.post;
+  if (!post || !post.ok || typeof post.text !== "string" || !post.text
+      || !/^\d{1,25}$/.test(String(post.id))) return null;
+  return { id: String(post.id), text: post.text.slice(0, 30000), show_more: !!post.show_more };
+}
+
 // E2: a tab open since before the extension was installed or updated never
 // got the declared content scripts. Inject the article parser and its
 // content script (host permission + "scripting"); true if they ran.
@@ -1635,6 +1670,74 @@ async function injectXArticleScripts(tabId) {
     console.warn("[stc] x-article script injection failed", e);
     return false;
   }
+}
+
+// 3.18 Uoink this page: read the page the way the user's tab shows it (after
+// it rendered, with their own sign-in) with lib/defuddle.js and
+// lib/page-capture.js, in the tab the user clicked (activeTab + scripting).
+// Null when the tab is gone, moved to another page, or can't be read; the
+// caller then falls back to the helper's own fetch of the URL.
+// The tab is checked before anything is injected: only an http(s) web page
+// (not the Web Store, an extension page, a local file or a PDF) that still
+// shows the asked-for page, query included, is read.
+const TRACKING_PARAM = /^(?:utm_\w+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|_ga)$/i;
+
+function pageKey(raw) {
+  const url = new URL(String(raw || ""));
+  const params = [...url.searchParams].filter(([key]) => !TRACKING_PARAM.test(key))
+    .sort((a, b) => (a[0] + "=" + a[1] < b[0] + "=" + b[1] ? -1 : 1));
+  return `${url.origin}${url.pathname.replace(/\/+$/, "")}?${new URLSearchParams(params)}`;
+}
+
+function samePage(a, b) {
+  try {
+    return pageKey(a) === pageKey(b);
+  } catch { return false; }
+}
+
+function readableTabUrl(raw) {
+  let url;
+  try { url = new URL(String(raw || "")); } catch { return false; }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+  const host = url.hostname.toLowerCase();
+  if (host === "chromewebstore.google.com" || (host === "chrome.google.com" && /^\/webstore/i.test(url.pathname))) {
+    return false;
+  }
+  return !/\.pdf$/i.test(url.pathname);
+}
+
+async function readPageFromTab(job) {
+  if (!Number.isInteger(job.tabId) || !chrome.scripting || !chrome.tabs || !chrome.tabs.get) return null;
+  let tab = null;
+  try { tab = await chrome.tabs.get(job.tabId); } catch { tab = null; }
+  if (!tab || !readableTabUrl(tab.url) || !readableTabUrl(job.url) || !samePage(tab.url, job.url)) return null;
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId: job.tabId },
+      files: ["lib/defuddle.js", "lib/page-capture.js"],
+    });
+    const rows = await chrome.scripting.executeScript({
+      target: { tabId: job.tabId },
+      func: () => (globalThis.UoinkPageCapture ? globalThis.UoinkPageCapture.capture(document) : null),
+    });
+    const result = rows && rows[0] && rows[0].result;
+    if (!result || !result.ok || !result.payload || !samePage(result.payload.url, job.url)) return null;
+    return result.payload;
+  } catch (e) {
+    console.warn("[stc] page read in the tab failed", e);
+    return null;
+  }
+}
+
+// The tab's text goes to the helper (POST /extract/page/dom, local only). An
+// older helper without that route answers 404: use the URL path instead.
+async function capturePage(job) {
+  const capture = await readPageFromTab(job);
+  if (capture) {
+    const data = await STC.postExtractPageDom(capture);
+    if (!(data && data.http_status === 404)) return data;
+  }
+  return STC.postExtractPage(job.url);
 }
 
 // A1: capture an X Article from the context menu the same way the in-page

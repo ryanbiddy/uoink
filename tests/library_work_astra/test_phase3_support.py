@@ -455,7 +455,6 @@ class Rig:
         from index import Index
         idx = Index.open(self.path)
         self.connections.append(idx)
-        idx._conn.execute('PRAGMA busy_timeout=250')
         with idx.write_transaction() as conn:
             conn.execute('''CREATE TABLE IF NOT EXISTS astra_fake_jobs(
                 job_id TEXT PRIMARY KEY, start_id TEXT UNIQUE NOT NULL, owner_token TEXT NOT NULL)''')

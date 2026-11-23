@@ -1,11 +1,11 @@
-"""Keep the Windows and macOS bundled yt-dlp versions in lockstep."""
+"""Keep the bundled and headless Linux yt-dlp pins in lockstep."""
 
 from pathlib import Path
 import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "2026.10.21"
+EXPECTED = "2026.10.26"
 
 
 def _required_match(path: Path, pattern: str) -> str:
@@ -23,8 +23,10 @@ def test_ytdlp_build_pins_match_current_stable():
         ROOT / "requirements-installer-lock.txt",
         r'(?m)^yt-dlp==([^\s]+)$',
     )
+    linux = _required_match(ROOT / "requirements-linux.txt", r"(?m)^yt-dlp==([^\s]+)$")
 
     assert windows == EXPECTED
+    assert linux == EXPECTED
     # Wheel metadata normalizes zero-padded release components.
     assert tuple(map(int, macos.split("."))) == tuple(map(int, EXPECTED.split(".")))
     # The mac builder now installs the qualified wheel graph from this lock.

@@ -21,7 +21,10 @@ from __future__ import annotations
 
 import uoink_usage
 
+from collections import Counter
+from contextlib import ExitStack
 import hashlib
+import math
 import json
 import logging
 import os
@@ -127,7 +130,7 @@ def _validate_feed_url(raw: str) -> str | None:
 
 # ---- feed CRUD ----------------------------------------------------------
 def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
-             auto_ingest: bool = False) -> dict:
+             auto_ingest: bool = False, title: str | None = None, enabled: bool = True) -> dict:
     """Insert + return a fresh feed row. UNIQUE constraint on feed_url
     prevents duplicate registration. Returns an existing row's dict
     when the URL is already in the table -- idempotent add."""
@@ -143,9 +146,9 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
         stored_auto_ingest = 0 if managed else (1 if auto_ingest else 0)
         cur = conn.execute(
             "INSERT OR IGNORE INTO podcast_feeds "
-            "(feed_url, poll_interval_min, auto_ingest, added_at) "
-            "VALUES (?, ?, ?, ?)",
-            (canonical, interval, stored_auto_ingest, _now_iso()))
+            "(feed_url, poll_interval_min, auto_ingest, added_at, title, enabled) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (canonical, interval, stored_auto_ingest, _now_iso(), title, int(enabled)))
         if cur.rowcount == 0:
             # Already present; return that row.
             row = conn.execute(
@@ -159,7 +162,7 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
         if result and managed:
             result["source_id"] = _subscriptions().legacy_register(
                 conn, kind="podcast_rss", url=result["feed_url"],
-                feed_id=int(result["id"]), interval=interval,
+                feed_id=int(result["id"]), interval=interval, display_name=result.get("title"),
                 detection_enabled=bool(result.get("enabled", 1)))
             if auto_ingest:
                 result["consent_required"] = True
@@ -189,7 +192,20 @@ def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
         sql += " WHERE f.enabled = 1"
     sql += " GROUP BY f.id ORDER BY f.added_at DESC"
     rows = idx._conn.execute(sql, params).fetchall()
-    return [dict(r) for r in rows]
+    feeds = [dict(r) for r in rows]
+    if feeds and _subscriptions().tables_present(idx._conn):
+        successes = dict(idx._conn.execute(
+            "SELECT s.legacy_feed_id, MAX(c.last_poll_success_ms) FROM source_subscriptions s "
+            "JOIN source_detection_cursors c USING(source_id) WHERE s.legacy_feed_id IS NOT NULL "
+            "AND c.last_poll_success_ms IS NOT NULL GROUP BY s.legacy_feed_id"))
+        for feed in feeds:
+            ms = successes.get(feed["id"])
+            if ms is not None:
+                success = datetime.fromtimestamp(ms / 1000, timezone.utc)
+                legacy = _parse_poll_timestamp(feed.get("last_polled_at"))
+                if legacy is None or success > legacy:
+                    feed["last_polled_at"] = success.isoformat().replace("+00:00", "Z")
+    return feeds
 
 
 class ManagedBySubscription(ValueError):
@@ -342,8 +358,11 @@ def _parse_duration(s: str | None) -> int | None:
     return None
 
 
-def parse_feed_body(body: bytes | str) -> dict:
+def parse_feed_body(body: bytes | str, *, limit: int | None = None) -> dict:
     """Pure parse: bytes/string of RSS or Atom XML -> structured dict.
+
+    ``limit`` raises the per-poll episode cap for a one-off whole-show
+    listing (show_capture.py); feed polls keep the default cap.
 
     Returns:
         {
@@ -437,7 +456,7 @@ def parse_feed_body(body: bytes | str) -> dict:
             f"unrecognised feed root element: {root_name!r}")
 
     return {"feed": feed_meta,
-            "episodes": episodes[:_EPISODES_PER_POLL_CAP]}
+            "episodes": episodes[:limit or _EPISODES_PER_POLL_CAP]}
 
 
 # ---- HTTP fetch with conditional GET -----------------------------------
@@ -562,11 +581,10 @@ def record_feed_meta(idx, feed_id: int, *, title: str | None,
         else:
             conn.execute(
                 "UPDATE podcast_feeds SET "
-                "  last_polled_at = ?, "
                 "  error_count = error_count + 1, "
                 "  last_error = ? "
                 "WHERE id = ?",
-                (_now_iso(), (error or "")[:512], feed_id))
+                ((error or "")[:512], feed_id))
 
 
 def poll_feed(idx, feed_id: int, *, refresh=None) -> dict:
@@ -1151,7 +1169,7 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
 
 
 def _podcast_root(data_root: Path) -> Path:
-    root = Path(data_root) / "Podcasts"
+    root = Path(data_root).resolve() / "Podcasts"
     root.mkdir(parents=True, exist_ok=True)
     return root
 
@@ -1240,6 +1258,25 @@ def _source_deep_link(source_url: str, seconds: float | int | None) -> str:
     return f"{source_url.split('#', 1)[0]}#t={timestamp}"
 
 
+def _valid_words(raw) -> list[dict] | None:
+    """Word timings as stored ({word, start, end}); anything malformed is
+    dropped, never an error, so old and new transcripts both read."""
+    if not isinstance(raw, list):
+        return None
+    words = []
+    for word in raw:
+        if not isinstance(word, dict) or not isinstance(word.get("word"), str):
+            continue
+        start, end = word.get("start"), word.get("end")
+        if (isinstance(start, bool) or isinstance(end, bool)
+                or not isinstance(start, (int, float)) or not isinstance(end, (int, float))
+                or not math.isfinite(start) or not math.isfinite(end) or min(start, end) < 0):
+            continue
+        if word["word"].strip():
+            words.append({"word": word["word"].strip(), "start": start, "end": max(start, end)})
+    return words or None
+
+
 def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
     try:
         raw = json.loads(data.decode("utf-8"))
@@ -1271,6 +1308,9 @@ def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
                 raise ValueError(f"transcript segment {seq} speaker must be text")
             if speaker.strip():
                 item["speaker"] = speaker.strip()
+        words = _valid_words(segment.get("words"))
+        if words:
+            item["words"] = words
         shaped.append(item)
     if not shaped:
         raise ValueError("transcript segments array is empty")
@@ -1306,6 +1346,136 @@ def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
     return {"path": path, "transcript": normalized}
 
 
+def _owned_file(data_root, value):
+    if not value:
+        return None
+    path = Path(value)
+    if not path.is_absolute() or ".." in path.parts or Path(path.parent.parent.name) != Path("Podcasts"):
+        return None
+    root = Path(data_root).resolve()
+    if path.parent.parent.parent.resolve() != root:
+        return None
+    canonical = root / "Podcasts" / path.parent.name / path.name
+    return canonical if path.resolve(strict=True) == canonical and canonical.is_file() else None
+
+
+def _audio_rows(db):
+    return db.execute(
+        "SELECT e.id, e.audio_local_path, e.transcript_local_path, e.transcript_status, e.status, e.guid, f.feed_url "
+        "FROM podcast_episodes e JOIN podcast_feeds f ON f.id=e.feed_id WHERE e.audio_local_path IS NOT NULL").fetchall()
+
+
+def _audio_refs(rows):
+    try:
+        return Counter(Path(row["audio_local_path"]).resolve() for row in rows if row["audio_local_path"])
+    except (OSError, RuntimeError, ValueError):
+        # An unreadable alias cannot establish exclusive ownership.
+        return Counter()
+
+
+def _removable_audio(data_root, row, references):
+    if row["status"] == EPISODE_STATUS_QUEUED or row["transcript_status"] != "done":
+        return None
+    try:
+        path = _owned_file(data_root, row["audio_local_path"])
+        if not path or path.suffix.lower() not in (".mp3", ".wav") or references[path] != 1:
+            return None
+        transcript = _owned_file(data_root, row["transcript_local_path"])
+        if transcript != path.with_suffix(".transcript.json"):
+            return None
+        _load_transcript(transcript)
+        return path
+    except (OSError, ValueError, RuntimeError):
+        return None
+
+
+def audio_storage(idx, data_root, protected=(), *, available=None):
+    """Measure regular downloads under the library and validate removable pairs."""
+    root = Path(data_root).resolve() / "Podcasts"
+    files = {}
+    if root.is_dir() and root.resolve() == root:
+        for folder in root.iterdir():
+            try:
+                if not folder.is_dir() or folder.resolve() != folder:
+                    continue
+                for path in folder.iterdir():
+                    try:
+                        if path.suffix.lower() in (".mp3", ".wav") and _owned_file(data_root, path):
+                            files[path] = path.stat().st_size
+                    except (OSError, RuntimeError):
+                        continue
+            except (OSError, RuntimeError):
+                continue
+    with idx.read_snapshot() as db:
+        rows = _audio_rows(db)
+    references = _audio_refs(rows)
+    removable = {}
+    for row in rows:
+        if row["id"] not in protected:
+            path = _removable_audio(data_root, row, references)
+            if path in files and (available is None or available(dict(row), path)):
+                removable[row["id"]] = files[path]
+    return {"bytes": sum(files.values()), "episodes": list(removable),
+            "deletable_bytes": sum(removable.values())}
+
+
+def _audio_lock_key(path):
+    return "podcast-audio:" + os.path.normcase(str(path.resolve()))
+
+
+def _unlink_download(root, path):
+    """Pin the library directories while removing a single file."""
+    with ExitStack() as held:
+        if os.name == "nt":
+            import _winapi
+            # Directory handles without FILE_SHARE_DELETE prevent a rename or a
+            # junction substitution between verification and the actual unlink.
+            share_read_write = 0x1 | 0x2
+            open_existing = 3
+            directory_no_follow = 0x02000000 | 0x00200000  # BACKUP_SEMANTICS | OPEN_REPARSE_POINT
+            file_list_directory = 0x0001
+            for folder in (root, path.parent.parent, path.parent):
+                handle = _winapi.CreateFile(str(folder), file_list_directory, share_read_write, 0, open_existing,
+                                            directory_no_follow, 0)
+                held.callback(_winapi.CloseHandle, handle)
+                if folder.resolve(strict=True) != folder:
+                    return False
+            if path.resolve(strict=True) != path:
+                return False
+            path.unlink()
+        else:
+            flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+            fd = os.open(root, flags)
+            held.callback(os.close, fd)
+            for name in ("Podcasts", path.parent.name):
+                fd = os.open(name, flags, dir_fd=fd)
+                held.callback(os.close, fd)
+            os.unlink(path.name, dir_fd=fd)
+    return True
+
+
+def delete_transcribed_audio(idx, data_root, episode_id):
+    """Check both database references and download ownership at the unlink."""
+    with idx.write_transaction() as db:
+        rows = _audio_rows(db)
+        row = next((item for item in rows if item["id"] == episode_id), None)
+        path = _removable_audio(data_root, row, _audio_refs(rows)) if row else None
+        if not path:
+            return False
+        try:
+            lock = source_subscriptions.CaptureLock.try_acquire(data_root, _audio_lock_key(path))
+            if not lock:
+                return False
+            with lock:
+                if not _unlink_download(Path(data_root).resolve(), path):
+                    return False
+                db.execute("UPDATE podcast_episodes SET audio_local_path=NULL, audio_size_bytes=NULL, "
+                           "audio_downloaded_at=NULL WHERE id=?", (episode_id,))
+        except (OSError, ValueError):
+            return False
+        return True
+
+
 def _atomic_write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_name = None
@@ -1337,7 +1507,7 @@ def _link_episode_to_yoink(idx, episode_id: int, video_id: str) -> None:
 
 
 @uoink_usage.capture("podcast")
-def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
+def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier=None) -> dict:
     """Publish a completed episode transcript into the shared corpus.
 
     Identity and file paths are deterministic, so retrying repairs a partial
@@ -1412,10 +1582,24 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     feed_key, guid, capture_key = _episode_full_identity(row)
     captured_at = (existing or {}).get("yoinked_at") or _now_iso()
     artwork_url = episode_artwork_url(idx, episode_id)
+    # A republish keeps the shelf the user (or an earlier pass) chose. A new
+    # episode is shelved from its transcript when the caller passes a router.
+    topic = (existing or {}).get("topic")
+    if not topic or str(topic).strip().lower() == "uncategorized":
+        topic = "Uncategorized"
+        if topic_classifier is not None:
+            try:
+                topic = topic_classifier({
+                    "title": episode_title, "channel": podcast_title, "description": "",
+                    "source_type": "podcast", "url": source_url,
+                    "transcript": " ".join(s["text"] for s in segments[:400]),
+                }) or "Uncategorized"
+            except Exception as exc:  # a shelf never blocks publication
+                log.warning("podcast shelf routing failed: %s", exc)
     record = {
         "video_id": video_id, "slug": folder.name,
         "channel": podcast_title, "author": podcast_title,
-        "title": episode_title, "topic": "Uncategorized",
+        "title": episode_title, "topic": topic,
         "hook_type": None, "yoinked_at": captured_at,
         "corpus_path": str(corpus_path), "sidecar_path": str(sidecar_path),
         "health_score_json": None,
@@ -1466,7 +1650,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         transcript=transcript_raw, transcript_bytes=transcript_bytes,
         corpus_revision=hashlib.sha256(corpus_bytes).hexdigest(), playback=playback)
     sidecar_transcript = []
-    for citation, annotation in zip(transcript_citations, media_block["cues"]):
+    for seq, (citation, annotation) in enumerate(zip(transcript_citations, media_block["cues"])):
         citation["speaker"] = annotation["speaker"]
         citation["speaker_provenance_json"] = (
             _media_mod.canonical_json(annotation["speaker_provenance"])
@@ -1478,6 +1662,8 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
             "source_url": citation["source_url"],
             "source_deep_link": citation["source_deep_link"],
             "youtube_deep_link": None,
+            # 3.18: word timings from local Whisper, when the transcript has them.
+            **({"words": segments[seq]["words"]} if segments[seq].get("words") else {}),
         })
     sidecar = {
         "schema_version": 2,
@@ -1694,7 +1880,6 @@ def download_episode_audio(idx, episode_id: int, *,
     path AND has non-zero size we mark status='downloaded' without
     re-downloading. Returns a structured result the endpoint surfaces.
     resolve_url is an explicit test injection for URL admission."""
-    import _platform
     episode = get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": f"episode not found: {episode_id}"}
@@ -1714,6 +1899,15 @@ def download_episode_audio(idx, episode_id: int, *,
         return {"ok": False, "error": "audio_url is not an http(s) URL"}
 
     out_path = _episode_audio_path(Path(data_root), feed, episode)
+    lock = source_subscriptions.CaptureLock.acquire(data_root, _audio_lock_key(out_path), timeout=5)
+    if lock is None:
+        return {"ok": False, "error": "Episode audio is busy. Try again."}
+    with lock:
+        return _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, timeout_sec, resolve_url)
+
+
+def _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, timeout_sec, resolve_url):
+    import _platform
     # Idempotent: inspect the final postprocessed path (WAV on Darwin,
     # MP3 elsewhere), rather than yt-dlp's intermediate download.
     if out_path.exists() and out_path.stat().st_size > 0:

@@ -21,12 +21,14 @@
 ;   models\whisper-bundled\<size>\  Pinned faster-whisper model (3.12+),
 ;                     read-only. Capture ASR and podcast jobs load it when no
 ;                     downloaded copy of the selected size exists.
+;   models\embed-bundled\potion-base-8m\  Pinned static text-embedding model
+;                     (3.18+), read-only. Shelf suggestions read it.
 ;   stop-server.bat  Stops the server via the PID file written at startup.
 ;   uoink.ico         Used for shortcuts and the uninstaller.
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.17.0"
+#define AppVersion    "3.18.0"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
@@ -112,8 +114,8 @@ InstallingLabel=This only takes a minute.
 StatusExtractFiles=Copying Uoink files...
 ClickFinish=
 FinishedHeadingLabel=Uoink is installed
-FinishedLabelNoIcons=Uoink opens next and walks you through adding the browser button. Your first save opens the dashboard with the source ready to read.
-FinishedLabel=Uoink opens next and walks you through adding the browser button. Your first save opens the dashboard with the source ready to read.
+FinishedLabelNoIcons=Uoink opens next and walks you through adding the browser button. Then click Uoink under any YouTube video to save it to your library.
+FinishedLabel=Uoink opens next and walks you through adding the browser button. Then click Uoink under any YouTube video to save it to your library.
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -138,7 +140,9 @@ Source: "staging\third-party-notices\yt-dlp-ejs-0.8.0-LICENSES.txt"; DestDir: "{
 Source: "staging\third-party-notices\scrapecreators-social-media-research-skills-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\mozilla-readability-APACHE-2.0.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\qrcode-generator-1.4.4-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\defuddle-0.19.6-MIT-LICENSE.txt"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 Source: "staging\third-party-notices\faster-whisper-base-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
+Source: "staging\third-party-notices\potion-base-8m-NOTICE.md"; DestDir: "{app}\third-party-notices"; Flags: ignoreversion
 
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
@@ -172,6 +176,7 @@ Source: "staging\library_cards.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_work.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_subscriptions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_availability.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\transcript_backfill.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_analysis.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_resources.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -200,6 +205,7 @@ Source: "staging\uoink_processes.py"; DestDir: "{app}"; Flags: ignoreversion
 ; opening default data. Must ship or isolated mode cannot start.
 Source: "staging\uoink_install_isolation.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_usage.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_browser.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_store.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\channels.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -225,13 +231,22 @@ Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\asr_worker.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\asr_models.py"; DestDir: "{app}"; Flags: ignoreversion
 ; U-15 X text/thread capture. server.py imports x_extractor at module top, so it
 ; MUST be in Inno's installed file list too -- build.ps1 staging coverage alone is
 ; not enough. Its absence here is why v3.2.6 shipped without it and the helper
 ; crashed on launch with ModuleNotFoundError: No module named 'x_extractor'.
 Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\x_fulltext.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\x_text_repair.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\page_dom_capture.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\show_capture.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\timed_cues.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\shelf_router.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\local_embed.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_verify.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research_report.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -292,6 +307,9 @@ Source: "staging\defaults\*"; DestDir: "{app}\defaults"; Flags: recursesubdirs i
 ; from scripts\whisper_model_pin.json (pinned revision, SHA-256 per file).
 ; [InstallDelete] below clears the previous version's copy first.
 Source: "staging\models\whisper-bundled\*"; DestDir: "{app}\models\whisper-bundled"; Flags: recursesubdirs ignoreversion createallsubdirs
+; 3.18: the static text-embedding model for shelf suggestions, staged from
+; scripts\embed_model_pin.json the same way. [InstallDelete] clears it first.
+Source: "staging\models\embed-bundled\*"; DestDir: "{app}\models\embed-bundled"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\stop-server.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\stop-server.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\verify_install.ps1"; DestDir: "{app}"; Flags: ignoreversion
@@ -421,6 +439,7 @@ Filename: "{app}\python\python.exe"; \
 ; Replace, never merge, the bundled model: a release that pins another
 ; revision or size must not leave the old files beside the new ones.
 Type: filesandordirs; Name: "{app}\models\whisper-bundled"
+Type: filesandordirs; Name: "{app}\models\embed-bundled"
 
 [UninstallDelete]
 ; Pip and the running Python create files we didn't ship (.pyc caches, the

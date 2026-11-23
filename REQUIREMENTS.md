@@ -1,7 +1,7 @@
 # Uoink — Manual source setup
 
 Most Windows users should use the
-[published v3.17.0 installer](https://github.com/ryanbiddy/uoink/releases/tag/v3.17.0) (`Uoink-Setup-3.17.0.exe`).
+[published v3.18.0 installer](https://github.com/ryanbiddy/uoink/releases/tag/v3.18.0) (`Uoink-Setup-3.18.0.exe`).
 Use this path when developing Uoink or testing the current source checkout.
 
 ## Prerequisites
@@ -28,7 +28,7 @@ Use this path when developing Uoink or testing the current source checkout.
 3. Install the pinned Python runtime dependencies:
    ```
    python -m pip install -r requirements.txt
-   python -m pip install "yt-dlp==2026.10.21"
+   python -m pip install "yt-dlp==2026.10.26"
    ```
    The second pin matches the version bundled by `build.ps1`.
 

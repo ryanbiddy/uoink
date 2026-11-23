@@ -30,6 +30,43 @@ class Element {
     this.childNodes = [];
     this.parentNode = null;
   }
+  get classList() { return (this.attributes.class || "").split(/\s+/); }
+  get dataset() {
+    this._dataset ??= Object.fromEntries(Object.entries(this.attributes)
+      .filter(([key]) => key.startsWith("data-"))
+      .map(([key, value]) => [key.slice(5).replace(/-([a-z])/g, (_, ch) => ch.toUpperCase()), value]));
+    return this._dataset;
+  }
+  set innerHTML(markup) {
+    this.childNodes = parseHTML(markup).childNodes;
+    for (const child of this.childNodes) child.parentNode = this;
+  }
+  get outerHTML() {
+    const attrs = Object.entries(this.attributes).map(([k,v]) => ` ${k}="${v}"`).join("");
+    const inner = this.childNodes.map(n => n.outerHTML ?? n.nodeValue).join("");
+    return `<${this.tagName}${attrs}>${inner}</${this.tagName}>`;
+  }
+  contains(node) {
+    for (; node; node = node.parentNode) if (node === this) return true;
+    return false;
+  }
+  insertBefore(child, sibling) {
+    child.remove();
+    const index = sibling ? this.childNodes.indexOf(sibling) : this.childNodes.length;
+    this.childNodes.splice(index, 0, child);
+    child.parentNode = this;
+  }
+  append(child) { this.insertBefore(child, null); }
+  remove() {
+    if (!this.parentNode) return;
+    const siblings = this.parentNode.childNodes;
+    siblings.splice(siblings.indexOf(this), 1);
+    this.parentNode = null;
+  }
+  replaceWith(child) {
+    this.parentNode.insertBefore(child, this);
+    this.remove();
+  }
   get children() {
     return this.childNodes.filter((n) => n.nodeType === 1);
   }
@@ -57,6 +94,7 @@ class Element {
     return all.length ? all[0] : null;
   }
   querySelectorAll(selector) {
+    if (selector.startsWith(".")) return this._descendants([]).filter(el => el.classList.includes(selector.slice(1)));
     const steps = parseSelector(selector);
     return this._descendants([]).filter((el) => matchesChain(el, steps));
   }

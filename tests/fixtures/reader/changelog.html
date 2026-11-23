@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Changelog | Quill</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta property="og:title" content="Changelog"><meta property="og:site_name" content="Quill"><meta property="og:url" content="https://quill.example.dev/changelog"><link rel="stylesheet" href="/static/site.css"></head>
+<body>
+<header class="site-header"><a class="skip-link" href="#main">Skip to main content</a><a class="logo" href="/">Quill</a><nav class="site-nav" aria-label="Main"><ul><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="/roadmap">Roadmap</a></li></ul></nav><form class="search" role="search"><input type="search" placeholder="Search"><button>Go</button></form></header>
+<main class="changelog">
+<h1>Changelog</h1>
+<p>All notable changes to Quill are listed here, newest first.</p>
+<h2>2.4.0</h2>
+<p>The plan was to benchmark the plugin hook, refactor the retry queue, and keep the nightly build open for two reviewers. Nobody expected the freeze to pin the plugin hook so quickly, yet the maintainers had to merge it again.</p>
+<ul><li>Added <code>jitter</code> to retries</li><li>Faster worker start on large queues</li><li>Fixed a lock file race on Windows</li></ul>
+<h2>2.3.1</h2>
+<p>The maintainers still argue about whether the plugin hook should be renamed or left noisy for another year. A stable lock file is easy to miss, so the triage rota now deprecate it every season and write the result down.</p>
+<ul><li>Fixed the schema check for nested payloads</li><li>Docs now cover plugin hooks</li></ul>
+<h2>2.3.0</h2>
+<p>Some of the maintainers wanted to deprecate the config loader at once, while others asked for three more weekends of notes. Each month, the triage rota walk past the CLI to deprecate the lock file and check the log rotation.</p>
+<ul><li>New <code>run_at</code> scheduling option</li><li>Deprecated the old config loader</li></ul>
+</main>
+<footer class="site-footer"><p>Quill changelog. Subscribe to release feeds for updates.</p><ul class="footer-links"><li><a href="/privacy">Privacy policy</a></li><li><a href="/terms">Terms of use</a></li><li><a href="/contact">Contact us</a></li></ul></footer>
+<script src="/static/analytics.js" async></script>
+</body></html>

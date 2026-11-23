@@ -160,6 +160,8 @@ async function detectCurrentSource() {
       }
     }
     currentSource = cls;
+    // Uoink this page reads the page as this tab shows it.
+    if (tab && Number.isInteger(tab.id)) cls.tabId = tab.id;
     const title = (tab.title || "").replace(/\s+-\s+YouTube\s*$/i, "").trim();
     // E1: the SW queue shows (and records a failure) under the tab title.
     currentSource.title = title;
@@ -237,6 +239,18 @@ function messageActiveTab(tabId, payload) {
       });
     } catch { resolve(null); }
   });
+}
+
+// 3.18.0: X's link copy of a long post stops near 280 characters. The worker
+// asks the open tab (content-x-article.js) for the post's own text when it
+// runs the save, so the popup only passes the tab's id and never waits.
+// Null when the tab is unknown.
+async function activeTabId() {
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs && tabs[0];
+    return tab && Number.isInteger(tab.id) ? tab.id : null;
+  } catch { return null; }
 }
 
 async function captureXArticle(url) {
@@ -461,8 +475,9 @@ async function runPopupUoinkCurrent() {
     // Article / web page: allowlist-gated. Runs in the SW queue (E1); on
     // host_not_allowed, showCaptureResult surfaces the one-click "Allow this
     // site and retry" button instead of a dead error.
+    // tabId lets the worker read the page as this tab shows it.
     if (src.action === "page") {
-      await queueCapture({ route: "page", url: src.canonical, interval });
+      await queueCapture({ route: "page", url: src.canonical, interval, tabId: src.tabId });
       return;
     }
 
@@ -476,7 +491,11 @@ async function runPopupUoinkCurrent() {
     // The worker owns the text and optional video, including deduplication
     // against pasted links, after this popup closes.
     if (src.action === "x_video") {
-      await queueCapture({ route: "x_post", url: src.canonical, interval });
+      // 3.18.0: queue first. The worker reads the open tab's own text of the
+      // post while it saves, so closing the popup never drops the save.
+      const tabId = await activeTabId();
+      await queueCapture(Object.assign({ route: "x_post", url: src.canonical, interval },
+        tabId !== null ? { readTabId: tabId } : {}));
       return;
     }
     // X article: content-script DOM parse first, /extract/page as fallback.
@@ -521,6 +540,10 @@ function offerAllowRetry(pageUrl, request) {
   }
   pendingAllowCapture = { url: pageUrl, title: (request && request.title) || "" };
   if (request && request.retryOf) pendingAllowCapture.retryOf = request.retryOf;
+  // Keep the tab, so the rerun still reads the page the user sees.
+  const tabId = request && Number.isInteger(request.tabId) ? request.tabId
+    : (currentSource && currentSource.canonical === pageUrl ? currentSource.tabId : undefined);
+  if (Number.isInteger(tabId)) pendingAllowCapture.tabId = tabId;
   setSourceNote(`Uoink hasn't been allowed on ${pendingAllowHost} yet.`);
   if (uoinkAllowRetryBtn) {
     uoinkAllowRetryBtn.classList.remove("hidden");
@@ -532,7 +555,7 @@ async function runAllowSiteAndRetry() {
   if (!uoinkAllowRetryBtn || !pendingAllowHost) return;
   // The capture that hit the wall (offerAllowRetry), else this tab's page.
   const capture = pendingAllowCapture
-    || (currentSource && { url: currentSource.canonical });
+    || (currentSource && { url: currentSource.canonical, tabId: currentSource.tabId });
   if (!capture) return;
   const host = pendingAllowHost;
   const old = uoinkAllowRetryBtn.textContent;
@@ -790,8 +813,10 @@ async function pollQueueStatus() {
   renderCaptures();
 }
 
+let streamId;
 function handleSseEvent(event, data) {
   if (event === "snapshot") {
+    streamId = data.stream_id;
     jobsRevision++;
     captureData.jobs = [...(data.active || []), ...(data.recent || [])];
     loadRecentUoinks();
@@ -804,7 +829,9 @@ function handleSseEvent(event, data) {
   renderCaptures();
 }
 const captureStream = PopupCaptures.stream({
-  connect: async signal => (await UoinkUI.authedFetch("/jobs/stream", { signal })).res,
+  connect: async signal => (await UoinkUI.authedFetch("/jobs/stream", {
+    signal, headers: streamId ? { "X-Uoink-Stream": streamId } : {},
+  })).res,
   onEvent: handleSseEvent,
   onState: state => {
     document.getElementById("capture-sync").textContent = state === "live" ? "" : "Reconnecting. Showing the last known status.";

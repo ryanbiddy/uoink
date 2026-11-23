@@ -10,6 +10,68 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
+- Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
+- When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.
+
+## [3.18.0] - 2026-11-22
+
+### Added
+
+- Finish old saves in **Settings > Library and export > Transcribe saves that have no words**. See which videos are on this computer, which can be downloaded again and which sources are gone. Start with the longest or newest. The run shows the current title, how many are done and a time estimate. Pause and resume any time. It resumes after restart and gives new captures priority.
+- Transcript repair waits 5, 20, then 60 minutes when a site refuses requests, longer after a bot check. It can still work on local video. It sets busy saves aside after repeated waits and skips a file that stops Uoink twice. New words appear in keyword and meaning search, corpus Markdown and `get_transcript` without rebuilding the index. Use `uoink backfill status|start|pause|resume` with `--order longest|newest`, or the token-protected `GET /library/transcript-backfill` and `POST /library/transcript-backfill/{start,pause,resume,finish}` routes.
+- Library health also lists interrupted first captures. **Finish** reuses the video, captions, thumbnail and screenshots, keeps the topic folder and can transcribe locally even if automatic fallback is off. A `capture-not-finished.txt` marker stays until both the details file and library row are saved. A successful repeat capture clears it too. Repairs start when you ask and keep your files.
+- **Save a whole show** in Sources accepts a YouTube channel, playlist, podcast RSS feed or list of links. Preview up to 5,000 episodes, the number of new ones, time and disk space before pressing Start. YouTube saves use captions and skip video, screenshots and comments. Optionally transcribe missing captions locally using temporary audio. Podcast episodes use local transcription and keep audio by default.
+- Whole-show runs queue one episode at a time behind your own saves and skip episodes already saved. See when YouTube will allow a retry, pause, resume or cancel a run, and retry failed episodes by reason. Progress survives a restart.
+- Save long X posts from the open tab. The extension expands “Show more” and keeps quoted posts, full links and the post text on videos. If the public endpoint returns only the start, the reader flags the cut-off text. **Uoink this article** saves X Articles with headings, lists, quotes, links, code and images.
+- For pasted X links, **Get full long posts and Articles through FxTwitter** is off by default in Capture settings. The reader offers this option or a link to open the post and save it with the extension. FxTwitter sees the post ID and your internet address. Switching it off stops requests even during a repair.
+- **Fix cut-off X posts** in Library and export counts affected saves and explains both repair options. With FxTwitter enabled, Start checks one post about every 3.5 seconds and slows down when asked. You can pause, stop or resume after a restart. A missing post keeps its original text. Notes, shelves, transcripts, screenshots and open history stay intact.
+- **Uoink this page** uses bundled Defuddle 0.19.6 (MIT) to read the text in your tab, including pages that need a sign-in or JavaScript. It sends the text, title, author and date to the local helper. If the page changes or cannot be read, Uoink falls back to fetching the link. The extension needs no extra permissions or remote code and grows by about 100 KB zipped.
+- **Tidy Uncategorized** groups suggestions by shelf and gives a reason for each. New shelf names come from words the saves share. Choose a group or individual saves, or leave them in place. Use **Select** to move library items together. Undo survives a dashboard reload and covers the items moved even if part of a batch fails.
+- From a terminal, use `uoink shelves tidy`, `uoink shelves apply SHELF`, `uoink shelves move SHELF ID...`, `uoink shelves undo` or `uoink capture --shelf NAME`. The helper exposes tidy, apply, move and undo under `/library/shelves/`.
+- Saves now distinguish the original publish date and description from the date saved, and record whether captions came from the creator or were generated. Search by original publish date with `published_from` and `published_to` on `/memory/search`. Library rows include `published_at`.
+- Clip tools can list saves by show and publish date with `GET /api/cues/v1/items`. Add `/<id>` for each cue’s start, end and timing source, available word timings, publish date, duration and source link. Both routes appear in OpenAPI. Use `uoink cues <id>` from a terminal. See [timed cues](docs/integrations/timed-cues.md). Existing corpus read contract v1 clients work as before.
+- Choose a transcription model in Capture settings. **English, quick** (distil-small.en, 336 MB) and **English, best** (distil-large-v3.5, 1.5 GB) join the bundled offline Balanced model. The chooser lists languages, download size, quality and a speed estimate based on processor cores. It recommends an English model for this computer. The multilingual model checks the language first and takes over for other languages. The transcript records that choice.
+- Model downloads from Hugging Face start on request, show progress, resume after a stop and check each file’s pinned size and hash. Cancel or delete a download in Settings. The CLI supports `uoink models [list|download|delete|use] <model>`. The helper exposes `GET /asr/models` and `POST /asr/models/download|cancel|delete|use`.
+- Local video and podcast transcripts now keep word timings when available, about 0.5 MB per hour of speech. Older items still open.
+- Contributors can run `python scripts/qa_smoke.py` to check the dashboard at phone and desktop sizes in both themes, an extension save, the API, MCP and CLI. The offline check uses a made-up library and a hidden helper on a test port. It reports results and screenshots and is excluded from app and extension builds. See [the smoke test guide](docs/qa-smoke.md).
+
+### Changed
+
+- New saves use post text, quotes, author, transcript, source and past shelf choices to find a shelf locally. Short videos with little text go to Clips. Notes and podcasts also get shelf suggestions. If evidence is thin, a save stays in Uncategorized until more information arrives.
+- Shelving compares meaning using the bundled potion-base-8M word vectors (about 30 MB, MIT), locally in milliseconds without a GPU. It prefers EmbeddingGemma vectors when ready and can use words, authors and nearby saves when neither model is available. Linux stages the model unless you pass `--no-model`.
+- X bookmark folders, YouTube playlists, CSV folder or playlist columns and Takeout playlists become shelves on import. A shelf you pick survives recapture, re-import, a late transcript, an older Tidy suggestion or an index rebuild. Uoink records the choice in the save’s files. CLI moves use the running helper, which finishes interrupted moves on restart.
+- Pasted pages keep code languages, nested code, alt text and lazy-loaded images, figure and table captions, footnotes and math. Table cells retain paragraphs, lists and code. Newsletter layouts read as text, Q&A pages keep the question and answers, and wiki navigation, tracking pixels and site names in titles drop out.
+- When a pasted link returns a sign-in, paywall preview, robot check, empty app or too little text, the row explains why nothing was saved and offers **Open page**. A short article ending in a newsletter or account box can still be saved with a preview warning.
+- Transcription runs outside the helper. Captures and re-transcriptions share one process, podcasts and backfill another. Each releases its memory after two idle minutes. Two busy processes can hold two models. A crash affects the current job. Settings > Diagnostics and `/health` show whether the engine is working or holding a model.
+- Podcasts use faster-whisper unless speaker labels are enabled. WhisperX and PyTorch load only when needed for that path. Local meaning search releases its model after five idle minutes. Set `UOINK_MODEL_IDLE_SECONDS` to change the search timeout.
+- Local transcription leaves CPU cores for other apps. Existing Turbo downloads still work after the repository rename. Whisper uses speech detection and checks compression, log probability and silence without feeding earlier text into the next passage. A filter removes repeated phrases that still slip through.
+- `uoink --text get <id>` prints the save, shelf and available transcript. Other text commands print their result values. Following a suggested podcast now saves the show name and schedules feed checks. Upgrading resumes checks for untitled shows left unpolled by 3.17. Audio capture needs separate consent.
+- The npm installer keeps a newer installed version and explains why. Failed X video captures show the reason when X supplies one.
+- The MCP server still exposes 99 tools by default, 36 with `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
+
+### Fixed
+
+- **Re-transcribe with** the selected model now fetches the audio again and replaces the transcript only after completion. Search updates immediately. The old details file stays in `.media-inputs`, and you can restore a much longer previous transcript from the item. Failure, cancellation, an edited transcript, an empty result or a partial sample leaves the original in place. The helper route is `POST /transcription/retranscribe`.
+- Long transcriptions continue while reporting progress or downloading a model, including on Windows systems with worker restrictions. A video capture or re-transcription can run alongside podcast transcription. Both retain progress. Cancellation stops the audio decoder too, and a stalled job no longer blocks the next capture.
+- Speaker labels work with the bundled WhisperX version. English-only models check for speech across the recording so they can skip a musical intro or outro.
+- X Articles keep the shelf you select from either the article or its post. Checking transcript progress as a repair starts no longer skips an unfinished capture. Whole-show capture honors the latest YouTube retry time across time zones.
+- Library search shows a description or matching passage for videos without captions. Short notes count toward Uncategorized and appear in its filter.
+- Each library card’s title has a keyboard-accessible Open button. Closing the hook guide, source consent dialog or screenshot handoff returns keyboard focus to its opener.
+- Closing the dashboard or popup releases its activity stream promptly. Repeated dashboard loads have a separate token request allowance, and the dashboard waits before retrying when the helper is busy.
+- Lite captures explain why comments were skipped. Settings shows podcast audio disk usage and lets you remove downloads after transcription or clean up existing audio with a finished transcript.
+- The dashboard and first-run window open the extensions page for the detected browser and explain how to pin Uoink. First-run notices, the empty library, Sources and the TikTok tip point to the Uoink button. The installer describes the first save correctly: you stay on the page and see a notice.
+- The Windows tray menu opens after a save, and Recent items picks up new saves within half a minute even if the tray has been idle. Clicking the Start menu or desktop shortcut during startup opens the dashboard when it is ready. An automatic restart after a crash no longer opens it unprompted.
+- The first-run window responds to Close and Escape even during startup, instead of leaving a blank window on top. Windows setup now checks that every Uoink program file arrived.
+
+### Security
+
+- Uoink neutralizes raw HTML, unsafe links and broken code fences in one pass before saving page text. Reader links open web pages only. If a page was read but could not be stored, the row reports the failure.
+- The extension checks the tab before reading and skips browser, store, extension, file and PDF tabs, including tabs that have navigated away. Large or slow pages fall back to fetching the link.
+- Video capture uses yt-dlp 2026.10.26 on Windows, macOS and Linux. The installer updates cryptography to 50.0.2, Starlette to 1.10.0 and python-multipart to 0.0.33 for MCP connections.
+
 ## [3.17.0] - 2026-11-12
 
 ### Added

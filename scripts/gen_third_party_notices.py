@@ -10,7 +10,8 @@ Uses pip-licenses' JSON output when available (build path); falls back to
 importlib.metadata so a dev run without pip-licenses still produces an
 honest, if terser, file. ffmpeg is not a pip package, so its LGPL notice is
 appended from a fixed block (the BtbN win64-lgpl build, per build.ps1). The
-bundled Whisper model's entry is rendered from scripts/whisper_model_pin.json.
+bundled Whisper model's entry is rendered from scripts/whisper_model_pin.json,
+and the bundled embedding model's from scripts/embed_model_pin.json.
 """
 from __future__ import annotations
 
@@ -120,6 +121,15 @@ See the [MIT license](third-party-notices/qrcode-generator-1.4.4-MIT-LICENSE.txt
 """
 
 
+DEFUDDLE_BLOCK = """The Chrome extension's Uoink this page reads the open tab with
+[Defuddle 0.19.6](https://github.com/kepano/defuddle) (MIT), copyright (c) 2025
+Steph Ango (@kepano), shipped unchanged as `extension/lib/defuddle.js` after a
+header comment, with its license beside it as `extension/lib/defuddle-LICENSE.txt`.
+It runs only in the tab you clicked and the text goes only to the helper on this computer.
+See the [MIT license](third-party-notices/defuddle-0.19.6-MIT-LICENSE.txt).
+"""
+
+
 WHISPER_PIN = Path(__file__).resolve().with_name("whisper_model_pin.json")
 
 
@@ -148,6 +158,33 @@ def whisper_model_block(pin_path: Path = WHISPER_PIN) -> str:
 {files}
 - Provenance and the full license text:
   [model notice](third-party-notices/faster-whisper-{model}-NOTICE.md).
+"""
+
+
+EMBED_PIN = Path(__file__).resolve().with_name("embed_model_pin.json")
+
+
+def embed_model_block(pin_path: Path = EMBED_PIN) -> str:
+    """The bundled text-embedding model's entry, rendered from the build pin."""
+    pin = json.loads(Path(pin_path).read_text(encoding="utf-8"))
+    model, repo, revision = pin["model"], pin["repo"], pin["revision"]
+    files = "\n".join(f"  - `{name}`: {meta['size']:,} bytes, SHA-256 `{meta['sha256']}`"
+                      for name, meta in sorted(pin["files"].items()))
+    return f"""\
+## Bundled text-embedding model (not a Python package)
+
+- **Component:** potion-base-8M, a Model2Vec static embedding model by
+  MinishLab, distilled from baai/bge-base-en-v1.5:
+  https://huggingface.co/{repo} at pinned revision
+  `{revision}`. Installed read-only at
+  `models/embed-bundled/{model}/` (macOS: `Contents/Resources/models/embed-bundled/{model}/`).
+  Uoink reads it with its own code; the model2vec package is not shipped.
+- **License:** MIT. The model card declares `license: mit`; the Model2Vec
+  project's MIT License is Copyright (c) 2024 Thomas van Dongen.
+- **Files** (the build refuses any size or hash mismatch):
+{files}
+- Provenance and the full license text:
+  [model notice](third-party-notices/{model}-NOTICE.md).
 """
 
 
@@ -325,7 +362,8 @@ def main() -> int:
         url = row.get("URL") or row.get("Home-page") or ""
         lines.append(f"| {name} | {version} | {lic} | {url} |")
     lines += ["", supplemental, "", EMBEDDINGGEMMA_BLOCK, "", ADAPTED_TEXT_BLOCK, "", FFMPEG_BLOCK,
-              "", DENO_BLOCK, "", whisper_model_block(), "", BUNDLED_FONTS_BLOCK, "", QRCODE_BLOCK, ""]
+              "", DENO_BLOCK, "", whisper_model_block(), "", embed_model_block(), "",
+              BUNDLED_FONTS_BLOCK, "", QRCODE_BLOCK, DEFUDDLE_BLOCK, ""]
     output.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {output} ({len(rows)} python packages, source: {source})")
     return 0

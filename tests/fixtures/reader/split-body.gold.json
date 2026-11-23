@@ -1,0 +1,48 @@
+{
+ "name": "split-body",
+ "url": "https://coast.example.com/news/2026/07/ferry-ramp-rebuilt",
+ "layout": "article body split into several containers by ads and promos",
+ "title": "The ferry ramp is rebuilt",
+ "expect": {
+  "python": "article",
+  "extension": "article"
+ },
+ "metadata": {
+  "author": "Pell Ashgrove",
+  "published": "2026-07-22",
+  "site_name": "Coast Courier"
+ },
+ "keep": [
+  "The ferry ramp is rebuilt",
+  "Each season, the harbor trust walk past the east breakwater to survey the fish market roof and check the net loft. The ferry pilots restored the quay wall first, because the tide gauge near the ferry slip looked too weathered to trust. The plan was to light the ferry ramp, document the fish market roof, and keep Saltmarsh Lane open for two apprentices. Records from March show that the harbor trust logged the bright harbor office near Gullhaven at least five times.",
+  "A fragile ferry ramp is easy to miss, so two apprentices now patch it every season and write the result down. A costly ferry ramp is easy to miss, so the lantern committee now haul it every season and write the result down. The net menders still argue about whether the boathouse should be mapped or left heavy for another year. Some of the net menders wanted to replace the mooring post at once, while others asked for two more days of notes.",
+  "The plan was to survey the tide gauge, patch the quay wall, and keep the east breakwater open for the ferry pilots. Each season, the net menders walk past the east breakwater to haul the harbor office and check the signal mast. By August, two apprentices had mapped the fish market roof twice, which left the net loft narrow but usable.",
+  "Why the net loft was restored",
+  "Nobody expected a long fog to document the rope store so quickly, yet two apprentices had to survey it again. Records from June show that the harbor trust tested the narrow rope store near Saltmarsh Lane at least ten times. The plan was to sand the ferry ramp, patch the boathouse, and keep Saltmarsh Lane open for the net menders.",
+  "The plan was to patch the net loft, clear the mooring post, and keep Saltmarsh Lane open for the harbor trust. Each week, volunteer crews walk past the north quay to inspect the quay wall and check the ferry ramp. The ferry pilots repaired the breakwater first, because the quay wall near Gullhaven looked too bright to trust. Some of the ferry pilots wanted to haul the lantern at once, while others asked for six more months of notes. The net menders still argue about whether the ferry ramp should be repaired or left weathered for another year.",
+  "It helped that the lantern was salt-worn, since volunteer crews could rig the rope store without waiting for a spring tide. Some of volunteer crews wanted to sand the signal mast at once, while others asked for ten more days of notes. The harbor trust still argue about whether the net loft should be sorted or left weathered for another year."
+ ],
+ "junk": [
+  "Read next: the lighthouse keeper who never missed a night",
+  "News Coast Boats Opinion",
+  "Marine insurance quotes in under two minutes",
+  "Is the game console worth it? Readers weigh in The sneaker drop everyone is talking about this weekend The lottery winner everyone is talking about this weekend Ten reasons the fitness tracker sold out in hours",
+  "Coast Courier. News from the harbors and beaches."
+ ],
+ "structure": {
+  "headings": [
+   "The ferry ramp is rebuilt",
+   "Why the net loft was restored"
+  ],
+  "list_items": [],
+  "code": [],
+  "tables": [],
+  "links": [],
+  "images": [],
+  "quotes": [],
+  "footnotes": [],
+  "math": [],
+  "captions": []
+ },
+ "rendered": null
+}
