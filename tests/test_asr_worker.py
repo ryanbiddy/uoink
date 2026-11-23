@@ -197,7 +197,12 @@ HARNESS = textwrap.dedent('''
     out["surviving_steps"] = len(rel.transcribe_media(os.path.join(work, "steps.wav"),
                                   model_name="tiny", checkpoint=interrupt_with_stall))
 
-    # A child that cannot answer a stop in time is killed.
+    # A child that cannot answer a stop in time is killed. Both slots write
+    # last_exit, and the warm background child idles out about now: let that
+    # exit land first so the reading below is this job's.
+    until = time.monotonic() + 10
+    while asr_worker._slots["background"].child is not None and time.monotonic() < until:
+        time.sleep(0.05)
     stuck = threading.Event()
     threading.Timer(1.0, stuck.set).start()
     try:
@@ -305,6 +310,7 @@ def test_a_child_that_ignores_a_stop_is_killed(harness_result):
     out, _log = harness_result
     assert out["stuck_cancelled"] is True
     assert out["stuck_exit"]["reason"] == "cancelled"
+    assert isinstance(out["stuck_exit"]["code"], int)  # the stuck child was reaped
 
 
 def test_checkpoint_pauses_between_segments_and_frees_the_engine(harness_result):
@@ -613,6 +619,9 @@ def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled, 
     monkeypatch.setattr(whisper_runner, "_WHISPERX_AVAILABLE", True)
     monkeypatch.setattr(whisper_runner, "_runtime_device", lambda: "cpu")
     monkeypatch.setattr(whisper_runner, "_hf_token", lambda: None)
+    # A real Mac host counts cores with sysctl through subprocess.run, which
+    # the decode fake below replaces. Pin the host count on every OS.
+    monkeypatch.setattr(whisper_runner.asr_models, "physical_cores", lambda: 4)
     monkeypatch.setattr(whisper_runner, "sys", types.SimpleNamespace(platform=platform))
     monkeypatch.setattr(_platform, "mac_bundle_contents", lambda: tmp_path if bundled else None)
     offloaded = platform == "win32"
