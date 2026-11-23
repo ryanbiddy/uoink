@@ -604,6 +604,8 @@ def test_stalled_request_write_has_a_watchdog(monkeypatch, tmp_path):
 ])
 def test_whisperx_pinned_api(monkeypatch, tmp_path, platform, diarize, bundled, supports_callback):
     """Exercise the 3.8.6 call chain and its submodule-only diarizer export."""
+    if diarize:
+        pytest.importorskip("numpy")  # the speaker-label path decodes PCM with numpy
     import types
     import _platform
     audio = tmp_path / "clip.wav"

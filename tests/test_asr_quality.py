@@ -383,6 +383,7 @@ def test_english_only_model_after_forty_seconds_of_music(media, monkeypatch, spe
 
 @pytest.mark.parametrize("empty", [True, False])
 def test_language_probe_unreadable_stream_falls_back(empty, monkeypatch, media):
+    pytest.importorskip("numpy")  # the probe decodes samples with numpy
     import contextlib
     class Container:
         streams = SimpleNamespace(audio=[] if empty else [SimpleNamespace(duration=100, time_base=1)])
