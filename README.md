@@ -1,102 +1,118 @@
-# Uoink
+<p align="center">
+  <a href="https://uoink.app"><img src="assets/brand/app-icon-1024.png" width="96" height="96" alt="Uoink logo"></a>
+</p>
 
-[![Release](https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release)](https://github.com/ryanbiddy/uoink/releases/latest)
-[![Platform: Windows, Mac and Linux](https://img.shields.io/badge/platform-Windows%2010%2F11%20%7C%20macOS%2015%2B%20%7C%20Linux-0A0A0A.svg)](https://uoink.app/get)
-[![ryanbiddy/uoink MCP server](https://glama.ai/mcp/servers/ryanbiddy/uoink/badges/score.svg)](https://glama.ai/mcp/servers/ryanbiddy/uoink)
+<h1 align="center">Uoink</h1>
 
-**A YouTube transcript MCP server that remembers.** Uoink saves YouTube videos, podcasts, X posts, Reddit threads and web pages with their full transcripts to a library on your computer. Claude, Cursor or Codex then searches all of it and cites the exact timestamp.
+<p align="center"><b>Save what you watch. Your AI cites it to the minute.</b></p>
 
-Free and open source (MIT). Windows 10/11 and Mac (Apple silicon, macOS 15+). Linux desktops and headless sandboxes use the [Linux install](docs/linux.md). No account, no Uoink cloud. Videos without captions are transcribed on your machine with Whisper.
+<p align="center">
+  A local library of YouTube videos, podcasts, X posts, Reddit threads and web pages, with full transcripts.<br>
+  Claude, Cursor or Codex searches all of it and quotes the exact timestamp.
+</p>
+
+<p align="center">
+  <a href="https://uoink.app/get"><b>Download</b></a> ·
+  <a href="https://uoink.app">Website</a> ·
+  <a href="docs/connect-your-agent.md">Connect your AI</a> ·
+  <a href="https://uoink.app/developers">Developers</a> ·
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/ryanbiddy/uoink/releases/latest"><img src="https://img.shields.io/github/v/release/ryanbiddy/uoink?color=C2410C&label=release" alt="Latest release"></a>
+  <a href="https://uoink.app/get"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-0A0A0A.svg" alt="Windows, macOS and Linux"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0A0A0A.svg" alt="MIT license"></a>
+  <a href="https://glama.ai/mcp/servers/ryanbiddy/uoink"><img src="https://glama.ai/mcp/servers/ryanbiddy/uoink/badges/score.svg" alt="Glama MCP server score"></a>
+</p>
+
+<p align="center">
+  <img src="docs/store/screenshots/02-your-local-library.png" width="840" alt="The Uoink library on a computer: saved YouTube lessons and web pages, each with its transcript, grouped by topic">
+</p>
+
+**[Download for Windows or Mac](https://uoink.app/get)**, or use Homebrew on a Mac. Then connect your AI:
+
+```sh
+brew install --cask ryanbiddy/uoink/uoink
+uoink connect claude-code
+```
+
+Paste a YouTube link into an AI chat and it guesses. Paste the transcript and the timestamps are gone, so when it says "they mention this around the middle" you can't check.
+
+Uoink is a YouTube transcript MCP server that remembers. Save a video once and the whole thing lands on your computer: transcript, screenshots, top comments and channel details. Your AI reads the real words and tells you the minute they were said.
+
+A transcript fetcher grabs the captions for one video when asked and keeps nothing. Uoink keeps everything you save in one library, so your AI can search across months of videos, podcasts and posts at once.
+
+- **Yours.** Free and open source (MIT). No account, no Uoink cloud. Files stay on your disk as Markdown and JSON.
+- **Any AI you already use.** Claude Desktop, Claude Code, Cursor, Codex and 40+ more over MCP, plus a CLI.
+- **Every platform.** Windows 10/11, Mac (Apple silicon, macOS 15+) and [Linux](docs/linux.md).
+
+## What it does
+
+**Save it.** Click the Uoink button under a video, press `Alt+U`, paste a link into the dashboard, or tell your agent to do it. Videos without captions are transcribed on your machine with Whisper.
+
+**Find it.** One search covers every transcript, post and page you've saved. Each hit comes with its source and timestamp.
+
+**Write from it, with receipts.** Your AI quotes what you saved and links the moment. Ask it which of your saved talks disagree, or run a research playbook over the library.
+
+```text
+You:  uoink https://youtu.be/... and tell me where they explain the eval setup
+AI:   They cover it at 14:32. "We run every prompt against 200 held-out cases..."
+
+You:  which of my saved talks disagreed about that?
+AI:   Two of them. Talk A (08:15) argues for it. Talk B (41:02) says it breaks at scale.
+```
 
 ## Quick start
 
-1. **Install:** download from **[uoink.app/get](https://uoink.app/get)**, on a Mac run `brew install --cask ryanbiddy/uoink/uoink`, or on Windows and Apple-silicon Macs run `npx uoink` (it checks the download's SHA-256 first). For Linux, see [the Linux guide](docs/linux.md).
-2. **Connect your AI:** `uoink connect claude-code`. For other clients run `uoink connect --list`; Claude Desktop can use the `.mcpb` extension from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
-3. **Ask:** *"uoink https://youtu.be/… and tell me where they explain the eval setup."* Later: *"which of my saved talks disagreed about that?"*
+1. **Install.** Download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`. For Linux, see [the Linux guide](docs/linux.md).
+2. **Connect your AI.** Run `uoink connect claude-code`. For other clients, run `uoink connect --list`. Claude Desktop can open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
+3. **Ask.** *"uoink https://youtu.be/… and tell me where they explain the eval setup."*
 
-Your AI gets the quote and the minute, not a guess. Every saved source stays on disk as Markdown and JSON you can open yourself.
+Good to know: the Windows installer is unsigned, so SmartScreen asks first (choose **More info → Run anyway**). The Mac app is signed and notarized. The browser button loads from the app's setup screen while the Chrome Web Store listing is pending.
 
-- **Website:** https://uoink.app · **Developers:** https://uoink.app/developers · Also listed on [mcpservers.org](https://mcpservers.org/servers/ryanbiddy/uoink) and the official MCP registry.
-- **Good to know:** the Windows installer is unsigned, so SmartScreen asks first (choose **More info → Run anyway**). The browser extension loads from the app's setup screen; it isn't on the Chrome Web Store yet. Anonymous usage counts stay off unless you turn them on.
+## What you can save
 
-If Uoink saves you time, a ⭐ helps other people find it.
-
-## Why Uoink
-
-You see a video that's clearly working and you want to know why. So you paste the YouTube link into Claude and hope it can "watch" it. It can't — it hallucinates the quotes, invents the title, and gives up past the first paragraph. You end up watching the whole thing on 2x, taking notes by hand.
-
-Uoink fixes that. Click the **Uoink** button under any video (or right-click a link, or press `Alt+U`) and you get the full transcript, timestamped screenshots, top comments, channel context, and metadata — copied to your clipboard and saved on disk, ready for Claude, ChatGPT, or your notes app. Or tell your AI agent *"uoink that video and decode the hook"* and it does both, with no clipboard step.
-
-The corpus compounds. Every source you save lands in one local library your AI can search, cite, and write from — in your voice.
-
-## What you can capture
-
-| Source | Captured |
+| Source | What Uoink keeps |
 |---|---|
-| **YouTube** (flagship) | Timestamped transcript, screenshots, top comments, channel context, full metadata, JSON sidecar |
-| **X / Twitter video + text** | Video transcript and post text, author credit, thread context |
-| **Podcasts** | Automatic RSS/Atom metadata watching; optional per-feed Auto-ingest for local MP3 download, WhisperX transcription (faster-whisper on Linux without WhisperX), and corpus publishing |
-| **Web pages / articles** | Readable text extraction into the same corpus format |
-| **Reddit** | Thread + top comments as Markdown |
+| **YouTube** | Timestamped transcript, screenshots, top comments, channel details, full metadata |
+| **Podcasts** | Feeds you follow, with new episodes transcribed on your computer if you turn that on |
+| **X posts and videos** | Post text, video transcript, author credit and thread context. Long posts and X Articles save in full from the open tab |
+| **Reddit** | The thread and its top comments |
+| **Web pages** | Readable article text, including pages that need a sign-in when you save from the open tab |
+| **Whole shows** | A YouTube channel, playlist or podcast feed, up to 5,000 episodes, with the time and disk space shown first |
 
-Published sources are indexed in one local library. Podcast audio and transcripts stay under Uoink's local data folder; publishing an episode adds its Markdown and sidecar to that same searchable index.
+You can also import YouTube Watch Later, X bookmarks and Reddit saves, and [share links from your phone](docs/relay.md).
 
-## Three ways your AI reads the corpus
+<p align="center">
+  <img src="docs/store/screenshots/01-uoink-button-on-youtube.png" width="410" alt="The Uoink button under a YouTube video">
+  <img src="docs/store/screenshots/10-search-your-corpus.png" width="410" alt="Searching the Uoink library for a word and getting the matching videos and pages">
+</p>
 
-**1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
+## Works with your AI
 
-**2. MCP server (the agent path)**: A local MCP server exposing 99 tools over stdio, five library resource templates and eleven prompts. Claude Desktop (.mcpb), Claude Code and Cursor get the full capture, research, writing and Library tool set through the standard connection. Consent gates are unchanged.
+| Client | How to connect |
+|---|---|
+| **Claude Desktop** | Open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). [Details](docs/mcpb-bundle.md) |
+| **Claude Code** | `uoink connect claude-code`, or the plugin: `claude plugin marketplace add ryanbiddy/uoink-agent-kit` |
+| **Cursor** | `uoink connect cursor` (use the 36-tool core set, since Cursor caps tools) |
+| **Codex, VS Code and more** | `uoink connect --list` prints setup for 48 clients and integrations |
+| **Any agent with a shell** | The `uoink` command: `uoink search "working memory" --limit 5` |
+| **ChatGPT or any chat box** | Click Uoink and paste. The transcript and key screenshots land on your clipboard |
 
-The stdio transport is tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested.
+The stdio transport is tested with **Claude Desktop and Cursor**, and Claude Code is checked on each release's install receipt. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Full list, config files and limits: [Connect your agent](docs/connect-your-agent.md).
 
-- **stdio** defaults to all 99 registry tools. `UOINK_MCP_TOOLSET=research` serves `research_start`, `research_discover`, `research_capture`, `research_status`, `research_evidence`, `research_publish` and `uoink_url` to discover, capture, retrieve evidence and publish verified reports. Set `UOINK_MCP_TOOLSET=core` in the client's environment for the 36 core tools (the earlier 35 plus `get_transcript`). Cursor and other clients with tool caps may need this setting. Restart the connection after changing it.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the same 99-tool registry through the token-authenticated local helper. Both MCP transports share handlers and flatten the same three top-level `oneOf` input schemas for client compatibility. The server still validates the exact frozen schemas.
-- **[Video deep research](docs/research.md):** find sources, capture transcripts and publish timestamped receipts through the CLI or dashboard Research tab.
+## For agents and developers
 
-**3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
+- **MCP server:** a local MCP server with 99 tools over stdio, five library resource templates and eleven prompts. Set `UOINK_MCP_TOOLSET=core` for 36 tools or `research` for the 7 research tools. [Tool reference](docs/v2-mcp.md)
+- **One launch line for any MCP client:** `"command": "uoink", "args": ["mcp"]`. [Setup by client](docs/connect-your-agent.md#one-launch-command-for-any-mcp-client)
+- **HTTP and OpenAPI:** the same tools at `http://127.0.0.1:5179/mcp/v1` (send the `X-Uoink-Token` header) and an OpenAPI 3.1 surface. Local OpenAPI-capable agents and scripts can drive the same tools through `/openapi/v1/spec.json` and `POST /tools/<name>`.
+- **CLI:** `uoink status`, `uoink search`, `uoink recent`, `uoink note`, `uoink cues <id>`. Local reads work without the app running.
+- **Skill:** a [portable skill](skills/uoink/SKILL.md) for finding saved evidence, citing timestamps and capturing links. Clients that support Agent Skills can load the same file next to the MCP tools or use its CLI commands (Claude Code, Codex, pi, Hermes Agent and OpenClaw).
+- **Research:** [video deep research](docs/research.md) finds sources, checks quotes and timestamps, and publishes a cited report. Six playbooks run over saved captures with no API key and no network calls: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown`, `repurpose-pack` and `thesis-check`.
+- **Agents installing Uoink for someone:** follow [llms-install.md](llms-install.md).
 
-### Use Uoink from any AI agent
-
-After installing, open a new terminal and run `uoink status` or
-`uoink search "working memory" --limit 5`. The installer's checked PATH option
-makes `uoink` available to agents with a local shell. `uoink connect <client>`
-prints connection instructions for MCP clients.
-
-The [portable skill](skills/uoink/SKILL.md) supports Claude Code, Codex, pi,
-Hermes Agent, and OpenClaw through MCP or the CLI. The Claude Code marketplace
-at [ryanbiddy/uoink-agent-kit](https://github.com/ryanbiddy/uoink-agent-kit),
-published with this release, bundles the skill and MCP config. See
-[Connect your agent](docs/connect-your-agent.md) for commands and client limits,
-or [agent installation steps](llms-install.md) for installation from a shell.
-
-### MCP setup (Claude Desktop, Cursor, Cline)
-
-After installing Uoink, open the setup page from the extension popup's **Settings** link and copy the generated snippet — or paste this into your client's MCP config. The stdio server runs the bundled Python against the installed `uoink_mcp.py` (the C-01 fix pins the app dir onto `sys.path`, so this command works on every install):
-
-```json
-{
-  "mcpServers": {
-    "uoink": {
-      "command": "%LOCALAPPDATA%\\Uoink\\python\\python.exe",
-      "args": ["%LOCALAPPDATA%\\Uoink\\uoink_mcp.py"]
-    }
-  }
-}
-```
-
-> Claude Desktop does not expand `%LOCALAPPDATA%` — use the full absolute path (e.g. `C:\\Users\\<you>\\AppData\\Local\\Uoink\\python\\python.exe`). Restart the client after saving; Uoink's tools appear automatically.
-
-Uoink 3.12.1 and later add a portable launch line that needs no install path: `"command": "uoink", "args": ["mcp"]`, or `"command": "cmd", "args": ["/c", "uoink", "mcp"]` for Windows clients that cannot start `.cmd` files. It uses the `uoink` command on PATH. See [Connect your agent](docs/connect-your-agent.md#one-launch-command-for-any-mcp-client).
-
-**One-click install:** a Claude Desktop [`.mcpb` bundle](./docs/mcpb-bundle.md) installs the stdio server without hand-editing config. See [docs/mcpb-bundle.md](./docs/mcpb-bundle.md).
-
-**HTTP transport:** point an HTTP MCP client at `http://127.0.0.1:5179/mcp/v1` and send the header `X-Uoink-Token` (read the token from `%LOCALAPPDATA%\Uoink\token.txt`).
-
-### Uoink Operator Skill
-
-Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) for finding saved evidence, citing timestamps, capturing URLs, saving notes, and writing from the user's sources and voice. Clients that support Agent Skills can load the same file alongside Uoink's MCP tools or use its exact CLI commands. See [Connect your agent](docs/connect-your-agent.md) for install paths and the small Claude Code plugin kit.
-
-## Install
+## Install, step by step
 
 1. **Download the installer.** Download `Uoink-Setup-3.18.0.exe` from the [v3.18.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.18.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
@@ -116,20 +132,6 @@ git clone https://github.com/ryanbiddy/uoink && sh uoink/scripts/linux/install.s
 
 For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` (see [docs/build-installer.md](./docs/build-installer.md)).
 
-### Quiet desktop notifications
-
-Desktop notifications are on by default. To keep background feed watches and
-captures invisible, open **Dashboard → Settings → Local app** and turn off
-**Show desktop notifications**. Uoink keeps suppressed updates in the
-dashboard's **Activity** view, so silence does not discard the event. Uoink
-also applies the same courtesy automatically while a foreground app covers its
-monitor, including borderless and exclusive-fullscreen games.
-
-The persisted setting is `notifications_enabled` in `settings.json`. Local
-clients can read it through `GET /settings` or update it with an authenticated
-`POST /settings` body such as `{"notifications_enabled": false}`. Restart is
-not required.
-
 ## Phone inbox (optional)
 
 Share a link from your phone's share sheet and Uoink captures it on your
@@ -142,23 +144,6 @@ optional note, until Uoink picks it up or for 7 days at most.
 
 Setup, the manual Shortcut fallback and the free-plan tradeoffs are in
 [docs/relay.md](docs/relay.md).
-
-## How it works
-
-**Extension flow:** click Uoink under a video → Uoink extracts transcript, screenshots, comments, metadata → Markdown corpus lands on your clipboard (screenshots embedded) and the full set saves to disk → paste, run a prompt, get analysis.
-
-**Agent flow (MCP):** your agent has the Uoink tools after setup → ask *"uoink this video and decode the hook"* → the agent calls `uoink_video` → `classify_hook` → analysis, no clipboard step.
-
-Six research playbooks work over saved captures: `outlier-posts`, `transcript-intel`, `comment-mining`, `creator-teardown`, `repurpose-pack` and `thesis-check`. `thesis-check` takes a claim you want to test and reads your saved transcripts and comments for the assumptions they share, the evidence for and against, and what your library does not cover, with a citation key and timestamp on every point. Use their stdio prompts or `get_playbook_input` on either transport. Uoink computes the metrics and supplies cited evidence; your client writes the report. These reads need no API key and make no network calls. See [arguments and examples](docs/v2-mcp.md#get_playbook_input).
-
-Optional ScrapeCreators discovery adds `discover_candidates` and
-`queue_discovered` on both transports. It is off by default and uses your own
-key, explicit credit confirmation and a daily credit cap (25 by default). Connected
-agents need a separate opt-in; dashboard calls use a short-lived intent from
-each click. Pick up to ten results to send through the normal capture queue.
-Saved metric snapshots can supplement local playbooks without another paid
-call. No ScrapeCreators thumbnails are loaded. The dashboard controls are
-pending; see the [discovery tool contract](docs/v2-mcp.md#discover_candidates).
 
 ## Privacy
 
@@ -188,6 +173,26 @@ stored in the OS credential store. Content you pass to an AI client is handled
 under that client's policy.
 
 Read the [Uoink privacy policy](https://uoink.app/privacy).
+
+## Docs
+
+| Guide | What's in it |
+|---|---|
+| [Connect your agent](docs/connect-your-agent.md) | Setup for every client, toolsets and limits |
+| [MCP tool reference](docs/v2-mcp.md) | All 99 tools, both transports, playbooks and discovery |
+| [Video deep research](docs/research.md) | Find, capture, verify and publish |
+| [Linux and Docker](docs/linux.md) | Headless installs for agents and sandboxes |
+| [Mac install](docs/mac/INSTALL.md) | The signed app, the extension and the `uoink` command |
+| [Phone inbox](docs/relay.md) | Share links from your phone |
+| [Notifications](docs/notifications.md) | Keep background captures quiet |
+| [Usage sharing](docs/usage-sharing.md) | The opt-in counts, field by field |
+| [Security](SECURITY.md) | How to report a problem |
+
+## Contributing
+
+Bug reports and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md). To run from source, see [REQUIREMENTS.md](./REQUIREMENTS.md).
+
+Ideas and questions go in [Discussions](https://github.com/ryanbiddy/uoink/discussions); bugs go in [Issues](https://github.com/ryanbiddy/uoink/issues).
 
 ## Disclaimer & Terms of Use
 
