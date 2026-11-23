@@ -1099,7 +1099,9 @@ def test_http_routes_and_token_gate(lib):
     lib.mp.setattr(server.socket, "create_connection", REAL_CREATE_CONNECTION)
     lib.add_video("via-http", url=_x(22), video_id="1800000000000000022", title="Over HTTP",
                   duration=60, saved_at="2026-07-01T00:00:00", media=True)
-    httpd = ThreadingHTTPServer(("127.0.0.1", server.PORT), server.Handler)
+    # Port 0: never the resident helper port, whatever the environment says.
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+    lib.mp.setattr(server, "PORT", httpd.server_address[1])
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
     def call(method, path, body=None, token=True):
@@ -1155,7 +1157,9 @@ def test_cli_backfill_talks_to_the_running_helper(lib, capsys):
     lib.mp.setattr(server.socket, "create_connection", REAL_CREATE_CONNECTION)
     lib.add_video("via-cli", url=_x(23), video_id="1800000000000000023", title="From the terminal",
                   duration=90, saved_at="2026-07-01T00:00:00", media=True)
-    httpd = ThreadingHTTPServer(("127.0.0.1", server.PORT), server.Handler)
+    # Port 0: never the resident helper port, whatever the environment says.
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+    lib.mp.setattr(server, "PORT", httpd.server_address[1])
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
     def run(action, order=None):
