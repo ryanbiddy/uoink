@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import shutil
 from pathlib import Path
 import sqlite3
@@ -19,6 +20,7 @@ from unittest.mock import Mock
 
 import pytest
 
+import fd_paths
 import index as index_module
 import library_media
 import uoink_reliability
@@ -691,6 +693,22 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
 
         for method in ("open", "mkdir", "rename", "replace"):
             track(method)
+        # POSIX storage writes open and replace by name inside a held directory.
+        os_open, os_replace = os.open, os.replace
+
+        def opened(name, *args, dir_fd=None, **kwargs):
+            if dir_fd is not None:
+                observe(fd_paths.full_path(name, dir_fd), "open")
+            return os_open(name, *args, dir_fd=dir_fd, **kwargs)
+
+        def replaced(source, target, **kwargs):
+            if kwargs.get("dst_dir_fd") is not None:
+                observe(fd_paths.replace_source(source, kwargs), "replace")
+                observe(fd_paths.replace_target(target, kwargs), "replace")
+            return os_replace(source, target, **kwargs)
+
+        monkeypatch.setattr(os, "open", opened)
+        monkeypatch.setattr(os, "replace", replaced)
         if rollback:
             with pytest.raises(OSError, match="injected publication failure"):
                 refresh.run(mode)
