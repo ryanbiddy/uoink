@@ -689,13 +689,25 @@ def stage_saves_text(data_root: Path, text: str, source=None, filename=None) -> 
 
 
 def stage_saves_file(data_root: Path, path, source=None) -> dict:
-    path = Path(path)
+    from uoink_core.storage import open_regular
+    if str(path).replace("\\", "/").startswith("//"):
+        raise ImportListError("Choose a file on this computer.", "unsupported")
+    path = Path(path).absolute()
+    if os.name == "nt":
+        import ctypes
+        if ctypes.windll.kernel32.GetDriveTypeW(path.anchor) == 4 or ":" in str(path)[len(path.anchor):]:
+            raise ImportListError("Choose a file on this computer.", "unsupported")
     if path.suffix.lower() not in (".csv", ".txt"):
         raise ImportListError("Choose a .csv or .txt saves file.", "unsupported")
     try:
-        if path.stat().st_size > SAVES_FILE_MAX_BYTES:
-            raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
-        with path.open("rb") as stream:
+        with open_regular(Path(path.anchor), path, binary=True) as stream:
+            actual, profile = path.resolve(), Path(data_root).resolve()
+            if actual.is_relative_to(profile) and any(
+                    part.lower().startswith(("token", "settings", "credential", ".env"))
+                    for part in actual.relative_to(profile).parts):
+                raise ImportListError("Choose a saves export outside Uoink's private files.", "unsupported")
+            if os.fstat(stream.fileno()).st_size > SAVES_FILE_MAX_BYTES:
+                raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
             raw = stream.read(SAVES_FILE_MAX_BYTES + 1)
     except OSError:
         raise ImportListError("That saves file wasn't found or couldn't be read.", "not_found")

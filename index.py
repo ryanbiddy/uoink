@@ -1724,7 +1724,8 @@ class Index:
         the user's shelf back in them."""
         try:
             from shelf_router import sync_files
-            sync_files(record.get("sidecar_path"), record.get("corpus_path"), shelf, by_hand=True)
+            sync_files(record.get("sidecar_path"), record.get("corpus_path"), shelf,
+                       by_hand=True, root=getattr(self, "corpus_root", None))
         except Exception as e:  # pragma: no cover -- the index already holds the shelf
             import logging
             logging.getLogger("uoink.index").warning("kept shelf not written to files: %s", e)

@@ -104,7 +104,7 @@ function location() {
         <div class="card">
           <label>Install folder</label>
           <div class="path-row">
-            <input value="${state.installDir}" data-install-dir>
+            <input data-install-dir>
             <button type="button" data-action="browse">Browse</button>
           </div>
           <div class="free-space">Free space readout: prototype hook ready</div>
@@ -143,7 +143,7 @@ function installing() {
       <div class="eyebrow">Installing</div>
       <h2>Running the installer.</h2>
       <div class="progress"><span style="width:${state.progress}%"></span></div>
-      <pre class="log">${state.log.join("\n")}</pre>
+      <pre class="log"></pre>
     </section>
   `;
 }
@@ -195,6 +195,10 @@ function screenHtml() {
 
 function render() {
   document.querySelector("#app").innerHTML = `${titlebar()}<main>${screenHtml()}</main>`;
+  const field = document.querySelector("[data-install-dir]");
+  if (field) field.value = state.installDir;
+  const log = document.querySelector(".log");
+  if (log) log.textContent = state.log.join("\n");
 }
 
 async function simulateInstall() {

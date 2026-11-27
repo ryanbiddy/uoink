@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import os
 from pathlib import Path
+
+from uoink_core.storage import checked_path, open_regular
 from urllib.parse import quote
 
 import corpus_contract
@@ -52,9 +55,10 @@ def _youtube_handle(metadata: dict) -> str | None:
 
 class UoinkCorpusProvider:
     def __init__(self, idx, data_root: Path, *,
-                 facet_labeler=None, vault_path: str | None = None):
+                 facet_labeler=None, vault_path: str | None = None, output_root=None):
         self.idx = idx
         self.data_root = Path(data_root)
+        self.output_root = Path(output_root) if output_root is not None else self.data_root
         self.facet_labeler = facet_labeler or self._default_label
         self.vault_path = vault_path
 
@@ -187,11 +191,10 @@ class UoinkCorpusProvider:
         import podcasts
         return podcasts.repair_corpus_titles(self.idx, [dict(row)], data_root=self.data_root)[0]
 
-    @staticmethod
-    def _content(row: dict) -> dict:
+    def _content(self, row: dict) -> dict:
         raw_path = row.get("corpus_path")
         path = Path(raw_path) if raw_path else None
-        if path is None or not path.is_file():
+        if path is None:
             return {
                 "available": False,
                 "media_type": "text/markdown",
@@ -200,7 +203,9 @@ class UoinkCorpusProvider:
                 "truncated": False,
             }
         try:
-            data = path.read_bytes()
+            with open_regular(self.output_root, path, binary=True) as source:
+                size = os.fstat(source.fileno()).st_size
+                data = source.read(MAX_CONTENT_BYTES)
         except OSError:
             return {
                 "available": False,
@@ -209,27 +214,26 @@ class UoinkCorpusProvider:
                 "byte_length": 0,
                 "truncated": False,
             }
-        truncated = len(data) > MAX_CONTENT_BYTES
+        truncated = size > MAX_CONTENT_BYTES
         return {
             "available": True,
             "media_type": "text/markdown",
             "text": data[:MAX_CONTENT_BYTES].decode(
                 "utf-8", errors="replace"),
-            "byte_length": len(data),
+            "byte_length": size,
             "truncated": truncated,
         }
 
-    @staticmethod
-    def _safe_file(folder: Path, raw_path) -> Path | None:
+    def _safe_file(self, folder: Path, raw_path) -> Path | None:
         if not raw_path or not isinstance(raw_path, (str, Path)):
             return None
         try:
-            base = folder.resolve()
+            checked_path(self.output_root, folder)
             candidate = Path(raw_path)
             if not candidate.is_absolute():
                 candidate = folder / candidate
-            candidate = candidate.resolve()
-            candidate.relative_to(base)
+            checked_path(self.output_root, candidate)
+            candidate.relative_to(folder)
         except (OSError, ValueError):
             return None
         return candidate if candidate.is_file() else None
@@ -267,8 +271,8 @@ class UoinkCorpusProvider:
         sidecar_path = self._safe_file(folder, raw_sidecar)
         if sidecar_path:
             try:
-                sidecar = _json_object(
-                    sidecar_path.read_text(encoding="utf-8"))
+                with open_regular(self.output_root, sidecar_path) as source:
+                    sidecar = _json_object(source.read())
             except OSError:
                 sidecar = {}
         candidates: list[tuple[str, str, str, object]] = [

@@ -31,12 +31,15 @@ Voice DNA applies to every user-visible string here.
 """
 from __future__ import annotations
 
+import io
 import json
 import logging
 import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+from uoink_core.storage import atomic_output, open_regular, _atomic_write_text
 
 # The taxonomy helpers (platform + source-type vocabulary) live in
 # page_extractor so every source agrees on one set of tags. An image is
@@ -183,8 +186,8 @@ def build_image(image_bytes: bytes, *, mime: str | None = None,
     }
 
 
-def _write_thumbnail(image_path: Path, thumb_path: Path,
-                     *, max_width: int = 800) -> tuple[int | None, int | None]:
+def _write_thumbnail(image: Path | bytes, thumb_path: Path,
+                     *, max_width: int = 800, root=None) -> tuple[int | None, int | None]:
     """Best-effort JPEG thumbnail for the Library card preview, plus the source
     image's pixel dimensions. Reuses the same Pillow path the clipboard corpus
     uses (lazy import so dev boxes without Pillow still save the image; the
@@ -197,7 +200,9 @@ def _write_thumbnail(image_path: Path, thumb_path: Path,
         log.info("Pillow not installed; skipping image thumbnail")
         return None, None
     try:
-        with Image.open(image_path, formats=_PIL_FORMATS) as img:
+        source = (io.BytesIO(image) if isinstance(image, bytes) else
+                  open_regular(root or Path(image.anchor), image, binary=True))
+        with source as src, Image.open(src, formats=_PIL_FORMATS) as img:
             width, height = img.width, img.height
             if width * height > MAX_THUMBNAIL_PIXELS:
                 log.warning("image thumbnail skipped: %dx%d is over the "
@@ -207,7 +212,8 @@ def _write_thumbnail(image_path: Path, thumb_path: Path,
         if preview.width > max_width:
             new_h = max(1, int(preview.height * (max_width / preview.width)))
             preview = preview.resize((max_width, new_h), Image.LANCZOS)
-        preview.save(thumb_path, format="JPEG", quality=80, optimize=True)
+        with atomic_output(thumb_path, root=root) as out:
+            preview.save(out, format="JPEG", quality=80, optimize=True)
         return width, height
     except Exception as e:  # decode/encode failure must never block the save
         log.warning("image thumbnail failed: %s", e)
@@ -279,12 +285,12 @@ def persist_image(idx, built: dict, image_bytes: bytes, *,
     width = height = None
     if data_root is not None:
         folder = Path(data_root) / subfolder / slug
-        folder.mkdir(parents=True, exist_ok=True)
         image_path = folder / image_filename
-        image_path.write_bytes(image_bytes)
+        with atomic_output(image_path, root=data_root) as stream:
+            stream.write(image_bytes)
 
         thumb_path = folder / "thumbnail.jpg"
-        width, height = _write_thumbnail(image_path, thumb_path)
+        width, height = _write_thumbnail(image_path, thumb_path, root=data_root)
         has_thumb = thumb_path.exists()
 
         corpus_path = folder / f"{slug}.md"
@@ -299,9 +305,9 @@ def persist_image(idx, built: dict, image_bytes: bytes, *,
         if source_url:
             md_lines.append(f"Source: {source_url}")
             md_lines.append("")
-        corpus_path.write_text("\n".join(md_lines), encoding="utf-8")
+        _atomic_write_text(corpus_path, "\n".join(md_lines), root=data_root)
 
-        sidecar_path.write_text(json.dumps({
+        _atomic_write_text(sidecar_path, json.dumps({
             "schema_version": 2,
             "source_type": SOURCE_TYPE,
             "platform": PLATFORM,
@@ -321,7 +327,7 @@ def persist_image(idx, built: dict, image_bytes: bytes, *,
             "yoinked_at": yoinked_at,
             "extracted_at": yoinked_at,
             "video_id": video_id,
-        }, indent=2, ensure_ascii=False), encoding="utf-8")
+        }, indent=2, ensure_ascii=False), root=data_root)
 
     metadata_json = json.dumps({
         "author": author,

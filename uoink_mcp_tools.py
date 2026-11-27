@@ -26,6 +26,7 @@ import re
 import threading
 import time
 from dataclasses import dataclass
+from uoink_core.storage import checked_path, open_regular
 from pathlib import Path
 from typing import Any, Callable
 from research import CANDIDATE_KEY_PATTERN, RUN_ID_PATTERN
@@ -99,7 +100,8 @@ def _limit_int(value: Any, *, default: int, low: int, high: int) -> int:
 
 def _read_json(path: Path) -> dict[str, Any]:
     try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        with open_regular(_b().DESKTOP_ROOT, path) as source:
+            raw = json.load(source)
         return raw if isinstance(raw, dict) else {}
     except (OSError, json.JSONDecodeError):
         return {}
@@ -136,9 +138,16 @@ def _iter_yoink_folders():
             continue
         if folder == trash or trash in folder.parents:
             continue
+        try:
+            checked_path(root, folder)
+        except OSError:
+            continue
         corpus = b._resolve_corpus_path(folder)
         if corpus is not None:
-            yield folder, corpus
+            try:
+                yield folder, checked_path(root, corpus)
+            except OSError:
+                continue
 
 
 def _yoink_summary(folder: Path, corpus: Path) -> dict[str, Any]:
@@ -184,7 +193,10 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     if row:
         corpus_path = row.get("corpus_path") or ""
         if corpus_path:
-            corpus = Path(corpus_path)
+            try:
+                corpus = checked_path(_b().DESKTOP_ROOT, Path(corpus_path))
+            except OSError:
+                return None, None
             if corpus.is_file():
                 return corpus.parent, corpus
         # Indexed row missing on disk (folder moved/deleted outside the
@@ -435,7 +447,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         return _err("uoink not found")
     try:
         from uoink_core.storage import read_export_markdown
-        md = read_export_markdown(corpus)
+        md = read_export_markdown(corpus, root=_b().DESKTOP_ROOT)
     except OSError as e:
         return _err(f"corpus read failed: {e}")
     sidecar = _read_sidecar(folder)

@@ -1,4 +1,4 @@
-﻿// Real setup and worker scripts with an in-memory DOM, storage and transport.
+// Real setup and worker scripts with an in-memory DOM, storage and transport.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -207,6 +207,20 @@ const groups = {
     const unavailable=await setup({fetch:path=>path==='/health'?jsonResponse({ok:true}):jsonResponse({},403)});
     assert.equal(unavailable.el('status-block').dataset.state,'running');
     assert.match(unavailable.el('diagnose-list').textContent,/unavailable/);
+  },
+  async manual_diagnostics() {
+    const token = 'fixture-helper-token';
+    const requests = [];
+    const env = await setup({fetch: (path, init) => {
+      requests.push({path, headers: init.headers});
+      if (path === '/token') return jsonResponse({token});
+      return jsonResponse({ok:true});
+    }});
+    assert.deepEqual(requests.map(r => r.path), ['/health', '/diagnose']);
+    env.el('verify-btn').click();
+    await settle();
+    assert.ok(env.fetches.some(url => url.endsWith('/diagnose?refresh=1')));
+    assert.equal(requests.at(-1).headers['X-Uoink-Token'], token);
   },
   async routes() {
     const destinations = [

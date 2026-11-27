@@ -172,7 +172,7 @@ def _fetch_playlist_video_ids(playlist_url: str, *,
         "--dump-json",
         "--no-warnings",
         "--skip-download",
-        playlist_url,
+        "--", playlist_url,
     ]
     run = run_subprocess if run_subprocess is not None else subprocess.run
     if run_subprocess is None and os.name != "nt":

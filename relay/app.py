@@ -646,7 +646,12 @@ _PHONE_SCRIPT = r"""
 
   $("pairform").addEventListener("submit", function (event) {
     event.preventDefault();
-    var token = tokenFrom($("pairlink").value);
+    var link;
+    try { link = new URL($("pairlink").value.trim()); } catch (e) {}
+    if (!link || link.origin !== window.location.origin) {
+      say($("pairresult"), "Use a pairing link from this relay.", "bad"); render(); return;
+    }
+    var token = tokenFrom(link.hash);
     if (!validToken(token)) { say($("pairresult"), "That isn't a pairing link from Uoink.", "bad"); render(); return; }
     write(token);
     pending = "";

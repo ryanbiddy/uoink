@@ -31,7 +31,7 @@ import pytest
 import _platform
 import uoink_usage
 from provenance import clamp_title
-from uoink_core.storage import read_export_markdown
+from uoink_core.storage import open_regular, read_export_markdown
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -532,7 +532,9 @@ def test_injected_sqlite_constraint_error_is_not_reported_as_success(capture, mo
 def _session_handler(capture, tmp_path, *, reused=None):
     scope = capture.scope
     session = {"slug": "research", "name": "Research", "status": "open", "videos": []}
-    folder = tmp_path / "sessions" / "research"
+    folder = scope["DESKTOP_ROOT"] / "_sessions" / "research"
+    scope["SESSIONS_ROOT"] = folder.parent
+    scope["open_regular"] = open_regular
     scope["_session_folder"] = lambda sid: folder
     scope["_read_session"] = lambda sid: session
     scope["_write_session"] = lambda sid, value: scope["_atomic_write_text"](

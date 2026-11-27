@@ -254,7 +254,7 @@ def consumers(network, monkeypatch, tmp_path):
     # Use the real parsing regexes without importing Crawl4AI.
     page["re"] = re
     tree = source_tree("page_extractor.py")
-    patterns = {"_TITLE_RE", "_META_RE", "_LINK_RE", "_IMG_RE", "_GENERIC_HOST_RE",
+    patterns = {"_LEGACY_TOKENS", "_TAG_NAME", "_BLOCK_MARKS", "_META_RE", "_LINK_RE", "_IMG_RE", "_GENERIC_HOST_RE",
                 "_USER_AGENT"}
     nodes = [n for n in tree.body if isinstance(n, ast.Assign)
              and any(isinstance(t, ast.Name) and t.id in patterns for t in n.targets)]
@@ -268,7 +268,7 @@ def consumers(network, monkeypatch, tmp_path):
     import article_extractor
     page.update(article_extractor=article_extractor, ENGINE_READABILITY=article_extractor.ENGINE,
                 ENGINE_CRAWL4AI="crawl4ai", _X_HOSTS={"x.com"}, _engine_version=lambda engine: "test")
-    load_functions("page_extractor.py", ("_extract_stdlib", "extract_page",
+    load_functions("page_extractor.py", ("_legacy_page", "_extract_stdlib", "extract_page",
                                          "normalize_page_url", "_fetch_page_html",
                                          "_extract_article_page"), page)
     # The relaxed /extract/any and /live/status validator's generic step.

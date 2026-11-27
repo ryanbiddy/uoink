@@ -584,7 +584,9 @@
       let diag = null;
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          diag = await (await fetch("/diagnose")).json();
+          const auth = await (await fetch("/token", {headers: {"X-Uoink-Client": "uoink-extension"}})).json();
+          if (!auth.token) throw new Error("Helper sign-in failed");
+          diag = await (await fetch("/diagnose", {headers: {"X-Uoink-Token": auth.token}})).json();
           if (diag && diag.ok !== false) break;
         } catch (_) { /* network not ready yet -- retry */ }
         if (attempt < 2) await new Promise((r) => setTimeout(r, 500));

@@ -126,7 +126,7 @@ def test_defaults_are_off_and_the_token_is_write_only(settings_route):
     assert "relay_token" not in settings and TOKEN not in json.dumps(probe.payload)
     stored = (folder / "settings.json").read_text(encoding="utf-8")
     assert TOKEN not in stored and "relay_token" not in json.loads(stored)
-    assert fake.values == {(server._isolated_keyring_service(folder), "relay_pull_token"): TOKEN}
+    assert fake.values == {(server._isolated_keyring_service(folder), "relay_pull_token"): "https://my-relay.onrender.com:443\n" + TOKEN}
     assert all(service == server._isolated_keyring_service(folder) for _, service, _ in fake.calls)
     get = Probe("/settings", method="GET")
     get._handle_settings_get()
@@ -143,8 +143,15 @@ def test_null_or_empty_token_clears_it(settings_route, clear):
     assert fake.values == {}
 
 
+def test_changing_relay_origin_clears_pull_token(settings_route):
+    post_settings({"relay_url": "https://first.example", "relay_token": TOKEN})
+    result = post_settings({"relay_url": "https://second.example"})
+    assert result.payload["ok"]
+    assert not result.payload["settings"]["relay_token_set"]
+
+
 def test_saving_keeps_the_token_when_it_is_left_out(settings_route):
-    post_settings({"relay_token": TOKEN})
+    post_settings({"relay_url": "https://r.example:443/first", "relay_token": TOKEN})
     probe = post_settings({"relay_enabled": True, "relay_url": "https://r.example"})
     assert probe.payload["settings"]["relay_token_set"] is True
 

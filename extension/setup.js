@@ -1,4 +1,4 @@
-﻿// Setup owns install, verify and the first capture. Settings live in the dashboard.
+// Setup owns install, verify and the first capture. Settings live in the dashboard.
 // Agent connections now expose all 99 tools; capped clients can use UOINK_MCP_TOOLSET=core.
 "use strict";
 const SERVER = "http://127.0.0.1:5179";
@@ -188,8 +188,8 @@ function showConnection(up) {
   renderAvailability();
 }
 
-async function readJson(path, signal) {
-  const response = await fetch(SERVER + path, { method: "GET", mode: "cors", cache: "no-store", signal });
+async function readJson(path, signal, headers = {}) {
+  const response = await fetch(SERVER + path, { method: "GET", mode: "cors", cache: "no-store", signal, headers });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const data = await response.json();
   if (!data || data.ok === false) throw new Error("Helper check failed");
@@ -231,7 +231,7 @@ async function checkConnection(refreshChecks = false) {
   const generation = ++probeGeneration;
   const controller = new AbortController();
   probe = controller;
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), refreshChecks ? 60000 : 4000);
   $("verify-btn").setAttribute("aria-busy", "true");
   $("verify-btn").textContent = "Checking…";
   const wasUp = helperUp;
@@ -242,7 +242,15 @@ async function checkConnection(refreshChecks = false) {
     showConnection(true);
     if (!wasUp || refreshChecks) {
       try {
-        const checks = await readJson("/diagnose", controller.signal);
+        const token = refreshChecks && await STC.getToken({ refresh: true });
+        if (refreshChecks && !token) throw new Error("Could not authorize additional checks.");
+        let checks = token
+          ? await readJson("/diagnose?refresh=1", controller.signal, { "X-Uoink-Token": token })
+          : await readJson("/diagnose", controller.signal);
+        while (checks.refreshing && !controller.signal.aborted && generation === probeGeneration) {
+          await new Promise(resolve => setTimeout(resolve, 250));
+          checks = await readJson("/diagnose", controller.signal);
+        }
         if (generation === probeGeneration) renderDiagnose(checks);
       } catch {
         // A diagnostics error does not mean the successful health probe failed.

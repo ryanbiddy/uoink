@@ -40,7 +40,7 @@ def surface_code():
         "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "_allowed_extension_ids", "_reports_live_extract", "Handler",
         "_diagnose_payload", "_public_diagnose_payload", "_build_diagnose_payload",
-        "_keyring_display_name", "_path_integrity_status",
+        "_keyring_display_name", "_path_integrity_status", "_diagnose_lock", "_diagnose_cache", "_refresh_diagnose",
         "_library_health_payload", "_heartbeat_payload", "_parse_utc_stamp",
         "doctor_payload",
     }
@@ -93,7 +93,7 @@ def helper(surface_code):
         "HOST": "127.0.0.1", "PORT": PORT, "VERSION": "test",
         "TOKEN": "synthetic-public-surfaces-token",
         "os": SimpleNamespace(environ={}, getpid=lambda: 12345), "sys": SimpleNamespace(platform="win32"),
-        "json": json, "re": re,
+        "threading": threading, "json": json, "re": re,
         "secrets": secrets, "urlparse": urlparse, "time": time,
         "datetime": datetime, "log": Mock(),
         "_BIN_DIR": PRIVATE_ROOT / "bin",
@@ -202,6 +202,7 @@ def test_non_darwin_diagnose_keeps_bare_ffmpeg_without_new_resolver(helper, plat
 @pytest.mark.parametrize("origin", [None, "https://www.youtube.com", PINNED_ORIGIN])
 def test_diagnose_has_no_paths_or_key_flags(helper, writable, origin):
     helper["_is_writable_dir"].return_value = writable
+    helper["_diagnose_cache"] = helper["_build_diagnose_payload"](public=True)
     status, _, payload = request(helper, "/diagnose", headers={"Origin": origin} if origin else {})
     assert status == 200
     assert_public(payload)
@@ -226,6 +227,7 @@ def test_diagnose_has_no_paths_or_key_flags(helper, writable, origin):
 ])
 def test_public_index_check_has_no_install_folder_detail(helper, writable, headers):
     helper["_is_writable_dir"].return_value = writable
+    helper["_diagnose_cache"] = helper["_build_diagnose_payload"](public=True)
     status, _, payload = request(helper, "/diagnose", headers=headers)
     assert status == 200
     check = next(c for c in payload["checks"] if c["name"] == "index_db_writable")
@@ -257,7 +259,7 @@ def test_public_diagnosis_is_independent_of_saved_key_state(helper, key, invalid
 def test_local_splash_gets_only_key_ready_boolean(helper, site, host, client):
     public = request(helper, "/diagnose")[2]
     status, _, payload = request(helper, "/diagnose", headers={
-        "Host": host, "Sec-Fetch-Site": site, "X-Uoink-Client": client,
+        "Host": host, "Sec-Fetch-Site": site, "X-Uoink-Client": client, "X-Uoink-Token": helper["TOKEN"],
     })
     assert status == 200
     assert payload.pop("anthropic_key_valid") is True
@@ -273,7 +275,7 @@ def test_local_splash_gets_only_key_ready_boolean(helper, site, host, client):
 def test_splash_preserves_invalid_and_missing_key_states(helper, key, invalid, expected):
     helper["_get_saved_anthropic_key"].return_value = key
     helper["_read_settings"].return_value["anthropic_key_invalid"] = invalid
-    status, _, payload = request(helper, "/diagnose", headers={"Sec-Fetch-Site": "same-origin"})
+    status, _, payload = request(helper, "/diagnose", headers={"Sec-Fetch-Site": "same-origin", "X-Uoink-Token": helper["TOKEN"]})
     assert status == 200
     if expected is None:
         # The shipped splash treats an absent value as "Add your key";
@@ -333,10 +335,36 @@ def test_http_cannot_select_console_diagnostics_even_with_token(helper, headers)
     })
     assert status == 200
     local_ui = "Sec-Fetch-Site" in headers
-    diagnose.assert_called_once_with(local_ui=local_ui)
+    diagnose.assert_called_once_with(local_ui=local_ui, refresh=False)
     console.assert_not_called()
     if local_ui:
         assert payload.pop("anthropic_key_valid") is True
+    assert_public(payload)
+
+
+def test_refresh_requires_token_and_coalesces_while_running(helper):
+    workers = []
+    class DeferredWorker:
+        def __init__(self, *, target, **kwargs):
+            self.target = target
+        def start(self):
+            workers.append(self.target)
+
+    helper["threading"] = SimpleNamespace(Thread=DeferredWorker)
+    route = "/diagnose?refresh=1"
+    for headers in ({}, {"X-Uoink-Token": "fixture-invalid"}):
+        assert request(helper, route, headers=headers)[2]["ok"]
+    helper["_probe_command"].assert_not_called()
+    assert not workers
+    for _ in range(2):
+        assert request(helper, route, headers={"X-Uoink-Token": helper["TOKEN"]})[2]["refreshing"]
+    assert len(workers) == 1
+    workers[0]()
+    count = helper["_probe_command"].call_count
+    assert count > 0
+    payload = request(helper, "/diagnose")[2]
+    assert not payload["refreshing"] and len(payload["checks"]) > 1
+    assert helper["_probe_command"].call_count == count
     assert_public(payload)
 
 
@@ -396,6 +424,7 @@ def test_console_diagnosis_keeps_migration_error_details(helper):
 def test_diagnose_omits_tool_output_and_credential_store_exception_paths(helper, probe_status):
     helper["_probe_command"].return_value = (probe_status, PRIVATE_DETAIL)
     helper["_credential_store_error"].return_value = OSError(PRIVATE_DETAIL)
+    helper["_diagnose_cache"] = helper["_build_diagnose_payload"](public=True)
     status, _, payload = request(helper, "/diagnose")
     assert status == 200
     assert_public(payload)
@@ -446,6 +475,7 @@ def test_public_failure_details_do_not_offer_start_helper(helper):
     helper["_probe_command"].return_value = ("error", PRIVATE_DETAIL)
     helper["_credential_store_error"].return_value = OSError(PRIVATE_DETAIL)
     helper["migrate_install"].migration_status.side_effect = OSError(PRIVATE_DETAIL)
+    helper["_diagnose_cache"] = helper["_build_diagnose_payload"](public=True)
     status, _, payload = request(helper, "/diagnose")
     assert status == 200
     rows = _setup_diagnostic_rows(payload)
@@ -465,6 +495,7 @@ def test_public_failure_details_do_not_offer_start_helper(helper):
 
 def test_migration_failure_is_generic(helper):
     helper["migrate_install"].migration_status.side_effect = OSError(PRIVATE_DETAIL)
+    helper["_diagnose_cache"] = helper["_build_diagnose_payload"](public=True)
     status, _, payload = request(helper, "/diagnose")
     assert status == 200
     assert_public(payload)
@@ -476,6 +507,7 @@ def test_migration_projection_does_not_forward_new_fields(helper):
     migration["future_detail"] = PRIVATE_DETAIL
     migration["app_data"]["future_detail"] = PRIVATE_DETAIL
     migration["desktop_corpus"]["future_detail"] = PRIVATE_DETAIL
+    helper["_diagnose_cache"] = helper["_build_diagnose_payload"](public=True)
     assert_public(request(helper, "/diagnose")[2])
 
 
