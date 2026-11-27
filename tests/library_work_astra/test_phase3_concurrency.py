@@ -195,8 +195,20 @@ def test_s05_simultaneous_revocation_and_dispatch_only_admits_valid_outcomes(rig
     start = rig.reserve(sid)
     _, other = rig.open()
     request = rig.operation(sid, 'off')
-    _, off = race(lambda: rig.svc.dispatch_capture(start['start_id'], start['owner_token']),
-                  lambda: other.set_source_consent(rig.context, request))
+
+    def dispatch():
+        # Either side may lose the write race. The scheduler's only caller of
+        # mark_started (advance_source) turns a locked database into a
+        # retryable storage_busy deferral, so the dispatch side gets the same
+        # treatment as the consent side below. Until 3.18.0 every rig
+        # connection had a 250 ms busy timeout, which made this race flaky.
+        try:
+            return rig.svc.dispatch_capture(start['start_id'], start['owner_token'])
+        except sqlite3.OperationalError as exc:
+            assert 'locked' in str(exc).lower() or 'busy' in str(exc).lower(), exc
+            return {'outcome': 'storage_busy'}
+
+    dispatched, off = race(dispatch, lambda: other.set_source_consent(rig.context, request))
     if not off['ok']:
         assert off['error']['code'] == 'storage_busy' and off['error']['retryable'] is True
         off = other.set_source_consent(rig.context, request)
@@ -205,6 +217,38 @@ def test_s05_simultaneous_revocation_and_dispatch_only_admits_valid_outcomes(rig
     assert source_row(rig.idx, sid)['consent_state'] == 'off'
     assert (stored['state'], len(rig.backend.launches), stored['started_at_ms'] is not None) in (
         ('released', 0, False), ('started', 1, True))
+    if dispatched.get('outcome') == 'storage_busy':
+        # A dispatch that never got the writer must not have started anything.
+        assert (stored['state'], len(rig.backend.launches)) == ('released', 0)
+
+
+def test_s05_dispatch_that_loses_the_writer_starts_nothing_and_off_still_releases(rig):
+    """Deterministic form of the CI flake (run 42772726922): the dispatch side's
+    BEGIN IMMEDIATE times out while another writer holds the database."""
+    sid = rig.enrolled()
+    start = rig.reserve(sid)
+    _, other = rig.open()
+    request = rig.operation(sid, 'off')
+    holder = sqlite3.connect(str(rig.path), isolation_level=None)
+    try:
+        holder.execute('BEGIN IMMEDIATE')
+        rig.idx._conn.execute('PRAGMA busy_timeout=50')
+        with pytest.raises(sqlite3.OperationalError, match='locked'):
+            rig.svc.dispatch_capture(start['start_id'], start['owner_token'])
+        # The scheduler path maps the same error to a retryable deferral.
+        deferred = rig.svc.service.advance_source(sid)
+        assert deferred['outcome'] == 'storage_busy' and deferred['retryable'] is True
+    finally:
+        holder.execute('ROLLBACK')
+        holder.close()
+        rig.idx._conn.execute('PRAGMA busy_timeout=5000')
+    stored = ledger(rig.idx, sid)[0]
+    assert stored['state'] == 'reserved' and stored['started_at_ms'] is None
+    assert rig.backend.launches == []
+    receipt = ok(other.set_source_consent(rig.context, request))
+    assert receipt['released_reservations'] == 1
+    assert ledger(rig.idx, sid)[0]['state'] == 'released'
+    assert rig.backend.launches == [] and rig.allowance(sid)['charged'] == 0
     assert rig.allowance(sid)['charged'] == len(rig.backend.launches)
 
 
