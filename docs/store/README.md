@@ -1,4 +1,4 @@
-# Uoink 3.18.0 store submission
+# Uoink 3.18.1 store submission
 
 Start with [SUBMIT-NOW.md](SUBMIT-NOW.md). The owner creates the developer account,
 pays the fee, uploads the zip and submits it.

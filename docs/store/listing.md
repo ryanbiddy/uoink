@@ -1,4 +1,4 @@
-# Uoink 3.18.0 listing fields
+# Uoink 3.18.1 listing fields
 
 Use the manifest name and summary below. They are already in the upload zip.
 The dashboard may populate them from the manifest instead of offering editable

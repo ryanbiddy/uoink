@@ -10,43 +10,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.18.1] - 2026-11-27
+
 ### Added
 
 - Save a Hacker News discussion with nested replies and a link to each comment. Saving a comment link puts that reply first. Open the saved discussion and choose **Save linked story** to capture the article or video too.
+- Saving a YouTube video after the first 15 seconds pins the moment you’re watching. A timestamped link can pin an earlier moment too. Each item keeps up to 20 pins. Open it to copy a quote and link or remove a pin. Claude and `uoink get` can read them too. Re-pinning a moment keeps it among your 20 most recent pins.
+- When a passage overlaps the 45 seconds on either side of a pin, forgiving keyword search gives it a 2% score boost among the selected results.
+- The extension shows the pinned time alongside first-save help, session details and queue updates.
+- Paste an Apple Podcasts show link to follow its RSS feed, or paste an episode link to save just that episode. A newly followed show displays its host name while Uoink looks up the title.
+- Uoink holds back likely Whisper inventions and non-speech labels from search, citations and transcript exports. Open a saved transcript and choose **Show them** to read the original lines. Run `uoink tidy-transcripts --dry-run` to check older saves, `--apply` to update them, or `--restore ITEM LINE` to put a line back. Lyrics between musical notes, confidently spoken repetitions and a closing “Thank you” on older saves without speech scores stay in the transcript.
+- Saved YouTube auto-captions use word timings to produce readable lines when available, and Uoink cleans up repeated display text when several caption windows clearly shift together. To check an older save, run `uoink repair-captions VIDEO_ID --dry-run`. Use `--apply` to update the transcript and search results. The original stays in the save folder. Both repair commands recognize saves written by 3.18.0, including their chapter headings, and keep your own edits.
+- Run `uoink connect claude-code --write` to add Uoink through the Claude CLI. For Claude Desktop, Cursor, Cline and other clients with a known JSON file, `--write` previews the edit and backs up existing settings before saving. Use `--yes` in scripts, or omit `--write` to print the recipe.
+- Your AI agent can see the 20 newest unfinished captures and how many there are in total. Asking for an interrupted capture by folder name shows whether Finish can reuse the local video, needs a download or is unavailable. This includes captures interrupted on 3.17 or earlier.
+- `uoink --text get <id>` also shows the date the video or post first came out and the folder its files are in, next to the source, save date, shelf and the saved text with its timestamps.
+- `/health` adds `whisper_model_downloaded`, which says whether the selected transcription model is on this computer. The older `whisperx_model_loaded` stays with the same value but never meant the model was in memory. `transcription_worker` reports that.
+
+### Changed
+
+- The MCP server still exposes 99 tools by default, 36 with `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
+- Transcript links in search, research reports and copied quotes open two seconds before the cited line.
+- `npx uoink` checks the copy it will replace and tells you whether it will update, reinstall or downgrade it. Replacing a newer copy or one with an unreadable version requires `--allow-downgrade`. Add `--yes` to skip the confirmation. If the new helper should start, the installer checks its identity and version for up to 90 seconds and reports any launch failure.
+- Queuing a podcast transcription from the CLI or MCP returns a job ID right away. Use `get_job_status` to check progress while the helper transcribes.
+- Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
+- Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see. On a phone-width window the search box shows "Search or paste a link" instead of a cut-off hint.
 
 ### Fixed
 
-- Research runs now recognize transcripts from saved podcast episodes and reuse them without queuing another capture.
-- Podcast feed checks on older libraries keep new episodes and corrected publication dates. A repeat check restores episodes that an earlier check found but failed to save.
-- Caption repair and transcript cleanup recognize timestamp links written by 3.18.0. Both commands preserve edits to the saved transcript.
-- Updated HTTPX2 and HTTPCore2 to 2.16.2. The bundled MCP HTTP client now honors wildcard proxy exceptions such as `*.example.com`. Updated Pydantic and python-multipart too, including a fix that keeps each multipart parser’s callbacks separate.
-- Hacker News stories keep their own shelves when you save another reply. The reader preserves HTML comments in code samples and the replies that follow them.
-- Podcast episodes now appear in release order, even when a show changes its date format. Episodes without a usable date appear last.
-- Uoink checks the first 50 entries in large podcast feeds. Older followed shows resume their scheduled checks, and Sources and Settings show why a check failed.
-- Paste an Apple Podcasts show link to follow its RSS feed, or paste an episode link to save just that episode. A newly followed show displays its host name while Uoink looks up the title. Removed shows disappear from your feed list.
-- Queuing a podcast transcription from the CLI or MCP returns a job ID right away. Use `get_job_status` to check progress while the helper transcribes.
-- Episodes with the same title now keep separate audio files. Uoink can still use an older download that belongs to one episode.
+- On Windows, reopening Uoink from the Start menu or tray brings the dashboard forward and restores it if minimized, instead of opening a second window. Item and tab links keep your unsaved Writing Studio draft. If the dashboard can't come forward, Uoink opens a new window. If the window can't start, the link opens in your browser.
+- Podcast episodes appear in release order, even when a show changes its date format. Episodes without a usable date appear last.
+- Uoink checks the first 50 entries in large podcast feeds. Older followed shows resume their scheduled checks, Sources and Settings show why a check failed, and removed shows disappear from your feed list. A repeat check restores episodes that an earlier check found but failed to save.
+- Episodes with the same title keep separate audio files. Uoink can still use an older download that belongs to one episode.
 - Uoink stops reading an entire-show listing or thumbnail when it reaches its download size or time limit.
-- If one YouTube caption track times out, a save now tries the next available track. Caption repair can also keep the chapter headings in older saves.
-- Saved YouTube auto-captions now use word timings to produce readable lines when available. Uoink also cleans up repeated display text when several caption windows clearly shift together. To check an older save, run `uoink repair-captions VIDEO_ID --dry-run`. Use `--apply` to update the transcript and search results. The original stays in the save folder.
-- Uoink holds back likely Whisper inventions and non-speech labels from search, citations and transcript exports. Open a saved transcript and choose **Show them** to read the original lines. Run `uoink tidy-transcripts --dry-run` to check older saves, `--apply` to update them, or `--restore ITEM LINE` to put a line back.
-- Transcript review keeps lyrics between musical notes, confidently spoken repetitions and a closing “Thank you” on older saves that lack speech scores.
-- Run `uoink connect claude-code --write` to add Uoink through the Claude CLI. For Claude Desktop, Cursor, Cline and other clients with a known JSON file, `--write` previews the edit and backs up existing settings before saving. Use `--yes` in scripts, or omit `--write` to print the recipe.
-- Claude Desktop setup now finds the Microsoft Store config on Windows. If the Store and roaming config files both exist, the CLI and dashboard update both.
-- Saving a YouTube video after the first 15 seconds pins the moment you’re watching. A timestamped link can pin an earlier moment too. Each item keeps up to 20 pins. Open it to copy a quote and link or remove a pin. Claude and `uoink get` can read them too.
-- When a passage overlaps the 45 seconds on either side of a pin, forgiving keyword search gives it a 2% score boost among the selected results.
-- The extension now shows the pinned time alongside first-save help, session details and queue updates. Re-pinning a moment keeps it among your 20 most recent pins.
-- Transcript links in search, research reports and copied quotes open two seconds before the cited line.
-- Security fixes from a full review cover opening Markdown, saves and exports in linked library folders, media links and thumbnails, startup diagnostics, phone pairing and inbox limits, private session names, and dashboard approval for new capture sites.
-- Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
-- Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
+- If one YouTube caption track times out, a save tries the next available track.
+- Hacker News stories keep their own shelves when you save another reply. The reader preserves HTML comments in code samples and the replies that follow them.
+- Claude Desktop setup finds the Microsoft Store config on Windows. If the Store and roaming config files both exist, the CLI and dashboard update both.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.
-- On Windows, reopening Uoink from the Start menu or tray brings the dashboard forward in your Windows session and restores it if minimized. Item and tab links keep your unsaved Writing Studio draft. If the dashboard can't come forward, Uoink opens a new window. If the window can't start, the link opens in your browser.
-- On a phone-width window the Library search box shows "Search or paste a link" instead of a cut-off hint. Wider windows keep the full hint.
-- `/health` adds `whisper_model_downloaded`, which says whether the selected transcription model is on this computer. The older `whisperx_model_loaded` stays with the same value but never meant the model was in memory. `transcription_worker` reports that.
-- `npx uoink` checks the copy it will replace and tells you whether it will update, reinstall or downgrade it. Replacing a newer copy or one with an unreadable version requires `--allow-downgrade`. Add `--yes` to skip the confirmation. If the new helper should start, the installer checks its identity and version for up to 90 seconds and reports any launch failure.
-- Your AI agent can see the 20 newest unfinished captures and how many there are in total. Asking for an interrupted capture by folder name shows whether Finish can reuse the local video, needs a download or is unavailable. This includes captures interrupted on 3.17 or earlier.
-- `uoink --text get <id>` also shows the date the video or post first came out and the folder its files are in, next to the source, save date, shelf and the saved text with its timestamps.
+
+### Security
+
+- Fixes from a full review cover opening Markdown, saves and exports in linked library folders, media links and thumbnails, startup diagnostics, phone pairing and inbox limits, private session names, and dashboard approval for new capture sites.
+- Updated HTTPX2 and HTTPCore2 to 2.16.2. The bundled MCP HTTP client now honors wildcard proxy exceptions such as `*.example.com`. Updated Pydantic and python-multipart too, including a fix that keeps each multipart parser’s callbacks separate.
 
 ## [3.18.0] - 2026-11-22
 
