@@ -244,9 +244,10 @@ def test_podcast_artwork_reaches_job_and_published_library_row(feed_env, tmp_pat
     turn_on(service, registered["source"]["source_id"])
     service.detection_pass()
     episode = podcasts.list_episodes(idx)[0]
-    audio = tmp_path / "audio.mp3"
+    # The episode's own folder under DATA_ROOT/Podcasts, as a real download names it.
+    audio = podcasts._episode_audio_path(tmp_path, podcasts.get_feed(idx, episode["feed_id"]), episode)
     audio.write_bytes(b"fixture")
-    transcript = tmp_path / "audio.transcript.json"
+    transcript = audio.with_suffix(".transcript.json")
     transcript.write_text(json.dumps({"segments": [{"start": 0, "end": 1, "text": "First flight"}]}))
     with idx.write_transaction() as conn:
         conn.execute("UPDATE podcast_episodes SET audio_local_path=?, transcript_local_path=?, "
