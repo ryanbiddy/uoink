@@ -33,11 +33,14 @@ HEAVY = ("torch", "torchaudio", "whisperx", "pyannote", "lightning", "pytorch_li
 CHILD = textwrap.dedent('''
     import json, os, sys, threading, time, urllib.request
     HEAVY = set(json.loads(os.environ["UOINK_TEST_HEAVY"]))
-    attempts, blocked = [], []
+    attempts, blocked, worker_starts = [], [], []
 
     def audit(event, args):
         if event == "import" and str(args[0]).split(".")[0] in HEAVY:
             attempts.append(str(args[0]).split(".")[0])
+        elif event == "subprocess.Popen" and (args[3] or {}).get("UOINK_ASR_CHILD") == "1":
+            worker_starts.append("asr_worker")
+            raise RuntimeError("idle fixture attempted to launch a transcription worker")
         elif event == "socket.connect":
             address = args[1]
             host = address[0] if isinstance(address, tuple) else str(address)
@@ -46,6 +49,8 @@ CHILD = textwrap.dedent('''
                 raise ConnectionRefusedError("tests never leave this computer")
     sys.addaudithook(audit)
     sys.path.insert(0, os.environ["UOINK_TEST_REPO"])
+    import helper._version
+    helper._version.__version__ = "3.18.1-rc.1"
     import server
     assert server.PORT == int(os.environ["UOINK_ISOLATED_PORT"]) != 5179
     after_import = sorted(set(attempts))
@@ -77,6 +82,7 @@ CHILD = textwrap.dedent('''
     print("RESULT " + json.dumps({
         "after_import": after_import, "attempts": sorted(set(attempts)),
         "loaded": loaded, "blocked": blocked, "routes": routes,
+        "worker_starts": worker_starts, "worker": server.asr_worker.status(),
         "version": health.get("version")}), flush=True)
     os._exit(0)
 ''')
@@ -131,7 +137,13 @@ def test_idle_helper_loads_no_model_runtime(tmp_path):
     assert proc.returncode == 0 and lines, (proc.returncode, proc.stdout[-2000:], proc.stderr[-4000:])
     result = json.loads(lines[-1][len("RESULT "):])
     assert result["blocked"] == [], result
-    assert result["routes"]["/health"] == 200, result
+    assert result["routes"] == {path: 200 for path in
+                               ("/health", "/asr/models", "/library/transcript-backfill")}, result
+    assert result["worker_starts"] == [], result
+    worker = result["worker"]
+    assert worker["state"] == "not_loaded" and worker["pid"] is None
+    assert worker["jobs_run"] == 0 and worker["last_exit"] is None
+    assert result["version"] == "3.18.1-rc.1"
     assert result["after_import"] == [], f"importing server pulled in {result['after_import']}"
     assert result["attempts"] == [], f"the idle helper tried to import {result['attempts']}"
     assert result["loaded"] == [], f"the idle helper holds {result['loaded']}"

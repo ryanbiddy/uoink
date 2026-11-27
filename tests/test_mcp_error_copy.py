@@ -6,6 +6,16 @@ import pytest
 import uoink_mcp_tools as tools
 
 
+@pytest.mark.parametrize("name", ["get_uoink_corpus", "get_uoink_health"])
+def test_errors_carrying_unfinished_capture_titles_lead_with_the_untrusted_notice(name, monkeypatch):
+    spec = tools.TOOL_REGISTRY[name]
+    error = {"ok": False, "error": "uoink not found", "capture_not_finished": {"title": "Captured words"}}
+    monkeypatch.setitem(tools.TOOL_REGISTRY, name, dataclasses.replace(spec, handler=lambda _: error))
+    result = tools.call_tool(name, {"slug": "unfinished"})
+    assert next(iter(result)) == "untrusted_content"
+    assert result["untrusted_content"] == tools.UNTRUSTED_CONTENT_NOTICE
+
+
 def test_scrub_removes_paths_and_clips():
     text = tools._scrub_error_text(
         "could not open C:\\Users\\Someone\\AppData\\Local\\Uoink\\index.db and /home/sam/x/y.json\nline two")

@@ -46,6 +46,22 @@ def collect() -> dict:
     }
 
 
+def test_helper_reads_semver_from_the_version_file(tmp_path, monkeypatch):
+    import sys
+    import server
+
+    monkeypatch.setitem(sys.modules, "helper._version", None)
+    monkeypatch.setattr(server, "HERE", tmp_path)
+    stamp = tmp_path / "VERSION"
+    for value in ("3.18.1-rc.1", "3.18.1-01a.0+build.007", "3.18.1+07"):
+        stamp.write_text(value + "\n", encoding="utf-8")
+        assert server._read_version() == value
+    for value in ("03.18.1", "3.018.1", "3.18.01", "3.18.1-rc.01", "3.18.1-rc..2", "3.18.1-"):
+        stamp.write_text(value, encoding="utf-8")
+        with pytest.raises(RuntimeError, match="Invalid VERSION"):
+            server._read_version()
+
+
 def test_release_version():
     values = collect()
     bad = {path: value for path, value in values.items() if value != EXPECTED}

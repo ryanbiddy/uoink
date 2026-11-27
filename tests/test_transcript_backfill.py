@@ -1308,13 +1308,92 @@ def test_a_killed_317_capture_is_unfinished_everywhere_and_finish_completes_it(l
     assert server._transcript_backfill_status()["half_capture_count"] == 0
     recent = mcp.list_recent_uoinks({"limit": 20})
     assert [y["slug"] for y in recent["yoinks"]] == [folder.name]
+    assert recent["unfinished_capture_count"] == 0
     assert "unfinished_captures" not in recent and "hint" not in recent
     assert mcp.get_uoink_corpus({"slug": folder.name})["ok"] is True
+
+
+@pytest.mark.parametrize("tool", ["list_recent_uoinks", "get_uoink_health", "get_uoink_corpus"])
+def test_mcp_unfinished_title_is_labeled_and_folder_is_private(lib, monkeypatch, tool):
+    import uoink_mcp_tools as mcp
+    monkeypatch.setattr(mcp, "_backend", server)
+    folder = _killed_317_capture(lib)
+    reply = mcp.call_tool(tool, {"limit": 1} if tool == "list_recent_uoinks" else {"slug": folder.name})
+    assert json.dumps(str(lib.root))[1:-1] not in json.dumps(reply)
+    assert reply["untrusted_content"] == mcp.UNTRUSTED_CONTENT_NOTICE
+    record = reply.get("capture_not_finished") or reply["unfinished_captures"][0]
+    assert record["folder_name"] == folder.name and "folder" not in record
+
+
+def test_mcp_bounds_caches_and_counts_unfinished_without_displacing_saves(lib, monkeypatch):
+    import uoink_mcp_tools as mcp
+    monkeypatch.setattr(mcp, "_backend", server)
+    lib.add_text_post("saved", url=_x(52), video_id="saved-post")
+    # Deliberately oldest first, with an old slug outside the displayed sample.
+    rows = [{"key": f"folder:AI/clip-{i}", "folder_name": f"clip-{i}",
+             "title": "A title " * 100, "saved_at": f"2026-03-{i:02}T12:00:00Z",
+             "media": "download"} for i in range(1, 26)]
+    scan = Mock(return_value=rows)
+    disk_lookup = Mock(wraps=mcp._iter_yoink_folders)
+    monkeypatch.setattr(server, "_transcript_backfill_half_captures", scan)
+    monkeypatch.setattr(mcp, "_iter_yoink_folders", disk_lookup)
+    for _ in range(2):
+        reply = mcp.call_tool("list_recent_uoinks", {"limit": 1})
+        assert reply["unfinished_capture_count"] == 25
+        assert [r["folder_name"] for r in reply["unfinished_captures"]] == [
+            f"clip-{i}" for i in range(25, 5, -1)]
+        assert [r["slug"] for r in reply["yoinks"]] == ["saved"]
+    assert mcp.call_tool("get_uoink_health", {"slug": "clip-1"})["capture_not_finished"]["folder_name"] == "clip-1"
+    assert mcp.call_tool("get_uoink_health", {"slug": "absent"})["error"] == "uoink not found"
+    assert scan.call_count == disk_lookup.call_count == 1
+
+
+def test_mcp_reuses_the_unfinished_scan_until_it_expires(lib, monkeypatch):
+    import uoink_mcp_tools as mcp
+    monkeypatch.setattr(mcp, "_backend", server)
+    now = [10.0]
+    monkeypatch.setattr(mcp, "monotonic", lambda: now[0])
+    scan = Mock(wraps=server._transcript_backfill_half_captures)
+    monkeypatch.setattr(server, "_transcript_backfill_half_captures", scan)
+    folder = _killed_317_capture(lib)
+    mcp.list_recent_uoinks({"limit": 1})
+    now[0] += 1
+    mcp.get_uoink_corpus({"slug": folder.name})
+    assert scan.call_count == 1
+    now[0] += 3
+    mcp.list_recent_uoinks({"limit": 1})
+    assert scan.call_count == 2
+
+
+@pytest.mark.parametrize(("state", "words"), [
+    ("on_disk", "reuses"), ("download", "download"), ("gone", "unavailable"),
+    ("queued", "queued"), ("missing_model", "model"),
+])
+def test_mcp_finish_hint_matches_recovery(lib, monkeypatch, state, words):
+    import uoink_mcp_tools as mcp
+    monkeypatch.setattr(mcp, "_backend", server)
+    folder = _killed_317_capture(lib)
+    if state in {"gone", "download"}:
+        (folder / "video.mp4").unlink()
+    key = "folder:AI/" + folder.name
+    job = lib.backfill()
+    if state == "gone":
+        job._state["settled"][key] = {"outcome": "gone"}
+    if state == "queued":
+        job._state["requested"].append(key)
+    job._save()
+    lib.model_cached = state != "missing_model"
+    reply = mcp.call_tool("get_uoink_health", {"slug": folder.name})
+    assert words in reply["hint"].lower()
+    if state in {"gone", "queued", "missing_model"}:
+        assert "press finish" not in reply["hint"].lower()
 
 
 def test_a_capture_still_writing_its_folder_is_not_called_unfinished_by_mcp(lib, monkeypatch):
     import uoink_mcp_tools as mcp
     monkeypatch.setattr(mcp, "_backend", server)
+    now = [100.]
+    monkeypatch.setattr(mcp, "monotonic", lambda: now[0])
     url = "https://www.youtube.com/watch?v=KiLLed31700"
     _killed_317_capture(lib, url=url)
     key = server._manual_capture_key(url)
@@ -1324,4 +1403,5 @@ def test_a_capture_still_writing_its_folder_is_not_called_unfinished_by_mcp(lib,
         assert "unfinished_captures" not in mcp.list_recent_uoinks({"limit": 5})
     finally:
         server._ServerCaptureBackend.release_identity(key, lock)
+    now[0] += 4  # The next snapshot sees that the active capture released its lock.
     assert len(mcp.list_recent_uoinks({"limit": 5})["unfinished_captures"]) == 1

@@ -27,6 +27,8 @@ import re
 import threading
 import time
 from dataclasses import dataclass
+from datetime import datetime
+from time import monotonic
 from pathlib import Path
 from typing import Any, Callable
 from research import CANDIDATE_KEY_PATTERN, RUN_ID_PATTERN
@@ -165,6 +167,39 @@ def _yoink_summary(folder: Path, corpus: Path) -> dict[str, Any]:
     }
 
 
+class _ScanCache:
+    """One short-lived snapshot per library, shared by concurrent requests."""
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.key = None
+        self.until = 0
+        self.value = None
+
+    def read(self, key, scan):
+        with self.lock:
+            if key != self.key or monotonic() >= self.until:
+                self.value = scan()
+                self.key = key
+                self.until = monotonic() + 3
+            return self.value
+
+
+_corpus_cache = _ScanCache()
+_unfinished_cache = _ScanCache()
+
+
+def _corpus_by_slug():
+    matches = {}
+    for folder, corpus in _iter_yoink_folders() or ():
+        try:
+            entry = (corpus.stat().st_mtime, folder, corpus)
+        except OSError:
+            continue
+        if folder.name not in matches or entry > matches[folder.name]:
+            matches[folder.name] = entry
+    return matches
+
+
 def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     """Resolve a yoink slug to (folder, corpus_path).
 
@@ -191,55 +226,77 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
         # Indexed row missing on disk (folder moved/deleted outside the
         # extension) -- fall through to the walk so we don't return a
         # broken pointer.
-    matches = []
-    for folder, corpus in _iter_yoink_folders() or []:
-        if folder.name == slug:
-            matches.append((corpus.stat().st_mtime, folder, corpus))
-    if not matches:
-        return None, None
-    matches.sort(key=lambda item: item[0], reverse=True)
-    return matches[0][1], matches[0][2]
+    b = _b()
+    matches = _corpus_cache.read((b, b.DESKTOP_ROOT), _corpus_by_slug)
+    entry = matches.get(slug)
+    if entry and entry[2].is_file():
+        return entry[1], entry[2]
+    return None, None
 
 
-UNFINISHED_CAPTURE_HINT = (
-    "These captures stopped before they finished, so they have no transcript and are not in "
-    "the library yet. Ask the user to press Finish in Uoink under Settings, Library health. "
-    "Finish reuses the files already saved.")
+def _capture_time(item):
+    try:
+        return datetime.fromisoformat(item["saved_at"].replace("Z", "+00:00")).timestamp()
+    except (AttributeError, KeyError, ValueError, OSError, OverflowError):
+        return float("-inf")
 
 
-def _unfinished_captures() -> list[dict[str, Any]]:
-    """Capture folders that stopped midway: files on disk, no details file and
-    no index row (3.18.1). The same read-only scan the dashboard's Library
-    health uses. It never takes a capture lock and never writes."""
+def _unfinished_snapshot():
+    import transcript_backfill
     b = _b()
     scan = getattr(b, "_transcript_backfill_half_captures", None)
     if scan is None:
-        return []
-    try:
+        return None, {}, set(), True
+    state_path = Path(b.DATA_ROOT) / transcript_backfill.STATE_FILE
+
+    def read():
         with b._get_index().read_snapshot() as db:
             rows = db.execute("SELECT sidecar_path, corpus_path FROM yoinks "
-                              "WHERE deleted_at IS NULL").fetchall()
-        indexed = {os.path.normcase(str(Path(p).parent)) for row in rows for p in row if p}
-        items = scan(indexed)
+                              "WHERE deleted_at IS NULL")
+            indexed = {os.path.normcase(str(Path(p).parent)) for row in rows for p in row if p}
+        items = sorted(scan(indexed), key=_capture_time, reverse=True)
+        # Stdio runs in a separate process from the helper that handles Finish.
+        state = _read_json(state_path) if items else {}
+        ready = not items or b._transcript_backfill_model_ready()[0]
+        return items, state.get("settled", {}), set(state.get("requested", [])), ready
+
+    try:
+        try:
+            revision = state_path.stat().st_mtime_ns
+        except FileNotFoundError:
+            revision = None
+        return _unfinished_cache.read((b, b.DESKTOP_ROOT, state_path, revision), read)
     except Exception:
         logging.getLogger("uoink.mcp").debug("unfinished capture scan failed", exc_info=True)
-        return []
-    return [{"title": item.get("title"), "folder_name": item.get("folder_name"),
-             "folder": item.get("folder"), "url": item.get("url"),
-             "started_at": item.get("saved_at"),
-             "video_on_this_computer": item.get("media") == "on_disk"}
-            for item in items]
+        return None, {}, set(), True
+
+
+def _capture_record(item, settled, requested, model_ready):
+    key = item["key"]
+    local = item.get("media") == "on_disk"
+    if settled.get(key, {}).get("outcome") == "gone" or item.get("media") == "gone":
+        hint = "Finish is unavailable. The source is gone and there is no local copy."
+    elif key in requested:
+        hint = "Finish is already queued. Check progress in Settings, Library health."
+    elif not model_ready:
+        hint = "Download the transcription model in Settings to make Finish available."
+    elif local:
+        hint = "Press Finish in Settings, Library health. Uoink reuses the video on this computer."
+    else:
+        hint = "Press Finish in Settings, Library health. Uoink needs to download the video again."
+    return {"title": item.get("title"), "folder_name": item.get("folder_name"),
+            "url": item.get("url"), "started_at": item.get("saved_at"),
+            "video_on_this_computer": local, "hint": hint}
 
 
 def _not_found(slug: Any = None) -> dict[str, Any]:
-    """'uoink not found', plus what happened when the slug names a capture
-    that stopped midway. The error text stays exact for existing clients."""
     out = _err("uoink not found")
-    if isinstance(slug, str) and slug:
-        for item in _unfinished_captures():
-            if item["folder_name"] == slug:
-                out["capture_not_finished"] = item
-                out["hint"] = UNFINISHED_CAPTURE_HINT
+    if isinstance(slug, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,160}", slug):
+        items, settled, requested, ready = _unfinished_snapshot()
+        for item in items or ():
+            if item.get("folder_name") == slug:
+                record = _capture_record(item, settled, requested, ready)
+                out.update(capture_not_finished=record, hint=record["hint"])
                 break
     return out
 
@@ -415,13 +472,14 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             "folder": str(Path(sidecar_path).parent) if sidecar_path else None,
             "yoinked_at": r.get("yoinked_at"),
         })
-    # 3.18.1: a capture killed midway has files on disk but no index row, so
-    # it is not a save. Say so instead of leaving the agent to guess. The
-    # folder scan is the one Library health runs (about 40 ms per 1,500 saves).
-    unfinished = _unfinished_captures()
-    if unfinished:
-        return _ok(yoinks=yoinks, unfinished_captures=unfinished, hint=UNFINISHED_CAPTURE_HINT)
-    return _ok(yoinks=yoinks)
+    items, settled, requested, ready = _unfinished_snapshot()
+    if items is None:
+        return _ok(yoinks=yoinks)
+    if items:
+        sample = [_capture_record(item, settled, requested, ready) for item in items[:20]]
+        return _ok(yoinks=yoinks, unfinished_capture_count=len(items), unfinished_captures=sample,
+                   hint="See Settings, Library health for each capture's Finish options.")
+    return _ok(yoinks=yoinks, unfinished_capture_count=0)
 
 
 def _search_source_availability(idx, rows) -> dict:
@@ -6688,6 +6746,19 @@ def cap_tool_result(envelope: Any, cap: int) -> Any:
             return envelope
     except (TypeError, ValueError):
         return envelope
+    if "yoinks" in envelope and envelope.get("unfinished_captures"):
+        # Spend the remaining wire budget on the optional newest-first sample.
+        sample = []
+        recent = {**envelope, "unfinished_captures": sample}
+        size = _json_len(recent)
+        for item in envelope["unfinished_captures"]:
+            size += _json_len(item) - 2 + (2 if sample else 0)
+            if size > cap:
+                break
+            sample.append(item)
+        if _json_len(recent) <= cap:
+            return recent
+        envelope = recent
     budget = max(cap - _CAP_NOTE_RESERVE, cap // 2)
     dropped: set = set()
     trimmed = _drop_bulky(envelope, dropped)
@@ -6822,8 +6893,8 @@ UNTRUSTED_CONTENT_NOTICE = (
 
 
 def _label_untrusted(name: str, result: Any) -> Any:
-    if (name in UNTRUSTED_CONTENT_TOOL_NAMES and isinstance(result, dict)
-            and result.get("ok") is True):
+    if isinstance(result, dict) and ((result.get("ok") is True and name in UNTRUSTED_CONTENT_TOOL_NAMES)
+                                     or "capture_not_finished" in result):
         return {"untrusted_content": UNTRUSTED_CONTENT_NOTICE,
                 **{k: v for k, v in result.items() if k != "untrusted_content"}}
     return result

@@ -220,26 +220,36 @@ def test_s05_simultaneous_revocation_and_dispatch_only_admits_valid_outcomes(rig
     if dispatched.get('outcome') == 'storage_busy':
         # A dispatch that never got the writer must not have started anything.
         assert (stored['state'], len(rig.backend.launches)) == ('released', 0)
+    assert rig.allowance(sid)['charged'] == len(rig.backend.launches)
 
 
-def test_s05_dispatch_that_loses_the_writer_starts_nothing_and_off_still_releases(rig):
+def test_s05_dispatch_that_loses_the_writer_starts_nothing_and_off_still_releases(rig, monkeypatch):
     """Deterministic form of the CI flake (run 42772726922): the dispatch side's
     BEGIN IMMEDIATE times out while another writer holds the database."""
     sid = rig.enrolled()
-    start = rig.reserve(sid)
     _, other = rig.open()
     request = rig.operation(sid, 'off')
+    service = rig.svc.service
+    mark_started = service.mark_started
     holder = sqlite3.connect(str(rig.path), isolation_level=None)
-    try:
+    attempted = []
+
+    def contend_after_claim(start_id, owner_token):
+        assert ledger(rig.idx, sid)[0]['state'] == 'reserved'
         holder.execute('BEGIN IMMEDIATE')
+        attempted.append(start_id)
+        with pytest.raises(sqlite3.OperationalError, match='locked') as busy:
+            mark_started(start_id, owner_token)
+        raise busy.value
+
+    monkeypatch.setattr(service, 'mark_started', contend_after_claim)
+    try:
         rig.idx._conn.execute('PRAGMA busy_timeout=50')
-        with pytest.raises(sqlite3.OperationalError, match='locked'):
-            rig.svc.dispatch_capture(start['start_id'], start['owner_token'])
-        # The scheduler path maps the same error to a retryable deferral.
-        deferred = rig.svc.service.advance_source(sid)
+        deferred = service.advance_source(sid)
         assert deferred['outcome'] == 'storage_busy' and deferred['retryable'] is True
+        assert attempted == [ledger(rig.idx, sid)[0]['start_id']]
     finally:
-        holder.execute('ROLLBACK')
+        holder.rollback()
         holder.close()
         rig.idx._conn.execute('PRAGMA busy_timeout=5000')
     stored = ledger(rig.idx, sid)[0]
@@ -249,7 +259,6 @@ def test_s05_dispatch_that_loses_the_writer_starts_nothing_and_off_still_release
     assert receipt['released_reservations'] == 1
     assert ledger(rig.idx, sid)[0]['state'] == 'released'
     assert rig.backend.launches == [] and rig.allowance(sid)['charged'] == 0
-    assert rig.allowance(sid)['charged'] == len(rig.backend.launches)
 
 
 def test_s09_one_due_poll_across_tick_status_and_manual_refresh(rig):

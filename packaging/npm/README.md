@@ -27,11 +27,13 @@ npx uoink --dry-run          print the plan and URLs, download nothing
 npx uoink --yes              skip the question
 npx uoink --version 3.16.3   install a specific version
 npx uoink install --version 3.16.3 --allow-downgrade
-                             go back to an older version than you have (asks first)
+                             allow an older version or replace a copy whose version is unknown
 npx uoink --no-connect       skip the agent hints
 ```
 
-Before it downloads anything it says whether this is an update, a reinstall of the version you have, or a downgrade. After installing, it waits up to 90 seconds for Uoink to answer on this computer (`127.0.0.1:5179/health`). If Uoink does not come back, it exits with an error and says what to try next.
+The installer checks the version in the destination folder. Use `--allow-downgrade` to replace a newer copy or one whose version it cannot read. Add `--yes` to skip the usual confirmation. A refused version pin exits with an error. A plain `update` succeeds if you already have a newer copy.
+
+When the helper should restart, the installer waits up to 90 seconds and checks the process and version answering `/health` on this computer. If the check fails, it exits with an error and tells you how to open Uoink.
 
 ## Privacy and safety
 
