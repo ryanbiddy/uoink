@@ -226,7 +226,7 @@ def consumers(network, monkeypatch, tmp_path, request):
                      images=images, atomic_output=atomic_output, DESKTOP_ROOT=tmp_path,
                      tempfile=tempfile, shutil=shutil,
                      urllib=urllib, log=logging.getLogger(__name__),
-                     subprocess=subprocess, time=time, tempfile=tempfile, json=json, Path=Path, urlparse=urlparse,
+                     subprocess=subprocess, time=time, json=json, Path=Path, urlparse=urlparse,
                      parse_qs=parse_qs, re=re,
                      YTDLP_CMD=["synthetic-yt-dlp"], COMMENTS_TIMEOUT_SEC=10,
                      PLATFORM_YOUTUBE="youtube", PLATFORM_TWITTER="twitter",
