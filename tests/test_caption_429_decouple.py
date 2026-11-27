@@ -34,7 +34,7 @@ def extraction(monkeypatch, tmp_path):
         caption_error=None, media_error=None, captions_available=True,
         settings=server._default_settings(), model_cached=True, calls=[],
         media_has_audio=True, audio_error=None, source_has_audio=True,
-        probe_error=None, cut_error=None, extra_srt={},
+        probe_error=None, cut_error=None, extra_srt={}, caption_files=None, caption_stderr=b"",
     )
     metadata = {
         "id": "abcdef12345", "title": "Caption test", "duration": 60,
@@ -60,16 +60,20 @@ def extraction(monkeypatch, tmp_path):
         elif "--skip-download" in cmd:
             if state.caption_error is not None:
                 raise state.caption_error
-            folder = Path(cmd[cmd.index("-o") + 1]).parent
+            template = Path(cmd[cmd.index("-o") + 1])
+            folder = template.parent
             assert list(folder.glob("*.mp4")), "media must precede captions"
-            if state.captions_available:
-                (folder / "video.en.srt").write_text(
+            if state.caption_files:
+                state.caption_files(cmd, template)
+            elif state.captions_available:
+                Path(str(template).replace("%(ext)s", "en.srt")).write_text(
                     "1\n00:00:00,000 --> 00:00:02,000\nPlatform captions.\n",
                     encoding="utf-8",
                 )
                 for name, text in state.extra_srt.items():
-                    (folder / name).write_text(
+                    Path(str(template).replace("%(ext)s", name.removeprefix("video."))).write_text(
                         f"1\n00:00:00,000 --> 00:00:02,000\n{text}\n", encoding="utf-8")
+            return subprocess.CompletedProcess(cmd, 0, b"", state.caption_stderr)
         else:
             if "bestaudio/best" in cmd and state.audio_error is not None:
                 raise state.audio_error
@@ -243,13 +247,10 @@ def test_full_mode_media_command_has_no_subtitle_flags(extraction):
     assert media_kwargs["check"] is True
     assert caption_cmd == [
         *server.YTDLP_CMD,
-        "--skip-download", "--write-auto-subs", "--write-subs",
-        # Named English tracks. A pattern would also select YouTube's
-        # auto-translated tracks, and a 429 on one of those saved nothing.
-        "--sub-lang", "en,en-US,en-GB,en-orig", "--convert-subs", "srt",
-        "-o", media_cmd[media_cmd.index("-o") + 1], URL,
+        "--skip-download", "--max-filesize", str(32 * 1024 * 1024), "--write-subs",
+        "--sub-lang", "en(?:-[A-Za-z0-9]+)*", "--sub-format", "vtt/srt",
+        "-o", str(extraction.folder / "video.manual.%(ext)s"), "--", URL,
     ]
-    assert Path(caption_cmd[caption_cmd.index("-o") + 1]).name == "video.%(ext)s"
     assert caption_kwargs["check"] is True
     assert caption_kwargs["timeout"] == server.COMMENTS_TIMEOUT_SEC
     assert result["ok"] is True
@@ -258,6 +259,140 @@ def test_full_mode_media_command_has_no_subtitle_flags(extraction):
     assert result["asr_fallback"] == {"status": "not_needed"}
     assert result["transcript_note"] is None
     extraction.asr.assert_not_called()
+
+
+def test_full_save_uses_json3_words_and_clamps_to_video_duration(extraction):
+    fixtures = Path(__file__).parent / "fixtures" / "captions"
+    extraction.metadata.update(duration=4.8, automatic_captions={"en-orig": [{"ext": "json3"}]})
+
+    def captions(cmd, template):
+        assert "--write-auto-subs" in cmd and "--write-subs" not in cmd
+        assert cmd[cmd.index("--sub-lang") + 1] == "en-orig"
+        assert cmd[cmd.index("--sub-format") + 1].split("/")[0] == "json3"
+        Path(str(template).replace("%(ext)s", "en-orig.json3")).write_bytes(
+            (fixtures / "rolling.en.json3").read_bytes())
+
+    extraction.caption_files = captions
+    result = extraction.run()
+    folder = Path(result["folder"])
+    side = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    assert side["caption_kind"] == "auto_captions"
+    assert result["caption_count"] == 2
+    first, last = side["transcript"]
+    assert (first["start"], first["end"], first["text"]) == (
+        0, 3, "At first light we crossed reeds beside the mill.")
+    assert (last["start"], last["end"], last["text"]) == (3, 4.8, "The upper wheel still turned slowly.")
+    assert first["words"][0] == {"word": "At", "start": 0, "end": 0.3}
+    assert last["words"][-1] == {"word": "slowly.", "start": 4.6, "end": 4.8}
+    assert (folder / "transcript.txt").read_text(encoding="utf-8") == first["text"] + "\n" + last["text"]
+    assert first["text"] in result["yoink_md"] and last["text"] in result["yoink_md"]
+    extraction.asr.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", [
+    subprocess.TimeoutExpired("yt-dlp", 1),
+    subprocess.CalledProcessError(1, "yt-dlp", stderr=b"track unavailable"),
+])
+def test_failed_uploaded_track_tries_the_listed_automatic_track(extraction, failure):
+    extraction.metadata.update(subtitles={"en-CA": [{}]}, automatic_captions={"en-orig": [{}]})
+    attempted = []
+
+    def captions(cmd, template):
+        language = cmd[cmd.index("--sub-lang") + 1]
+        attempted.append(language)
+        if language == "en-CA":
+            raise failure
+        Path(str(template).replace("%(ext)s", "en-orig.srt")).write_text(
+            "1\n00:00:00,000 --> 00:00:01,000\nAutomatic words.\n", encoding="utf-8")
+
+    extraction.caption_files = captions
+    result = extraction.run()
+    assert attempted == ["en-CA", "en-orig"]
+    assert result["transcript_source"] == "captions"
+    assert (extraction.folder / "transcript.txt").read_text(encoding="utf-8") == "Automatic words."
+    extraction.asr.assert_not_called()
+
+
+def test_bad_json_downloads_same_auto_track_as_text(extraction):
+    extraction.metadata.update(automatic_captions={"en-orig": [{"ext": "json3"}, {"ext": "vtt"}]})
+    requests = []
+
+    def captions(cmd, template):
+        assert "--write-auto-subs" in cmd and "--write-subs" not in cmd
+        assert cmd[cmd.index("--sub-lang") + 1] == "en-orig"
+        formats = cmd[cmd.index("--sub-format") + 1]
+        requests.append(formats)
+        if formats.startswith("json3"):
+            Path(str(template).replace("%(ext)s", "en-orig.json3")).write_text(
+                '{"events":[{"segs":null}]}', encoding="utf-8")
+            Path(str(template).replace("%(ext)s", "en-orig.vtt")).write_bytes(b"")
+        else:
+            assert "--force-overwrites" in cmd, "yt-dlp must replace a broken text file"
+            Path(str(template).replace("%(ext)s", "en-orig.srt")).write_text(
+                "1\n00:00:01,000 --> 00:00:03,000\nThe fallback words.\n", encoding="utf-8")
+
+    extraction.caption_files = captions
+    result = extraction.run()
+    folder = Path(result["folder"])
+    assert requests == ["json3/vtt/srt", "vtt/srt"]
+    assert (folder / "transcript.txt").read_text(encoding="utf-8") == "The fallback words."
+    extraction.asr.assert_not_called()
+
+
+def test_regional_manual_caption_wins_and_keeps_line_breaks(extraction):
+    fixtures = Path(__file__).parent / "fixtures" / "captions"
+    extraction.metadata.update(subtitles={"en-CA": [{"ext": "srt"}]},
+                               automatic_captions={"en": [{"ext": "json3"}]})
+
+    def captions(cmd, template):
+        assert "--write-subs" in cmd and "--write-auto-subs" not in cmd
+        assert cmd[cmd.index("--sub-lang") + 1] == "en-CA"
+        Path(str(template).replace("%(ext)s", "en-CA.srt")).write_bytes(
+            (fixtures / "manual.en-CA.srt").read_bytes())
+
+    extraction.caption_files = captions
+    result = extraction.run()
+    folder = Path(result["folder"])
+    side = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    assert side["caption_kind"] == "captions"
+    assert [row["text"] for row in side["transcript"]] == [
+        "We listened  first.\nBy the river.", "By the river.", "By the river."]
+
+
+def test_manual_ttml_only_still_uses_yt_dlp_srt_conversion(extraction):
+    extraction.metadata.update(subtitles={"en-CA": [{"ext": "ttml"}]},
+                               automatic_captions={"en": [{"ext": "vtt"}]})
+    requests = []
+
+    def captions(cmd, template):
+        assert cmd[cmd.index("--sub-lang") + 1] == "en-CA"
+        assert "--write-subs" in cmd and "--write-auto-subs" not in cmd
+        requests.append(cmd[cmd.index("--sub-format") + 1])
+        if "--convert-subs" in cmd:
+            assert cmd[cmd.index("--convert-subs") + 1] == "srt"
+            Path(str(template).replace("%(ext)s", "en-CA.srt")).write_text(
+                "1\n00:00:00,000 --> 00:00:02,000\nA human caption.\n", encoding="utf-8")
+        else:
+            Path(str(template).replace("%(ext)s", "en-CA.ttml")).write_text(
+                '<tt><body><p begin="0s" end="2s">A human caption.</p></body></tt>', encoding="utf-8")
+
+    extraction.caption_files = captions
+    result = extraction.run()
+    folder = Path(result["folder"])
+    assert requests == ["vtt/srt", "ttml"]
+    assert (folder / "transcript.txt").read_text(encoding="utf-8") == "A human caption."
+    assert json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))["caption_kind"] == "captions"
+    extraction.asr.assert_not_called()
+
+
+@pytest.mark.parametrize("have_words", [True, False])
+def test_exit_zero_rate_warning_uses_readable_file_first(extraction, have_words):
+    extraction.captions_available = have_words
+    extraction.caption_stderr = CAPTION_429.encode()
+    result = extraction.run()
+    assert result["captions_refused"] == (not have_words)
+    assert result["transcript_source"] == ("captions" if have_words else "asr")
+    assert len([cmd for cmd, _ in extraction.calls if "--skip-download" in cmd]) == 1
 
 
 @pytest.mark.parametrize("mode", ["full", "chunked"])

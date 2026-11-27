@@ -30,6 +30,7 @@ import urllib.request
 import pytest
 import _platform
 import uoink_usage
+import yt_extract
 from provenance import clamp_title
 from uoink_core.storage import read_export_markdown
 
@@ -128,6 +129,7 @@ def capture(tmp_path, monkeypatch):
         path.write_text(text, encoding="utf-8")
 
     scope = {
+        "yt_extract": yt_extract,
         "_platform": _platform,
         "Path": Path, "json": json, "hashlib": hashlib, "re": re,
         "threading": threading, "datetime": datetime, "shutil": shutil,
@@ -175,7 +177,7 @@ def capture(tmp_path, monkeypatch):
     _load(ROOT / "server.py", {
         "ExtractionPhaseError",
         "_video_capture_source", "_video_capture_id", "_video_capture_folder",
-        "_verify_video_capture_folder", "_create_video_entry_folder",
+        "_verify_video_capture_folder", "_create_video_entry_folder", "_capture_caption_entries",
         "_prepare_video_capture_folder", "_run_extraction",
         "_normalize_video_url", "_normalize_youtube_url", "_normalize_twitter_url",
         "_normalize_tiktok_url", "_normalize_instagram_url", "_detect_platform_from_url",

@@ -33,6 +33,9 @@ try {
       assert.notEqual(url.port, "5179", "never contact production helper");
       if (url.hostname !== "uoink.test") return route.abort();
       if (url.pathname === "/dashboard") return route.fulfill({ contentType: "text/html", body: html });
+      if (url.pathname === "/dashboard/qrcode.js") return route.fulfill({
+        contentType: "application/javascript", body: readFileSync(resolve(root, "assets/dashboard/qrcode.js")),
+      });
       if (url.pathname.startsWith("/brand/fonts/") && /\.(woff|woff2)$/.test(url.pathname)) {
         return route.fulfill({ contentType: "font/woff", body: readFileSync(resolve(root, "assets/brand/fonts", basename(url.pathname))) });
       }

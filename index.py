@@ -3887,7 +3887,7 @@ class Index:
                 input_files=input_files)
 
     def publish_media_snapshot(self, video_id: str, *, cues: list[dict], media_block: dict,
-                               artifacts: dict, ticket=None) -> dict:
+                               artifacts: dict, ticket=None, dry_run=False) -> dict:
         """The complete publication operation: one coherent source/citation/
         media/clip snapshot committed under the index lock through
         ``library_media.publish_transcript`` (ownership fence, owned files,
@@ -3901,8 +3901,9 @@ class Index:
             if self._conn.in_transaction:
                 raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
             result = _media.publish_transcript(self._conn, video_id, cues=cues, media_block=media_block,
-                                               artifacts=artifacts, ticket=ticket)
-        self._invalidate_after_publication(video_id)
+                                               artifacts=artifacts, ticket=ticket, dry_run=dry_run)
+        if not dry_run:
+            self._invalidate_after_publication(video_id)
         return result
 
     def refresh_media_bindings(self, video_id: str, *, clock=time.monotonic, deadline=None) -> bool:
