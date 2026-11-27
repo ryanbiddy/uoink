@@ -81,7 +81,7 @@ def allow_fixture_origin(guards, origin):
     """The only test seam: admit this exact loopback origin in this process."""
     originals = {name: getattr(guards, name) for name in (
         "public_http_open", "resolve_public_http_url", "check_public_http_url",
-        "normalize_podcast_feed_url") if hasattr(guards, name)}
+        "_parse_http_url") if hasattr(guards, name)}
     authority = urllib.parse.urlsplit(origin).netloc
 
     def is_fixture(url):
@@ -118,18 +118,18 @@ def allow_fixture_origin(guards, origin):
             return url
         return originals["check_public_http_url"](url)
 
-    def normalize_podcast_feed_url(url):
-        # Following a feed normalizes it first, and that refuses literal
-        # loopback hosts before any network check. Admit only the fixture.
+    def parse_http_url(url):
+        # Following and polling a feed parse its URL first, and that refuses
+        # literal loopback hosts before any network check. Admit only the fixture.
         if is_fixture(url):
-            return url
-        return originals["normalize_podcast_feed_url"](url)
+            return urllib.parse.urlparse(url)
+        return originals["_parse_http_url"](url)
 
     guards.public_http_open = public_http_open
     guards.resolve_public_http_url = resolve_public_http_url
     guards.check_public_http_url = check_public_http_url
-    if "normalize_podcast_feed_url" in originals:
-        guards.normalize_podcast_feed_url = normalize_podcast_feed_url
+    if "_parse_http_url" in originals:
+        guards._parse_http_url = parse_http_url
     try:
         yield
     finally:
