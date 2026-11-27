@@ -386,9 +386,8 @@ def test_podcast_review_preserves_speaker_and_restored_line(tmp_path, monkeypatc
     idx, episode_id, _, _ = _seed_episode(tmp_path)
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
-    producer = tmp_path / "Podcasts" / "fixture" / "episode.transcript.json"
-    producer.parent.mkdir(parents=True)
-    raw = json.loads((tmp_path / "episode.transcript.json").read_text("utf-8"))
+    producer = Path(podcasts.get_episode(idx, episode_id)["transcript_local_path"])
+    raw = json.loads(producer.read_text("utf-8"))
     raw["segments"].insert(1, {"start": 7., "end": 8., "text": "[Applause]"})
     producer.write_text(json.dumps(raw), "utf-8")
     with idx.write_transaction() as db:

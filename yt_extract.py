@@ -634,6 +634,8 @@ def main():
     ap.add_argument("--keep-video", action="store_true", help="keep the downloaded video file")
     args = ap.parse_args()
 
+    from source_subscriptions import check_public_http_url
+    url = check_public_http_url(args.url)
     import _platform
     _platform.require_media()
 
@@ -644,7 +646,7 @@ def main():
     ytdlp = ([sys.executable, "-m", "yt_dlp", *_platform.ytdlp_media_args()]
              if sys.platform == "darwin" else ["yt-dlp"])
     metadata = json.loads(subprocess.check_output(
-        [*ytdlp, "--dump-single-json", "--skip-download", "--", args.url], text=True, encoding="utf-8"))
+        [*ytdlp, "--dump-single-json", "--skip-download", "--", url], text=True, encoding="utf-8"))
     title = metadata["title"]
     folder = out_root / slugify(title)
     folder.mkdir(exist_ok=True)
@@ -657,7 +659,7 @@ def main():
             "-f", (_platform.video_format("worst[height>=360]/worst")
                    if sys.platform == "darwin" else "worst[height>=360]/worst"),
             "-o", str(folder / "video.%(ext)s"),
-            "--", args.url,
+            "--", check_public_http_url(url),
         ],
         check=True,
     )
@@ -687,7 +689,7 @@ def main():
 
     def fetch(track, prefix, text_only):
         cmd = [*ytdlp, "--skip-download", *caption_args(track, text_only),
-               "-o", str(folder / f"{prefix}.%(ext)s"), "--", args.url]
+               "-o", str(folder / f"{prefix}.%(ext)s"), "--", check_public_http_url(url)]
         try:
             done = subprocess.run(cmd, check=True, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as exc:

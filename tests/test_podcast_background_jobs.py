@@ -18,8 +18,6 @@ def _seed_downloaded_episodes(idx, tmp_path: Path, count: int = 2) -> list[int]:
     feed_id = podcasts.add_feed(idx, "https://jobs.example/feed.xml")["id"]
     episodes = []
     for number in range(count):
-        audio = tmp_path / f"episode-{number}.mp3"
-        audio.write_bytes(b"synthetic audio")
         episodes.append({
             "guid": f"job-episode-{number}", "title": f"Episode {number}",
             "audio_url": f"https://cdn.example/{number}.mp3",
@@ -28,7 +26,8 @@ def _seed_downloaded_episodes(idx, tmp_path: Path, count: int = 2) -> list[int]:
     podcasts.upsert_episodes(idx, feed_id, episodes)
     rows = podcasts.list_episodes(idx, feed_id=feed_id)
     for row in rows:
-        audio = tmp_path / f"episode-{row['title'].split()[-1]}.mp3"
+        audio = podcasts._episode_audio_path(tmp_path, podcasts.get_feed(idx, feed_id), row)
+        audio.write_bytes(b"synthetic audio")
         podcasts._record_audio_result(
             idx, row["id"], local_path=str(audio), size_bytes=audio.stat().st_size,
             error=None, status=podcasts.EPISODE_STATUS_DOWNLOADED)
@@ -145,9 +144,7 @@ def test_restarted_job_reuses_a_completed_transcript(tmp_path, monkeypatch, keep
     idx = index_mod.Index.open(tmp_path / "index.db")
     episode_id = _seed_downloaded_episodes(idx, tmp_path, count=1)[0]
     episode = podcasts.get_episode(idx, episode_id)
-    audio_path = tmp_path / "Podcasts" / "example-show" / "episode.mp3"
-    audio_path.parent.mkdir(parents=True)
-    Path(episode["audio_local_path"]).rename(audio_path)
+    audio_path = Path(episode["audio_local_path"])
     podcasts._record_audio_result(idx, episode_id, local_path=str(audio_path), size_bytes=audio_path.stat().st_size,
                                   error=None, status=podcasts.EPISODE_STATUS_DOWNLOADED)
     monkeypatch.setattr(server, "_read_settings", lambda: {"keep_podcast_audio": keep_audio})

@@ -36,7 +36,7 @@ def _seed_episode(tmp_path: Path, *, guid: str = "opaque-guid-42",
         "description": "A grounded episode.",
     }])
     episode = podcasts.list_episodes(idx, feed_id=feed["id"])[0]
-    transcript_path = tmp_path / "episode.transcript.json"
+    transcript_path = podcasts._episode_audio_path(tmp_path, podcasts.get_feed(idx, feed["id"]), episode).with_suffix(".transcript.json")
     segments = [
         {"start": 0.0, "end": 4.5, "text": "A grounded opening."},
         {"start": 64.2, "end": 70.0, "text": "The durable detail."},

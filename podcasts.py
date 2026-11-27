@@ -33,6 +33,7 @@ import os
 import sys
 import re
 import sqlite3
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -47,6 +48,9 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import source_subscriptions
 from moments import citation_link
+from uoink_core.storage import (
+    LibraryPathError, StorageSubtree, atomic_output, checked_path, ensure_parent, open_regular, read_checked_bytes,
+)
 
 log = logging.getLogger("uoink.podcasts")
 
@@ -1379,10 +1383,13 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
     return target
 
 
+def podcast_storage(data_root):
+    return StorageSubtree(Path(data_root), "Podcasts")
+
+
 def _podcast_root(data_root: Path) -> Path:
-    root = Path(data_root).resolve() / "Podcasts"
-    root.mkdir(parents=True, exist_ok=True)
-    return root
+    root = Path(data_root) / "Podcasts"
+    return checked_path(data_root, root)
 
 
 # ---- transcript -> corpus bridge --------------------------------------
@@ -1452,6 +1459,72 @@ def _check_corpus_identity(idx, existing: dict | None, row: dict, video_id: str)
     if reason:
         raise CorpusIdentityConflict(
             f"corpus id {video_id}: {reason}; refusing to overwrite or link")
+
+
+def episode_corpus_folder(root, row):
+    _, suffix = _episode_corpus_id(row)
+    show = _slugify(row.get("podcast_title") or "Untitled podcast", fallback=f"feed-{row['feed_id']}")
+    title = _slugify(row.get("title") or "Untitled episode", fallback=f"ep-{row['id']}")
+    return checked_path(root, Path(root) / show / f"{title}-{suffix}")
+
+
+def corpus_storage(idx, item, data_root):
+    """Confirm both indexed files against the episode that owns this corpus."""
+    root = podcast_storage(data_root)
+    try:
+        meta = json.loads(item.get("metadata_json") or "{}")
+        with idx._lock:
+            episode = get_episode_with_feed(idx, meta["episode_id"])
+            if not episode or _episode_corpus_id(episode)[0] != item["video_id"]:
+                raise ValueError
+            _check_corpus_identity(idx, item, episode, item["video_id"])
+        # Titles may have changed on the feed since this snapshot was published.
+        saved = dict(episode, podcast_title=meta.get("podcast_title") or episode["podcast_title"],
+                     title=item.get("title") or episode["title"])
+        folder = episode_corpus_folder(root, saved)
+        for field, suffix in (("corpus_path", ".md"), ("sidecar_path", ".json")):
+            if checked_path(root, Path(item[field])) != folder / (folder.name + suffix):
+                raise ValueError
+        return root
+    except (ValueError, KeyError, TypeError, AttributeError) as exc:
+        raise LibraryPathError("The saved files do not belong to this podcast episode.") from exc
+
+
+def episode_media_path(idx, episode_id, data_root, *, transcript=False):
+    """Match a recorded producer file to its episode, including 3.18.0 title-only names."""
+    with idx._lock:
+        row = get_episode_with_feed(idx, episode_id)
+        if not row:
+            raise ValueError("Podcast episode not found.")
+        field = "transcript_local_path" if transcript else "audio_local_path"
+        path = checked_path(podcast_storage(data_root), Path(row.get(field) or ""))
+        rel = path.relative_to(Path(data_root) / "Podcasts")
+        suffix = ".transcript.json" if transcript else path.suffix
+        if (len(rel.parts) != 2 or not path.name.endswith(suffix)
+                or not transcript and suffix.lower() not in (".mp3", ".wav")):
+            raise ValueError("The recording is outside its episode folder.")
+        name = path.name[:-len(suffix)]
+        if "--" in name:
+            identity = _episode_full_identity(row)[2].removeprefix("podcast:")[:32]
+            matches = name.endswith("--" + identity)
+        else:
+            show = _slugify(row["podcast_title"] or row["feed_url"], fallback=f"feed-{row['feed_id']}")
+            matches = rel.parts[0] == show and name == _slugify(row["title"], fallback=f"ep-{episode_id}")
+        if not matches:
+            raise ValueError("Download this episode again so Uoink can identify its recording.")
+        if transcript and "--" not in name:
+            claims = idx._conn.execute(
+                "SELECT id, transcript_local_path FROM podcast_episodes WHERE transcript_local_path IS NOT NULL")
+            if any(claim["id"] != episode_id and Path(claim["transcript_local_path"]).resolve() == path.resolve()
+                   for claim in claims):
+                raise ValueError("Another episode also claims this transcript.")
+        if transcript and row.get("audio_local_path"):
+            audio = checked_path(podcast_storage(data_root), Path(row["audio_local_path"]))
+            if path != audio.with_suffix(".transcript.json"):
+                raise ValueError("The transcript does not belong to this recording.")
+        if not transcript and audio_path_owners(idx._conn, path) != [episode_id]:
+            raise ValueError("Another episode also claims this recording.")
+    return path
 
 
 def _timestamp_label(seconds: float) -> str:
@@ -1525,9 +1598,9 @@ def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
     return raw, shaped
 
 
-def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
+def _load_transcript(path: Path, *, root) -> tuple[dict, list[dict]]:
     try:
-        data = path.read_bytes()
+        data = read_checked_bytes(root, path)
     except FileNotFoundError:
         raise FileNotFoundError(f"transcript file missing: {path}") from None
     except OSError as exc:
@@ -1535,7 +1608,7 @@ def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
     return _transcript_from_bytes(data)
 
 
-def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
+def load_completed_episode_transcript(idx, episode_id: int, *, data_root) -> dict | None:
     """Load a reusable DONE transcript, or return None when none is recorded.
 
     A recorded path that no longer loads is an integrity failure, not a cache
@@ -1547,8 +1620,8 @@ def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
     path_raw = episode.get("transcript_local_path")
     if episode.get("transcript_status") != "done" or not path_raw:
         return None
-    path = Path(path_raw)
-    transcript, segments = _load_transcript(path)
+    path = episode_media_path(idx, episode_id, data_root, transcript=True)
+    transcript, segments = _load_transcript(path, root=podcast_storage(data_root))
     normalized = dict(transcript)
     normalized["segments"] = segments
     return {"path": path, "transcript": normalized}
@@ -1591,7 +1664,7 @@ def _removable_audio(data_root, row, references):
         transcript = _owned_file(data_root, row["transcript_local_path"])
         if transcript != path.with_suffix(".transcript.json"):
             return None
-        _load_transcript(transcript)
+        _load_transcript(transcript, root=podcast_storage(data_root))
         return path
     except (OSError, ValueError, RuntimeError):
         return None
@@ -1684,27 +1757,6 @@ def delete_transcribed_audio(idx, data_root, episode_id):
         return True
 
 
-def _atomic_write(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp_name = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", newline="\n", delete=False,
-            dir=path.parent, prefix=f".{path.name}.", suffix=".tmp",
-        ) as handle:
-            handle.write(content)
-            handle.flush()
-            os.fsync(handle.fileno())
-            temp_name = handle.name
-        os.replace(temp_name, path)
-    finally:
-        if temp_name:
-            try:
-                Path(temp_name).unlink(missing_ok=True)
-            except OSError:
-                pass
-
-
 def _link_episode_to_yoink(idx, episode_id: int, video_id: str) -> None:
     with idx.write_transaction() as conn:
         cur = conn.execute(
@@ -1729,24 +1781,23 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
     transcript_path_raw = row.get("transcript_local_path")
     if not transcript_path_raw:
         raise FileNotFoundError("episode has no transcript_local_path")
-    transcript_path = Path(transcript_path_raw)
+    root = podcast_storage(data_root)
+    transcript_path = episode_media_path(idx, episode_id, data_root, transcript=True)
     # Consume the mutable transcript once, then mint. A newer owner that
     # completes before this ticket is obtained cannot be replaced by these
     # already-read bytes (BC-3d / BD2-02).
     try:
-        transcript_bytes = transcript_path.read_bytes()
+        transcript_bytes = read_checked_bytes(root, transcript_path)
     except FileNotFoundError:
         raise FileNotFoundError(f"transcript file missing: {transcript_path}") from None
     except OSError as exc:
         raise ValueError(f"transcript is not readable JSON: {exc}") from exc
     transcript_raw, segments = _transcript_from_bytes(transcript_bytes)
     source_url = _episode_source_url(row)
-    video_id, suffix = _episode_corpus_id(row)
+    video_id, _ = _episode_corpus_id(row)
     podcast_title = row.get("podcast_title") or "Untitled podcast"
     episode_title = row.get("title") or "Untitled episode"
-    feed_slug = _slugify(podcast_title, fallback=f"feed-{row['feed_id']}")
-    episode_slug = _slugify(episode_title, fallback=f"ep-{episode_id}")
-    folder = _podcast_root(Path(data_root)) / feed_slug / f"{episode_slug}-{suffix}"
+    folder = episode_corpus_folder(root, row)
     corpus_path = folder / f"{folder.name}.md"
     sidecar_path = folder / f"{folder.name}.json"
 
@@ -1760,11 +1811,12 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
     # before building or replacing files and again inside publication.
     import library_media as _media_fence  # noqa: WPS433 -- lazy: keeps module import graph unchanged
     ticket = (idx.begin_media_publication(
-                  video_id, folder=folder,
+                  video_id, folder=folder, root=root,
                   input_files={transcript_path: transcript_bytes})
               if _media_fence.schema_ready(idx._conn) else None)
     if ticket is not None:
-        _media_fence.require_unchanged_input_bytes(transcript_path, transcript_bytes)
+        with _media_fence.publication_storage(root):
+            _media_fence.require_unchanged_input_bytes(transcript_path, transcript_bytes)
 
     speakers = list(dict.fromkeys(
         segment["speaker"] for segment in segments if segment.get("speaker")
@@ -1930,7 +1982,8 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
         # (sidecar last), commits the citation/media/clip rows together,
         # prunes obsolete owned inputs and invalidates Phase 2 work.
         # Retry replays the same inputs.
-        _media_mod.require_unchanged_input_bytes(transcript_path, transcript_bytes)
+        with _media_mod.publication_storage(root):
+            _media_mod.require_unchanged_input_bytes(transcript_path, transcript_bytes)
         idx.upsert_yoink(record, content=markdown)
         materialized = None
         try:
@@ -1953,9 +2006,10 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
     else:
         # Legacy schema (migration 0030 absent): the pre-Phase 6 file-then-
         # rows sequence; no media snapshot can be materialized.
-        _media_mod.archive_artifact(folder, media_artifact)
-        _atomic_write(corpus_path, markdown)
-        _atomic_write(sidecar_path, sidecar_bytes.decode("utf-8"))
+        with _media_mod.publication_storage(root):
+            _media_mod.archive_artifact(folder, media_artifact)
+            _media_mod._atomic_replace(corpus_path, corpus_bytes)
+            _media_mod._atomic_replace(sidecar_path, sidecar_bytes)
         idx.upsert_yoink(record, content=markdown)
         idx.insert_citations(video_id, transcript_citations)
     _link_episode_to_yoink(idx, episode_id, video_id)
@@ -2005,9 +2059,10 @@ def reconcile_episode_corpus_links(
             reason = "episode has no transcript_local_path"
         else:
             try:
-                _load_transcript(Path(transcript_path))
+                path = episode_media_path(idx, episode["id"], data_root, transcript=True)
+                _load_transcript(path, root=podcast_storage(data_root))
                 repairable = True
-            except (FileNotFoundError, ValueError) as exc:
+            except (OSError, ValueError) as exc:
                 reason = str(exc)
         item = {
             "episode_id": int(episode["id"]),
@@ -2047,14 +2102,15 @@ def _episode_audio_path(data_root: Path, feed_row: dict,
                           fallback=f"feed-{feed_row.get('id') or 0}")
     ep_slug = _slugify(episode_row.get("title"),
                         fallback=f"ep-{episode_row.get('id') or 0}")
-    folder = _podcast_root(data_root) / feed_slug
-    folder.mkdir(parents=True, exist_ok=True)
+    folder = checked_path(podcast_storage(data_root), _podcast_root(data_root) / feed_slug)
     audio_format = "mp3"
     if sys.platform == "darwin":
         import _platform
         audio_format = _platform.podcast_audio_format()
     identity = _episode_full_identity({"feed_url": feed_row.get("feed_url"), "guid": episode_row.get("guid")})[2]
-    return folder / f"{ep_slug}--{identity.removeprefix('podcast:')[:32]}.{audio_format}"
+    path = folder / f"{ep_slug}--{identity.removeprefix('podcast:')[:32]}.{audio_format}"
+    ensure_parent(podcast_storage(data_root), path)
+    return path
 
 
 def _record_audio_result(idx, episode_id: int, *,
@@ -2119,7 +2175,13 @@ def _reuse_recorded_audio(idx, episode_id, recorded, data_root, target):
                                  "audio_downloaded_at=NULL WHERE id=?", [(owner,) for owner in owners])
         if owners != [episode_id] or not saved.is_file():
             return None
-        size = saved.stat().st_size
+        try:
+            if episode_media_path(idx, episode_id, data_root) != checked_path(podcast_storage(data_root), saved):
+                return None
+            with open_regular(podcast_storage(data_root), saved, binary=True) as audio:
+                size = os.fstat(audio.fileno()).st_size
+        except (OSError, ValueError):
+            return None
         if not size:
             return None
         _record_audio_result(idx, episode_id, local_path=str(saved), size_bytes=size,
@@ -2154,7 +2216,10 @@ def download_episode_audio(idx, episode_id: int, *,
                              status="error")
         return {"ok": False, "error": "audio_url is not an http(s) URL"}
 
-    out_path = _episode_audio_path(Path(data_root), feed, episode)
+    try:
+        out_path = _episode_audio_path(Path(data_root), feed, episode)
+    except OSError:
+        return {"ok": False, "episode_id": episode_id, "error": "The podcast download folder is unavailable."}
     lock = source_subscriptions.CaptureLock.acquire(data_root, _audio_lock_key(out_path), timeout=5)
     if lock is None:
         return {"ok": False, "error": "Episode audio is busy. Try again."}
@@ -2170,14 +2235,14 @@ def download_episode_audio(idx, episode_id: int, *,
             with idx._lock:
                 if any(owner != episode_id for owner in audio_path_owners(idx._conn, out_path)):
                     return {"ok": False, "error": "Another episode owns this audio file."}
-        # yt-dlp can itself reuse existing output. Give it a fresh directory,
-        # then publish only its completed result, on the same filesystem.
-        with tempfile.TemporaryDirectory(dir=out_path.parent, prefix=".download-") as tmp:
+        # The downloader sees only a private scratch directory. Copy the completed
+        # recording to a checked, same-filesystem temporary file for publication.
+        with tempfile.TemporaryDirectory(prefix="uoink-podcast-download-") as tmp:
             return _download_audio_file(idx, episode_id, episode, out_path, Path(tmp),
-                                        ytdlp_cmd, timeout_sec, resolve_url)
+                                        ytdlp_cmd, timeout_sec, resolve_url, podcast_storage(data_root))
 
 
-def _download_audio_file(idx, episode_id, episode, out_path, staging, ytdlp_cmd, timeout_sec, resolve_url):
+def _download_audio_file(idx, episode_id, episode, out_path, staging, ytdlp_cmd, timeout_sec, resolve_url, root):
     import _platform
 
     try:
@@ -2273,8 +2338,15 @@ def _download_audio_file(idx, episode_id, episode, out_path, staging, ytdlp_cmd,
                               status=EPISODE_STATUS_NEW)
         return {"ok": False, "episode_id": episode_id,
                 "error": "output file missing"}
-    size = completed.stat().st_size
-    os.replace(completed, out_path)
+    try:
+        with open_regular(staging, completed, binary=True) as audio, atomic_output(out_path, root=root) as output:
+            shutil.copyfileobj(audio, output)
+            size = output.tell()
+    except OSError:
+        error = "Could not save the recording in the podcast folder."
+        _record_audio_result(idx, episode_id, local_path=None, size_bytes=None,
+                             error=error, status=EPISODE_STATUS_NEW)
+        return {"ok": False, "episode_id": episode_id, "error": error}
     _record_audio_result(idx, episode_id, local_path=str(out_path),
                           size_bytes=size, error=None,
                           status=EPISODE_STATUS_DOWNLOADED)

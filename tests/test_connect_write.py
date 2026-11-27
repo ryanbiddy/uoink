@@ -194,7 +194,7 @@ def test_restore_first_config_if_second_replace_fails(home, monkeypatch):
     replace = Path.replace
 
     def locked(path, target):
-        if target == package:
+        if target.resolve() == package.resolve():
             raise PermissionError("client has this file open")
         return replace(path, target)
 
@@ -613,7 +613,7 @@ def test_existing_backup_link_never_modifies_its_target(home, monkeypatch):
             replace = Path.replace
 
             def locked(staged, dest):
-                if dest == cfg:
+                if dest.resolve() == cfg.resolve():
                     raise PermissionError("locked")
                 return replace(staged, dest)
 
@@ -656,9 +656,9 @@ def test_rollback_continues_after_one_restore_fails(home, monkeypatch):
     original_error = PermissionError("locked during save")
 
     def locked(staged, dest):
-        if dest == third.path:
+        if dest.resolve() == third.path.resolve():
             raise original_error
-        if dest == second.path and dest.read_bytes() == second.replacement:
+        if dest.resolve() == second.path.resolve() and dest.read_bytes() == second.replacement:
             raise PermissionError("locked during restore")
         return replace(staged, dest)
 

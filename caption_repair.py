@@ -11,6 +11,7 @@ import clips
 import library_cards
 import library_media as media
 import yt_extract
+from uoink_core.storage import checked_path, read_checked_bytes
 
 
 def _check_track(side, video_id):
@@ -48,7 +49,7 @@ _UNSUPPORTED_CHAPTERS = "Cannot verify this save's chapter layout. Its files wer
 _CHAPTER_SECTION_END = re.compile(rb"(?:\r?\n)*(?:\Z|---(?:\r?\n|\Z))")
 
 
-def _legacy_chapters(source, folder, inputs):
+def _legacy_chapters(source, folder, inputs, root):
     chapters = source.get("source_chapters") or source.get("chapters")
     if chapters:
         return chapters
@@ -57,7 +58,7 @@ def _legacy_chapters(source, folder, inputs):
     if path.is_symlink() or not path.is_file() or path.resolve().parent != folder.resolve():
         raise ValueError(_UNSUPPORTED_CHAPTERS)
     try:
-        inputs[path] = media._read_artifact_bytes(path, limit=yt_extract.MAX_CAPTION_BYTES)
+        inputs[path] = read_checked_bytes(root, path, limit=yt_extract.MAX_CAPTION_BYTES)
         data = json.loads(inputs[path])
     except (media.MediaError, ValueError, RecursionError) as exc:
         raise ValueError(_UNSUPPORTED_CHAPTERS) from exc
@@ -106,19 +107,18 @@ def _markdown_after_repair(corpus, old_sections, new, *, retry, grouped=False):
                      "The saved caption section has changed. Your edits were kept.")
 
 
-def repair(idx, item, build_plan, *, dry_run=True):
+def repair(idx, item, build_plan, *, root, dry_run=True):
     video_id = item["video_id"]
     if item.get("platform") != "youtube":
         raise ValueError("Caption repair is only available for saved YouTube videos.")
-    side_path = Path(item["sidecar_path"])
+    side_path = checked_path(root, Path(item["sidecar_path"]))
     folder = side_path.parent
-    corpus_path = Path(item["corpus_path"])
+    corpus_path = checked_path(root, Path(item["corpus_path"]))
     plain = folder / "transcript.txt"
     archive = folder / media.MEDIA_INPUTS_DIR
-    if any(p.is_symlink() or p.resolve().parent != folder.resolve()
-           for p in (side_path, corpus_path, plain, archive)):
+    if any(checked_path(root, p).parent != folder for p in (corpus_path, plain, archive)):
         raise ValueError("A transcript file has moved outside the saved item.")
-    side_raw = side_path.read_bytes()
+    side_raw = read_checked_bytes(root, side_path)
     current = media._parse_json_object(side_raw, "sidecar")
     _check_track(current, video_id)
     backups = list(folder.glob("captions-before-*.bak"))
@@ -128,7 +128,7 @@ def repair(idx, item, build_plan, *, dry_run=True):
         backup = backups[0]
         if backup.is_symlink() or not backup.is_file():
             raise ValueError("The original caption backup has moved.")
-        original = backup.read_bytes()
+        original = read_checked_bytes(root, backup)
     else:
         original = side_raw
     backup_path = folder / ("captions-before-" + hashlib.sha256(original).hexdigest() + ".bak")
@@ -138,13 +138,13 @@ def repair(idx, item, build_plan, *, dry_run=True):
     _check_track(source, video_id)
     rows, removed = _clean_rows(source)
     target = dict(source, transcript=rows)
-    corpus_before = corpus_path.read_bytes()
+    corpus_before = read_checked_bytes(root, corpus_path)
     old_block = source.get("media_depth")
     grouped = old_block is None and re.search(
         rb"(?m)^## Transcript\r?\n\r?\n### Chapter: ", corpus_before) is not None
     inputs = {side_path: side_raw, corpus_path: corpus_before, backup_path: original if backups else None}
     if grouped:
-        target["source_chapters"] = _legacy_chapters(source, folder, inputs)
+        target["source_chapters"] = _legacy_chapters(source, folder, inputs, root)
     # A retry can find either carrier on disk. Reconstruct from the backup
     # every time so a second pass cannot trim a newly exposed spoken repeat.
     is_target = current.get("transcript") == rows
@@ -155,7 +155,7 @@ def repair(idx, item, build_plan, *, dry_run=True):
     # A legacy save needs an explicit chapter list to build its first snapshot.
     source_for_plan = dict(source, source_chapters=target.get("source_chapters", []))
     old_plan = build_plan(source_for_plan, folder, item=item)
-    old_sections = [old_plan["markdown"]]
+    old_sections = [old_plan["markdown"], media.capture_markdown_3180(old_plan, source["transcript"])]
     if old_block is not None:
         media.validate_media_block(old_block)
         if (old_block["diarization_state"] != "not_requested"
@@ -188,7 +188,7 @@ def repair(idx, item, build_plan, *, dry_run=True):
         repaired["source_chapters"] = target["source_chapters"]
     artifacts = {backup_path: original, corpus_path: corpus, archive / (digest + ".json"): plan["artifact"],
                  side_path: json.dumps(repaired, ensure_ascii=False, indent=2).encode()}
-    plain_before = plain.read_bytes() if plain.is_file() else None
+    plain_before = read_checked_bytes(root, plain) if plain.is_file() else None
     inputs[plain] = plain_before
     if plain_before is not None:
         newline = b"\r\n" if b"\r\n" in plain_before else b"\n"
@@ -199,7 +199,7 @@ def repair(idx, item, build_plan, *, dry_run=True):
             raise ValueError("The saved transcript.txt has changed. Your edits were kept.")
         artifacts[plain] = new_plain.replace(b"\n", newline)
 
-    ticket = idx.begin_media_publication(video_id, folder=folder,
+    ticket = idx.begin_media_publication(video_id, folder=folder, root=root,
                                          capture_binding=media.capture_sidecar_inputs(current), input_files=inputs)
     old_revision = old_block["media_revision"] if old_block else None
     if ticket.base_media_revision not in (old_revision, block["media_revision"]):

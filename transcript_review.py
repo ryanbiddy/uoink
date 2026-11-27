@@ -10,6 +10,7 @@ import math
 import re
 import sqlite3
 import unicodedata
+from uoink_core.storage import checked_path, open_regular, read_checked_json, unlink_regular
 
 
 SCORES = ("no_speech_prob", "avg_logprob", "compression_ratio")
@@ -187,7 +188,8 @@ def _decision(record, field, whisper, duration, restore):
 
 def last_summary(root):
     try:
-        return (Path(root) / "transcript-review-summary.txt").read_text("utf-8")
+        with open_regular(root, Path(root) / "transcript-review-summary.txt") as source:
+            return source.read()
     except (OSError, UnicodeError):
         return None
 
@@ -212,33 +214,48 @@ def _publishing():
         raise _PublicationPending(str(exc)) from exc
 
 
+def _generated_section(markdown, section):
+    if not section or markdown.count(section) != 1:
+        return False
+    start = markdown.index(section)
+    end = start + len(section)
+    return (start == 0 or markdown[start - 1] == "\n") and (end == len(markdown) or markdown[end] == "\n")
+
+
 def _review_capture(server, item, path, side, kept, held, pending):
     """Write intent first. A stopped CLI can settle each output on its next run."""
     folder = path.parent
-    corpus = Path(item["corpus_path"])
-    plain = folder / "transcript.txt"
-    if corpus.parent != folder or corpus.resolve() != corpus or plain.resolve() != plain:
+    root = server.DESKTOP_ROOT
+    corpus = checked_path(root, Path(item["corpus_path"]))
+    plain = checked_path(root, folder / "transcript.txt")
+    if corpus.parent != folder:
         raise ValueError("A transcript file has moved.")
+    def read_text(file):
+        with open_regular(root, file) as source:
+            return source.read()
+
     if not pending:
         new = dict(side, transcript=kept, held_transcript_lines=held)
         # A legacy capture gets a first media snapshot, including an all-held item.
         new.setdefault("source_chapters", [])
         new["health"] = server.compute_health(new)
         old_text = server._transcript_text_from_sidecar(side)
-        if plain.exists() and plain.read_text("utf-8").strip() != old_text.strip():
+        if plain.exists() and read_text(plain).strip() != old_text.strip():
             raise ValueError("The plain transcript has edits. Its files were kept.")
-        md = corpus.read_text("utf-8")
+        md = read_text(corpus)
         old_plan = server._capture_media_plan(side, folder, item=item)
         plan = server._capture_media_plan(new, folder, item=item)
         old_block = old_plan["markdown"].rstrip() if old_plan else None
-        if not old_block or md.count(old_block) != 1:
+        if not _generated_section(md, old_block):
             # Formats before the media snapshot: replace only the exact
             # transcript block generated from these rows, never the rest of the file.
             entries = side.get("transcript") or []
             legacy, _ = server._transcript_backfill_render(folder, side)
-            candidates = [legacy.rstrip(), "## Transcript\n\n" + "\n".join(
+            from library_media import capture_markdown_3180
+            historical = capture_markdown_3180(old_plan, entries).rstrip() if old_plan else None
+            candidates = [historical, legacy.rstrip(), "## Transcript\n\n" + "\n".join(
                 f"- [{server.fmt_time(int(r['start']))}] {r['text']}" for r in entries)]
-            old_block = next((b for b in candidates if b and md.count(b) == 1), None)
+            old_block = next((b for b in candidates if _generated_section(md, b)), None)
         if not old_block:
             raise ValueError("The saved transcript section has edits. Its files were kept.")
         updated = md.replace(old_block, plan["markdown"].rstrip(), 1)
@@ -249,31 +266,31 @@ def _review_capture(server, item, path, side, kept, held, pending):
         new["pending_transcript_review"] = pending
         if "reliability" in new:
             new["reliability"] = {"status": "not_computed", "spans": [], "span_count": 0}
-        server._atomic_write_text(path, json.dumps(new, ensure_ascii=False, indent=2))
+        server._atomic_write_text(path, json.dumps(new, ensure_ascii=False, indent=2), root=root)
         side = new
     with server._corpus_update_lock:
-        md = corpus.read_text("utf-8")
+        md = read_text(corpus)
         if _digest(md) != pending["after"]:
             old, new = pending["old_block"], pending["new_block"]
-            if md.count(old) != 1:
-                if md.count(new) != 1:
+            if not _generated_section(md, old):
+                if not _generated_section(md, new):
                     raise ValueError("The saved transcript section changed during review.")
             else:
-                server._atomic_write_text(corpus, md.replace(old, new, 1))
+                server._atomic_write_text(corpus, md.replace(old, new, 1), root=root)
     if plain.exists():
         target = server._transcript_text_from_sidecar(side)
-        current = plain.read_text("utf-8").strip()
+        current = read_text(plain).strip()
         if current != target.strip():
             if _digest(current) != pending["old_plain"]:
                 raise ValueError("The plain transcript changed during review.")
-            server._atomic_write_text(plain, target)
+            server._atomic_write_text(plain, target, root=root)
     with _publishing():
         server._index_yoink(folder, side, corpus, path, require_media_update=True)
-    latest = json.loads(path.read_text("utf-8"))
+    latest = read_checked_json(root, path)
     if latest.get("pending_transcript_review") != pending:
         raise ValueError("The transcript changed during review.")
     latest.pop("pending_transcript_review")
-    server._atomic_write_text(path, json.dumps(latest, ensure_ascii=False, indent=2))
+    server._atomic_write_text(path, json.dumps(latest, ensure_ascii=False, indent=2), root=root)
 
 
 def _episode_review(server, item, side, restore, write):
@@ -282,11 +299,9 @@ def _episode_review(server, item, side, restore, write):
     import podcasts
     idx = server._get_index()
     episode_id = json.loads(item["metadata_json"])["episode_id"]
-    episode = podcasts.get_episode(idx, episode_id)
-    producer = podcasts._owned_file(server.DATA_ROOT, episode["transcript_local_path"])
-    if not producer:
-        raise ValueError("The saved episode transcript file has moved.")
-    raw = json.loads(producer.read_text("utf-8"))
+    root = podcasts.podcast_storage(server.DATA_ROOT)
+    producer = podcasts.episode_media_path(idx, episode_id, server.DATA_ROOT, transcript=True)
+    raw = read_checked_json(root, producer)
     duration = side.get("duration_seconds")
     before = raw.get("held_transcript_lines") or []
     published = side.get("held_transcript_lines") or []
@@ -317,7 +332,7 @@ def _episode_review(server, item, side, restore, write):
             raw.update(segments=kept, held_transcript_lines=held)
             if valid:
                 run["artifact_sha256"] = hashlib.sha256(library_media.transcript_artifact_bytes(raw)).hexdigest()
-            server._atomic_write_text(producer, json.dumps(raw, ensure_ascii=False, indent=2))
+            server._atomic_write_text(producer, json.dumps(raw, ensure_ascii=False, indent=2), root=root)
         with _publishing():
             podcasts.episode_to_corpus(idx, episode_id, data_root=server.DATA_ROOT)
     return len(held), _changed_lines(published, held)
@@ -331,16 +346,15 @@ def _item_review(server, item, restore, write):
         return 0, 0
     path = Path(item.get("sidecar_path") or "")
     episode = item.get("source_type") == "episode"
-    root = (Path(server.DATA_ROOT) / "Podcasts").resolve()
-    if not (path.is_relative_to(root) if episode else path.is_relative_to(server.DESKTOP_ROOT)):
-        raise ValueError("The transcript is outside the library.")
-    if path.resolve() != path or (not episode and not server._transcript_backfill_inside_library(path)):
+    root = server._item_storage_root(item)
+    path = checked_path(root, path)
+    if not episode and not server._transcript_backfill_inside_library(path):
         raise ValueError("The transcript is outside the library.")
     if not path.is_file():
         if restore:
             raise ValueError("This save has no transcript file.")
         return 0, 0
-    side = json.loads(path.read_text("utf-8"))
+    side = read_checked_json(root, path)
     if not isinstance(side, dict) or not (side.get("transcript") or side.get("held_transcript_lines")
                                            or side.get("pending_transcript_review")):
         if restore:
@@ -357,7 +371,7 @@ def _item_review(server, item, restore, write):
     else:
         lock = nullcontext()
     with lock, server._sidecar_update_lock:
-        if write and json.loads(path.read_text("utf-8")) != side:
+        if write and read_checked_json(root, path) != side:
             raise ValueError("The transcript changed during review.")
         if episode:
             return _episode_review(server, item, side, restore, write)
@@ -365,7 +379,7 @@ def _item_review(server, item, restore, write):
         pending = side.get("pending_transcript_review")
         if pending and restore is not None:
             _review_capture(server, item, path, side, side["transcript"], before, pending)
-            side = json.loads(path.read_text("utf-8"))
+            side = read_checked_json(root, path)
             rows = all_rows(side["transcript"], before)
             if 1 <= restore <= len(rows) and rows[restore - 1].get("review_restored"):
                 return len(before), 1
@@ -401,12 +415,13 @@ def tidy(server, *, apply=False, restore=None):
     if lock is None:
         raise ValueError("A transcript review is already running.")
     mode = "apply" if apply else "dry-run"
-    checkpoint = Path(server.DATA_ROOT) / f"transcript-review-{mode}.json"
     with lock:
+        checkpoint = checked_path(server.DATA_ROOT, Path(server.DATA_ROOT) / f"transcript-review-{mode}.json")
+        summary_path = checked_path(server.DATA_ROOT, Path(server.DATA_ROOT) / "transcript-review-summary.txt")
         progress = {"cursor": "", "held": 0, "changed": 0, "errors": [], "root": str(server.DESKTOP_ROOT)}
         if checkpoint.is_file():
             try:
-                previous = json.loads(checkpoint.read_text("utf-8"))
+                previous = read_checked_json(server.DATA_ROOT, checkpoint)
                 if (not isinstance(previous, dict)
                         or any(type(previous.get(k)) is not type(v) for k, v in progress.items())
                         or previous["held"] < 0 or previous["changed"] < 0):
@@ -422,7 +437,7 @@ def tidy(server, *, apply=False, restore=None):
             while True:
                 with idx.read_snapshot() as db:
                     items = db.execute(
-                        "SELECT video_id, source_type, sidecar_path, corpus_path, metadata_json FROM yoinks "
+                        "SELECT video_id, title, slug, source_type, sidecar_path, corpus_path, metadata_json FROM yoinks "
                         "WHERE deleted_at IS NULL AND video_id>? ORDER BY video_id LIMIT 64",
                         (progress["cursor"],)).fetchall()
                 if not items:
@@ -434,7 +449,7 @@ def tidy(server, *, apply=False, restore=None):
                         progress["changed"] += difference
                     except _PublicationPending as exc:
                         # Cursor and totals still describe the last completed item.
-                        server._atomic_write_text(checkpoint, json.dumps(progress))
+                        server._atomic_write_text(checkpoint, json.dumps(progress), root=server.DATA_ROOT)
                         message = (f"Publication stopped at {item['video_id']}. "
                                    f"Run uoink tidy-transcripts --{mode} to resume.")
                         return {"ok": False, "review_summary": message, "error": message,
@@ -443,9 +458,9 @@ def tidy(server, *, apply=False, restore=None):
                     except (OSError, ValueError, KeyError, RuntimeError, sqlite3.Error, MediaError) as exc:
                         progress["errors"].append({"item": item["video_id"], "error": str(exc)})
                     progress["cursor"] = item["video_id"]
-                server._atomic_write_text(checkpoint, json.dumps(progress))
+                server._atomic_write_text(checkpoint, json.dumps(progress), root=server.DATA_ROOT)
         except KeyboardInterrupt:
-            server._atomic_write_text(checkpoint, json.dumps(progress))
+            server._atomic_write_text(checkpoint, json.dumps(progress), root=server.DATA_ROOT)
             raise ValueError(f"Review stopped. Run uoink tidy-transcripts --{mode} to resume.") from None
         total, changed, errors = progress["held"], progress["changed"], progress["errors"]
         action = "Changed" if apply else "Would change"
@@ -455,7 +470,8 @@ def tidy(server, *, apply=False, restore=None):
                    "A scoreless closing ‘Thank you’ stays.")
         if errors:
             summary += f" {len(errors)} saves need another look."
-        server._atomic_write_text(Path(server.DATA_ROOT) / "transcript-review-summary.txt", summary)
-        checkpoint.unlink(missing_ok=True)
+        server._atomic_write_text(summary_path, summary, root=server.DATA_ROOT)
+        if checkpoint.exists():
+            unlink_regular(server.DATA_ROOT, checkpoint)
         return {"ok": not errors, "held_count": total, "changed": changed,
                 "review_summary": summary, "errors": errors, **({"error": summary} if errors else {})}

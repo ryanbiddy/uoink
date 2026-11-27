@@ -1484,7 +1484,8 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
         assert len(queued) == count
     # Execute the real queue admission function with inert dependencies. Missing
     # download consent must return before any job, worker or model can start.
-    audio_placeholder = env.root / "never-decoded.mp3"
+    audio_placeholder = env.root / "Podcasts" / "show" / "never-decoded.mp3"
+    audio_placeholder.parent.mkdir(parents=True)
     audio_placeholder.write_bytes(b"synthetic placeholder; not an audio fixture")
     admission_globals = {
         "source_subscriptions": SimpleNamespace(CaptureLock=SimpleNamespace(
@@ -1492,7 +1493,8 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
         "_platform": _platform,
         "Path": Path, "_get_index": lambda: None,
         "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
-            "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"}),
+            "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"},
+            episode_media_path=lambda idx, episode_id, root: audio_placeholder),
         "whisper_runner": SimpleNamespace(is_whisperx_available=lambda: True,
                                            is_transcription_available=lambda: True,
                                            normalize_model=lambda value: value or "base",
@@ -1522,14 +1524,18 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     assert result["attribution"]["runs"] == f.block["runs"]
     assert _snapshot(conn, f) == before
     import podcasts
-    transcript_path = env.root / "done.json"
+    feed = {"id": 1, "title": "Show", "feed_url": "https://show.test/rss"}
+    episode = {"id": 42, "feed_id": 1, "guid": "episode-42", "title": "Never decoded",
+               "podcast_title": feed["title"], "feed_url": feed["feed_url"]}
+    transcript_path = podcasts._episode_audio_path(env.root, feed, episode).with_suffix(".transcript.json")
     transcript = dict(model="base", diarization_ran=True, diarization_run_id=f.block["runs"][0]["run_id"],
                       media_depth=f.block, segments=[dict(start=0.0, end=25.0, text=f.cues[0]["text"], speaker="SPEAKER_00")])
     transcript_path.write_text(_json(transcript), encoding="utf-8")
     with env.patch.context() as patch:
-        patch.setattr(podcasts, "get_episode", lambda idx, episode_id: {
-            "transcript_status": "done", "transcript_local_path": str(transcript_path), "diarization_ran": False})
-        reused = podcasts.load_completed_episode_transcript(SimpleNamespace(), 42)
+        episode.update(transcript_status="done", transcript_local_path=str(transcript_path), diarization_ran=False)
+        patch.setattr(podcasts, "get_episode", lambda idx, episode_id: episode)
+        patch.setattr(podcasts, "get_episode_with_feed", lambda idx, episode_id: episode)
+        reused = podcasts.load_completed_episode_transcript(SimpleNamespace(_lock=threading.RLock()), 42, data_root=env.root)
         assert reused["transcript"]["diarization_run_id"] == transcript["diarization_run_id"]
         assert reused["transcript"]["media_depth"] == f.block
     failed = _fixture(env, key="failed-optional-stage", state="failed")
@@ -1596,11 +1602,20 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
                 (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
         return SimpleNamespace(returncode=0)
 
+    admitted_hosts = []
+
+    def resolve_host(host):
+        admitted_hosts.append(host)
+        return ["8.8.8.8"]
+
     with env.patch.context() as patch:
+        patch.setattr(subscriptions, "_check_resolved_host", resolve_host)
         patch.setattr(yt_extract.subprocess, "run", record_command)
         patch.setattr(yt_extract.subprocess, "check_output", record_command)
         patch.setattr(yt_extract.sys, "argv", ["yt_extract.py", "https://www.youtube.com/watch?v=abcdefghijk", "--out", str(output), "--keep-video"])
         yt_extract.main()
+    assert admitted_hosts == ["www.youtube.com"] * 3
+
     def tool(cmd):
         if cmd[0] == "yt-dlp" or list(cmd[1:3]) == ["-m", "yt_dlp"]:
             return "yt-dlp"

@@ -22,9 +22,10 @@ ROLLING = [(i, i + 3, " ".join(WORDS[2*i:2*i+6])) for i in range(5)]
 def library(tmp_path, monkeypatch):
     with index.Index.open(tmp_path / "index.db") as idx:
         monkeypatch.setattr(server, "_get_index", lambda: idx)
+        monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "library")
         def save(entries=ROLLING, legacy=False, **fields):
-            folder = tmp_path / VID
-            folder.mkdir()
+            folder = server.DESKTOP_ROOT / VID
+            folder.mkdir(parents=True)
             item = seed_yoink_item(idx, folder, video_id=VID, slug=VID, title="Evening sky")
             side = {"video_id": VID, "url": "https://www.youtube.com/watch?v=" + VID,
                     "transcript_source": "captions", "source_chapters": [], "duration_seconds": 20,

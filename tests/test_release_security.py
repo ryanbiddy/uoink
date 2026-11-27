@@ -36,12 +36,16 @@ def test_reliability_admits_url_and_terminates_options(tmp_path, monkeypatch):
     assert run.call_args.args[0][-2:] == ["--", url]
 
 
-def test_playlist_url_follows_end_of_options():
+def test_playlist_url_follows_end_of_options(monkeypatch):
     import mobile_playlists
     url = "https://example.com/playlist"
+    admitted = url + "?admitted=1"
+    policy = Mock(return_value=admitted)
+    monkeypatch.setattr(server.source_subscriptions, "check_public_http_url", policy)
     run = Mock(return_value=Mock(returncode=0, stdout=""))
     mobile_playlists._fetch_playlist_video_ids(url, ytdlp_cmd=["yt-dlp"], run_subprocess=run)
-    assert run.call_args.args[0][-2:] == ["--", url]
+    policy.assert_called_once_with(url)
+    assert run.call_args.args[0][-2:] == ["--", admitted]
 
 
 def test_public_diagnose_does_no_probes(monkeypatch):

@@ -172,7 +172,7 @@ def _extract_page_to_prose(url: str, *, enforce_allowlist: bool = True) -> str |
 from uoink_core.storage import (  # noqa: E402
     _atomic_write_text as _storage_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
     COMMENTS_START_MARK, COMMENTS_END_MARK,
-    atomic_output, checked_path, open_regular, move_library_folder, LibraryPathError, _is_writable_dir,
+    atomic_output, checked_path, open_regular, read_checked_json, read_checked_bytes, move_library_folder, LibraryPathError, _is_writable_dir,
     _path_under_any,
     _topic_folder_name,
 )
@@ -3762,6 +3762,12 @@ def _transcript_text_from_sidecar(sidecar: dict) -> str:
     )
 
 
+def _item_storage_root(row, idx=None):
+    if row and row.get("source_type") == "episode":
+        return podcasts.corpus_storage(idx or _get_index(), row, DATA_ROOT)
+    return DESKTOP_ROOT
+
+
 def _folder_for_video_id(video_id: str) -> tuple[Path | None, dict | None]:
     vid = (video_id or "").strip()
     if not vid:
@@ -3769,29 +3775,36 @@ def _folder_for_video_id(video_id: str) -> tuple[Path | None, dict | None]:
     row = _get_index().get_yoink(vid)
     if not row or row.get("deleted_at"):
         return None, None
-    sidecar_path = Path(row.get("sidecar_path") or "")
+    try:
+        sidecar_path = checked_path(_item_storage_root(row), Path(row.get("sidecar_path") or ""))
+    except OSError:
+        return None, None
     if not sidecar_path.is_file():
         return None, None
     return sidecar_path.parent, row
 
 
-def _read_sidecar_for_folder(folder: Path) -> tuple[Path, dict]:
+def _read_sidecar_for_folder(folder: Path, *, root=None) -> tuple[Path, dict]:
     sidecar_path = folder / f"{folder.name}.json"
     try:
-        with open_regular(DESKTOP_ROOT, sidecar_path) as source:
-            data = json.load(source)
+        data = read_checked_json(root or DESKTOP_ROOT, sidecar_path)
         if not isinstance(data, dict):
             data = {}
-    except (OSError, json.JSONDecodeError):
+    except (OSError, ValueError):
         data = {}
     return sidecar_path, data
 
 
-def _write_reliability_to_sidecar(folder: Path, reliability: dict) -> dict:
+def _write_reliability_to_sidecar(folder: Path, reliability: dict, *, root=None) -> dict:
+    root = DESKTOP_ROOT if root is None else root
     with _sidecar_update_lock:
-        sidecar_path, data = _read_sidecar_for_folder(folder)
+        sidecar_path = folder / f"{folder.name}.json"
+        try:
+            data = read_checked_json(root, sidecar_path)
+        except FileNotFoundError:
+            data = {}
         data["reliability"] = reliability
-        _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
+        _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2), root=root)
         return data
 
 
@@ -4038,8 +4051,9 @@ def _download_caption_track(url: str, track: dict, tmp_dir: Path,
                             duration: object) -> list[tuple[float, float, str]]:
     """Download exactly one named caption track; raise on refusal."""
     def fetch(selected, prefix, text_only):
+        admitted = source_subscriptions.check_public_http_url(url)
         cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(selected, text_only),
-               "-o", str(tmp_dir / f"{prefix}.%(ext)s"), "--", url]
+               "-o", str(tmp_dir / f"{prefix}.%(ext)s"), "--", admitted]
         done = _run_subprocess(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
                                timeout=COMMENTS_TIMEOUT_SEC)
         stderr = getattr(done, "stderr", None) or b""
@@ -4058,7 +4072,7 @@ def _transcript_cache_path(video_id: str, lang: str | None) -> Path:
 
 def _read_transcript_cache(video_id: str, lang: str | None) -> dict | None:
     try:
-        data = json.loads(_transcript_cache_path(video_id, lang).read_text(encoding="utf-8"))
+        data = read_checked_json(DATA_ROOT, _transcript_cache_path(video_id, lang))
     except (OSError, ValueError):
         return None
     if (not isinstance(data, dict) or data.get("version") not in (2, _TRANSCRIPT_CACHE_VERSION)
@@ -4088,11 +4102,8 @@ def _read_transcript_cache(video_id: str, lang: str | None) -> dict | None:
 def _write_transcript_cache(record: dict, lang: str | None) -> None:
     path = _transcript_cache_path(record["video_id"], lang)
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(f".{os.getpid()}.tmp")
         payload = dict(record, segments=[uoink_reliability.entry_to_json(e) for e in record["segments"]])
-        tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
-        os.replace(tmp, path)
+        _atomic_write_text(path, json.dumps(payload, ensure_ascii=False), root=DATA_ROOT)
     except OSError as e:
         log.warning("transcript cache write skipped: %s", _sanitize_error(str(e)))
 
@@ -4105,7 +4116,7 @@ def _library_transcript(video_id: str) -> dict | None:
         return None
     if folder is None:
         return None
-    _path, sidecar = _read_sidecar_for_folder(folder)
+    _path, sidecar = _read_sidecar_for_folder(folder, root=_item_storage_root(row))
     held = sidecar.get("held_transcript_lines") or []
     segments = []
     for seg in sidecar.get("transcript") or []:
@@ -4384,12 +4395,19 @@ def _compute_transcript_reliability(
     if (_platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None
             and not _VIDEO_ID_RE.fullmatch(video_id or "")):
         return {"ok": False, "error": "video id invalid"}
-    if folder is None:
-        folder, _row = _folder_for_video_id(video_id)
+    row = None
+    if folder is None or video_id.startswith("episode_"):
+        indexed, row = _folder_for_video_id(video_id)
+        if folder is not None and folder != indexed:
+            return {"ok": False, "error": "Podcast episode folder does not match the index."}
+        folder = indexed
     if folder is None:
         return {"ok": False, "error": "uoink not found"}
 
-    sidecar_path, sidecar = _read_sidecar_for_folder(folder)
+    root = _item_storage_root(row)
+    sidecar_path, sidecar = _read_sidecar_for_folder(folder, root=root)
+    if not sidecar:
+        return {"ok": False, "error": "Saved transcript is unreadable."}
     vid = (sidecar.get("video_id") or video_id or "").strip()
     if not vid:
         return {"ok": False, "error": "uoink has no video_id"}
@@ -4409,7 +4427,7 @@ def _compute_transcript_reliability(
             "span_count": 0,
             "computed_at": _now_iso(),
         }
-        _write_reliability_to_sidecar(folder, reliability)
+        _write_reliability_to_sidecar(folder, reliability, root=root)
         return {"ok": True, "reliability": reliability, "cached": False}
 
     reliability_model = _selected_reliability_model()
@@ -4423,7 +4441,7 @@ def _compute_transcript_reliability(
             "span_count": 0,
             "computed_at": _now_iso(),
         }
-        _write_reliability_to_sidecar(folder, reliability)
+        _write_reliability_to_sidecar(folder, reliability, root=root)
         return {"ok": False, "error": "Whisper model not downloaded", "reliability": reliability}
 
     def run_detection(path: Path) -> dict:
@@ -4468,10 +4486,13 @@ def _compute_transcript_reliability(
             "span_count": 0,
             "computed_at": _now_iso(),
         }
-        _write_reliability_to_sidecar(folder, reliability)
+        _write_reliability_to_sidecar(folder, reliability, root=root)
         return {"ok": False, "error": reliability["error"], "reliability": reliability}
 
-    sidecar = _write_reliability_to_sidecar(folder, reliability)
+    sidecar = _write_reliability_to_sidecar(folder, reliability, root=root)
+    if row and row.get("source_type") == "episode":
+        # The episode publisher owns its sealed Markdown and citation snapshot.
+        return {"ok": True, "reliability": reliability, "cached": False}
     corpus = _resolve_corpus_path(folder)
     if corpus:
         _replace_reliability_section(corpus, reliability)
@@ -4671,8 +4692,9 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     video_id = (sidecar.get("video_id") or "").strip()
     consumed_binding = library_media.capture_sidecar_inputs(sidecar)
     ticket = idx.begin_media_publication(
-        video_id, folder=folder, capture_binding=consumed_binding)
-    library_media.require_capture_binding(sidecar_path, consumed_binding)
+        video_id, folder=folder, root=root or DESKTOP_ROOT, capture_binding=consumed_binding)
+    with library_media.publication_storage(root or DESKTOP_ROOT):
+        library_media.require_capture_binding(sidecar_path, consumed_binding)
     row = idx.get_yoink(video_id)
     if row is None:
         raise library_media.MediaError("resource_not_found")
@@ -4701,8 +4723,9 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     # disk and rebuild the owned plan from those bytes before the publisher
     # writes. Sealed artifact overrides remain allowed only while this
     # consumed-input binding still holds.
-    library_media.require_capture_binding(sidecar_path, consumed_binding)
-    disk_side = library_media.read_owned_sidecar(sidecar_path, fallback=None)
+    with library_media.publication_storage(root or DESKTOP_ROOT):
+        library_media.require_capture_binding(sidecar_path, consumed_binding)
+        disk_side = library_media.read_owned_sidecar(sidecar_path, fallback=None)
     if disk_side is not None:
         disk_plan = _capture_media_plan(disk_side, folder, item=row)
         if disk_plan is None or not library_media.capture_plan_matches(plan, disk_plan):
@@ -5032,8 +5055,8 @@ _transcript_backfill_instance_lock = threading.Lock()
 def _capture_incomplete_record(folder: Path) -> dict:
     """The url and start time _run_extraction wrote in capture-not-finished.txt."""
     try:
-        text = (folder / CAPTURE_INCOMPLETE_NAME).read_text(encoding="utf-8")
-    except (OSError, UnicodeError):
+        text = read_checked_bytes(DESKTOP_ROOT, folder / CAPTURE_INCOMPLETE_NAME, limit=16 * 1024).decode("utf-8")
+    except (OSError, ValueError):
         return {}
     record = {}
     for line in text.splitlines():
@@ -5141,7 +5164,7 @@ def _transcript_backfill_scan() -> dict:
         if not (row.get("sidecar_path") and _transcript_backfill_inside_library(sidecar_path)):
             continue  # a stale or outside path is never written to
         try:
-            sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            sidecar = read_checked_json(DESKTOP_ROOT, sidecar_path)
         except (OSError, ValueError):
             continue
         if not isinstance(sidecar, dict) or sidecar.get("pending_transcript_review"):
@@ -5213,6 +5236,11 @@ def _transcript_backfill_half_captures(indexed_folders: set) -> list[dict]:
             dirnames[:] = []
             continue
         folder = Path(dirpath)
+        try:
+            checked_path(root, folder)
+        except OSError:
+            dirnames[:] = []
+            continue
         names = set(filenames)
         claimed = ".capture-source.json" in names or CAPTURE_INCOMPLETE_NAME in names
         legacy = "metadata.json" in names and (
@@ -5235,7 +5263,7 @@ def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
         if name not in names:
             return {}
         try:
-            value = json.loads((folder / name).read_text(encoding="utf-8"))
+            value = read_checked_json(DESKTOP_ROOT, folder / name)
         except (OSError, ValueError):
             return {}
         return value if isinstance(value, dict) else {}
@@ -5351,9 +5379,7 @@ def _transcript_backfill_release_identity(held) -> None:
 def _transcript_backfill_inside_library(path) -> bool:
     """True for a real folder or file inside the library (not its trash)."""
     try:
-        candidate = Path(path)
-        if candidate.is_symlink():
-            return False
+        candidate = checked_path(DESKTOP_ROOT, Path(path))
         root = DESKTOP_ROOT.resolve()
         resolved = candidate.resolve()
         trash = _trash_root().resolve()
@@ -5515,7 +5541,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
     try:
         with _sidecar_update_lock:
             try:
-                original = sidecar_path.read_bytes()
+                original = read_checked_bytes(DESKTOP_ROOT, sidecar_path, limit=64 * 1024 * 1024)
                 sidecar = json.loads(original)
             except (OSError, ValueError):
                 return "skipped"
@@ -5540,7 +5566,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                         return "skipped"  # unreadable: do not touch
                 if "source_chapters" not in sidecar:
                     try:
-                        held_meta = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+                        held_meta = read_checked_json(DESKTOP_ROOT, folder / "metadata.json")
                         chapters = held_meta.get("chapters") if isinstance(held_meta, dict) else None
                     except (OSError, ValueError):
                         chapters = None
@@ -5592,7 +5618,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
         with _sidecar_update_lock:
             # Index what is on disk now, with any edit made meanwhile.
             try:
-                latest = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                latest = read_checked_json(DESKTOP_ROOT, sidecar_path)
             except (OSError, ValueError):
                 latest = None
         latest = latest if isinstance(latest, dict) else sidecar
@@ -5601,7 +5627,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
             raise RuntimeError("the library index did not take the new transcript")
         with _sidecar_update_lock:
             try:
-                current = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                current = read_checked_json(DESKTOP_ROOT, sidecar_path)
             except (OSError, ValueError):
                 current = None
             marker = current.get("transcript_backfill") if isinstance(current, dict) else None
@@ -5661,7 +5687,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
         if result != "applied":
             return {"outcome": result}
         try:
-            saved = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+            saved = read_checked_json(DESKTOP_ROOT, Path(item["sidecar_path"]))
             stored = (saved.get("transcript_backfill") or {}).get("result")
         except (OSError, ValueError, AttributeError):
             stored = None
@@ -5670,7 +5696,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
     url, host, duration = item.get("url"), item.get("host") or "other", item.get("duration")
     network_hosts = []
     try:
-        sidecar = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+        sidecar = read_checked_json(DESKTOP_ROOT, Path(item["sidecar_path"]))
     except (OSError, ValueError):
         return {"outcome": "skipped", "reason": "The save was moved or removed."}
     if not isinstance(sidecar, dict) or _sidecar_has_words(sidecar):
@@ -5772,7 +5798,7 @@ def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) 
         if (folder / f"{folder.name}.json").exists() or _resolve_corpus_path(folder):
             return {"outcome": "skipped", "reason": "This capture already finished."}
         try:
-            metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+            metadata = read_checked_json(DESKTOP_ROOT, folder / "metadata.json")
         except (OSError, ValueError):
             metadata = None
         if not isinstance(metadata, dict) or not metadata.get("title"):
@@ -7226,6 +7252,8 @@ def _fetch_metadata(url: str, *,
     if not _is_youtube_ytdlp_call([*YTDLP_CMD, url]) and not strict_platform_url:
         url = (resolve_url or source_subscriptions.resolve_public_http_url)(
             url, user_agent=page_extractor._USER_AGENT)
+    else:
+        url = source_subscriptions.check_public_http_url(url)
     cp = _run_subprocess(
         [*YTDLP_CMD, "--dump-single-json", "--no-download", "--", url],
         cancel_event=cancel_event,
@@ -7278,14 +7306,19 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
             try:
                 with browser_open(url, timeout=8) as resp, raw_path.open("wb") as dest:
                     for chunk in source_subscriptions.bounded_http_chunks(
-                            resp, max_bytes=8 * 1024 * 1024, deadline=deadline):
+                            resp, max_bytes=min(images.MAX_IMAGE_BYTES, 8 * 1024 * 1024), deadline=deadline):
                         dest.write(chunk)
             except Exception as exc:
                 log.warning("thumbnail download failed: %s", _sanitize_error(str(exc), max_len=500))
                 return None
+            with raw_path.open("rb") as source:
+                mime = images.sniff_mime(source.read(12))
+            demuxer = {"image/jpeg": "jpeg_pipe", "image/png": "png_pipe", "image/webp": "webp_pipe"}.get(mime)
+            if not demuxer:
+                return None
             _run_subprocess(
                 [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
-                 "-loglevel", "error", "-y", "-protocol_whitelist", "file", "-f", "image2pipe",
+                 "-loglevel", "error", "-y", "-protocol_whitelist", "file", "-f", demuxer,
                  "-max_pixels", "16777216",
                  "-i", str(raw_path), "-frames:v", "1", str(converted)],
                 cancel_event=cancel_event, check=True, timeout=15, stderr=subprocess.PIPE,
@@ -8486,6 +8519,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         info_template = output_folder / "%(id)s_yoink_comments.%(ext)s"
         # Cached JSON cannot restore yt-dlp's lazy comment extractor. Keep
         # this separate extraction on the shared YouTube limiter.
+        url = source_subscriptions.check_public_http_url(url)
         _run_subprocess(
             [*YTDLP_CMD,
              "--write-info-json",
@@ -8794,6 +8828,7 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
                  CAPTIONS_BOT_CHECK_COOLDOWN)
         return CAPTIONS_BOT_CHECK_COOLDOWN
     try:
+        url = source_subscriptions.check_public_http_url(url)
         cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(track, text_only),
                "-o", str(output_folder / f"{prefix}.%(ext)s"), "--", url]
         done = _run_subprocess(
@@ -9440,6 +9475,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if phase_callback:
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
+    else:
+        url = source_subscriptions.check_public_http_url(url)
     # 3.18.0: an X video's Description is the post's whole text (X only).
     if isinstance(metadata, dict) and str(
             metadata.get("extractor") or metadata.get("extractor_key") or "").lower().startswith("twitter"):
@@ -9758,6 +9795,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             media_before_download = set(asset_folder.glob(media_glob))
             try:
                 if not reused_media and not transcript_only:
+                    media_cmd[-1] = source_subscriptions.check_public_http_url(url)
                     _run_subprocess(
                         media_cmd,
                         cancel_event=cancel_event,
@@ -12731,7 +12769,8 @@ def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
         return None, capability["code"], 501
     try:
         cp = _run_subprocess(
-            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", "--", normalized],
+            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", "--",
+             source_subscriptions.check_public_http_url(normalized)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -13351,11 +13390,15 @@ def _podcast_transcription_worker() -> None:
                 continue
             model = whisper_runner.normalize_model(job.get("model"))
             _raise_if_cancelled(job.get("_cancel_event"))
-            audio_path = Path(job["audio_path"])
+            idx = _get_index()
+            root = podcasts.podcast_storage(DATA_ROOT)
+            audio_path = podcasts.episode_media_path(idx, episode_id, DATA_ROOT)
+            if checked_path(root, Path(job["audio_path"])) != audio_path:
+                raise ValueError("The recording changed after this job was queued.")
             reusable = None
             try:
                 reusable = podcasts.load_completed_episode_transcript(
-                    _get_index(), episode_id)
+                    idx, episode_id, data_root=DATA_ROOT)
             except (FileNotFoundError, ValueError) as exc:
                 log.warning(
                     "podcast job %s could not reuse its DONE transcript; "
@@ -13384,11 +13427,7 @@ def _podcast_transcription_worker() -> None:
                     vocabulary_hint = _podcast_initial_prompt(episode_id)
                 except Exception:
                     vocabulary_hint = None  # a hint is never worth a failed job
-                idx = _get_index()
-                with idx._lock:
-                    if podcasts.audio_path_owners(idx._conn, audio_path) != [episode_id]:
-                        raise ValueError("Download this episode again so Uoink can identify its recording.")
-                with (source_subscriptions.capture_context(
+                with open_regular(root, audio_path, binary=True), (source_subscriptions.capture_context(
                         standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
                         if standing_start else contextlib.nullcontext()):
                     transcript = whisper_runner.transcribe_audio(
@@ -13403,8 +13442,10 @@ def _podcast_transcription_worker() -> None:
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
+                if podcasts.episode_media_path(idx, episode_id, DATA_ROOT) != audio_path:
+                    raise ValueError("The recording changed during transcription.")
                 out_path = whisper_runner.write_transcript(
-                    transcript, audio_path=audio_path)
+                    transcript, audio_path=audio_path, root=root)
                 whisper_runner.update_episode_transcript_state(
                     _get_index(), episode_id,
                     status=whisper_runner.STATUS_DONE,
@@ -14021,7 +14062,10 @@ def _admit_podcast_transcription(
             "error": ("episode has no audio_local_path -- run "
                       "/podcasts/episodes/download first"),
         }, 400
-    audio_path = Path(audio_path_raw)
+    try:
+        audio_path = podcasts.episode_media_path(idx, episode_id, DATA_ROOT)
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "error": str(exc)}, 400
     if not audio_path.is_file():
         return {"ok": False, "error": f"audio file missing: {audio_path}"}, 404
     if _platform.sys.platform == "darwin" and language is not None and not isinstance(language, str):
@@ -14473,7 +14517,10 @@ def _plain_transcript_bytes(folder):
     path = folder / "transcript.txt"
     if path.is_symlink() or path.resolve().parent != folder.resolve():
         raise ValueError("The transcript file has moved.")
-    return path.read_bytes() if path.exists() else None
+    try:
+        return read_checked_bytes(DESKTOP_ROOT, path)
+    except FileNotFoundError:
+        return None
 
 
 def repair_rolling_captions(video_id: str, *, dry_run=True) -> dict:
@@ -14485,11 +14532,11 @@ def repair_rolling_captions(video_id: str, *, dry_run=True) -> dict:
         raise ValueError("Saved item not found.")
     try:
         idx = _get_index()
-        result = caption_repair.repair(idx, item, _capture_media_plan, dry_run=dry_run)
+        result = caption_repair.repair(idx, item, _capture_media_plan, root=DESKTOP_ROOT, dry_run=dry_run)
         if result["removed_words"] == 0:
             # A settled retry writes nothing. Check the same corpus, citations
             # and archived evidence that consumers read before reporting success.
-            with idx.detached_snapshot() as conn:
+            with idx.detached_snapshot() as conn, library_media.publication_storage(DESKTOP_ROOT):
                 snapshot = library_media._read_snapshot(conn, video_id)
             plain = _plain_transcript_bytes(folder)
             if plain is not None:
@@ -19294,7 +19341,7 @@ def _list_import_ytdlp(url: str, start: int, end: int) -> dict:
     try:
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
-             "--playlist-items", f"{int(start)}:{int(end)}", "--", url],
+             "--playlist-items", f"{int(start)}:{int(end)}", "--", source_subscriptions.check_public_http_url(url)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             encoding="utf-8", errors="replace", timeout=COMMENTS_TIMEOUT_SEC)
         return json.loads(cp.stdout)
@@ -24175,7 +24222,7 @@ class Handler(BaseHTTPRequestHandler):
         folder, _row = _folder_for_video_id(video_id)
         if folder is None:
             return self._send_json(404, {"ok": False, "error": "uoink not found"})
-        _sidecar_path, sidecar = _read_sidecar_for_folder(folder)
+        _sidecar_path, sidecar = _read_sidecar_for_folder(folder, root=_item_storage_root(_row))
         reliability = sidecar.get("reliability")
         if not isinstance(reliability, dict):
             reliability = {
@@ -26160,7 +26207,7 @@ class Handler(BaseHTTPRequestHandler):
                 "error": "This uoink has no saved markdown on disk yet.",
                 "state": "no_markdown"})
         try:
-            p = checked_path(DESKTOP_ROOT, Path(corpus_path))
+            p = checked_path(_item_storage_root(row), Path(corpus_path))
             if p.suffix.lower() != ".md":
                 raise ValueError("expected Markdown")
         except (ValueError, LibraryPathError):
@@ -26197,7 +26244,7 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
-            text = _read_export_markdown(path, root=DESKTOP_ROOT)
+            text = _read_export_markdown(path, root=_item_storage_root(_get_index().get_yoink(video_id)))
         except (OSError, UnicodeError) as e:
             log.warning("/yoinks/%s/markdown read failed: %s", video_id, e)
             return self._send_json(500, {"ok": False,
@@ -26222,16 +26269,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(*err)
             # An external viewer reads the original path. Repair only the file
             # explicitly opened, under the same lock as the comments writer.
+            root = _item_storage_root(_get_index().get_yoink(video_id))
             with _corpus_update_lock, contextlib.ExitStack() as held:
-                source = held.enter_context(open_regular(DESKTOP_ROOT, path, newline=""))
+                source = held.enter_context(open_regular(root, path, newline=""))
                 original = source.read()
                 if "\x00" in original:
                     return self._send_json(400, {"ok": False, "error": "The saved Markdown contains binary data."})
-                normalized = normalize_export_comments(path, original, root=DESKTOP_ROOT)
+                normalized = normalize_export_comments(path, original, root=root)
                 if original != normalized:
                     held.close()
-                    _atomic_write_text(path, normalized, newline="", root=DESKTOP_ROOT)
-                    source = held.enter_context(open_regular(DESKTOP_ROOT, path, newline=""))
+                    _atomic_write_text(path, normalized, newline="", root=root)
+                    source = held.enter_context(open_regular(root, path, newline=""))
                     if source.read() != normalized:
                         raise OSError("The saved Markdown changed.")
                 _platform.open_in_os(path)
@@ -26247,8 +26295,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_yoink_details(self, bare: str):
         """GET /yoinks/<id>/details -- bounded authenticated saved-media-detail read path.
-        Resolves the item's registered sidecar path from the index, sandboxed to
-        DESKTOP_ROOT, rejecting escapes and symlinks, and bounds the JSON read.
+        Reads the indexed sidecar under the capture or episode's storage root.
         Returns only saved fields needed by the dashboard."""
         from urllib.parse import unquote
         video_id = unquote(
@@ -26269,63 +26316,17 @@ class Handler(BaseHTTPRequestHandler):
         sidecar_raw = (row.get("sidecar_path") or "").strip()
         if not sidecar_raw:
             return unavailable(404, "This uoink has no saved details on disk yet.", state="no_sidecar")
-        if _path_has_parent_ref(sidecar_raw):
-            return self._send_json(400, {"ok": False,
-                                         "error": "sidecar path escapes Uoink root"})
         try:
-            p = Path(sidecar_raw)
-            if not p.is_absolute():
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar path escapes Uoink root"})
-            # Lexical containment must precede metadata probes on this path.
-            details_root = DESKTOP_ROOT
-            if (row.get("source_type") == "episode" and p.parent.name == row.get("slug")
-                    and p.name == p.parent.name + ".json"
-                    and p.parent.parent.parent == DATA_ROOT / "Podcasts"):
-                details_root = DATA_ROOT / "Podcasts"
-            p.relative_to(details_root.absolute())
-            cur = p
-            while True:
-                if cur.is_symlink():
-                    return self._send_json(400, {"ok": False,
-                                                 "error": "symlink sidecar rejected"})
-                try:
-                    if getattr(cur.lstat(), "st_file_attributes", 0) & 0x400:
-                        return self._send_json(400, {"ok": False,
-                                                     "error": "symlink sidecar rejected"})
-                except OSError:
-                    pass
-                if cur == cur.parent:
-                    break
-                cur = cur.parent
-
-            root = details_root.resolve()
-            resolved = p.resolve()
-            if any(part == ".." for part in resolved.parts):
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar path escapes Uoink root"})
-            resolved.relative_to(root)
-        except (ValueError, OSError):
-            return self._send_json(400, {"ok": False,
-                                         "error": "sidecar path escapes Uoink root"})
-
-        if not resolved.exists() or not resolved.is_file():
-            return unavailable(404, "sidecar file not found")
-
-        try:
-            if resolved.stat().st_size > MAX_SIDECAR_BYTES:
-                return unavailable(400, "sidecar file too large")
-            with open(resolved, "rb") as f:
-                content = f.read(MAX_SIDECAR_BYTES + 1)
+            details_root = _item_storage_root(row)
+            resolved = checked_path(details_root, Path(sidecar_raw))
+            with open_regular(details_root, resolved, binary=True) as source:
+                content = source.read(MAX_SIDECAR_BYTES + 1)
             if len(content) > MAX_SIDECAR_BYTES:
                 return unavailable(400, "sidecar file too large")
-        except UnicodeDecodeError:
-            return self._send_json(400, {"ok": False,
-                                         "error": "malformed sidecar JSON"})
-        except OSError as e:
-            log.warning("/yoinks/%s/details read failed: %s", video_id, e)
-            return self._send_json(500, {"ok": False,
-                                         "error": "could not read sidecar"})
+        except FileNotFoundError:
+            return unavailable(404, "sidecar file not found")
+        except OSError:
+            return self._send_json(400, {"ok": False, "error": "sidecar path escapes Uoink root or is unavailable"})
 
         def finite_float(value):
             number = float(value)

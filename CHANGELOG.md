@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Caption repair and transcript cleanup recognize timestamp links written by 3.18.0. Both commands preserve edits to the saved transcript.
 - Updated HTTPX2 and HTTPCore2 to 2.16.2. The bundled MCP HTTP client now honors wildcard proxy exceptions such as `*.example.com`. Updated Pydantic and python-multipart too, including a fix that keeps each multipart parser’s callbacks separate.
 - Hacker News stories keep their own shelves when you save another reply. The reader preserves HTML comments in code samples and the replies that follow them.
 - Podcast episodes now appear in release order, even when a show changes its date format. Episodes without a usable date appear last.

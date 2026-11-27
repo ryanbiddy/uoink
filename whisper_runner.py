@@ -752,7 +752,7 @@ def transcript_output_path(audio_path: Path) -> Path:
     return audio_path.with_suffix(".transcript.json")
 
 
-def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
+def write_transcript(transcript: dict, *, audio_path: Path, root=None) -> Path:
     """Persist the transcript JSON. Phase 6 (phase6-v1): when the transcript
     carries a ``diarization_run`` record, the output artifact digest is
     computed over the transcript *without* its run/provenance members
@@ -765,9 +765,9 @@ def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
         import library_media  # offline validator; no model, no helper import
         run["artifact_sha256"] = hashlib.sha256(
             library_media.transcript_artifact_bytes(transcript)).hexdigest()
-    out.write_text(
-        json.dumps(transcript, indent=2, ensure_ascii=False, allow_nan=False),
-        encoding="utf-8")
+    from uoink_core.storage import atomic_output
+    with atomic_output(out, root=root, encoding="utf-8") as target:
+        json.dump(transcript, target, indent=2, ensure_ascii=False, allow_nan=False)
     return out
 
 

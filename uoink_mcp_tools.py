@@ -29,7 +29,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from time import monotonic
-from uoink_core.storage import checked_path, open_regular
+from uoink_core.storage import checked_path, open_regular, read_checked_json
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlsplit
@@ -102,12 +102,11 @@ def _limit_int(value: Any, *, default: int, low: int, high: int) -> int:
     return max(low, min(high, out))
 
 
-def _read_json(path: Path) -> dict[str, Any]:
+def _read_json(path: Path, *, root=None) -> dict[str, Any]:
     try:
-        with open_regular(_b().DESKTOP_ROOT, path) as source:
-            raw = json.load(source)
+        raw = read_checked_json(root or _b().DESKTOP_ROOT, path)
         return raw if isinstance(raw, dict) else {}
-    except (OSError, json.JSONDecodeError):
+    except (OSError, ValueError, RecursionError):
         return {}
 
 
@@ -119,8 +118,8 @@ def _metadata_path(folder: Path) -> Path:
     return folder / "metadata.json"
 
 
-def _read_sidecar(folder: Path) -> dict[str, Any]:
-    return _read_json(_sidecar_path(folder))
+def _read_sidecar(folder: Path, *, root=None) -> dict[str, Any]:
+    return _read_json(_sidecar_path(folder), root=root)
 
 
 def _read_metadata(folder: Path) -> dict[str, Any]:
@@ -210,7 +209,12 @@ def _corpus_by_slug():
     return matches
 
 
-def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
+def _find_yoink(slug):
+    folder, corpus, _root = _locate_yoink(slug)
+    return folder, corpus
+
+
+def _locate_yoink(slug: str):
     """Resolve a yoink slug to (folder, corpus_path).
 
     Sprint 19.6 / Fix 5: the index is queried first (O(1) seek by slug),
@@ -220,7 +224,7 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     takes a slug benefits: get_uoink_corpus, get_citation_map,
     get_uoink_health, analyze_comments, classify_hook."""
     if not isinstance(slug, str) or not re.match(r"^[A-Za-z0-9_-]{1,160}$", slug):
-        return None, None
+        return None, None, None
     # Fast path: index lookup. get_by_slug filters deleted_at IS NULL so a
     # trashed yoink won't resolve here.
     try:
@@ -231,11 +235,13 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
         corpus_path = row.get("corpus_path") or ""
         if corpus_path:
             try:
-                corpus = checked_path(_b().DESKTOP_ROOT, Path(corpus_path))
+                b = _b()
+                root = b._item_storage_root(row) if row.get("source_type") == "episode" else b.DESKTOP_ROOT
+                corpus = checked_path(root, Path(corpus_path))
             except OSError:
-                return None, None
+                return None, None, None
             if corpus.is_file():
-                return corpus.parent, corpus
+                return corpus.parent, corpus, root
         # Indexed row missing on disk (folder moved/deleted outside the
         # extension) -- fall through to the walk so we don't return a
         # broken pointer.
@@ -243,8 +249,8 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     matches = _corpus_cache.read((b, b.DESKTOP_ROOT), _corpus_by_slug)
     entry = matches.get(slug)
     if entry and entry[2].is_file():
-        return entry[1], entry[2]
-    return None, None
+        return entry[1], entry[2], b.DESKTOP_ROOT
+    return None, None, None
 
 
 def _capture_time(item):
@@ -269,7 +275,7 @@ def _unfinished_snapshot():
             indexed = {os.path.normcase(str(Path(p).parent)) for row in rows for p in row if p}
         items = sorted(scan(indexed), key=_capture_time, reverse=True)
         # Stdio runs in a separate process from the helper that handles Finish.
-        state = _read_json(state_path) if items else {}
+        state = _read_json(state_path, root=b.DATA_ROOT) if items else {}
         ready = not items or b._transcript_backfill_model_ready()[0]
         return items, state.get("settled", {}), set(state.get("requested", [])), ready
 
@@ -557,15 +563,15 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
 
 def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
-    folder, corpus = _find_yoink(slug)
+    folder, corpus, root = _locate_yoink(slug)
     if not folder or not corpus:
         return _not_found(slug)
     try:
         from uoink_core.storage import read_export_markdown
-        md = read_export_markdown(corpus, root=_b().DESKTOP_ROOT)
+        md = read_export_markdown(corpus, root=root)
     except OSError as e:
         return _err(f"corpus read failed: {e}")
-    sidecar = _read_sidecar(folder)
+    sidecar = _read_sidecar(folder, root=root)
     video_id = sidecar.get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         video_id = None
@@ -653,10 +659,10 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     """Return the transcript + screenshot citation map for a saved yoink,
     each entry carrying a source-aware timestamp link."""
     slug = args.get("slug")
-    folder, corpus = _find_yoink(slug)
+    folder, corpus, root = _locate_yoink(slug)
     if not folder or not corpus:
         return _not_found(slug)
-    video_id = _read_sidecar(folder).get("video_id")
+    video_id = _read_sidecar(folder, root=root).get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         return _err("This saved item has no video_id, so it cannot be used here.")
     transcript: list[dict[str, Any]] = []
@@ -786,10 +792,10 @@ def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
 def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     """Return the per-section extraction health score for a saved uoink."""
     slug = args.get("slug")
-    folder, corpus = _find_yoink(slug)
+    folder, corpus, root = _locate_yoink(slug)
     if not folder or not corpus:
         return _not_found(slug)
-    sidecar = _read_sidecar(folder)
+    sidecar = _read_sidecar(folder, root=root)
     video_id = sidecar.get("video_id")
     health = None
     if isinstance(video_id, str) and video_id.strip():
@@ -2626,7 +2632,8 @@ def get_transcript_reliability(args: dict[str, Any]) -> dict[str, Any]:
     folder, _row = _b()._folder_for_video_id(video_id.strip())
     if not folder:
         return _err("uoink not found")
-    reliability = _read_sidecar(folder).get("reliability")
+    root = _b()._item_storage_root(_row) if _row and _row.get("source_type") == "episode" else _b().DESKTOP_ROOT
+    reliability = _read_sidecar(folder, root=root).get("reliability")
     if not isinstance(reliability, dict):
         reliability = {"status": "not_computed", "spans": [], "span_count": 0}
     return _ok(video_id=video_id.strip(), reliability=reliability)

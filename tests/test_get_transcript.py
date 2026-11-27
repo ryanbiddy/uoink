@@ -133,8 +133,8 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
         return [(0.0, 2.0, "hello world")]
 
     def save_library(segments, **fields):
-        state.folder = tmp_path / "saved-video"
-        state.folder.mkdir(exist_ok=True)
+        state.folder = server.DESKTOP_ROOT / "saved-video"
+        state.folder.mkdir(exist_ok=True, parents=True)
         state.row = {"title": "Saved transcript"}
         sidecar = {
             "title": "Saved transcript", "duration_seconds": 120,
@@ -162,6 +162,7 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
     monkeypatch.setattr(server.tempfile, "tempdir", str(scratch))
     monkeypatch.setattr(server, "_folder_for_video_id", state.lookup)
     monkeypatch.setattr(server, "_get_index", unexpected_io)
+    monkeypatch.setattr(server.source_subscriptions, "_check_resolved_host", lambda host: ["8.8.8.8"])
     monkeypatch.setattr(server, "_fetch_metadata", state.metadata_fetch)
     monkeypatch.setattr(server, "_run_subprocess", fake_run)
     monkeypatch.setattr(server, "_download_reliability_audio", state.download_audio)
@@ -177,6 +178,14 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
 
     yield state
     unexpected_io.assert_not_called()
+
+
+def test_saved_transcript_outside_current_library_is_ignored(transcript, monkeypatch, tmp_path):
+    transcript.save_library([(0, 1, "Words from the previous library.")])
+    monkeypatch.setattr(transcript.server, "DESKTOP_ROOT", tmp_path / "new-library")
+    result = transcript.tools.get_transcript({"url": URL})
+    assert result["source"] == "captions"
+    assert result["transcript"] == "Manual English captions."
 
 
 def caption_keys(transcript):

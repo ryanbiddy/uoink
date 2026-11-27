@@ -31,6 +31,7 @@ import pytest
 import _platform
 import uoink_usage
 import yt_extract
+import transcript_review
 from provenance import clamp_title
 from uoink_core.storage import checked_path, open_regular, read_export_markdown
 
@@ -130,6 +131,9 @@ def capture(tmp_path, monkeypatch):
 
     scope = {
         "yt_extract": yt_extract,
+        "transcript_review": transcript_review,
+        "source_subscriptions": SimpleNamespace(check_public_http_url=lambda url: url),
+        "_review_entries": lambda entries, whisper, duration: (entries, []),
         "_platform": _platform,
         "Path": Path, "json": json, "hashlib": hashlib, "re": re,
         "threading": threading, "datetime": datetime, "shutil": shutil,

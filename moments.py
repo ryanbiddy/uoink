@@ -19,7 +19,7 @@ def citation_link(url, start, *, youtube=False, lead=2):
     return urlunsplit(parts._replace(query=urlencode([*query, ("t", f"{second}s")]), fragment=""))
 
 
-def cited_url(link, start):
+def cited_url(link, start, *, lead=2):
     """Retarget known timed links. Preserve opaque publisher links and untimed cues."""
     if not isinstance(link, str) or start is None:
         return link
@@ -27,9 +27,9 @@ def cited_url(link, start):
         parts = urlsplit(link)
         if parts.hostname in {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}:
             if {"t", "start"} & parse_qs(parts.query).keys():
-                return citation_link(link, start, youtube=True)
+                return citation_link(link, start, youtube=True, lead=lead)
         if re.fullmatch(r"t=\d+(?:\.\d+)?s?", parts.fragment):
-            return citation_link(link, start)
+            return citation_link(link, start, lead=lead)
     except ValueError:
         pass
     return link

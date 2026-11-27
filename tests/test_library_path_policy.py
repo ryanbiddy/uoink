@@ -85,7 +85,7 @@ def test_mcp_corpus_lookup_checks_index_path(directories, monkeypatch):
     root, other, alias = directories
     folder = alias("sample")
     (other / "sample.md").write_text("Sample text")
-    backend = Mock(DESKTOP_ROOT=root)
+    backend = Mock(DESKTOP_ROOT=root, DATA_ROOT=other, _transcript_backfill_half_captures=None)
     backend._get_index.return_value.get_by_slug.return_value = {"corpus_path": str(folder / "sample.md")}
     monkeypatch.setattr(uoink_mcp_tools, "_backend", backend)
     result = uoink_mcp_tools.get_uoink_corpus({"slug": "sample"})

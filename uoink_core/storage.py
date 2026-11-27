@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from contextlib import ExitStack, contextmanager
+from dataclasses import dataclass
 import json
 import logging
 import os
@@ -44,8 +45,23 @@ class LibraryPathError(OSError):
     """A path does not satisfy the library's ownership or link policy."""
 
 
+@dataclass(frozen=True)
+class StorageSubtree:
+    """A fixed child of a configured root. Only the configured root may be linked."""
+    parent: Path
+    name: str
+
+    def __fspath__(self):
+        return os.fspath(Path(self.parent) / self.name)
+
+
 def _rooted_path(root: Path, path: Path) -> tuple[Path, Path]:
     """Follow the selected root once. Keep every component beneath it lexical."""
+    if isinstance(root, StorageSubtree):
+        base, candidate = _rooted_path(root.parent, path)
+        if not candidate.is_relative_to(base / root.name):
+            raise LibraryPathError("The file must be inside the storage folder.")
+        return base, candidate
     root = Path(root).absolute()
     path = Path(path)
     if os.name == "nt" and any(":" in part for part in path.parts[1:]):
@@ -65,7 +81,7 @@ def checked_path(root: Path, path: Path) -> Path:
     """Check ownership and every component strictly inside the chosen root."""
     selected = Path(root).absolute()
     original = Path(path)
-    root, path = _rooted_path(selected, path)
+    root, path = _rooted_path(root, path)
     current = root
     for part in path.relative_to(root).parts:
         current /= part
@@ -78,7 +94,9 @@ def checked_path(root: Path, path: Path) -> Path:
     if not path.resolve().is_relative_to(root.resolve()):
         raise LibraryPathError("The file must be inside the library.")
     # Keep the configured spelling for paths returned to the UI and index.
-    return original if original.is_relative_to(selected) else selected / path.relative_to(root)
+    if original.is_relative_to(selected):
+        return original
+    return selected / path.relative_to(selected.resolve())
 
 
 @contextmanager
@@ -116,6 +134,27 @@ def _parent_directory(root: Path, path: Path, *, create: bool = False):
         yield parent_fd
 
 
+def ensure_parent(root, path):
+    base, target = _rooted_path(root, path)
+    with _parent_directory(base, target, create=True):
+        pass
+
+
+@contextmanager
+def pinned_parent(root, path, *, create=False):
+    """Keep a directory stable for a producer which needs to operate by name."""
+    base, target = _rooted_path(root, path)
+    with _parent_directory(base, target, create=create) as fd:
+        if fd is None:
+            yield target.parent
+        else:
+            # Both Linux and macOS expose held directory descriptors here.
+            directory = Path("/dev/fd") / str(fd)
+            if not os.path.samestat(directory.stat(), os.fstat(fd)):
+                raise LibraryPathError("The settings folder changed.")
+            yield directory
+
+
 def _check_opened(root, path, fd):
     path = checked_path(root, path)
     opened = os.fstat(fd)
@@ -135,6 +174,27 @@ def open_regular(root, path, *, binary=False, newline=None):
         with os.fdopen(fd, "rb" if binary else "r", encoding=None if binary else "utf-8", newline=newline) as stream:
             _check_opened(root, path, fd)
             yield stream
+
+
+def read_checked_bytes(root, path, *, limit=None):
+    with open_regular(root, path, binary=True) as stream:
+        data = stream.read() if limit is None else stream.read(limit + 1)
+    if limit is not None and len(data) > limit:
+        raise ValueError("The saved file exceeds the size limit.")
+    return data
+
+
+def read_checked_json(root, path):
+    # Large transcripts can contain word timings. Bound the raw bytes before parsing.
+    return json.loads(read_checked_bytes(root, path, limit=64 * 1024 * 1024).decode("utf-8"))
+
+
+def unlink_regular(root, path):
+    root, path = _rooted_path(root, path)
+    with _parent_directory(root, path) as parent:
+        if not stat.S_ISREG(path.lstat().st_mode):
+            raise LibraryPathError("Choose a regular file.")
+        os.unlink(path if parent is None else path.name, dir_fd=parent)
 
 
 def normalize_export_comments(path: Path, text: str, *, root=None) -> str:

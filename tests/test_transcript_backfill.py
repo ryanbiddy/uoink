@@ -93,6 +93,7 @@ class Library:
         mp.setattr(server, "_incremental_index_update", lambda *a, **k: None)
         mp.setattr(server, "_get_saved_anthropic_key", lambda: None)
         mp.setattr(server, "_anthropic_key_for_feature", lambda *a: None)
+        mp.setattr(server.source_subscriptions, "_check_resolved_host", lambda host: ["8.8.8.8"])
         mp.setattr(server, "_run_subprocess", self.fake_run)
         mp.setattr(reliability, "transcribe_media", self.fake_asr)
         original_notify = self.idx._notify_source_changed

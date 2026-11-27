@@ -93,11 +93,12 @@ def test_thumbnail_limits_the_read_and_selects_the_image_reader(tmp_path, monkey
     monkeypatch.setattr(server, "_run_subprocess", run)
     path = server._download_thumbnail({"thumbnail": "https://media.example.test/cover"},
                                       tmp_path, http_open=lambda *a, **kw: response)
-    read.assert_called_once_with(server.images.MAX_IMAGE_BYTES + 1)
+    assert len(read.call_args_list) == 2  # header-sized fixture, then EOF
+    assert all(0 < call.args[0] <= 64 * 1024 for call in read.call_args_list)
     argv = run.call_args.args[0]
     assert argv[argv.index("-f") + 1] == demuxer
     assert argv[argv.index("-protocol_whitelist") + 1] == "file"
-    assert argv[argv.index("-frames:v") + 1] == "1" and run.call_args.kwargs["timeout"] == 30
+    assert argv[argv.index("-frames:v") + 1] == "1" and run.call_args.kwargs["timeout"] == 15
     assert list(tmp_path.iterdir()) == [path] and path.read_bytes() == b"converted"
 
 

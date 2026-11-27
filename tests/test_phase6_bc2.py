@@ -555,7 +555,7 @@ def _seed_episode(env, idx, *, speakers=True):
         "description": "A grounded episode.",
     }])
     episode = podcasts.list_episodes(idx, feed_id=feed["id"])[0]
-    transcript_path = env.root / "episode.transcript.json"
+    transcript_path = podcasts._episode_audio_path(env.root, podcasts.get_feed(idx, feed["id"]), episode).with_suffix(".transcript.json")
     segments = [{"start": 0.0, "end": 4.5, "text": "A grounded opening."},
                 {"start": 64.2, "end": 70.0, "text": "The durable detail."}]
     if speakers:

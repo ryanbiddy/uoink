@@ -222,7 +222,8 @@ def dialer(network, monkeypatch):
 
 @pytest.fixture
 def consumers(network, monkeypatch, tmp_path, request):
-    namespace = dict(_platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
+    import server
+    namespace = dict(_sanitize_error=server._sanitize_error, _platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
                      images=images, atomic_output=atomic_output, DESKTOP_ROOT=tmp_path,
                      tempfile=tempfile, shutil=shutil,
                      urllib=urllib, log=logging.getLogger(__name__),
@@ -578,7 +579,8 @@ def test_youtube_metadata_keeps_original_url_without_unpaced_get(host, network, 
     url = f"https://{host}/watch?v=abcdef12345"
     assert consumers.server["_is_youtube_ytdlp_call"](["synthetic-yt-dlp", url])
     assert consumers.server["_fetch_metadata"](url)
-    assert network.requests == network.lookups == []
+    assert network.requests == []
+    assert [name.rstrip(".").lower() for name in network.lookups] == [urlparse(url).hostname.rstrip(".").lower()]
     assert consumers.child.call_args.args[0][-2:] == ["--", url]
 
 
@@ -862,7 +864,8 @@ def test_non_strict_platform_url_goes_through_checked_get(url, network, consumer
 def test_strict_platform_url_keeps_existing_ytdlp_flow(url, network, consumers):
     assert consumers.server["_normalize_video_url"](url)[0] == url
     assert consumers.server["_fetch_metadata"](url)
-    assert network.requests == network.lookups == []
+    assert network.requests == []
+    assert [name.rstrip(".").lower() for name in network.lookups] == [urlparse(url).hostname.rstrip(".").lower()]
     assert consumers.child.call_args.args[0][-2:] == ["--", url]
 
 
@@ -901,7 +904,8 @@ def test_live_status_strict_platform_url_keeps_existing_flow(url, network, consu
     status, body = live_status(url)
     assert status == 200
     assert body["ok"] is True and body["url"] == url
-    assert network.requests == network.lookups == []
+    assert network.requests == []
+    assert [name.rstrip(".").lower() for name in network.lookups] == [urlparse(url).hostname.rstrip(".").lower()]
     assert consumers.child.call_args.args[0][-2:] == ["--", url]
 
 

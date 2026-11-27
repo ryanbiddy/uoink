@@ -3879,11 +3879,11 @@ class Index:
                 "next_step": "retry_publication"})
 
     def begin_media_publication(self, video_id: str, *, folder=None, capture_binding=None,
-                                input_files=None):
+                                input_files=None, root=None):
         """Mint the publication ticket (ownership fence) a caller must carry
         into ``publish_media_snapshot``. See library_media.begin_publication."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
-        with self._lock:
+        with self._lock, _media.publication_storage(root):
             return _media.begin_publication(
                 self._conn, video_id, folder=folder, capture_binding=capture_binding,
                 input_files=input_files)
@@ -3899,7 +3899,7 @@ class Index:
         an omitted ticket is refused rather than minted here. Classification
         of omitted versus superseded committed input is the publisher's."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
-        with self._lock:
+        with self._lock, _media.publication_storage(getattr(ticket, "root", None)):
             if self._conn.in_transaction:
                 raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
             result = _media.publish_transcript(self._conn, video_id, cues=cues, media_block=media_block,

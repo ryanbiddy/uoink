@@ -280,9 +280,11 @@ def get_item(idx, item_id: str, query: dict | None = None) -> dict:
     sidecar_path = row.get("sidecar_path")
     if sidecar_path:
         try:
-            loaded = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+            import server
+            from uoink_core.storage import read_checked_json
+            loaded = read_checked_json(server._item_storage_root(row, idx), Path(sidecar_path))
             sidecar = loaded if isinstance(loaded, dict) else {}
-        except (OSError, ValueError):
+        except (OSError, ValueError, RecursionError):
             sidecar = {}
     held = sidecar.get("held_transcript_lines") or []
     include_held = params.get("include_held", "0").lower()

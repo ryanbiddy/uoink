@@ -104,6 +104,7 @@ def test_download_deadline_closes_slow_stream(tmp_path, monkeypatch, purpose):
 
 
 def test_thumbnail_bounds_reads_pixels_and_conversion(tmp_path, monkeypatch):
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     class Chunked(Response):
         def read(self, size=-1):
             assert 0 < size <= 65536
@@ -115,7 +116,7 @@ def test_thumbnail_bounds_reads_pixels_and_conversion(tmp_path, monkeypatch):
         Path(args[-1]).write_bytes(b"fixture jpeg")
     monkeypatch.setattr(server, "_run_subprocess", convert)
     jpg = server._download_thumbnail({"thumbnail": "https://images.test/a"}, tmp_path,
-                                     http_open=lambda *a, **kw: Chunked(b"fixture image"))
+                                     http_open=lambda *a, **kw: Chunked(b"\xff\xd8\xff" + bytes(16)))
     assert jpg and jpg.read_bytes() == b"fixture jpeg"
 
 
@@ -151,14 +152,17 @@ def test_show_listing_consumes_entries_without_serializing_feed(monkeypatch, ato
 
 
 def test_thumbnail_conversion_timeout_cleans_partial_output(tmp_path, monkeypatch):
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     existing = tmp_path / "thumbnail.jpg"
     existing.write_bytes(b"previous thumbnail")
     def timeout(args, **kw):
         Path(args[-1]).write_bytes(b"incomplete")
         raise subprocess.TimeoutExpired(args, kw.get("timeout", 0))
-    monkeypatch.setattr(server, "_run_subprocess", timeout)
+    converter = Mock(side_effect=timeout)
+    monkeypatch.setattr(server, "_run_subprocess", converter)
     path = server._download_thumbnail({"thumbnail": "https://images.test/a"}, tmp_path,
-                                      http_open=lambda *a, **kw: Response(b"fixture image"))
+                                      http_open=lambda *a, **kw: Response(b"\xff\xd8\xff" + bytes(16)))
+    converter.assert_called_once()
     assert path is None and list(tmp_path.iterdir()) == [existing]
     assert existing.read_bytes() == b"previous thumbnail"
 
@@ -168,11 +172,12 @@ def test_thumbnail_conversion_timeout_cleans_partial_output(tmp_path, monkeypatc
 def test_podcast_reliability_checks_saved_url_before_download(tmp_path, monkeypatch, platform, admit):
     url = "https://episode.test/page"
     final = "https://episode.test/final"
-    folder = tmp_path / "episode"
-    folder.mkdir()
-    side = {"url": url, "video_id": "episode_123", "platform": "podcast",
-            "transcript": [{"text": "fixture transcript", "start": 0, "end": 1}]}
-    (folder / "episode.json").write_text(json.dumps(side))
+    from tests.test_podcast_corpus_bridge import _seed_episode
+    idx, episode_id, _, _ = _seed_episode(tmp_path, page_url=url)
+    published = podcasts.episode_to_corpus(idx, episode_id, data_root=tmp_path)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(ss, "_check_resolved_host", lambda host: ["8.8.8.8"])
     monkeypatch.setattr(server._platform.sys, "platform", platform)
     monkeypatch.setattr(server._platform, "media_capability", lambda: {"available": True})
     monkeypatch.setattr(server._platform, "require_media", lambda: None)
@@ -182,7 +187,10 @@ def test_podcast_reliability_checks_saved_url_before_download(tmp_path, monkeypa
     monkeypatch.setattr(ss, "resolve_public_http_url", probe)
     child = Mock(side_effect=RuntimeError("stop after inspecting arguments"))
     monkeypatch.setattr(server, "_run_subprocess", child)
-    server._compute_transcript_reliability("episode_123", folder=folder)
+    try:
+        server._compute_transcript_reliability(published["video_id"])
+    finally:
+        idx.close()
     assert probe.call_args.args == (url,)
     if admit:
         assert child.call_args.args[0][-2:] == ["--", final]

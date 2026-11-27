@@ -10,6 +10,7 @@ import shutil
 import stat
 import sys
 import tempfile
+from uoink_core.storage import checked_path, pinned_parent, read_checked_bytes
 
 
 class ConfigError(ValueError):
@@ -50,6 +51,7 @@ def cline_config() -> Path:
 
 @dataclass
 class ConfigEdit:
+    root: Path
     path: Path
     original: bytes | None
     replacement: bytes
@@ -71,11 +73,22 @@ def _unique_keys(pairs):
     return result
 
 
-def _read(path: Path) -> bytes | None:
+def _settings_root(path):
+    roots = [roaming_dir(), Path.home(), Path.cwd()]
+    for name in ("LOCALAPPDATA", "COPILOT_HOME"):
+        if os.environ.get(name):
+            roots.append(Path(os.environ[name]).absolute())
+    for root in sorted(roots, key=lambda root: len(root.parts), reverse=True):
+        if path.is_relative_to(root):
+            return root
+    raise ConfigError("The settings file is outside the recognized client configuration folders.", 409)
+
+
+def _read(path: Path, *, root=None) -> bytes | None:
     if path.is_symlink():
         raise ConfigError("The settings file is a symbolic link. Merge the printed recipe into its target.", 409)
     try:
-        return path.read_bytes()
+        return read_checked_bytes(root, path) if root is not None else path.read_bytes()
     except FileNotFoundError:
         return None
 
@@ -86,7 +99,9 @@ def _invalid_constant(value):
 
 def plan_edit(path: Path, label: str, section: str, entry: dict) -> ConfigEdit:
     try:
-        original = _read(path)
+        root = _settings_root(path)
+        checked_path(root, path.parent)
+        original = _read(path, root=root)
     except OSError as exc:
         raise ConfigError(f"Couldn't read the {label} settings.") from exc
     try:
@@ -105,7 +120,7 @@ def plan_edit(path: Path, label: str, section: str, entry: dict) -> ConfigEdit:
     except (ValueError, RecursionError) as exc:
         raise ConfigError(f"Couldn't merge the {label} settings. Check for invalid JSON or duplicate keys. "
                           "If it uses comments, run uoink connect without --write and merge the printed entry.", 422) from exc
-    return ConfigEdit(path, original, replacement, action)
+    return ConfigEdit(root, path, original, replacement, action)
 
 
 def _discard(staged: Path):
@@ -189,22 +204,24 @@ def apply_edits(edits: list[ConfigEdit], label: str) -> None:
         applied = []
         try:
             for edit in edits:
-                _check_original(edit.path, edit.original, label)
-                edit.path.parent.mkdir(parents=True, exist_ok=True)
-                new = _stage_bytes(edit.path, edit.replacement, cleanup)
+                directory = cleanup.enter_context(pinned_parent(edit.root, edit.path, create=True))
+                path = directory / edit.path.name
+                _check_original(path, edit.original, label)
+                new = _stage_bytes(path, edit.replacement, cleanup)
                 restore = None
                 if edit.original is not None:
-                    backup = edit.backup
+                    backup = directory / edit.backup.name
                     try:
-                        original_copy = _stage_copy(edit.path, edit.original, cleanup, label)
+                        original_copy = _stage_copy(path, edit.original, cleanup, label)
                         previous, previous_copy = _previous_backup(backup, cleanup, label)
                     except OSError as exc:
                         raise ConfigError(f"Couldn't back up the {label} settings.") from exc
                     backups.append(_PendingWrite(backup, previous, edit.original, original_copy, previous_copy))
-                    restore = _stage_bytes(edit.path, edit.original, cleanup)
-                    shutil.copymode(edit.path, restore)
-                    shutil.copymode(edit.path, new)
-                configs.append(_PendingWrite(edit.path, edit.original, edit.replacement, new, restore, edit.backup))
+                    restore = _stage_bytes(path, edit.original, cleanup)
+                    shutil.copymode(path, restore)
+                    shutil.copymode(path, new)
+                configs.append(_PendingWrite(path, edit.original, edit.replacement, new, restore,
+                                             directory / edit.backup.name if edit.backup else None))
 
             pending = backups + configs
             for item in pending:

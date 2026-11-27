@@ -106,6 +106,7 @@ def helper(source_tree, tmp_path, monkeypatch):
     idx.import_payload.return_value = {"style_anchors": {"imported": 1}}
     namespace = {
         "uoink_usage": uoink_usage, "yt_extract": yt_extract,
+        "source_subscriptions": SimpleNamespace(check_public_http_url=lambda url: url),
         "_platform": _platform, "sys": sys,
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
@@ -726,10 +727,14 @@ class _StopWorker(BaseException):
 @pytest.fixture
 def podcast_job(helper, tmp_path):
     """Run the real podcast transcription worker for one in-memory job."""
+    from uoink_core.storage import StorageSubtree, checked_path, open_regular
+    audio = tmp_path / "Podcasts" / "show" / "episode.mp3"
+    audio.parent.mkdir(parents=True)
+    audio.write_bytes(b"fixture")
     job_id = "job_podcast"
     helper["_jobs"][job_id] = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
-        "episode_id": 7, "audio_path": str(tmp_path / "episode.mp3"),
+        "episode_id": 7, "audio_path": str(audio),
         "model": "base", "title": "Synthetic episode", "publish_to_corpus": True}
     jobs = iter([job_id])
 
@@ -744,14 +749,17 @@ def podcast_job(helper, tmp_path):
         set_current_thread_below_normal=lambda: True,
         normalize_model=lambda model: model or "base",
         transcribe_audio=Mock(return_value={"model": "base", "segments": []}),
-        write_transcript=Mock(return_value=tmp_path / "episode.transcript.json"),
+        write_transcript=Mock(return_value=audio.with_suffix(".transcript.json")),
         update_episode_transcript_state=Mock())
     podcasts = SimpleNamespace(
         EPISODE_STATUS_TRANSCRIBED="transcribed",
+        podcast_storage=lambda root: StorageSubtree(root, "Podcasts"),
+        episode_media_path=lambda idx, episode_id, root: audio,
         load_completed_episode_transcript=Mock(return_value=None),
         set_episode_status=Mock(), episode_to_corpus=Mock(return_value={"video_id": "v"}))
     helper.update(
         contextlib=contextlib, DATA_ROOT=tmp_path, whisper_runner=whisper, podcasts=podcasts,
+        checked_path=checked_path, open_regular=open_regular,
         RETRANSCRIBE_KIND="retranscribe", asr_worker=__import__("asr_worker"),
         PlaylistJobCancelled=type("PlaylistJobCancelled", (Exception,), {}), _raise_if_cancelled=Mock(),
         _podcast_transcription_queue=SimpleNamespace(get=get, task_done=Mock()),
