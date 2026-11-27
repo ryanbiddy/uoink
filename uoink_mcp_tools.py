@@ -468,6 +468,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     citations: list[dict[str, Any]] = []
     pins = []
     if video_id:
+        idx = None
         try:
             idx = _b()._get_index()
             citations = idx.get_citations(video_id)
@@ -475,9 +476,12 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
                 if cue.get("kind") == "transcript_chunk":
                     for key in ("source_deep_link", "youtube_deep_link"):
                         cue[key] = cited_url(cue.get(key), cue.get("timestamp_start"))
-            pins = _item_pins(idx, video_id)
         except Exception:
             citations = []
+        try:
+            pins = _item_pins(idx, video_id)
+        except Exception:
+            pins = []
     extra: dict[str, Any] = {}
     # Context-layer item 3: for an image uoink, the corpus markdown carries the
     # caption + source, but the pixels live in the image file. Hand a vision-

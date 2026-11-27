@@ -26073,7 +26073,7 @@ class Handler(BaseHTTPRequestHandler):
                 for s in raw_diar["segments"]:
                     if isinstance(s, dict):
                         clean_diar_segs.append({
-                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
                                              "speaker_label", "speaker_id")
                             if k in s and isinstance(s[k], (str, int, float))
                         })
@@ -26083,8 +26083,8 @@ class Handler(BaseHTTPRequestHandler):
         # Use the same line link as search, including for captures made by older helpers.
         saved_url = data.get("url") or data.get("source_url")
         if row.get("platform") == "youtube" or (isinstance(saved_url, str) and _normalize_youtube_url(saved_url)):
-            for key in ("transcript", "segments"):
-                entries = filtered.get(key)
+            for entries in (filtered.get("transcript"), filtered.get("segments"),
+                            filtered.get("diarization", {}).get("segments")):
                 if isinstance(entries, list):
                     for segment in entries:
                         if isinstance(segment, dict):
@@ -27325,8 +27325,6 @@ class Handler(BaseHTTPRequestHandler):
             })
             return True
         _remember_pending_long_video_mode(pending_id, long_video_mode)
-        if moment:
-            moments.add(_get_index(), *moment, pending_id=pending_id)
         log.info("POST /extract -> queued (live state=%s) pending_id=%d",
                   live_state, pending_id)
         self._send_json(200, {
@@ -27335,6 +27333,7 @@ class Handler(BaseHTTPRequestHandler):
             "pending_id": pending_id,
             "retry_after": retry_after,
             "reason": "live_stream",
+            **(moments.add(_get_index(), *moment, pending_id=pending_id) if moment else {}),
             "live_state": live_state,
             "behavior": behavior,
             "title": live_title,
@@ -27427,8 +27426,9 @@ class Handler(BaseHTTPRequestHandler):
                         **moments.add(idx, video_id, pin)})
                 pending = moments.pending_capture(idx, url)
                 if pending:
-                    moments.add(idx, video_id, pin, pending_id=pending["pending_id"])
-                    return self._send_json(200, {"ok": True, "queued": True, **pending})
+                    return self._send_json(200, {
+                        "ok": True, "queued": True, **pending,
+                        **moments.add(idx, video_id, pin, pending_id=pending["pending_id"])})
             if ownership.completed_while_waiting and ownership.reused:
                 _record_single_extract_job(url, started_at, result=ownership.reused)
                 log.info("POST /extract -> ok (reused capture of %s)", ownership.already_captured)
@@ -27492,8 +27492,6 @@ class Handler(BaseHTTPRequestHandler):
                                         _sanitize_error(str(detail_err)))
                         _remember_pending_long_video_mode(
                             pending_id, long_video_mode)
-                        if video_id:
-                            moments.add(_get_index(), video_id, pin, pending_id=pending_id)
                         log.info(
                             "POST /extract -> queued (rate-limit) pending_id=%d; "
                             "retry at %s (in %d minutes, retry 1 of %d)",
@@ -27508,6 +27506,7 @@ class Handler(BaseHTTPRequestHandler):
                             "reason": ("youtube_rate_limit" if _is_youtube_rate_limit(e)
                                        else "youtube_bot_check"),
                             "long_video_mode": long_video_mode,
+                            **(moments.add(_get_index(), video_id, pin, pending_id=pending_id) if video_id else {}),
                         })
                 msg = friendly_error(e)
                 detail = (_youtube_rate_limit_detail(e) if _is_youtube_rate_limit(e)

@@ -451,6 +451,17 @@
     });
   }
 
+  async function sendAfterSaveNotice(data, copied = false) {
+    try {
+      await chrome.runtime.sendMessage({
+        type: "afterSaveNotice", topic: data.topic || null, folder: data.folder || null,
+        pinned_seconds: data.pinned_seconds, copied,
+      });
+    } catch (e) {
+      console.warn("[Uoink] after-save notice failed", e);
+    }
+  }
+
   function rememberFailure(url, error, replacesId) {
     STC.rememberFailure(url, error, { title: pageVideoTitle() }, replacesId);
   }
@@ -552,8 +563,9 @@
 
     if (data.queued) {
       setButtonState(btn, "success", "Queued");
-      btn.title = queuedMessage(data);
-      notify("Uoink queued", queuedMessage(data));
+      const message = queuedMessage(data);
+      btn.title = message;
+      notify(STC.pinnedMessage(data) ? "Moment pinned" : "Uoink queued", STC.pinnedMessage(data, message));
       resetButtonAfter(btn, 5000);
       return;
     }
@@ -590,14 +602,7 @@
       // Saved to the library; no clipboard write, no new tab. The notification
       // (some systems hide its buttons) and this button both offer the copy.
       const first = await STC.isFirstSave();
-      try {
-        await chrome.runtime.sendMessage({
-          type: "afterSaveNotice", topic: data.topic || null, folder: data.folder || null,
-          pinned_seconds: data.pinned_seconds,
-        });
-      } catch (e) {
-        console.warn("[Uoink] after-save notice failed", e);
-      }
+      await sendAfterSaveNotice(data);
       // A narrow window has no room for "Saved." in front.
       const narrow = window.innerWidth < 520;
       const label = first ? (narrow ? "See it in Claude" : "Saved. See it in Claude")
@@ -641,11 +646,7 @@
     const destination = STC.afterSaveChoice(afterSave);
     if (destination.url) openTab(destination.url);
 
-    // Same shared helper used by the SW queue path. First successful uoink
-    // (whether triggered here or through the right-click menu) gets the
-    // CTA copy; subsequent uoinks fall back to the topic-aware copy.
-    const message = await STC.buildUoinkedMessage(data, copied);
-    notify("Uoinked ★", message);
+    await sendAfterSaveNotice(data, copied);
 
     setButtonState(btn, "success", "Uoinked ★");
     btn.title = SAVED_TITLE;
@@ -688,9 +689,9 @@
     }
     STC.forgetFailure(retryOf);
 
-    notify("Added to session",
-           STC.pinnedMessage(data) || `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
-           `End the session in the popup to send to Claude or ChatGPT.`);
+    const message = `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
+      "End the session in the popup to send to Claude or ChatGPT.";
+    notify("Added to session", STC.pinnedMessage(data, message));
 
     setButtonState(btn, "success", `Added (${data.video_count})`);
     btn.title = SAVED_TITLE;

@@ -70,15 +70,20 @@ def requested_time(url):
 
 def add(idx, video_id, seconds, *, pending_id=None):
     with idx._lock, idx._conn as db:
-        if pending_id is None:
-            db.execute("INSERT OR IGNORE INTO item_moments(video_id, seconds) VALUES(?, ?)", (video_id, seconds))
-        else:
-            # Cancellation or publication may have won the race with the save request.
-            db.execute("""
-                INSERT OR IGNORE INTO item_moments(video_id, seconds, pending_id)
-                SELECT ?, ?, CASE WHEN EXISTS(SELECT 1 FROM yoinks WHERE video_id=?) THEN NULL ELSE pending_id END
-                FROM pending_yoinks WHERE pending_id=? AND status!='cancelled'
-            """, (video_id, seconds, video_id, pending_id))
+        # Re-pinning takes the new row's place in eviction order, keeping the
+        # original pin date, note and ownership. A cancelled job cannot add a pin.
+        write = db.execute("""
+            INSERT OR IGNORE INTO item_moments(video_id, seconds, pending_id)
+            SELECT :video_id, :seconds, CASE WHEN EXISTS (
+                SELECT 1 FROM yoinks WHERE video_id=:video_id
+            ) THEN NULL ELSE :pending_id END
+            WHERE :pending_id IS NULL OR EXISTS (
+                SELECT 1 FROM pending_yoinks WHERE pending_id=:pending_id AND status!='cancelled'
+            )
+            ON CONFLICT(video_id, seconds) DO UPDATE SET rowid=excluded.rowid
+        """, {"video_id": video_id, "seconds": seconds, "pending_id": pending_id})
+        if write.rowcount == 0:
+            return {}
         db.execute("DELETE FROM item_moments WHERE video_id=? AND rowid NOT IN "
                    "(SELECT rowid FROM item_moments WHERE video_id=? ORDER BY rowid DESC LIMIT 20)",
                    (video_id, video_id))

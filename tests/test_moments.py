@@ -1,6 +1,7 @@
 """Pinned moments on an isolated index. All acquisitions are fixtures."""
 import contextlib
 import json
+import subprocess
 from unittest.mock import patch
 
 import pytest
@@ -167,6 +168,78 @@ def test_queued_pin_follows_completed_item_and_cancel_clears_it(library):
     with library._conn as db:
         db.execute("DELETE FROM pending_yoinks WHERE pending_id=?", (pending_id,))
     assert [p["seconds"] for p in library.get_pins(VID)] == [12, 30]
+
+
+def test_repin_at_capacity_keeps_the_requested_second(library):
+    seed(library)
+    for second in range(20):
+        moments.add(library, VID, second)
+    with library._conn as db:
+        db.execute("UPDATE item_moments SET note='Opening' WHERE video_id=? AND seconds=0", (VID,))
+    oldest, *others = library.get_pins(VID)
+    assert moments.add(library, VID, 0) == {"pinned_seconds": 0}
+    assert library.get_pins(VID) == [oldest, *others]
+    moments.add(library, VID, 20)
+    pins = library.get_pins(VID)
+    assert [pin["seconds"] for pin in pins] == [0, *range(2, 21)]
+    assert pins[0] == oldest
+
+
+@pytest.mark.parametrize("cancelled", [False, True], ids=["missing", "cancelled"])
+def test_unstored_pending_pin_is_not_reported(library, cancelled):
+    pending_id = 42
+    if cancelled:
+        pending_id = library.enqueue_pending(URL, 30, "2026-11-27")
+        assert library.cancel_pending(pending_id)
+    assert moments.add(library, VID, 0, pending_id=pending_id) == {}
+    assert library.get_pins(VID) == []
+
+
+@pytest.mark.parametrize("path", ["already_queued", "live", "429"])
+def test_queued_extract_acknowledges_the_stored_pin(library, monkeypatch, path):
+    owner = server._ManualOwnership()
+    monkeypatch.setattr(server, "_manual_extraction_ownership", lambda url: contextlib.nullcontext(owner))
+    monkeypatch.setattr(server, "_read_settings", lambda: {})
+    if path == "already_queued":
+        library.enqueue_pending(URL, 30, "2026-11-27")
+
+    def metadata(url):
+        assert url == URL
+        if path == "429":
+            raise subprocess.CalledProcessError(1, ["yt-dlp"], stderr="ERROR: unable to download video data: HTTP Error 429")
+        assert path == "live"
+        return {"id": VID, "live_status": "is_live"}
+
+    monkeypatch.setattr(server, "_fetch_metadata", metadata)
+    handler = server.Handler.__new__(server.Handler)
+    replies = []
+    handler._send_json = lambda status, data: replies.append((status, data))
+    handler._handle_extract({"url": URL + "&t=872s"})
+    (status, response), = replies
+    assert status == 200 and response["queued"]
+    assert response["pending_id"] == moments.pending_capture(library, URL)["pending_id"]
+    if path != "already_queued":
+        assert response["reason"] == ("live_stream" if path == "live" else "youtube_rate_limit")
+    assert [pin["seconds"] for pin in library.get_pins(VID)] == [872]
+    assert response["pinned_seconds"] == 872
+
+
+@pytest.mark.parametrize("failed_read", ["get_pins", "get_citations"])
+def test_corpus_loads_pins_and_citations_independently(library, monkeypatch, failed_read):
+    seed(library)
+    add_cues(library)
+    moments.add(library, VID, 56)
+    baseline = tools.call_tool("get_uoink_corpus", {"slug": VID})
+    assert baseline["pins"] and baseline["citations"]
+
+    def unavailable(video_id):
+        raise RuntimeError("read unavailable")
+
+    monkeypatch.setattr(library, failed_read, unavailable)
+    result = tools.call_tool("get_uoink_corpus", {"slug": VID})
+    assert result["ok"] and result["corpus_md"] == baseline["corpus_md"]
+    for field in ("pins", "citations"):
+        assert result[field] == ([] if failed_read == "get_" + field else baseline[field])
 
 
 def test_pinned_window_breaks_keyword_tie(library):

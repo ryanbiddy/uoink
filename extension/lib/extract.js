@@ -165,10 +165,12 @@
     return url;
   }
 
-  function pinnedMessage(data) {
+  function pinnedMessage(data, message = "") {
     const n = data && data.pinned_seconds;
-    if (!Number.isInteger(n) || n < 0) return "";
-    return "Saved. Pinned " + Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
+    if (!Number.isInteger(n) || n < 0) return message;
+    const prefix = message || "Saved.";
+    return prefix + (prefix.endsWith(".") ? " " : ". ") +
+      "Pinned " + Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
   }
 
   const TWITTER_HOSTS = new Set(["twitter.com", "www.twitter.com", "mobile.twitter.com", "x.com", "www.x.com"]);
@@ -912,15 +914,6 @@
     return normalizeAnyUrl(url) || String(url || "");
   }
 
-  // Shared "uoinked!" notification builder. Called from both the in-page
-  // YouTube button success path (content.js) and the SW-driven queue path
-  // (background.js) so the first-uoink CTA fires no matter which path the
-  // user takes -- previously only the SW path set the flag, and a normal
-  // YouTube-button click never got the special copy.
-  //
-  // Returns the message string to pass to chrome.notifications.create (each
-  // caller fires it via its own context-appropriate path). Atomically marks
-  // has_completed_first_yoink on the first successful + copied uoink.
   // "After a save" setting (extension-local, chrome.storage.local).
   //   stay    -- save only; the notification offers Copy for Claude / ChatGPT
   //   claude  -- copy, then open claude.ai/new (the pre-3.17 behaviour)
@@ -1039,35 +1032,18 @@
     return data && data.ok && typeof data.corpus_md === "string" ? data.corpus_md : "";
   }
 
-  // mode (optional): the After a save value. "stay" says it was saved and how
-  // to use the library from an AI; any other value (or none) keeps the
-  // clipboard wording. The first-uoink flag is set once the user has been
-  // told, whether or not anything was copied.
-  async function buildUoinkedMessage(data, copied, mode) {
+  // The worker records the first save after Chrome creates the notice.
+  async function buildUoinkedMessage(data, copied, mode, firstTime) {
+    const first = firstTime ?? await isFirstSave();
+    return pinnedMessage(data, saveMessage(data, copied, mode, first));
+  }
+
+  function saveMessage(data, copied, mode, firstTime) {
     const FIRST_UOINK_MSG =
       "Copied to your clipboard. Paste it in Claude or ChatGPT to see what it can do.";
     const FIRST_SAVE_MSG =
       "Saved to your library. Once Uoink is connected, ask Claude or ChatGPT about it.";
-    const stay = mode === "stay";
-    let firstTime = false;
-    try {
-      const stored = await new Promise((r) => {
-        try {
-          chrome.storage.local.get({ has_completed_first_yoink: false }, (i) => r(i));
-        } catch { r({ has_completed_first_yoink: false }); }
-      });
-      firstTime = !stored.has_completed_first_yoink;
-      if (firstTime && (copied || stay)) {
-        await new Promise((r) => {
-          try {
-            chrome.storage.local.set({ has_completed_first_yoink: true }, () => r());
-          } catch { r(); }
-        });
-      }
-    } catch { /* fall through to topic-aware copy */ }
-
-    if (pinnedMessage(data)) return pinnedMessage(data);
-    if (stay) {
+    if (mode === "stay") {
       if (firstTime) return FIRST_SAVE_MSG;
       const rawTopic = data && data.topic && data.topic !== "Uncategorized" ? String(data.topic).trim() : "";
       const topic = rawTopic.length > 40 ? `${rawTopic.slice(0, 39).trimEnd()}…` : rawTopic;

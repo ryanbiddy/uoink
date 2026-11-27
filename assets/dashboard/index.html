@@ -9080,7 +9080,8 @@
     }
 
     function transcriptSegments(sidecar = {}) {
-      const raw = sidecar.transcript || sidecar.segments || (sidecar.diarization && sidecar.diarization.segments) || [];
+      const raw = [sidecar.transcript, sidecar.segments, sidecar.diarization?.segments]
+        .find(value => Array.isArray(value) ? value.length > 0 : typeof value === "string" && value.trim());
       if (typeof raw === "string") {
         // The Reader shows the whole text, not a preview.
         return raw.split(/\n+/).filter(Boolean).map((text) => ({ text }));
