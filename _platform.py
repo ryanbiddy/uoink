@@ -909,7 +909,7 @@ def _macos_toast(title: str, body: str) -> None:
 # --------------------------------------------------------------------------
 def _linux_toast(title: str, body: str) -> None:
     try:
-        subprocess.Popen(["notify-send", title, body], **_DETACHED_IO)
+        subprocess.Popen(["notify-send", "--", title, body], **_DETACHED_IO)
     except FileNotFoundError:
         # libnotify isn't installed -- this is fine, the helper still
         # boots, the user just doesn't see a desktop notification.

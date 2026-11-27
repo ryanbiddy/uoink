@@ -35,6 +35,7 @@ class ObservedCondition(threading.Condition):
 
 @pytest.fixture
 def network(monkeypatch):
+    monkeypatch.setattr(server.source_subscriptions, "_check_resolved_host", lambda host: ["192.0.2.1"])
     limiter = server._YouTubeCallLimiter(jitter=lambda: 0)
     limiter._condition = ObservedCondition()
     state = SimpleNamespace(
@@ -910,6 +911,7 @@ def test_mcp_and_manual_captures_reuse_completion_while_paced(
 
 
 def test_channel_context_fetch_has_a_timeout(monkeypatch):
+    monkeypatch.setattr(server.source_subscriptions, "_check_resolved_host", lambda host: ["192.0.2.1"])
     run = Mock(side_effect=subprocess.TimeoutExpired(cmd="yt-dlp", timeout=1))
     monkeypatch.setattr(server, "_run_subprocess", run)
     assert server._fetch_channel_context("https://youtube.com/@example") == {

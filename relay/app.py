@@ -266,7 +266,8 @@ def validate_url(value: str) -> str:
         raise ShareError("url is required")
     if len(value) > MAX_URL_CHARS:
         raise ShareError(f"url is longer than {MAX_URL_CHARS} characters")
-    if any(ch.isspace() or unicodedata.category(ch) == "Cc" for ch in value):
+    if any(ch.isspace() or unicodedata.category(ch) == "Cc"
+           or ch in _BIDI_CONTROLS or ch in "\u061c\u200e\u200f" for ch in value):
         raise ShareError("url contains spaces or control characters")
     try:
         parts = urlsplit(value)

@@ -360,27 +360,65 @@ def normalize_page_url(raw: str) -> str | None:
 
 
 # ---- allowlist ---------------------------------------------------------
+# Common multi-label registries and shared hosting suffixes. The helper
+# ships without a public suffix database and must work offline.
+_PUBLIC_SUFFIXES = frozenset("""
+    ac.uk co.uk gov.uk ltd.uk me.uk net.uk nhs.uk org.uk plc.uk sch.uk
+    asn.au com.au edu.au gov.au id.au net.au org.au
+    ac.nz co.nz govt.nz net.nz org.nz school.nz
+    ac.jp co.jp go.jp ne.jp or.jp ac.kr co.kr ne.kr or.kr
+    ac.in co.in edu.in firm.in gen.in gov.in ind.in net.in org.in
+    com.ar com.br com.cn com.co com.hk com.mx com.my com.ph com.pk com.pl
+    com.sg com.tr com.tw com.ua com.vn co.id co.il co.th co.za org.za
+    net.br org.br gov.br edu.cn gov.cn net.cn org.cn
+    appspot.com azurewebsites.net blogspot.com cloudfront.net firebaseapp.com
+    github.io gitlab.io herokuapp.com netlify.app onrender.com pages.dev
+    vercel.app web.app wordpress.com workers.dev
+""".split())
+_HOST_LABEL = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")
+
+
+def _site_pattern_host(pattern: str) -> str:
+    """Return the allowed domain of a normalized rule, or an empty string."""
+    host = pattern.removeprefix("*.")
+    if (len(pattern) > 253 or "." not in host or host in _PUBLIC_SUFFIXES
+            or not all(_HOST_LABEL.fullmatch(label) for label in host.split("."))):
+        return ""
+    return host
+
+
+def normalize_site_pattern(value: str) -> str:
+    pattern = value.strip().lower() if isinstance(value, str) else ""
+    if not _site_pattern_host(pattern):
+        raise ValueError("Enter a site such as example.com or *.docs.example.com.")
+    return pattern
+
+
+def page_consent_required(pattern: str) -> dict:
+    return {"ok": False, "code": "consent_required",
+            "error": (f"Allow {pattern} in the Uoink dashboard under Settings > Capture > "
+                      "Sites Uoink works on, then retry the capture.")}
+
+
 def list_allowed(idx, *, active_only: bool = False) -> list[dict]:
     sql = "SELECT * FROM allowed_sites"
     if active_only:
         sql += " WHERE active = 1"
     sql += " ORDER BY added_at ASC"
-    rows = idx._conn.execute(sql).fetchall()
-    return [dict(r) for r in rows]
+    sites = []
+    for record in idx._conn.execute(sql):
+        row = dict(record)
+        if row["active"] and not _site_pattern_host(row["url_pattern"].lower()):
+            # Keep legacy rules visible for removal without granting access.
+            row["active"] = 0
+        if row["active"] or not active_only:
+            sites.append(row)
+    return sites
 
 
 def add_allowed(idx, url_pattern: str) -> dict:
     """Insert (idempotent on UNIQUE url_pattern). Returns the row."""
-    pattern = (url_pattern or "").strip().lower()
-    if not pattern:
-        raise ValueError("url_pattern required")
-    # Don't pre-validate as a strict hostname -- wildcards are explicit:
-    # '*.docs.example.com' is a legal pattern (and not a legal hostname).
-    # We just confirm it's not gibberish.
-    if len(pattern) > 253:
-        raise ValueError("url_pattern too long (max 253)")
-    if any(c in pattern for c in (" ", "\t", "\n", "\r")):
-        raise ValueError("url_pattern cannot contain whitespace")
+    pattern = normalize_site_pattern(url_pattern)
     with idx.write_transaction() as conn:
         cur = conn.execute(
             "INSERT OR IGNORE INTO allowed_sites "
@@ -418,13 +456,8 @@ def _host_matches(host: str, pattern: str) -> bool:
     matches exact host AND any subdomain of pattern (so 'example.com'
     matches 'www.example.com')."""
     host = (host or "").lower()
-    pattern = (pattern or "").lower()
-    if not host or not pattern:
-        return False
-    if pattern.startswith("*."):
-        suffix = pattern[2:]
-        return host == suffix or host.endswith("." + suffix)
-    return host == pattern or host.endswith("." + pattern)
+    suffix = _site_pattern_host((pattern or "").lower())
+    return bool(suffix) and (host == suffix or host.endswith("." + suffix))
 
 
 def host_is_allowed(idx, url: str) -> bool:
@@ -436,10 +469,8 @@ def host_is_allowed(idx, url: str) -> bool:
     host = (parsed.hostname or "").lower()
     if not host:
         return False
-    for row in list_allowed(idx, active_only=True):
-        if _host_matches(host, row["url_pattern"]):
-            return True
-    return False
+    rules = idx._conn.execute("SELECT url_pattern FROM allowed_sites WHERE active = 1")
+    return any(_host_matches(host, rule["url_pattern"]) for rule in rules)
 
 
 # ---- extraction --------------------------------------------------------

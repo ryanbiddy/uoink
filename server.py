@@ -42,6 +42,7 @@ import urllib.error
 import urllib.request
 import uuid
 import webbrowser
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -140,19 +141,15 @@ import media_handoff  # noqa: E402  -- authenticated kept-media boundary
 import suite_service  # noqa: E402  -- suite discovery/health/runtime lease
 
 
-def _extract_page_to_prose(url: str) -> str | None:
-    """v3.2 synergy bridge: Writing Studio's URL anchor ingestion calls
-    this to convert a URL into prose. We wrap page_extractor.extract_page
-    with enforce_allowlist=False (user-explicit save is consent enough)
-    and return the markdown body. Returns None on failure so the anchor
-    still saves with raw_text=NULL."""
+def _extract_page_to_prose(url: str, *, enforce_allowlist: bool = True) -> str | None:
+    """Fetch a style reference. Only an explicit dashboard save grants one-off access."""
     try:
         result = page_extractor.extract_page(
             _get_index(), url,
             render_mode=page_extractor.RENDER_MODE_STATIC,
             include_screenshot=False,
             follow_links_depth=0,
-            enforce_allowlist=False)
+            enforce_allowlist=enforce_allowlist)
     except Exception as e:
         log.warning("style anchor URL extraction failed: %s", e)
         return None
@@ -7066,35 +7063,41 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     user_agent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
 
-    def browser_open(target, **kwargs):
-        return opener(target, headers={"User-Agent": user_agent}, **kwargs)
-
-    raw_path = output_folder / "thumbnail.raw"
     try:
-        with browser_open(
-                url, timeout=30) as resp, open(raw_path, "wb") as f:
-            f.write(resp.read())
+        with opener(url, headers={"User-Agent": user_agent}, timeout=30) as resp:
+            data = resp.read(images.MAX_IMAGE_BYTES + 1)
     except Exception as e:
         log.warning("thumbnail download failed: %s", e)
         return None
-
+    if len(data) > images.MAX_IMAGE_BYTES:
+        return None
+    readers = {"image/jpeg": "jpeg_pipe", "image/png": "png_pipe", "image/webp": "webp_pipe"}
+    demuxer = readers.get(images.sniff_mime(data))
+    if not demuxer:
+        return None
     jpg_path = output_folder / "thumbnail.jpg"
     try:
-        _run_subprocess(
-            [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
-             "-loglevel", "error", "-y",
-             "-i", str(raw_path), str(jpg_path)],
-            cancel_event=cancel_event,
-            check=True,
-            stderr=subprocess.PIPE,
-        )
+        with tempfile.TemporaryDirectory(dir=output_folder) as temp:
+            raw_path = Path(temp) / "input"
+            raw_path.write_bytes(data)
+            converted = Path(temp) / "preview.jpg"
+            _run_subprocess(
+                [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+                 "-loglevel", "error", "-y", "-protocol_whitelist", "file", "-f", demuxer,
+                 "-i", str(raw_path), "-frames:v", "1", str(converted)],
+                cancel_event=cancel_event, timeout=30, check=True, stderr=subprocess.PIPE,
+            )
+            converted.replace(jpg_path)
+    except subprocess.TimeoutExpired:
+        log.warning("thumbnail conversion timed out")
+        return None
     except subprocess.CalledProcessError as e:
         log.warning("ffmpeg thumbnail convert failed with exit code %s", e.returncode)
         return None
-    finally:
-        raw_path.unlink(missing_ok=True)
-
-    return jpg_path if jpg_path.exists() else None
+    except OSError as e:
+        log.warning("thumbnail could not be saved: %s", e)
+        return None
+    return jpg_path
 
 
 def _x_video_poster_url(extract_result: dict) -> str | None:
@@ -7187,6 +7190,7 @@ def _fetch_channel_context(channel_url: str, *,
         target = target + "/videos"
 
     try:
+        target = source_subscriptions.check_public_http_url(target)
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
              "--playlist-end", "5", "--", target],
@@ -11352,9 +11356,8 @@ def _suite_capture_start(body) -> tuple[int, dict]:
     if source in _SUITE_CAPTURE_PAGE_SOURCES \
             and not page_extractor.host_is_allowed(_get_index(), canonical):
         host = urlparse(canonical).hostname or "this site"
-        return _suite_capture_error(
-            409, "consent_required",
-            f"Allow {host} in Uoink under Settings, Allowed sites, then try again.")
+        refusal = page_extractor.page_consent_required(host)
+        return _suite_capture_error(409, refusal["code"], refusal["error"])
     if source in _SUITE_CAPTURE_MEDIA_SOURCES:
         refusal = _platform.capability_refusal(_platform.media_capability())
         if refusal is not None:
@@ -15548,6 +15551,9 @@ RELAY_CHECK_WAIT_SEC = 8.0
 RELAY_NOTE_TITLE = "From my phone"
 RELAY_FALLBACK_TITLE = "From my phone (not captured)"
 RELAY_DONE_TTL_SEC = 8 * 24 * 60 * 60   # past the relay's own 7-day expiry
+RELAY_RETRY_LIMIT = 1024                 # the relay holds at most 500 pending links
+RELAY_LINKS_PER_POLL = 100
+RELAY_MAX_RESPONSE_BYTES = 1024 * 1024
 _RELAY_ID_RE = re.compile(r"\A[0-9]{13}-[0-9a-f]{12}\Z")
 _RELAY_RATE_LIMITED_PREFIX = "rate limit exceeded"
 
@@ -15567,13 +15573,26 @@ _relay_state = {
     "generation": 0,
     "next_due": 0.0,
 }
-# In memory only: capture raises per link id, and ids already captured whose
-# DELETE has not succeeded yet (never captured twice).
-_relay_raises: dict[str, int] = {}
-_relay_done: dict[str, float] = {}
-# Links Uoink couldn't capture whose fallback note hasn't saved yet: the
-# reason to write, retried on the next check before the link is deleted.
-_relay_fallback: dict[str, str] = {}
+
+
+@dataclass(frozen=True)
+class _RelayRetry:
+    updated: float
+    stage: str
+    attempts: int = 0
+    reason: str = ""
+
+
+# Only the poller accesses this map, under _relay_poll_lock. Entries are
+# ordered by last update so expiry and capacity eviction remove the oldest.
+_relay_retries: dict[str, _RelayRetry] = {}
+
+
+def _relay_remember(link_id: str, stage: str, *, attempts: int = 0, reason: str = "") -> None:
+    _relay_retries.pop(link_id, None)
+    if len(_relay_retries) >= RELAY_RETRY_LIMIT:
+        del _relay_retries[next(iter(_relay_retries))]
+    _relay_retries[link_id] = _RelayRetry(time.monotonic(), stage, attempts, reason)
 
 
 class _RelayError(Exception):
@@ -15631,13 +15650,12 @@ def _relay_http(method: str, url: str, token: str,
     opener = urllib.request.build_opener(_RelayNoRedirect)
     try:
         with opener.open(request, timeout=timeout) as response:
-            status, raw = response.status, response.read(1024 * 1024)
+            status, raw = response.status, response.read(RELAY_MAX_RESPONSE_BYTES + 1)
+            if len(raw) > RELAY_MAX_RESPONSE_BYTES:
+                raise _RelayError("The relay response was too large. Uoink will try again later.")
     except urllib.error.HTTPError as e:
-        status = e.code
-        try:
-            raw = e.read(64 * 1024)
-        except Exception:
-            raw = b""
+        with e:
+            return e.code, {}
     try:
         payload = json.loads(raw.decode("utf-8")) if raw else {}
     except (UnicodeDecodeError, ValueError):
@@ -15706,17 +15724,19 @@ def _relay_pairing() -> dict:
     return {"ok": True, "state": "error", "message": _relay_status_error(status)}
 
 
-def _relay_delete(base: str, token: str, link_id: str) -> bool:
+def _relay_delete(base: str, token: str, link_id: str, outcome: str) -> str:
     try:
         status, _payload = _relay_http("DELETE", f"{base}/v1/links/{link_id}", token)
     except Exception as exc:
         log.warning("relay: delete failed (%s)", type(exc).__name__)
-        return False
+        return outcome
     if status in (200, 404):   # 404: already gone (expired, or deleted earlier)
-        _relay_done.pop(link_id, None)
-        return True
+        _relay_retries.pop(link_id, None)
+        return outcome
+    if status == 429:
+        return "deferred"
     log.warning("relay: delete answered HTTP %d", status)
-    return False
+    return outcome
 
 
 def _relay_capture_failure_reason(result: dict, url: str) -> str:
@@ -15731,41 +15751,62 @@ def _relay_capture_failure_reason(result: dict, url: str) -> str:
     return _sanitize_error(str(message or "the capture failed")) or "the capture failed"
 
 
-def _relay_save_fallback_note(tools, url: str, note, reason: str) -> bool:
+def _relay_rate_limited(result) -> bool:
+    if not isinstance(result, dict) or result.get("ok") is not False:
+        return False
+    error = result.get("error")
+    return (result.get("code") == "rate_limited"
+            or (isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX))
+            or (isinstance(error, dict) and error.get("code") == "rate_limited"))
+
+
+def _relay_save_note(tools, title: str, text: str) -> str:
+    try:
+        saved = tools.call_tool("uoink_note", {"title": title, "text": text, "author": "Phone inbox"})
+    except Exception as exc:
+        log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
+        return "kept"
+    if _relay_rate_limited(saved):
+        return "deferred"
+    return "noted" if isinstance(saved, dict) and saved.get("ok") is True else "kept"
+
+
+def _relay_save_fallback_note(tools, url: str, note, reason: str) -> str:
     """Keep a link Uoink couldn't capture as a Uoink note: the shared note,
     the URL, and one line saying why."""
     parts = [note.strip()] if isinstance(note, str) and note.strip() else []
     if url:
         parts.append(url)
     parts.append(f"Uoink couldn't capture this link: {reason}")
-    try:
-        saved = tools.call_tool("uoink_note", {
-            "title": RELAY_FALLBACK_TITLE, "text": "\n\n".join(parts)})
-    except Exception as exc:
-        log.warning("relay: the fallback note was not saved (%s)", type(exc).__name__)
-        return False
-    if isinstance(saved, dict) and saved.get("ok") is True:
-        return True
-    log.warning("relay: the fallback note was not saved")
-    return False
+    return _relay_save_note(tools, RELAY_FALLBACK_TITLE, "\n\n".join(parts))
 
 
 def _relay_settle_uncaptured(link_id: str, base: str, token: str, tools,
                              url: str, note, reason: str) -> str:
     """Nothing shared is lost: save the link as a note, then delete it from
     the relay. If the note can't be saved, keep the link for the next check."""
-    if not _relay_save_fallback_note(tools, url, note, reason):
-        _relay_fallback[link_id] = reason
+    outcome = _relay_save_fallback_note(tools, url, note, reason)
+    if outcome != "noted":
+        _relay_remember(link_id, "fallback", reason=reason)
         _relay_update(last_capture_error=_sanitize_error(
             "A shared link couldn't be captured or saved as a note. Uoink will "
             f"try again at the next check. {reason}"))
-        return "kept"
-    _relay_fallback.pop(link_id, None)
-    _relay_done[link_id] = time.time()
+        return outcome
+    _relay_remember(link_id, "delete")
     _relay_update(last_capture_error=_sanitize_error(
         f"A shared link couldn't be captured, so it was saved as a note: {reason}"))
-    _relay_delete(base, token, link_id)
-    return "noted"
+    return _relay_delete(base, token, link_id, "noted")
+
+
+def _relay_finish_capture(link_id: str, base: str, token: str, tools, url: str, note) -> str:
+    if isinstance(note, str) and note.strip():
+        outcome = _relay_save_note(tools, RELAY_NOTE_TITLE, f"{note.strip()}\n\n{url}")
+        if outcome != "noted":
+            _relay_remember(link_id, "shared_note")
+            _relay_update(last_capture_error="The link was captured. Uoink will retry its phone note.")
+            return outcome
+    _relay_remember(link_id, "delete")
+    return _relay_delete(base, token, link_id, "captured")
 
 
 def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
@@ -15774,16 +15815,18 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     link_id = link.get("id")
     if not isinstance(link_id, str) or not _RELAY_ID_RE.match(link_id):
         return "skipped"
-    if link_id in _relay_done:
+    retry = _relay_retries.get(link_id)
+    if retry and retry.stage == "delete":
         # Handled on an earlier check; only the DELETE is still owed.
-        _relay_delete(base, token, link_id)
-        return "skipped"
+        return _relay_delete(base, token, link_id, "skipped")
     url = link.get("url") if isinstance(link.get("url"), str) else ""
     note = link.get("note")
-    if link_id in _relay_fallback:
+    if retry and retry.stage == "shared_note":
+        return _relay_finish_capture(link_id, base, token, tools, url, note)
+    if retry and retry.stage == "fallback":
         # The capture already failed; only its fallback note is still owed.
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
-                                        _relay_fallback[link_id])
+                                        retry.reason)
     route = _classify_capture_url(url)
     capture_tools = _capture_tools()
     if not route.get("ok") or route.get("source") not in capture_tools:
@@ -15795,23 +15838,21 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     try:
         result = tools.call_tool(name, {key: route["canonical"]})
     except Exception as exc:
-        attempts = _relay_raises.get(link_id, 0) + 1
+        attempts = retry.attempts + 1 if retry else 1
         if attempts >= RELAY_MAX_RAISES:
-            _relay_raises.pop(link_id, None)
             log.warning("relay: capture failed %d times (%s); the link becomes a note",
                         attempts, type(exc).__name__)
             return _relay_settle_uncaptured(
                 link_id, base, token, tools, url, note,
                 f"the capture failed {attempts} times ({type(exc).__name__}).")
-        _relay_raises[link_id] = attempts
+        _relay_remember(link_id, "capture", attempts=attempts)
         log.warning("relay: capture raised %s; the link stays for the next check",
                     type(exc).__name__)
         return "kept"
-    _relay_raises.pop(link_id, None)
+    _relay_retries.pop(link_id, None)
     if not isinstance(result, dict):
         result = {"ok": False, "error": "capture returned no result"}
-    error = result.get("error")
-    if result.get("ok") is False and isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX):
+    if _relay_rate_limited(result):
         # The registry refused before trying. Not picked up: try next check.
         return "deferred"
     with _relay_cond:
@@ -15820,17 +15861,7 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     if result.get("ok") is not True:
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
                                         _relay_capture_failure_reason(result, url))
-    _relay_done[link_id] = time.time()
-    if isinstance(note, str) and note.strip():
-        try:
-            saved = tools.call_tool("uoink_note", {
-                "title": RELAY_NOTE_TITLE, "text": f"{note.strip()}\n\n{url}"})
-            if not (isinstance(saved, dict) and saved.get("ok") is True):
-                log.warning("relay: the shared note was not saved")
-        except Exception as exc:
-            log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
-    _relay_delete(base, token, link_id)
-    return "captured"
+    return _relay_finish_capture(link_id, base, token, tools, url, note)
 
 
 def _relay_poll_once() -> dict:
@@ -15842,16 +15873,21 @@ def _relay_poll_once() -> dict:
             if settings.get("relay_enabled") is not True or not base or not token:
                 return _relay_status_payload(settings)
             _relay_update(polling=True, last_poll_at=_now_iso())
-            cutoff = time.time() - RELAY_DONE_TTL_SEC
-            for done_id in [k for k, at in _relay_done.items() if at < cutoff]:
-                _relay_done.pop(done_id, None)
+            cutoff = time.monotonic() - RELAY_DONE_TTL_SEC
+            while _relay_retries:
+                oldest = next(iter(_relay_retries))
+                if _relay_retries[oldest].updated > cutoff:
+                    break
+                del _relay_retries[oldest]
             status, payload = _relay_http("GET", f"{base}/v1/links", token)
             links = payload.get("links")
             if status != 200 or payload.get("ok") is not True or not isinstance(links, list):
                 raise _RelayError(_relay_status_error(status) if status != 200
                                   else "The relay sent an answer Uoink doesn't understand.")
-            links = [link for link in links if isinstance(link, dict)]
-            links.sort(key=lambda link: str(link.get("id") or ""))
+            links = [link for link in links[:RELAY_LINKS_PER_POLL]
+                     if isinstance(link, dict) and isinstance(link.get("id"), str)
+                     and _RELAY_ID_RE.fullmatch(link["id"])]
+            links.sort(key=lambda link: link["id"])
             _relay_update(last_pending_count=len(links), last_error=None)
             tools = _mcp_tools_module() if links else None
             outcomes = []
@@ -15862,7 +15898,7 @@ def _relay_poll_once() -> dict:
                 outcomes.append(outcome)
                 if outcome == "deferred":
                     break
-            if outcomes and not {"noted", "kept"} & set(outcomes):
+            if outcomes and not {"noted", "kept", "deferred"} & set(outcomes):
                 _relay_update(last_capture_error=None)
             _relay_update(last_ok_at=_now_iso())
             if outcomes:
@@ -20462,6 +20498,7 @@ class Handler(BaseHTTPRequestHandler):
             body = dashboard_html(body)
         self.send_response(200)
         self.send_header("Content-Type", mime)
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Content-Length", str(len(body)))
         # Revalidate every load: an upgrade replaces these files, and a cached
         # copy kept an open tab on the old dashboard for up to five minutes.
@@ -23223,13 +23260,8 @@ class Handler(BaseHTTPRequestHandler):
     #   POST /writing/style-anchors/<id>/remove  -> delete
 
     def _writing_url_fetcher(self):
-        """Return a callable that, given a URL, returns extracted prose.
-        Bridges Writing Studio's style anchor URL ingestion to whatever
-        page extractor is currently shipped (Universal Site PR / Crawl4AI
-        wrapper). Falls back to None when no extractor is bound -- the
-        anchor still saves, just with raw_text=NULL."""
-        fetcher = globals().get("_extract_page_to_prose")
-        return fetcher if callable(fetcher) else None
+        """A dashboard save authorizes this one style reference."""
+        return lambda url: _extract_page_to_prose(url, enforce_allowlist=False)
 
     def _handle_writing_style_anchors_list(self):
         if not self._require_token():
@@ -23666,15 +23698,17 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        action = (body.get("action") or "").strip().lower()
-        pattern = (body.get("url_pattern") or "").strip()
+        action = body.get("action")
+        action = action.strip().lower() if isinstance(action, str) else ""
+        pattern = body.get("url_pattern")
         if action not in ("add", "remove"):
             return self._send_json(400, {
                 "ok": False,
                 "error": "action must be 'add' or 'remove'"})
-        if not pattern:
+        if not isinstance(pattern, str) or not pattern.strip():
             return self._send_json(400, {
                 "ok": False, "error": "url_pattern required"})
+        pattern = pattern.strip()
         try:
             if action == "add":
                 row = page_extractor.add_allowed(_get_index(), pattern)

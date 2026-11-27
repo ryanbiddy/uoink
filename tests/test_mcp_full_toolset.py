@@ -85,7 +85,7 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
                 "get_user_taste", "get_user_memory", "update_user_taste", "get_facet_taxonomy",
                 "assemble_workspace", "list_workspaces", "list_claims", "list_scripts",
                 "list_writing_pieces", "list_style_anchors", "uoink_note",
-                "list_allowed_sites", "add_allowed_site", "remove_allowed_site",
+                "list_allowed_sites", "remove_allowed_site",
             }
             for request_id, name in enumerate((n for n in names if n not in CORE_STDIO_TOOLS), 4):
                 client.send({"jsonrpc": "2.0", "id": request_id, "method": "tools/call",
@@ -99,6 +99,8 @@ def test_real_stdio_toolsets_and_helper_down(tmp_path, mode, count):
                     jsonschema.validate(body, tools.OUTPUT_SCHEMAS[name])
                 if name in local_successes:
                     assert body["ok"] is True, (name, body)
+                if name == "add_allowed_site":
+                    assert body["ok"] is False and body["code"] == "consent_required"
                 if body["ok"] is False:
                     error = body["error"]
                     if isinstance(error, dict):
@@ -141,6 +143,20 @@ def test_library_apply_stays_off_on_stdio_and_http(local_backend):
     stdio = call("apply_reshelving", args)
     http = mcp_call("apply_reshelving", args).payload["result"]["structuredContent"]
     assert stdio == http and stdio["error"]["code"] == "apply_disabled"
+
+
+def test_only_the_dashboard_can_add_a_site(local_backend):
+    import page_extractor as pages
+    args = {"url_pattern": "sample.github.io"}
+    stdio = call("add_allowed_site", args)
+    http = mcp_call("add_allowed_site", args).payload["result"]
+    assert http["isError"] and stdio == http["structuredContent"]
+    assert stdio["code"] == "consent_required"
+    assert not pages.host_is_allowed(local_backend, "https://sample.github.io/")
+    saved = post("/extract/page/allowlist", {"action": "add", **args})
+    assert saved.payload["ok"]
+    assert pages.host_is_allowed(local_backend, "https://sample.github.io/")
+    assert not pages.host_is_allowed(local_backend, "https://other.github.io/")
 
 
 def test_registry_handlers_run_on_the_event_loop_like_v391(monkeypatch):

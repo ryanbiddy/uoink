@@ -57,7 +57,7 @@ def test_errors_and_other_tools_are_not_labelled(monkeypatch):
     assert uoink_mcp_tools.call_tool("get_uoink_corpus", {}) == {
         "ok": False, "error": "uoink not found"}
     assert "get_uoink_health" not in uoink_mcp_tools.UNTRUSTED_CONTENT_TOOL_NAMES
-    assert "uoink_url" not in uoink_mcp_tools.UNTRUSTED_CONTENT_TOOL_NAMES
+    assert "uoink_note" not in uoink_mcp_tools.UNTRUSTED_CONTENT_TOOL_NAMES
 
 
 def test_thumbnail_refuses_formats_the_sniff_gate_does_not_allow():
