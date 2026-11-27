@@ -59,7 +59,7 @@ def requested_time(url):
         value = (query.get(key) or [""])[0]
         if not value or len(value) > 16:
             continue
-        match = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?", value)
+        match = re.fullmatch(r"(?:(\d{1,10})h)?(?:(\d{1,10})m)?(?:(\d{1,10})s?)?", value)
         if match:
             h, m, s = (int(part or 0) for part in match.groups())
             seconds = h * 3600 + m * 60 + s
