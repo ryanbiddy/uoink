@@ -135,6 +135,7 @@ models, output-root recovery, and corpus state. The response shape is:
   },
   "whisperx_available": false,
   "whisper_model": "base",
+  "whisper_model_downloaded": false,
   "whisperx_model_loaded": false,
   "index_recovering": false,
   "output_root_fallback": false,
@@ -162,6 +163,8 @@ models, output-root recovery, and corpus state. The response shape is:
   }
 }
 ```
+
+`whisperx_model_loaded` is a deprecated alias for `whisper_model_downloaded`. Both report whether the model files are on disk. Use `transcription_worker.state` to check whether the model is in memory.
 
 `pid` identifies the responding helper process. `supervisor_run_id` is a fresh
 identifier for each supervised child, or `null` for a direct start. The

@@ -22599,7 +22599,7 @@
     // shows Library.
     function applyHashRoute() {
       const loc = window.location;
-      const route = parseRoute(loc ? loc.hash : "") || parseRoute("#library");
+      const route = parseRoute(loc?.hash || new URLSearchParams(loc?.search).get("tab")) || parseRoute("#library");
       if (route.hash === currentRoute) return true;
       currentRoute = route.hash;
       applyRoute(route);
@@ -22668,6 +22668,13 @@
     }
 
     function wireRoutes() {
+      window.uoinkOpenDashboardLink = (url, expires) => {
+        if (Date.now() >= expires) return false;
+        const target = new URL(url);
+        if (target.origin !== window.location.origin || target.pathname !== "/dashboard") return false;
+        if ([...target.searchParams.keys()].some(key => key !== "tab")) return false;
+        return navigateTo(target.hash || target.searchParams.get("tab") || "#library");
+      };
       window.addEventListener("hashchange", applyHashRoute);
       window.addEventListener("popstate", applyHashRoute);
       // In-app hash links (#settings/capture, #for-you, #activity) go
@@ -22688,6 +22695,46 @@
       const content = document.querySelector(".content");
       if (content) content.addEventListener("scroll", syncReaderCrumbs, { passive: true });
       window.addEventListener("scroll", syncReaderCrumbs, { passive: true });
+    }
+
+    // 3.18.1: the search box hint is clipped on a phone (390 px). Show the
+    // longest hint that fits the box. The aria-label keeps the full sentence.
+    const SEARCH_PLACEHOLDERS = [
+      "Search your library or paste a link to uoink it",
+      "Search or paste a link",
+      "Search",
+    ];
+
+    function searchPlaceholderFor(room, measure) {
+      for (const text of SEARCH_PLACEHOLDERS) {
+        if (measure(text) <= room) return text;
+      }
+      return SEARCH_PLACEHOLDERS[SEARCH_PLACEHOLDERS.length - 1];
+    }
+
+    function fitSearchPlaceholder() {
+      const input = els.searchInput;
+      if (!input || !input.clientWidth) return;
+      const style = getComputedStyle(input);
+      const canvas = fitSearchPlaceholder.canvas || (fitSearchPlaceholder.canvas = document.createElement("canvas"));
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      // A few pixels of slack for rounding and the box's own text inset.
+      const room = input.clientWidth - parseFloat(style.paddingLeft || "0") - parseFloat(style.paddingRight || "0") - 6;
+      const text = searchPlaceholderFor(room, (value) => context.measureText(value).width);
+      if (input.placeholder !== text) input.placeholder = text;
+    }
+
+    function bindSearchPlaceholderFit() {
+      if (!els.searchInput) return;
+      fitSearchPlaceholder();
+      if (typeof ResizeObserver === "function") {
+        new ResizeObserver(() => fitSearchPlaceholder()).observe(els.searchInput);
+      } else {
+        window.addEventListener("resize", fitSearchPlaceholder);
+      }
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSearchPlaceholder, () => {});
     }
 
     function wireEvents() {
@@ -22744,6 +22791,7 @@
         event.preventDefault();
         startLibraryCapture();
       });
+      bindSearchPlaceholderFit();
       if (els.libraryCaptureButton) els.libraryCaptureButton.addEventListener("click", startLibraryCapture);
       els.yoinkCopyMarkdown.addEventListener("click", () => copySelectedMarkdown());
       els.yoinkSendClaude.addEventListener("click", () => copySelectedMarkdown({ openClaude: true }));

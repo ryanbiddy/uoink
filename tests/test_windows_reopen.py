@@ -1,18 +1,4 @@
-"""Windows: clicking Uoink in the Start menu while it runs brings up the dashboard.
-
-Bug (3.2 to 3.17): the Start menu and desktop shortcuts run
-``uoink_supervisor.py --show-dashboard``. With a resident supervisor holding the
-lock, the second launch opened the dashboard only when the saved status was
-already "running". A click while the helper was still starting (login, an
-upgrade, a crash restart) exited silently. The Mac answers such a click by
-queueing it for the resident supervisor (3.11.2); Windows now does the same.
-
-Windows also passed --show-dashboard to every helper start, so each crash
-restart popped the dashboard at the user. Like the Mac, only the first start
-gets it now.
-
-No window is opened: show_running_dashboard and the helper process are fakes.
-"""
+"""Headless checks for the Windows shortcut, cold startup and recovery opens."""
 from __future__ import annotations
 
 import io
@@ -26,6 +12,8 @@ REAL_SUPERVISOR = uoink_supervisor.Supervisor
 
 @pytest.fixture
 def windows(monkeypatch, tmp_path):
+    import uoink_dashboard
+    monkeypatch.setattr(uoink_dashboard, "has_window_candidate", lambda: False)
     monkeypatch.setattr(uoink_supervisor.sys, "platform", "win32")
     monkeypatch.setattr(uoink_supervisor, "data_root", lambda: tmp_path)
     monkeypatch.setattr(uoink_supervisor, "login_session", lambda: "session")
@@ -45,20 +33,82 @@ def _next_tick():
         uoink_supervisor.time.sleep(0.001)
 
 
-@pytest.mark.parametrize("state", ["starting", "backoff", "running"])
-def test_click_while_a_supervisor_runs_is_queued_for_it(windows, monkeypatch, tmp_path, state):
-    # "running" too: the file can still say so for a moment after a crash, and
-    # only the resident can coalesce with the window its own launch opened.
-    shown = []
-    monkeypatch.setattr(windows, "show_running_dashboard", lambda root: shown.append(root) or True)
-    monkeypatch.setattr(windows.subprocess, "Popen", lambda *a, **k: pytest.fail("started a second helper"))
-    windows.write_json(tmp_path / windows.STATE_FILE, {"status": state})
-    with windows.admission(tmp_path) as owned:  # The resident supervisor holds the lock.
+@pytest.mark.parametrize("already_ready", [True, False])
+def test_installed_shortcut_opens_in_clicking_process(windows, monkeypatch, tmp_path, already_ready):
+    import os
+    import uoink_dashboard
+    import uoink_install_isolation as iso
+    from pathlib import Path
+    shortcut = (Path(windows.__file__).parent / "installer" / "uoink.iss").read_text(encoding="utf-8")
+    entry = shortcut.split('Name: "{group}\\Uoink";', 1)[1].split("Check:", 1)[0]
+    assert 'Filename: "{app}\\python\\pythonw.exe"' in entry
+    assert 'Parameters: """{app}\\uoink_supervisor.py"" --show-dashboard"' in entry
+    calls = []
+    readiness = iter([already_ready, True, True])
+    monkeypatch.setattr(windows, "ready", lambda url: next(readiness))
+    monkeypatch.setattr(uoink_dashboard, "main", lambda: calls.append(os.getpid()) or 0)
+    monkeypatch.setattr(windows.subprocess, "Popen", lambda *a, **k: pytest.fail("duplicate resident"))
+    windows.write_json(tmp_path / windows.STATE_FILE, {"status": "running", "session": "other-login"})
+    with windows.admission(tmp_path) as owned:
         assert owned
-        assert windows.main(["--show-dashboard"]) == 0
-    assert shown == []
-    assert windows.read_json(tmp_path / windows.DASHBOARD_REQUEST)["session"] == "session"
-    assert windows.take_dashboard_request(tmp_path) is not None
+        assert windows.main(["--show-dashboard", *iso.child_argv()]) == 0
+    assert calls == [os.getpid()]
+    assert not (tmp_path / windows.DASHBOARD_REQUEST).exists()
+
+
+@pytest.mark.parametrize("ready_session,expected", [("session", [True]), ("other-session", [])])
+def test_cold_click_starts_only_helper_in_background(windows, monkeypatch, tmp_path, ready_session, expected):
+    import uoink_dashboard
+    import uoink_install_isolation as iso
+    sessions = iter(["session", ready_session])
+    health = iter([False, True])
+    monkeypatch.setattr(windows, "login_session", lambda: next(sessions))
+    monkeypatch.setattr(windows, "ready", lambda url: next(health))
+    started, shown = [], []
+    monkeypatch.setattr(windows.subprocess, "Popen", lambda cmd, **kwargs: started.append(cmd))
+    monkeypatch.setattr(uoink_dashboard, "main", lambda: shown.append(True) or 0)
+    with iso.bound_isolation(profile=tmp_path, port=18123):
+        assert windows.open_windows_app(tmp_path, False) == 0
+        assert started == [[windows.sys.executable, "-B", "-s", str(windows.HERE / "uoink_supervisor.py"),
+                            "--resident", *iso.child_argv()]]
+    assert shown == expected
+
+
+def test_resident_drops_deferred_request_from_other_windows_session(windows, monkeypatch, tmp_path):
+    shown = []
+    monkeypatch.setattr(windows, "Supervisor", _Fake)
+    monkeypatch.setattr(windows, "show_running_dashboard", lambda root: shown.append(root))
+    assert windows.main(["--startup"]) == 0
+    windows.request_dashboard_later(tmp_path, session="other-session")
+    _Fake.captured["on_ready"](False)
+    assert _wait_for(shown, timeout=0.1) == []
+
+
+def test_reopen_visible_dashboard_while_resident_helper_restarts(windows, monkeypatch, tmp_path):
+    import uoink_dashboard
+    from unittest.mock import Mock
+    probe = Mock(side_effect=[False, AssertionError("waited for helper with an open dashboard")])
+    monkeypatch.setattr(windows, "ready", probe)
+    monkeypatch.setattr(uoink_dashboard, "has_window_candidate", lambda: True)
+    opened = Mock(return_value=0)
+    monkeypatch.setattr(uoink_dashboard, "main", opened)
+    with windows.admission(tmp_path) as owned:
+        assert owned and windows.open_windows_app(tmp_path, False) == 0
+    opened.assert_called_once()
+
+
+def test_isolated_shortcut_reopens_dashboard_in_clicked_server_process(monkeypatch):
+    import server
+    import uoink_dashboard
+    monkeypatch.setattr(server, "_existing_server_responds", lambda: True)
+    monkeypatch.delenv("UOINK_SUPERVISOR_RUN_ID", raising=False)
+    monkeypatch.setattr(server.sys, "platform", "win32")
+    monkeypatch.setattr(server, "_spawn_dashboard_window", lambda **kwargs: pytest.fail("delegated click"))
+    called = []
+    monkeypatch.setattr(uoink_dashboard, "main", lambda: called.append(True) or 0)
+    with pytest.raises(SystemExit) as exit_status:
+        server.main(show_dashboard=True)
+    assert exit_status.value.code == 0 and called == [True]
 
 
 class _Fake:
@@ -80,7 +130,7 @@ def test_login_resident_answers_a_click_made_while_it_started(windows, monkeypat
     assert windows.main(["--startup"]) == 0  # The scheduled login start: no flag.
     on_ready = _Fake.captured["on_ready"]
     assert on_ready is not None
-    windows.request_dashboard_later(tmp_path)  # A Start menu click during startup.
+    windows.request_dashboard_later(tmp_path, session="session")  # A Start menu click during startup.
     on_ready(False)  # The login start opens no window of its own.
     assert _wait_for(shown) == [tmp_path]
     assert not (tmp_path / windows.DASHBOARD_REQUEST).exists()
@@ -90,17 +140,17 @@ def test_a_click_before_the_launch_window_is_not_opened_twice(windows, monkeypat
     shown = []
     monkeypatch.setattr(windows, "Supervisor", _Fake)
     monkeypatch.setattr(windows, "show_running_dashboard", lambda root: shown.append(root))
-    assert windows.main(["--show-dashboard"]) == 0
+    assert windows.main(["--resident", "--show-dashboard"]) == 0
     assert _Fake.captured["first_args"] == ["--show-dashboard"]
     assert "--show-dashboard" not in _Fake.captured["command"]
     on_ready = _Fake.captured["on_ready"]
-    windows.request_dashboard_later(tmp_path)  # A second click while it started.
+    windows.request_dashboard_later(tmp_path, session="session")  # A second click while it started.
     _next_tick()
     on_ready(True)  # server.py --show-dashboard already opened a window.
     on_ready(False)
     assert shown == []
     _next_tick()
-    windows.request_dashboard_later(tmp_path)  # A later click.
+    windows.request_dashboard_later(tmp_path, session="session")  # A later click.
     on_ready(False)
     assert _wait_for(shown) == [tmp_path]
 
@@ -136,7 +186,7 @@ def _run_main_with_helpers(windows, monkeypatch, argv, children):
 def test_a_crash_restart_does_not_reopen_the_dashboard(windows, monkeypatch, tmp_path):
     # Start menu click: the helper opens its window, runs, crashes, restarts.
     commands, shown = _run_main_with_helpers(
-        windows, monkeypatch, ["--show-dashboard"], [_Child(alive=5, code=1), _Child(alive=5, code=0)])
+        windows, monkeypatch, ["--resident", "--show-dashboard"], [_Child(alive=5, code=1), _Child(alive=5, code=0)])
     assert len(commands) == 2
     assert "--show-dashboard" in commands[0]
     assert "--show-dashboard" not in commands[1], "a crash restart popped the dashboard again"
@@ -149,7 +199,7 @@ def test_a_launch_that_dies_before_its_window_still_opens_the_dashboard(windows,
     # The click's own start never got ready; the restart has no flag, so the
     # supervisor answers the click itself once the restarted helper is ready.
     commands, shown = _run_main_with_helpers(
-        windows, monkeypatch, ["--show-dashboard"], [_Child(alive=0, code=1), _Child(alive=5, code=0)])
+        windows, monkeypatch, ["--resident", "--show-dashboard"], [_Child(alive=0, code=1), _Child(alive=5, code=0)])
     assert "--show-dashboard" in commands[0] and "--show-dashboard" not in commands[1]
     assert _wait_for(shown) == [tmp_path]
 
@@ -162,6 +212,18 @@ def test_a_click_during_sign_in_survives_the_login_start(windows, monkeypatch, t
     REAL_SUPERVISOR(tmp_path, ["pythonw", "server.py"], "http://127.0.0.1:1/health",
                     session="session", startup=True, poll=0, sleep=lambda seconds: None).run()
     assert windows.take_dashboard_request(tmp_path) is not None
+
+
+def test_upgrade_in_same_windows_logon_keeps_quit_and_crash_history(windows, monkeypatch, tmp_path):
+    luid = "0100000000000000"
+    windows.write_json(tmp_path / windows.STATE_FILE, {"session": "windows:" + luid,
+                       "status": "crash_loop", "restart_count": 3})
+    windows.write_json(tmp_path / windows.STOP_FILE, {"reason": "quit"})
+    supervisor = REAL_SUPERVISOR(tmp_path, [], "unused", session="windows:2:" + luid, startup=True)
+    monkeypatch.setattr(supervisor, "loop", lambda: pytest.fail("restarted after Quit"))
+    assert supervisor.run() == 0
+    assert (tmp_path / windows.STOP_FILE).exists()
+    assert supervisor.state["restart_count"] == 3
 
 
 @pytest.mark.parametrize("pending", [None, "last-boot"])

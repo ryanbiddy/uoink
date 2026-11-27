@@ -246,8 +246,9 @@ class UoinkTray:
     def _spawn_dashboard_window(self) -> None:
         script = str(Path(__file__).parent / "uoink_dashboard.py")
         try:
+            import uoink_install_isolation as isolation
             creationflags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
-            subprocess.Popen([sys.executable, script], creationflags=creationflags)
+            subprocess.Popen([sys.executable, script, *isolation.child_argv()], creationflags=creationflags)
             return
         except Exception as e:
             log.debug("dashboard subprocess failed (%s); falling back to browser tab", e)

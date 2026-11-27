@@ -172,6 +172,7 @@ Success response: HTTP 200
   },
   "whisperx_available": false,
   "whisper_model": "base",
+  "whisper_model_downloaded": false,
   "whisperx_model_loaded": false,
   "index_recovering": false,
   "output_root_fallback": false,
@@ -216,7 +217,8 @@ Fields:
 | `heartbeat` | object | Scheduler heartbeat with separate stamps: `last_tick_completed_at` (a pass finished, any outcome), `last_successful_tick_at` (zero failed polls), `last_successful_poll_at`, `last_failed_poll_at` + `last_poll_error` (a failed poll never advances a success stamp), `last_ingest_completed_at` (an episode was published into the corpus by the watch pipeline), `last_tick` and `counts` tallies, `tick_interval_sec`, and `freshness` (`state` is `never` / `fresh` / `stale`, with `age_sec` since the last completed pass and the `stale_after_sec` bound). `uoink doctor` reports the same block and fails on `stale`. |
 | `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
 | `whisper_model` | string | Normalized model selected in settings. |
-| `whisperx_model_loaded` | boolean | Whether the selected model is already present locally. |
+| `whisper_model_downloaded` | boolean | Whether the selected model's files are on this computer. It does not say whether a model is in memory; see `transcription_worker`. |
+| `whisperx_model_loaded` | boolean | Deprecated alias of `whisper_model_downloaded` with the same value, kept for older readers. Despite the name it reports files on disk, not a model in memory. |
 | `index_recovering` | boolean | `true` while a corrupt `index.db` has been quarantined and the replacement database is being backfilled from disk. |
 | `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Uoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
 | `path_integrity` | object | Aggregate `ok`, `checked`, and `missing` values for indexed corpus paths. Missing files add a generic `hint`; a failed scan adds the generic `error` value `index unavailable; see server.log`. |

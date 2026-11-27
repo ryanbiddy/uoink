@@ -78,5 +78,28 @@ check(/<button class="card-title" type="button" title="\$\{title\}"[^\n]+>\$\{ti
 check(PAGE.includes('id="noteTitleInput" type="text" maxlength="300"'), "the note title box matches the 300 character title limit");
 check(/@media \(max-width: 620px\) \{[\s\S]*?\.uoink-card \.row-actions \{\s*opacity: 1;/.test(PAGE), "single-column cards show their actions instead of leaving a hidden blank row");
 
+// 3.18.1: the search box hint fits a 390 px phone. At 16px the full hint is
+// about 329 px and the box has about 304 px of room at 390 px (measured in
+// headless Chrome), so a phone gets the short hint and a desktop the full one.
+{
+  const at = PAGE.indexOf("const SEARCH_PLACEHOLDERS");
+  const hasFit = at >= 0 && PAGE.includes("function searchPlaceholderFor(");
+  check(hasFit, "the search box has a hint that fits its width");
+  if (hasFit) {
+    const fitCtx = vm.createContext({});
+    vm.runInContext(PAGE.slice(at, PAGE.indexOf("];", at) + 2) + "\n" + grab("searchPlaceholderFor") +
+      "\nthis.pick = searchPlaceholderFor;", fitCtx);
+    const measure = (text) => text.length * 7;  // 7 px a character: 47 chars = 329 px
+    const full = "Search your library or paste a link to uoink it";
+    check(fitCtx.pick(304, measure) === "Search or paste a link", "a 390 px phone gets the short hint", fitCtx.pick(304, measure));
+    check(fitCtx.pick(938, measure) === full, "a desktop keeps the full hint", fitCtx.pick(938, measure));
+    check(fitCtx.pick(329, measure) === full, "the full hint shows when it just fits", fitCtx.pick(329, measure));
+    check(fitCtx.pick(20, measure) === "Search", "a very narrow box still gets a hint", fitCtx.pick(20, measure));
+    check(PAGE.includes(`aria-label="${full}"`), "screen readers still hear the full hint");
+    check(/function wireEvents\(\) \{[\s\S]*?bindSearchPlaceholderFit\(\);/.test(PAGE), "the hint is fitted when the dashboard starts");
+    check(/function bindSearchPlaceholderFit\(\) \{[\s\S]*?new ResizeObserver\(/.test(PAGE), "the hint is fitted again when the box changes size");
+  }
+}
+
 console.log(`${checks} checks, ${failures} failures`);
 process.exit(failures ? 1 : 0);

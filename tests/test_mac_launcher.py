@@ -321,8 +321,11 @@ def test_duplicate_windows_launch_still_spawns_dashboard_script(monkeypatch, tmp
     monkeypatch.setattr(uoink_supervisor.sys, "platform", "win32")
     spawned = []
     monkeypatch.setattr(uoink_supervisor.subprocess, "Popen", lambda args, **k: spawned.append(args))
-    assert uoink_supervisor.show_running_dashboard(tmp_path) is True
-    assert len(spawned) == 1 and spawned[0][1].endswith("uoink_dashboard.py")
+    import uoink_install_isolation as isolation
+    with isolation.bound_isolation(profile=tmp_path, port=18123):
+        assert uoink_supervisor.show_running_dashboard(tmp_path) is True
+        assert len(spawned) == 1 and spawned[0][1].endswith("uoink_dashboard.py")
+        assert spawned[0][2:] == isolation.child_argv()
 
 
 @pytest.mark.parametrize("platform,command_flag,first_args", [
@@ -348,7 +351,7 @@ def test_show_dashboard_reaches_only_the_first_darwin_helper(monkeypatch, tmp_pa
     monkeypatch.setattr(uoink_supervisor, "Supervisor", Fake)
     monkeypatch.setattr(uoink_supervisor, "data_root", lambda: tmp_path)
     monkeypatch.setattr(uoink_supervisor, "login_session", lambda: "session")
-    resident = ["--resident"] if platform == "darwin" else []
+    resident = ["--resident"]
     assert uoink_supervisor.main([*resident, "--show-dashboard"]) == 0
     assert ("--show-dashboard" in captured["command"]) is command_flag
     assert captured["first_args"] == first_args

@@ -733,7 +733,8 @@ def test_spawn_dashboard_passes_isolation_argv(tmp_path, monkeypatch):
     monkeypatch.setattr(server, "HERE", tmp_path)
     (tmp_path / "uoink_dashboard.py").write_text("# stub\n", encoding="utf-8")
     with iso.bound_isolation(profile=profile, port=port):
-        assert server._spawn_dashboard_window(reason="iso") is True
+        assert server._spawn_dashboard_window(reason="iso", settings=True) is True
+        assert iso.helper_url("/dashboard#settings") in captured["cmd"]
     assert iso.CLI_PROFILE in captured["cmd"]
     assert str(port) in captured["cmd"]
     assert captured["env"][iso.ENV_PORT] == str(port)
