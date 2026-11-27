@@ -279,6 +279,7 @@ def _handler(monkeypatch, idx, tmp_path, *, enabled=True, token=True):
     handler._check_token = lambda: token
     handler.command, handler.path = "GET", "/suggestions/podcasts"
     monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(podcasts, "fetch_feed", lambda row, **kwargs: (b"<rss><channel/></rss>", {}))
     monkeypatch.setattr(server, "_source_service_instance", None)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     monkeypatch.setattr(server, "_read_settings", lambda: {"suggest_podcasts": enabled})
@@ -510,7 +511,8 @@ def test_list_feeds_keeps_newest_cursor_if_a_legacy_binding_is_shared(idx, later
         db.execute("UPDATE source_detection_cursors SET last_poll_success_ms=? WHERE source_id=?",
                    (later_cursor, second["source_id"]))
         db.execute("CREATE TEMP VIEW source_subscriptions AS "
-                   "SELECT MIN(legacy_feed_id) OVER () AS legacy_feed_id, source_id "
+                   "SELECT MIN(legacy_feed_id) OVER () AS legacy_feed_id, source_id, archived, "
+                   "detection_enabled, consent_epoch, follow_feed "
                    "FROM main.source_subscriptions ORDER BY rowid")
     result = next(feed for feed in podcasts.list_feeds(idx) if feed["id"] == first["id"])
     assert result["last_polled_at"] == "1970-01-01T00:00:05Z"

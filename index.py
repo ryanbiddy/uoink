@@ -715,6 +715,12 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
                 if version == PUBLISHED_DAY_MIGRATION:
                     # Parsing every shape of date needs Python, not SQL.
                     _backfill_published_day(conn)
+                if version == 40:
+                    from source_subscriptions import parse_published_ms
+                    conn.create_function("uoink_podcast_date_ms", 1, parse_published_ms,
+                                         deterministic=True)
+                    conn.execute("UPDATE podcast_episodes SET published_at_ms="
+                                 "uoink_podcast_date_ms(published_at) WHERE published_at IS NOT NULL")
                 conn.execute(
                     "INSERT INTO schema_version (version, applied_at) "
                     "VALUES (?, ?)", (version, _now_iso()),
@@ -1183,6 +1189,8 @@ class Index:
         conn = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True,
                                check_same_thread=False)
         try:
+            from source_subscriptions import parse_published_ms
+            conn.create_function("uoink_podcast_date_ms", 1, parse_published_ms, deterministic=True)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys=ON")
             conn.execute("SELECT name FROM sqlite_master LIMIT 1").fetchone()

@@ -259,7 +259,9 @@ def test_saved_show_name_displays_on_read_only_provider_without_writes(tmp_path,
         provider = corpus_provider.UoinkCorpusProvider(idx, tmp_path)
         assert provider.get(published["video_id"])["item"]["author"] == "The Grounded Show"
         assert _saved_podcast_state(idx, saved) == before
-        assert podcasts.list_feeds(idx)[0]["title"] is None
+        feed, = podcasts.list_feeds(idx)
+        assert feed["title"] == "show.example"
+        assert podcasts.get_feed(idx, feed["id"])["title"] is None
         assert not fetch.requests
     finally:
         idx.close()
@@ -394,7 +396,9 @@ def test_startup_uses_only_local_titles_and_leaves_saved_media_unchanged(tmp_pat
         server._repair_podcast_titles_at_boot()
         assert not fetch.requests
         assert _saved_podcast_state(idx, saved) == before
-        assert podcasts.list_feeds(idx)[0]["title"] == ("The Grounded Show" if local_title else None)
+        feed, = podcasts.list_feeds(idx)
+        assert feed["title"] == ("The Grounded Show" if local_title else "show.example")
+        assert podcasts.get_feed(idx, feed["id"])["title"] == ("The Grounded Show" if local_title else None)
         assert [tuple(r) for r in idx._conn.execute("SELECT * FROM source_detection_cursors")] == cursors
         assert [tuple(r) for r in idx._conn.execute("SELECT * FROM podcast_episodes")] == episodes
         changes = idx._conn.total_changes

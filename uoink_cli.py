@@ -249,6 +249,7 @@ CAPTURE_TOOLS = {
     "x_article": ("uoink_page", "url"),
     "reddit_thread": ("uoink_reddit_thread", "url"),
     "podcast_feed": ("add_podcast_feed", "feed_url"),
+    "podcast_episode": ("add_podcast_feed", "feed_url"),
     "web_page": ("uoink_page", "url"),
 }
 
@@ -1053,7 +1054,6 @@ def install_skill(parent: Path, force=False):
 
 # These finite backend workers may outlive a registry call in a persistent MCP
 # session. A one-shot CLI must let them finish before its daemon threads exit.
-# The podcast worker is permanent, so drain its queue instead of joining it.
 CAPTURE_WORKERS = ("playlist-", "source-capture-", "comments-", "hook-type-",
                    "comment-intelligence-", "entity-extraction-")
 
@@ -1110,9 +1110,7 @@ def models_command(ns, server):
         return {"ok": False, "model": entry["id"], "error": str(exc)}
 
 
-def finish_call_work(server, name, payload, existing_threads):
-    if name == "transcribe_podcast_episode" and payload.get("ok") is True:
-        server._podcast_transcription_queue.join()
+def finish_call_work(existing_threads):
     while True:
         workers = [thread for thread in threading.enumerate()
                    if thread not in existing_threads
@@ -1228,7 +1226,7 @@ def main(argv=None):
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)
                 existing_threads = set(threading.enumerate())
                 payload = runtime.call_tool(name, args, server)
-                finish_call_work(server, name, payload, existing_threads)
+                finish_call_work(existing_threads)
         return emit(payload, text_mode, index=(server._get_index() if text_mode
                     and ("hits" in payload or "yoinks" in payload or "card" in payload) else None))
     except UsageError as exc:

@@ -529,12 +529,12 @@
         "openWorldHint": true,
         "readOnlyHint": false
       },
-      "description": "Register a podcast RSS feed for ongoing metadata monitoring. Use for the podcast feed and episode workflow; use register_source for the general standing-source interface or list_podcast_feeds to find an existing feed. Returns the existing row for a duplicate URL. Audio auto-ingest is a separate explicit opt-in, off by default; standing capture still requires source consent through the dashboard.",
+      "description": "Follow an RSS or Atom feed or an Apple Podcasts show for new episode metadata. Pasting an Apple episode link queues just that episode for local transcription and returns its episode_id and show_job_id. Following a show returns its feed and leaves automatic audio capture off until you grant consent in the dashboard. Use list_podcast_feeds to see followed shows.",
       "inputSchema": {
         "properties": {
           "feed_url": {
             "type": "string",
-            "description": "Public HTTP(S) RSS or Atom feed URL, not the podcast's homepage."
+            "description": "Public RSS or Atom feed URL, or an Apple Podcasts show or episode link."
           },
           "poll_interval_min": {
             "type": "integer",

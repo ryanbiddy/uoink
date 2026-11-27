@@ -413,9 +413,8 @@ def _podcast_episode(item: dict) -> dict:
     return ep
 
 
-def create(data_root: Path, text: str) -> dict:
-    """Classify the paste and save a new run in the listing state. Nothing
-    is fetched here; ``tick`` (or ``run_listing``) lists it in the background."""
+def create(data_root: Path, text: str, *, selected_episode: dict | None = None, title=None) -> dict:
+    """Save a listing request or queue the single episode selected by its link."""
     spec = classify(text)
     now = _iso(_utcnow())
     job = {
@@ -427,7 +426,20 @@ def create(data_root: Path, text: str) -> dict:
                      "truncated": bool(spec.get("truncated"))}
                     if spec["kind"] == KIND_URL_LIST else {}),
     }
+    if selected_episode is not None:
+        if job["kind"] != KIND_PODCAST or not selected_episode.get("audio_url"):
+            raise ShowCaptureError("This podcast episode has no audio to save.")
+        # An explicit episode paste has already selected one entry. Persist
+        # that choice in one write so a restart can never list the whole show.
+        job.update(title=title, state=RUNNING, started_at=now, asr=True,
+                   episodes=[_podcast_episode(selected_episode)])
     with _lock:
+        if selected_episode is not None:
+            for current in list_jobs(data_root):
+                entries = current.get("episodes") or []
+                if (current.get("url") == job["url"] and current.get("state") in (RUNNING, WAITING, PAUSED)
+                        and len(entries) == 1 and entries[0].get("guid") == selected_episode["guid"]):
+                    return current
         _write(data_root, job)
         _prune(data_root)
     return job

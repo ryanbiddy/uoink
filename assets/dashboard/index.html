@@ -3891,6 +3891,9 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    #podcastFeedList .settings-list-row strong {
+      display: block;
+    }
 
     .folder-summary,
     .topic-undo,
@@ -5088,6 +5091,10 @@
     .subscription-title-wrap {
       min-width: 0;
       flex: 1;
+    }
+    .subscription-card .soft-note,
+    .podcast-check-error {
+      overflow-wrap: anywhere;
     }
     .subscription-card-head h3 {
       margin: 0 0 4px;
@@ -12200,7 +12207,7 @@
         renderStandingSubscriptions();
         if (standingRefreshRemaining > 0 && state.activeTab === "sources" && !document.hidden && state.standingSources.some((source) => {
           if (source.kind !== "podcast_rss" || source.archived || source.detection_enabled === false) return false;
-          if (source.consent_state !== "on" && !source.consent_epoch) return false;
+          if (!source.follow_feed && source.consent_state !== "on" && !source.consent_epoch) return false;
           const det = source.detection || {};
           const counts = source.item_counts || {};
           const due = !det.next_poll_at_ms || det.next_poll_at_ms <= Date.now();
@@ -12246,8 +12253,9 @@
       if (els.standingEmptyState) els.standingEmptyState.style.display = "none";
       els.standingSubscriptionList.innerHTML = sources.map((source) => {
         const id = source.source_id;
-        const title = source.display_name || source.canonical_url || "Untitled source";
         const kind = source.kind || "podcast_rss";
+        const title = kind === "podcast_rss" ? podcastDisplayName(source.display_name, source.canonical_url)
+          : source.display_name || source.canonical_url || "Untitled source";
         const kindLabel = kind === "podcast_rss" ? "Podcast RSS" : kind === "youtube_channel" ? "YouTube Channel" : "YouTube Playlist";
 
         // Detection & Health
@@ -12257,7 +12265,7 @@
         // arrived, so refresh errors were rendered as "healthy".
         const errorCount = Number(det.consecutive_failures ?? det.error_count ?? 0);
         const lastError = det.error && typeof det.error === "object"
-          ? `${det.error.code || "error"}${det.error.message ? ": " + det.error.message : ""}`
+          ? (det.error.message || det.error.code || "Check failed")
           : (det.last_error || "");
         let healthClass = "healthy";
         let healthLabel = "healthy";
@@ -12267,7 +12275,7 @@
             healthLabel = "Feed unreachable" + ` (${errorCount} failures)`;
           } else {
             healthClass = "degraded";
-            healthLabel = `degraded: ${lastError || "poll failed"}`;
+            healthLabel = "Check failed";
           }
         }
         const lastPollStr = det.last_poll_success_ms
@@ -12352,10 +12360,10 @@
         const episode = kind === "podcast_rss" ? source.latest_episode : null;
         const episodeInFlight = episode && episode.item_id && inFlight.some((item) => item.item_id === episode.item_id);
         const episodeProgress = kind !== "podcast_rss" ? ""
-          : source.consent_state !== "on" && !source.consent_epoch
-            ? "Turn on automatic capture to check for episodes."
-          : lastError
-          ? "Couldn't check for episodes. Uoink will try again."
+          : source.detection_enabled === false ? "Checks are paused for this feed."
+          : lastError ? lastError
+          : !source.follow_feed && source.consent_state !== "on" && !source.consent_epoch
+            ? "Scheduled checks are off. Use Check now to look for episodes."
           : episode || inFlight.length ? ""
           : det.poll_in_progress || !det.last_poll_success_ms || enroll.pending
             ? "Looking for episodes…" : "No episodes in this feed yet.";
@@ -12834,13 +12842,17 @@
           url,
           display_name: displayName || undefined,
         };
-        const res = await callRegistryTool("register_source", payload);
+        const res = kind === "podcast_rss"
+          ? await authFetch("/podcasts/feeds", {
+              method: "POST", body: JSON.stringify({ feed_url: url, display_name: displayName || undefined }),
+            })
+          : await callRegistryTool("register_source", payload);
         if (res && res.ok === false) throw registryToolError("register_source", res);
         if (els.standingAddUrl) els.standingAddUrl.value = "";
         if (els.standingAddDisplayName) els.standingAddDisplayName.value = "";
-        showToast(res && res.created === false
+        showToast(res && res.episode_id ? "Podcast episode queued." : res && res.created === false
           ? "Source already registered. Current settings retained."
-          : "Source subscribed. Capture is off by default; detection watches metadata.");
+          : "Subscribed. Uoink will check for new items. Automatic capture is off.");
         await loadStandingSubscriptions();
       } catch (err) {
         showToast(`Could not register source: ${err.message}`);
@@ -12882,7 +12894,7 @@
       }
       if (outcome === "detection_disabled") return "Checking is off for this feed.";
       const poll = (res && res.poll) || {};
-      if (poll.ok === false) return "The feed did not answer. Try again in a bit.";
+      if (poll.ok === false) return poll.message || "The feed did not answer. Try again in a bit.";
       const added = Number(poll.inserted || 0);
       return added ? `Found ${added} new episode${added === 1 ? "" : "s"}.` : "Checked. No new episodes.";
     }
@@ -15726,7 +15738,9 @@
 
     function finishLibraryRun(run, data) {
       dropLibraryRun(run);
-      if (data.queued) {
+      if (run.source === "podcast_episode") {
+        setLibraryCaptureNote("Podcast episode queued. Track it in Activity.");
+      } else if (data.queued) {
         const at = captureClock(data.retry_after);
         setLibraryCaptureNote(`YouTube asked Uoink to wait, so it's queued${at ? ` and retries on its own at ${at}` : ""}.`);
       } else if (run.source === "podcast_feed") {
@@ -20256,6 +20270,12 @@
       )).join("");
     }
 
+    function podcastDisplayName(name, url) {
+      const title = String(name || "").trim();
+      if (title && title.toLowerCase() !== "untitled podcast" && title !== url) return title;
+      return urlHostname(url) || "Podcast feed";
+    }
+
     function renderPodcastFeedList(rows) {
       if (!rows.length) {
         els.podcastFeedList.innerHTML = emptyPanelRow(
@@ -20265,19 +20285,21 @@
         return;
       }
       els.podcastFeedList.innerHTML = rows.map((row) => {
-        const title = firstValue(row.title, row.podcast_title, row.feed_url, row.url, "Untitled feed");
+        const title = podcastDisplayName(row.title || row.podcast_title, row.feed_url || row.url);
         const episodeCount = Number(row.episode_count || 0);
         const autoIngest = Number(row.auto_ingest || 0) === 1;
         const meta = [
           `${episodeCount} episode${episodeCount === 1 ? "" : "s"}`,
           `poll every ${Number(row.poll_interval_min || 60)} min`,
           row.last_polled_at || "waiting for first poll",
+          ...(row.scheduled_checks === false ? ["Scheduled checks are off"] : []),
         ].join(" | ");
         return `
           <div class="settings-list-row">
             <div style="min-width:0">
-              <strong>${htmlEscape(title)}</strong>
+              <strong title="${htmlEscape(title)}">${htmlEscape(title)}</strong>
               <div class="job-sub">${htmlEscape(meta)}</div>
+              ${row.last_error ? `<div class="job-sub podcast-check-error">${htmlEscape(row.last_error)}</div>` : ""}
               <span class="soft-note check-now-note" role="status" aria-live="polite"></span>
             </div>
             <span class="phase-chip">${autoIngest ? "Auto-ingest on" : "Metadata only"}</span>
@@ -20339,14 +20361,14 @@
       const autoIngest = Boolean(els.podcastAutoIngest && els.podcastAutoIngest.checked);
       setSettingFeedback("podcastFeedUrl", "Saving…", "saving");
       try {
-        await authFetch("/podcasts/feeds", {
+        const result = await authFetch("/podcasts/feeds", {
           method: "POST",
           body: JSON.stringify({ feed_url: feedUrl, auto_ingest: autoIngest }),
         });
         els.podcastFeedUrl.value = "";
         if (els.podcastAutoIngest) els.podcastAutoIngest.checked = false;
-        setSettingFeedback("podcastFeedUrl", autoIngest
-          ? "Podcast feed saved. Auto-ingest is on for newly discovered episodes."
+        setSettingFeedback("podcastFeedUrl", result.episode_id ? "Podcast episode queued." : autoIngest
+          ? "Podcast feed saved. Confirm automatic capture in Sources to start saving audio."
           : "Podcast feed saved. Uoink will watch metadata; audio stays off.");
         loadPodcastFeedSettings();
       } catch (err) {
