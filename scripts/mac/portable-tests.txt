@@ -7,3 +7,7 @@ mcp-types==2.3.0
 httpx2==2.16.0
 httpcore2==2.16.0
 truststore==0.10.5
+# The transcription tests that decode audio samples skip without numpy.
+# Same pin as requirements-installer-lock.txt. Mac only: the ci.yml stdlib
+# jobs stay numpy-free on purpose.
+numpy==2.4.6

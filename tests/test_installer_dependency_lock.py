@@ -173,3 +173,23 @@ def test_sdk2_hash_lock_is_compatible_with_qualification_readers():
     portable = verify.read_lock(ROOT / "scripts/mac/portable-tests.txt")
     for name in ("mcp", "mcp-types", "httpx2", "httpcore2", "truststore"):
         assert portable[name] == locked[name]
+
+
+def test_mac_portable_tests_install_numpy_and_stdlib_jobs_do_not() -> None:
+    """The Mac portable job runs the numpy transcription tests (3.18.1).
+
+    Its numpy pin matches the installer lock. The ci.yml stdlib-tests job keeps
+    skipping numpy cases on purpose, so its install line must not gain numpy.
+    """
+    import re
+
+    locked = verify.read_lock(LOCK)
+    portable = verify.read_lock(ROOT / "scripts/mac/portable-tests.txt")
+    assert portable["numpy"] == locked["numpy"]
+    mac = (ROOT / ".github/workflows/mac-qualify.yml").read_text(encoding="utf-8")
+    job = mac[mac.index("\n  portable-tests:"):mac.index("\n  dependency-graph:")]
+    assert "-r scripts/mac/portable-tests.txt" in job
+    ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    stdlib = ci[ci.index("\n  stdlib-tests:"):]
+    installs = re.findall(r"pip install [^\n]*", stdlib)
+    assert installs and not any("numpy" in line for line in installs)
