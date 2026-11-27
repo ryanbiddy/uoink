@@ -61,10 +61,10 @@ def test_runtime_entry_points_match_the_installer_pins(filename):
 
 def test_linux_diarization_reuses_the_base_model_loaders():
     base = verify.read_lock(ROOT / "requirements-linux.txt")
-    assert {"faster-whisper", "av", "ctranslate2", "onnxruntime", "huggingface-hub", "tokenizers"} <= base.keys()
+    assert {"faster-whisper", "av", "ctranslate2", "onnxruntime", "huggingface-hub", "tokenizers", "numpy"} <= base.keys()
     optional = (ROOT / "requirements-linux-whisperx.txt").read_text(encoding="utf-8").splitlines()
     assert "-c requirements-linux.txt" in optional
-    selected = {Requirement(line).name for line in optional if line and not line.startswith(("#", "-"))}
+    selected = {verify.canonical_name(Requirement(line).name) for line in optional if line and not line.startswith(("#", "-"))}
     assert {"torch", "torchaudio", "torchvision", "torchcodec", "transformers", "omegaconf", "pyannote-audio"} <= selected
 
 
@@ -213,5 +213,5 @@ def test_sdk2_hash_lock_is_compatible_with_qualification_readers():
         parsed = dict(getattr(module, reader)(LOCK))
         assert {verify.canonical_name(k): v for k, v in parsed.items()} == locked
     portable = verify.read_lock(ROOT / "scripts/mac/portable-tests.txt")
-    for name in ("mcp", "mcp-types", "httpx2", "httpcore2", "truststore"):
+    for name in ("mcp", "mcp-types", "httpx2", "httpcore2", "truststore", "pillow"):
         assert portable[name] == locked[name]

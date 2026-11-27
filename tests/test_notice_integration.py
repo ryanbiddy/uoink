@@ -134,14 +134,18 @@ def test_changed_version_refuses_without_overwriting_old_index(tmp_path, monkeyp
 
 def test_exact_upstream_bytes_and_relative_links():
     folder = ROOT / "third-party-notices"
-    # Source reference for the declined update. The active notice below is for 4.9.3.
-    candidate = (folder / "antlr4-python3-runtime-4.13.2-LICENSE.txt").read_bytes()
-    assert hashlib.sha256(candidate).hexdigest() == "3db1fb3ee79a4b4f9918fc4d0f6133bf18a3cf787f126cd22f8aa9b862281c0c"
     expected = {
         "antlr4-python3-runtime-4.9.3-LICENSE.txt": (2699, "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a"),
         "proxy-tools-0.1.0-UPSTREAM-LICENSE.txt": (1436, "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4"),
     }
     assert (folder / ".gitattributes").read_bytes() == b"* -text\n"
+    # Every file in the folder is one the README lists. A stray license (for example
+    # for a declined update) would ship on macOS and Linux, which copy the whole folder.
+    readme = (folder / "README.md").read_text(encoding="utf8")
+    unlisted = sorted(p.name for p in folder.iterdir()
+                      if p.is_file() and p.name not in (".gitattributes", "README.md")
+                      and f"]({p.name})" not in readme)
+    assert unlisted == [], unlisted
     for name, (size, digest) in expected.items():
         raw = (folder / name).read_bytes()
         assert (len(raw), hashlib.sha256(raw).hexdigest()) == (size, digest)

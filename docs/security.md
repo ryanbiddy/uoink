@@ -676,7 +676,7 @@ Both move in the first WhisperX release that allows them.
 - **Speaker pipeline.** pyannote-pipeline 4.1 requires Optuna 5. The packaged speaker-labeling check covers that pair.
 - **Model loading.** WhisperX 3.8.6 requires torchaudio `~=2.8.0`, torchvision `~=0.23.0` and TorchCodec `>=0.6,<0.8` on Windows. The installer pairs 2.8.0, 0.23.0 and 0.7.0 with torch 2.8.0 and the bundled FFmpeg 7 libraries.
 - **Model downloads and tokenization.** WhisperX requires huggingface-hub below 1.0. Transformers 4.57.6 requires tokenizers `>=0.22.0,<=0.23.0`. The latest stable releases within those bounds are huggingface-hub 0.36.2 and tokenizers 0.22.2.
-- **Model configuration.** OmegaConf 2.3.1 requires ANTLR `==4.9.*`. Keep 4.9.3 and its shipped notice. OmegaConf 2.4 vendors its parser. The source tree includes the [reviewed ANTLR 4.13.2 license](../third-party-notices/antlr4-python3-runtime-4.13.2-LICENSE.txt) for that proposed update.
+- **Model configuration.** OmegaConf 2.3.1 requires ANTLR `==4.9.*`. Keep 4.9.3 and its shipped notice. OmegaConf 2.4 vendors its parser. ANTLR 4.13.2 (BSD-3-Clause) was reviewed for that proposed update but does not ship.
 - **Torch math.** SymPy 1.14.0 requires mpmath `>=1.1.0,<1.4`, which keeps mpmath at 1.3.0.
 - **Desktop window.** pywebview 6, pythonnet and clr-loader need a Windows
   desktop check that opens and closes the dashboard from the tray.
