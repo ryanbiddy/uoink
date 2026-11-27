@@ -194,7 +194,8 @@ working.
 | `lang` | `lang` | Default: English when YouTube has it, otherwise the spoken language. A missing language falls back to what's available and `why` says so. |
 | `include_timestamps` | `include_timestamps` | `[m:ss] text` lines, plus a `segments` list with start and end seconds. |
 | `next_cursor` | `next_cursor` | Long transcripts come in pages of about 40,000 characters. Pass back the returned `next_cursor` until it is `null`. |
-| `strip_ads` | accepted, ignored | Uoink returns every word. |
+| `strip_ads` | accepted, ignored | For compatibility with clients that send this option. |
+| | `include_held` | By default Uoink omits sound labels and lines it suspects Whisper invented. Set this to `true` to read the held lines at their original positions. |
 
 Why it keeps working where they stop:
 

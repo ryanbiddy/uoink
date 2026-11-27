@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asr_worker
 import asr_models
+import transcript_review
 import math
 import json
 import re
@@ -138,23 +139,40 @@ class TranscriptEntry(tuple):
     model's word timings in ``words``. It unpacks as three values and equals
     the plain tuple, so every caller that reads rows is unchanged."""
 
-    def __new__(cls, start: float, end: float, text: str, words: list | None = None):
+    def __new__(cls, start: float, end: float, text: str, words: list | None = None,
+                scores=None, held_reason=None):
         entry = super().__new__(cls, (start, end, text))
         entry.words = words or None
+        entry.scores = scores or {}
+        entry.held_reason = held_reason
         return entry
 
 
 def entry_to_json(entry) -> list:
     row = [entry[0], entry[1], entry[2]]
     words = getattr(entry, "words", None)
-    if words:
+    metadata = dict(getattr(entry, "scores", {}))
+    if getattr(entry, "held_reason", None):
+        metadata["held_reason"] = entry.held_reason
+    if metadata:
+        row.extend((words, metadata))
+    elif words:
         row.append(words)
     return row
 
 
 def entry_from_json(row) -> TranscriptEntry:
     words = row[3] if len(row) > 3 and isinstance(row[3], list) else None
-    return TranscriptEntry(float(row[0]), float(row[1]), str(row[2]), words)
+    metadata = row[4] if len(row) > 4 and isinstance(row[4], dict) else {}
+    return TranscriptEntry(float(row[0]), float(row[1]), str(row[2]), words,
+                           transcript_review.scores(metadata), metadata.get("held_reason"))
+
+
+def segment_dict(entry):
+    return {"start": entry[0], "end": entry[1], "text": entry[2],
+            **getattr(entry, "scores", {}),
+            **({"held_reason": entry.held_reason} if getattr(entry, "held_reason", None) else {}),
+            **({"words": entry.words} if getattr(entry, "words", None) else {})}
 
 
 def _import_faster_whisper():
@@ -513,8 +531,8 @@ def _transcript_entries_from_segments(
         except (TypeError, ValueError):
             continue
         words = _segment_words(segment)
-        entries.append(TranscriptEntry(start_value, end_value, clean_text, words)
-                       if words else (start_value, end_value, clean_text))
+        metrics = transcript_review.scores({key: get(key) for key in transcript_review.SCORES})
+        entries.append(TranscriptEntry(start_value, end_value, clean_text, words, metrics))
         if scores is not None:
             scores.append((get("compression_ratio"), get("no_speech_prob")))
     return entries
@@ -565,16 +583,7 @@ def drop_repetition_loops(entries: list, scores: list | None = None) -> list:
         previous = tokens
         if run > 2:
             continue
-        phrase = None
-        for offset in range(min(2, len(tokens))):
-            for width in range(2, min(8, (len(tokens) - offset) // 4) + 1):
-                candidate = tokens[offset:offset + width]
-                if (len(set(candidate)) > 1 and
-                        all(t == candidate[j % width] for j, t in enumerate(tokens[offset:]))):
-                    phrase = (offset, width)
-                    break
-            if phrase:
-                break
+        phrase = transcript_review.repeated_phrase(tokens)
         if phrase:
             if isinstance(ratio, (int, float)) and ratio > DECODE_OPTIONS["compression_ratio_threshold"]:
                 continue
@@ -698,12 +707,17 @@ def transcribe_media(media_path: str | Path, *,
             if fallback:
                 info["model"] = run_model
                 info["english_fallback"] = fallback
+        duration_seconds = getattr(detected, "duration", None) or duration_seconds
         segments = _watched_segments(
             segments, cancel_event, progress, getattr(detected, "duration", None))
     if checkpoint is not None:
         segments = _with_checkpoint(segments, checkpoint)
-    scores: list = []
-    return drop_repetition_loops(_transcript_entries_from_segments(segments, scores), scores)
+    entries = _transcript_entries_from_segments(segments)
+    decisions = transcript_review.reasons([segment_dict(e) for e in entries],
+                                          whisper=True, duration=duration_seconds)
+    for entry, reason in zip(entries, decisions):
+        entry.held_reason = reason
+    return entries
 
 
 def _language_samples(media, cancel_event=None):

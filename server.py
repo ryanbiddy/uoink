@@ -105,6 +105,7 @@ import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
+import transcript_review
 import asr_worker  # noqa: E402  -- 3.18 models run in a child process that exits when idle
 import asr_models  # noqa: E402  -- 3.18 pinned speech model catalog + downloader
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
@@ -2073,6 +2074,7 @@ def _public_settings(data: dict | None = None) -> dict:
     )
     return {
         "usage_sharing": data.get("usage_sharing") is True and not uoink_usage.forced_off(),
+        "transcript_review_summary": transcript_review.last_summary(DATA_ROOT),
         "usage_sharing_forced_off": uoink_usage.forced_off(),
         "usage_sharing_prompt_seen": data.get("usage_sharing_prompt_seen") is True,
         "usage_sharing_disclosure": uoink_usage.disclosure(),
@@ -3551,11 +3553,16 @@ def _resolve_video_transcript(
                 if media_chunks:
                     # ASR timestamps are local to each sampled section. Bound
                     # them to that section before linking to the source video.
-                    entries.extend(
-                        (offset + max(0.0, start), offset + min(end, length), text)
-                        for start, end, text in local_entries
-                        if min(end, length) > max(0.0, start)
-                    )
+                    for entry in local_entries:
+                        start, end, text = entry
+                        if min(end, length) <= max(0.0, start):
+                            continue
+                        words = [dict(w, start=w["start"] + offset, end=w["end"] + offset)
+                                 for w in getattr(entry, "words", None) or []]
+                        # A sampled section's end is not the end of the recording.
+                        entries.append(uoink_reliability.TranscriptEntry(
+                            offset + max(0.0, start), offset + min(end, length), text,
+                            words, getattr(entry, "scores", None)))
                 else:
                     entries.extend(local_entries)
     except PlaylistJobCancelled:
@@ -3733,7 +3740,7 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
 # on any fallback, why in one plain sentence.
 
 TRANSCRIPT_CACHE_DIRNAME = "transcript-cache"
-_TRANSCRIPT_CACHE_VERSION = 2
+_TRANSCRIPT_CACHE_VERSION = 4
 _TRANSCRIPT_LANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,2}$")
 _TRANSCRIPT_BARE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 _TRANSCRIPT_TRACK_KEY_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{1,8}){0,3}$")
@@ -3920,10 +3927,27 @@ def _read_transcript_cache(video_id: str, lang: str | None) -> dict | None:
         data = json.loads(_transcript_cache_path(video_id, lang).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    if (not isinstance(data, dict) or data.get("version") != _TRANSCRIPT_CACHE_VERSION
+    if (not isinstance(data, dict) or data.get("version") not in (2, _TRANSCRIPT_CACHE_VERSION)
             or data.get("video_id") != video_id or not isinstance(data.get("segments"), list)
-            or not data["segments"]):
+            or not (data["segments"] or data.get("held_transcript_lines"))):
         return None
+    if data["version"] == 2 and data.get("held_transcript_lines"):
+        # Old cache entries kept scores only on the held rows. Reconsider
+        # those dictionaries offline. Already visible cues are plain triples.
+        previous = {h["line"]: h for h in data["held_transcript_lines"]}
+        original = transcript_review.all_rows(data["segments"], data["held_transcript_lines"])
+        decisions = transcript_review.reasons(original, whisper=data.get("source") == "whisper",
+                                              duration=data.get("duration_seconds"))
+        kept, held = [], []
+        for line, (segment, reason) in enumerate(zip(original, decisions), 1):
+            if line in previous:
+                cue = transcript_review.held_cue(segment)
+                if reason or cue is None:
+                    held.append(dict(previous[line], reason=reason or previous[line]["reason"]))
+                    continue
+                segment = cue
+            kept.append(segment)
+        data.update(segments=kept, held_transcript_lines=held, version=_TRANSCRIPT_CACHE_VERSION)
     return data
 
 
@@ -3948,15 +3972,18 @@ def _library_transcript(video_id: str) -> dict | None:
     if folder is None:
         return None
     _path, sidecar = _read_sidecar_for_folder(folder)
+    held = sidecar.get("held_transcript_lines") or []
     segments = []
     for seg in sidecar.get("transcript") or []:
         if not isinstance(seg, dict) or not str(seg.get("text") or "").strip():
+            if held:
+                segments.append(None)  # Held ordinals include every original slot.
             continue
         start = _as_float(seg.get("start")) or 0.0
         end = _as_float(seg.get("end"))
         segments.append(uoink_reliability.TranscriptEntry(
             start, end if end is not None else start, str(seg["text"]), seg.get("words")))
-    if not segments:
+    if not segments and not held:
         return None
     provider = sidecar.get("transcript_source")
     asr = sidecar.get("asr_fallback") if isinstance(sidecar.get("asr_fallback"), dict) else {}
@@ -3973,6 +4000,7 @@ def _library_transcript(video_id: str) -> dict | None:
         "video_id": video_id,
         "title": sidecar.get("title") or (row or {}).get("title"),
         "segments": segments,
+        "held_transcript_lines": held,
         "transcribed_by": transcribed_by,
         "language": language,
         "slug": folder.name,
@@ -4021,7 +4049,33 @@ def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
                      "language": info.get("language") or "und"}
 
 
-def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
+def get_transcript_cascade(raw_url: object, lang: object = None, *, include_held=False) -> dict:
+    record = _get_transcript_record(raw_url, lang)
+    held = record.pop("held_transcript_lines", None)
+    if held:
+        record["held_count"] = len(held)
+        note = transcript_review.notice(held)
+        record["why"] = " ".join(filter(None, [record.get("why"), note,
+            "Held lines included." if include_held else "Set include_held to show them."]))
+        if include_held:
+            rows = transcript_review.all_rows(record["segments"], held)
+            reasons = {h["line"]: h["reason"] for h in held}
+            segments, marks = [], {}
+            for line, row in enumerate(rows, 1):
+                if line in reasons:
+                    row = transcript_review.held_cue(row)
+                    if row is None:
+                        continue
+                    marks[len(segments) + 1] = (line, reasons[line])
+                if row is not None:
+                    segments.append(row)
+            record["segments"], record["held_reasons"] = segments, marks
+        else:
+            record["segments"] = [s for s in record["segments"] if s is not None]
+    return record
+
+
+def _get_transcript_record(raw_url, lang):
     """Return one YouTube transcript record or raise TranscriptUnavailable.
 
     The record has ``video_id``, ``url``, ``title``, ``source`` (library,
@@ -4121,6 +4175,7 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
             "why": why, "segments": entries, "duration_seconds": duration,
             "fetched_at": _now_iso(), "version": _TRANSCRIPT_CACHE_VERSION,
         }
+        _review_transcript_record(record)
         if not (lang and mismatch):
             # A stand-in language is not cached, so a later call retries the
             # requested one.
@@ -4156,8 +4211,24 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
         "duration_seconds": duration, "whisper_model": asr["model"],
         "fetched_at": _now_iso(), "version": _TRANSCRIPT_CACHE_VERSION,
     }
+    _review_transcript_record(record)
     _write_transcript_cache(record, lang)
     return {**record, "cached": False}
+
+
+def _review_transcript_record(record):
+    kept, held = _review_entries(record["segments"], record["source"] == "whisper",
+                                 record.get("duration_seconds"))
+    record["segments"] = kept
+    if held:
+        record["held_transcript_lines"] = held
+
+
+def _review_entries(entries, whisper, duration):
+    rows = [uoink_reliability.segment_dict(e) for e in entries]
+    _, held = transcript_review.partition(rows, whisper=whisper, duration=duration)
+    withheld = {h["line"] for h in held}
+    return [e for i, e in enumerate(entries, 1) if i not in withheld], held
 
 
 def _compute_transcript_reliability(
@@ -4314,7 +4385,8 @@ def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
     for entry in entries:
         s, e, t = entry
         youtube_link, citation_source, deep_link = links(s)
-        row = {"start": s, "end": e, "text": t, "source_url": citation_source,
+        row = {"start": s, "end": e, "text": t, **getattr(entry, "scores", {}),
+               "source_url": citation_source,
                "source_deep_link": deep_link, "youtube_deep_link": youtube_link}
         # JSON3 and local Whisper may supply timings for each spoken word.
         words = getattr(entry, "words", None)
@@ -4422,6 +4494,9 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
         "transcript": [{"start": c["timestamp_start"], "end": c["timestamp_end"], "text": c["text"]}
                        for c in cues],
     }
+    restored = [i for i, entry in enumerate(entries) if entry.get("review_restored")]
+    if restored:
+        record["review_restored"] = restored
     artifact = library_media.canonical_json(record).encode("utf-8")
     provider = sidecar.get("transcript_source")
     provider = provider if isinstance(provider, str) and provider.strip() else "youtube_captions"
@@ -4430,14 +4505,18 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
         video_id=video_id, source_revision="0" * 64, cues=cues, artifact_bytes=artifact,
         corpus_revision="0" * 64, playback=playback, transcript_kind=kind, transcript_provider=provider,
         chapter_rows=chapter_rows, recorded_at=sidecar.get("yoinked_at"), item=item)
+    markdown = library_media.render_markdown(
+        {"video_id": video_id}, cues, chapters=block["chapters"], annotations=block)
+    if sidecar.get("held_transcript_lines"):
+        import transcript_review
+        markdown += "\n" + transcript_review.notice(sidecar["held_transcript_lines"]) + "\n"
     return {"cues": cues, "artifact": artifact, "digest": digest, "chapter_rows": chapter_rows,
             "playback": playback, "block": block, "transcript_kind": kind, "transcript_provider": provider,
-            "markdown": library_media.render_markdown(
-                {"video_id": video_id}, cues, chapters=block["chapters"], annotations=block)}
+            "markdown": markdown}
 
 
 def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
-                           sidecar_path: Path, plan: dict | None = None) -> bool:
+                           sidecar_path: Path, plan: dict | None = None, *, include_corpus=False) -> bool:
     """Phase 6 (BC-2/BC-3e/BC-3f): publish the helper capture through the shared
     media publisher. The consumed sidecar binding is frozen, then the
     ownership ticket is minted carrying that original binding. Every input
@@ -4498,6 +4577,7 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     idx.publish_media_snapshot(
         video_id, cues=plan["cues"], media_block=block,
         artifacts={
+            **({str(corpus_path): corpus_bytes} if include_corpus else {}),
             str(folder / library_media.MEDIA_INPUTS_DIR / (digest + ".json")): plan["artifact"],
             str(sidecar_path): json.dumps(published, ensure_ascii=False, indent=2).encode("utf-8"),
         },
@@ -4507,7 +4587,7 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
 
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
-                 sidecar_path: Path) -> bool:
+                 sidecar_path: Path, *, require_media_update=False) -> bool:
     """Upsert one yoink + its citations into the library index idempotently.
     Returns True if the row was indexed, False if its identity is missing.
     Storage errors propagate so capture callers can report a failed save.
@@ -4520,6 +4600,15 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         # video_id is the yoinks primary key + citations FK -- can't index.
         log.warning("index skip: no video_id for %s", folder)
         return False
+    if require_media_update:
+        # Tidy edits a previously indexed save. Publish FTS and citations in
+        # one transaction and keep the index metadata for this existing item.
+        if corpus_path is None:
+            raise ValueError("The saved transcript has no corpus file.")
+        idx = _get_index()
+        _publish_capture_media(idx, folder, sidecar, corpus_path, sidecar_path, include_corpus=True)
+        _mirror_event("capture", video_id=video_id)
+        return True
     try:
         content = (corpus_path.read_text(encoding="utf-8")
                    if corpus_path and corpus_path.exists() else "")
@@ -4848,6 +4937,18 @@ def _sidecar_has_words(sidecar: dict) -> bool:
                for e in (sidecar.get("transcript") or []))
 
 
+def _transcript_backup_path(folder: Path, original: bytes) -> Path:
+    import library_media
+    backup_dir = folder / library_media.MEDIA_INPUTS_DIR
+    if backup_dir.is_symlink() or backup_dir.resolve().parent != folder.resolve():
+        raise ValueError("The transcript backup folder has moved.")
+    digest = hashlib.sha256(original).hexdigest()
+    backup = backup_dir / ("transcript-before-" + digest[:16] + ".json")
+    if backup.is_symlink() or (backup.exists() and backup.read_bytes() != original):
+        raise ValueError("The transcript backup file has changed.")
+    return backup
+
+
 def _corpus_transcript_bounds(md: str) -> tuple[int, int] | None:
     """Start and end of the corpus transcript section(s), up to its rule."""
     tags = md.find("\n## Tags\n")
@@ -4906,7 +5007,7 @@ def _transcript_backfill_scan() -> dict:
             sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        if not isinstance(sidecar, dict):
+        if not isinstance(sidecar, dict) or sidecar.get("pending_transcript_review"):
             continue
         marker = sidecar.get("transcript_backfill")
         repair = isinstance(marker, dict) and marker.get("status") == "saving"
@@ -5276,11 +5377,14 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
     try:
         with _sidecar_update_lock:
             try:
-                sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                original = sidecar_path.read_bytes()
+                sidecar = json.loads(original)
             except (OSError, ValueError):
                 return "skipped"
             if not isinstance(sidecar, dict):
                 return "skipped"
+            if sidecar.get("pending_transcript_review"):
+                return "busy"
             marker = sidecar.get("transcript_backfill")
             saving = isinstance(marker, dict) and marker.get("status") == "saving"
             if entries is None:
@@ -5303,6 +5407,22 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                         chapters = None
                     if isinstance(chapters, list) and chapters:
                         sidecar["source_chapters"] = chapters
+                entries, held_lines = _review_entries(entries, source == "asr", sidecar.get("duration_seconds"))
+                previous_held = sidecar.get("held_transcript_lines")
+                if previous_held or held_lines:
+                    # A legacy capture with no public cues still needs an
+                    # explicit media snapshot, including after a restore.
+                    sidecar.setdefault("source_chapters", [])
+                if previous_held and (entries or held_lines) and previous_held != held_lines:
+                    # This pass has its own line numbers. Preserve the previous
+                    # transcript in the same backup used by Restore transcript.
+                    backup = _transcript_backup_path(folder, original)
+                    _atomic_write_text(backup, original.decode("utf-8"), newline="")
+                    sidecar["transcript_backup"] = hashlib.sha256(original).hexdigest()
+                    sidecar["transcript_backup_plain"] = None
+                    sidecar.pop("held_transcript_lines")
+                if held_lines:
+                    sidecar["held_transcript_lines"] = held_lines
                 sidecar["transcript"] = _transcript_entries_with_links(sidecar, entries)
                 sidecar["transcript_source"] = source
                 sidecar["caption_kind"] = caption_kind if source == "captions" else None
@@ -5415,6 +5535,8 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
         return {"outcome": "skipped", "reason": "The save was moved or removed."}
     if not isinstance(sidecar, dict) or _sidecar_has_words(sidecar):
         return {"outcome": "skipped"}
+    if sidecar.get("pending_transcript_review"):
+        return {"outcome": "busy"}
     settings = dict(_read_settings(), asr_fallback_enabled=True)
     asr_check = _transcript_backfill_checkpoint(checkpoint, url)
     asr_check()
@@ -9694,6 +9816,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
                    if finish_on_disk else {}),
             )
+        entries, held_lines = _review_entries(entries, transcript_source == "asr", duration)
         if not shelf_hint:
             # One more routing pass now that the words spoken are known.
             topic = _reroute_with_transcript(topic, metadata, entries, url=url)
@@ -9762,6 +9885,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
         capture_seed = {
             "video_id": video_id, "url": url, "source_type": source_type,
+            **({"held_transcript_lines": held_lines} if held_lines else {}),
             "transcript": [], "source_chapters": held_chapters,
             "transcript_source": transcript_source,
             "asr_fallback": asr_fallback,
@@ -9871,6 +9995,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # link values, and the held chapter metadata travels with the
                 # capture so reconstruction never re-derives either.
                 "transcript": capture_seed["transcript"],
+                **({"held_transcript_lines": held_lines} if held_lines else {}),
                 "source_chapters": held_chapters,
                 # CM-11: provenance is explicit whenever transcript rows exist.
                 # A null source means the capture honestly remains caption-less;
@@ -14333,7 +14458,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         if previous.get("video_id") != video_id:
             raise ValueError("The previous transcript belongs to another item.")
         new_side = dict(side)
-        for key in ("transcript", "asr_fallback", "transcript_note", "transcript_source"):
+        for key in ("transcript", "asr_fallback", "transcript_note", "transcript_source", "held_transcript_lines"):
             new_side[key] = previous.get(key)
         new_plain = _transcript_text_from_sidecar(previous).encode()
         plain_hash = side.get("transcript_backup_plain")
@@ -14364,6 +14489,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
                 raise ValueError("Whisper found no speech, so the transcript is unchanged.")
             raise ValueError(meta.get("error") or meta.get("reason") or "Transcription failed.")
 
+        entries, held_lines = _review_entries(entries, True, side.get("duration_seconds"))
         chars = sum(len("".join(text.split())) for _, _, text in entries)
         old_chars = len("".join(_transcript_text_from_sidecar(side).split()))
         old_coverage = (side.get("asr_fallback") or {}).get("coverage")
@@ -14375,9 +14501,11 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         if meta.get("requested_model"):
             note += f" (the language check selected it in place of {meta['requested_model']})"
         new_side = dict(side, transcript=_transcript_entries_with_links(side, entries),
+                        held_transcript_lines=held_lines,
                         transcript_source="asr", asr_fallback=meta, transcript_note=note)
         new_plain = "\n".join(text for _, _, text in entries).encode()
     new_side["transcript_backup"] = original_id if shorter else None
+    new_side["health"] = compute_health(new_side)
     new_side["transcript_backup_plain"] = (
         hashlib.sha256(plain_before).hexdigest() if shorter and plain_before is not None else None)
     binding = media.capture_sidecar_inputs(side)
@@ -14400,7 +14528,10 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         video_id=video_id, source_revision=revision, cues=plan["cues"], artifact_bytes=plan["artifact"],
         corpus_revision=hashlib.sha256(corpus).hexdigest(), playback=plan["playback"],
         transcript_kind=plan["transcript_kind"], transcript_provider=plan["transcript_provider"],
-        chapter_rows=plan["chapter_rows"], recorded_at=side.get("yoinked_at"), item=item)
+        chapter_rows=plan["chapter_rows"], recorded_at=side.get("yoinked_at"), item=item,
+        # An all-held restore has no public cues. Its backup digest still
+        # distinguishes this intentional restore from replaying an old snapshot.
+        retain_empty_artifact=restore is not None)
     artifacts = {corpus_path: corpus,
                  folder / media.MEDIA_INPUTS_DIR / (digest + ".json"): plan["artifact"],
                  side_path: json.dumps(dict(new_side, media_depth=block), ensure_ascii=False).encode()}
@@ -14409,10 +14540,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         artifacts[backup_dir / ("transcript-before-" + new_side["transcript_backup_plain"] + ".txt")] = plain_before
     # Keep the exact old details file next to the media inputs, so the old
     # transcript can be recovered by hand. Retention prunes only <sha256>.json.
-    backup = backup_dir / (
-        "transcript-before-" + hashlib.sha256(original).hexdigest()[:16] + ".json")
-    if backup.is_symlink() or (backup.exists() and backup.read_bytes() != original):
-        raise ValueError("The transcript backup file has changed.")
+    backup = _transcript_backup_path(folder, original)
     artifacts[backup] = original
     _raise_if_cancelled(cancel_event)
     try:
@@ -26007,7 +26135,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {"ok": False,
                                              "error": "sidecar path escapes Uoink root"})
             # Lexical containment must precede metadata probes on this path.
-            p.relative_to(DESKTOP_ROOT.absolute())
+            details_root = DESKTOP_ROOT
+            if (row.get("source_type") == "episode" and p.parent.name == row.get("slug")
+                    and p.name == p.parent.name + ".json"
+                    and p.parent.parent.parent == DATA_ROOT / "Podcasts"):
+                details_root = DATA_ROOT / "Podcasts"
+            p.relative_to(details_root.absolute())
             cur = p
             while True:
                 if cur.is_symlink():
@@ -26023,7 +26156,7 @@ class Handler(BaseHTTPRequestHandler):
                     break
                 cur = cur.parent
 
-            root = DESKTOP_ROOT.resolve()
+            root = details_root.resolve()
             resolved = p.resolve()
             if any(part == ".." for part in resolved.parts):
                 return self._send_json(400, {"ok": False,
@@ -26201,6 +26334,15 @@ class Handler(BaseHTTPRequestHandler):
             filtered["screenshots"] = clean_shots
 
         raw_transcript = data.get("transcript")
+        held = data.get("held_transcript_lines")
+        if isinstance(held, list):
+            held = [h for h in held if isinstance(h, dict) and type(h.get("line")) is int
+                    and isinstance(h.get("segment"), dict) and isinstance(h.get("reason"), str)]
+            if held:
+                filtered["review_note"] = transcript_review.notice(held)
+                if parse_qs(urlsplit(getattr(self, "path", bare)).query).get("include_held") == ["1"]:
+                    filtered["held_transcript_lines"] = [
+                        {"line": h["line"], "text": h["segment"].get("text", "")} for h in held]
         if isinstance(raw_transcript, str):
             filtered["transcript"] = raw_transcript
         elif isinstance(raw_transcript, list):
@@ -27328,6 +27470,7 @@ class Handler(BaseHTTPRequestHandler):
         # Best-effort transcript reconstruction from yt-dlp's
         # subtitles/automatic_captions map (when present).
         transcript_entries = _extract_generic_transcript(metadata)
+        transcript_entries, held_lines = transcript_review.partition(transcript_entries, whisper=False)
         if not shelf:
             topic = _reroute_with_transcript(topic, metadata, transcript_entries, url=canonical)
 
@@ -27351,6 +27494,7 @@ class Handler(BaseHTTPRequestHandler):
             "like_count": metadata.get("like_count"),
             "video_id": existing["video_id"] if existing else _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
+            **({"held_transcript_lines": held_lines} if held_lines else {}),
             # Comments/screenshots/hook are explicit nulls so the
             # dashboard knows they're unavailable rather than missing.
             "comments_status": "skipped_generic",
@@ -27387,12 +27531,16 @@ class Handler(BaseHTTPRequestHandler):
                     f"- [{fmt_time(int(ent.get('start') or 0))}] "
                     f"{ent.get('text') or ''}")
             corpus_lines.append("")
+        elif held_lines:
+            corpus_lines.extend(["## Transcript", ""])
         else:
             corpus_lines += ["## Transcript",
                               "",
                               "_No transcript available (site did not "
                               "expose subtitles / yt-dlp could not parse)._",
                               ""]
+        if held_lines:
+            corpus_lines.extend([transcript_review.notice(held_lines), ""])
         corpus_path = Path(existing["corpus_path"]) if existing else folder / "corpus.md"
         _atomic_write_text(corpus_path, "\n".join(corpus_lines))
 

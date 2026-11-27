@@ -46,6 +46,7 @@ $requiredFiles = @(
     'source_manifest.py',
     'source_availability.py',
     'transcript_backfill.py',
+    'transcript_review.py',
     'library_remember.py',
     'openapi_bridge.py',
     'reddit_extractor.py',

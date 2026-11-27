@@ -594,6 +594,19 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
                 "width": sidecar.get("width"),
                 "height": sidecar.get("height"),
             }
+    held = sidecar.get("held_transcript_lines") or []
+    if held:
+        import transcript_review
+        extra["review_note"] = transcript_review.notice(held)
+        if args.get("include_held") is True:
+            lines = []
+            for h in held:
+                cue = transcript_review.held_cue(h.get("segment"))
+                if cue is not None:
+                    start, _, text = cue
+                    lines.append(f"- Line {h['line']} [{_transcript_clock(start)}] {text}")
+            if lines:
+                md += "\n\n## Held transcript lines\n\n" + "\n".join(lines)
     return _ok(
         corpus_md=md,
         folder=str(folder),
@@ -4065,15 +4078,15 @@ def _transcript_clock(seconds: float) -> str:
     return f"{hours}:{minutes:02d}:{secs:02d}" if hours else f"{minutes}:{secs:02d}"
 
 
-def _split_long_segments(segments: list) -> list:
+def _split_long_segments(segments: list, held_reasons: dict) -> list:
     """Split an over-long cue (an unpunctuated ASR run) so one page can hold it."""
     out = []
     size = GET_TRANSCRIPT_SEGMENT_MAX_CHARS
-    for start, end, text in segments:
-        if len(text) <= size:
-            out.append((start, end, text))
-            continue
-        out.extend((start, end, text[i:i + size]) for i in range(0, len(text), size))
+    for position, (start, end, text) in enumerate(segments, 1):
+        line, reason = held_reasons.get(position, (position, None))
+        # A long cue can span pages. Each part retains the original review decision.
+        out.extend((start, end, text[i:i + size], line, reason)
+                   for i in range(0, max(1, len(text)), size))
     return out
 
 
@@ -4083,11 +4096,13 @@ def _transcript_page(segments: list, cursor: int, include_timestamps: bool):
     used = 0
     index = cursor
     while index < len(segments):
-        start, end, text = segments[index]
+        _, _, text, _, reason = segments[index]
         cost = len(json.dumps(text)) * (2 if include_timestamps else 1) + (80 if include_timestamps else 2)
+        if reason:
+            cost += 96  # Held-line label, original number and optional structured fields.
         if page and used + cost > GET_TRANSCRIPT_PAGE_BUDGET:
             break
-        page.append((start, end, text))
+        page.append(segments[index])
         used += cost
         index += 1
     return page, (index if index < len(segments) else None)
@@ -4104,17 +4119,20 @@ def get_transcript(args: dict[str, Any]) -> dict[str, Any]:
         return _err("next_cursor must be a non-negative integer from an earlier get_transcript call")
     include_timestamps = args.get("include_timestamps") is True
     try:
-        record = b.get_transcript_cascade(args.get("url"), args.get("lang"))
+        record = b.get_transcript_cascade(args.get("url"), args.get("lang"),
+                                          **({"include_held": True} if args.get("include_held") is True else {}))
     except b.TranscriptUnavailable as e:
         return {"ok": False, "error": e.why[:1].upper() + e.why[1:], "reason": e.reason}
-    segments = _split_long_segments(list(record.get("segments") or []))
+    segments = _split_long_segments(record.get("segments") or [], record.get("held_reasons") or {})
     if cursor >= len(segments) and cursor:
         return _err("next_cursor is past the end of this transcript")
     page, next_cursor = _transcript_page(segments, cursor, include_timestamps)
-    if include_timestamps:
-        text = "\n".join(f"[{_transcript_clock(s)}] {t}" for s, _e, t in page)
-    else:
-        text = " ".join(t for _s, _e, t in page)
+    lines = []
+    for start, _, words, line, reason in page:
+        clock = f"[{_transcript_clock(start)}] " if include_timestamps else ""
+        held = f"[held line {line}] " if reason else ""
+        lines.append(clock + held + words)
+    text = ("\n" if include_timestamps else " ").join(lines)
     out = {
         "video_id": record["video_id"],
         "url": record["url"],
@@ -4132,11 +4150,14 @@ def get_transcript(args: dict[str, Any]) -> dict[str, Any]:
     if record["source"] == "library":
         out["transcribed_by"] = record.get("transcribed_by")
         out["slug"] = record.get("slug")
+    if record.get("held_count"):
+        out["held_count"] = record["held_count"]
     if record.get("whisper_model"):
         out["whisper_model"] = record["whisper_model"]
     if include_timestamps:
-        out["segments"] = [{"start": round(float(s), 3), "end": round(float(e), 3), "text": t}
-                           for s, e, t in page]
+        out["segments"] = [{"start": round(float(s), 3), "end": round(float(e), 3), "text": t,
+                            **({"held_line": line, "held_reason": reason} if reason else {})}
+                           for s, e, t, line, reason in page]
     return _ok(**out)
 
 
@@ -4752,10 +4773,11 @@ for _name, _key, _meaning in (
 
 # Optional get_transcript fields: present only for some sources or options.
 OUTPUT_SCHEMAS["get_transcript"]["properties"].update({
+    "held_count": _field("integer", "Number of saved lines held back by default."),
     "transcribed_by": _field("string", "Library hits only: captions or whisper, how the saved copy was made."),
     "slug": _field("string", "Library hits only: the saved item's slug."),
     "whisper_model": _field("string", "Whisper results only: the local model used."),
-    "segments": _field("array", "With include_timestamps: this page's cues as start, end (seconds) and text.", items={"type": "object"}),
+    "segments": _field("array", "With include_timestamps: cues with start, end (seconds) and text. Included held cues also carry held_line and held_reason.", items={"type": "object"}),
 })
 
 for _name in ("remove_podcast_feed", "remove_monitored_playlist"):
@@ -5076,6 +5098,8 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         description=DESCRIPTIONS["get_uoink_corpus"],
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
+            "include_held": {"type": "boolean", "default": False,
+                             "description": "Append held transcript lines in a separate review section."},
         }, ["slug"]),
         handler=get_uoink_corpus,
     ),
@@ -6584,10 +6608,12 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                      "description": "Preferred language code such as en, de or pt-BR. Default: English when YouTube has it, else the spoken language. Falls back to the available language and says so in why."},
             "include_timestamps": {"type": "boolean", "default": False,
                                    "description": "When true, each line starts with [m:ss] and segments carries start/end seconds."},
+            "include_held": {"type": "boolean", "default": False,
+                             "description": "Show suspected Whisper lines and non-speech labels for review."},
             "next_cursor": {"type": "integer", "minimum": 0,
                             "description": "Segment index from the previous response's next_cursor, to read the next page of a long transcript."},
             "strip_ads": {"type": "boolean",
-                          "description": "Accepted for compatibility with other transcript servers and ignored: Uoink returns every word."},
+                          "description": "Accepted for compatibility with other transcript servers and ignored."},
         }, ["url"]),
         handler=get_transcript,
         rate_limiter=_RateLimiter(20),

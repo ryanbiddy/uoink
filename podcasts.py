@@ -27,6 +27,7 @@ import hashlib
 import http.client
 import math
 import json
+import transcript_review
 import logging
 import os
 import sys
@@ -1510,6 +1511,7 @@ def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
                 f"transcript segment {seq} has invalid timing or text")
         item: dict[str, Any] = {
             "start": start, "end": end, "text": text.strip(),
+            **transcript_review.scores(segment),
         }
         speaker = segment.get("speaker")
         if speaker is not None:
@@ -1521,7 +1523,7 @@ def _transcript_from_bytes(data: bytes) -> tuple[dict, list[dict]]:
         if words:
             item["words"] = words
         shaped.append(item)
-    if not shaped:
+    if not shaped and not raw.get("held_transcript_lines"):
         raise ValueError("transcript segments array is empty")
     return raw, shaped
 
@@ -1849,6 +1851,8 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
         corpus_revision="0" * 64, playback=playback)
     markdown = "\n".join(header_lines) + "\n" + _media_mod.render_markdown(
         media_item, transcript_citations, chapters=[], annotations=provisional)
+    if transcript_raw.get("held_transcript_lines"):
+        markdown += "\n" + transcript_review.notice(transcript_raw["held_transcript_lines"]) + "\n"
     corpus_bytes = markdown.encode("utf-8")
     corpus_head = corpus_bytes[:_cards_mod.CORPUS_READ_BYTES].decode("utf-8", "replace")
     source_revision = _cards_mod.build_card(
@@ -1873,6 +1877,7 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
             "youtube_deep_link": None,
             # 3.18: word timings from local Whisper, when the transcript has them.
             **({"words": segments[seq]["words"]} if segments[seq].get("words") else {}),
+            **transcript_review.scores(segments[seq]),
         })
     sidecar = {
         "schema_version": 2,
@@ -1908,6 +1913,8 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path, topic_classifier
             row.get("diarization_ran") or transcript_raw.get("diarization_ran")),
         "speakers": speakers,
         "transcript": sidecar_transcript,
+        **({"held_transcript_lines": transcript_raw["held_transcript_lines"]}
+           if transcript_raw.get("held_transcript_lines") else {}),
         "media_depth": media_block,
     }
     sidecar_bytes = (json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n").encode("utf-8")

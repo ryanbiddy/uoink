@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Uoink stops reading an entire-show listing or thumbnail when it reaches its download size or time limit.
 - If one YouTube caption track times out, a save now tries the next available track. Caption repair can also keep the chapter headings in older saves.
 - Saved YouTube auto-captions now use word timings to produce readable lines when available. Uoink also cleans up repeated display text when several caption windows clearly shift together. To check an older save, run `uoink repair-captions VIDEO_ID --dry-run`. Use `--apply` to update the transcript and search results. The original stays in the save folder.
+- Uoink holds back likely Whisper inventions and non-speech labels from search, citations and transcript exports. Open a saved transcript and choose **Show them** to read the original lines. Run `uoink tidy-transcripts --dry-run` to check older saves, `--apply` to update them, or `--restore ITEM LINE` to put a line back.
+- Transcript review keeps lyrics between musical notes, confidently spoken repetitions and a closing “Thank you” on older saves that lack speech scores.
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.

@@ -143,7 +143,7 @@ PHASE6_TRANSCRIPT_KEYS = ("diarization_run", "diarization_run_id", "media_depth"
 # Keys this publisher replaces on the sidecar. Every other top-level member
 # belongs to another owner or to the carrier identity and is snapshotted on
 # the ticket so an intervening edit can be merged instead of clobbered.
-SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript"})
+SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript", "held_transcript_lines"})
 
 CHAPTER_STATES = ("present", "absent", "invalid", "unsupported")
 SPEAKER_STATES = ("present", "partial", "absent", "invalid", "unsupported")
@@ -1935,6 +1935,7 @@ def _sidecar_entry_binding(entry: dict) -> tuple:
         entry.get("start"),
         entry.get("end"),
         entry.get("text"),
+        entry.get("review_restored") is True,
         "source_url" in entry,
         entry.get("source_url") if "source_url" in entry else None,
         "source_deep_link" in entry,
@@ -1979,6 +1980,7 @@ def capture_sidecar_inputs(sidecar: dict) -> tuple:
         sidecar.get("transcript_source"),
         entries,
         chapters,
+        _binding_json(sidecar.get("held_transcript_lines") or []),
     )
 
 
@@ -2460,6 +2462,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
                 "INSERT INTO yoinks_fts(video_id, slug, channel, title, topic, hook_type, content) "
                 "SELECT video_id, slug, channel, title, topic, hook_type, ? FROM yoinks WHERE video_id=?",
                 (owned[corpus_path].decode("utf-8"), video_id))
+            if isinstance(sidecar.get("health"), dict):
+                conn.execute("UPDATE yoinks SET health_score_json=? WHERE video_id=?",
+                             (_json(sidecar["health"]), video_id))
             if sidecar.get("transcript_source"):
                 metadata = _metadata(item)
                 metadata["transcript_source"] = sidecar["transcript_source"]
@@ -2612,7 +2617,8 @@ def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], a
                      corpus_revision: str, playback: dict, transcript_kind: str = "captions",
                      transcript_provider: str = "youtube_captions", language: str | None = None,
                      chapter_rows: list[dict] | None = None, chapter_provider: str = "youtube_metadata",
-                     recorded_at: str | None = None, item: dict | None = None) -> tuple[dict, str]:
+                     recorded_at: str | None = None, item: dict | None = None,
+                     retain_empty_artifact: bool = False) -> tuple[dict, str]:
     """Build the sealed block for a capture whose caption cues and source
     chapter list are already held in one archived JSON artifact
     (``artifact_bytes``: the capture record whose ``chapters`` member is the
@@ -2658,7 +2664,7 @@ def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], a
         "provenance": {
             "chapter_source": chapter_source,
             "transcript_source": {"kind": transcript_kind if cores else "none",
-                                  "artifact_sha256": digest if cores else None,
+                                  "artifact_sha256": digest if cores or retain_empty_artifact else None,
                                   "provider": transcript_provider if cores else None,
                                   "model": None, "language": language if cores else None},
             "active_diarization_run_id": None,
