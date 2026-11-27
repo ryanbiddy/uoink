@@ -135,6 +135,7 @@ models, output-root recovery, and corpus state. The response shape is:
   },
   "whisperx_available": false,
   "whisper_model": "base",
+  "whisper_model_downloaded": false,
   "whisperx_model_loaded": false,
   "index_recovering": false,
   "output_root_fallback": false,

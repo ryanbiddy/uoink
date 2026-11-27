@@ -20479,6 +20479,8 @@ class Handler(BaseHTTPRequestHandler):
             settings = _read_settings() or {}
             whisper_model = whisper_runner.normalize_model(
                 settings.get("whisper_model"))
+            model_downloaded = whisper_runner.is_model_downloaded(
+                DATA_ROOT, whisper_model)
             latest_migration = index.latest_schema_version()
             return self._send_json(200, {
                 "ok": True,
@@ -20499,8 +20501,12 @@ class Handler(BaseHTTPRequestHandler):
                 "whisperx_available": whisper_runner.is_whisperx_available(),
                 "transcription_engine": whisper_runner.transcription_engine(),
                 "whisper_model": whisper_model,
-                "whisperx_model_loaded": whisper_runner.is_model_downloaded(
-                    DATA_ROOT, whisper_model),
+                # 3.18.1: whether the selected model's files are on this
+                # computer. Whether one is in memory is transcription_worker.
+                "whisper_model_downloaded": model_downloaded,
+                # Deprecated alias of whisper_model_downloaded, kept for old
+                # readers. Despite the name it never meant "in memory".
+                "whisperx_model_loaded": model_downloaded,
                 # 3.18: whether a transcription process holds model memory now
                 # (state not_loaded / loaded / running) and when it frees it.
                 "transcription_worker": {**_asr.status(), "line": _asr.status_line()},
