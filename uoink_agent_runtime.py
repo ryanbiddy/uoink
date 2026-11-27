@@ -5,6 +5,7 @@ Semantic search uses the resident helper after its process identity is checked.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -92,11 +93,39 @@ def dispatch_search(name, arguments, backend, local, *, running=None):
 
 
 def call_tool(name, arguments, backend, *, running=None):
+    # CLI and stdio processes can exit immediately after this call. Only the
+    # resident helper owns the speech worker and its live cancellation event.
+    # Other jobs can belong to this stdio session (e.g. a playlist).
+    job_id = arguments.get("job_id") if isinstance(arguments, dict) else None
+    remote_job = (name in ("get_job_status", "cancel_job") and isinstance(job_id, str)
+                  and job_id not in backend._jobs)
+    if (remote_job or name in ("transcribe_podcast_episode", "add_podcast_feed")) and (
+            running() if running is not None else helper_running(backend)):
+        envelope = backend._call_http_registry_tool(name, arguments)
+        return envelope.get("result", envelope)
     if name == "poll_monitored_playlist" and not (
             running() if running is not None else helper_running(backend)):
         return {"ok": False, "error": "Open Uoink first, then retry polling the monitored playlist. "
                 "Its scheduled captures need the running Uoink helper."}
     result = dispatch_search(name, arguments, backend, lambda: registry.call_tool(name, arguments), running=running)
+    start_helper = (name == "transcribe_podcast_episode"
+                    and result.get("job", {}).get("state") in ("running", "queued")
+                    and not backend._TOKEN_OWNED)
+    if name == "add_podcast_feed":
+        start_helper = result.get("title_pending") or result.get("episode_id")
+    if result.get("ok") and start_helper:
+        # The requested work is durable. The supervisor's admission lock also
+        # covers two clients submitting during startup. Keep all model output
+        # and the lifetime of the helper independent of this tool's pipes.
+        cmd = [sys.executable, "-B", "-s", str(backend.HERE / "uoink_supervisor.py"),
+               "--quiet", *isolation.child_argv()]
+        try:
+            subprocess.Popen(cmd, cwd=backend.HERE, stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                             start_new_session=os.name != "nt")
+        except OSError:
+            result["message"] = "Your request is saved. Open Uoink to finish it."
     if name == "research_capture" and result.get("ok") is True and not (
             running() if running is not None else helper_running(backend)):
         result["warnings"] = ["helper_not_running"]

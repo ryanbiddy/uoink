@@ -1,0 +1,8 @@
+{
+  "results": [
+    {"wrapperType":"track","kind":"podcast","collectionId":42,"trackId":42,"collectionName":"Signal Notes","feedUrl":"https://feeds.example.test/signal.xml"},
+    {"wrapperType":"podcastEpisode","collectionId":42,"trackId":71,"trackName":"Old Apple title","episodeGuid":"episode-two","episodeUrl":"https://cdn.example.test/one.mp3"},
+    {"wrapperType":"podcastEpisode","collectionId":42,"trackId":72,"trackName":"Wrong title","episodeGuid":"changed-guid","episodeUrl":"https://cdn.example.test/one.mp3?updated=2"},
+    {"wrapperType":"podcastEpisode","collectionId":42,"trackId":73,"trackName":"Third episode"}
+  ]
+}

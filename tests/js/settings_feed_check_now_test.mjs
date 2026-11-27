@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const page = readFileSync(new URL('../../assets/dashboard/index.html', import.meta.url), 'utf8');
 const between = (a, b) => page.slice(page.indexOf(a), page.indexOf(b, page.indexOf(a)));
 const checkLogic = between('    function checkNowMessage(res)', '    // V-2a');
-const renderLogic = between('    function renderPodcastFeedList(rows)', '    async function loadPlaylistSettings');
+const renderLogic = between('    function podcastDisplayName(name, url)', '    async function loadPlaylistSettings');
 
 function setup(responder) {
   const calls = [];

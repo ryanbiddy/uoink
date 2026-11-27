@@ -18,6 +18,8 @@ import re
 import socket
 import ssl
 import subprocess
+import tempfile
+import time
 import urllib.error
 import urllib.request
 from contextlib import nullcontext
@@ -213,10 +215,10 @@ def dialer(network, monkeypatch):
 
 
 @pytest.fixture
-def consumers(network, monkeypatch, tmp_path):
+def consumers(network, monkeypatch, tmp_path, request):
     namespace = dict(_platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
                      urllib=urllib, log=logging.getLogger(__name__),
-                     subprocess=subprocess, json=json, Path=Path, urlparse=urlparse,
+                     subprocess=subprocess, time=time, tempfile=tempfile, json=json, Path=Path, urlparse=urlparse,
                      parse_qs=parse_qs, re=re,
                      YTDLP_CMD=["synthetic-yt-dlp"], COMMENTS_TIMEOUT_SEC=10,
                      PLATFORM_YOUTUBE="youtube", PLATFORM_TWITTER="twitter",
@@ -273,15 +275,16 @@ def consumers(network, monkeypatch, tmp_path):
                                          "_extract_article_page"), page)
     # The relaxed /extract/any and /live/status validator's generic step.
     namespace["page_extractor"].normalize_page_url = page["normalize_page_url"]
-    episode ={"feed_id": 1, "audio_url": PUBLIC, "status": "new"}
-    monkeypatch.setattr(podcasts, "get_episode", lambda *args: episode)
-    monkeypatch.setattr(podcasts, "get_feed", lambda *args: {"id": 1})
-    monkeypatch.setattr(podcasts, "_episode_audio_path", lambda *args: tmp_path / "episode.mp3")
-    monkeypatch.setattr(podcasts, "_record_audio_result", Mock())
-    monkeypatch.setattr(podcasts, "set_episode_status", Mock())
+    import index
+    idx = index.Index.open(tmp_path / "index.db")
+    request.addfinalizer(idx.close)
+    feed = podcasts.add_feed(idx, "https://feed.example/rss")
+    podcasts.upsert_episodes(idx, feed["id"], [{"guid": "one", "title": "Episode", "audio_url": PUBLIC}])
+    episode, = podcasts.list_episodes(idx)
+    audio_path = podcasts._episode_audio_path(tmp_path, feed, episode)
 
     def audio_run(args, **kwargs):
-        (tmp_path / "episode.mp3").write_bytes(b"synthetic audio")
+        Path(args[args.index("-o") + 1].replace("%(ext)s", audio_path.suffix[1:])).write_bytes(b"synthetic audio")
         return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
 
     audio_child = Mock(side_effect=audio_run)
@@ -299,12 +302,13 @@ def consumers(network, monkeypatch, tmp_path):
             return namespace["_download_thumbnail"]({"thumbnail": url}, tmp_path) is not None
         if kind == "generic":
             return bool(namespace["_fetch_metadata"](url))
-        episode["audio_url"] = url
+        with idx.write_transaction() as db:
+            db.execute("UPDATE podcast_episodes SET audio_url=? WHERE id=?", (url, episode["id"]))
         return podcasts.download_episode_audio(
-            None, 1, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"])["ok"]
+            idx, episode["id"], data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"])["ok"]
 
     return SimpleNamespace(invoke=invoke, child=child, audio_child=audio_child,
-                           server=namespace, page=page, audio_path=tmp_path / "episode.mp3")
+                           server=namespace, page=page, audio_path=audio_path, idx=idx, episode_id=episode["id"])
 
 
 CONSUMERS = ["feed", "standing", "page", "thumbnail", "generic", "enclosure"]
@@ -481,6 +485,9 @@ def test_failed_preflight_never_starts_ytdlp(kind, network, consumers):
 
 def test_existing_audio_remains_available_without_network(network, consumers):
     consumers.audio_path.write_bytes(b"existing local audio")
+    with consumers.idx.write_transaction() as db:
+        db.execute("UPDATE podcast_episodes SET audio_local_path=? WHERE id=?",
+                   (str(consumers.audio_path), consumers.episode_id))
     assert consumers.invoke("enclosure", "http://127.0.0.1/audio")
     assert network.requests == network.lookups == []
     consumers.audio_child.assert_not_called()
@@ -500,7 +507,7 @@ def test_local_fixture_transport_requires_explicit_injection(network, consumers,
         {"thumbnail": local}, tmp_path, http_open=fixture_open)
     assert consumers.server["_fetch_metadata"](local, resolve_url=lambda url, **kwargs: url)
     assert podcasts.download_episode_audio(
-        None, 1, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"],
+        consumers.idx, consumers.episode_id, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"],
         resolve_url=lambda url, **kwargs: local)["ok"]
     assert network.requests == network.lookups == []
 
@@ -550,7 +557,7 @@ def test_audio_policy_refusal_and_transient_failure_keep_distinct_statuses(
         answer, status, network, consumers):
     network.addresses["public.example"] = answer
     assert_refused(consumers, "enclosure", PUBLIC)
-    assert podcasts._record_audio_result.call_args.kwargs["status"] == status
+    assert podcasts.get_episode(consumers.idx, consumers.episode_id)["status"] == status
 
 
 @pytest.mark.parametrize("host", [
@@ -690,7 +697,7 @@ def test_extract_any_url_admission_errors_return_400(failure, network, consumers
 def test_enclosure_response_errors_leave_episode_retryable(error_type, network, consumers):
     network.routes[PUBLIC] = error_type("fixture response failure")
     assert_refused(consumers, "enclosure", PUBLIC)
-    assert podcasts._record_audio_result.call_args.kwargs["status"] == "new"
+    assert podcasts.get_episode(consumers.idx, consumers.episode_id)["status"] == "new"
 
 
 def load_handler_method(namespace, name):
@@ -787,9 +794,9 @@ def test_enclosure_unencodable_host_is_a_refusal_not_a_retry(host, hop, network,
     url = f"https://{host}/audio.mp3" if hop == "initial" else PUBLIC
     network.routes[PUBLIC] = (302, {"Location": f"http://{host}/audio.mp3"}, b"")
     assert_refused(consumers, "enclosure", url)
-    recorded = podcasts._record_audio_result.call_args.kwargs
+    recorded = podcasts.get_episode(consumers.idx, consumers.episode_id)
     assert recorded["status"] == "error"
-    assert "Malformed URL host" in recorded["error"]
+    assert "Malformed URL host" in recorded["audio_download_error"]
 
 
 # Relaxed URLs on the X/Twitter and Instagram hosts that the strict validator

@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Updated HTTPX2 and HTTPCore2 to 2.16.2. The bundled MCP HTTP client now honors wildcard proxy exceptions such as `*.example.com`. Updated Pydantic and python-multipart too, including a fix that keeps each multipart parser’s callbacks separate.
 - Hacker News stories keep their own shelves when you save another reply. The reader preserves HTML comments in code samples and the replies that follow them.
+- Podcast episodes now appear in release order, even when a show changes its date format. Episodes without a usable date appear last.
+- Uoink checks the first 50 entries in large podcast feeds. Older followed shows resume their scheduled checks, and Sources and Settings show why a check failed.
+- Paste an Apple Podcasts show link to follow its RSS feed, or paste an episode link to save just that episode. A newly followed show displays its host name while Uoink looks up the title. Removed shows disappear from your feed list.
+- Queuing a podcast transcription from the CLI or MCP returns a job ID right away. Use `get_job_status` to check progress while the helper transcribes.
+- Episodes with the same title now keep separate audio files. Uoink can still use an older download that belongs to one episode.
+- Uoink stops reading an entire-show listing or thumbnail when it reaches its download size or time limit.
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.

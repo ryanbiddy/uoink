@@ -326,7 +326,7 @@ def _wrap_podcasts(mod):
 
     original_fetch = getattr(mod, "fetch_feed", None)
 
-    def fetch_feed(feed_row):
+    def fetch_feed(feed_row, **kwargs):
         url = (feed_row or {}).get("feed_url") if isinstance(feed_row, dict) else None
         if url and _is_synthetic_url(str(url)):
             rewritten, mode = _rewrite_synthetic(str(url))
@@ -336,7 +336,7 @@ def _wrap_podcasts(mod):
             with urllib.request.urlopen(req, timeout=5) as resp:
                 return resp.read(), dict(resp.headers.items())
         if original_fetch is not None:
-            return original_fetch(feed_row)
+            return original_fetch(feed_row, **kwargs)
         raise RuntimeError("podcasts.fetch_feed missing")
 
     mod.download_episode_audio = download

@@ -938,7 +938,6 @@ def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     URL returns the same row. Default poll interval 60 min, range
     15-1440. Audio auto-ingest is a separate opt-in and defaults off."""
     server = _b()
-    import podcasts as _pod
     feed_url = args.get("feed_url")
     if not isinstance(feed_url, str) or not feed_url.strip():
         return _err("feed_url (string) is required")
@@ -947,10 +946,7 @@ def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(auto_ingest, bool):
         return _err("auto_ingest must be a boolean when provided")
     try:
-        return _ok(feed=_pod.add_feed(server._get_index(),
-                                        feed_url.strip(),
-                                        poll_interval_min=int(interval),
-                                        auto_ingest=auto_ingest))
+        return server._follow_podcast_link(feed_url.strip(), poll_interval_min=interval, auto_ingest=auto_ingest)
     except ValueError as e:
         return _err(str(e))
     except Exception as e:
@@ -971,7 +967,7 @@ def list_podcast_feeds(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.1 podcast: delete a feed + cascade its episodes."""
+    """Remove a show from the feed list, retaining linked subscription history."""
     server = _b()
     import podcasts as _pod
     try:
@@ -982,7 +978,8 @@ def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
         removed = _pod.remove_feed(server._get_index(), feed_id)
     except Exception as e:
         return _err(f"remove_podcast_feed failed: {e}")
-    return _ok(removed=removed)
+    return _ok(removed=removed, message=("Removed from your podcast feeds." if removed
+                                         else "This feed is already gone."))
 
 
 def poll_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
@@ -1083,7 +1080,7 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     language = args.get("language")
     result, _status = server._queue_podcast_transcription(
         episode_id, model=model, language=language, diarize=diarize,
-        consent_given=consent_given)
+        consent_given=consent_given, defer_worker=not server._TOKEN_OWNED)
     return result
 
 
@@ -4224,7 +4221,7 @@ DESCRIPTIONS = {
     "get_uoink_health": "Read the stored per-section extraction health of a saved capture. Use to diagnose missing or failed capture sections; use get_transcript_reliability for questionable transcript spans. Reads the index snapshot, falling back to the sidecar, and returns an error when no health data exists. It does not retry extraction or recompute health.",
     "find_mentions": "Find recorded entity-name mentions across saved items, with stored spans, timing and source links. Use for people, products, tools or topics already indexed as entities; use search_clips for arbitrary transcript text or search_uoinks for whole-item search. Ranks by name match with newest first on ties. Results are limited and do not extract new entities.",
     "get_transcript_reliability": "Read stored transcript-reliability spans for a saved item. Use to inspect suspect wording before quoting; use get_uoink_health for extraction-section health or export_cited_range for stored cue text. Returns status not_computed with empty spans when no reliability snapshot exists. Computation requires the helper endpoint or the user's auto-check setting; this read never downloads a model.",
-    "add_podcast_feed": "Register a podcast RSS feed for ongoing metadata monitoring. Use for the podcast feed and episode workflow; use register_source for the general standing-source interface or list_podcast_feeds to find an existing feed. Returns the existing row for a duplicate URL. Audio auto-ingest is a separate explicit opt-in, off by default; standing capture still requires source consent through the dashboard.",
+    "add_podcast_feed": "Follow an RSS or Atom feed or an Apple Podcasts show for new episode metadata. Pasting an Apple episode link queues just that episode for local transcription and returns its episode_id and show_job_id. Following a show returns its feed and leaves automatic audio capture off until you grant consent in the dashboard. Use list_podcast_feeds to see followed shows.",
     "list_podcast_feeds": "List registered podcast feeds newest first, including their saved polling settings. Use to obtain a feed_id before polling or removal; use list_podcast_episodes to inspect episodes and list_sources for standing-source consent. Returns feeds and their count. This call reads saved registrations without fetching RSS.",
     "remove_podcast_feed": "Stop monitoring a registered podcast feed. Use after list_podcast_feeds identifies the feed; use set_source_consent to disable capture while retaining detection. A source-linked feed is archived and disabled; a legacy unlinked feed is deleted with its tracked episode rows. Returns whether a row was affected; already published corpora are not removed.",
     "poll_podcast_feed": "Refresh metadata for one registered podcast feed through the source-aware polling path. Use after add_podcast_feed when new episode observations are needed; use list_podcast_episodes to read cached episodes without a fetch. Managed sources honor detection due times and leases. Polling records observations; capture remains subject to separate source consent and scheduling. Returns the poll outcome or a feed error.",
@@ -4316,7 +4313,7 @@ PARAMETERS = {
     "feed_id": "Integer feed ID returned by add_podcast_feed or list_podcast_feeds.",
     "episode_id": "Integer episode ID from list_podcast_episodes, not the feed ID.",
     "playlist_id": "Integer monitor ID from add_monitored_playlist or list_monitored_playlists.",
-    "feed_url": "Public HTTP(S) RSS or Atom feed URL, not the podcast's homepage.",
+    "feed_url": "Public RSS or Atom feed URL, or an Apple Podcasts show or episode link.",
     "playlist_url": "YouTube playlist URL containing its list identifier.",
     "poll_interval_min": "Requested interval between metadata checks, in minutes; not a capture deadline.",
     "auto_ingest": "Explicit podcast audio-ingest preference; false unless the user opted in. Standing-source capture consent is separate.",

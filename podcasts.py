@@ -24,6 +24,7 @@ import uoink_usage
 from collections import Counter
 from contextlib import ExitStack
 import hashlib
+import http.client
 import math
 import json
 import logging
@@ -33,14 +34,15 @@ import re
 import sqlite3
 import subprocess
 import tempfile
+import threading
+import time
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
-from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import source_subscriptions
 
@@ -175,31 +177,47 @@ def get_feed(idx, feed_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def _episode_date_sql(idx, prefix="") -> str:
+    # A read-only client may open the library before the upgraded helper
+    # runs migration 0040. Keep that read local, without writing a backfill.
+    if getattr(idx, "_existing_read_only", False) and idx.schema_version() < 40:
+        return f"uoink_podcast_date_ms({prefix}published_at)"
+    return f"{prefix}published_at_ms"
+
+
 def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
+    managed = _subscriptions().tables_present(idx._conn)
     sql = (
-        "SELECT f.*, "
-        "  COUNT(e.id) AS episode_count, "
-        "  MAX(e.published_at) AS latest_episode_published_at, "
-        "  (SELECT e2.title FROM podcast_episodes e2 "
-        "   WHERE e2.feed_id = f.id "
-        "   ORDER BY e2.published_at DESC, e2.discovered_at DESC "
-        "   LIMIT 1) AS last_episode_title "
+        "SELECT f.*, e.title AS last_episode_title, e.published_at AS latest_episode_published_at, "
+        "(SELECT COUNT(*) FROM podcast_episodes WHERE feed_id=f.id) AS episode_count "
         "FROM podcast_feeds f "
-        "LEFT JOIN podcast_episodes e ON e.feed_id = f.id"
+        "LEFT JOIN podcast_episodes e ON e.id=(SELECT id FROM podcast_episodes WHERE feed_id=f.id "
+        f"ORDER BY {_episode_date_sql(idx)} DESC, id DESC LIMIT 1)"
     )
-    params: list = []
+    filters = []
     if enabled_only:
-        sql += " WHERE f.enabled = 1"
-    sql += " GROUP BY f.id ORDER BY f.added_at DESC"
-    rows = idx._conn.execute(sql, params).fetchall()
+        filters.append("f.enabled=1")
+    if managed:
+        filters.append("NOT EXISTS (SELECT 1 FROM source_subscriptions s "
+                       "WHERE s.legacy_feed_id=f.id AND s.archived=1)")
+    if filters:
+        sql += " WHERE " + " AND ".join(filters)
+    sql += " ORDER BY f.added_at DESC, f.id DESC"
+    rows = idx._conn.execute(sql).fetchall()
     feeds = [dict(r) for r in rows]
-    if feeds and _subscriptions().tables_present(idx._conn):
-        successes = dict(idx._conn.execute(
-            "SELECT s.legacy_feed_id, MAX(c.last_poll_success_ms) FROM source_subscriptions s "
+    for feed in feeds:
+        if not _channel_title(feed.get("title")) or feed["title"] == feed["feed_url"]:
+            feed["title"] = urlparse(feed["feed_url"]).hostname or feed["feed_url"]
+    if feeds and managed:
+        follow = "s.follow_feed" if idx.schema_version() >= 39 else "0"
+        cursors = {fid: (success, scheduled) for fid, success, scheduled in idx._conn.execute(
+            "SELECT s.legacy_feed_id, MAX(c.last_poll_success_ms), "
+            f"MAX(s.detection_enabled AND (s.consent_epoch>0 OR {follow})) FROM source_subscriptions s "
             "JOIN source_detection_cursors c USING(source_id) WHERE s.legacy_feed_id IS NOT NULL "
-            "AND c.last_poll_success_ms IS NOT NULL GROUP BY s.legacy_feed_id"))
+            "GROUP BY s.legacy_feed_id")}
         for feed in feeds:
-            ms = successes.get(feed["id"])
+            ms, scheduled = cursors.get(feed["id"], (None, feed["enabled"]))
+            feed["scheduled_checks"] = bool(scheduled)
             if ms is not None:
                 success = datetime.fromtimestamp(ms / 1000, timezone.utc)
                 legacy = _parse_poll_timestamp(feed.get("last_polled_at"))
@@ -226,6 +244,116 @@ def _subscriptions():
     return source_subscriptions
 
 
+def apple_link_ids(url: str) -> tuple[str, str | None] | None:
+    canonical = _validate_feed_url(url)
+    parsed = urlparse(canonical or "")
+    if parsed.hostname != "podcasts.apple.com":
+        return None
+    show = re.search(r"/id([0-9]+)/*$", parsed.path)
+    if not show:
+        return None
+    episode = parse_qs(parsed.query, keep_blank_values=True).get("i", [None])[0]
+    return show[1], episode
+
+
+def resolve_apple_podcast(show_id: str, episode_id: str | None) -> tuple[str, str | None, dict | None]:
+    params = {"id": show_id}
+    if episode_id is not None:
+        if not re.fullmatch(r"[0-9]+", episode_id):
+            raise ValueError("That Apple Podcasts link has an invalid episode ID.")
+        params.update(entity="podcastEpisode", limit="200")
+    url = "https://itunes.apple.com/lookup?" + urlencode(params)
+    try:
+        with source_subscriptions.public_http_open(
+                url, headers={"User-Agent": _FEED_USER_AGENT, "Accept": "application/json"}, timeout=5) as resp:
+            raw = resp.read(4 * 1024 * 1024 + 1)
+        if len(raw) > 4 * 1024 * 1024:
+            raise ValueError("Response too large")
+        results = json.loads(raw)["results"]
+        if not isinstance(results, list):
+            raise ValueError("Invalid results")
+    except (OSError, http.client.HTTPException, KeyError, TypeError, ValueError, source_subscriptions.ServiceError) as exc:
+        if isinstance(exc, urllib.error.HTTPError):
+            exc.close()
+        raise ValueError("Couldn't look up that show on Apple Podcasts. Try again later.") from exc
+    rows = [r for r in results if isinstance(r, dict)
+            and (r.get("collectionId") is None or str(r["collectionId"]) == show_id)]
+    show = next((r for r in rows if r.get("feedUrl") and r.get("kind") in (None, "podcast")
+                 and r.get("wrapperType") != "podcastEpisode"), None)
+    if show is None or not _validate_feed_url(show["feedUrl"]):
+        raise ValueError("Apple Podcasts didn't return a feed for that show.")
+    episode = None
+    if episode_id is not None:
+        episode = next((r for r in rows if r is not show and str(r.get("trackId")) == episode_id), None)
+        if episode is None:
+            raise ValueError("Apple Podcasts didn't return that episode among the show's latest 200.")
+    return show["feedUrl"], show.get("collectionName"), episode
+
+
+def read_pasted_feed(url: str, *, limit: int) -> dict:
+    try:
+        body, _ = fetch_feed({"feed_url": url}, limit=limit)
+        return parse_feed_body(body or b"", limit=limit)
+    except (ET.ParseError, OSError, http.client.HTTPException) as exc:
+        raise ValueError("Couldn't read the podcast feed. Check its address and try again.") from exc
+    except source_subscriptions.ServiceError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+def match_apple_episode(episodes: list[dict], apple: dict) -> dict:
+    guid = apple.get("episodeGuid")
+    if guid:
+        for ep in episodes:
+            if ep["guid"] == guid:
+                return ep
+    keys = source_subscriptions.podcast_audio_keys(apple.get("episodeUrl"))
+    for position, key in enumerate(keys):
+        if key:
+            matches = [ep for ep in episodes
+                       if source_subscriptions.podcast_audio_keys(ep.get("audio_url"))[position] == key]
+            if len(matches) == 1:
+                return matches[0]
+    title = str(apple.get("trackName") or "").strip().casefold()
+    matches = [ep for ep in episodes if title and str(ep.get("title") or "").strip().casefold() == title]
+    if len(matches) == 1:
+        return matches[0]
+    raise ValueError("Couldn't match that Apple Podcasts episode to the show's feed.")
+
+
+_pending_titles = set()
+_pending_titles_lock = threading.Lock()
+
+
+def fetch_title_in_background(idx, feed: dict) -> None:
+    """Request just the feed header and first entry. A scheduled poll can also fill the name."""
+    feed_id, url = feed["id"], feed["feed_url"]
+    key = (id(idx), feed_id)
+    with _pending_titles_lock:
+        if key in _pending_titles:
+            return
+        _pending_titles.add(key)
+
+    def read_title():
+        try:
+            title = str(read_pasted_feed(url, limit=1)["feed"].get("title") or "").strip()[:200]
+            if title:
+                host = urlparse(url).hostname
+                with idx.write_transaction() as conn:
+                    conn.execute("UPDATE podcast_feeds SET title=? WHERE id=? AND feed_url=? AND enabled=1 "
+                                 "AND (lower(trim(coalesce(title,''))) IN ('','untitled podcast') OR title=?)",
+                                 (title, feed_id, url, host))
+                    conn.execute("UPDATE source_subscriptions SET display_name=? WHERE legacy_feed_id=? "
+                                 "AND archived=0 AND (lower(trim(coalesce(display_name,''))) IN ('','untitled podcast') "
+                                 "OR display_name IN (?,canonical_url))", (title, feed_id, host))
+        except (ValueError, sqlite3.Error):
+            log.info("Could not read the title for podcast feed %s", feed_id)
+        finally:
+            with _pending_titles_lock:
+                _pending_titles.discard(key)
+
+    threading.Thread(target=read_title, name="podcast-feed-title", daemon=True).start()
+
+
 def remove_feed(idx, feed_id: int) -> bool:
     """Delete a feed + its episodes (FK cascade).
 
@@ -234,12 +362,14 @@ def remove_feed(idx, feed_id: int) -> bool:
     feed and must survive (contract, "Migration 0028 schema": old delete
     routes archive the source and preserve referenced rows)."""
     with idx.write_transaction() as conn:
-        source_id = _subscriptions().legacy_archive(conn, feed_id=int(feed_id))
-        if source_id is not None:
-            cur = conn.execute(
-                "UPDATE podcast_feeds SET enabled=0, auto_ingest=0 WHERE id=?",
-                (feed_id,))
-            return cur.rowcount > 0
+        linked = _subscriptions().legacy_source_id(conn, feed_id=int(feed_id))
+        if linked is not None:
+            archived = conn.execute("SELECT archived FROM source_subscriptions WHERE source_id=?",
+                                    (linked,)).fetchone()[0]
+            if not archived:
+                _subscriptions().legacy_archive(conn, feed_id=int(feed_id))
+            conn.execute("UPDATE podcast_feeds SET enabled=0, auto_ingest=0 WHERE id=?", (feed_id,))
+            return not archived
         cur = conn.execute(
             "DELETE FROM podcast_feeds WHERE id=?", (feed_id,))
         return cur.rowcount > 0
@@ -349,7 +479,7 @@ def _parse_duration(s: str | None) -> int | None:
         if ":" not in s:
             return int(float(s))
         parts = [int(p) for p in s.split(":")]
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if len(parts) == 2:
         return parts[0] * 60 + parts[1]
@@ -358,109 +488,100 @@ def _parse_duration(s: str | None) -> int | None:
     return None
 
 
-def parse_feed_body(body: bytes | str, *, limit: int | None = None) -> dict:
-    """Pure parse: bytes/string of RSS or Atom XML -> structured dict.
-
-    ``limit`` raises the per-poll episode cap for a one-off whole-show
-    listing (show_capture.py); feed polls keep the default cap.
-
-    Returns:
-        {
-          'feed': {'title': ..., 'description': ..., 'homepage': ...},
-          'episodes': [
-            {'guid': ..., 'title': ..., 'audio_url': ...,
-             'episode_page_url': ..., 'published_at': ...,
-             'description': ..., 'duration_seconds': ...},
-            ...
-          ],
-        }
-
-    Raises ET.ParseError on malformed XML so the caller can surface a
-    useful error to the user."""
-    if isinstance(body, bytes):
-        # ElementTree will sniff the XML declaration's encoding.
-        root = ET.fromstring(body)
+def _parsed_episode(entry):
+    if _localname(entry.tag) == "item":
+        page = _findtext(entry, "link")
+        guid = _findtext(entry, "guid") or page
+        audio = _findattr(entry, "enclosure", "url")
+        duration = _parse_duration(_findtext(entry, "duration"))
+        published = source_subscriptions.podcast_published_text(entry, "pubDate", "published")
+        description = _findtext(entry, "description", "summary")
     else:
-        root = ET.fromstring(body)
+        guid = _findtext(entry, "id")
+        page = audio = None
+        for link in entry:
+            if _localname(link.tag) != "link":
+                continue
+            rel = link.get("rel") or "alternate"
+            if rel == "enclosure":
+                audio = link.get("href")
+            elif rel == "alternate" and not page:
+                page = link.get("href")
+        duration = None
+        published = source_subscriptions.podcast_published_text(entry, "published", "updated")
+        description = _findtext(entry, "summary", "content")
+    if guid:
+        return {"guid": guid, "title": _findtext(entry, "title"), "audio_url": audio,
+                "episode_page_url": page, "duration_seconds": duration,
+                "published_at": published, "description": description}
 
-    feed_meta = {"title": None, "description": None, "homepage": None}
-    episodes: list[dict] = []
 
-    # RSS 2.0: <rss><channel><item>...
-    # Atom 1.0: <feed><entry>...
-    root_name = _localname(root.tag)
-    if root_name == "rss":
-        channels = [c for c in root if _localname(c.tag) == "channel"]
-        channel = channels[0] if channels else None
-        if channel is not None:
-            feed_meta["title"] = _findtext(channel, "title")
-            feed_meta["description"] = _findtext(channel, "description",
-                                                    "subtitle")
-            feed_meta["homepage"] = _findtext(channel, "link")
-            for item in channel:
-                if _localname(item.tag) != "item":
-                    continue
-                episode_page_url = _findtext(item, "link")
-                guid = _findtext(item, "guid") or episode_page_url
-                if not guid:
-                    continue
-                audio = _findattr(item, "enclosure", "url")
-                duration = _parse_duration(_findtext(item, "duration"))
-                episodes.append({
-                    "guid": guid,
-                    "title": _findtext(item, "title"),
-                    "audio_url": audio,
-                    "episode_page_url": episode_page_url,
-                    "duration_seconds": duration,
-                    "published_at": _findtext(item, "pubDate", "published"),
-                    "description": _findtext(item, "description", "summary"),
-                })
-    elif root_name == "feed":  # Atom
-        feed_meta["title"] = _findtext(root, "title")
-        feed_meta["description"] = _findtext(root, "subtitle", "summary")
-        for child in root:
-            if _localname(child.tag) == "link":
-                href = child.attrib.get("href")
-                rel = child.attrib.get("rel") or "alternate"
-                if rel == "alternate" and href:
-                    feed_meta["homepage"] = href
+def _parsed_feed(root, limit):
+    feed = {"title": None, "description": None, "homepage": None}
+    name = _localname(root.tag)
+    if name == "rss":
+        container = next((c for c in root if _localname(c.tag) == "channel"), None)
+        if container is None:
+            return {"feed": feed, "episodes": []}
+        entry_tag = "item"
+        feed["description"] = _findtext(container, "description", "subtitle")
+        feed["homepage"] = _findtext(container, "link")
+    elif name == "feed":
+        container, entry_tag = root, "entry"
+        feed["description"] = _findtext(root, "subtitle", "summary")
+        feed["homepage"] = next((link.get("href") for link in root if _localname(link.tag) == "link"
+                                 and (link.get("rel") or "alternate") == "alternate" and link.get("href")), None)
+    else:
+        message = ("That link is a web page, not a podcast feed" if name.lower() == "html"
+                   else "That link does not contain an RSS or Atom podcast feed.")
+        raise source_subscriptions.PodcastFeedError(message)
+    feed["title"] = _findtext(container, "title")
+    episodes = []
+    for entry in container:
+        if _localname(entry.tag) == entry_tag:
+            episode = _parsed_episode(entry)
+            if episode:
+                episodes.append(episode)
+                if len(episodes) >= limit:
                     break
-        for entry in root:
-            if _localname(entry.tag) != "entry":
-                continue
-            guid = _findtext(entry, "id")
-            if not guid:
-                continue
-            # Atom <link rel="enclosure" type="audio/...">
-            audio = None
-            episode_page_url = None
-            for child in entry:
-                if _localname(child.tag) == "link":
-                    rel = child.attrib.get("rel") or ""
-                    if rel == "enclosure":
-                        audio = child.attrib.get("href")
-                    elif rel in ("", "alternate") and not episode_page_url:
-                        episode_page_url = child.attrib.get("href")
-            episodes.append({
-                "guid": guid,
-                "title": _findtext(entry, "title"),
-                "audio_url": audio,
-                "episode_page_url": episode_page_url,
-                "duration_seconds": None,
-                "published_at": _findtext(entry, "published", "updated"),
-                "description": _findtext(entry, "summary", "content"),
-            })
-    else:
-        # Unknown root element -- not RSS, not Atom. Be defensive.
-        raise ValueError(
-            f"unrecognised feed root element: {root_name!r}")
+    return {"feed": feed, "episodes": episodes}
 
-    return {"feed": feed_meta,
-            "episodes": episodes[:limit or _EPISODES_PER_POLL_CAP]}
+
+def parse_feed_body(body: bytes | str, *, limit: int | None = None) -> dict:
+    """Parse a supplied RSS or Atom document without allowing a document type."""
+    root = ET.fromstring(body, parser=ET.XMLParser(target=source_subscriptions.PodcastTreeBuilder()))
+    return _parsed_feed(root, limit or _EPISODES_PER_POLL_CAP)
+
+
+def fetch_show_feed(url: str, limit: int) -> dict:
+    """Keep the listing fields and release each XML entry as it is read."""
+    episodes = []
+
+    def collect(entry):
+        episode = _parsed_episode(entry)
+        if episode:
+            # Match the listing's persisted title and description limits.
+            episode["description"] = (episode["description"] or "")[:2000] or None
+            episode["title"] = (episode["title"] or "")[:300]
+            episodes.append(episode)
+
+    deadline = time.monotonic() + 30
+    try:
+        with source_subscriptions.public_http_open(
+                url, headers={"User-Agent": _FEED_USER_AGENT}, timeout=_FEED_FETCH_TIMEOUT_SEC) as response:
+            root, _ = source_subscriptions.read_podcast_window(
+                response, limit, max_bytes=64 * 1024 * 1024, on_entry=collect, deadline=deadline)
+    except urllib.error.HTTPError as exc:
+        exc.close()
+        raise
+    parsed = _parsed_feed(root, limit)
+    parsed["episodes"] = episodes
+    return parsed
 
 
 # ---- HTTP fetch with conditional GET -----------------------------------
-def fetch_feed(feed_row: dict, *, http_open=None) -> tuple[bytes | None, dict | None]:
+def fetch_feed(feed_row: dict, *, http_open=None, limit: int | None = None,
+               max_bytes: int = source_subscriptions.FEED_MAX_BYTES) -> tuple[bytes | None, dict | None]:
     """Conditional HTTP GET for a feed. Returns:
       (body, response_headers) on 200
       (None,  response_headers) on 304 Not Modified
@@ -468,6 +589,8 @@ def fetch_feed(feed_row: dict, *, http_open=None) -> tuple[bytes | None, dict | 
       surfaces the error onto the feed row.
 
     We send ETag / If-Modified-Since headers when previously seen.
+    With a limit, return a valid XML document for the first entries and
+    close the response early. A zero limit only validates the feed shape.
     Reasonable headers + a tight timeout. http_open is a test injection;
     production always checks public DNS answers and every redirect."""
     url = feed_row.get("feed_url")
@@ -482,13 +605,20 @@ def fetch_feed(feed_row: dict, *, http_open=None) -> tuple[bytes | None, dict | 
         headers["If-None-Match"] = etag
     if last_mod:
         headers["If-Modified-Since"] = last_mod
+    deadline = time.monotonic() + _FEED_FETCH_TIMEOUT_SEC
     try:
         with (http_open or source_subscriptions.public_http_open)(
                 url, headers=headers, timeout=_FEED_FETCH_TIMEOUT_SEC) as resp:
-            return resp.read(), dict(resp.headers.items())
+            if limit is not None:
+                root, _ = source_subscriptions.read_podcast_window(resp, limit, max_bytes=max_bytes, deadline=deadline)
+                return ET.tostring(root, encoding="utf-8"), dict(resp.headers.items())
+            body = b"".join(source_subscriptions.bounded_http_chunks(resp, max_bytes=max_bytes, deadline=deadline))
+            return body, dict(resp.headers.items())
     except urllib.error.HTTPError as e:
         if e.code == 304:
-            return None, dict(e.headers.items()) if e.headers else {}
+            with e:
+                return None, dict(e.headers.items()) if e.headers else {}
+        e.close()
         raise
 
 
@@ -527,15 +657,18 @@ def _upsert_episodes_with_ids(
                     page_url=ep.get("episode_page_url"), candidates=suggested) is not None:
                 seen += 1
                 continue
+            raw_date = ep.get("published_at")
+            date_ms = source_subscriptions.parse_published_ms(raw_date)
             cur = conn.execute(
                 "INSERT OR IGNORE INTO podcast_episodes "
                 "(feed_id, guid, title, audio_url, episode_page_url, "
-                " duration_seconds, published_at, description, status, "
+                " duration_seconds, published_at, published_at_ms, description, status, "
                 " discovered_at, auto_ingest_requested) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)",
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)",
                 (feed_id, guid, ep.get("title"), ep.get("audio_url"),
                  ep.get("episode_page_url"), ep.get("duration_seconds"),
-                 ep.get("published_at"), ep.get("description"), now,
+                 raw_date, date_ms,
+                 ep.get("description"), now,
                  auto_ingest_requested))
             if cur.rowcount:
                 inserted += 1
@@ -545,12 +678,13 @@ def _upsert_episodes_with_ids(
                 # Migration 0022 added this field after feeds could already
                 # contain episodes. A later poll repairs those older rows
                 # without changing their feed-scoped identity or status.
-                if ep.get("episode_page_url"):
+                if ep.get("episode_page_url") or date_ms is not None:
                     conn.execute(
-                        "UPDATE podcast_episodes SET episode_page_url="
-                        "COALESCE(episode_page_url, ?) "
+                        "UPDATE podcast_episodes SET episode_page_url=COALESCE(episode_page_url, ?), "
+                        "published_at=CASE WHEN ? IS NOT NULL THEN ? ELSE published_at END, "
+                        "published_at_ms=COALESCE(?, published_at_ms) "
                         "WHERE feed_id=? AND guid=?",
-                        (ep.get("episode_page_url"), feed_id, guid))
+                        (ep.get("episode_page_url"), date_ms, raw_date, date_ms, feed_id, guid))
     return inserted, seen, inserted_ids
 
 
@@ -615,22 +749,35 @@ def poll_feed(idx, feed_id: int, *, refresh=None) -> dict:
         shaped["seen"] = int(poll.get("updated") or 0)
         shaped["new_episode_ids"] = []
         if not result.get("ok"):
-            shaped["error"] = (result.get("error") or {}).get("code", "refresh_failed")
+            detail = result.get("error") or {}
+            shaped["error_code"] = detail.get("code", "refresh_failed")
+            shaped["error"] = detail.get("message") or "Uoink could not check this feed."
         elif poll.get("ok") is False:
             shaped["ok"] = False
-            shaped["error"] = poll.get("code") or "poll_failed"
+            shaped["error_code"] = poll.get("code") or "poll_failed"
+            shaped["error"] = poll.get("message") or "Uoink could not check this feed."
+        elif result.get("backoff"):
+            shaped["last_error"] = feed.get("last_error")
         return shaped
     if not feed.get("enabled"):
         return {"ok": True, "feed_id": feed_id, "skipped": "disabled"}
     try:
-        body, headers = fetch_feed(feed)
+        body, headers = fetch_feed(feed, limit=_EPISODES_PER_POLL_CAP)
     except Exception as e:
-        log.warning("podcast feed fetch failed (%s): %s",
-                     feed.get("feed_url"), e)
+        if isinstance(e, (source_subscriptions.ServiceError, source_subscriptions.PodcastFeedError)):
+            message = str(e)
+        elif isinstance(e, urllib.error.HTTPError):
+            message = f"The podcast host returned HTTP {e.code}."
+            e.close()
+        elif isinstance(e, ET.ParseError):
+            message = "Uoink could not read the feed's XML."
+        else:
+            message = "Uoink could not reach the feed."
+        log.warning("podcast feed %s check failed: %s", feed_id, message)
         record_feed_meta(idx, feed_id, title=None, description=None,
                           homepage=None, etag=None, last_modified=None,
-                          ok=False, error=str(e))
-        return {"ok": False, "feed_id": feed_id, "error": str(e)}
+                          ok=False, error=message)
+        return {"ok": False, "feed_id": feed_id, "error": message}
     if body is None:
         # 304 Not Modified -- count as success but no new episodes.
         record_feed_meta(idx, feed_id, title=None, description=None,
@@ -643,10 +790,11 @@ def poll_feed(idx, feed_id: int, *, refresh=None) -> dict:
     try:
         parsed = parse_feed_body(body)
     except (ET.ParseError, ValueError) as e:
+        message = str(e) if isinstance(e, source_subscriptions.PodcastFeedError) else "Uoink could not read the feed's XML."
         record_feed_meta(idx, feed_id, title=None, description=None,
                           homepage=None, etag=None, last_modified=None,
-                          ok=False, error=f"parse: {e}")
-        return {"ok": False, "feed_id": feed_id, "error": f"parse: {e}"}
+                          ok=False, error=message)
+        return {"ok": False, "feed_id": feed_id, "error": message}
     inserted, seen, inserted_ids = _upsert_episodes_with_ids(
         idx, feed_id, parsed["episodes"])
     record_feed_meta(idx, feed_id,
@@ -681,7 +829,7 @@ def list_episodes(idx, *, feed_id: int | None = None,
     params.append(max(1, min(int(limit), 1000)))
     rows = idx._conn.execute(
         "SELECT * FROM podcast_episodes" + where_sql +
-        " ORDER BY published_at DESC NULLS LAST, id DESC LIMIT ?",
+        f" ORDER BY {_episode_date_sql(idx)} DESC, id DESC LIMIT ?",
         params).fetchall()
     return [dict(r) for r in rows]
 
@@ -703,19 +851,21 @@ def list_auto_ingest_candidates(
     with idx._lock:
         managed = _subscriptions().tables_present(idx._conn)
         if managed:
-            feed_ids = ([int(feed_id)] if feed_id is not None else [
-                int(r[0]) for r in idx._conn.execute(
-                    "SELECT id FROM podcast_feeds").fetchall()])
-            started: list[int] = []
-            for fid in feed_ids:
-                started.extend(_subscriptions().legacy_started_episode_ids(idx._conn, fid))
-    if managed:
-        rows: list[dict] = []
-        for episode_id in started[:max(1, min(int(limit), 50))]:
-            row = get_episode_with_feed(idx, episode_id)
-            if row is not None:
-                rows.append(row)
-        return rows
+            params = []
+            feed_filter = ""
+            if feed_id is not None:
+                feed_filter = " AND f.id=?"
+                params.append(int(feed_id))
+            params.append(max(1, min(int(limit), 50)))
+            rows = idx._conn.execute(
+                "SELECT e.*, f.feed_url, f.title AS podcast_title, f.homepage AS podcast_homepage "
+                "FROM source_capture_starts st JOIN source_items i USING(item_id, source_id) "
+                "JOIN source_subscriptions s USING(source_id) "
+                "JOIN podcast_episodes e ON e.id=i.legacy_episode_id "
+                "JOIN podcast_feeds f ON f.id=e.feed_id AND f.id=s.legacy_feed_id "
+                "WHERE st.state='started'" + feed_filter +
+                f" ORDER BY {_episode_date_sql(idx, 'e.')} DESC, e.id DESC LIMIT ?", params)
+            return [dict(row) for row in rows]
     wheres = [
         "e.auto_ingest_requested = 1",
         "e.yoink_video_id IS NULL",
@@ -734,7 +884,7 @@ def list_auto_ingest_candidates(
         "JOIN podcast_feeds f ON f.id=e.feed_id "
         "WHERE " + " AND ".join(wheres) + " "
         "ORDER BY CASE WHEN e.status='new' THEN 1 ELSE 0 END, "
-        "e.published_at DESC NULLS LAST, e.id DESC",
+        f"{_episode_date_sql(idx, 'e.')} DESC, e.id DESC",
         params,
     ).fetchall()
     shaped = [dict(row) for row in rows]
@@ -783,26 +933,6 @@ def count_daily_ingest_starts(
     return int(row[0]) if row else 0
 
 
-def _published_sort_key(row: dict) -> tuple[float, int]:
-    raw = str(row.get("published_at") or "").strip()
-    parsed = None
-    if raw:
-        try:
-            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-        except ValueError:
-            try:
-                parsed = parsedate_to_datetime(raw)
-            except (TypeError, ValueError, OverflowError):
-                parsed = None
-    if parsed is not None:
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
-        stamp = parsed.astimezone(timezone.utc).timestamp()
-    else:
-        stamp = 0.0
-    return stamp, int(row.get("id") or 0)
-
-
 def repair_stranded_auto_ingest(
         idx, *, feed_id: int | None = None, dry_run: bool = False,
         now: datetime | None = None) -> dict:
@@ -847,14 +977,14 @@ def repair_stranded_auto_ingest(
             (source_id,),
         ).fetchone()[0])
         remaining = max(0, AUTO_INGEST_BACK_CATALOG_CAP - requested)
-        candidates = [dict(row) for row in idx._conn.execute(
-            "SELECT id, published_at FROM podcast_episodes "
+        candidates = idx._conn.execute(
+            "SELECT id FROM podcast_episodes "
             "WHERE feed_id=? AND status='new' "
-            "AND auto_ingest_requested=0 AND yoink_video_id IS NULL",
-            (source_id,),
-        ).fetchall()]
-        candidates.sort(key=_published_sort_key, reverse=True)
-        selected = [int(row["id"]) for row in candidates[:remaining]]
+            "AND auto_ingest_requested=0 AND yoink_video_id IS NULL "
+            "ORDER BY published_at_ms DESC, id DESC LIMIT ?",
+            (source_id, remaining),
+        ).fetchall()
+        selected = [int(row["id"]) for row in candidates]
         selected_by_feed[source_id] = selected
         detail[str(source_id)] = len(selected)
 
@@ -916,6 +1046,85 @@ def get_episode(idx, episode_id: int) -> dict | None:
         "SELECT * FROM podcast_episodes WHERE id=?",
         (episode_id,)).fetchone()
     return dict(row) if row else None
+
+
+def saved_transcription_job(idx, job_id):
+    row = idx.get_job(job_id)
+    if row and row["kind"] == "podcast_transcribe":
+        try:
+            job = json.loads(row["metadata_json"])
+        except (TypeError, ValueError):
+            return None
+        if isinstance(job, dict):
+            return job
+    return None
+
+
+def active_transcription_jobs(idx, *, episode_id=None, waiting_only=False):
+    sql = ("SELECT metadata_json FROM jobs WHERE kind='podcast_transcribe' "
+           "AND status IN ('queued','running') AND json_valid(metadata_json) AND json_type(metadata_json)='object'")
+    params = ()
+    if episode_id is not None:
+        sql += " AND json_extract(metadata_json,'$.episode_id')=?"
+        params = (episode_id,)
+    if waiting_only:
+        sql += " AND json_extract(metadata_json,'$.current_video_phase')='awaiting_helper'"
+    with idx._lock:
+        return [json.loads(row[0]) for row in idx._conn.execute(sql + " ORDER BY rowid", params)]
+
+
+def store_waiting_transcription(idx, job, *, cancelled=False):
+    """Keep the one-shot client's durable job and episode badge in one commit."""
+    with idx.write_transaction() as conn:
+        if cancelled:
+            conn.execute("UPDATE jobs SET status=?, updated_at=?, metadata_json=? WHERE job_id=?",
+                         (job["state"], job["updated_at"], json.dumps(job), job["id"]))
+        else:
+            conn.execute("INSERT INTO jobs(job_id,kind,status,title,updated_at,metadata_json) "
+                         "VALUES (?,?,?,?,?,?)",
+                         (job["id"], job["kind"], job["state"], job["title"], job["updated_at"],
+                          json.dumps(job)))
+        conn.execute("UPDATE podcast_episodes SET transcript_status=?, transcript_model_used=?, "
+                     "transcript_error=NULL, transcript_finished_at=NULL WHERE id=?",
+                     ("none" if cancelled else "queued", job["model"], job["episode_id"]))
+
+
+PODCAST_WORKER_LOCK = "podcast-transcription-worker"
+
+
+def cancel_saved_transcription(idx, job_id, data_root):
+    """Cancel a waiting submission or a job left behind by a stopped helper."""
+    saved = saved_transcription_job(idx, job_id)
+    if not saved or saved.get("state") not in ("running", "queued"):
+        return None
+    lock = source_subscriptions.CaptureLock.acquire(
+        data_root, f"podcast-queue:{saved['episode_id']}", timeout=5)
+    if lock is None:
+        return None, "This job is starting. Try cancelling it again.", 409
+    with lock:
+        saved = saved_transcription_job(idx, job_id)
+        if not saved or saved.get("state") not in ("running", "queued"):
+            return None
+        owner = None
+        if saved.get("current_video_phase") != "awaiting_helper":
+            # A helper holds this from before it restores jobs until exit.
+            # A PID check alone would race startup or a concurrent claim.
+            owner = source_subscriptions.CaptureLock.try_acquire(data_root, PODCAST_WORKER_LOCK)
+            if owner is None:
+                return None, "The helper is starting. Try cancelling this job again.", 409
+        try:
+            if owner is not None:
+                saved = saved_transcription_job(idx, job_id)
+                if not saved or saved.get("state") not in ("running", "queued"):
+                    return None
+            now = _now_iso()
+            saved.update(state="cancelled", current_video=None, current_video_phase=None,
+                         completed_at=now, updated_at=now, message="Transcription cancelled.")
+            store_waiting_transcription(idx, saved, cancelled=True)
+        finally:
+            if owner is not None:
+                owner.release()
+        return saved, None, 200
 
 
 def find_feed_episode(idx, feed_id: int, *, audio_url=None, title=None,
@@ -1840,7 +2049,8 @@ def _episode_audio_path(data_root: Path, feed_row: dict,
     if sys.platform == "darwin":
         import _platform
         audio_format = _platform.podcast_audio_format()
-    return folder / f"{ep_slug}.{audio_format}"
+    identity = _episode_full_identity({"feed_url": feed_row.get("feed_url"), "guid": episode_row.get("guid")})[2]
+    return folder / f"{ep_slug}--{identity.removeprefix('podcast:')[:32]}.{audio_format}"
 
 
 def _record_audio_result(idx, episode_id: int, *,
@@ -1870,15 +2080,57 @@ def _is_http_url(value) -> bool:
     return parts.scheme in ("http", "https") and bool(parts.netloc)
 
 
+def audio_path_owners(conn, path):
+    path = path.resolve()
+    return [row["id"] for row in conn.execute(
+        "SELECT id,audio_local_path FROM podcast_episodes WHERE audio_local_path IS NOT NULL")
+        if Path(row["audio_local_path"]).resolve() == path]
+
+
+def _reuse_recorded_audio(idx, episode_id, recorded, data_root, target):
+    if not recorded or not Path(recorded).is_file():
+        return None
+    try:
+        saved = _owned_file(data_root, recorded)
+    except FileNotFoundError:
+        return None
+    if saved is None or saved.suffix.lower() not in (".mp3", ".wav"):
+        return None
+    # Old title-only names have no double hyphen. A new filename also has
+    # to match the episode's identity, even if its display title changed.
+    _, separator, identity = saved.stem.rpartition("--")
+    if separator and not target.stem.endswith("--" + identity):
+        return None
+    with ExitStack() as held:
+        if saved != target:
+            lock = source_subscriptions.CaptureLock.acquire(data_root, _audio_lock_key(saved), timeout=5)
+            if lock is None:
+                return {"ok": False, "error": "Episode audio is busy. Try again."}
+            held.enter_context(lock)
+        with idx.write_transaction() as conn:
+            owners = audio_path_owners(conn, saved)
+            if len(owners) > 1:
+                # No row can identify this legacy recording. Preserve the file and transcripts.
+                conn.executemany("UPDATE podcast_episodes SET audio_local_path=NULL, audio_size_bytes=NULL, "
+                                 "audio_downloaded_at=NULL WHERE id=?", [(owner,) for owner in owners])
+        if owners != [episode_id] or not saved.is_file():
+            return None
+        size = saved.stat().st_size
+        if not size:
+            return None
+        _record_audio_result(idx, episode_id, local_path=str(saved), size_bytes=size,
+                             error=None, status=EPISODE_STATUS_DOWNLOADED)
+        return {"ok": True, "episode_id": episode_id, "local_path": str(saved),
+                "size_bytes": size, "skipped_existing": True}
+
+
 def download_episode_audio(idx, episode_id: int, *,
                             data_root: Path,
                             ytdlp_cmd: list[str] | None = None,
                             timeout_sec: int = 600,
                             resolve_url=None) -> dict:
     """Download an episode's MP3 via yt-dlp + ffmpeg into the per-feed
-    folder. Idempotent -- if the file already exists at the canonical
-    path AND has non-zero size we mark status='downloaded' without
-    re-downloading. Returns a structured result the endpoint surfaces.
+    folder. Reuse a complete download only when its row owns the file.
     resolve_url is an explicit test injection for URL admission."""
     episode = get_episode(idx, episode_id)
     if episode is None:
@@ -1903,23 +2155,26 @@ def download_episode_audio(idx, episode_id: int, *,
     if lock is None:
         return {"ok": False, "error": "Episode audio is busy. Try again."}
     with lock:
-        return _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, timeout_sec, resolve_url)
+        # Another downloader may have finished while we waited for the lock.
+        episode = get_episode(idx, episode_id)
+        if not episode:
+            return {"ok": False, "error": "Episode was removed."}
+        cached = _reuse_recorded_audio(idx, episode_id, episode.get("audio_local_path"), data_root, out_path)
+        if cached is not None:
+            return cached
+        if out_path.exists():
+            with idx._lock:
+                if any(owner != episode_id for owner in audio_path_owners(idx._conn, out_path)):
+                    return {"ok": False, "error": "Another episode owns this audio file."}
+        # yt-dlp can itself reuse existing output. Give it a fresh directory,
+        # then publish only its completed result, on the same filesystem.
+        with tempfile.TemporaryDirectory(dir=out_path.parent, prefix=".download-") as tmp:
+            return _download_audio_file(idx, episode_id, episode, out_path, Path(tmp),
+                                        ytdlp_cmd, timeout_sec, resolve_url)
 
 
-def _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, timeout_sec, resolve_url):
+def _download_audio_file(idx, episode_id, episode, out_path, staging, ytdlp_cmd, timeout_sec, resolve_url):
     import _platform
-    # Idempotent: inspect the final postprocessed path (WAV on Darwin,
-    # MP3 elsewhere), rather than yt-dlp's intermediate download.
-    if out_path.exists() and out_path.stat().st_size > 0:
-        _record_audio_result(idx, episode_id,
-                              local_path=str(out_path),
-                              size_bytes=out_path.stat().st_size,
-                              error=None,
-                              status=EPISODE_STATUS_DOWNLOADED)
-        return {"ok": True, "episode_id": episode_id,
-                "local_path": str(out_path),
-                "size_bytes": out_path.stat().st_size,
-                "skipped_existing": True}
 
     try:
         audio_url = (resolve_url or source_subscriptions.resolve_public_http_url)(
@@ -1943,7 +2198,7 @@ def _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, ti
         set_episode_status(idx, episode_id, EPISODE_STATUS_QUEUED)
 
     # Drop the extension; yt-dlp adds the selected format after conversion.
-    out_stem = out_path.with_suffix("")
+    out_stem = staging / "audio"
     cmd = list(ytdlp_cmd or [])
     if not cmd:
         # Lazy import to avoid a hard server.py dependency from here.
@@ -2006,14 +2261,16 @@ def _download_audio_file(idx, episode_id, feed, episode, out_path, ytdlp_cmd, ti
                               size_bytes=None, error=err,
                               status=EPISODE_STATUS_NEW)
         return {"ok": False, "episode_id": episode_id, "error": err}
-    if not out_path.exists() or out_path.stat().st_size == 0:
+    completed = out_stem.with_suffix(out_path.suffix)
+    if not completed.is_file() or completed.stat().st_size == 0:
         _record_audio_result(idx, episode_id, local_path=None,
                               size_bytes=None,
                               error="output file missing post-download",
                               status=EPISODE_STATUS_NEW)
         return {"ok": False, "episode_id": episode_id,
                 "error": "output file missing"}
-    size = out_path.stat().st_size
+    size = completed.stat().st_size
+    os.replace(completed, out_path)
     _record_audio_result(idx, episode_id, local_path=str(out_path),
                           size_bytes=size, error=None,
                           status=EPISODE_STATUS_DOWNLOADED)

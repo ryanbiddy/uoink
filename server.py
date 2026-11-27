@@ -3709,7 +3709,7 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
             *YTDLP_CMD,
             "-f", "bestaudio/best",
             "-o", str(tmp_dir / "audio.%(ext)s"),
-            url,
+            "--", url,
         ],
         cancel_event=cancel_event,
         check=True,
@@ -4257,6 +4257,9 @@ def _compute_transcript_reliability(
             url = (sidecar.get("url") or "").strip()
             if not url:
                 return {"ok": False, "error": "uoink has no source URL"}
+            if (sidecar.get("platform") == "podcast" or sidecar.get("source_type") == "episode"
+                    or vid.startswith("episode_")):
+                url = source_subscriptions.resolve_public_http_url(url)
             with tempfile.TemporaryDirectory(prefix="uoink-reliability-") as tmp:
                 audio = _download_reliability_audio(url, Path(tmp))
                 reliability = run_detection(audio)
@@ -7018,33 +7021,35 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     def browser_open(target, **kwargs):
         return opener(target, headers={"User-Agent": user_agent}, **kwargs)
 
-    raw_path = output_folder / "thumbnail.raw"
+    deadline = time.monotonic() + 30
     try:
-        with browser_open(
-                url, timeout=30) as resp, open(raw_path, "wb") as f:
-            f.write(resp.read())
-    except Exception as e:
-        log.warning("thumbnail download failed: %s", e)
-        return None
-
-    jpg_path = output_folder / "thumbnail.jpg"
-    try:
-        _run_subprocess(
-            [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
-             "-loglevel", "error", "-y",
-             "-i", str(raw_path), str(jpg_path)],
-            cancel_event=cancel_event,
-            check=True,
-            stderr=subprocess.PIPE,
-        )
-    except subprocess.CalledProcessError as e:
-        stderr = (e.stderr or b"").decode("utf-8", errors="ignore").strip()
+        with tempfile.TemporaryDirectory(dir=output_folder, prefix=".thumbnail-") as temp:
+            raw_path = Path(temp) / "image"
+            jpg_path = Path(temp) / "thumbnail.jpg"
+            try:
+                with browser_open(url, timeout=8) as resp, raw_path.open("wb") as dest:
+                    for chunk in source_subscriptions.bounded_http_chunks(
+                            resp, max_bytes=8 * 1024 * 1024, deadline=deadline):
+                        dest.write(chunk)
+            except Exception as exc:
+                log.warning("thumbnail download failed: %s", exc)
+                return None
+            _run_subprocess(
+                [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+                 "-loglevel", "error", "-y", "-f", "image2pipe", "-max_pixels", "16777216",
+                 "-i", str(raw_path), "-frames:v", "1", str(jpg_path)],
+                cancel_event=cancel_event, check=True, timeout=15, stderr=subprocess.PIPE,
+            )
+            if jpg_path.is_file() and jpg_path.stat().st_size:
+                return jpg_path.replace(output_folder / "thumbnail.jpg")
+    except subprocess.TimeoutExpired:
+        log.warning("thumbnail conversion timed out")
+    except subprocess.CalledProcessError as exc:
+        stderr = (exc.stderr or b"").decode("utf-8", errors="ignore").strip()
         log.warning("ffmpeg thumbnail convert failed: %s", stderr)
-        return None
-    finally:
-        raw_path.unlink(missing_ok=True)
-
-    return jpg_path if jpg_path.exists() else None
+    except OSError as exc:
+        log.warning("could not save thumbnail: %s", exc)
+    return None
 
 
 def _x_video_poster_url(extract_result: dict) -> str | None:
@@ -11077,6 +11082,12 @@ _CAPTURE_SOURCES = {
         "note": ("Adds the RSS feed and watches for new episode metadata. "
                  "Audio processing stays off until Auto-ingest is enabled."),
     },
+    "podcast_episode": {
+        "label": "Podcast episode",
+        "endpoint": "/podcasts/feeds",
+        "payload_key": "feed_url",
+        "note": "Looks up this episode on Apple Podcasts and queues its audio for local transcription.",
+    },
     "web_page": {
         "label": "Article / web page",
         "endpoint": "/extract/page",
@@ -11147,6 +11158,10 @@ def _classify_capture_url(raw: str) -> dict:
     hn_id = hn_extractor.item_id(text)
     if hn_id:
         return _result("hn_thread", hn_extractor.ITEM_URL + hn_id)
+    apple_ids = podcasts.apple_link_ids(text)
+    if apple_ids:
+        return _result("podcast_episode" if apple_ids[1] is not None else "podcast_feed",
+                       podcasts._validate_feed_url(text))
     if _looks_like_feed_url(text):
         canonical, _platform = _normalize_any_url(text)
         return _result("podcast_feed", canonical or text.strip())
@@ -11318,6 +11333,11 @@ def _suite_capture_start(body) -> tuple[int, dict]:
             400, "unsupported_url", "Uoink can't read this link. YouTube, X, "
             "Reddit threads and most web pages work.")
     canonical = route["canonical"]
+
+    if source == "podcast_episode":
+        return _suite_capture_error(
+            400, "unsupported_url", "Paste this episode link in the Uoink dashboard. "
+            "Suite capture cannot track podcast episode downloads.")
 
     # Already saved: never recapture.
     try:
@@ -12761,7 +12781,8 @@ def _restore_jobs_from_disk() -> None:
     Named for historical continuity; the source is now index.db, not
     jobs.json (which _migrate_jobs_json_to_index folds in once)."""
     try:
-        rows = _get_index().list_jobs(limit=1000)
+        idx = _get_index()
+        rows = idx.list_jobs(limit=1000)
     except Exception as e:
         log.warning("job restore from the index failed: %s", e)
         return
@@ -12774,9 +12795,22 @@ def _restore_jobs_from_disk() -> None:
             public = None
         if not isinstance(public, dict):
             continue
+        if public.get("kind") == "podcast_transcribe" and public.get("current_video_phase") == "awaiting_helper":
+            # These may still be cancelled by the submitting client during
+            # startup. Claim them under the episode lock after normal restore.
+            continue
         job = _validate_persisted_job(public)
         if job is not None:
             restored[job["id"]] = job
+    if len(rows) == 1000:
+        # Activity history is capped. A still-active transcription can be
+        # older than all 1,000 visible rows and must also resume after boot.
+        for saved in podcasts.active_transcription_jobs(idx):
+            if saved.get("id") in restored or saved.get("current_video_phase") == "awaiting_helper":
+                continue
+            job = _validate_persisted_job(saved)
+            if job is not None:
+                restored[job["id"]] = job
     with _jobs_lock:
         _jobs.clear()
         _jobs.update(restored)
@@ -13047,6 +13081,8 @@ def _get_public_job(job_id: str) -> dict | None:
         public = _public_job(job) if job else None
         if public and isinstance(public.get("result"), dict):
             public["result"] = dict(public["result"])
+    if public is None:
+        return podcasts.saved_transcription_job(_get_index(), job_id)
     # Only an individual job request loads corpus text. Lists, SSE snapshots,
     # and the retained job record stay small; file I/O never holds _jobs_lock.
     if public and public["state"] in _JOB_TERMINAL_STATES:
@@ -13151,6 +13187,10 @@ def _podcast_transcription_worker() -> None:
                     vocabulary_hint = _podcast_initial_prompt(episode_id)
                 except Exception:
                     vocabulary_hint = None  # a hint is never worth a failed job
+                idx = _get_index()
+                with idx._lock:
+                    if podcasts.audio_path_owners(idx._conn, audio_path) != [episode_id]:
+                        raise ValueError("Download this episode again so Uoink can identify its recording.")
                 with (source_subscriptions.capture_context(
                         standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
                         if standing_start else contextlib.nullcontext()):
@@ -13771,6 +13811,7 @@ def _admit_podcast_transcription(
         episode_id: int, *, model: str | None = None,
         language: str | None = None, diarize: bool = False,
         consent_given: bool = False,
+        defer_worker: bool = False,
         publish_to_corpus: bool = False,
         source_start_id: str | None = None,
         source_owner_token: str | None = None) -> tuple[dict, int]:
@@ -13780,7 +13821,8 @@ def _admit_podcast_transcription(
     capture ledger row; the worker completes or fails that row with the owner
     token when the job ends (Phase 3, "Atomic starts": the start id is the
     job's idempotency identity)."""
-    episode = podcasts.get_episode(_get_index(), episode_id)
+    idx = _get_index()
+    episode = podcasts.get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": "episode not found"}, 404
     audio_path_raw = episode.get("audio_local_path")
@@ -13800,29 +13842,51 @@ def _admit_podcast_transcription(
         return refusal, 501
     with _jobs_lock:
         existing = next((
-            _public_job(job) for job in _jobs.values()
+            job for job in _jobs.values()
             if job.get("kind") == "podcast_transcribe"
             and job.get("episode_id") == episode_id
             and job.get("state") not in _JOB_TERMINAL_STATES
         ), None)
-    if existing:
-        if publish_to_corpus and not existing.get("publish_to_corpus"):
-            existing = _update_job(
-                existing["id"], publish_to_corpus=True,
-                message="Podcast transcription queued for corpus publish.")
-        if source_start_id and not existing.get("source_start_id"):
-            # A manual job already owns this episode: the standing start adopts
-            # it (one pipeline per canonical item) and is completed by it.
-            existing = _update_job(
-                existing["id"], source_start_id=source_start_id,
-                publish_to_corpus=True)
-            with _jobs_lock:
-                if existing and existing["id"] in _jobs:
-                    _jobs[existing["id"]]["_source_owner_token"] = source_owner_token
-        return {
-            "ok": True, "job_id": existing["id"], "job": existing,
-            "reused_existing": True,
-        }, 202
+        if existing:
+            if source_start_id and not existing.get("source_start_id"):
+                existing.update(source_start_id=source_start_id, _source_owner_token=source_owner_token)
+            if publish_to_corpus or source_start_id:
+                existing.update(publish_to_corpus=True, updated_at=_now_iso())
+                _persist_jobs_locked(existing)
+            public = _public_job(existing)
+            return {"ok": True, "job_id": public["id"], "job": public, "reused_existing": True}, 202
+    if defer_worker or episode.get("transcript_status") in ("queued", "running"):
+        saved = podcasts.active_transcription_jobs(idx, episode_id=episode_id)
+        if saved:
+            job = saved[0]
+            if source_start_id and not job.get("source_start_id"):
+                job["source_start_id"] = source_start_id
+            if publish_to_corpus or source_start_id:
+                job.update(publish_to_corpus=True, updated_at=_now_iso())
+            if not defer_worker:
+                owner = source_owner_token if job.get("source_start_id") == source_start_id else None
+                job = _start_waiting_podcast_job(job, owner_token=owner)
+            elif _validate_persisted_job(job) is None:
+                job = None
+            elif publish_to_corpus or source_start_id:
+                # The episode lock fences awaiting_helper pickup. For other
+                # phases also fence restoration by a helper that is starting.
+                with contextlib.ExitStack() as held:
+                    if job.get("current_video_phase") != "awaiting_helper":
+                        owner = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, podcasts.PODCAST_WORKER_LOCK)
+                        if owner is None:
+                            return {"ok": False, "error": "The helper is starting. Try this episode again."}, 409
+                        held.enter_context(owner)
+                        current = podcasts.saved_transcription_job(idx, job["id"])
+                        if not current or current.get("state") in _JOB_TERMINAL_STATES:
+                            return {"ok": False, "error": "The transcription job has finished."}, 409
+                        current.update(publish_to_corpus=True, updated_at=_now_iso(),
+                                       source_start_id=current.get("source_start_id") or source_start_id)
+                        job = current
+                    idx.upsert_job(_index_job_row(job))
+            if job is None:
+                return {"ok": False, "error": "The saved transcription job could not be read."}, 409
+            return {"ok": True, "job_id": job["id"], "job": job, "reused_existing": True}, 202
     if not whisper_runner.is_transcription_available():
         return {
             "ok": False, "whisperx_available": False,
@@ -13872,6 +13936,12 @@ def _admit_podcast_transcription(
         "source_start_id": source_start_id,
         "_source_owner_token": source_owner_token,
     }
+    if defer_worker:
+        job.update(current_video_phase="awaiting_helper",
+                   message="Queued. Waiting for the Uoink helper to start transcription.")
+        public = _public_job(job)
+        podcasts.store_waiting_transcription(_get_index(), public)
+        return {"ok": True, "job_id": job_id, "job": public}, 202
     whisper_runner.update_episode_transcript_state(
         _get_index(), episode_id, status=whisper_runner.STATUS_QUEUED,
         model_used=selected_model)
@@ -13879,6 +13949,35 @@ def _admit_podcast_transcription(
     _podcast_transcription_queue.put(job_id)
     _ensure_podcast_transcription_worker()
     return {"ok": True, "job_id": job_id, "job": public}, 202
+
+
+def _start_waiting_podcast_job(saved, *, owner_token=None):
+    """Caller holds the episode admission lock. Hand the disk row to the worker."""
+    job = _validate_persisted_job(saved)
+    if job is None:
+        return None
+    job["_source_owner_token"] = owner_token
+    job["message"] = "Podcast transcription queued."
+    public = _add_job_record(job)
+    _podcast_transcription_queue.put(job["id"])
+    _ensure_podcast_transcription_worker()
+    return public
+
+
+def _pickup_waiting_podcast_jobs():
+    # Also covers a client submission that crossed helper startup.
+    idx = _get_index()
+    for job in podcasts.active_transcription_jobs(idx, waiting_only=True):
+        episode_id = job.get("episode_id")
+        if type(episode_id) is not int or not job.get("id"):
+            continue
+        lock = source_subscriptions.CaptureLock.acquire(
+            DATA_ROOT, f"podcast-queue:{episode_id}", timeout=0)
+        if lock is not None:
+            with lock:
+                saved = podcasts.saved_transcription_job(idx, job["id"]) or {}
+                if saved.get("current_video_phase") == "awaiting_helper":
+                    _start_waiting_podcast_job(saved)
 
 
 def _resume_podcast_transcription_jobs() -> int:
@@ -15171,6 +15270,55 @@ def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
     return result
 
 
+def _follow_podcast_link(feed_url: str, *, poll_interval_min=60, auto_ingest=False, display_name=None) -> dict:
+    """Resolve a pasted show or episode before creating anything in the library."""
+    apple = podcasts.apple_link_ids(feed_url)
+    show_title = selected = None
+    if apple:
+        feed_url, show_title, selected = podcasts.resolve_apple_podcast(*apple)
+    try:
+        url = source_subscriptions.normalize_podcast_feed_url(podcasts._validate_feed_url(feed_url) or "")
+    except source_subscriptions.ServiceError as exc:
+        raise ValueError(str(exc)) from exc
+    # A follow only needs to recognize the RSS channel or Atom root on this
+    # thread. Looking up an individual episode needs the bounded episode list.
+    parsed = podcasts.read_pasted_feed(url, limit=200 if selected else 0)
+    title = (str(display_name or show_title or parsed["feed"]["title"] or "").strip() or None)
+    idx = _get_index()
+    if selected:
+        episode = podcasts.match_apple_episode(parsed["episodes"], selected)
+        if not podcasts._is_http_url(episode.get("audio_url")):
+            raise ValueError("This episode has no audio to save.")
+        problem = _podcast_suggestion_setup_problem()
+        if problem:
+            raise ValueError(problem)
+        row = _register_show_episode(idx, url, title, episode)
+        feed = podcasts.get_feed(idx, row["feed_id"])
+        job = show_capture.create(DATA_ROOT, url, title=title, selected_episode=episode)
+        if _TOKEN_OWNED:
+            _show_capture_wake.set()
+        return {"ok": True, "feed": feed, "episode_id": row["id"], "show_job_id": job["id"],
+                "message": ("This episode capture is paused. Resume it in Sources under Save a whole show."
+                            if job["state"] == show_capture.PAUSED else
+                            "Episode queued. Track it in Sources under Save a whole show.")}
+    registered = _source_service().follow_podcast(url, title=title, interval=int(poll_interval_min))
+    source = registered["source"]
+    feed_id = (source.get("legacy") or {}).get("feed_id")
+    feed = podcasts.get_feed(idx, feed_id) if feed_id is not None else None
+    if feed is None:
+        raise ValueError("Uoink couldn't find the podcast feed for this subscription.")
+    feed["source_id"] = source["source_id"]
+    if auto_ingest:
+        feed["consent_required"] = True
+    hostname = urlparse(url).hostname
+    title_pending = str(feed.get("title") or "").strip().casefold() in ("", "untitled podcast", hostname)
+    if title_pending:
+        feed["title"] = hostname
+        if _TOKEN_OWNED:
+            podcasts.fetch_title_in_background(idx, feed)
+    return {"ok": True, "feed": feed, "created": registered["created"], "title_pending": title_pending}
+
+
 # ---- 3.17 podcast suggestions ---------------------------------------------
 _podcast_suggestion_saves: dict[str, dict] = {}
 _podcast_suggestion_saves_lock = threading.Lock()
@@ -15515,6 +15663,7 @@ def _start_podcast_feed_scheduler_thread() -> threading.Thread:
     def _runner():
         while True:
             try:
+                _pickup_waiting_podcast_jobs()
                 _podcast_feed_scheduler_tick()
                 _source_availability_tick()
             except Exception:
@@ -16020,6 +16169,12 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
 
 def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
     """Cancel a running async job. Returns (job, error, status)."""
+    with _jobs_lock:
+        known = job_id in _jobs
+    if not known:
+        cancelled = podcasts.cancel_saved_transcription(_get_index(), job_id, DATA_ROOT)
+        if cancelled:
+            return cancelled
     with _jobs_lock:
         job = _jobs.get(job_id)
         if not job:
@@ -19102,14 +19257,13 @@ def _register_show_episode(idx, feed_url: str, show_title, episode: dict) -> dic
     """Put one feed episode in the podcast tables under its real GUID
     without following the show (the same rule as a suggestion save: a show
     not already followed is added switched off, so nothing polls it)."""
-    existed = _show_podcast_feed(idx, feed_url) is not None
-    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False, enabled=False, title=show_title)
     feed_id = int(feed["id"])
-    if not existed:
-        podcasts.set_feed_enabled(idx, feed_id, False)
-        podcasts.record_feed_meta(
-            idx, feed_id, title=show_title or None, description=None,
-            homepage=None, etag=None, last_modified=None, ok=True)
+    with idx._lock:
+        exact = idx._conn.execute("SELECT * FROM podcast_episodes WHERE feed_id=? AND guid=?",
+                                  (feed_id, episode.get("guid"))).fetchone()
+    if exact is not None:
+        return dict(exact)
     same = podcasts.find_feed_episode(
         idx, feed_id, audio_url=episode.get("audio_url"), title=episode.get("title"),
         published=episode.get("published_at"))
@@ -19199,13 +19353,12 @@ class _ServerShowBackend:
 
     def fetch_feed(self, url):
         try:
-            body, _headers = podcasts.fetch_feed({"feed_url": url})
+            return podcasts.fetch_show_feed(url, show_capture.MAX_EPISODES + 1)
+        except (TimeoutError, source_subscriptions.ServiceError, source_subscriptions.PodcastFeedError) as exc:
+            raise show_capture.ShowCaptureError(str(exc), "fetch_failed") from None
         except Exception:
             raise show_capture.ShowCaptureError(
                 "Uoink couldn't open that feed. Check the link.", "fetch_failed") from None
-        if not body:
-            raise show_capture.ShowCaptureError("That feed came back empty.", "fetch_failed")
-        return body
 
     def in_library(self, job, episode):
         if episode.get("video_id"):
@@ -22490,17 +22643,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False, "error": "auto_ingest (boolean) required"})
         try:
-            row = podcasts.add_feed(_get_index(), feed_url,
-                                       poll_interval_min=int(interval),
-                                       auto_ingest=auto_ingest)
-            if not row.get("title"):
-                row["title"] = urlparse(row["feed_url"]).hostname
+            result = _follow_podcast_link(feed_url, poll_interval_min=interval, auto_ingest=auto_ingest,
+                                          display_name=body.get("display_name"))
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:
             log.exception("/podcasts/feeds POST failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
-        return self._send_json(200, {"ok": True, "feed": row})
+        return self._send_json(200, result)
 
     def _handle_podcasts_feed_remove(self, body):
         if not isinstance(body, dict):
@@ -22801,22 +22951,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
             item = suggestions.get_item(DATA_ROOT, sid) or {}
-            title = (str(item.get("show") or "").strip() or urlparse(feed_url).hostname or "")[:200]
-            register = _source_service().register_source(_source_operator_context(), {
-                "kind": "podcast_rss", "url": feed_url, "display_name": title})
-            if not register.get("ok"):
-                raise ValueError("This feed could not be scheduled for checks.")
-            source = register["source"]
-            feed_id = source["legacy"]["feed_id"]
-            with _get_index().write_transaction() as conn:
-                if not feed_id or not conn.execute(
-                        "UPDATE source_subscriptions SET detection_enabled=1, follow_feed=1, "
-                        "display_name=coalesce(nullif(trim(display_name),''), ?) "
-                        "WHERE source_id=? AND archived=0 AND legacy_feed_id=?",
-                        (title, source["source_id"], feed_id)).rowcount:
-                    raise ValueError("This feed could not be scheduled for checks.")
-                conn.execute("UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''), ?) "
-                             "WHERE id=?", (title, feed_id))
+            result = _follow_podcast_link(feed_url, display_name=item.get("show"))
+            feed_id = result["feed"]["id"]
         except suggestions.SuggestionError as exc:
             status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
             return self._send_json(status, {"ok": False, "error": str(exc)})
@@ -28055,7 +28191,7 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
 
 
 def main(*, show_dashboard: bool = False, quiet: bool = False):
-    global _active_migration_version, _TOKEN_OWNED
+    global _TOKEN_OWNED
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
     # writers all mkdir(parents=True, exist_ok=True) their own parents).
@@ -28117,7 +28253,23 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         else:
             log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
         sys.exit(1)
-    # This process owns the port, so its token is the one clients must read.
+    owner = source_subscriptions.CaptureLock.acquire(DATA_ROOT, podcasts.PODCAST_WORKER_LOCK, timeout=10)
+    if owner is None:
+        server.server_close()
+        raise RuntimeError("Another helper is using this library's podcast transcription queue.")
+    with owner:
+        try:
+            _serve_owned_library(server, show_dashboard=show_dashboard, quiet=quiet)
+        finally:
+            _TOKEN_OWNED = False
+            server.server_close()
+
+
+def _serve_owned_library(server, *, show_dashboard, quiet):
+    global _active_migration_version, _TOKEN_OWNED
+    import atexit
+
+    # The port and the library belong to this helper.
     _persist_token(TOKEN)
     _TOKEN_OWNED = True
     # 3.18: the helper never loads a speech model itself. Each transcription
@@ -28209,7 +28361,6 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
     except OSError:
         pass
-    import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
     if isolated is not None:
         try:
@@ -28391,7 +28542,6 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
             # close(), not pause(): a pause here was saved and kept semantic
             # search paused after every orderly restart.
             _local_search_singleton.close()
-        server.server_close()
 
 
 def _print_json(payload: dict) -> None:
