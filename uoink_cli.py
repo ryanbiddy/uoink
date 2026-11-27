@@ -882,6 +882,12 @@ def text_item(payload, index):
                 "SELECT n.name FROM item_shelves s JOIN shelf_nodes n USING(version_id,shelf_id) "
                 "WHERE s.video_id=? AND n.retired=0 ORDER BY s.is_primary DESC, n.name", (identity,))
             lines.append("Shelf: " + (", ".join(terminal_label(r[0]) for r in shelves) or "Unshelved"))
+        # 3.18.1: the original publish day and where the files are on disk.
+        if row.get("published_day"):
+            lines.append("Published: " + terminal_label(row["published_day"]))
+        saved_file = row.get("corpus_path") or row.get("sidecar_path")
+        if saved_file:
+            lines.append("Folder: " + terminal_label(str(Path(saved_file).parent)))
         admission = payload.get("corpus_admission") or {}
         if admission.get("ok") and row.get("corpus_path"):
             import library_resources

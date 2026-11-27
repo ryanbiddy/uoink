@@ -24,6 +24,17 @@ def _bulky_record():
     }
 
 
+def test_recent_saves_keep_their_places_when_unfinished_sample_exceeds_the_wire_limit():
+    saves = [{"slug": str(i)} for i in range(100)]
+    reply = {"ok": True, "yoinks": saves, "unfinished_capture_count": 1000,
+             "unfinished_captures": [{"title": "x" * 8000} for _ in range(20)]}
+    result = tools.cap_tool_result(reply, CAP)
+    assert result["yoinks"] == saves
+    assert result["unfinished_capture_count"] == 1000
+    assert len(result["unfinished_captures"]) < 20 and _size(result) <= CAP
+    assert len(reply["unfinished_captures"]) == 20
+
+
 def test_small_reply_is_untouched():
     reply = {"ok": True, "video_id": "x_1", "title": "short"}
     assert tools.cap_tool_result(reply, CAP) is reply

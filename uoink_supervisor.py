@@ -443,6 +443,7 @@ class Supervisor:
             shown = first and "--show-dashboard" in self.first_args
             first = False
             self.save(status="starting", last_start_at=stamp(), ready_at=None,
+                      supervisor_run_id=run_id, helper_pid=None,
                       reason="Waiting for helper readiness.", action="")
             env = dict(os.environ, UOINK_SUPERVISOR_RUN_ID=run_id, PYTHONUNBUFFERED="1")
             child = None

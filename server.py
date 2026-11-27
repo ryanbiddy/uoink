@@ -83,7 +83,10 @@ def _read_version() -> str:
             # import before it can bind the port. Degrade to a sentinel so the
             # post-install verifier can report a concrete mismatch.
             return "0.0.0-unknown"
-    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+    number = r"(?:0|[1-9][0-9]*)"
+    identifier = rf"(?:{number}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+    semver = rf"{number}\.{number}\.{number}(?:-{identifier}(?:\.{identifier})*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    if not re.fullmatch(semver, version):
         raise RuntimeError(f"Invalid VERSION file value: {version!r}")
     return version
 

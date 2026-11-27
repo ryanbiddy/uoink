@@ -65,6 +65,7 @@ function posixDeps(t, extra = {}) {
     stderr: err,
     isTTY: false,
     counterBase: null,
+    helperHealth: async () => { throw new Error('tests never probe the real helper port'); },
     run: async (cmd, args, opts = {}) => {
       calls.run.push({ cmd, args, env: opts.env || {} });
       return { code: 0 };

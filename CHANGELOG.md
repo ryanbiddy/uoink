@@ -24,6 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - On Windows, reopening Uoink from the Start menu or tray brings the dashboard forward in your Windows session and restores it if minimized. Item and tab links keep your unsaved Writing Studio draft. If the dashboard can't come forward, Uoink opens a new window. If the window can't start, the link opens in your browser.
 - On a phone-width window the Library search box shows "Search or paste a link" instead of a cut-off hint. Wider windows keep the full hint.
 - `/health` adds `whisper_model_downloaded`, which says whether the selected transcription model is on this computer. The older `whisperx_model_loaded` stays with the same value but never meant the model was in memory. `transcription_worker` reports that.
+- `npx uoink` checks the copy it will replace and tells you whether it will update, reinstall or downgrade it. Replacing a newer copy or one with an unreadable version requires `--allow-downgrade`. Add `--yes` to skip the confirmation. If the new helper should start, the installer checks its identity and version for up to 90 seconds and reports any launch failure.
+- Your AI agent can see the 20 newest unfinished captures and how many there are in total. Asking for an interrupted capture by folder name shows whether Finish can reuse the local video, needs a download or is unavailable. This includes captures interrupted on 3.17 or earlier.
+- `uoink --text get <id>` also shows the date the video or post first came out and the folder its files are in, next to the source, save date, shelf and the saved text with its timestamps.
 
 ## [3.18.0] - 2026-11-22
 

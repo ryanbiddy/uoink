@@ -7,3 +7,6 @@ mcp-types==2.3.0
 httpx2==2.16.2
 httpcore2==2.16.2
 truststore==0.10.5
+# Audio decoding in test_asr_quality needs both installer pins.
+numpy==2.4.6
+av==18.0.0
