@@ -982,7 +982,7 @@ def test_tick_releases_lock_if_thread_cannot_start(helper, idx, monkeypatch, cap
     assert "source availability tick crashed" in caplog.text
 
 
-def test_existing_scheduler_calls_availability_after_podcast_tick(helper, monkeypatch):
+def test_existing_scheduler_calls_availability_after_podcast_tick(helper, idx, monkeypatch):
     events, threads = [], []
     class StopLoop(BaseException):
         pass
@@ -991,6 +991,7 @@ def test_existing_scheduler_calls_availability_after_podcast_tick(helper, monkey
     def thread(**kwargs):
         threads.append(kwargs)
         return SimpleNamespace(start=lambda: None)
+    monkeypatch.setattr(helper, "_get_index", lambda: idx)
     monkeypatch.setattr(helper, "_podcast_feed_scheduler_tick", lambda: events.append("podcasts"))
     monkeypatch.setattr(helper, "_source_availability_tick", lambda: events.append("availability"))
     monkeypatch.setattr(helper.time, "sleep", sleep)

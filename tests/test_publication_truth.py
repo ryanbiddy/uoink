@@ -724,6 +724,7 @@ def test_standing_save_failure_is_terminal_for_downloads(publication, monkeypatc
                               _ensure_ownership=Mock(), holds_execution=lambda start: True,
                               release=Mock())
     source_api = SimpleNamespace(
+        check_public_http_url=state.scope["source_subscriptions"].check_public_http_url,
         video_watch_url=lambda video_id: URL_A,
         CompletionProof=lambda *args: args,
         CaptureOutcome=lambda status: SimpleNamespace(status=status),

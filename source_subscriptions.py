@@ -3905,6 +3905,8 @@ class SourceSubscriptionService:
                  item_id))
             if existing.get("legacy_episode_id") is not None:
                 _refresh_podcast_date(conn, existing["legacy_episode_id"], (obs.metadata or {}).get("published_raw"))
+            else:
+                self._project_legacy(conn, source, item_id, obs, now)
             updated += 1
         return {"inserted": inserted, "updated": updated, "linked": linked}
 
@@ -5359,10 +5361,19 @@ def legacy_started_episode_ids(conn, feed_id: int) -> list[int]:
 def _refresh_podcast_date(conn, episode_id: int, raw) -> None:
     """Apply a newly supplied or corrected date without erasing a known date."""
     ms = parse_published_ms(raw)
-    if ms is not None:
+    if ms is None:
+        return
+    try:
         conn.execute("UPDATE podcast_episodes SET published_at=?, published_at_ms=? WHERE id=? "
                      "AND (published_at IS NOT ? OR published_at_ms IS NOT ?)",
                      (raw, ms, episode_id, raw, ms))
+    except sqlite3.OperationalError as exc:
+        if "no such column: published_at_ms" not in str(exc):
+            raise
+        # A pre-0040 library stores the feed date as text. Its migration
+        # derives the sortable timestamp from this value.
+        conn.execute("UPDATE podcast_episodes SET published_at=? WHERE id=? AND published_at IS NOT ?",
+                     (raw, episode_id, raw))
 
 
 def project_podcast_episode(conn, source: dict, item_id: str, entry_id: str, title,
@@ -5382,15 +5393,15 @@ def project_podcast_episode(conn, source: dict, item_id: str, entry_id: str, tit
         if adopted is not None:
             row = (adopted,)
         else:
-            inserted = conn.execute(
+            conn.execute(
                 "INSERT OR IGNORE INTO podcast_episodes (feed_id, guid, title, audio_url, "
-                "episode_page_url, duration_seconds, published_at, published_at_ms, description, status, "
-                "discovered_at, auto_ingest_requested) VALUES (?,?,?,?,?,?,?,?,NULL,'new',?,0)",
+                "episode_page_url, duration_seconds, published_at, description, status, "
+                "discovered_at, auto_ingest_requested) VALUES (?,?,?,?,?,?,?,NULL,'new',?,0)",
                 (int(feed_id), entry_id, title, audio_url, page_url,
-                 _duration_seconds(duration_raw), published_raw, parse_published_ms(published_raw), now_iso))
+                 _duration_seconds(duration_raw), published_raw, now_iso))
             row = conn.execute("SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=?",
                                (int(feed_id), entry_id)).fetchone()
-            if row is not None and not inserted.rowcount:
+            if row is not None:
                 _refresh_podcast_date(conn, row[0], published_raw)
     except sqlite3.OperationalError:
         return None

@@ -8,7 +8,7 @@ import index
 import podcasts
 import source_subscriptions as ss
 import uoink_mcp_tools as mcp
-from source_subscriptions_fixtures import Clock, FakeAdapter, make_service, status
+from source_subscriptions_fixtures import Clock, FakeAdapter, items, make_service, register, status, turn_on
 from tests.test_dashboard_runthrough_fixes import run_js
 
 
@@ -29,6 +29,43 @@ def old_feed(index_db, consent=False):
             "INSERT INTO podcast_feeds(feed_url,title,added_at,last_polled_at,auto_ingest) "
             "VALUES ('https://radio.test/rss','Test radio','2026-08-01','2026-08-02',?)",
             (int(consent),)).lastrowid
+
+
+@pytest.mark.parametrize("old_schema", [True, False])
+def test_projected_episode_keeps_its_identity_and_corrected_date(tmp_path, monkeypatch, old_schema):
+    if old_schema:
+        migrations = [(n, p) for n, p in index._discover_migrations() if n <= 28]
+        monkeypatch.setattr(index, "_discover_migrations", lambda: migrations)
+    with index.Index.open(tmp_path / "pod.db") as idx:
+        clock = Clock()
+        snapshots = []
+        for raw in (DATES["old"], DATES["new"], DATES["new"]):
+            observation = ss.Observation(
+                entry_id="one", title="Episode one",
+                metadata={"identity_method": "guid", "published_raw": raw,
+                          "audio_url": "https://radio.test/one.mp3"},
+            )
+            snapshots.append(ss.AdapterResult("snapshot", observations=[observation], coverage="complete"))
+        service = make_service(idx, clock=clock, adapter=FakeAdapter(snapshots))
+        sid = register(service, kind="podcast_rss", url="https://radio.test/feed")["source_id"]
+        turn_on(service, sid)
+        for raw in (DATES["old"], DATES["new"]):
+            service.detection_pass()
+            item, = items(service, sid)
+            episode, = idx._conn.execute("SELECT * FROM podcast_episodes")
+            assert episode["id"] == item["legacy_episode_id"] and episode["published_at"] == raw
+            if not old_schema:
+                assert episode["published_at_ms"] == ss.parse_published_ms(raw)
+            clock.advance(61 * 60_000)
+        # Prior polls could retain the observation without creating its episode.
+        with idx.write_transaction() as db:
+            db.execute("UPDATE source_items SET legacy_episode_id=NULL WHERE item_id=?", (item["item_id"],))
+            db.execute("DELETE FROM podcast_episodes WHERE id=?", (episode["id"],))
+        service.detection_pass()
+        recovered, = items(service, sid)
+        episode, = idx._conn.execute("SELECT * FROM podcast_episodes")
+        assert recovered["item_id"] == item["item_id"]
+        assert recovered["legacy_episode_id"] == episode["id"] and episode["published_at"] == DATES["new"]
 
 
 def test_feed_and_episodes_sort_by_publish_instant(tmp_path):

@@ -545,7 +545,7 @@ test("a pinned in-page session add keeps the session instructions", async () => 
   const { bg } = await inPage("stay", { capture: { ...CAPTURE, pinned_seconds: 872 },
     session: { id: "loom", name: "Weaving" } });
   const message = bg.env.notifications.at(-1).message;
-  assert.match(message, /Weaving · 1 video so far\. End the session in the popup.*Pinned 14:32/);
+  assert.equal(message, "1 video so far. End the session in the popup to send to Claude or ChatGPT. Pinned 14:32");
   assert.ok(!bg.store.local.has_completed_first_yoink);
 });
 

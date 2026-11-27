@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT))
 
 import index as index_mod  # noqa: E402
 import server  # noqa: E402
+from tests.offline_dns import public_address
 
 URL = "https://www.youtube.com/watch?v=showep00001"
 SRT = ("1\n00:00:01,000 --> 00:00:03,500\nwelcome back to the show\n\n"
@@ -93,6 +94,8 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(server, "_anthropic_key_for_feature", lambda *_a, **_k: "key-set")
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "lib")
+    monkeypatch.setattr(server.socket, "getaddrinfo", public_address)
     (tmp_path / "data").mkdir()
 
     def fake_comments(*_a, **_k):

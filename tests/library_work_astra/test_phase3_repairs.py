@@ -12,7 +12,7 @@ import pytest
 from test_phase3_integration import server_parts
 from test_phase3_support import (
     Crash, item_rows, ledger, migration_dir, ok, phase3_isolation,
-    phase3_module, rig, rows, snapshot,
+    phase3_module, podcast_rig, rig, rows, snapshot, transcript_path_for_episode,
 )
 
 
@@ -154,7 +154,7 @@ def podcast_attempt(rig):
     rig.svc.poll_source(sid)
     start = rig.start(sid)
     episode_id = item_rows(rig.idx, sid)[0]['legacy_episode_id']
-    transcript = rig.root / 'as2.transcript.json'
+    transcript = transcript_path_for_episode(rig, episode_id)
     transcript.write_text(json.dumps(dict(model='synthetic', segments=[dict(
         start=12.5, end=21.75, text='AS-2 local publication evidence.')])), encoding='utf-8')
     with rig.idx.write_transaction() as conn:
@@ -186,9 +186,10 @@ def test_as2_s16_recovery_reuses_valid_files_before_corpus_upsert(rig, monkeypat
     assert len(rows(rig.idx, 'source_classification_outbox')) == 1
 
 
-def test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link(rig):
+def test_as2_s15_podcast_publisher_checks_reverse_legacy_episode_link(podcast_rig):
     import podcasts
 
+    rig = podcast_rig
     _sid, _start, episode_id = podcast_attempt(rig)
     incoming = podcasts.get_episode_with_feed(rig.idx, episode_id)
     vid, _suffix = podcasts._episode_corpus_id(incoming)

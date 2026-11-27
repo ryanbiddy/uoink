@@ -95,7 +95,7 @@ def test_type_chips_are_all_videos_posts_notes_podcasts():
     # The helper groups source types the same way.
     assert server._LIBRARY_KINDS == {
         "videos": ("video", "short_video"),
-        "posts": ("x_thread", "x_article", "reddit_thread", "page"),
+        "posts": ("x_thread", "x_article", "reddit_thread", "hn_thread", "page"),
         "notes": ("note", "image"),
         "podcasts": ("episode",),
     }

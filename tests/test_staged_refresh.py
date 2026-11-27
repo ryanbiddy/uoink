@@ -21,8 +21,9 @@ import pytest
 
 import index as index_module
 import library_media
+import uoink_reliability
 import yt_extract
-from uoink_core.storage import _atomic_write_text
+from uoink_core.storage import _atomic_write_text, read_checked_json
 
 from test_unique_capture_folders import ROOT, URL_A, _load, _metadata, _snapshot, capture
 
@@ -394,13 +395,15 @@ def phase6_refresh(refresh, tmp_path, monkeypatch):
     scope["_sidecar_update_lock"] = threading.Lock()
     scope["_selected_reliability_model"] = lambda: "tiny"
     scope["_reliability_model_status"] = lambda model: {"cached": True}
-    scope["uoink_reliability"] = SimpleNamespace(detect_unreliable_spans=Mock(return_value=[]))
+    monkeypatch.setattr(uoink_reliability, "detect_unreliable_spans", Mock(return_value=[]))
+    scope["read_checked_json"] = read_checked_json
+    scope["_atomic_write_text"] = _atomic_write_text
     scope["_download_reliability_audio"] = Mock(side_effect=AssertionError("unexpected download"))
     _load(ROOT / "server.py", {
         "_as_float", "_parse_hms", "_youtube_deep_link", "_source_deep_link",
         "_sidecar_link_builder", "_transcript_entries_with_links", "_citations_from_sidecar",
         "_capture_media_plan", "_publish_capture_media", "_compute_transcript_reliability",
-        "_transcript_text_from_sidecar", "_read_sidecar_for_folder",
+        "_transcript_text_from_sidecar", "_read_sidecar_for_folder", "_item_storage_root",
         "_write_reliability_to_sidecar", "_render_reliability_summary",
         "_replace_reliability_section",
     }, scope)

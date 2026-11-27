@@ -25,10 +25,12 @@ import tempfile
 import time
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
 import index as index_module  # noqa: E402
+from tests.offline_dns import public_address
 
 
 def _assert(cond, msg):
@@ -89,10 +91,13 @@ def test_chunk_plan():
           f"{processed}s media work")
 
 
+@patch("socket.getaddrinfo", new=public_address)
 def test_chunked_extraction_path(tmp: Path):
+    tmp = tmp / "capture"
+    tmp.mkdir()
     calls = []
     saved = {name: getattr(server, name) for name in (
-        "_run_subprocess", "_download_thumbnail", "_fetch_channel_context",
+        "DESKTOP_ROOT", "_run_subprocess", "_download_thumbnail", "_fetch_channel_context",
         "_should_start_hook_type", "_read_settings", "_incremental_index_update",
         "_index_yoink", "_start_entity_extraction_thread",
         "_start_comments_thread",
@@ -117,6 +122,7 @@ def test_chunked_extraction_path(tmp: Path):
 
     phases = []
     try:
+        server.DESKTOP_ROOT = tmp.parent
         server._run_subprocess = fake_run
         server._download_thumbnail = lambda *_a, **_k: None
         server._fetch_channel_context = lambda *_a, **_k: {}

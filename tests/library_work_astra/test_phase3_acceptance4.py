@@ -16,7 +16,7 @@ import pytest
 from test_phase3_acceptance3 import _load_manual_dispatch
 from test_phase3_repairs import podcast_attempt, production_backend, production_start
 from test_phase3_support import (
-    ROOT, Crash, ledger, migration_dir, phase3_isolation, phase3_module, rig, rows,
+    ROOT, Crash, ledger, migration_dir, phase3_isolation, phase3_module, podcast_rig, rig, rows,
 )
 
 
@@ -150,9 +150,10 @@ def test_as4_s13_unclaimed_intent_keeps_charge_without_redispatch(
     assert ns['launches'] == []
 
 
-def test_as4_s16_local_recovery_uses_capture_lock_without_execution_claim(rig, monkeypatch):
+def test_as4_s16_local_recovery_uses_capture_lock_without_execution_claim(podcast_rig, monkeypatch):
     import podcasts
 
+    rig = podcast_rig
     sid, start, episode_id = podcast_attempt(rig)
     ns, backend = production_backend(rig)
     ns['podcasts'] = podcasts

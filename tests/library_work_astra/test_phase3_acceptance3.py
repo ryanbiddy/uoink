@@ -17,7 +17,7 @@ import pytest
 
 from test_phase3_repairs import podcast_attempt, production_backend, production_start
 from test_phase3_support import (
-    ROOT, ledger, migration_dir, phase3_isolation, phase3_module, rig, rows,
+    ROOT, ledger, migration_dir, phase3_isolation, phase3_module, podcast_rig, rig, rows,
 )
 
 
@@ -198,10 +198,11 @@ def test_as3_s15_manual_waiter_reuses_standing_completion(rig, monkeypatch):
     ('feed_url', 'https://other.example/contradictory.xml'),
     ('guid', 'contradictory-guid'),
 ])
-def test_as3_s15_podcast_publisher_checks_each_available_identity_field(rig, field, value):
+def test_as3_s15_podcast_publisher_checks_each_available_identity_field(podcast_rig, field, value):
     """One agreeing capture key does not erase a contradictory partial provenance."""
     import podcasts
 
+    rig = podcast_rig
     _sid, _start, episode_id = podcast_attempt(rig)
     incoming = podcasts.get_episode_with_feed(rig.idx, episode_id)
     vid, _suffix = podcasts._episode_corpus_id(incoming)

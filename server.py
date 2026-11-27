@@ -19310,12 +19310,12 @@ def _research_status(args: dict) -> dict:
 def _research_library_transcript(video_id: str) -> dict | None:
     """Read saved research evidence without assuming missing provenance is captions."""
     try:
-        folder, _row = _folder_for_video_id(video_id)
+        folder, row = _folder_for_video_id(video_id)
+        if folder is None:
+            return None
+        _path, sidecar = _read_sidecar_for_folder(folder, root=_item_storage_root(row))
     except Exception:
         return None
-    if folder is None:
-        return None
-    _path, sidecar = _read_sidecar_for_folder(folder)
     if not any(isinstance(segment, dict) and str(segment.get("text") or "").strip()
                for segment in sidecar.get("transcript") or []):
         return None

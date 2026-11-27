@@ -91,6 +91,7 @@ def save_library(helper, item, *, source="captions", transcript=True, deleted=Fa
         "deleted_at": "2026-11-03T12:01:00" if deleted else None}, content="Fixture transcript")
     if deleted:
         helper.idx.soft_delete_yoink(video_id)
+    return sidecar
 
 
 @pytest.mark.parametrize("top", [False, True])
@@ -387,7 +388,11 @@ def test_status_provenance_from_saved_sidecars(helper, monkeypatch, fields, sour
     pid = capture(run, top=1)["queued"][0]["pending_id"]
     helper.idx.mark_pending_running(pid)
     helper.idx.mark_pending_succeeded(pid, "fixture")
-    save_library(helper, item, source=None, sidecar_fields=fields)
+    # The queue indexed a YouTube save. Vary the provenance in its saved
+    # sidecar independently of the indexed location that owns the files.
+    path = save_library(helper, item, source=None)
+    sidecar = json.loads(path.read_text(encoding="utf-8"))
+    path.write_text(json.dumps({**sidecar, **fields}), encoding="utf-8")
     monkeypatch.setattr(helper.server, "_library_transcript", Mock(
         side_effect=AssertionError("research must not use get_transcript's provenance default")))
     result = status(run)
@@ -446,6 +451,30 @@ def test_podcast_library_ids_and_audio_url_join(helper, prefix):
     with helper.idx.write_transaction() as conn:
         conn.execute("UPDATE podcast_episodes SET yoink_video_id=? WHERE feed_id=?", (video_id, feed["id"]))
     # Discovery has no corpus ID and the saved metadata contains only the page URL.
+    item = {**parsed, "video_id": None, "in_library": False}
+    assert helper.server._research_library_lookup(item)["video_id"] == video_id
+    # An enclosure match alone cannot authorize reading this desktop folder as an episode.
+    run = run_with(helper, [item], budget=0)
+    result = capture(run, top=1)
+    assert result["already"] == [] and result["queued"] == []
+    assert result["skipped"] == [{"key": item["key"], "reason": "podcast_capture_later"}]
+    helper.idx.soft_delete_yoink(video_id)
+    assert helper.server._research_library_lookup(item) is None
+
+
+def test_published_podcast_capture_from_enclosure(helper):
+    import podcasts
+    from tests.test_podcast_corpus_bridge import _seed_episode
+
+    idx, episode_id, _, _ = _seed_episode(helper.root)
+    try:
+        episode = podcasts.get_episode(idx, episode_id)
+        published = podcasts.episode_to_corpus(idx, episode_id, data_root=helper.root)
+    finally:
+        idx.close()
+    video_id = published["video_id"]
+    parsed, = research.parse_library([{"video_id": video_id, "url": episode["episode_page_url"],
+                                      "enclosure_url": episode["audio_url"], "title": episode["title"]}])
     item = {**parsed, "video_id": None, "in_library": False}
     run = run_with(helper, [item], budget=0)
     result = capture(run, top=1)

@@ -37,10 +37,10 @@ async function button({ width, store = {} } = {}) {
   return { env, btn };
 }
 
-test("a long active session name is clipped by CSS and kept in full in the tooltip", async () => {
+test("a long private session name stays out of the page label and tooltip", async () => {
   const { env, btn } = await button({ store: { active_session: { id: "s1", name: SESSION } } });
-  assert.match(btn.textContent, /Add to session: Research session/);
-  assert.equal(btn.title, `Add to session: ${SESSION}`);
+  assert.equal(btn.textContent.trim(), "Add to session");
+  assert.equal(btn.title, "");
   const label = btn.childNodes.at(-1);
   assert.equal(label.className, "stc-yt-label");
   const css = env.document.getElementById("stc-yt-styles").textContent;

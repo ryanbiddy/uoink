@@ -23,9 +23,11 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
+from tests.offline_dns import public_address
 
 
 def _assert(cond, msg):
@@ -46,11 +48,14 @@ def test_normalize_accepts_lite():
     print("ok  _normalize_long_video_mode accepts lite, rejects junk")
 
 
+@patch("socket.getaddrinfo", new=public_address)
 def test_lite_extraction_path(tmp: Path):
+    tmp = tmp / "capture"
+    tmp.mkdir()
     calls = []
     comments_started = {"n": 0}
     saved = {name: getattr(server, name) for name in (
-        "_run_subprocess", "_download_thumbnail", "_fetch_channel_context",
+        "DESKTOP_ROOT", "_run_subprocess", "_download_thumbnail", "_fetch_channel_context",
         "_should_start_hook_type", "_read_settings", "_incremental_index_update",
         "_index_yoink", "_start_entity_extraction_thread",
         "_start_comments_thread", "_generate_paste_corpus",
@@ -75,6 +80,7 @@ def test_lite_extraction_path(tmp: Path):
 
     phases = []
     try:
+        server.DESKTOP_ROOT = tmp.parent
         server._run_subprocess = fake_run
         server._download_thumbnail = lambda *_a, **_k: None
         server._fetch_channel_context = lambda *_a, **_k: {}
@@ -167,7 +173,11 @@ def test_old_lite_export_on_read(tmp_path, monkeypatch):
     saved = f"Quoted text: {pending}\n{server.COMMENTS_START_MARK}\n{pending}\n{server.COMMENTS_END_MARK}"
     path.write_text(saved, encoding="utf-8")
     sidecar = tmp_path / f"{tmp_path.name}.json"
-    monkeypatch.setattr(uoink_mcp_tools, "_find_yoink", lambda slug: (tmp_path, path))
+    row = {"video_id": "fixture", "slug": "fixture", "corpus_path": str(path),
+           "sidecar_path": str(sidecar), "source_type": "video"}
+    idx = Mock()
+    idx.get_by_slug.return_value = idx.get_yoink.return_value = row
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(uoink_mcp_tools, "_backend", server)
     for mode, status, expected in [("lite", "skipped", 1), ("full", "pending", 2)]:
         sidecar.write_text(json.dumps({"long_video_mode": mode, "comments_status": status}), encoding="utf-8")

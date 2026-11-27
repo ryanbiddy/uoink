@@ -8,6 +8,7 @@ from __future__ import annotations
 import ast
 from contextlib import contextmanager, nullcontext, suppress
 from datetime import datetime
+from functools import lru_cache
 import hashlib
 import json
 import logging
@@ -29,10 +30,14 @@ import urllib.request
 
 import pytest
 import _platform
+import list_imports
+import source_subscriptions
+import transcript_review
+import uoink_reliability
 import uoink_usage
 import yt_extract
-import transcript_review
 from provenance import clamp_title
+from tests.offline_dns import public_address
 from uoink_core.storage import checked_path, open_regular, read_export_markdown
 
 
@@ -41,9 +46,14 @@ URL_A = "https://www.youtube.com/watch?v=aaaaaaaaaaa"
 URL_B = "https://www.youtube.com/watch?v=bbbbbbbbbbb"
 
 
+@lru_cache(maxsize=None)
+def _source_tree(path):
+    return ast.parse(path.read_text(encoding="utf-8-sig"))
+
+
 def _load(path, names, scope, *, constants=(), class_name=None):
     scope.setdefault("uoink_usage", uoink_usage)
-    tree = ast.parse(path.read_text(encoding="utf-8-sig"))
+    tree = _source_tree(path)
     body = tree.body
     if class_name:
         body = next(n.body for n in body
@@ -81,6 +91,7 @@ def capture(tmp_path, monkeypatch):
     monkeypatch.setattr(subprocess, "Popen", blocked)
     monkeypatch.setattr(socket, "create_connection", blocked)
     monkeypatch.setattr(socket.socket, "connect", blocked)
+    monkeypatch.setattr(socket, "getaddrinfo", public_address)
     monkeypatch.setattr(urllib.request, "urlopen", blocked)
     monkeypatch.setitem(sys.modules, "channels", SimpleNamespace(tag_if_self=lambda *a: None))
     monkeypatch.setitem(sys.modules, "provenance", SimpleNamespace(
@@ -131,9 +142,11 @@ def capture(tmp_path, monkeypatch):
 
     scope = {
         "yt_extract": yt_extract,
+        "list_imports": list_imports,
+        "DATA_ROOT": tmp_path / "profile",
         "transcript_review": transcript_review,
-        "source_subscriptions": SimpleNamespace(check_public_http_url=lambda url: url),
-        "_review_entries": lambda entries, whisper, duration: (entries, []),
+        "source_subscriptions": source_subscriptions,
+        "uoink_reliability": uoink_reliability,
         "_platform": _platform,
         "Path": Path, "json": json, "hashlib": hashlib, "re": re,
         "threading": threading, "datetime": datetime, "shutil": shutil,
@@ -183,7 +196,7 @@ def capture(tmp_path, monkeypatch):
         "ExtractionPhaseError",
         "_video_capture_source", "_video_capture_id", "_video_capture_folder",
         "_verify_video_capture_folder", "_create_video_entry_folder", "_capture_caption_entries",
-        "_prepare_video_capture_folder", "_run_extraction",
+        "_prepare_video_capture_folder", "_run_extraction", "_review_entries",
         "_normalize_video_url", "_normalize_youtube_url", "_normalize_twitter_url",
         "_normalize_tiktok_url", "_normalize_instagram_url", "_detect_platform_from_url",
         "_index_yoink", "_corpus_path", "_resolve_corpus_path", "_build_corpus", "_demote_headings",

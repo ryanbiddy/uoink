@@ -153,13 +153,13 @@ def test_server_log_rotates_with_three_bounded_backups(tmp_path, monkeypatch):
     config = next(n for n in tree.body if isinstance(n, ast.Expr)
                   and isinstance(n.value, ast.Call)
                   and ast.unparse(n.value.func) == "logging.basicConfig")
-    file_handler = next(n for n in tree.body if isinstance(n, ast.Assign)
-                        and any(isinstance(t, ast.Name) and t.id == "_server_log_handler"
-                                for t in n.targets))
+    handler_defs = [n for n in tree.body if isinstance(n, ast.Assign)
+                    and any(isinstance(t, ast.Name) and t.id in {"_server_log_handler", "_console_log_handler"}
+                            for t in n.targets)]
     configure = Mock()
     monkeypatch.setattr(logging, "basicConfig", configure)
     log_path = tmp_path / "server.log"
-    exec(compile(ast.Module(body=[file_handler, config], type_ignores=[]), "server.py", "exec"), {
+    exec(compile(ast.Module(body=[*handler_defs, config], type_ignores=[]), "server.py", "exec"), {
         "logging": logging, "RotatingFileHandler": RotatingFileHandler,
         "LOG_PATH": log_path, "sys": sys,
     })

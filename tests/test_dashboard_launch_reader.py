@@ -42,7 +42,8 @@ def capture(tmp_path, monkeypatch):
     sidecar.write_text(json.dumps(data), encoding="utf-8")
     row = {"video_id": "synthetic", "title": "Synthetic capture",
            "corpus_path": str(folder / "synthetic.md"), "sidecar_path": str(sidecar)}
-    idx = SimpleNamespace(get_yoink=lambda video_id: row if video_id == "synthetic" else None)
+    idx = SimpleNamespace(get_yoink=lambda video_id: row if video_id == "synthetic" else None,
+                          get_pins=lambda video_id: [])
     monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "output")
     monkeypatch.setattr(server, "_allowed_roots", lambda: [tmp_path / "output"])
     monkeypatch.setattr(server, "_get_index", lambda: idx)

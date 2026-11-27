@@ -64,6 +64,7 @@ def model(monkeypatch, tmp_path):
         invalid_key=Mock(), index=idx,
     )
     monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     monkeypatch.setattr(server, "_anthropic_key_available", lambda: "test-key")
     monkeypatch.setattr(server, "_anthropic_messages", state.client)
     monkeypatch.setattr(server, "_record_anthropic_usage", state.meter)
