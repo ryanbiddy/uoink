@@ -90,3 +90,9 @@ Uoink this page in, and the page text goes only to the local helper.
 - npm tarball `defuddle-0.19.6.tgz`, SHA-256 `a911cacd4f3d2ceb256e19965a4a970efa861b2943b149c19888df9114cbd45f`.
 - `dist/index.js`: 340,738 bytes, SHA-256 `f40075dc7b7b0460c16f77b9486a0ee66907a19677d2984e198e94356116a1e8`.
 - License: 1,076 bytes, SHA-256 `c63e6774d9c9da3de01428e0809080c4758de3636c8e9e6fe51525c9ab4cd092`.
+
+**Deno, yt-dlp-ejs and qrcode-generator.** These are described in
+[THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md). Their license files in this
+folder: [Deno 2.9.8 MIT license](deno-2.9.8-MIT-LICENSE.txt),
+[yt-dlp-ejs 0.8.0 notices](yt-dlp-ejs-0.8.0-LICENSES.txt) and
+[qrcode-generator 1.4.4 MIT license](qrcode-generator-1.4.4-MIT-LICENSE.txt).

@@ -654,8 +654,8 @@ dismissed, so they close when the pins move.
   code execution advisories are about loading untrusted checkpoint files. Uoink
   loads only checkpoints that ship with the app or come from the named model
   repositories described above.
-- **transformers 4.57.6** (fixes in 5.x). Every transformers 5.x release needs
-  huggingface-hub 1.x, and WhisperX 3.8.6 requires huggingface-hub below 1.0.
+- **transformers 4.57.6** (fixes in 5.x). The proposed 5.23.0 requires
+  huggingface-hub `>=1.31.0,<3.0`, and WhisperX 3.8.6 requires huggingface-hub below 1.0.
   Uoink never imports transformers. WhisperX uses it only during speaker
   labeling, to load a wav2vec2 alignment model for languages other than
   English. English alignment uses torchaudio's built-in
@@ -665,7 +665,7 @@ dismissed, so they close when the pins move.
 
 Both move in the first WhisperX release that allows them.
 
-### Other dependency updates held for 3.18
+### Other dependency updates held for 3.18.1
 
 - **Transcription and speaker labels.** Keep torchaudio with torch 2.8 and
   tokenizers with transformers 4.57.6. Changes to CTranslate2, ONNX Runtime,
@@ -673,8 +673,14 @@ Both move in the first WhisperX release that allows them.
   pytorch-metric-learning need a transcription and speaker-labeling test on
   the packaged app. The same test covers the model configuration readers,
   OmegaConf and the ANTLR runtime.
+- **Speaker pipeline.** pyannote-pipeline 4.1 requires Optuna 5. The packaged speaker-labeling check covers that pair.
+- **Model loading.** WhisperX 3.8.6 requires torchaudio `~=2.8.0`, torchvision `~=0.23.0` and TorchCodec `>=0.6,<0.8` on Windows. The installer pairs 2.8.0, 0.23.0 and 0.7.0 with torch 2.8.0 and the bundled FFmpeg 7 libraries.
+- **Model downloads and tokenization.** WhisperX requires huggingface-hub below 1.0. Transformers 4.57.6 requires tokenizers `>=0.22.0,<=0.23.0`. The latest stable releases within those bounds are huggingface-hub 0.36.2 and tokenizers 0.22.2.
+- **Model configuration.** OmegaConf 2.3.1 requires ANTLR `==4.9.*`. Keep 4.9.3 and its shipped notice. OmegaConf 2.4 vendors its parser. ANTLR 4.13.2 (BSD-3-Clause) was reviewed for that proposed update but does not ship.
+- **Torch math.** SymPy 1.14.0 requires mpmath `>=1.1.0,<1.4`, which keeps mpmath at 1.3.0.
 - **Desktop window.** pywebview 6, pythonnet and clr-loader need a Windows
   desktop check that opens and closes the dashboard from the tray.
+  The build selects pywebview 5.4 and pythonnet 3.0.5. That pythonnet release requires clr-loader below 0.3.
 - **Other transitive packages.** SQLAlchemy 2.1, Alembic and Optuna need a
   separate compatibility check together. The python-dateutil 4 and multidict
   7 upgrades also wait for a review of their callers. The release keeps the
