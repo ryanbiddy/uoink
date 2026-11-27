@@ -6388,6 +6388,7 @@
             </div>
               <div class="inline-row yoink-actions">
                 <button class="button" type="button" id="yoinkCopyMarkdown">Copy as Markdown</button>
+                <button class="button hidden" type="button" id="yoinkSaveHnStory">Save linked story</button>
                 <button class="button" type="button" id="yoinkSendClaude">Send to Claude</button>
                 <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
                 <button class="button primary" type="button" id="yoinkWriteFrom" aria-describedby="yoinkWriteHint" disabled>Write from this</button>
@@ -7745,8 +7746,8 @@
     };
 
     const FALLBACK_FACETS = {
-      platform: ["youtube", "x", "reddit", "podcast", "web", "note", "image"],
-      source_type: ["video", "x_thread", "x_article", "reddit_thread", "page", "episode", "note", "image"],
+      platform: ["youtube", "x", "reddit", "hn", "podcast", "web", "note", "image"],
+      source_type: ["video", "x_thread", "x_article", "reddit_thread", "hn_thread", "page", "episode", "note", "image"],
       format: ["one-shot", "talking-head", "tutorial", "listicle", "narrative", "vlog", "interview", "screen-recording", "B-roll-heavy"],
       performance: ["over", "average", "under"],
       length: ["short", "medium", "long", "deep"],
@@ -8415,6 +8416,7 @@
       const lines = text.replace(/\r\n/g, "\n").split("\n");
       const out = [];
       let list = [];
+      let fence = "", code = [];
       const flushList = () => {
         if (!list.length) return;
         out.push(`<ul>${list.map((item) => `<li>${renderInline(item)}</li>`).join("")}</ul>`);
@@ -8422,6 +8424,20 @@
       };
       for (const line of lines) {
         const trimmed = line.trim();
+        if (fence) {
+          if (/^`+$/.test(trimmed) && trimmed.length >= fence.length) {
+            out.push(`<pre><code>${htmlEscape(code.join("\n"))}</code></pre>`);
+            fence = "";
+            code = [];
+          } else code.push(line);
+          continue;
+        }
+        const opening = /^(`{3,})[\w+#.-]*$/.exec(trimmed);
+        if (opening) {
+          flushList();
+          fence = opening[1];
+          continue;
+        }
         if (!trimmed) {
           flushList();
           continue;
@@ -8432,7 +8448,7 @@
           continue;
         }
         flushList();
-        const heading = /^(#{1,3})\s+(.+)$/.exec(trimmed);
+        const heading = /^(#{1,6})\s+(.+)$/.exec(trimmed);
         if (heading) {
           const level = heading[1].length;
           out.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
@@ -8441,6 +8457,7 @@
         }
       }
       flushList();
+      if (fence) out.push(`<pre><code>${htmlEscape(code.join("\n"))}</code></pre>`);
       return out.join("");
     }
 
@@ -9236,6 +9253,7 @@
       if (st === "x_article") return "article";
       if (st === "x_thread" && !videoPost) return "post";
       if (st === "reddit_thread" && !videoPost) return "thread";
+      if (st === "hn_thread") return "thread";
       const platform = platformOf(row, sidecar);
       if (platform === "note") return "note";
       if (platform === "image") return "image";
@@ -9249,6 +9267,7 @@
         twitter: "X",
         x: "X",
         reddit: "Reddit",
+        hn: "Hacker News",
         podcast: "Podcast",
         web: "Web",
         generic: "Web",
@@ -9269,6 +9288,7 @@
         x_thread: "post",
         x_article: "article",
         reddit_thread: "thread",
+        hn_thread: "thread",
         page: "page",
         episode: "episode",
         note: "note",
@@ -9299,7 +9319,7 @@
       if (isNoteContent(row, sidecar)) return false;
       if (isVideoPost(row, sidecar)) return true;
       const st = String(firstValue(row && row.source_type, sidecar.source_type) || "").toLowerCase();
-      if (["image", "page", "x_article", "x_thread", "reddit_thread"].includes(st)) return false;
+      if (["image", "page", "x_article", "x_thread", "reddit_thread", "hn_thread"].includes(st)) return false;
       return platformOf(row, sidecar) !== "image";
     }
 
@@ -9493,7 +9513,7 @@
         .replace(/^\s*#\s+[^\n]*\n/, "")
         .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
       const html = renderMarkdown(text, readerInline)
-        .replace(/<(\/?)h([1-3])>/g, (_, slash, level) => `<${slash}h${Number(level) + 1}>`);
+        .replace(/<(\/?)h([1-6])>/g, (_, slash, level) => `<${slash}h${Math.min(6, Number(level) + 1)}>`);
       return html ? `<div class="reader-prose markdown-rendered">${html}</div>` : "";
     }
 
@@ -9820,6 +9840,18 @@
       renderYoinkZing();
     }
 
+    function renderHnStoryButton(row, sidecar) {
+      const button = document.getElementById("yoinkSaveHnStory");
+      const link = row?.source_type === "hn_thread" && sidecar.story_url;
+      const url = link ? sanitizeHttpUrl(link) : "";
+      button.classList.toggle("hidden", !url);
+      button.title = url || "";
+      button.onclick = url ? () => {
+        switchTab("library");
+        retryLibraryCapture(url);
+      } : null;
+    }
+
     function renderYoinkDetail() {
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
@@ -9839,6 +9871,7 @@
       els.yoinkRetranscribe.title = isNote ? "Re-transcription is not applicable for notes." : "";
       els.yoinkRetryCapture.title = isNote ? "Re-capture is not applicable for notes." : (sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.");
       els.yoinkCopyMarkdown.disabled = !hasRow || !videoIdOf(row);
+      renderHnStoryButton(row, sidecar);
       els.yoinkSendClaude.disabled = !hasRow || !videoIdOf(row);
       const lookup = !hasRow && state.selectedYoinkLookup ? YOINK_LOOKUP_COPY[state.selectedYoinkLookup.state] : null;
       if (lookup || !hasRow) {
@@ -11182,7 +11215,7 @@
       return { capture: "Saved item", publication: "Published item", apply: "Library updated",
         undo: "Change undone", taxonomy_version: "Shelves updated", run: "Library review",
         podcast_rss: "Podcast", youtube_channel: "YouTube channel", youtube_playlist: "YouTube playlist",
-        youtube: "YouTube", podcast: "Podcast", page: "Web page", x: "X", reddit: "Reddit",
+        youtube: "YouTube", podcast: "Podcast", page: "Web page", x: "X", reddit: "Reddit", hn: "Hacker News",
         channel: "Channel", author: "Author", host: "Host", creator_handle: "Creator",
         author_handle: "Author", channel_handle: "Channel", unknown: "Unknown" }[value] || "Other";
     }
@@ -15427,6 +15460,7 @@
       const videoPost = isVideoPost(row);
       if (st === "x_thread" && !videoPost) return "post and thread";
       if (st === "reddit_thread" && !videoPost) return "thread and comments";
+      if (st === "hn_thread") return "thread and comments";
       const kind = transcriptKind(row && row.transcript_source);
       if (kind === "captions") return `${platformChipLabel(platformOf(row))} captions`;
       if (kind === "asr") return "transcript by Whisper";

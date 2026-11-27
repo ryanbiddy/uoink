@@ -49,6 +49,7 @@ $requiredFiles = @(
     'library_remember.py',
     'openapi_bridge.py',
     'reddit_extractor.py',
+    'hn_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
     'x_fulltext.py',

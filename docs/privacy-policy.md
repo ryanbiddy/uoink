@@ -57,7 +57,10 @@ Uoink makes these outbound requests:
 - **Source capture — when you ask for it.** A YouTube capture downloads
   public video data, thumbnails, transcripts, comments, and metadata from
   YouTube and its delivery hosts. A pasted Reddit thread uses Reddit's public
-  JSON endpoint. A pasted X post uses X's public syndication endpoint at
+  JSON endpoint. Saving a Hacker News thread sends the item ID to Algolia's
+  public API at `hn.algolia.com`. For a comment link, Uoink also requests
+  the parent story by ID. The linked article or video is a separate save.
+  A pasted X post uses X's public syndication endpoint at
   `cdn.syndication.twimg.com`, and an X video's post text comes from the same
   endpoint. When you save a post from an open X tab with the extension, it
   also reads that post's text from the page and sends it only to Uoink on

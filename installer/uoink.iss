@@ -229,6 +229,7 @@ Source: "staging\article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_manifest.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\hn_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\asr_worker.py"; DestDir: "{app}"; Flags: ignoreversion

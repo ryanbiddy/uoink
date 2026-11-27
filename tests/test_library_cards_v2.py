@@ -69,7 +69,7 @@ def synthetic_clips(count: int = 10, start_step: int = 60) -> list[dict]:
 def test_selection_version_and_eligible_sources():
     assert cards.SELECTION_VERSION == "spread-longest-v2"
     assert cards.PROSE_ELIGIBLE_SOURCES == frozenset({
-        "page", "x_article", "x_thread", "reddit_thread", "note"
+        "page", "x_article", "x_thread", "reddit_thread", "hn_thread", "note"
     })
     assert issubclass(cards.CardFreezeError, ValueError)
 

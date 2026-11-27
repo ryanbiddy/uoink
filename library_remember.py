@@ -21,7 +21,7 @@ NEVER_MIN_AGE_DAYS = 2
 _GENERIC_TOPICS = {"", "other", "others", "uncategorized", "unknown", "misc", "general", "none", "n/a"}
 _KIND_LABELS = {
     "video": "video", "x_thread": "post", "x_article": "article",
-    "reddit_thread": "thread", "page": "page", "episode": "episode",
+    "reddit_thread": "thread", "hn_thread": "thread", "page": "page", "episode": "episode",
     "note": "note", "image": "image",
 }
 _ASKS = (

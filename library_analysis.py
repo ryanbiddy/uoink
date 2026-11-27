@@ -53,6 +53,7 @@ CANONICAL_SOURCE_TYPES = frozenset({
     "x_article",
     "page",
     "reddit_thread",
+    "hn_thread",
     "note",
     "image",
     "short_video",

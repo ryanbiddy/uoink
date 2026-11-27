@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Save a Hacker News discussion with nested replies and a link to each comment. Saving a comment link puts that reply first. Open the saved discussion and choose **Save linked story** to capture the article or video too.
+
 ### Fixed
 
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.

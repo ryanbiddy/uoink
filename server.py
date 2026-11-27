@@ -128,6 +128,7 @@ import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
 import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
+import hn_extractor  # noqa: E402
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 import x_text_repair  # noqa: E402  -- 3.18.0 fix cut-off X posts job
@@ -147,6 +148,8 @@ def _extract_page_to_prose(url: str) -> str | None:
     and return the markdown body. Returns None on failure so the anchor
     still saves with raw_text=NULL."""
     try:
+        if hn_extractor.item_id(url):
+            return hn_extractor.extract_hn_thread(url).get("markdown")
         result = page_extractor.extract_page(
             _get_index(), url,
             render_mode=page_extractor.RENDER_MODE_STATIC,
@@ -226,7 +229,7 @@ LENGTH_BUCKET_ENUM = ("short", "medium", "long", "deep")  # <4m | 4-15 | 15-30 |
 # alongside the raw value so the frontend never hardcodes its own map.
 _FACET_LABELS = {
     "platform": {
-        "youtube": "YouTube", "x": "X", "reddit": "Reddit",
+        "youtube": "YouTube", "x": "X", "reddit": "Reddit", "hn": "Hacker News",
         "podcast": "Podcast", "web": "Web", "note": "Note",
         "tiktok": "TikTok", "instagram": "Instagram", "image": "Image",
         # legacy metadata_json tags a stray row might still carry.
@@ -235,7 +238,7 @@ _FACET_LABELS = {
     "source_type": {
         "video": "Video", "short_video": "Short video",
         "x_thread": "X post", "x_article": "X article",
-        "reddit_thread": "Reddit thread", "page": "Web page",
+        "reddit_thread": "Reddit thread", "hn_thread": "Hacker News thread", "page": "Web page",
         "episode": "Podcast episode", "note": "Note", "image": "Image",
     },
     "format": {
@@ -3264,6 +3267,7 @@ _HEALTH_NOT_APPLICABLE = {
     "x_article": ("transcript", "screenshots", "comments"),
     "x_thread": ("transcript", "screenshots", "comments"),
     "reddit_thread": ("transcript", "screenshots", "comments"),
+    "hn_thread": ("transcript", "screenshots", "comments"),
     "image": ("transcript", "screenshots", "comments"),
     "episode": ("screenshots", "comments"),
 }
@@ -10661,6 +10665,8 @@ _PLATFORM_HOST_HINTS: dict[str, str] = {
     "www.reddit.com": "reddit",
     "old.reddit.com": "reddit",
     "new.reddit.com": "reddit",
+    "news.ycombinator.com": "hn",
+    "www.news.ycombinator.com": "hn",
     # Vimeo, Dailymotion, etc. are TBD -- left to Codex's chip work
     # so this PR stays focused on the helper-side extractor surface.
 }
@@ -11055,6 +11061,12 @@ _CAPTURE_SOURCES = {
         "payload_key": "url",
         "note": "",
     },
+    "hn_thread": {
+        "label": "Hacker News thread",
+        "endpoint": "/extract/page",
+        "payload_key": "url",
+        "note": "Saves the story and its discussion.",
+    },
     "podcast_feed": {
         "label": "Podcast feed",
         "endpoint": "/podcasts/feeds",
@@ -11129,6 +11141,9 @@ def _classify_capture_url(raw: str) -> dict:
         return _result("x_article", canonical)
     if reddit_extractor.is_reddit_thread_url(text):
         return _result("reddit_thread", text.strip())
+    hn_id = hn_extractor.item_id(text)
+    if hn_id:
+        return _result("hn_thread", hn_extractor.ITEM_URL + hn_id)
     if _looks_like_feed_url(text):
         canonical, _platform = _normalize_any_url(text)
         return _result("podcast_feed", canonical or text.strip())
@@ -16342,6 +16357,10 @@ def _reyoink_source(idx, video_id: str) -> tuple[str, int | None] | None:
         try:
             sidecar = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
             url = (sidecar.get("url") or "").strip()
+            if sidecar.get("source_type") == "hn_thread":
+                requested = (sidecar.get("metadata") or {}).get("source_url")
+                if hn_extractor.item_id(requested):
+                    url = requested
             raw_interval = sidecar.get("interval_seconds")
             interval = int(raw_interval) if raw_interval else None
         except (OSError, json.JSONDecodeError, TypeError, ValueError):
@@ -18038,7 +18057,7 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 # Requests without them keep the index's path unchanged.
 _LIBRARY_KINDS = {
     "videos": ("video", "short_video"),
-    "posts": ("x_thread", "x_article", "reddit_thread", "page"),
+    "posts": ("x_thread", "x_article", "reddit_thread", "hn_thread", "page"),
     "notes": ("note", "image"),
     "podcasts": ("episode",),
 }
@@ -18563,6 +18582,29 @@ def _persist_reddit_thread(result: dict, *, topic: str | None = None):
         topic_classifier=_route_topic)
 
 
+def _capture_hn_thread(body):
+    url = body["url"]
+    shelf, error = _shelf_from_body(body, remember_url=url)
+    if error:
+        return 400, {"ok": False, "error": error}
+    result = hn_extractor.extract_hn_thread(url)
+    if not result.get("ok"):
+        return 400, result
+    try:
+        # Two different comment links can update the same story's files.
+        with _corpus_update_lock:
+            saved = page_extractor.persist_page_yoink(
+                _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
+                source_type=hn_extractor.SOURCE_TYPE, subfolder="Hacker News", slug_prefix="hn",
+                topic_classifier=lambda meta: _route_topic(meta, url=url))
+    except Exception:
+        log.exception("Hacker News thread save failed")
+        saved = None
+    if not saved:
+        return 500, {"ok": False, "error": "Could not save the Hacker News thread locally."}
+    return 200, {**result, "video_id": saved}
+
+
 def _saves_capture_one(now=None) -> bool:
     """Capture the oldest due saved post. ``now`` is a Unix timestamp for tests.
 
@@ -18783,6 +18825,9 @@ def _research_url_key(url) -> str | None:
     if reddit_extractor.is_reddit_thread_url(url):
         canonical = reddit_extractor.canonical_json_url(url)
         return "reddit:" + canonical.lower().removesuffix("/.json").removesuffix(".json") if canonical else None
+    hn_id = hn_extractor.item_id(url)
+    if hn_id:
+        return "hn:" + hn_id
     canonical = page_extractor.normalize_page_url(url)
     if not canonical:
         return None
@@ -21122,7 +21167,7 @@ class Handler(BaseHTTPRequestHandler):
         Always 200: an unsupported URL is a valid answer, not an error."""
         raw = (parse_qs(urlparse(self.path).query).get("url") or [""])[0]
         result = _classify_capture_url(raw)
-        if result.get("endpoint") == "/extract/page":
+        if result.get("source") in _SUITE_CAPTURE_PAGE_SOURCES:
             result["needs_allow"] = not page_extractor.host_is_allowed(
                 _get_index(), result["canonical"])
         self._send_json(200, result)
@@ -23623,6 +23668,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
         url = (body.get("url") or "").strip()
+        if hn_extractor.item_id(url):
+            return self._send_json(*_capture_hn_thread(body))
         render_mode = (body.get("render_mode")
                          or page_extractor.RENDER_MODE_JS).strip().lower()
         include_screenshot = bool(body.get("include_screenshot", True))
@@ -23689,6 +23736,8 @@ class Handler(BaseHTTPRequestHandler):
         /extract/page. The tab supplies the text. The helper can fetch a
         same-site lead image for the Library thumbnail."""
         url = page_extractor.normalize_page_url(str((body or {}).get("url") or ""))
+        if hn_extractor.item_id(url):
+            return self._send_json(*_capture_hn_thread(body))
         if url and not page_extractor.host_is_allowed(_get_index(), url):
             return self._send_json(403, page_extractor.host_not_allowed_result(url))
         result = page_dom_capture.build_extract_result(body)
@@ -25708,6 +25757,8 @@ class Handler(BaseHTTPRequestHandler):
                 "error": ("This uoink has no saved source link to re-capture. "
                           "Grab it again from the original page.")})
         body = {"url": url}
+        if hn_extractor.item_id(url):
+            return self._send_json(*_capture_hn_thread(body))
         if isinstance(interval, int) and interval > 0:
             body["interval"] = interval
         log.info("POST /yoinks/%s/reyoink -> re-extract %s", video_id, url)
@@ -26085,6 +26136,11 @@ class Handler(BaseHTTPRequestHandler):
                         })
                 clean_diar["segments"] = clean_diar_segs
             filtered["diarization"] = clean_diar
+
+        if row.get("source_type") == "hn_thread" and isinstance(data.get("metadata"), dict):
+            story_url = data["metadata"].get("story_url")
+            if isinstance(story_url, str) and page_extractor.normalize_page_url(story_url):
+                filtered["story_url"] = story_url
 
         # 3.18.0: an X save that holds only part of the post's text.
         cut_off = _x_cut_off_detail(data)
@@ -27062,6 +27118,8 @@ class Handler(BaseHTTPRequestHandler):
         ffmpeg screenshots once we know which sites benefit."""
         raw = (body.get("url") or "").strip()
         canonical, platform = _normalize_any_url(raw)
+        if platform == "hn" and hn_extractor.item_id(raw):
+            return self._send_json(*_capture_hn_thread(body))
         if not canonical:
             return self._send_json(400, {
                 "ok": False,

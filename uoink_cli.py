@@ -248,6 +248,7 @@ CAPTURE_TOOLS = {
     "x_video": ("uoink_url", "url"),
     "x_article": ("uoink_page", "url"),
     "reddit_thread": ("uoink_reddit_thread", "url"),
+    "hn_thread": ("uoink_page", "url"),
     "podcast_feed": ("add_podcast_feed", "feed_url"),
     "web_page": ("uoink_page", "url"),
 }
@@ -689,7 +690,7 @@ def text_kind(row):
                     ("ep_", "podcast"), ("episode_", "podcast")) if identity.startswith(prefix)), "item")
     return {"page": "article", "x_article": "article", "youtube": "video",
             "youtube_video": "video", "short_video": "video", "x_video": "video",
-            "x_thread": "thread", "reddit_thread": "thread"}.get(kind, kind)
+            "x_thread": "thread", "reddit_thread": "thread", "hn_thread": "thread"}.get(kind, kind)
 
 
 def text_source(row):

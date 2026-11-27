@@ -1153,6 +1153,18 @@
     return _getJson("/memory/search" + query);
   }
 
+  function normalizeHnUrl(rawUrl) {
+    try {
+      const url = new URL(rawUrl.includes("://") ? rawUrl : "https://" + rawUrl);
+      const ids = url.searchParams.getAll("id");
+      if (!/^https?:$/.test(url.protocol) || !/^(www\.)?news\.ycombinator\.com$/.test(url.host)
+          || url.username || url.password || !/^\/item\/?$/.test(url.pathname)
+          || ids.length !== 1 || !/^\d{1,20}$/.test(ids[0])) return null;
+      const id = ids[0].replace(/^0+/, "");
+      return id ? `https://news.ycombinator.com/item?id=${id}` : null;
+    } catch { return null; }
+  }
+
   function normalizeRedditUrl(rawUrl) {
     if (!rawUrl) return null;
     let u;
@@ -1276,6 +1288,9 @@
     reddit_thread: {
       label: "thread", endpoint: "/extract/reddit", action: "reddit", note: "",
     },
+    hn_thread: {
+      label: "thread", endpoint: "/extract/page", action: "page", note: "",
+    },
     podcast_feed: {
       label: "podcast", endpoint: "/podcasts/feeds", action: "podcast",
       note: "Adds the RSS feed and watches new episode metadata. Audio stays off by default.",
@@ -1324,6 +1339,8 @@
     if (tw) return _classifyResult("x_video", tw);
     const rd = normalizeRedditUrl(text);
     if (rd) return _classifyResult("reddit_thread", rd);
+    const hn = normalizeHnUrl(text);
+    if (hn) return _classifyResult("hn_thread", hn);
     if (looksLikeFeedUrl(text)) {
       return _classifyResult("podcast_feed", normalizeAnyUrl(text) || text);
     }
@@ -1475,6 +1492,7 @@
     normalizeXArticleUrl,
     isXArticleUrl,
     normalizeRedditUrl,
+    normalizeHnUrl,
     normalizePlaylistUrl,
     normalizeTikTokUrl,
     normalizeInstagramUrl,
