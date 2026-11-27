@@ -169,9 +169,12 @@ def parser():
     backfill.add_argument("action", choices=BACKFILL_ACTIONS, help="status, start, pause or resume")
     backfill.add_argument("--order", choices=("longest", "newest"),
                           help="with start: longest first (default) or newest saved first")
-    connect = command("connect", help="print local connection recipes; never writes client files")
+    connect = command("connect", help="preview a connection recipe or apply it with --write")
     connect.add_argument("client", nargs="?", help="client name; use --list to see them")
     connect.add_argument("--list", action="store_true", help="list the supported clients")
+    connect.add_argument("--write", action="store_true", help="add Uoink to a supported client after confirmation")
+    connect.add_argument("--yes", action="store_true", help="confirm --write without a prompt")
+    connect.add_argument("--manifest", type=Path, help="unpacked Uoink MCPB manifest for windows-odr")
     connect.add_argument("--deeplink", action="store_true", help="print a Cursor or VS Code install link")
     connect.add_argument("--toolset", choices=TOOLSETS, default=None,
                          help="tools to serve: full (99), core (36), search (9) or research (7); default full, core for Cursor")
@@ -1200,7 +1203,13 @@ def main(argv=None):
             with redirect_stdout(sys.stderr):
                 return backend().run_cli([*isolation.child_argv(), *ns.server_args])
         if ns.command == "connect":
-            from uoink_connect import CLIENTS, client_spec, render, deeplink, python_command
+            from uoink_connect import CLIENTS, client_spec, connect_recipe, deeplink, python_command
+            if ns.manifest is not None and ns.client != "windows-odr":
+                raise UsageError("--manifest requires windows-odr")
+            if ns.yes and not ns.write:
+                raise UsageError("--yes requires --write")
+            if ns.write and (ns.list or ns.deeplink):
+                raise UsageError("--write requires a client and cannot be combined with --list or --deeplink")
             if ns.list and ns.client:
                 raise UsageError("choose a client or --list, not both")
             if ns.deeplink and (ns.list or ns.client not in ("cursor", "vscode")):
@@ -1217,7 +1226,14 @@ def main(argv=None):
                 raise UsageError(str(exc)) from exc
             python = python_command(APP_DIR)
             output_format = "install deeplink" if ns.deeplink else spec.format
-            print(f"File: {spec.location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
+            location = spec.location
+            if ns.client == "claude-desktop" and sys.platform == "win32":
+                from agent_config_writer import claude_desktop_paths, roaming_dir
+                paths = claude_desktop_paths()
+                if paths != [roaming_dir() / "Claude/claude_desktop_config.json"]:
+                    location = "\nFile: ".join(str(path) for path in paths)
+                    location += f"\nDefault location: {spec.location}"
+            print(f"File: {location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
             verification = "yes" if spec.verified else "no: " + spec.reason
             print(f"Official docs verified: {verification}. Checked: {spec.checked}.", file=sys.stderr)
             print("Sources: " + ", ".join(spec.sources), file=sys.stderr)
@@ -1227,9 +1243,15 @@ def main(argv=None):
                 print("JSON-form YAML 1.2; the entire output is a valid YAML document.", file=sys.stderr)
             if spec.format == "shell" and sys.platform == "win32":
                 print("Run this command in PowerShell.", file=sys.stderr)
-            print(deeplink(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset) if ns.deeplink
-                  else render(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset))
-            return 0
+            if ns.deeplink:
+                print(deeplink(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset))
+                return 0
+            try:
+                return connect_recipe(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset,
+                                      write=ns.write, yes=ns.yes, manifest=ns.manifest)
+            except (ValueError, OSError) as exc:
+                print(f"uoink: {exc}", file=sys.stderr)
+                return 1
         if ns.command == "skill":
             if ns.skill_command == "path":
                 print(APP_DIR / "skills" / "uoink")

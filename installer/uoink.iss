@@ -194,6 +194,7 @@ Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_cli.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_connect.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\agent_config_writer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_agent_runtime.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts\install-watchdog.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion

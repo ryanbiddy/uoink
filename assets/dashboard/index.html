@@ -8658,13 +8658,16 @@
       if (!client) return;
       setSettingFeedback("settingsAgentSetupCard", "Saving…", "saving");
       try {
-        await authFetch(`/agents/connect/${encodeURIComponent(client)}`, {
+        const result = await authFetch(`/agents/connect/${encodeURIComponent(client)}`, {
           method: "POST",
           body: JSON.stringify({}),
         });
-        showToast("Writing agent connected.");
+        const count = result.config_paths?.length || 1;
+        const saved = count > 1 ? `Saved ${count} ${result.label} config files.` : "Saved.";
+        const next = `Restart ${result.label}, then ask it: what's in my Uoink library?`;
+        showToast(`${saved} ${next}`);
         await loadAgentSetup();
-        setSettingFeedback("settingsAgentSetupCard", "Saved. Restart the client to use the connection.", "saved");
+        setSettingFeedback("settingsAgentSetupCard", `${saved} ${next}`, "saved");
       } catch (err) {
         showToast(`Couldn't connect that agent: ${err.message}`);
         setSettingFeedback("settingsAgentSetupCard", `Not saved: ${settingError(err)}`, "error", () => connectAgent(client));

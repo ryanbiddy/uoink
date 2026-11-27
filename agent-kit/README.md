@@ -89,9 +89,10 @@ uoink connect cursor
 uoink connect codex
 ```
 
-`connect` prints an absolute-path config and tells you where it belongs.
-Merge the entry into your existing config and reconnect. It never edits other
-apps' files. Cursor's recipe uses the smaller `core` toolset.
+By default, `connect` prints the config and its destination. Run
+`uoink connect cursor --write` to review and save the entry, then restart
+Cursor. Cursor's recipe uses the smaller `core` toolset. For Codex, merge
+the printed entry into your TOML file by hand.
 
 Official documentation was checked on 2026-10-21. The table separates verified
 formats and routes from remaining documentation gaps. All actual client

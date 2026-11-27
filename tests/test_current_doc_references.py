@@ -3,9 +3,21 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
+
+
+@pytest.mark.parametrize("document,context", [
+    ("agent-kit/README.md", "smaller `core`"),
+    ("docs/linux.md", "~/.cursor/mcp.json"),
+    ("docs/connect-your-agent.md", "one JSON envelope"),
+])
+def test_connect_guides_explain_write_mode(document, context):
+    paragraphs = (ROOT / document).read_text(encoding="utf-8").split("\n\n")
+    paragraph = next(p for p in paragraphs if context in p)
+    assert "--write" in paragraph
 
 
 def test_readme_local_images_resolve() -> None:
