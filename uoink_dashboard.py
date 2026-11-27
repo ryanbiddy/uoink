@@ -30,6 +30,7 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
+from urllib.parse import urlsplit
 
 if sys.platform == "darwin":
     sys.dont_write_bytecode = True
@@ -42,7 +43,6 @@ sys.path.insert(0, str(HERE))
 import uoink_install_isolation as _install_isolation  # noqa: E402
 _install_isolation.apply_from_process()
 
-DASHBOARD_URL = "http://127.0.0.1:5179/dashboard"
 WIDTH, HEIGHT = 1280, 800
 ICON_PATH = HERE / "uoink.ico"
 _ICON_HANDLES = []
@@ -55,10 +55,7 @@ def _dashboard_url() -> str:
 def _target_url() -> str:
     bound = _dashboard_url()
     for candidate in sys.argv[1:]:
-        if candidate.startswith(bound) or (
-            _install_isolation.current_binding() is None
-            and candidate.startswith(DASHBOARD_URL)
-        ):
+        if _allowed_url(candidate):
             return candidate
     return bound
 
@@ -188,12 +185,17 @@ def _requested_url(target_url: str) -> str | None:
 
 def _allowed_url(url) -> bool:
     """Only this window's own dashboard address may be loaded through the pipe."""
-    if not isinstance(url, str) or len(url) > _MAX_URL:
+    if not isinstance(url, str) or url != url.strip() or "\\" in url:
         return False
     if any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in url):
         return False
-    bound = _dashboard_url()
-    return url.startswith(bound) and url[len(bound):len(bound) + 1] in ("", "#", "?", "/")
+    try:
+        target, bound = urlsplit(url), urlsplit(_dashboard_url())
+        return (target.scheme == bound.scheme and target.hostname == bound.hostname
+                and target.username is None and target.password is None
+                and target.port == bound.port and target.path == bound.path == "/dashboard")
+    except ValueError:
+        return False
 
 
 def _instance_name(api) -> str:
@@ -212,6 +214,9 @@ class _Win32:
     ERROR_ALREADY_EXISTS = 183
     ERROR_IO_PENDING = 997
     WAIT_OBJECT_0 = 0
+    SECURITY_IDENTIFICATION = 0x00010000
+    SECURITY_SQOS_PRESENT = 0x00100000
+    FILE_FLAG_FIRST_PIPE_INSTANCE = 0x00080000
     PIPE_REJECT_REMOTE_CLIENTS = 0x00000008
 
     def __init__(self) -> None:
@@ -225,6 +230,29 @@ class _Win32:
         a = ctypes.WinDLL("advapi32", use_last_error=True)
         k.CreateMutexW.argtypes = [ctypes.c_void_p, wt.BOOL, wt.LPCWSTR]
         k.CreateMutexW.restype = wt.HANDLE
+        k.OpenMutexW.argtypes = [wt.DWORD, wt.BOOL, wt.LPCWSTR]
+        k.OpenMutexW.restype = wt.HANDLE
+        k.OpenProcess.argtypes = [wt.DWORD, wt.BOOL, wt.DWORD]
+        k.OpenProcess.restype = wt.HANDLE
+        k.QueryFullProcessImageNameW.argtypes = [wt.HANDLE, wt.DWORD, wt.LPWSTR, ctypes.POINTER(wt.DWORD)]
+        k.QueryFullProcessImageNameW.restype = wt.BOOL
+
+        class SecurityAttributes(ctypes.Structure):
+            _fields_ = [("length", wt.DWORD), ("descriptor", ctypes.c_void_p), ("inherit", wt.BOOL)]
+
+        self._sa = SecurityAttributes
+        a.ConvertStringSecurityDescriptorToSecurityDescriptorW.argtypes = [
+            wt.LPCWSTR, wt.DWORD, ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(wt.DWORD)]
+        a.ConvertStringSecurityDescriptorToSecurityDescriptorW.restype = wt.BOOL
+        k.CreateNamedPipeW.argtypes = [wt.LPCWSTR, wt.DWORD, wt.DWORD, wt.DWORD, wt.DWORD,
+                                       wt.DWORD, wt.DWORD, ctypes.POINTER(SecurityAttributes)]
+        k.CreateNamedPipeW.restype = wt.HANDLE
+        k.DisconnectNamedPipe.argtypes = [wt.HANDLE]
+        k.DisconnectNamedPipe.restype = wt.BOOL
+        u.ShowWindow.argtypes = [wt.HWND, ctypes.c_int]
+        u.ShowWindow.restype = wt.BOOL
+        u.SetForegroundWindow.argtypes = [wt.HWND]
+        u.SetForegroundWindow.restype = wt.BOOL
         k.CloseHandle.argtypes = [wt.HANDLE]
         k.CloseHandle.restype = wt.BOOL
         k.GetNamedPipeServerProcessId.argtypes = [wt.HANDLE, ctypes.POINTER(wt.ULONG)]
@@ -242,17 +270,10 @@ class _Win32:
         a.GetTokenInformation.restype = wt.BOOL
         a.ConvertSidToStringSidW.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
         a.ConvertSidToStringSidW.restype = wt.BOOL
-        self._enum_proc = ctypes.WINFUNCTYPE(wt.BOOL, wt.HWND, wt.LPARAM)
-        u.EnumWindows.argtypes = [self._enum_proc, wt.LPARAM]
-        u.EnumWindows.restype = wt.BOOL
         u.GetWindowThreadProcessId.argtypes = [wt.HWND, ctypes.POINTER(wt.DWORD)]
         u.GetWindowThreadProcessId.restype = wt.DWORD
-        u.IsWindowVisible.argtypes = [wt.HWND]
-        u.IsWindowVisible.restype = wt.BOOL
         u.IsIconic.argtypes = [wt.HWND]
         u.IsIconic.restype = wt.BOOL
-        u.GetWindowTextW.argtypes = [wt.HWND, wt.LPWSTR, ctypes.c_int]
-        u.GetWindowTextW.restype = ctypes.c_int
         u.GetForegroundWindow.argtypes = []
         u.GetForegroundWindow.restype = wt.HWND
         u.AllowSetForegroundWindow.argtypes = [wt.DWORD]
@@ -260,39 +281,56 @@ class _Win32:
         self._k, self._u, self._a = k, u, a
 
     # identity
-    def user_sid(self) -> str:
-        ctypes, wt = self._ctypes, self._wt
-        try:
-            token = wt.HANDLE()
-            if not self._a.OpenProcessToken(self._k.GetCurrentProcess(), 0x0008, ctypes.byref(token)):
-                raise OSError(ctypes.get_last_error(), "OpenProcessToken")
-            try:
-                size = wt.DWORD()
-                self._a.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
-                buf = ctypes.create_string_buffer(max(size.value, 1))
-                if not self._a.GetTokenInformation(token, 1, buf, size, ctypes.byref(size)):
-                    raise OSError(ctypes.get_last_error(), "GetTokenInformation")
-                sid = ctypes.cast(buf, ctypes.POINTER(ctypes.c_void_p))[0]
-                text = ctypes.c_void_p()
-                if not self._a.ConvertSidToStringSidW(sid, ctypes.byref(text)):
-                    raise OSError(ctypes.get_last_error(), "ConvertSidToStringSidW")
-                try:
-                    return ctypes.wstring_at(text.value)
-                finally:
-                    self._k.LocalFree(text)
-            finally:
-                self._k.CloseHandle(token)
-        except OSError as exc:
-            log.debug("user SID unavailable; using the account name: %s", exc)
-            return "%s\\%s" % (os.environ.get("USERDOMAIN", ""), os.environ.get("USERNAME", ""))
+    def open_process(self, pid):
+        handle = self._k.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            raise self._ctypes.WinError(self._ctypes.get_last_error())
+        return handle
 
-    def session_id(self) -> int:
+    def image_path(self, process=None) -> str:
+        size = self._wt.DWORD(32768)
+        buf = self._ctypes.create_unicode_buffer(size.value)
+        handle = process or self._k.GetCurrentProcess()
+        if not self._k.QueryFullProcessImageNameW(handle, 0, buf, self._ctypes.byref(size)):
+            raise self._ctypes.WinError(self._ctypes.get_last_error())
+        return buf.value
+
+    def user_sid(self, process=None) -> str:
+        ctypes, wt = self._ctypes, self._wt
+        token = wt.HANDLE()
+        if not self._a.OpenProcessToken(process or self._k.GetCurrentProcess(), 0x0008, ctypes.byref(token)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        try:
+            size = wt.DWORD()
+            self._a.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
+            buf = ctypes.create_string_buffer(size.value)
+            if not self._a.GetTokenInformation(token, 1, buf, size, ctypes.byref(size)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            sid = ctypes.cast(buf, ctypes.POINTER(ctypes.c_void_p))[0]
+            text = ctypes.c_void_p()
+            if not self._a.ConvertSidToStringSidW(sid, ctypes.byref(text)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            try:
+                return ctypes.wstring_at(text.value)
+            finally:
+                self._k.LocalFree(text)
+        finally:
+            self.close(token.value)
+
+    def session_id(self, pid=None) -> int:
         session = self._wt.DWORD()
-        if self._k.ProcessIdToSessionId(os.getpid(), self._ctypes.byref(session)):
-            return int(session.value)
-        return -1
+        if not self._k.ProcessIdToSessionId(os.getpid() if pid is None else pid, self._ctypes.byref(session)):
+            raise self._ctypes.WinError(self._ctypes.get_last_error())
+        return session.value
 
     # handles
+    def has_mutex(self, name: str) -> bool:
+        handle = self._k.OpenMutexW(0x00100000, False, name)  # SYNCHRONIZE
+        if not handle:
+            return False
+        self.close(handle)
+        return True
+
     def create_mutex(self, name: str):
         """(handle or None, True when another process already holds the name)."""
         self._ctypes.set_last_error(0)
@@ -313,7 +351,8 @@ class _Win32:
         while True:
             try:
                 handle = w.CreateFile(pipe, w.GENERIC_READ | w.GENERIC_WRITE, 0, w.NULL,
-                                      w.OPEN_EXISTING, w.FILE_FLAG_OVERLAPPED, w.NULL)
+                                      w.OPEN_EXISTING, w.FILE_FLAG_OVERLAPPED | self.SECURITY_SQOS_PRESENT
+                                      | self.SECURITY_IDENTIFICATION, w.NULL)
                 break
             except OSError as exc:
                 remaining = deadline - time.monotonic()
@@ -366,12 +405,27 @@ class _Win32:
     # pipe, server side
     def create_server(self, pipe: str):
         w = self._w
-        return w.CreateNamedPipe(
-            pipe,
-            w.PIPE_ACCESS_DUPLEX | w.FILE_FLAG_OVERLAPPED,
-            w.PIPE_TYPE_MESSAGE | w.PIPE_READMODE_MESSAGE | w.PIPE_WAIT | self.PIPE_REJECT_REMOTE_CLIENTS,
-            w.PIPE_UNLIMITED_INSTANCES, _MAX_MESSAGE, _MAX_MESSAGE, 0, w.NULL,
-        )
+        ctypes = self._ctypes
+        descriptor = ctypes.c_void_p()
+        dacl = f"D:P(A;;GA;;;{self.user_sid()})"
+        if not self._a.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+                dacl, 1, ctypes.byref(descriptor), None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        try:
+            attrs = self._sa(ctypes.sizeof(self._sa), descriptor, False)
+            handle = self._k.CreateNamedPipeW(
+                pipe, w.PIPE_ACCESS_DUPLEX | w.FILE_FLAG_OVERLAPPED | self.FILE_FLAG_FIRST_PIPE_INSTANCE,
+                w.PIPE_TYPE_MESSAGE | w.PIPE_READMODE_MESSAGE | self.PIPE_REJECT_REMOTE_CLIENTS,
+                1, _MAX_MESSAGE, _MAX_MESSAGE, 0, ctypes.byref(attrs))
+            if handle == self._wt.HANDLE(-1).value:
+                raise ctypes.WinError(ctypes.get_last_error())
+            return handle
+        finally:
+            self._k.LocalFree(descriptor)
+
+    def disconnect(self, handle):
+        if not self._k.DisconnectNamedPipe(handle) and self._ctypes.get_last_error() != 233:
+            raise self._ctypes.WinError(self._ctypes.get_last_error())
 
     def accept(self, handle, stop: threading.Event) -> bool:
         ov = self._w.ConnectNamedPipe(handle, overlapped=True)
@@ -395,24 +449,13 @@ class _Win32:
         self._u.GetWindowThreadProcessId(hwnd, self._ctypes.byref(pid))
         return int(pid.value)
 
-    def find_window(self, pid: int, title: str):
-        found = []
-
-        def visit(hwnd, _lparam):
-            if self.window_pid(hwnd) != pid or not self._u.IsWindowVisible(hwnd):
-                return True
-            text = self._ctypes.create_unicode_buffer(256)
-            self._u.GetWindowTextW(hwnd, text, len(text))
-            if text.value != title:
-                return True
-            found.append(int(hwnd))
-            return False
-
-        self._u.EnumWindows(self._enum_proc(visit), 0)
-        return found[0] if found else None
-
     def is_iconic(self, hwnd) -> bool:
         return bool(self._u.IsIconic(hwnd))
+
+    def activate(self, hwnd):
+        if self.is_iconic(hwnd):
+            self._u.ShowWindow(hwnd, 9)  # SW_RESTORE uses the native window placement.
+        self._u.SetForegroundWindow(hwnd)
 
     def foreground(self):
         return self._u.GetForegroundWindow() or None
@@ -421,21 +464,45 @@ class _Win32:
         return bool(self._u.AllowSetForegroundWindow(pid))
 
 
+def has_window_candidate() -> bool:
+    """A shortcut may try the normal verified handoff even during helper recovery."""
+    try:
+        api = _Win32()
+        return api.has_mutex("Local\\" + _instance_name(api))
+    except Exception:
+        return False
+
+
 def _hand_off(api, name: str, url: str | None, wait_s: float) -> bool:
     """True only when an open Uoink window of this profile is now in front."""
-    pipe = None
+    pipe = process = None
     try:
+        if url is not None and (not _allowed_url(url) or len(url) > _MAX_URL):
+            return False
         pipe = api.connect("\\\\.\\pipe\\" + name, wait_s)
         if not pipe:
             return False
         pid = api.server_pid(pipe)
         if not pid:
             return False
+        process = api.open_process(pid)  # Keep the process object alive through HWND verification.
+        image = Path(api.image_path(process))
+        local = Path(api.image_path())
+        if api.user_sid(process) != api.user_sid() or api.session_id(pid) != api.session_id():
+            return False
+        python_pair = {image.name.lower(), local.name.lower()} == {"python.exe", "pythonw.exe"}
+        if image != local and not (python_pair and image.parent == local.parent):
+            return False
+        expires = time.monotonic() + _REPLY_WAIT_S
+        message = json.dumps({"uoink": "dashboard-focus", "v": 2, "url": url, "expires": expires},
+                             ensure_ascii=False).encode("utf-8")
+        if len(message) > _MAX_MESSAGE:
+            return False
         # This launch came from the user's click, so it may give the open
         # window's process the right to come to the front.
         api.allow_foreground(pid)
-        api.send(pipe, json.dumps({"uoink": "dashboard-focus", "v": 1, "url": url}).encode("utf-8"))
-        raw = api.recv(pipe, _REPLY_WAIT_S)
+        api.send(pipe, message)
+        raw = api.recv(pipe, max(0, expires - time.monotonic()))
         # Hang up now so the open window can answer the next launch.
         api.close(pipe)
         pipe = None
@@ -459,30 +526,19 @@ def _hand_off(api, name: str, url: str | None, wait_s: float) -> bool:
     finally:
         if pipe:
             api.close(pipe)
+        if process:
+            api.close(process)
 
 
 class _FocusServer:
-    """Answers later launches for one open window. Runs on its own thread and
-    reaches the window only through pywebview's public calls, which run the
-    work on the window's GUI thread."""
+    """Own one pipe instance and dispatch its requests to the WinForms thread."""
 
-    def __init__(self, api, name: str, window) -> None:
+    def __init__(self, api, name: str, window, owner=None) -> None:
         self.api = api
         self.pipe = "\\\\.\\pipe\\" + name
         self.window = window
         self.stop = threading.Event()
-        self.maximized = False
-        try:
-            window.events.maximized += self._on_maximized
-            window.events.restored += self._on_restored
-        except Exception as exc:
-            log.debug("window state events unavailable: %s", exc)
-
-    def _on_maximized(self) -> None:
-        self.maximized = True
-
-    def _on_restored(self) -> None:
-        self.maximized = False
+        self.owner = owner
 
     def start(self) -> threading.Thread:
         thread = threading.Thread(target=self.run, name="uoink-dashboard-focus", daemon=True)
@@ -490,53 +546,110 @@ class _FocusServer:
         return thread
 
     def run(self) -> None:
+        handle = listener_mutex = None
         try:
-            # Serve only once the window exists; until then a later launch waits.
             while not self.window.events.shown.wait(0.5):
                 if self.stop.is_set():
                     return
+            # Every live candidate holds the presence mutex. Only one listens.
+            # A third click can therefore wait for a fallback already on screen
+            # even if it arrives just as the original owner exits.
             failures = 0
-            while not self.stop.is_set() and failures < 50:
-                handle = self.api.create_server(self.pipe)
+            while not self.stop.is_set():
                 try:
+                    if self.owner and listener_mutex is None:
+                        candidate, existed = self.api.create_mutex("Local\\" + self.owner.name + "-listener")
+                        if not candidate:
+                            raise OSError("listener mutex unavailable")
+                        if existed:
+                            self.api.close(candidate)
+                            self.stop.wait(0.1)
+                            continue
+                        listener_mutex = candidate
+                    if handle is None:
+                        handle = self.api.create_server(self.pipe)
                     if not self.api.accept(handle, self.stop):
-                        failures += 1
-                        time.sleep(0.05)
-                        continue
+                        if self.stop.is_set():
+                            return
+                        raise OSError("pipe accept failed")
                     request = self.api.recv(handle, 2.0)
                     self.api.send(handle, self.answer(request))
                     self.api.linger(handle, 2.0)
+                    self.api.disconnect(handle)
                     failures = 0
-                except Exception as exc:
+                except OSError as exc:
+                    # Disconnect and reuse the reserved instance even if the client vanished.
+                    if handle is not None:
+                        try:
+                            self.api.disconnect(handle)
+                        except OSError:
+                            self.api.close(handle)
+                            handle = None
                     failures += 1
-                    log.debug("dashboard focus request failed: %s", exc)
-                    time.sleep(0.05)
-                finally:
-                    self.api.close(handle)
+                    log.debug("dashboard focus pipe failed: %s", exc)
+                    if failures >= 8 or self.stop.wait(min(1.0, 0.05 * 2 ** (failures - 1))):
+                        return
         except Exception as exc:
             log.debug("dashboard focus listener stopped: %s", exc)
+        finally:
+            if handle is not None:
+                self.api.close(handle)
+            if listener_mutex:
+                self.api.close(listener_mutex)
+            if self.owner:
+                self.owner.drop_mutex()
 
     def answer(self, raw) -> bytes:
         try:
-            request = json.loads(raw.decode("utf-8")) if raw else None
-        except (UnicodeDecodeError, ValueError):
-            request = None
-        if not isinstance(request, dict) or request.get("uoink") != "dashboard-focus":
-            return _FAILED
-        try:
-            hwnd = self.api.find_window(os.getpid(), WINDOW_TITLE)
-            if not hwnd:
+            request = json.loads(raw) if raw else None
+            if (not isinstance(request, dict) or request.get("uoink") != "dashboard-focus"
+                    or request.get("v") != 2):
                 return _FAILED
-            if self.api.is_iconic(hwnd):
-                if self.maximized:
-                    self.window.maximize()
-                else:
-                    self.window.restore()
-            self.window.show()  # Show() + Activate() on the GUI thread
-            url = request.get("url")
-            if url is not None and _allowed_url(url):
-                self.window.load_url(url)
-            return json.dumps({"ok": True, "hwnd": int(hwnd)}).encode("utf-8")
+            expires = request["expires"]
+            if type(expires) not in (float, int) or not 0 < expires - time.monotonic() <= _REPLY_WAIT_S:
+                return _FAILED
+            url = request["url"]
+            if url is not None and (not _allowed_url(url) or len(url) > _MAX_URL):
+                return _FAILED
+            if url is not None and not self.window.events.loaded.wait(max(0, expires - time.monotonic())):
+                return _FAILED
+
+            # BeginInvoke is safe across threads. All form, HWND and WebView2 access
+            # happens inside its delegate, including the deadline check after a busy UI.
+            from System import Action
+            done = threading.Event()
+            result = {}
+            form = self.window.native
+
+            def focus():
+                try:
+                    if self.stop.is_set() or time.monotonic() >= expires:
+                        return
+                    hwnd = form.Handle.ToInt64()
+                    if not hwnd:
+                        return
+                    self.api.activate(hwnd)
+                    if url is not None:
+                        # WebView2 may dispatch this later than WinForms. Check the
+                        # current document before giving its page the link.
+                        page_deadline = int(1000 * (time.time() + (expires - time.monotonic())))
+                        script = (f"location.origin + location.pathname === {json.dumps(_dashboard_url())}"
+                                  f" && window.uoinkOpenDashboardLink({json.dumps(url)}, {page_deadline})")
+                        result["navigation"] = form.webview.CoreWebView2.ExecuteScriptAsync(script)
+                    result["hwnd"] = hwnd
+                except Exception as exc:
+                    log.debug("dashboard GUI handoff failed: %s", exc)
+                finally:
+                    done.set()
+
+            form.BeginInvoke(Action(focus))
+            if not done.wait(max(0, expires - time.monotonic())) or not result.get("hwnd"):
+                return _FAILED
+            if url is not None:
+                task = result["navigation"]
+                if not task.Wait(max(0, int(1000 * (expires - time.monotonic())))) or task.Result != "true":
+                    return _FAILED
+            return json.dumps({"ok": True, "hwnd": result["hwnd"]}).encode()
         except Exception as exc:
             log.debug("could not bring the dashboard forward: %s", exc)
             return _FAILED
@@ -551,6 +664,8 @@ class _OneWindow:
         self.mutex = None
         self.server = None
         self.handed_off = False
+        self._lock = threading.Lock()
+        self.thread = None
 
     @classmethod
     def claim(cls, target_url: str, api_factory=None) -> "_OneWindow":
@@ -558,36 +673,47 @@ class _OneWindow:
         try:
             one.api = (api_factory or _Win32)()
             one.name = _instance_name(one.api)
+            if one.keep_presence():
+                # Only windows may keep the name alive. A client waiting for
+                # a dead listener must not make the next click wait too.
+                one.drop_mutex()
+                one.handed_off = _hand_off(one.api, one.name, _requested_url(target_url), _HANDOFF_WAIT_S)
+                if not one.handed_off:
+                    one.keep_presence()  # The local fallback will be a candidate.
         except Exception as exc:
             log.debug("One-window check unavailable: %s", exc)
+            one.drop_mutex()
             one.api = None
-            return one
-        existed = False
-        try:
-            one.mutex, existed = one.api.create_mutex("Local\\" + one.name)
-        except Exception as exc:
-            log.debug("One-window mutex unavailable: %s", exc)
-        wait_s = _HANDOFF_WAIT_S if existed else 0.0
-        if _hand_off(one.api, one.name, _requested_url(target_url), wait_s):
-            one.release()
-            one.handed_off = True
         return one
+
+    def keep_presence(self) -> bool:
+        self.mutex, existed = self.api.create_mutex("Local\\" + self.name)
+        if not self.mutex:
+            raise OSError("CreateMutexW failed")
+        return existed
+
+    def drop_mutex(self) -> None:
+        with self._lock:
+            if self.mutex:
+                self.api.close(self.mutex)
+                self.mutex = None
 
     def serve(self, window) -> None:
         if self.api is None:
             return
         try:
-            self.server = _FocusServer(self.api, self.name, window)
-            self.server.start()
+            self.server = _FocusServer(self.api, self.name, window, self)
+            self.thread = self.server.start()
         except Exception as exc:
+            self.release()
             log.debug("One-window listener unavailable: %s", exc)
 
     def release(self) -> None:
         if self.server is not None:
             self.server.stop.set()
-        if self.mutex and self.api is not None:
-            self.api.close(self.mutex)
-        self.mutex = None
+            if self.thread is not None:
+                self.thread.join(0.5)
+        self.drop_mutex()
 
 
 def main() -> int:
@@ -616,27 +742,25 @@ def main() -> int:
     one = _OneWindow.claim(target_url) if sys.platform == "win32" else None
     if one is not None and one.handed_off:
         return 0
-    window = webview.create_window(
-        WINDOW_TITLE,
-        target_url,
-        width=WIDTH,
-        height=HEIGHT,
-        resizable=True,
-        js_api=JsApi(),
-    )
-    if sys.platform == "win32":
-        threading.Thread(
-            target=_brand_windows_icon_when_ready,
-            name="uoink-dashboard-icon",
-            daemon=True,
-        ).start()
-    if one is not None:
-        one.serve(window)
     try:
+        window = webview.create_window(WINDOW_TITLE, target_url, width=WIDTH, height=HEIGHT,
+                                       resizable=True, js_api=JsApi())
+        if window is None:
+            raise RuntimeError("pywebview did not create a dashboard window")
+        if sys.platform == "win32":
+            threading.Thread(target=_brand_windows_icon_when_ready, name="uoink-dashboard-icon",
+                             daemon=True).start()
+        if one is not None:
+            one.serve(window)
         webview.start()
+    except Exception as exc:
+        log.warning("Dashboard window unavailable; opening browser: %s", exc)
+    else:
+        return 0
     finally:
         if one is not None:
             one.release()
+    webbrowser.open(target_url)
     return 0
 
 

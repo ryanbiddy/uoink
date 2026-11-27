@@ -22538,7 +22538,7 @@
     // shows Library.
     function applyHashRoute() {
       const loc = window.location;
-      const route = parseRoute(loc ? loc.hash : "") || parseRoute("#library");
+      const route = parseRoute(loc?.hash || new URLSearchParams(loc?.search).get("tab")) || parseRoute("#library");
       if (route.hash === currentRoute) return true;
       currentRoute = route.hash;
       applyRoute(route);
@@ -22607,6 +22607,13 @@
     }
 
     function wireRoutes() {
+      window.uoinkOpenDashboardLink = (url, expires) => {
+        if (Date.now() >= expires) return false;
+        const target = new URL(url);
+        if (target.origin !== window.location.origin || target.pathname !== "/dashboard") return false;
+        if ([...target.searchParams.keys()].some(key => key !== "tab")) return false;
+        return navigateTo(target.hash || target.searchParams.get("tab") || "#library");
+      };
       window.addEventListener("hashchange", applyHashRoute);
       window.addEventListener("popstate", applyHashRoute);
       // In-app hash links (#settings/capture, #for-you, #activity) go

@@ -27915,8 +27915,8 @@ def _is_installed_layout() -> bool:
 
 def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
+    url = _install_isolation.helper_url("/dashboard") + ("#settings" if settings else "")
     if sys.platform.startswith("linux"):
-        url = _install_isolation.helper_url("/dashboard") + ("#settings" if settings else "")
         log.info("dashboard: %s (%s)", url, reason)
         return True
     try:
@@ -27924,7 +27924,7 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         # spawner requires the installed app's interpreter.
         if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
             from helper.mac_ui import spawn
-            spawn("uoink_dashboard", _install_isolation.helper_url("/dashboard") + ("#settings" if settings else ""))
+            spawn("uoink_dashboard", url)
             log.info("dashboard: spawned (%s)", reason)
             return True
         script = HERE / "uoink_dashboard.py"
@@ -27934,7 +27934,7 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
             env = os.environ.copy()
             env.update(_install_isolation.child_environ())
             subprocess.Popen(
-                [str(exe), str(script), *_install_isolation.child_argv()],
+                [str(exe), str(script), url, *_install_isolation.child_argv()],
                 cwd=str(HERE),
                 creationflags=creationflags,
                 env=env,
@@ -27945,9 +27945,6 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
 
     try:
-        url = _install_isolation.helper_url("/dashboard")
-        if sys.platform == "darwin" and settings:
-            url += "#settings"
         opened = bool(webbrowser.open(url))
         log.info("dashboard: browser fallback %s (%s)", "opened" if opened else "unavailable", reason)
         return opened
@@ -28008,7 +28005,12 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # try to bind 5179. Probe the canonical /health endpoint first.
     if _existing_server_responds():
         if show_dashboard:
-            _spawn_dashboard_window(reason="existing-server")
+            if sys.platform == "win32" and not os.environ.get("UOINK_SUPERVISOR_RUN_ID"):
+                # The isolated installer shortcut invokes this script directly.
+                import uoink_dashboard
+                uoink_dashboard.main()
+            else:
+                _spawn_dashboard_window(reason="existing-server")
         log.info("Uoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 

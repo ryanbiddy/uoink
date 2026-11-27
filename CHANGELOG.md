@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.
-- On Windows, opening Uoink from the Start menu or the tray while the dashboard is already open brings that window to the front instead of opening a second one. A minimized window is restored, and a link to an item opens in it. If the open window can't come forward, a new one opens as before.
+- On Windows, reopening Uoink from the Start menu or tray brings the dashboard forward in your Windows session and restores it if minimized. Item and tab links keep your unsaved Writing Studio draft. If the dashboard can't come forward, Uoink opens a new window. If the window can't start, the link opens in your browser.
 - On a phone-width window the Library search box shows "Search or paste a link" instead of a cut-off hint. Wider windows keep the full hint.
 - `/health` adds `whisper_model_downloaded`, which says whether the selected transcription model is on this computer. The older `whisperx_model_loaded` stays with the same value but never meant the model was in memory. `transcription_worker` reports that.
 

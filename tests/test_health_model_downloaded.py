@@ -61,3 +61,6 @@ def test_docs_call_the_old_key_an_alias_of_downloaded():
     assert "transcription_worker" in new_row
     for name in ("README_server.md", "docs/v2-api.md"):
         assert '"whisper_model_downloaded": false' in (ROOT / name).read_text(encoding="utf-8")
+    readme = (ROOT / "README_server.md").read_text(encoding="utf-8")
+    assert "`whisperx_model_loaded` is a deprecated alias for `whisper_model_downloaded`" in readme
+    assert "`transcription_worker.state`" in readme
