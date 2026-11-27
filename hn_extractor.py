@@ -4,6 +4,7 @@ from __future__ import annotations
 import http.client
 import json
 import re
+import threading
 import time
 from datetime import datetime, timezone
 from html import unescape
@@ -18,6 +19,20 @@ API_HOST = "hn.algolia.com"
 MAX_BYTES = article.MAX_INPUT
 MAX_MARKDOWN_BYTES = article.MAX_MARKDOWN
 TIMEOUT = 8
+REQUEST_INTERVAL = 1.0
+_request_lock = threading.Lock()
+_last_request_at = None
+
+
+def wait_for_algolia():
+    """Space Algolia requests from concurrent captures and other helper callers."""
+    global _last_request_at
+    with _request_lock:
+        if _last_request_at is not None:
+            delay = _last_request_at + REQUEST_INTERVAL - time.monotonic()
+            if delay > 0:
+                time.sleep(delay)
+        _last_request_at = time.monotonic()
 
 
 def _id(value):
@@ -47,6 +62,7 @@ def _fetch_item(item):
     # Fixed HTTPS origin, no redirect handling, cookies or story-link fetches.
     conn = http.client.HTTPSConnection(API_HOST, timeout=TIMEOUT)
     try:
+        wait_for_algolia()
         conn.request("GET", f"/api/v1/items/{item}",
                      headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
         resp = conn.getresponse()
@@ -74,7 +90,9 @@ def _fetch_item(item):
     finally:
         conn.close()
     try:
-        return json.loads(raw)
+        # No HN integer field needs more than the 20 digits accepted for IDs.
+        # Skip oversized numbers without converting them or losing the story.
+        return json.loads(raw, parse_int=lambda s: int(s) if len(s) <= 20 else None)
     except (ValueError, UnicodeError, RecursionError):
         raise ValueError("Algolia returned unreadable Hacker News thread data.") from None
 
@@ -147,18 +165,18 @@ def _render(story, focus):
     stamp = _time(story)
     raw_link = story.get("url") or ""
     link = article.safe_link(raw_link, url) if len(raw_link) <= 4096 else None
-    points = int(story.get("points") or 0)
-    meta = [f"posted by {article._escape(author)}", f"{points} points"]
+    points = story.get("points")
+    meta = [f"posted by {article._escape(author)}"]
+    has_score = type(points) is int and 0 <= points <= 2**31 - 1
+    if has_score:
+        meta.append(f"{points} points")
     if stamp:
         meta.append(article._escape(stamp))
-    parts = [f"# {article._escape(title)}", "**Hacker News** · " + " · ".join(meta),
-             f"**Source:** {url}"]
-    if link:
-        parts.append(f"**Story link:** [Open the story]({link})")
+    parts = []
     count = 0
     truncated = False
     # Reserve space for the footer. Keep complete Markdown blocks.
-    remaining = MAX_MARKDOWN_BYTES - len("\n\n".join(parts).encode()) - 100
+    remaining = MAX_MARKDOWN_BYTES - 100
 
     def append(block, shortened=False):
         nonlocal remaining, truncated
@@ -171,6 +189,11 @@ def _render(story, focus):
         remaining -= size
         return True
 
+    append(f"# {article._escape(title)}")
+    append("**Hacker News** · " + " · ".join(meta))
+    append(f"**Source:** {url}")
+    if link:
+        append(f"**Story link:** [Open the story]({link})")
     focus_id = _id(focus["id"]) if focus else None
     if focus:
         append("## Selected comment")
@@ -210,7 +233,7 @@ def _render(story, focus):
         parts.append("(No public comments.)")
     return {
         "ok": True, "url": url, "title": title, "markdown": "\n\n".join(parts) + "\n",
-        "metadata": {"author": author, "score": points, "created_at": stamp,
+        "metadata": {"author": author, **({"score": points} if has_score else {}), "created_at": stamp,
                      "source_url": ITEM_URL + focus_id if focus_id else url,
                      "story_url": link, "selected_comment_id": focus_id,
                      "comments_captured": count, "depth_limit": DEFAULT_DEPTH_LIMIT},
@@ -232,13 +255,19 @@ def extract_hn_thread(url):
         return node
 
     try:
-        item = fetch(requested)
-        if item.get("type") == "comment":
-            story_id = _id(item.get("story_id"))
+        story = fetch(requested)
+        focus = None
+        if story.get("type") == "comment":
+            focus = story
+            story_id = _id(focus.get("story_id"))
             if not story_id:
                 raise ValueError("Algolia could not identify the story for this comment.")
-            return _render(fetch(story_id), item)
-        return _render(item, None)
+            story = fetch(story_id)
+        kind = story.get("type")
+        if kind in ("job", "poll"):
+            return {"ok": False, "code": "unsupported_item",
+                    "error": f"This Hacker News {kind} cannot be saved as a story thread."}
+        return _render(story, focus)
     except article.ExtractionLimit:
         return {"ok": False, "code": "parse_failed", "error": "This thread exceeds the text processing limit."}
     except ValueError as exc:

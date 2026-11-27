@@ -8410,21 +8410,22 @@
       return html;
     }
 
-    function renderMarkdown(value, renderInline = renderInlineMarkdown) {
+    function renderMarkdown(value, renderInline = renderInlineMarkdown, hideFileMarkers = false) {
       const text = String(value || "").trim();
       if (!text) return "";
-      const lines = text.replace(/\r\n/g, "\n").split("\n");
+      const lines = text.replace(/\r\n/g, "\n").split("\n").values();
       const out = [];
       let list = [];
       let fence = "", code = [];
+      let skipTitle = hideFileMarkers;
       const flushList = () => {
         if (!list.length) return;
         out.push(`<ul>${list.map((item) => `<li>${renderInline(item)}</li>`).join("")}</ul>`);
         list = [];
       };
-      for (const line of lines) {
-        const trimmed = line.trim();
+      for (let line of lines) {
         if (fence) {
+          const trimmed = line.trim();
           if (/^`+$/.test(trimmed) && trimmed.length >= fence.length) {
             out.push(`<pre><code>${htmlEscape(code.join("\n"))}</code></pre>`);
             fence = "";
@@ -8432,6 +8433,15 @@
           } else code.push(line);
           continue;
         }
+        if (hideFileMarkers) {
+          if (line.includes("<!--")) line = readerStripComments(line, lines);
+          if (skipTitle && line.trim()) {
+            skipTitle = false;
+            if (/^\s*#\s+/.test(line)) continue;
+          }
+          if (/^\s*!\[[^\]]*\]\([^)]*\)\s*$/.test(line)) continue;
+        }
+        const trimmed = line.trim();
         const opening = /^(`{3,})[\w+#.-]*$/.exec(trimmed);
         if (opening) {
           flushList();
@@ -9503,16 +9513,33 @@
       loadReaderImages();
     }
 
+    // Called outside fences. Skip inline code spans and join the surrounding
+    // text when a file comment continues onto another line.
+    function readerStripComments(line, lines) {
+      const tokens = /(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)|<!--/g;
+      let kept = "", start = 0, token;
+      while ((token = tokens.exec(line))) {
+        if (token[0] !== "<!--") continue;
+        kept += line.slice(start, token.index);
+        let end = line.indexOf("-->", tokens.lastIndex);
+        while (end < 0) {
+          const next = lines.next();
+          if (next.done) return kept;
+          line = next.value;
+          end = line.indexOf("-->");
+        }
+        start = tokens.lastIndex = end + 3;
+      }
+      return kept + line.slice(start);
+    }
+
     // The saved Markdown as the document (notes, pages, posts, threads, and
     // older captures with no saved segments), without its front matter, the
     // title line the reader already shows, image lines or file markers.
     function readerMarkdownHtml(markdown) {
       const text = String(markdown || "").replace(/\r\n/g, "\n")
-        .replace(/^---\n[\s\S]*?\n---\n/, "")
-        .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
-        .replace(/^\s*#\s+[^\n]*\n/, "")
-        .replace(/^\s*!\[[^\]]*\]\([^)]*\)\s*$/gm, "");
-      const html = renderMarkdown(text, readerInline)
+        .replace(/^---\n[\s\S]*?\n---\n/, "");
+      const html = renderMarkdown(text, readerInline, true)
         .replace(/<(\/?)h([1-6])>/g, (_, slash, level) => `<${slash}h${Math.min(6, Number(level) + 1)}>`);
       return html ? `<div class="reader-prose markdown-rendered">${html}</div>` : "";
     }

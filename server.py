@@ -18584,7 +18584,7 @@ def _persist_reddit_thread(result: dict, *, topic: str | None = None):
 
 def _capture_hn_thread(body):
     url = body["url"]
-    shelf, error = _shelf_from_body(body, remember_url=url)
+    shelf, error = _shelf_from_body(body)
     if error:
         return 400, {"ok": False, "error": error}
     result = hn_extractor.extract_hn_thread(url)
@@ -18593,10 +18593,12 @@ def _capture_hn_thread(body):
     try:
         # Two different comment links can update the same story's files.
         with _corpus_update_lock:
+            if shelf:
+                _remember_capture_shelf(result["url"], shelf, by_hand=body.get("shelf") is not None)
             saved = page_extractor.persist_page_yoink(
                 _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
                 source_type=hn_extractor.SOURCE_TYPE, subfolder="Hacker News", slug_prefix="hn",
-                topic_classifier=lambda meta: _route_topic(meta, url=url))
+                topic_classifier=_route_topic)
     except Exception:
         log.exception("Hacker News thread save failed")
         saved = None

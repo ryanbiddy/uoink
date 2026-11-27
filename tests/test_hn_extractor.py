@@ -1,6 +1,7 @@
 """Offline Algolia responses through the normal capture and library readers."""
 import io
 import json
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -8,7 +9,10 @@ import pytest
 
 import hn_extractor as hn
 import index
+import list_imports
+import research
 import server
+import shelf_router
 import uoink_cli
 import uoink_mcp_tools as mcp
 
@@ -21,9 +25,11 @@ COMMENT = hn.ITEM_URL + "903"
 @pytest.fixture
 def api(monkeypatch):
     requests = []
+    starts = []
+    monkeypatch.setattr(hn, "_last_request_at", None, raising=False)
     bodies = {key: (FIXTURES / f"{name}.json").read_bytes()
               for key, name in [("901", "story"), ("903", "comment"), ("1000", "large")]}
-    config = SimpleNamespace(status=200, bodies=bodies, requests=requests)
+    config = SimpleNamespace(status=200, bodies=bodies, requests=requests, starts=starts)
 
     class Connection:
         def __init__(self, host, timeout):
@@ -34,6 +40,7 @@ def api(monkeypatch):
             assert set(headers) == {"Accept", "User-Agent"}
             self.item = path.removeprefix("/api/v1/items/")
             requests.append(self.item)
+            starts.append(hn.time.monotonic())
 
         def getresponse(self):
             resp = io.BytesIO(bodies[self.item])
@@ -71,6 +78,96 @@ def test_comment_uses_story_identity_and_highlights_once(api):
     assert md.index("## Selected comment") < md.index("tidewheel") < md.index("## Top comments")
     assert md.count("tidewheel") == 1 and COMMENT in md
     assert result["comments_captured"] == 3
+
+
+def test_algolia_spaces_comment_parent_and_next_capture(api, monkeypatch):
+    now = time.monotonic()
+
+    def advance(seconds):
+        nonlocal now
+        now += seconds
+
+    monkeypatch.setattr(hn, "time", SimpleNamespace(monotonic=lambda: now, sleep=advance))
+
+    def fetch_json(url):
+        assert url.startswith("https://hn.algolia.com/")
+        api.starts.append(hn.time.monotonic())
+        return json.loads(api.bodies["901"])
+
+    assert hn.extract_hn_thread(COMMENT)["ok"]
+    list_imports.fetch_source({"kind": list_imports.SOURCE_HN, "id": 901},
+                              offset=0, limit=1, fetch_json=fetch_json)
+    monkeypatch.setattr(research, "http_get_json", fetch_json)
+    research.fetch_hn("clocks", 1)
+    assert hn.extract_hn_thread(STORY)["ok"]
+    assert api.requests == ["903", "901", "901"]
+    assert len(api.starts) == 5
+    assert all(b - a >= 1 for a, b in zip(api.starts, api.starts[1:]))
+
+
+@pytest.mark.parametrize("kind", ["job", "poll"])
+def test_non_thread_item_explains_its_type(api, kind):
+    api.bodies["901"] = json.dumps({"id": 901, "type": kind}).encode()
+    result = hn.extract_hn_thread(STORY)
+    assert result["code"] == "unsupported_item"
+    assert kind in result["error"] and "thread" in result["error"]
+
+
+@pytest.mark.parametrize("score", [b'"n/a"', b"null", b"true", b"-5", b"1.5", b"9" * 200000],
+                         ids=["text", "null", "boolean", "negative", "fraction", "huge-integer"])
+def test_invalid_points_leave_the_thread_readable(api, score):
+    api.bodies["901"] = api.bodies["901"].replace(b'"points": 28', b'"points": ' + score)
+    result = hn.extract_hn_thread(STORY)
+    assert result["ok"], result
+    assert " points" not in result["markdown"] and "score" not in result["metadata"]
+    assert "tidewheel" in result["markdown"] and len(result["markdown"].encode()) <= hn.MAX_MARKDOWN_BYTES
+
+
+def test_header_respects_markdown_budget(api, monkeypatch):
+    story = json.loads(api.bodies["901"])
+    story["url"] = "https://example.test/" + "潮" * 3500
+    story["points"] = 0
+    api.bodies["901"] = json.dumps(story).encode()
+    monkeypatch.setattr(hn, "MAX_MARKDOWN_BYTES", 2000)
+    result = hn.extract_hn_thread(STORY)
+    assert result["ok"] and result["output_truncated"]
+    assert len(result["markdown"].encode()) <= 2000
+    assert "0 points" in result["markdown"] and STORY in result["markdown"]
+    assert "tidewheel" in result["markdown"] and result["links"]
+
+
+def test_two_stories_keep_their_own_shelf_after_comment_recapture(api, tmp_path, monkeypatch):
+    other = hn.ITEM_URL + "910"
+    api.bodies["910"] = json.dumps({"id": 910, "type": "story", "title": "Second story"}).encode()
+    third = hn.ITEM_URL + "920"
+    api.bodies["920"] = json.dumps({"id": 920, "type": "story", "title": "Third story"}).encode()
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
+    monkeypatch.setattr(server, "_shelf_library", lambda: None)
+    with index.Index.open(tmp_path / "index.db") as db:
+        monkeypatch.setattr(server, "_get_index", lambda: db)
+
+        def capture(url, **kwargs):
+            status, result = server._capture_hn_thread({"url": url, **kwargs})
+            assert status == 200, result
+            return result["video_id"]
+
+        first = capture(STORY)
+        assert server._reshelve([(first, "Reading")], label="Move")["moved"] == 1
+        seq = db.shelf_hand_seq(first)
+        second = capture(other, shelf="Workshop")
+        assert capture(COMMENT) == first
+        assert db.get_yoink(first)["topic"] == "Reading"
+        assert db.shelf_hand_seq(first) == seq and db.get_yoink(second)["topic"] == "Workshop"
+        assert shelf_router.hint_for(tmp_path, third) is None
+        third_save = capture(third)
+        assert db.get_yoink(third_save)["topic"] != "Workshop" and db.shelf_hand_seq(third_save) == 0
+        assert capture(COMMENT, shelf="Favorites") == first
+        assert db.get_yoink(first)["topic"] == "Favorites"
+        assert shelf_router.hint_for(tmp_path, STORY) == "Favorites"
+        assert shelf_router.hint_for(tmp_path, other) == "Workshop"
+        assert shelf_router.hint_for(tmp_path, COMMENT) is None
+        assert shelf_router.url_key(STORY) == "hn:901"
 
 
 def test_ask_story_with_an_unavailable_selected_comment(api):

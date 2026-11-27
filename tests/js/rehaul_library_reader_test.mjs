@@ -602,6 +602,19 @@ function readerFiles(details, markdown = "# Agent loops explained\n\nBody") {
 }
 
 async function groupReader() {
+  await scenario("HTML comment markers in saved code stay visible", async () => {
+    const markdown = ["# An HN thread", "<!-- private marker", "```", "-->",
+      "````html", "<!-- sample -->", "```", "<!-- open", "````", "The next reply.",
+      "Inline `<!--` example.", "<!-- hidden -->Visible ending.",
+      "Before<!-- a file marker", "over two lines --> and after."].join("\n");
+    const p = makePage({ files: readerFiles({}, markdown) });
+    await p.page.openYoinkDetail({ ...READER_ROW, platform: "hn", source_type: "hn_thread" });
+    const html = p.els.yoinkDetail.innerHTML;
+    check(html.includes("<pre><code>&lt;!-- sample --&gt;\n```\n&lt;!-- open</code></pre>"), "fenced HTML markers survive verbatim", html);
+    check(html.includes("The next reply.") && html.includes("Inline <code>&lt;!--</code> example."), "unclosed markers in code preserve subsequent text", html);
+    check(html.includes("Visible ending.") && !html.includes("private marker") && !html.includes("hidden --"), "file comments outside code are removed", html);
+    check(html.includes("<p>Before and after.</p>"), "a multiline file marker preserves the surrounding paragraph", html);
+  });
   await scenario("a Hacker News reply and its linked story in the reader", async () => {
     const story = "https://www.youtube.com/watch?v=clock000001";
     const markdown = "# Tide clock\n\n#### foamloop · [permalink](https://news.ycombinator.com/item?id=903)\n\n```\na < b\n```";

@@ -1258,6 +1258,11 @@ def url_key(url: Any) -> str | None:
         match = re.search(r"/comments/([A-Za-z0-9]+)", path)
         if match:
             return "reddit:" + match.group(1).lower()
+    if host == "news.ycombinator.com":
+        from hn_extractor import item_id
+        item = item_id(raw)
+        if item:
+            return "hn:" + item
     if not host or not re.fullmatch(r"[\w.-]+", host) or "." not in host.strip("."):
         return None  # not a web address ("not a url at all")
     return "url:" + host + path.rstrip("/").lower()

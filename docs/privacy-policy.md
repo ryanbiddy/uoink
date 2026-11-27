@@ -73,6 +73,9 @@ Uoink makes these outbound requests:
   only the list's address. Those services receive the ordinary
   request metadata needed to answer, such as your IP address and Uoink's user
   agent, and may redirect the request to their own CDN.
+- **Hacker News availability checks.** When source checks are enabled, Uoink
+  sends the saved story ID to `hn.algolia.com` to check whether the story
+  is still public. A save made from a comment link uses its parent story ID.
 - **Anthropic API requests — only with your own key.** Uoink has no
   Anthropic key of its own and calls Anthropic's API only with your key
   (the one you saved, or one you type to test it), in these cases:
