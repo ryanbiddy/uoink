@@ -22,6 +22,7 @@ sys.path.insert(0, str(KIT))
 import p4_common as common
 import p4_inspect_evidence as inspect
 import p4_prepare_fixture as prepare
+from tests.receipt_fixtures import prepare_receipt
 import p4_session as session
 import p4_stdio_check as stdio_check
 
@@ -447,7 +448,7 @@ def test_prepare_writes_default_store_and_versioned_artifact(tmp_path: Path):
         instrument_only=True,
         original_local=_original_local(),
     )
-    receipt_out = prepare.prepare(binding)
+    receipt_out = prepare_receipt(binding)
     assert receipt_out["apply_enabled"] is False
     expected = json.loads((profile / "expected.json").read_text(encoding="utf-8"))
     assert expected["fixture_generator_version"] == prepare.FIXTURE_GENERATOR_VERSION

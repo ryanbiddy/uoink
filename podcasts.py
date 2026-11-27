@@ -1341,22 +1341,24 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
     link = _subscriptions()._http_link(artwork_url)
     if not link or not title or title.casefold() == "untitled podcast":
         return None
-    folder = _podcast_root(Path(data_root)) / _slugify(title, fallback=f"feed-{feed.get('id') or 0}")
+    root = podcast_storage(data_root)
+    folder = Path(root) / _slugify(title, fallback=f"feed-{feed.get('id') or 0}")
     for suffix in _ARTWORK_TYPES.values():
-        if (folder / f"artwork{suffix}").is_file():
-            return folder / f"artwork{suffix}"
+        cached = checked_path(root, folder / f"artwork{suffix}")
+        if cached.is_file():
+            return cached
     # A refused URL is remembered so the next poll does not download it again;
     # a changed URL is tried afresh.
     refused = folder / "artwork.refused"
     try:
-        if refused.read_text(encoding="utf-8").strip() == link:
+        if read_checked_bytes(root, refused).decode("utf-8").strip() == link:
             return None
-    except OSError:
+    except FileNotFoundError:
         pass
 
     def refuse() -> None:
-        folder.mkdir(parents=True, exist_ok=True)
-        refused.write_text(link, encoding="utf-8")
+        with atomic_output(refused, root=root, encoding="utf-8") as stream:
+            stream.write(link)
 
     opener = opener or _subscriptions().public_http_open
     with opener(link, headers={"User-Agent": _subscriptions().FEED_USER_AGENT,
@@ -1375,11 +1377,9 @@ def cache_feed_artwork(data_root: Path, feed: dict, artwork_url: str | None,
     if len(body) > _ARTWORK_MAX_BYTES or not body.startswith(_ARTWORK_MAGIC[suffix]):
         refuse()
         return None
-    folder.mkdir(parents=True, exist_ok=True)
     target = folder / f"artwork{suffix}"
-    partial = folder / f"artwork{suffix}.part"
-    partial.write_bytes(body)
-    os.replace(partial, target)
+    with atomic_output(target, root=root) as stream:
+        stream.write(body)
     return target
 
 
@@ -1508,8 +1508,10 @@ def episode_media_path(idx, episode_id, data_root, *, transcript=False):
             identity = _episode_full_identity(row)[2].removeprefix("podcast:")[:32]
             matches = name.endswith("--" + identity)
         else:
-            show = _slugify(row["podcast_title"] or row["feed_url"], fallback=f"feed-{row['feed_id']}")
-            matches = rel.parts[0] == show and name == _slugify(row["title"], fallback=f"ep-{episode_id}")
+            # 3.18.0 stored the feed folder only in the episode's path. A poll
+            # may change the display title while this indexed file stays put.
+            matches = (path.is_file() and re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", rel.parts[0])
+                       and name == _slugify(row["title"], fallback=f"ep-{episode_id}"))
         if not matches:
             raise ValueError("Download this episode again so Uoink can identify its recording.")
         if transcript and "--" not in name:

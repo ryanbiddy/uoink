@@ -26,7 +26,7 @@ def no_network(monkeypatch):
 
 
 @pytest.fixture
-def capture_env(tmp_path, monkeypatch, no_network):
+def capture_env(tmp_path, monkeypatch, no_network, public_dns):
     import index
     import server
 

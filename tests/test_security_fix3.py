@@ -305,7 +305,9 @@ def test_open_markdown_errors_are_specific_and_private(tmp_path, monkeypatch, so
     path = tmp_path / "saved.md"
     path.write_bytes(b"\xff" if source == "utf8" else b"text")
     h = handler()
-    h._yoink_markdown_path = lambda _: (path, None)
+    idx = Mock()
+    idx.get_yoink.return_value = {"video_id": "sample", "corpus_path": str(path)}
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     if source == "disk":
         monkeypatch.setattr(server, "open_regular", Mock(side_effect=error))

@@ -64,6 +64,24 @@ def test_unowned_file_at_target_is_never_adopted(tmp_path):
         assert not result["ok"] and not podcasts.get_episode(idx, row["id"])["audio_local_path"]
 
 
+def test_legacy_recording_and_transcript_survive_show_rename(tmp_path):
+    with index.Index.open(tmp_path / "index.db") as idx:
+        feed = podcasts.add_feed(idx, "https://feed.test/rss", title="First name")
+        podcasts.upsert_episodes(idx, feed["id"], [{"guid": "1", "title": "Episode"}])
+        episode, = podcasts.list_episodes(idx)
+        audio = tmp_path / "Podcasts" / "first-name" / "episode.mp3"
+        audio.parent.mkdir(parents=True)
+        audio.write_bytes(b"fixture")
+        transcript = audio.with_suffix(".transcript.json")
+        transcript.write_text('{"segments": []}', encoding="utf-8")
+        with idx.write_transaction() as db:
+            db.execute("UPDATE podcast_episodes SET audio_local_path=?, transcript_local_path=? WHERE id=?",
+                       (str(audio), str(transcript), episode["id"]))
+            db.execute("UPDATE podcast_feeds SET title='New name' WHERE id=?", (feed["id"],))
+        assert podcasts.episode_media_path(idx, episode["id"], tmp_path) == audio
+        assert podcasts.episode_media_path(idx, episode["id"], tmp_path, transcript=True) == transcript
+
+
 def test_ambiguous_legacy_claims_stay_unusable_for_both_episodes(tmp_path):
     with index.Index.open(tmp_path / "index.db") as idx:
         feed = podcasts.add_feed(idx, "https://feed.test/rss", title="Show")

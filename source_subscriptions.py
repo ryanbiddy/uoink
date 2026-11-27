@@ -474,14 +474,12 @@ def _is_nonpublic_address(address) -> bool:
 
 
 def _embedded_ipv4(address) -> list:
-    """IPv4 destinations carried inside an IPv6 address: IPv4-mapped, NAT64
-    well-known prefix and 6to4. Each one must pass the IPv4 rule as well,
+    """IPv4 destinations carried inside mapped and 6to4 addresses.
+    Each one must pass the IPv4 rule as well,
     whatever Python's flags say about the IPv6 form."""
     if address.version != 6:
         return []
     embedded = [address.ipv4_mapped, address.sixtofour]
-    if address in _NAT64_WELL_KNOWN:
-        embedded.append(ipaddress.IPv4Address(int(address) & 0xFFFFFFFF))
     return [ipv4 for ipv4 in embedded if ipv4 is not None]
 
 
@@ -490,6 +488,8 @@ def _reject_private_ip(host: str) -> None:
         address = ipaddress.ip_address(host.strip("[]"))
     except ValueError:
         return
+    if address.version == 6 and address in _NAT64_WELL_KNOWN:
+        address = ipaddress.IPv4Address(int(address) & 0xFFFFFFFF)
     if (_is_nonpublic_address(address)
             or (address.version == 6 and address in _NAT64_LOCAL_USE)
             or any(_is_nonpublic_address(ipv4) for ipv4 in _embedded_ipv4(address))):
@@ -797,7 +797,7 @@ def check_public_http_url(url: str) -> str:
     Shape-only registration validators intentionally remain separate. Repeat
     this check at fetch time, including for saved feeds and every redirect.
     """
-    return _admit_public_http_url(url)[0]
+    return _admit_public_http_url(url.partition("#")[0] if isinstance(url, str) else url)[0]
 
 
 def _admit_public_http_url(url: str) -> tuple[str, str, tuple[str, ...]]:

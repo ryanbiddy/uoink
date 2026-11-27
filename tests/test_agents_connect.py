@@ -30,7 +30,7 @@ def _home_env(home: Path) -> dict:
 
 @pytest.fixture(autouse=True)
 def temp_client_home(tmp_path, monkeypatch):
-    for key, value in _home_env(tmp_path / "temporary client home").items():
+    for key, value in _home_env(tmp_path).items():
         monkeypatch.setenv(key, value)
 
 
@@ -201,7 +201,7 @@ def test_connect_unknown_client():
 def main():
     with tempfile.TemporaryDirectory() as d:
         base = Path(d)
-        with patch.dict(os.environ, _home_env(base / "home")):
+        with patch.dict(os.environ, _home_env(base)):
             return _run_standalone(base)
 
 

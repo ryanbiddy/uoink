@@ -29,7 +29,7 @@ SUBTITLE_FLAGS = {
 
 
 @pytest.fixture
-def extraction(monkeypatch, tmp_path):
+def extraction(monkeypatch, tmp_path, public_dns):
     state = SimpleNamespace(
         caption_error=None, media_error=None, captions_available=True,
         settings=server._default_settings(), model_cached=True, calls=[],

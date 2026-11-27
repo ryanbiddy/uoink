@@ -22,6 +22,7 @@ import threading
 import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -87,10 +88,11 @@ def _call(method, path, payload=None):
         return json.loads(r.read().decode())
 
 
-def test_dashboard_payload_round_trips():
+@patch.object(server, "_get_index")
+def test_dashboard_payload_round_trips(get_index):
     tmp = tempfile.TemporaryDirectory()
     idx = index_mod.Index.open(Path(tmp.name) / "index.db")
-    server._get_index = lambda: idx  # type: ignore
+    get_index.return_value = idx
     httpd = ThreadingHTTPServer(("127.0.0.1", PORT), server.Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     try:
@@ -113,6 +115,7 @@ def test_dashboard_payload_round_trips():
         print("ok  round-trip: dashboard payload saves and reloads intact")
     finally:
         httpd.shutdown()
+        httpd.server_close()
         idx.close()
         tmp.cleanup()
 

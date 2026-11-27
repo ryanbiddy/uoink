@@ -260,10 +260,13 @@ def test_episode_identity_checked_before_corpus_read(tmp_path, monkeypatch):
         monkeypatch.setattr(server, "_get_existing_index", lambda **kwargs: idx)
         args = {"video_id": published["video_id"], "start": 0, "end": 4.5}
         assert mcp.get_uoink_corpus({"slug": published["slug"]})["ok"]
+        saved = idx.get_yoink(published["video_id"])
+        assert mcp._byo_source_text(server, saved)
         assert library_media.export_cited_range_tool(args, server)["ok"]
         with idx.write_transaction() as db:
             db.execute("UPDATE podcast_episodes SET guid=? WHERE id=?", ("different", episode_id))
         assert not mcp.get_uoink_corpus({"slug": published["slug"]})["ok"]
+        assert mcp._byo_source_text(server, saved) == ""
         assert not library_media.export_cited_range_tool(args, server)["ok"]
         assert server.Handler._yoink_markdown_path(None, published["video_id"])[0] is None
     finally:

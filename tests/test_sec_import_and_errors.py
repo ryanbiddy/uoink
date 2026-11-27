@@ -32,6 +32,8 @@ import pytest
 import _platform
 
 import index
+import podcasts as podcast_module
+import source_subscriptions
 import uoink_usage
 import yt_extract
 
@@ -54,14 +56,13 @@ def source_tree():
 
 
 @pytest.fixture
-def helper(source_tree, tmp_path, monkeypatch):
+def helper(source_tree, tmp_path, monkeypatch, public_dns):
     def forbidden(*args, **kwargs):
         raise AssertionError("Network access is forbidden")
 
     monkeypatch.setattr(socket.socket, "connect", forbidden)
     monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
     monkeypatch.setattr(socket, "create_connection", forbidden)
-    monkeypatch.setattr(socket, "getaddrinfo", forbidden)
     names = {
         "Handler", "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "EXPORTS_DIRNAME", "_allowed_extension_ids",
@@ -106,7 +107,7 @@ def helper(source_tree, tmp_path, monkeypatch):
     idx.import_payload.return_value = {"style_anchors": {"imported": 1}}
     namespace = {
         "uoink_usage": uoink_usage, "yt_extract": yt_extract,
-        "source_subscriptions": SimpleNamespace(check_public_http_url=lambda url: url),
+        "source_subscriptions": source_subscriptions,
         "_platform": _platform, "sys": sys,
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
@@ -725,16 +726,16 @@ class _StopWorker(BaseException):
 
 
 @pytest.fixture
-def podcast_job(helper, tmp_path):
+def podcast_job(helper, tmp_path, recorded_episode):
     """Run the real podcast transcription worker for one in-memory job."""
-    from uoink_core.storage import StorageSubtree, checked_path, open_regular
-    audio = tmp_path / "Podcasts" / "show" / "episode.mp3"
-    audio.parent.mkdir(parents=True)
-    audio.write_bytes(b"fixture")
+    from uoink_core.storage import checked_path, open_regular
+    idx, episode_id = recorded_episode
+    idx.upsert_job = Mock(wraps=idx.upsert_job)
+    audio = podcast_module.episode_media_path(idx, episode_id, tmp_path)
     job_id = "job_podcast"
     helper["_jobs"][job_id] = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
-        "episode_id": 7, "audio_path": str(audio),
+        "episode_id": episode_id, "audio_path": str(audio),
         "model": "base", "title": "Synthetic episode", "publish_to_corpus": True}
     jobs = iter([job_id])
 
@@ -753,12 +754,12 @@ def podcast_job(helper, tmp_path):
         update_episode_transcript_state=Mock())
     podcasts = SimpleNamespace(
         EPISODE_STATUS_TRANSCRIBED="transcribed",
-        podcast_storage=lambda root: StorageSubtree(root, "Podcasts"),
-        episode_media_path=lambda idx, episode_id, root: audio,
+        podcast_storage=podcast_module.podcast_storage,
+        episode_media_path=podcast_module.episode_media_path,
         load_completed_episode_transcript=Mock(return_value=None),
         set_episode_status=Mock(), episode_to_corpus=Mock(return_value={"video_id": "v"}))
     helper.update(
-        contextlib=contextlib, DATA_ROOT=tmp_path, whisper_runner=whisper, podcasts=podcasts,
+        contextlib=contextlib, DATA_ROOT=tmp_path, _get_index=lambda: idx, whisper_runner=whisper, podcasts=podcasts,
         checked_path=checked_path, open_regular=open_regular,
         RETRANSCRIBE_KIND="retranscribe", asr_worker=__import__("asr_worker"),
         PlaylistJobCancelled=type("PlaylistJobCancelled", (Exception,), {}), _raise_if_cancelled=Mock(),

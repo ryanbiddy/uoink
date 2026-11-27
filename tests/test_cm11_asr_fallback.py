@@ -386,7 +386,7 @@ def _fake_no_caption_subprocess(cmd, **_kwargs):
 
 @pytest.mark.parametrize("audio_case", ["embedded", "video_only", "download_failed", "silent_source"])
 def test_captionless_x_capture_persists_asr_and_provenance(
-        monkeypatch, tmp_path, audio_case):
+        monkeypatch, tmp_path, audio_case, public_dns):
     root = tmp_path / "corpus"
     root.mkdir()
     idx = index_mod.Index.open(tmp_path / "index.db")

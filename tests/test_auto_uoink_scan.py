@@ -22,6 +22,7 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 import sys
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import index as index_mod  # noqa: E402
@@ -51,11 +52,13 @@ def _req(method, path, *, token=True, body=None):
         return e.code, json.loads(e.read().decode() or "{}")
 
 
-def test_auto_uoink_scan():
+@patch.object(server, "_settings_path")
+@patch.object(server, "_get_index")
+def test_auto_uoink_scan(get_index, settings_path):
     tmp = tempfile.TemporaryDirectory()
     idx = index_mod.Index.open(Path(tmp.name) / "index.db")
-    server._get_index = lambda: idx  # type: ignore
-    server.SETTINGS_PATH = Path(tmp.name) / "settings.json"  # type: ignore
+    get_index.return_value = idx
+    settings_path.return_value = Path(tmp.name) / "settings.json"
     httpd = ThreadingHTTPServer(("127.0.0.1", PORT), server.Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     try:
@@ -105,6 +108,7 @@ def test_auto_uoink_scan():
         print("\nall green")
     finally:
         httpd.shutdown()
+        httpd.server_close()
         idx.close()
         tmp.cleanup()
 

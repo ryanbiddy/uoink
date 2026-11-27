@@ -5104,7 +5104,11 @@ def _transcript_backup_path(folder: Path, original: bytes) -> Path:
         raise ValueError("The transcript backup folder has moved.")
     digest = hashlib.sha256(original).hexdigest()
     backup = backup_dir / ("transcript-before-" + digest[:16] + ".json")
-    if backup.is_symlink() or (backup.exists() and backup.read_bytes() != original):
+    try:
+        existing = read_checked_bytes(DESKTOP_ROOT, backup)
+    except FileNotFoundError:
+        return backup
+    if existing != original:
         raise ValueError("The transcript backup file has changed.")
     return backup
 
@@ -7246,6 +7250,7 @@ def _fetch_metadata(url: str, *,
     # X/Twitter, TikTok and Instagram skip it only for the strict validator's
     # own output. Any other URL on those hosts, such as a relaxed /live/status
     # probe that keeps its full path and query, is admitted like a generic URL.
+    url = url.partition("#")[0]
     strict_url, strict_platform = _normalize_video_url(url)
     strict_platform_url = strict_url == url and strict_platform in (
         PLATFORM_TWITTER, PLATFORM_TIKTOK, PLATFORM_INSTAGRAM)
@@ -14564,8 +14569,9 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
 
     idx = _get_index()
     side_path = Path(item["sidecar_path"])
-    side = media.read_owned_sidecar(side_path)
-    if not side or side.get("video_id") != video_id:
+    original = read_checked_bytes(DESKTOP_ROOT, side_path, limit=64 * 1024 * 1024)
+    side = media._parse_json_object(original, "sidecar")
+    if side.get("video_id") != video_id:
         raise ValueError("This save's details file is missing.")
     url = side.get("source_url") or side.get("url")
     if not isinstance(url, str) or not url.startswith(("http://", "https://")):
@@ -14578,7 +14584,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
     if not old_plan or not old_block:
         raise ValueError("This save predates the transcript history needed to replace it safely.")
     corpus_path = Path(item["corpus_path"])
-    corpus = corpus_path.read_bytes()
+    corpus = read_checked_bytes(DESKTOP_ROOT, corpus_path)
     newline = b"\r\n" if b"\r\n" in corpus else b"\n"
     old = old_plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
     if not old or corpus.count(old) != 1:
@@ -14591,7 +14597,6 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
                               if isinstance(r, dict)).strip()
         if saved_plain != old_plain:
             raise ValueError("transcript.txt was edited after saving. Your edits were kept.")
-    original = side_path.read_bytes()
     original_id = hashlib.sha256(original).hexdigest()
     backup_dir = folder / media.MEDIA_INPUTS_DIR
     if backup_dir.is_symlink() or backup_dir.resolve().parent != folder.resolve():
@@ -14604,7 +14609,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         archived = backup_dir / ("transcript-before-" + restore[:16] + ".json")
         if archived.is_symlink() or not archived.is_file():
             raise ValueError("The previous transcript is unavailable.")
-        raw = archived.read_bytes()
+        raw = read_checked_bytes(DESKTOP_ROOT, archived, limit=64 * 1024 * 1024)
         if hashlib.sha256(raw).hexdigest() != restore:
             raise ValueError("The previous transcript backup has changed.")
         previous = json.loads(raw)
@@ -14621,7 +14626,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
             path = backup_dir / ("transcript-before-" + plain_hash + ".txt")
             if path.is_symlink() or not path.is_file():
                 raise ValueError("The text backup is unavailable.")
-            new_plain = path.read_bytes()
+            new_plain = read_checked_bytes(DESKTOP_ROOT, path)
             if hashlib.sha256(new_plain).hexdigest() != plain_hash:
                 raise ValueError("The text backup has changed.")
         meta = new_side.get("asr_fallback") or {}
@@ -14665,7 +14670,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
     plan = _capture_media_plan(new_side, folder, item=item)
     if not plan:
         raise ValueError("The replacement transcript could not be prepared.")
-    if corpus_path.read_bytes() != corpus or _plain_transcript_bytes(folder) != plain_before:
+    if read_checked_bytes(DESKTOP_ROOT, corpus_path) != corpus or _plain_transcript_bytes(folder) != plain_before:
         raise ValueError("The transcript changed while transcribing. Your edits were kept.")
     new = plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
     corpus = corpus.replace(old, new, 1)
@@ -14707,9 +14712,9 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
                 raise ValueError("A capture of this item is running. Try restoring again when it finishes.")
             time.sleep(0.1)
         with lock:
-            if side_path.read_bytes() != original or _plain_transcript_bytes(folder) != plain_before:
+            if read_checked_bytes(DESKTOP_ROOT, side_path) != original or _plain_transcript_bytes(folder) != plain_before:
                 raise ValueError("The transcript changed while transcribing. Your edits were kept.")
-            ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding)
+            ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding, root=DESKTOP_ROOT)
             if ticket.base_media_revision != old_block.get("media_revision"):
                 raise ValueError("A newer capture replaced this transcript.")
             idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,

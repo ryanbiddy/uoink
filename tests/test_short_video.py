@@ -166,7 +166,7 @@ def _fake_run_subprocess(cmd, **kwargs):
     return types.SimpleNamespace(returncode=0, stdout="", stderr=b"")
 
 
-def test_mocked_extraction_persists_and_surfaces(monkeypatch):
+def test_mocked_extraction_persists_and_surfaces(monkeypatch, public_dns):
     tmp, idx = _fresh_index()
     root = Path(tmp.name) / "corpus"
     root.mkdir(parents=True)

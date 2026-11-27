@@ -354,7 +354,7 @@ def test_d12_unowned_temps_are_never_inferred_from_name_or_text(env, suffix, con
 
 
 @pytest.mark.skipif(sys.platform == "darwin", reason="library_mirror_unavailable_macos: gate covered in test_mac_capabilities.py")
-def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch):
+def test_d13_replace_syscall_cannot_complete_after_timeout(env, monkeypatch, isolated_mirror_mutex):
     # Let setup reach the held replace before starting the real timeout.
     target = item_file(env)
     entered, release, finished = threading.Event(), threading.Event(), threading.Event()

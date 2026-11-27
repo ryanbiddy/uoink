@@ -62,7 +62,8 @@ def test_subscription_feed_title_reaches_new_episodes(tmp_path, kind):
         assert service.detection_pass()[0]["ok"]
         episode = podcasts.list_episodes(idx)[0]
         assert podcasts.get_episode_with_feed(idx, episode["id"])["podcast_title"] == "Channel title"
-        transcript = tmp_path / "transcript.json"
+        feed = podcasts.get_feed(idx, episode["feed_id"])
+        transcript = podcasts._episode_audio_path(tmp_path, feed, episode).with_suffix(".transcript.json")
         transcript.write_text(json.dumps({"segments": [{"start": 0, "end": 2, "text": "Example."}]}), encoding="utf-8")
         with idx.write_transaction() as conn:
             conn.execute("UPDATE podcast_episodes SET transcript_local_path=? WHERE id=?",
@@ -302,7 +303,8 @@ def test_consented_poll_recovers_missing_show_without_republishing(tmp_path):
         turn_on(service, sid)
         assert service.detection_pass()[0]["ok"]
         episode = podcasts.list_episodes(idx)[0]
-        transcript = tmp_path / "transcript.json"
+        feed = podcasts.get_feed(idx, episode["feed_id"])
+        transcript = podcasts._episode_audio_path(tmp_path, feed, episode).with_suffix(".transcript.json")
         transcript.write_text('{"segments":[{"start":0,"end":2,"text":"Example."}]}', encoding="utf-8")
         with idx.write_transaction() as conn:
             conn.execute("UPDATE podcast_episodes SET transcript_local_path=? WHERE id=?",

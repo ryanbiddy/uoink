@@ -67,6 +67,8 @@ def _run_mocked_extraction(monkeypatch, *, settings: dict,
                            url: str, metadata: dict):
     """Run _run_extraction with yt-dlp / ffmpeg / settings mocked.
     Returns (folder, sidecar_dict)."""
+    from tests.offline_dns import public_address
+    monkeypatch.setattr("socket.getaddrinfo", public_address)
     tmp = tempfile.TemporaryDirectory()
     idx = index_mod.Index.open(Path(tmp.name) / "index.db")
     root = Path(tmp.name) / "corpus"

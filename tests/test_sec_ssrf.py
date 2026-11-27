@@ -560,6 +560,30 @@ def test_public_ipv6_resolution_is_allowed(network):
     assert ss.default_http_fetch(PUBLIC, {}).status == 200
 
 
+@pytest.mark.parametrize("address,allowed", [
+    ("64:ff9b::808:808", True), ("64:ff9b::a00:1", False),
+])
+def test_dns64_mixed_answers_check_embedded_destination(network, address, allowed):
+    network.addresses["public.example"] = ["8.8.8.8", address]
+    if allowed:
+        assert ss.check_public_http_url(PUBLIC) == PUBLIC
+    else:
+        with pytest.raises(ss.ServiceError, match="refused"):
+            ss.check_public_http_url(PUBLIC)
+
+
+@pytest.mark.parametrize("url", [
+    "https://www.youtube.com/watch?v=abcdef12345#t=1m30s",
+    "https://x.com/example/status/1234567890123456789#:~:text=quote",
+])
+def test_platform_metadata_drops_fragment_before_dispatch(url, network, consumers):
+    canonical = url.partition("#")[0]
+    assert consumers.server["_normalize_video_url"](url)[0] == canonical
+    assert consumers.server["_fetch_metadata"](url)
+    assert network.lookups == [urlparse(canonical).hostname] and not network.requests
+    assert consumers.child.call_args.args[0][-2:] == ["--", canonical]
+
+
 @pytest.mark.parametrize("answer,status", [
     (["127.0.0.1"], "error"),
     (socket.gaierror(socket.EAI_NONAME, "fixture DNS failure"), "new"),

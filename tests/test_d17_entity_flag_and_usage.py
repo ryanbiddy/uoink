@@ -225,7 +225,7 @@ def _capture_with(monkeypatch, *, settings: dict) -> tuple[dict, list]:
         tmp.cleanup()
 
 
-def test_saved_key_with_all_flags_off_makes_zero_background_model_calls(monkeypatch):
+def test_saved_key_with_all_flags_off_makes_zero_background_model_calls(monkeypatch, public_dns):
     sidecar, model_calls = _capture_with(monkeypatch, settings={})
     assert model_calls == []
     assert sidecar["entity_extraction_status"] == "skipped"
@@ -233,7 +233,7 @@ def test_saved_key_with_all_flags_off_makes_zero_background_model_calls(monkeypa
     assert sidecar.get("comment_intelligence") is None
 
 
-def test_sidecar_entity_status_matches_gate_when_flag_on(monkeypatch):
+def test_sidecar_entity_status_matches_gate_when_flag_on(monkeypatch, public_dns):
     """Flag on + key: the sidecar says pending and the worker does run
     (its model call is the one the fake refuses, so it lands as failed --
     the point is that it *spawned* and that it went through the gate)."""

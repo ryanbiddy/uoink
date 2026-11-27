@@ -30,7 +30,7 @@ def backend(tmp_path, monkeypatch):
     import server
 
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
-    monkeypatch.setattr(server, "SETTINGS_PATH", tmp_path / "settings.json")
+    monkeypatch.setattr(server, "_settings_path", lambda: tmp_path / "settings.json")
     monkeypatch.setattr(server, "_get_index", lambda: SimpleNamespace(
         search_mode=lambda *a, **k: {"results": []}, get_yoink=lambda video_id: None))
     monkeypatch.setattr(server._platform, "media_capability", lambda: {"available": True})

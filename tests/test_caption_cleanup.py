@@ -386,7 +386,7 @@ def test_oversized_native_subtitle_is_not_sent_to_conversion(tmp_path, monkeypat
 
 @pytest.mark.parametrize("message", [b"HTTP Error 429: Too Many Requests",
                                      b"Sign in to confirm you're not a bot"])
-def test_standalone_stops_all_track_requests_on_youtube_refusal(tmp_path, monkeypatch, message):
+def test_standalone_stops_all_track_requests_on_youtube_refusal(tmp_path, monkeypatch, message, public_dns):
     import _platform
 
     url = "https://www.youtube.com/watch?v=talk0000001"

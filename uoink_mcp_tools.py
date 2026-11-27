@@ -380,8 +380,10 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
             if ownership.completed_while_waiting and ownership.reused:
                 result = dict(ownership.reused)
                 corpus_path = result.get("corpus_path")
-                result["yoink_md"] = (
-                    Path(corpus_path).read_text(encoding="utf-8") if corpus_path else "")
+                result["yoink_md"] = ""
+                if corpus_path:
+                    with open_regular(b._item_storage_root(result), corpus_path) as stream:
+                        result["yoink_md"] = stream.read()
             else:
                 metadata = b._fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
@@ -1321,25 +1323,28 @@ def _byo_source_text(server, yoink_row) -> str:
     empty string is fine (the model still has the title/channel)."""
     if not yoink_row:
         return ""
-    from pathlib import Path as _Path
+    try:
+        root = server._item_storage_root(yoink_row)
+    except (OSError, ValueError):
+        return ""
     sidecar_path = yoink_row.get("sidecar_path") or ""
-    if sidecar_path and _Path(sidecar_path).exists():
+    if sidecar_path:
         try:
-            data = json.loads(_Path(sidecar_path).read_text(encoding="utf-8"))
+            data = read_checked_json(root, sidecar_path)
             segs = data.get("transcript") or []
             text = " ".join(
                 str(s.get("text") or "").strip()
                 for s in segs if isinstance(s, dict))
             if text.strip():
                 return text[:_BYO_SOURCE_CHAR_CAP]
-        except (OSError, json.JSONDecodeError, AttributeError):
+        except (OSError, ValueError, AttributeError):
             pass
     corpus_path = yoink_row.get("corpus_path") or ""
-    if corpus_path and _Path(corpus_path).exists():
+    if corpus_path:
         try:
-            return _Path(corpus_path).read_text(
-                encoding="utf-8")[:_BYO_SOURCE_CHAR_CAP]
-        except OSError:
+            with open_regular(root, corpus_path) as stream:
+                return stream.read(_BYO_SOURCE_CHAR_CAP)
+        except (OSError, ValueError):
             pass
     return ""
 

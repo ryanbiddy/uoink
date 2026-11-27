@@ -919,6 +919,24 @@ def test_channel_context_fetch_has_a_timeout(monkeypatch):
     assert run.call_args.kwargs["timeout"] == server.COMMENTS_TIMEOUT_SEC
 
 
+def test_mcp_reuse_refuses_corpus_after_library_move(mcp_capture, monkeypatch, tmp_path):
+    corpus = tmp_path / "previous-library" / "capture.md"
+    corpus.parent.mkdir()
+    corpus.write_text("Fixture from a previous location", encoding="utf-8")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "current-library")
+    ownership = SimpleNamespace(raise_if_unavailable=lambda: None, conflict=None,
+                                completed_while_waiting=True, reused={"corpus_path": str(corpus)})
+
+    @contextmanager
+    def owned(_url):
+        yield ownership
+
+    monkeypatch.setattr(server, "_manual_extraction_ownership", owned)
+    result = uoink_mcp_tools.uoink_video({"url": URL})
+    assert result["ok"] is False
+    assert "Fixture from a previous location" not in str(result)
+
+
 @pytest.mark.parametrize("reused", [
     {"reused": True, "corpus_path": None, "folder": None},
     {"reused": True, "corpus_path": None},

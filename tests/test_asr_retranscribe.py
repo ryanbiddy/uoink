@@ -204,7 +204,15 @@ def _unchanged(saved):
     return {name: path.read_bytes() for name, path in saved.files.items()} == saved.before
 
 
-def test_a_new_transcript_replaces_the_old_one_with_word_timings(saved):
+def test_a_new_transcript_replaces_the_old_one_with_word_timings(saved, monkeypatch):
+    begin = saved.idx.begin_media_publication
+
+    def begin_in_library(*args, **kwargs):
+        ticket = begin(*args, **kwargs)
+        assert ticket.root == server.DESKTOP_ROOT
+        return ticket
+
+    monkeypatch.setattr(saved.idx, "begin_media_publication", begin_in_library)
     result = server.retranscribe_item(VID, "small")
     assert result["segments"] == 2 and result["model"] == "small"
     assert saved.calls[0]["model_name"] == "small"

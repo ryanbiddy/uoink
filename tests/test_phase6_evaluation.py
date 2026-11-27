@@ -1484,17 +1484,13 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
         assert len(queued) == count
     # Execute the real queue admission function with inert dependencies. Missing
     # download consent must return before any job, worker or model can start.
-    audio_placeholder = env.root / "Podcasts" / "show" / "never-decoded.mp3"
-    audio_placeholder.parent.mkdir(parents=True)
-    audio_placeholder.write_bytes(b"synthetic placeholder; not an audio fixture")
+    import podcasts
+    from tests.podcast_fixtures import _seed_downloaded_episodes
     admission_globals = {
         "source_subscriptions": SimpleNamespace(CaptureLock=SimpleNamespace(
             acquire=lambda root, key, timeout: nullcontext())),
         "_platform": _platform,
-        "Path": Path, "_get_index": lambda: None,
-        "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
-            "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"},
-            episode_media_path=lambda idx, episode_id, root: audio_placeholder),
+        "Path": Path, "podcasts": podcasts,
         "whisper_runner": SimpleNamespace(is_whisperx_available=lambda: True,
                                            is_transcription_available=lambda: True,
                                            normalize_model=lambda value: value or "base",
@@ -1508,9 +1504,12 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     }
     _function("server.py", "_admit_podcast_transcription", admission_globals)
     admission = _function("server.py", "_queue_podcast_transcription", admission_globals)
-    for diarize in (False, True):
-        body, status = admission(42, diarize=diarize, consent_given=False)
-        assert status == 412 and body["consent_required"] is True
+    with index_mod.Index.open(env.root / "admission.db") as idx:
+        episode_id, = _seed_downloaded_episodes(idx, env.root, count=1)
+        admission_globals["_get_index"] = lambda: idx
+        for diarize in (False, True):
+            body, status = admission(episode_id, diarize=diarize, consent_given=False)
+            assert status == 412 and body["consent_required"] is True
     # Recorded completed output: its own report and run ID survive reuse even
     # if the saved preference is subsequently disabled. Nothing is executed.
     f = _fixture(env, 3)
@@ -1523,7 +1522,6 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     assert result["attribution"]["diarization_ran"] is True
     assert result["attribution"]["runs"] == f.block["runs"]
     assert _snapshot(conn, f) == before
-    import podcasts
     feed = {"id": 1, "title": "Show", "feed_url": "https://show.test/rss"}
     episode = {"id": 42, "feed_id": 1, "guid": "episode-42", "title": "Never decoded",
                "podcast_title": feed["title"], "feed_url": feed["feed_url"]}

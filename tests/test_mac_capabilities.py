@@ -186,7 +186,7 @@ def test_cli_refusal_and_status(darwin, monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out)["capabilities"]["library_mirror"]["code"] == CODE
 
 
-def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path):
+def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path, recorded_episode):
     monkeypatch.setattr(_platform.sys, "executable",
         str(tmp_path / "Uoink.app/Contents/Resources/Python/bin/python3"), raising=False)
     monkeypatch.setattr(_platform, "__file__", str(tmp_path / "Uoink.app/Contents/Resources/_platform.py"))
@@ -195,12 +195,13 @@ def test_media_bundle_gate_never_uses_path(darwin, monkeypatch, tmp_path):
     with pytest.raises(RuntimeError, match="media_requires_ffmpeg"):
         server._run_extraction("https://www.youtube.com/watch?v=aaaaaaaaaaa", 5, tmp_path / "absent")
     assert not (tmp_path / "absent").exists()
-    audio = tmp_path / "audio.wav"
-    audio.touch()
-    monkeypatch.setattr(server, "_get_index", lambda: None)
-    monkeypatch.setattr(server.podcasts, "get_episode", lambda *args: {"audio_local_path": str(audio)})
-    result, status = server._queue_podcast_transcription(1)
+    idx, episode_id = recorded_episode
+    audio = server.podcasts.episode_media_path(idx, episode_id, tmp_path)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    result, status = server._queue_podcast_transcription(episode_id)
     assert status == 501 and result["code"] == "media_requires_ffmpeg"
+    monkeypatch.setattr(uoink_mcp_tools, "_backend", server)
     for name, url in (("uoink_video", "https://www.youtube.com/watch?v=aaaaaaaaaaa"),
                       ("uoink_playlist", "https://www.youtube.com/playlist?list=PLtest")):
         assert uoink_mcp_tools.call_tool(name, {"url": url})["code"] == "media_requires_ffmpeg"
@@ -364,7 +365,7 @@ def test_media_helpers_fail_before_subprocess_or_capture_io(missing_media, monke
     assert server._fetch_playlist_preview("https://www.youtube.com/playlist?list=PLtest") == (
         None, "media_requires_ffmpeg", 501)
     monkeypatch.setattr(server, "_folder_for_video_id", lambda video_id: (tmp_path, {}))
-    monkeypatch.setattr(server, "_read_sidecar_for_folder", lambda folder: (None, {"video_id": "aaaaaaaaaaa"}))
+    monkeypatch.setattr(server, "_read_sidecar_for_folder", lambda folder, *, root: (None, {"video_id": "aaaaaaaaaaa"}))
     assert server._compute_transcript_reliability("aaaaaaaaaaa") == missing_media
     with pytest.raises(_platform.MediaUnavailableError) as exc:
         server._download_reliability_audio("https://example.test/video", tmp_path)
