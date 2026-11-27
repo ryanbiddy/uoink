@@ -1,4 +1,4 @@
-"""Print-only agent connection recipes. Keep format and location choices in one table.
+"""Agent connection recipes and optional installation. Keep formats and locations in one table.
 
 Documentation verification is separate from client acceptance. JSON is also valid
 YAML 1.2, so YAML clients receive a JSON-form YAML document without a dependency.
@@ -11,6 +11,8 @@ import json
 import os
 from pathlib import Path
 import shlex
+import shutil
+import subprocess
 import sys
 from urllib.parse import quote, urlencode
 
@@ -303,6 +305,12 @@ def deeplink(client: str, app_dir: Path, python: Path, isolation_args=(), toolse
     raise ValueError("deeplinks require cursor or vscode")
 
 
+def claude_add_argv(entry: dict) -> list[str]:
+    env_flags = [part for key, value in entry["env"].items() for part in ("-e", f"{key}={value}")]
+    return ["claude", "mcp", "add", "--scope", "user", *env_flags, "--transport", "stdio",
+            "uoink", "--", entry["command"], *entry["args"]]
+
+
 def render(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=None) -> str:
     require_platform(client)
     spec = client_spec(client)
@@ -322,10 +330,9 @@ def render(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=
     if spec.format == "shell":
         # PowerShell single quotes preserve spaces, $, backticks and apostrophes.
         quote = (lambda s: "'" + s.replace("'", "''") + "'") if sys.platform == "win32" else shlex.quote
-        return ("claude mcp add --scope user "
-                + "".join(f"-e {key}={value} " for key, value in env.items())
-                + "--transport stdio uoink -- "
-                + " ".join(quote(s) for s in [command, *args]))
+        argv = claude_add_argv(entry)
+        split = argv.index("--") + 1
+        return " ".join([*argv[:split], *(quote(s) for s in argv[split:])])
     if spec.format == "crushrc":
         return shlex.join(["mcp", "add", "uoink", "--command", command, "--args", *args,
                            *(part for key, value in env.items() for part in ("--env", key, value))])
@@ -354,3 +361,129 @@ def render(client: str, app_dir: Path, python: Path, isolation_args=(), toolset=
     elif client == "dive":
         entry = {**entry, "enabled": True}
     return json.dumps({spec.shape: {"uoink": entry}}, indent=2, ensure_ascii=False)
+
+
+def _json_path(client: str, spec: Client) -> Path | None:
+    """Resolve only file locations in the recipe table. UI routes stay manual."""
+    from agent_config_writer import cline_config, roaming_dir
+    if client == "cline":
+        return cline_config()
+    location = spec.location
+    if spec.format != "json" or not location.endswith(".json"):
+        return None
+    if client == "copilot-cli" and os.environ.get("COPILOT_HOME"):
+        return Path(os.environ["COPILOT_HOME"]).absolute() / "mcp-config.json"
+    if location.startswith("Project "):
+        return Path.cwd() / location.removeprefix("Project ")
+    if location.startswith("%APPDATA%/"):
+        return roaming_dir() / location.removeprefix("%APPDATA%/")
+    if location.startswith("%USERPROFILE%/"):
+        return Path.home() / location.removeprefix("%USERPROFILE%/")
+    path = Path(location)
+    return path if path.is_absolute() else None
+
+
+def _confirmed(yes: bool) -> bool:
+    if yes:
+        return True
+    if sys.stdin is None or not sys.stdin.isatty():
+        raise ValueError("Use --write --yes to connect from a non-interactive terminal.")
+    print("Apply this change? [y/N] ", end="", file=sys.stderr, flush=True)
+    return sys.stdin.readline().strip().lower() in {"y", "yes"}
+
+
+def _run_add(argv: list[str], label: str, yes: bool) -> int:
+    # On Windows a bare which() may also search the current project ahead of PATH.
+    for folder in os.get_exec_path():
+        executable = shutil.which(str(Path(folder).absolute() / argv[0]))
+        if executable:
+            break
+    else:
+        print(f"{argv[0]} was not found on PATH. Run the printed command after installing it.", file=sys.stderr)
+        return 1
+    argv = [executable, *argv[1:]]
+    if sys.platform == "win32" and Path(executable).suffix.lower() in {".bat", ".cmd"}:
+        # Windows itself interprets batch launchers, even with shell=False.
+        if any(set('&|<>^%"!()\r\n').intersection(arg) for arg in argv):
+            print("Run the printed command in PowerShell to use this batch launcher with these paths.", file=sys.stderr)
+            return 1
+    if not _confirmed(yes):
+        print("Cancelled.", file=sys.stderr)
+        return 1
+    try:
+        result = subprocess.run(argv, shell=False, timeout=30)
+    except subprocess.TimeoutExpired:
+        print(f"{label} did not finish within 30 seconds. Check its server list before retrying.", file=sys.stderr)
+        return 1
+    if result.returncode:
+        print(f"{label} could not add Uoink (exit {result.returncode}).", file=sys.stderr)
+        return 1
+    if label == "Claude Code":
+        print("Restart Claude Code, then ask it: what's in my Uoink library?")
+    else:
+        print("Run odr.exe list to check that Uoink is registered.")
+    return 0
+
+
+def connect_recipe(client: str, app_dir: Path, python: Path, isolation_args, toolset,
+                   *, write: bool, yes: bool, manifest: Path | None = None) -> int:
+    from agent_config_writer import apply_edits, claude_desktop_paths, plan_edit
+    spec = client_spec(client)
+    recipe_text = render(client, app_dir, python, isolation_args, toolset)
+    if client == "windows-odr":
+        if manifest is None:
+            print(recipe_text, flush=True)
+            print("Use --manifest <path to manifest.json> --write to register an unpacked Uoink bundle.", file=sys.stderr)
+            return 1 if write else 0
+        manifest = manifest.absolute()
+        argv = ["odr.exe", "mcp", "add", str(manifest)]
+        print("odr.exe mcp add '" + str(manifest).replace("'", "''") + "'", flush=True)
+        if not write:
+            print("Run with --write to add it for you.", file=sys.stderr)
+            return 0
+        data = json.loads(manifest.read_text(encoding="utf-8-sig"))
+        server = data.get("server") if isinstance(data, dict) else None
+        entry_point = server.get("entry_point") if isinstance(server, dict) else None
+        if (not isinstance(entry_point, str) or data.get("name") != "uoink"
+                or Path(entry_point).anchor or ".." in Path(entry_point).parts
+                or not (manifest.parent / entry_point).is_file()):
+            raise ValueError("Choose the manifest.json beside the files in the unpacked Uoink bundle.")
+        print("+ Register the Uoink MCP server with Windows ODR.", file=sys.stderr)
+        return _run_add(argv, "Windows ODR", yes)
+    path = _json_path(client, spec)
+    manual = client != "claude-code" and path is None
+    if not write or manual:
+        print(recipe_text, flush=True)
+        hint = ("Follow the printed recipe to finish setup." if manual
+                else "Run with --write to add it for you.")
+        print(hint, file=sys.stderr)
+        return 1 if write else 0
+
+    labels = {"claude-desktop": "Claude Desktop", "claude-code": "Claude Code",
+              "vscode": "VS Code", "cursor": "Cursor", "cline": "Cline"}
+    label = labels.get(client, client)
+    if client == "claude-code":
+        print(recipe_text, flush=True)
+        entry = server_entry(client, app_dir, python, isolation_args, toolset)
+        print("+ Add the uoink server to your Claude Code user settings.", file=sys.stderr)
+        return _run_add(claude_add_argv(entry), label, yes)
+    paths = claude_desktop_paths() if client == "claude-desktop" else [path]
+    entry = json.loads(recipe_text)[spec.shape]["uoink"]
+    edits = []
+    for target in paths:
+        print(target, file=sys.stderr)
+        edit = plan_edit(target, label, spec.shape, entry)
+        edits.append(edit)
+        verb = "~ Replace" if edit.action == "updated" else "+ Add"
+        print(f"  {verb} {spec.shape}.uoink", file=sys.stderr)
+        if edit.backup:
+            print(f"  Back up to {edit.backup}", file=sys.stderr)
+    print("+ " + json.dumps(entry, ensure_ascii=False), file=sys.stderr)
+    if not _confirmed(yes):
+        print("Cancelled.", file=sys.stderr)
+        return 1
+    apply_edits(edits, label)
+    for edit in edits:
+        print(f"Saved {edit.path}")
+    print(f"Restart {label}, then ask it: what's in my Uoink library?")
+    return 0

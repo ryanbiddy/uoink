@@ -79,6 +79,7 @@
     "uoink_agent_runtime.py",
     "uoink_cli.py",
     "uoink_connect.py",
+    "agent_config_writer.py",
     "uoink_core",
     "uoink_dashboard.py",
     "uoink_install_isolation.py",

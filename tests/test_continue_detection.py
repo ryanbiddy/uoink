@@ -19,6 +19,8 @@ def client_home(tmp_path, monkeypatch):
         monkeypatch.setenv(key, str(value))
     app = tmp_path / "O'Brien & \u96ea Uoink"
     monkeypatch.setattr(server, "HERE", app)
+    # Model a standard install's command while the test server itself stays isolated.
+    monkeypatch.setattr(server._install_isolation, "child_argv", lambda: [])
     monkeypatch.setattr(server, "_mcp_stdio_command", lambda: (
         str(app / "python/python.exe"), [str(app / "uoink_mcp.py")]))
     return home

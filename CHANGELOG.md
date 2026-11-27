@@ -10,8 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Run `uoink connect claude-code --write` to add Uoink through the Claude CLI. For Claude Desktop, Cursor, Cline and other clients with a known JSON file, `--write` previews the edit and backs up existing settings before saving. Use `--yes` in scripts, or omit `--write` to print the recipe.
+
 ### Fixed
 
+- Claude Desktop setup now finds the Microsoft Store config on Windows. If the Store and roaming config files both exist, the CLI and dashboard update both.
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.

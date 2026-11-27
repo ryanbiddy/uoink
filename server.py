@@ -16608,29 +16608,24 @@ def _mcp_config_payload() -> dict:
 AGENT_CLIENTS = ("claude-desktop", "cursor", "cline", "continue")
 
 
-def _env_dir(var: str) -> Path | None:
-    val = os.environ.get(var)
-    return Path(val) if val else None
-
-
 def _agent_client_specs() -> list[dict]:
     """Per-client detection spec: the config file we'd edit, plus the marker
     paths whose existence means "this client is installed". Continue's current
     YAML config needs manual merging; the JSON writer must not modify it."""
+    from agent_config_writer import claude_desktop_paths, cline_config, cline_storage, roaming_dir
     home = Path.home()
-    appdata = _env_dir("APPDATA") or (home / "AppData" / "Roaming")
-    local = _env_dir("LOCALAPPDATA") or (home / "AppData" / "Local")
-    code_user = appdata / "Code" / "User"
+    appdata = roaming_dir()
+    local = Path(os.environ.get("LOCALAPPDATA") or home / "AppData/Local")
     if sys.platform == "darwin":
-        appdata = home / "Library/Application Support"
         local = home / "Applications"
-        code_user = appdata / "Code/User"
+    claude_paths = claude_desktop_paths()
     return [
         {
             "name": "claude-desktop",
             "label": "Claude Desktop",
-            "config_path": appdata / "Claude" / "claude_desktop_config.json",
-            "markers": [appdata / "Claude",
+            "config_path": claude_paths[0],
+            "config_paths": claude_paths,
+            "markers": [claude_paths[0].parent, appdata / "Claude",
                         local / "AnthropicClaude",
                         local / "Programs" / "claude"] + (
                             [Path("/Applications/Claude.app"), home / "Applications/Claude.app"]
@@ -16649,12 +16644,10 @@ def _agent_client_specs() -> list[dict]:
             "name": "cline",
             "label": "Cline",
             # Cline (VS Code extension) keeps its MCP servers here.
-            "config_path": (code_user / "globalStorage"
-                            / "saoudrizwan.claude-dev" / "settings"
-                            / "cline_mcp_settings.json"),
+            "config_path": cline_config(),
             # Plain VS Code is not Cline. Require Cline's own extension
             # storage marker so detection does not offer a false connect.
-            "markers": [code_user / "globalStorage" / "saoudrizwan.claude-dev"],
+            "markers": [cline_storage()],
         },
         {
             "name": "continue",
@@ -16744,7 +16737,7 @@ def _client_is_connected(config_path: Path) -> bool:
     try:
         if not config_path.exists():
             return False
-        data = json.loads(config_path.read_text(encoding="utf-8"))
+        data = json.loads(config_path.read_text(encoding="utf-8-sig"))
     except (OSError, UnicodeError, ValueError, RecursionError):
         return False
     servers = data.get("mcpServers") if isinstance(data, dict) else None
@@ -16810,7 +16803,9 @@ def _detect_ai_clients() -> list[dict]:
             cfg, connected, reason = _continue_connection(spec)
             details["connected_reason"] = reason
         else:
-            connected = _client_is_connected(cfg)
+            paths = spec.get("config_paths", [cfg])
+            connected = all(_client_is_connected(path) for path in paths)
+            details["config_paths"] = [str(path) for path in paths]
         out.append({
             "name": spec["name"],
             "label": spec["label"],
@@ -16824,113 +16819,31 @@ def _detect_ai_clients() -> list[dict]:
 
 
 def _connect_ai_client(name: str) -> dict:
-    """Add Uoink's MCP server entry to a client's config file in place.
-
-    Validates existing JSON before touching it (a malformed config is left
-    untouched and reported, never clobbered), writes a `.bak` copy first, then
-    atomically rewrites the file with the `uoink` entry merged into
-    `mcpServers`. Returns a result dict; raises ValueError (mapped to 4xx) for
-    an unknown client or a missing parent directory ("not installed")."""
+    """Merge Uoink into every active config selected by the dashboard."""
+    from agent_config_writer import ConfigError, apply_edits, plan_edit
     spec = _agent_client_spec(name)
     if spec is None:
-        e = ValueError("That AI client is not supported.")
-        e.http_status = 404
-        raise e
+        raise ConfigError("That AI client is not supported.", 404)
     if spec.get("manual_only"):
-        e = ValueError("Continue uses YAML configuration. Run 'uoink connect continue' "
-                       "and follow its merge instructions. Nothing was changed.")
-        e.http_status = 409
-        raise e
-    cfg: Path = spec["config_path"]
-    installed = any(p.exists() for p in spec["markers"])
-    if not installed and not cfg.parent.exists():
-        e = ValueError(
-            f"{spec['label']} doesn't look installed on this machine.")
-        e.http_status = 409
-        raise e
-
-    existed = cfg.exists()
-    data: dict = {}
-    if existed:
-        try:
-            raw = cfg.read_text(encoding="utf-8")
-        except OSError as exc:
-            log.warning("agent connect: config read failed (%s)", exc)
-            e = ValueError(
-                f"Couldn't read the {spec['label']} settings. "
-                "Nothing was changed.")
-            e.http_status = 500
-            raise e
-        if raw.strip():
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                e = ValueError(
-                    f"{spec['label']} settings aren't valid JSON; "
-                    "left it untouched. Open it and fix the syntax, then "
-                    "try connecting again.")
-                e.http_status = 422
-                raise e
-            if not isinstance(parsed, dict):
-                e = ValueError(
-                    f"{spec['label']} config isn't a JSON object; "
-                    "left it untouched.")
-                e.http_status = 422
-                raise e
-            data = parsed
-
-    servers = data.get("mcpServers")
-    if not isinstance(servers, dict):
-        servers = {}
-    already = "uoink" in servers
-    servers["uoink"] = _uoink_mcp_entry()
-    data["mcpServers"] = servers
-
-    backup_path = cfg.with_suffix(cfg.suffix + ".bak")
-    try:
-        cfg.parent.mkdir(parents=True, exist_ok=True)
-    except OSError as exc:
-        log.warning("agent connect: settings directory unavailable (%s)", exc)
-        e = ValueError(
-            f"Couldn't prepare the {spec['label']} settings folder. "
-            "Nothing was changed.")
-        e.http_status = 500
-        raise e
-    if existed:
-        try:
-            shutil.copy2(cfg, backup_path)
-        except OSError as exc:
-            log.warning("agent connect: backup failed (%s)", exc)
-            e = ValueError(
-                f"Couldn't back up the {spec['label']} settings, so Uoink "
-                "refused to change them.")
-            e.http_status = 500
-            raise e
-    else:
-        backup_path = None
-
-    tmp = cfg.with_suffix(cfg.suffix + ".tmp")
-    try:
-        tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False),
-                       encoding="utf-8")
-        tmp.replace(cfg)
-    except OSError as exc:
-        log.warning("agent connect: config write failed (%s)", exc)
-        tmp.unlink(missing_ok=True)
-        e = ValueError(
-            f"Couldn't update the {spec['label']} settings. "
-            "The original settings were left in place.")
-        e.http_status = 500
-        raise e
-    log.info("agent connect: wrote uoink mcpServers entry to %s", cfg)
+        raise ConfigError("Continue uses YAML configuration. Run 'uoink connect continue' "
+                          "and follow its merge instructions. Nothing was changed.", 409)
+    paths = spec.get("config_paths", [spec["config_path"]])
+    if not any(p.exists() for p in spec["markers"]) and not paths[0].parent.exists():
+        raise ConfigError(f"{spec['label']} doesn't look installed on this machine.", 409)
+    entry = _uoink_mcp_entry()
+    edits = [plan_edit(path, spec["label"], "mcpServers", entry) for path in paths]
+    apply_edits(edits, spec["label"])
+    first = edits[0]
     return {
         "client": spec["name"],
         "label": spec["label"],
-        "config_path": str(cfg),
-        "backup_path": (str(backup_path) if backup_path else None),
-        "action": "updated" if already else "added",
-        "created_config": not existed,
-        "entry": servers["uoink"],
+        "config_path": str(first.path),
+        "config_paths": [str(edit.path) for edit in edits],
+        "backup_path": str(first.backup) if first.backup else None,
+        "backup_paths": [str(edit.backup) for edit in edits if edit.backup],
+        "action": first.action,
+        "created_config": first.original is None,
+        "entry": entry,
     }
 
 

@@ -34,7 +34,7 @@
 
 ```sh
 brew install --cask ryanbiddy/uoink/uoink
-uoink connect claude-code
+uoink connect claude-code --write
 ```
 
 Paste a YouTube link into an AI chat and it guesses. Paste the transcript and the timestamps are gone, so when it says "they mention this around the middle" you can't check.
@@ -66,7 +66,7 @@ AI:   Two of them. Talk A (08:15) argues for it. Talk B (41:02) says it breaks a
 ## Quick start
 
 1. **Install.** Download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`. For Linux, see [the Linux guide](docs/linux.md).
-2. **Connect your AI.** Run `uoink connect claude-code`. For other clients, run `uoink connect --list`. Claude Desktop can open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
+2. **Connect your AI.** Run `uoink connect claude-code --write` and confirm. If `claude` is on PATH, Uoink adds the server for you. Restart Claude Code and ask “What's in my Uoink library?” For other clients, run `uoink connect --list`. Claude Desktop can also open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
 3. **Ask.** *"uoink https://youtu.be/… and tell me where they explain the eval setup."*
 
 Good to know: the Windows installer is unsigned, so SmartScreen asks first (choose **More info → Run anyway**). The Mac app is signed and notarized. The browser button loads from the app's setup screen while the Chrome Web Store listing is pending.
@@ -94,9 +94,9 @@ You can also import YouTube Watch Later, X bookmarks and Reddit saves, and [shar
 | Client | How to connect |
 |---|---|
 | **Claude Desktop** | Open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). [Details](docs/mcpb-bundle.md) |
-| **Claude Code** | `uoink connect claude-code`, or the plugin: `claude plugin marketplace add ryanbiddy/uoink-agent-kit` |
-| **Cursor** | `uoink connect cursor` (use the 36-tool core set, since Cursor caps tools) |
-| **Codex, VS Code and more** | `uoink connect --list` prints setup for 48 clients and integrations |
+| **Claude Code** | `uoink connect claude-code --write`, or the plugin: `claude plugin marketplace add ryanbiddy/uoink-agent-kit` |
+| **Cursor** | `uoink connect cursor --write` uses the 36-tool core set. |
+| **Codex, VS Code and more** | `uoink connect --list` lists 48 clients and integrations. Use `uoink connect <client>` to preview a recipe. |
 | **Any agent with a shell** | The `uoink` command: `uoink search "working memory" --limit 5` |
 | **ChatGPT or any chat box** | Click Uoink and paste. The transcript and key screenshots land on your clipboard |
 

@@ -42,6 +42,7 @@ $requiredFiles = @(
     'cli\uoink',
     'uoink_cli.py',
     'uoink_connect.py',
+    'agent_config_writer.py',
     'uoink_agent_runtime.py',
     'source_manifest.py',
     'source_availability.py',
