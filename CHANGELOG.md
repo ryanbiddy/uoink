@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.
 - `npx uoink` says what it is about to do: **Update to X (you have Y)**, **Reinstall X** for the version you already have, or **Downgrade to X (you have Y)**. Going back to an older version now needs `--allow-downgrade` and still asks first. After installing, it waits up to 90 seconds for Uoink to answer on this computer. If Uoink does not come back, it says so, exits with an error and tells you what to try next, instead of reporting success.
+- Your AI agent now hears about captures that stopped partway. `list_recent_uoinks` lists them with a note to press **Finish** in Settings, Library health, and asking for one by its folder name says it did not finish instead of only "not found". This includes captures interrupted on 3.17 or earlier, which left no note in the folder.
 
 ## [3.18.0] - 2026-11-22
 

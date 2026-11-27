@@ -1240,3 +1240,88 @@ def test_repo_launchers_route_backfill_to_the_cli():
     root = Path(__file__).resolve().parent.parent
     assert "|status|backfill|" in (root / "uoink").read_text(encoding="utf-8")
     assert " status backfill " in (root / "uoink.cmd").read_text(encoding="utf-8")
+
+
+def _killed_317_capture(lib, slug="two-hour-stream_0123456789abcdef",
+                        url="https://www.youtube.com/watch?v=KiLLed31700"):
+    """What a 3.17.0 capture killed during transcription left (2026-11-09):
+    metadata, thumbnail, screenshots and the full video. No details file, no
+    corpus Markdown, no index row, and no capture-not-finished note or claim
+    file, because 3.17.0 wrote neither."""
+    folder = lib.root / "AI" / slug
+    (folder / "screenshots").mkdir(parents=True)
+    (folder / "metadata.json").write_text(json.dumps({
+        "id": "KiLLed31700", "title": "A two hour stream", "duration": 7200,
+        "webpage_url": url, "uploader": "examplemaker", "channel": "examplemaker"}), encoding="utf-8")
+    (folder / "thumbnail.jpg").write_bytes(b"jpg")
+    for n in range(1, 4):
+        (folder / "screenshots" / f"shot_{n:04d}.jpg").write_bytes(b"jpg")
+    (folder / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4" + b"7" * 4096)
+    return folder
+
+
+def test_a_killed_317_capture_is_unfinished_everywhere_and_finish_completes_it(lib, monkeypatch):
+    """3.18.1: the killed capture is marked unfinished in Library health, the
+    CLI and MCP readers, never shown as a save, and Finish completes it."""
+    import uoink_cli as cli
+    import uoink_mcp_tools as mcp
+    monkeypatch.setattr(mcp, "_backend", server)
+    folder = _killed_317_capture(lib)
+    assert not (folder / server.CAPTURE_INCOMPLETE_NAME).exists()
+    assert not (folder / ".capture-source.json").exists()
+
+    # (a) the scan marks it unfinished, with the video it can reuse.
+    [item] = server._transcript_backfill_scan()["items"]
+    assert item["half"] is True and item["media"] == "on_disk"
+    assert item["key"] == "folder:AI/" + folder.name and item["title"] == "A two hour stream"
+    assert item["url"] == "https://www.youtube.com/watch?v=KiLLed31700"
+    # (b) Library health (the dashboard reads this route payload) and the CLI.
+    status = server._transcript_backfill_status()
+    assert status["half_capture_count"] == 1 and status["half_captures"][0]["key"] == item["key"]
+    assert "1 capture did not finish." in cli.backfill_text(status)
+    # (b) MCP readers never see it as a save, and are told it did not finish.
+    recent = mcp.list_recent_uoinks({"limit": 20})
+    assert recent["ok"] is True and recent["yoinks"] == []
+    [unfinished] = recent["unfinished_captures"]
+    assert unfinished["title"] == "A two hour stream" and unfinished["folder_name"] == folder.name
+    assert unfinished["video_on_this_computer"] is True
+    assert "Finish" in recent["hint"] and "Library health" in recent["hint"]
+    corpus = mcp.get_uoink_corpus({"slug": folder.name})
+    assert corpus["ok"] is False and corpus["error"] == "uoink not found", "existing clients match this text"
+    assert corpus["capture_not_finished"]["title"] == "A two hour stream"
+    assert "hint" in corpus
+    for tool in (mcp.get_citation_map, mcp.get_uoink_health):
+        result = tool({"slug": folder.name})
+        assert result["error"] == "uoink not found" and result["capture_not_finished"]["folder_name"] == folder.name
+    other = mcp.get_uoink_corpus({"slug": "never-saved"})
+    assert other == {"ok": False, "error": "uoink not found"}, "an unknown slug gets no extra fields"
+    assert lib.asr_calls == [] and lib.downloads == [], "looking never starts anything"
+
+    # (c) Finish completes it from the files on disk.
+    assert lib.backfill().finish(item["key"])["ok"] is True
+    _wait(lambda: lib.finished() and not lib.backfill()._state["requested"], timeout=20, message="finish")
+    assert lib.downloads == [], "Finish reuses the video on disk"
+    sidecar = json.loads((folder / f"{folder.name}.json").read_text(encoding="utf-8"))
+    assert sidecar["transcript_source"] == "asr" and sidecar["transcript"]
+    assert lib.idx.get_yoink("KiLLed31700") is not None
+    assert (folder / "video.mp4").exists()
+    assert server._transcript_backfill_status()["half_capture_count"] == 0
+    recent = mcp.list_recent_uoinks({"limit": 20})
+    assert [y["slug"] for y in recent["yoinks"]] == [folder.name]
+    assert "unfinished_captures" not in recent and "hint" not in recent
+    assert mcp.get_uoink_corpus({"slug": folder.name})["ok"] is True
+
+
+def test_a_capture_still_writing_its_folder_is_not_called_unfinished_by_mcp(lib, monkeypatch):
+    import uoink_mcp_tools as mcp
+    monkeypatch.setattr(mcp, "_backend", server)
+    url = "https://www.youtube.com/watch?v=KiLLed31700"
+    _killed_317_capture(lib, url=url)
+    key = server._manual_capture_key(url)
+    lock = server._ServerCaptureBackend.acquire_identity(key)
+    try:
+        assert lock
+        assert "unfinished_captures" not in mcp.list_recent_uoinks({"limit": 5})
+    finally:
+        server._ServerCaptureBackend.release_identity(key, lock)
+    assert len(mcp.list_recent_uoinks({"limit": 5})["unfinished_captures"]) == 1

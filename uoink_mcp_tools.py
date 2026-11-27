@@ -22,6 +22,7 @@ import base64
 import json
 import logging
 import math
+import os
 import re
 import threading
 import time
@@ -200,6 +201,49 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     return matches[0][1], matches[0][2]
 
 
+UNFINISHED_CAPTURE_HINT = (
+    "These captures stopped before they finished, so they have no transcript and are not in "
+    "the library yet. Ask the user to press Finish in Uoink under Settings, Library health. "
+    "Finish reuses the files already saved.")
+
+
+def _unfinished_captures() -> list[dict[str, Any]]:
+    """Capture folders that stopped midway: files on disk, no details file and
+    no index row (3.18.1). The same read-only scan the dashboard's Library
+    health uses. It never takes a capture lock and never writes."""
+    b = _b()
+    scan = getattr(b, "_transcript_backfill_half_captures", None)
+    if scan is None:
+        return []
+    try:
+        with b._get_index().read_snapshot() as db:
+            rows = db.execute("SELECT sidecar_path, corpus_path FROM yoinks "
+                              "WHERE deleted_at IS NULL").fetchall()
+        indexed = {os.path.normcase(str(Path(p).parent)) for row in rows for p in row if p}
+        items = scan(indexed)
+    except Exception:
+        logging.getLogger("uoink.mcp").debug("unfinished capture scan failed", exc_info=True)
+        return []
+    return [{"title": item.get("title"), "folder_name": item.get("folder_name"),
+             "folder": item.get("folder"), "url": item.get("url"),
+             "started_at": item.get("saved_at"),
+             "video_on_this_computer": item.get("media") == "on_disk"}
+            for item in items]
+
+
+def _not_found(slug: Any = None) -> dict[str, Any]:
+    """'uoink not found', plus what happened when the slug names a capture
+    that stopped midway. The error text stays exact for existing clients."""
+    out = _err("uoink not found")
+    if isinstance(slug, str) and slug:
+        for item in _unfinished_captures():
+            if item["folder_name"] == slug:
+                out["capture_not_finished"] = item
+                out["hint"] = UNFINISHED_CAPTURE_HINT
+                break
+    return out
+
+
 def _saved_key() -> str | None:
     return _b()._saved_anthropic_key()
 
@@ -371,6 +415,12 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             "folder": str(Path(sidecar_path).parent) if sidecar_path else None,
             "yoinked_at": r.get("yoinked_at"),
         })
+    # 3.18.1: a capture killed midway has files on disk but no index row, so
+    # it is not a save. Say so instead of leaving the agent to guess. The
+    # folder scan is the one Library health runs (about 40 ms per 1,500 saves).
+    unfinished = _unfinished_captures()
+    if unfinished:
+        return _ok(yoinks=yoinks, unfinished_captures=unfinished, hint=UNFINISHED_CAPTURE_HINT)
     return _ok(yoinks=yoinks)
 
 
@@ -432,7 +482,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     try:
         from uoink_core.storage import read_export_markdown
         md = read_export_markdown(corpus)
@@ -503,7 +553,7 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     video_id = _read_sidecar(folder).get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         return _err("This saved item has no video_id, so it cannot be used here.")
@@ -634,7 +684,7 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     sidecar = _read_sidecar(folder)
     video_id = sidecar.get("video_id")
     health = None
@@ -2490,7 +2540,7 @@ def analyze_comments_tool(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     comments = _comments_for_folder(folder)
     if len(comments) < 5:
         return _err("This item has too few saved comments to analyze. Capture a page or video that has comments.")
@@ -2519,7 +2569,7 @@ def classify_hook(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     try:
         context = _hook_context_for_folder(folder)
         analysis = b.analyze_hook_type(context, api_key=key)
