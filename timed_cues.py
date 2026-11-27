@@ -18,6 +18,7 @@ without a running helper. server.py owns the routes and the token gate.
 from __future__ import annotations
 
 import json
+import transcript_review
 import math
 import re
 from datetime import datetime
@@ -32,7 +33,7 @@ VERSION = 1
 ITEM_PREFIX = "/api/cues/v1/items"
 MAX_LIMIT = 200
 DEFAULT_LIMIT = 50
-ITEM_PARAMS = frozenset({"start", "end", "limit", "offset", "include_words"})
+ITEM_PARAMS = frozenset({"start", "end", "limit", "offset", "include_words", "include_held"})
 # Cues per item response: a multi-hour episode with word timings is several MB.
 CUE_DEFAULT_LIMIT = 1000
 CUE_MAX_LIMIT = 5000
@@ -149,6 +150,8 @@ def cues_of(sidecar: dict, *, start: float | None = None,
         if end is not None and s > end:
             continue
         cue: dict[str, Any] = {"start": round(s, 3), "end": round(e, 3), "text": text.strip()}
+        if "held_line" in seg:
+            cue.update(held_line=seg["held_line"], held_reason=seg.get("held_reason"))
         speaker = seg.get("speaker")
         if isinstance(speaker, str) and speaker.strip() and isinstance(seg.get("speaker_provenance"), dict):
             cue["speaker"] = speaker.strip()
@@ -280,6 +283,14 @@ def get_item(idx, item_id: str, query: dict | None = None) -> dict:
             sidecar = loaded if isinstance(loaded, dict) else {}
         except (OSError, ValueError):
             sidecar = {}
+    held = sidecar.get("held_transcript_lines") or []
+    include_held = params.get("include_held", "0").lower()
+    if include_held not in ("0", "1", "true", "false"):
+        raise CuesError("invalid_request", "include_held is 0 or 1", 400)
+    if held and include_held in ("1", "true"):
+        flagged = [dict(h, segment=dict(h["segment"], held_line=h["line"], held_reason=h["reason"]))
+                   for h in held]
+        sidecar = dict(sidecar, transcript=transcript_review.all_rows(sidecar.get("transcript", []), flagged))
     every = cues_of(sidecar)
     window = [cue for cue in every
               if (start is None or cue["end"] >= start) and (end is None or cue["start"] <= end)]
@@ -289,6 +300,7 @@ def get_item(idx, item_id: str, query: dict | None = None) -> dict:
     shown = offset + len(cues)
     return {
         "item": item_of(row, sidecar),
+        **({"held_count": len(held), "review_note": transcript_review.notice(held)} if held else {}),
         "timing": timing_of(sidecar, row, every),
         "range": {"start": start, "end": end},
         "cue_count": len(cues),
@@ -344,6 +356,8 @@ _CUE_SCHEMA = {
         "start": {"type": "number", "description": "Seconds from the start of the source."},
         "end": {"type": "number"},
         "text": {"type": "string"},
+        "held_line": {"type": "integer", "description": "Original line number for --restore."},
+        "held_reason": {"type": "string", "description": "Why this line is held back."},
         "speaker": {"type": "string", "description": "Only when the stored cue has an attributed speaker."},
         "deep_link": {"type": "string", "description": "Source link that opens at this cue, when stored."},
         "words": {"type": "array", "description": "Word timings, only when the stored transcript has them.",
@@ -389,6 +403,8 @@ def openapi_paths() -> dict:
             "word_timings": {"type": "boolean"}}},
         "range": {"type": "object"},
         "cue_count": {"type": "integer", "description": "Cues in this response."},
+        "held_count": {"type": "integer", "description": "Total held lines in this saved item."},
+        "review_note": {"type": "string", "description": "Why transcript lines were held back."},
         "page": {"type": "object", "description": "limit, offset, total cues in the window, next_offset."},
         "cues": {"type": "array", "items": _CUE_SCHEMA},
     }}
@@ -434,6 +450,8 @@ def openapi_paths() -> dict:
                 _query_param("offset", "Start position in the window. Use page.next_offset.",
                              {"type": "integer", "minimum": 0}),
                 _query_param("include_words", "0 leaves word timings out (default 1).",
+                             {"type": "string", "enum": ["0", "1", "true", "false"]}),
+                _query_param("include_held", "1 includes held lines in this export (default 0).",
                              {"type": "string", "enum": ["0", "1", "true", "false"]}),
             ],
             "responses": {"200": {"description": "uoink.cues.read v1 item envelope.",

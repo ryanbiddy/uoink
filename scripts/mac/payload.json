@@ -75,6 +75,7 @@
     "third-party-notices",
     "topics.json",
     "transcript_backfill.py",
+    "transcript_review.py",
     "uoink",
     "uoink_agent_runtime.py",
     "uoink_cli.py",

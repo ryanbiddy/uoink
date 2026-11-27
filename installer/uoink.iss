@@ -177,6 +177,7 @@ Source: "staging\library_work.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_subscriptions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_availability.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\transcript_backfill.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\transcript_review.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_analysis.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_resources.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion

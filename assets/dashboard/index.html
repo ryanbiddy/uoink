@@ -7118,6 +7118,11 @@
             <div class="setting-block library-health" id="settings-library-health">
               <h2>Library health</h2>
               <p class="setting-copy">Repairs for saves that came in without everything. Each one starts only when you start it.</p>
+              <div class="health-repair" aria-labelledby="transcriptReviewTitle">
+                <h3 id="transcriptReviewTitle">Review saved transcripts</h3>
+                <p class="setting-copy" id="transcriptReviewCount"></p>
+                <p class="setting-copy">Run <code>uoink tidy-transcripts --dry-run</code> to count suspect lines on this computer. Use <code>--apply</code> to hold them back from search and quotes.</p>
+              </div>
               <div class="health-repair" id="transcriptBackfill" aria-labelledby="backfillTitle">
                 <h3 id="backfillTitle">Transcribe saves that have no words</h3>
                 <p class="backfill-count" id="backfillCount" role="status" aria-live="polite">Checking your library…</p>
@@ -9890,7 +9895,25 @@
         : (state.selectedYoinkSidecar ? "ready" : (state.selectedYoinkSidecarError || "checking saved files"));
       const speakers = shouldShowDiarization(row, sidecar) && diarizationSegments(sidecar).length
         ? diarizationTimelineHtml(row, sidecar) : "";
-      els.yoinkDetail.innerHTML = `${speakers}${readerDocumentHtml(row, sidecar)}`;
+      els.yoinkDetail.innerHTML = `${heldTranscriptHtml(sidecar)}${speakers}${readerDocumentHtml(row, sidecar)}`;
+      const reviewBox = els.yoinkDetail.querySelector("[data-held-lines]");
+      if (reviewBox) reviewBox.addEventListener("toggle", async () => {
+        if (!reviewBox.open || reviewBox.dataset.loaded) return;
+        reviewBox.dataset.loaded = "true";
+        const list = reviewBox.querySelector("ul");
+        list.textContent = "";
+        try {
+          const data = await loadYoinkDetails(sidecar.video_id, true);
+          for (const line of data.held_transcript_lines || []) {
+            const li = document.createElement("li");
+            li.textContent = `Line ${line.line} · ${line.text}`;
+            list.append(li);
+          }
+        } catch {
+          delete reviewBox.dataset.loaded;
+          list.textContent = "Could not read the held lines. Close and reopen to try again.";
+        }
+      });
       els.yoinkDetail.setAttribute("aria-label", isTimedMedia(row, sidecar) ? "Transcript" : "Saved text");
       const comments = readerCommentsHtml(sidecar);
       const commentCount = Array.isArray(sidecar.comments) ? sidecar.comments.length : 0;
@@ -9903,6 +9926,13 @@
       els.yoinkAnalysisSection.classList.toggle("hidden", !analysis);
       els.yoinkFacts.innerHTML = yoinkFactsHtml(row, sidecar);
       loadReaderImages();
+    }
+
+    function heldTranscriptHtml(sidecar) {
+      if (!sidecar.review_note) return "";
+      return `<details class="reader-note" data-held-lines><summary>${htmlEscape(sidecar.review_note)} Show them</summary>
+        <ul></ul>
+        <p>To restore a line, run <code>uoink tidy-transcripts --restore ${htmlEscape(String(sidecar.video_id || ""))} LINE</code> with its line number.</p></details>`;
     }
 
     // ---- 3.18.0: an X save that holds only part of the post ---------------
@@ -10242,8 +10272,8 @@
       return JSON.parse(await res.text());
     }
 
-    async function loadYoinkDetails(videoId) {
-      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/details`);
+    async function loadYoinkDetails(videoId, includeHeld = false) {
+      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/details${includeHeld ? "?include_held=1" : ""}`);
       return data.details || data;
     }
 
@@ -21035,6 +21065,8 @@
       syncWhisperModelOptions();
       if (modelValue) els.whisperModel.value = modelValue;
       renderReliabilityStatus(els.whisperModel.value, settings.transcript_reliability_model || {});
+      const reviewCount = document.getElementById("transcriptReviewCount");
+      if (reviewCount) reviewCount.textContent = settings.transcript_review_summary || "Older saves have not been checked yet.";
       els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
       renderWritingScreenshots();
       renderAgentSetup();

@@ -309,8 +309,8 @@ def get_evidence_card(
     return uoink_mcp_tools.call_tool("get_evidence_card", args)
 
 
-def get_uoink_corpus(slug: str) -> dict:
-    return uoink_mcp_tools.call_tool("get_uoink_corpus", {"slug": slug})
+def get_uoink_corpus(slug: str, include_held: bool = False) -> dict:
+    return uoink_mcp_tools.call_tool("get_uoink_corpus", {"slug": slug, **({"include_held": True} if include_held else {})})
 
 
 def analyze_comments(slug: str) -> dict:

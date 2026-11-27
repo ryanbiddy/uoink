@@ -360,6 +360,7 @@ foreach ($f in @(
     'source_availability.py',
     # 3.18 transcript backfill (Library health); server.py imports it lazily.
     'transcript_backfill.py',
+    'transcript_review.py',
     'library_analysis.py',
     'library_resources.py',
     'library_prompts.py',
@@ -712,6 +713,7 @@ Copy-Item (Join-Path $RepoRoot 'library_work.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_subscriptions.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_availability.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'transcript_backfill.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'transcript_review.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force

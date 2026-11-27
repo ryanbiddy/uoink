@@ -143,7 +143,7 @@ PHASE6_TRANSCRIPT_KEYS = ("diarization_run", "diarization_run_id", "media_depth"
 # Keys this publisher replaces on the sidecar. Every other top-level member
 # belongs to another owner or to the carrier identity and is snapshotted on
 # the ticket so an intervening edit can be merged instead of clobbered.
-SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript"})
+SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript", "held_transcript_lines"})
 
 CHAPTER_STATES = ("present", "absent", "invalid", "unsupported")
 SPEAKER_STATES = ("present", "partial", "absent", "invalid", "unsupported")
@@ -1935,6 +1935,7 @@ def _sidecar_entry_binding(entry: dict) -> tuple:
         entry.get("start"),
         entry.get("end"),
         entry.get("text"),
+        entry.get("review_restored") is True,
         "source_url" in entry,
         entry.get("source_url") if "source_url" in entry else None,
         "source_deep_link" in entry,
@@ -1979,6 +1980,7 @@ def capture_sidecar_inputs(sidecar: dict) -> tuple:
         sidecar.get("transcript_source"),
         entries,
         chapters,
+        _binding_json(sidecar.get("held_transcript_lines") or []),
     )
 
 

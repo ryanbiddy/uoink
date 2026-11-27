@@ -85,6 +85,13 @@ def parser():
     cues.add_argument("id", nargs="?", help="item id from search or recent; omit to list items")
     cues.add_argument("--start", type=float, help="only cues from this second")
     cues.add_argument("--end", type=float, help="only cues up to this second")
+    cues.add_argument("--include-held", action="store_true", help="include lines held back for review")
+    review = command("tidy-transcripts", help="review saved transcripts on this computer")
+    action = review.add_mutually_exclusive_group(required=True)
+    action.add_argument("--dry-run", action="store_true", help="count lines that would be held")
+    action.add_argument("--apply", action="store_true", help="hold those lines and update search")
+    action.add_argument("--restore", nargs=2, metavar=("ITEM", "LINE"),
+                        help="return one held line to the transcript and search")
     cues.add_argument("--channel", help="list: only this show or channel (exact name)")
     cues.add_argument("--from", dest="published_from", help="list: published on or after YYYY-MM-DD")
     cues.add_argument("--to", dest="published_to", help="list: published on or before YYYY-MM-DD")
@@ -396,7 +403,8 @@ def cues_command(ns, server):
     """`uoink cues`: the timed cues read contract (timed_cues.py) in-process,
     the same envelopes GET /api/cues/v1/items returns. Local reads only."""
     import timed_cues
-    item_flags = {"start": ns.start, "end": ns.end}
+    item_flags = {"start": ns.start, "end": ns.end,
+                  "include_held": 1 if getattr(ns, "include_held", False) else None}
     list_flags = {"channel": ns.channel, "published_from": ns.published_from,
                   "published_to": ns.published_to, "q": ns.q}
     page_flags = {"limit": ns.limit, "offset": ns.offset}
@@ -439,7 +447,10 @@ def cues_text(payload):
     head = [terminal_label(item.get("title") or item.get("id") or "Item"),
             f"Published: {terminal_label(item.get('published_at') or 'unknown')} | "
             f"Timing: {source} | {len(cues)} cues"]
-    rows = [f"{text_timestamp(c['start'])}–{text_timestamp(c['end'])}  {text_excerpt(c['text'])}"
+    if data.get("review_note"):
+        head.append(data["review_note"] + " Use --include-held to see them.")
+    rows = [(f"[held line {c['held_line']}] " if "held_line" in c else "")
+            + f"{text_timestamp(c['start'])}–{text_timestamp(c['end'])}  {text_excerpt(c['text'])}"
             for c in cues[:40]]
     if len(cues) > 40:
         rows.append("More cues in JSON output.")
@@ -917,6 +928,8 @@ def human(payload, *, index=None):
         return error_text(payload)
     if "half_capture_count" in payload and "progress" in payload:
         return backfill_text(payload)
+    if "review_summary" in payload:
+        return payload["review_summary"]
     if payload.get("contract") == "uoink.cues.read":
         return cues_text(payload)
     if ("groups" in payload and "stays" in payload) or "restored" in payload or (
@@ -1209,6 +1222,9 @@ def main(argv=None):
                 payload = research_command(ns, server)
             elif ns.command == "cues":
                 payload = cues_command(ns, server)
+            elif ns.command == "tidy-transcripts":
+                import transcript_review
+                payload = transcript_review.tidy(server, apply=ns.apply, restore=ns.restore)
             elif ns.command == "shelves":
                 payload = shelves_command(ns, server)
             elif ns.command == "models":

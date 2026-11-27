@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Uoink holds back likely Whisper inventions and non-speech labels from search, citations and transcript exports. Open a saved transcript and choose **Show them** to read the original lines. Run `uoink tidy-transcripts --dry-run` to check older saves, `--apply` to update them, or `--restore ITEM LINE` to put a line back.
+
 ### Fixed
 
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
