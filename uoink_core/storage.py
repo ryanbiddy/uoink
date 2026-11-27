@@ -49,7 +49,8 @@ def normalize_export_comments(path: Path, text: str) -> str:
 
 
 def read_export_markdown(path: Path) -> str:
-    return normalize_export_comments(path, path.read_text(encoding="utf-8"))
+    from moments import export_links
+    return export_links(normalize_export_comments(path, path.read_text(encoding="utf-8")))
 
 
 def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8", newline: str | None = None) -> None:

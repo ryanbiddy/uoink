@@ -12,7 +12,7 @@ Evals catch regressions\.
 
 evals catch regressions before deployment
 
-[00\:27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=27s)
+[00\:27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=25s)
 
 > evals catch regressions before deployment
 
@@ -20,7 +20,7 @@ Channel attribution.
 
 however benchmarks miss failures in real workflows
 
-[00\:38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=38s)
+[00\:38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=36s)
 
 > however benchmarks miss failures in real workflows
 
@@ -36,7 +36,7 @@ Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly
 
 | c1 | c2 |
 | --- | --- |
-| evals catch regressions before deployment [00\:27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=27s) Channel attribution. | however benchmarks miss failures in real workflows [00\:38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=38s) Transcript may be wrong here; listen at 00\:40 Channel attribution. Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly overstated |
+| evals catch regressions before deployment [00\:27 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=25s) Channel attribution. | however benchmarks miss failures in real workflows [00\:38 · Fixture talks, "Evaluation practice"](https://www.youtube.com/watch?v=talk0000001&t=36s) Transcript may be wrong here; listen at 00\:40 Channel attribution. Speaker unconfirmed; channel attribution; Transcript may be wrong here; Possibly overstated |
 
 ## Sources
 

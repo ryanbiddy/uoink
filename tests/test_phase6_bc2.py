@@ -601,7 +601,7 @@ def test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_s
                              / media.PUBLICATION_LEDGER).read_text(encoding="utf-8"))
         assert ledger["generation"] == 1 and ledger["media_revision"] == row["media_revision"]
         markdown = Path(first["corpus_path"]).read_text(encoding="utf-8")
-        assert "## Transcript" in markdown and "https://show.example/episodes/42#t=64" in markdown
+        assert "## Transcript" in markdown and "https://show.example/episodes/42#t=62" in markdown
         assert "HOST" in markdown and "legacy transcript report; run legacy_" in markdown
         assert "youtube.com" not in markdown.lower()
         citations = idx.get_citations(vid)
@@ -612,7 +612,7 @@ def test_bc2_podcast_publication_routes_through_the_fenced_operation_with_null_s
         _success(exported)
         assert exported["citation"]["seek_link"] is None
         assert exported["citation"]["player_seek_seconds"] is None
-        assert exported["citation"]["source_deep_link"] == "https://show.example/episodes/42#t=64"
+        assert exported["citation"]["source_deep_link"] == "https://show.example/episodes/42#t=62"
         assert exported["units"][0]["speaker"] == "GUEST"
         assert exported["attribution"]["diarization_ran"] is True
         # The producer snapshot itself records the null seek fields.
@@ -1076,7 +1076,7 @@ def test_bc2_youtube_capture_publishes_held_chapters_through_the_shared_publishe
         _success(exported)
         assert [c["title"] for c in exported["chapters"]] == ["Intro & Welcome", "Main [topic]"]
         assert exported["chapters"][0]["provenance"]["provider"] == "youtube_metadata"
-        assert exported["citation"]["seek_link"] == f"https://www.youtube.com/watch?v={vid}&t=48s"
+        assert exported["citation"]["seek_link"] == f"https://www.youtube.com/watch?v={vid}&t=46s"
         assert exported["provenance"]["transcript_source"]["kind"] == "captions"
         # Idempotent re-index keeps the same snapshot and generation.
         assert ns["_index_yoink"](y.folder, y.sidecar, y.corpus_path, y.sidecar_path) is True
@@ -1266,13 +1266,14 @@ def test_bc2_sidecar_link_fields_are_stored_values_and_legacy_recovery_is_exact(
     rows = ns["_citations_from_sidecar"](sidecar, env.root)
     assert (rows[0]["source_url"], rows[0]["source_deep_link"], rows[0]["youtube_deep_link"]) == (None, None, None)
     assert rows[1]["source_url"] == sidecar["url"]
-    assert rows[1]["source_deep_link"] == rows[1]["youtube_deep_link"] == "https://youtube.com/watch?v=yt-links-0001&t=9s"
+    assert rows[1]["source_deep_link"] == rows[1]["youtube_deep_link"] == "https://youtube.com/watch?v=yt-links-0001&t=7s"
     assert rows[2]["source_deep_link"] == "https://youtube.com/watch?v=yt-links-0001&t=12s"
-    assert rows[2]["youtube_deep_link"] == "https://youtube.com/watch?v=yt-links-0001&t=12s"
+    # Preserve the explicit source link, but build the missing compatibility link from the cue start.
+    assert rows[2]["youtube_deep_link"] == "https://youtube.com/watch?v=yt-links-0001&t=10s"
     # The writer persists the same convention it reads: a podcast link never
     # acquires YouTube playback meaning through the compatibility column.
     pod = {"video_id": "episode_abc", "url": "https://show.example/ep", "source_type": "episode", "transcript": []}
     written = ns["_transcript_entries_with_links"](pod, [(3.0, 8.0, "hello")])
     assert written == [{"start": 3.0, "end": 8.0, "text": "hello", "source_url": "https://show.example/ep",
-                        "source_deep_link": "https://show.example/ep#t=3", "youtube_deep_link": None}]
+                        "source_deep_link": "https://show.example/ep#t=1", "youtube_deep_link": None}]
     assert ns["_citations_from_sidecar"](dict(pod, transcript=written), env.root)[0]["youtube_deep_link"] is None

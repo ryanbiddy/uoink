@@ -451,6 +451,17 @@
     });
   }
 
+  async function sendAfterSaveNotice(data, copied = false) {
+    try {
+      await chrome.runtime.sendMessage({
+        type: "afterSaveNotice", topic: data.topic || null, folder: data.folder || null,
+        pinned_seconds: data.pinned_seconds, copied,
+      });
+    } catch (e) {
+      console.warn("[Uoink] after-save notice failed", e);
+    }
+  }
+
   function rememberFailure(url, error, replacesId) {
     STC.rememberFailure(url, error, { title: pageVideoTitle() }, replacesId);
   }
@@ -497,7 +508,7 @@
 
   async function onClick(btn) {
     if (btn._afterSavePending) return copyPendingForClaude(btn);
-    const url = normalizedCurrentVideoUrl();
+    const url = STC.momentUrl(window.location.href, document.querySelector("video")?.currentTime);
     if (!url) return;
 
     // Gate by live server status: don't even attempt uoink while the helper
@@ -552,9 +563,18 @@
 
     if (data.queued) {
       setButtonState(btn, "success", "Queued");
-      btn.title = queuedMessage(data);
-      notify("Uoink queued", queuedMessage(data));
+      const message = queuedMessage(data);
+      btn.title = message;
+      notify(STC.pinnedMessage(data) ? "Moment pinned" : "Uoink queued", STC.pinnedMessage(data, message));
       resetButtonAfter(btn, 5000);
+      return;
+    }
+
+    if (data.reused && !data.yoink_md && Number.isInteger(data.pinned_seconds)) {
+      notify("Uoinked ★", STC.pinnedMessage(data));
+      setButtonState(btn, "success", "Saved");
+      btn.title = SAVED_TITLE;
+      resetButtonAfter(btn, 3000);
       return;
     }
 
@@ -565,7 +585,7 @@
       rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
       await STC.stashPickerCorpus(data);
       notify("Uoink ready",
-             "Click the Uoink icon to pick which screenshots to include.");
+             [STC.pinnedMessage(data), "Click the Uoink icon to pick which screenshots to include."].filter(Boolean).join(". "));
       setButtonState(btn, "success", "Pick screenshots →");
       btn.title = `${SAVED_TITLE} Click the Uoink icon to finish.`;
       resetButtonAfter(btn, 5000);
@@ -582,13 +602,7 @@
       // Saved to the library; no clipboard write, no new tab. The notification
       // (some systems hide its buttons) and this button both offer the copy.
       const first = await STC.isFirstSave();
-      try {
-        await chrome.runtime.sendMessage({
-          type: "afterSaveNotice", topic: data.topic || null, folder: data.folder || null,
-        });
-      } catch (e) {
-        console.warn("[Uoink] after-save notice failed", e);
-      }
+      await sendAfterSaveNotice(data);
       // A narrow window has no room for "Saved." in front.
       const narrow = window.innerWidth < 520;
       const label = first ? (narrow ? "See it in Claude" : "Saved. See it in Claude")
@@ -632,11 +646,7 @@
     const destination = STC.afterSaveChoice(afterSave);
     if (destination.url) openTab(destination.url);
 
-    // Same shared helper used by the SW queue path. First successful uoink
-    // (whether triggered here or through the right-click menu) gets the
-    // CTA copy; subsequent uoinks fall back to the topic-aware copy.
-    const message = await STC.buildUoinkedMessage(data, copied);
-    notify("Uoinked ★", message);
+    await sendAfterSaveNotice(data, copied);
 
     setButtonState(btn, "success", "Uoinked ★");
     btn.title = SAVED_TITLE;
@@ -679,9 +689,9 @@
     }
     STC.forgetFailure(retryOf);
 
-    notify("Added to session",
-           `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
-           `End the session in the popup to send to Claude or ChatGPT.`);
+    const message = `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
+      "End the session in the popup to send to Claude or ChatGPT.";
+    notify("Added to session", STC.pinnedMessage(data, message));
 
     setButtonState(btn, "success", `Added (${data.video_count})`);
     btn.title = SAVED_TITLE;
@@ -881,6 +891,10 @@
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!sender || sender.id !== chrome.runtime.id) return;
+    if (msg && msg.type === "uoinkReadMoment" && msg.videoId === currentVideoId()) {
+      sendResponse({ videoId: msg.videoId, seconds: document.querySelector("video")?.currentTime });
+      return;
+    }
     if (msg && msg.type === "uoinkShortcutTriggered") {
       const btn = document.getElementById(BTN_ID);
       if (btn) {

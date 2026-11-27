@@ -637,9 +637,9 @@ async function groupReader() {
     const details = {
       title: "Agent loops explained", channel: "Example Channel", duration_seconds: 754, transcript_source: "captions",
       transcript: [
-        { start: 0, end: 3, text: "Hello there." },
+        { start: 0, end: 3, text: "Hello there.", deep_link: "https://www.youtube.com/watch?v=vidR&t=0s" },
         { start: 3, end: 6, text: "This is the first idea." },
-        { start: 20, end: 24, text: "A new part starts after a pause." },
+        { start: 20, end: 24, text: "A new part starts after a pause.", deep_link: "https://www.youtube.com/watch?v=vidR&t=18s" },
       ],
       screenshots: [{ timestamp: "00:00:10", path: "screenshots/shot_0001.jpg", filename: "shot_0001.jpg" }],
       comments: [{ author: "Ana", text: "Great breakdown", like_count: 12, reply_count: 1, time_text: "2 days ago", is_pinned: false }],
@@ -654,7 +654,7 @@ async function groupReader() {
     const paras = html.split('class="reader-row reader-para"').length - 1;
     check(paras === 2, "two paragraphs: a pause starts the second", paras);
     check(html.includes('href="https://www.youtube.com/watch?v=vidR&amp;t=0s"') && html.includes(">0:00</a>"), "the first paragraph's time links to the source at 0:00", html);
-    check(html.includes('href="https://www.youtube.com/watch?v=vidR&amp;t=20s"') && html.includes(">0:20</a>"), "the second paragraph's time links to 0:20", html);
+    check(html.includes('href="https://www.youtube.com/watch?v=vidR&amp;t=18s"') && html.includes(">0:20</a>"), "the second paragraph at 0:20 links to 0:18", html);
     check(html.includes("Hello there. This is the first idea."), "segments join into the paragraph", html);
     const shot = html.indexOf('alt="Screenshot at 0:10"');
     const second = html.indexOf("A new part starts");

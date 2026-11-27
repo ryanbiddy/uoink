@@ -100,6 +100,7 @@ if _BIN_DIR.is_dir():
 
 import yt_extract  # noqa: E402
 from yt_extract import slugify, fmt_time  # noqa: E402
+import moments  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
@@ -3246,23 +3247,15 @@ def _parse_hms(value) -> float | None:
     return float(secs)
 
 
-def _youtube_deep_link(video_id: str, seconds) -> str:
-    """A watch URL deep-linked to a timestamp -- the citations contract."""
-    vid = (video_id or "").strip()
-    try:
-        t = max(0, int(float(seconds)))
-    except (TypeError, ValueError):
-        t = 0
-    return f"https://youtube.com/watch?v={vid}&t={t}s"
+def _youtube_deep_link(video_id: str, seconds, *, lead=2) -> str:
+    from moments import citation_link
+    return citation_link(f"https://youtube.com/watch?v={(video_id or '').strip()}", seconds,
+                         youtube=True, lead=lead)
 
 
-def _source_deep_link(source_url: str, seconds) -> str:
-    """A generic timestamp fragment for sources without a native URL form."""
-    try:
-        t = max(0, int(float(seconds)))
-    except (TypeError, ValueError):
-        t = 0
-    return f"{source_url.split('#', 1)[0]}#t={t}"
+def _source_deep_link(source_url: str, seconds, *, lead=2) -> str:
+    from moments import citation_link
+    return citation_link(source_url, seconds, lead=lead)
 
 
 # Sections a capture kind never produces. They report "skipped", as a note's
@@ -4360,9 +4353,9 @@ def _sidecar_link_builder(sidecar: dict):
         sidecar.get("source_type"), source_url or ""
     ) == page_extractor.PLATFORM_YOUTUBE
 
-    def links(timestamp):
+    def links(timestamp, *, lead=2):
         if is_youtube:
-            deep = _youtube_deep_link(video_id, timestamp)
+            deep = _youtube_deep_link(video_id, timestamp, lead=lead)
             base = (
                 source_url if isinstance(source_url, str)
                 and source_url.startswith(("http://", "https://"))
@@ -4370,7 +4363,7 @@ def _sidecar_link_builder(sidecar: dict):
             )
             return deep, base, deep
         if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
-            return None, source_url, _source_deep_link(source_url, timestamp)
+            return None, source_url, _source_deep_link(source_url, timestamp, lead=lead)
         return None, None, None
 
     return links
@@ -4435,7 +4428,7 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             continue
         ts = _parse_hms(shot.get("timestamp"))
         rel = shot.get("path") or shot.get("filename") or ""
-        youtube_link, citation_source, deep_link = links(ts)
+        youtube_link, citation_source, deep_link = links(ts, lead=0)
         out.append({
             "kind": "screenshot",
             "seq": i,
@@ -26033,12 +26026,15 @@ class Handler(BaseHTTPRequestHandler):
         if row is None:
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
+        def unavailable(status, message, **fields):
+            pins = _get_index().get_pins(video_id)
+            if pins:
+                fields["pins"] = pins
+            return self._send_json(status, {"ok": False, "error": message, **fields})
+
         sidecar_raw = (row.get("sidecar_path") or "").strip()
         if not sidecar_raw:
-            return self._send_json(404, {
-                "ok": False,
-                "error": "This uoink has no saved details on disk yet.",
-                "state": "no_sidecar"})
+            return unavailable(404, "This uoink has no saved details on disk yet.", state="no_sidecar")
         if _path_has_parent_ref(sidecar_raw):
             return self._send_json(400, {"ok": False,
                                          "error": "sidecar path escapes Uoink root"})
@@ -26080,18 +26076,15 @@ class Handler(BaseHTTPRequestHandler):
                                          "error": "sidecar path escapes Uoink root"})
 
         if not resolved.exists() or not resolved.is_file():
-            return self._send_json(404, {"ok": False,
-                                         "error": "sidecar file not found"})
+            return unavailable(404, "sidecar file not found")
 
         try:
             if resolved.stat().st_size > MAX_SIDECAR_BYTES:
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar file too large"})
+                return unavailable(400, "sidecar file too large")
             with open(resolved, "rb") as f:
                 content = f.read(MAX_SIDECAR_BYTES + 1)
             if len(content) > MAX_SIDECAR_BYTES:
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar file too large"})
+                return unavailable(400, "sidecar file too large")
         except UnicodeDecodeError:
             return self._send_json(400, {"ok": False,
                                          "error": "malformed sidecar JSON"})
@@ -26246,6 +26239,7 @@ class Handler(BaseHTTPRequestHandler):
                     clean_shots.append(clean_shot)
             filtered["screenshots"] = clean_shots
 
+        filtered["pins"] = _get_index().get_pins(video_id)
         raw_transcript = data.get("transcript")
         held = data.get("held_transcript_lines")
         if isinstance(held, list):
@@ -26316,7 +26310,7 @@ class Handler(BaseHTTPRequestHandler):
                 for s in raw_diar["segments"]:
                     if isinstance(s, dict):
                         clean_diar_segs.append({
-                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
                                              "speaker_label", "speaker_id")
                             if k in s and isinstance(s[k], (str, int, float))
                         })
@@ -26327,6 +26321,18 @@ class Handler(BaseHTTPRequestHandler):
             story_url = data["metadata"].get("story_url")
             if isinstance(story_url, str) and page_extractor.normalize_page_url(story_url):
                 filtered["story_url"] = story_url
+
+        # Use the same line link as search, including for captures made by older helpers.
+        saved_url = data.get("url") or data.get("source_url")
+        if row.get("platform") == "youtube" or (isinstance(saved_url, str) and _normalize_youtube_url(saved_url)):
+            for entries in (filtered.get("transcript"), filtered.get("segments"),
+                            filtered.get("diarization", {}).get("segments")):
+                if isinstance(entries, list):
+                    for segment in entries:
+                        if isinstance(segment, dict):
+                            start = _as_float(segment.get("start", segment.get("start_seconds")))
+                            if start is not None:
+                                segment["deep_link"] = _youtube_deep_link(video_id, start)
 
         # 3.18.0: an X save that holds only part of the post's text.
         cut_off = _x_cut_off_detail(data)
@@ -26449,6 +26455,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_playlist_start(body)
         if bare.startswith("/jobs/") and bare.endswith("/cancel"):
             return self._handle_job_cancel(bare)
+        if bare.startswith("/yoinks/") and bare.endswith("/moments/remove"):
+            video_id = bare[len("/yoinks/"):-len("/moments/remove")]
+            second = body.get("seconds")
+            if type(second) is not int or not 0 <= second <= 2147483647:
+                return self._send_json(400, {"ok": False, "error": "Invalid pin time."})
+            moments.remove(_get_index(), video_id, second)
+            return self._send_json(200, {"ok": True})
         if bare == "/extract":
             return self._handle_extract(body)
         if bare == "/extract/any":
@@ -26740,6 +26753,7 @@ class Handler(BaseHTTPRequestHandler):
         # video, so the existing YouTube/X paths are untouched.
         if isinstance(body, dict):
             body["__platform"] = platform
+            body["__moment"] = moments.requested_time(url) if platform == "youtube" else None
             body["__source_type"] = (
                 SOURCE_TYPE_SHORT_VIDEO if _is_short_video_url(url) else None)
         return normalized, interval, None
@@ -27505,7 +27519,7 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _handle_live_extract_dispatch(self, url, interval, live_state,
-                                      metadata, long_video_mode):
+                                      metadata, long_video_mode, *, moment=None):
         """v3.1 live stream branch. Returns True after sending a response;
         returns False when the caller should proceed with the normal
         download (post_live with a recording exposed).
@@ -27578,6 +27592,7 @@ class Handler(BaseHTTPRequestHandler):
             "pending_id": pending_id,
             "retry_after": retry_after,
             "reason": "live_stream",
+            **(moments.add(_get_index(), *moment, pending_id=pending_id) if moment else {}),
             "live_state": live_state,
             "behavior": behavior,
             "title": live_title,
@@ -27631,6 +27646,9 @@ class Handler(BaseHTTPRequestHandler):
         if shelf_error:
             return self._send_json(400, {"ok": False, "error": shelf_error})
 
+        pin = body.get("__moment")
+        video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url) if pin is not None else None
+
         # Waiting for the capture lock until the `with` below takes it.
         refusal = _platform.capability_refusal(_platform.media_capability())
         if refusal is not None:
@@ -27656,6 +27674,20 @@ class Handler(BaseHTTPRequestHandler):
                 log.info("POST /extract -> 409 (%s)", ownership.conflict)
                 return self._send_json(409, {"ok": False, "error": ownership.conflict,
                                              "identity_conflict": True})
+            if video_id:
+                idx = _get_index()
+                row = ownership.corpus_row(video_id)
+                if row:
+                    return self._send_json(200, {
+                        "ok": True, "reused": True, "video_id": video_id, "title": row.get("title"),
+                        "video_slug": row.get("slug"),
+                        "folder": str(Path(row["corpus_path"]).parent) if row.get("corpus_path") else None,
+                        **moments.add(idx, video_id, pin)})
+                pending = moments.pending_capture(idx, url)
+                if pending:
+                    return self._send_json(200, {
+                        "ok": True, "queued": True, **pending,
+                        **moments.add(idx, video_id, pin, pending_id=pending["pending_id"])})
             if ownership.completed_while_waiting and ownership.reused:
                 _record_single_extract_job(url, started_at, result=ownership.reused)
                 log.info("POST /extract -> ok (reused capture of %s)", ownership.already_captured)
@@ -27672,7 +27704,8 @@ class Handler(BaseHTTPRequestHandler):
                 if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
                                     LIVE_STATE_POST_LIVE):
                     if self._handle_live_extract_dispatch(
-                            url, interval, live_state, metadata, long_video_mode):
+                            url, interval, live_state, metadata, long_video_mode,
+                            **({"moment": (video_id, pin)} if video_id else {})):
                         return
                 title = metadata.get("title") or "Untitled"
                 topic = shelf or _route_topic(metadata, url=url)
@@ -27690,6 +27723,8 @@ class Handler(BaseHTTPRequestHandler):
                                           long_video_mode=long_video_mode,
                                           phase_callback=phase_cb,
                                           shelf_hint=shelf)
+                if video_id and result.get("ok"):
+                    result.update(moments.add(_get_index(), video_id, pin))
             except BaseException as e:
                 # Sprint 19 / C4: YouTube 429 or bot check -> queue for retry
                 # instead of surfacing an error. The retry worker takes over.
@@ -27730,6 +27765,7 @@ class Handler(BaseHTTPRequestHandler):
                             "reason": ("youtube_rate_limit" if _is_youtube_rate_limit(e)
                                        else "youtube_bot_check"),
                             "long_video_mode": long_video_mode,
+                            **(moments.add(_get_index(), video_id, pin, pending_id=pending_id) if video_id else {}),
                         })
                 msg = friendly_error(e)
                 detail = (_youtube_rate_limit_detail(e) if _is_youtube_rate_limit(e)
@@ -27836,6 +27872,16 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(409, {"ok": False, "error": ownership.conflict,
                                              "identity_conflict": True,
                                              "session_id": session_id})
+            pin = body.get("__moment")
+            video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url) if pin is not None else None
+            if video_id and ownership.already_captured:
+                current = _read_session(session_id) or session
+                if any(member.get("url") == url for member in current.get("videos", [])):
+                    return self._send_json(200, {
+                        "ok": True, "session_id": session_id, "video_count": len(current["videos"]),
+                        **moments.add(_get_index(), video_id, pin)})
+                if not ownership.reused:
+                    ownership.recheck(video_id, ownership.corpus_row(video_id), existed_before=False)
             try:
                 if ownership.completed_while_waiting and ownership.reused:
                     # AS-03 (run AT-4): the capture this request waited behind
@@ -27882,17 +27928,20 @@ class Handler(BaseHTTPRequestHandler):
                 # publication retries. Its corpus already exists on disk.
                 _record_single_extract_job(url, _now_iso(), result=result)
 
-        with _session_lock:
-            session = _read_session(session_id) or session
-            session.setdefault("videos", []).append({
-                "url": url,
-                "title": result["title"],
-                "video_slug": result["video_slug"],
-                "screenshot_count": result["screenshot_count"],
-                "caption_count": result.get("caption_count", 0),
-                "added_at": _now_iso(),
-            })
-            _write_session(session_id, session)
+            if video_id:
+                result.update(moments.add(_get_index(), video_id, pin))
+
+            with _session_lock:
+                session = _read_session(session_id) or session
+                session.setdefault("videos", []).append({
+                    "url": url,
+                    "title": result["title"],
+                    "video_slug": result["video_slug"],
+                    "screenshot_count": result["screenshot_count"],
+                    "caption_count": result.get("caption_count", 0),
+                    "added_at": _now_iso(),
+                })
+                _write_session(session_id, session)
 
         if result.get("status") == "saved_with_errors":
             # Membership is committed. Callers use ok=False to offer a new

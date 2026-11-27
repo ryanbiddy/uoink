@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from clips import timing_kind
+from moments import cited_url
 
 SCHEMA_VERSION = 1
 SELECTION_VERSION = "spread-longest-v2"
@@ -224,6 +225,9 @@ def build_card(item: dict, clips: list[dict], *, corpus_text: str = "",
             has_mixed = False
             selection_truncated = False
 
+    # The original evidence still supplies its stable source revision and excerpt ID.
+    for excerpt in excerpts:
+        excerpt["deep_link"] = cited_url(excerpt["deep_link"], excerpt["start"])
     card.update(
         schema_version=SCHEMA_VERSION, source_revision=revision, profile=profile,
         selection_version=SELECTION_VERSION, url=url,

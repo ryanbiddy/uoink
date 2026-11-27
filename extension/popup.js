@@ -330,8 +330,11 @@ const SOURCE_CAPTURE_ROUTES = {
 };
 
 function capturesCurrentSource(url, route) {
-  return !!currentSource && STC.queueUrlKey(url) === STC.queueUrlKey(currentSource.canonical)
-    && !!SOURCE_CAPTURE_ROUTES[currentSource.action]?.includes(route);
+  if (!currentSource || !SOURCE_CAPTURE_ROUTES[currentSource.action]?.includes(route)) return false;
+  if (currentSource.action === "video") {
+    return STC.extractVideoId(url) === STC.extractVideoId(currentSource.canonical);
+  }
+  return STC.queueUrlKey(url) === STC.queueUrlKey(currentSource.canonical);
 }
 
 async function handOffCapture(request, view) {
@@ -485,7 +488,8 @@ async function runPopupUoinkCurrent() {
     // queue checks the helper's queue for room before it runs (E1); this
     // popup doesn't wait on /queue/status before handing it over.
     if (src.action === "video") {
-      await queueCapture({ route: "video", url: src.canonical, interval });
+      const url = await STC.tabMomentUrl(src.tabId, src.canonical);
+      await queueCapture({ route: "video", url, interval });
       return;
     }
     // The worker owns the text and optional video, including deduplication

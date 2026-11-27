@@ -249,6 +249,7 @@ Source: "staging\page_dom_capture.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\show_capture.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\timed_cues.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\moments.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\shelf_router.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\local_embed.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion

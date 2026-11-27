@@ -27,6 +27,7 @@ from typing import Any
 from urllib.parse import quote
 
 import index as index_mod
+from moments import cited_url
 
 CONTRACT = "uoink.cues.read"
 VERSION = 1
@@ -157,7 +158,7 @@ def cues_of(sidecar: dict, *, start: float | None = None,
             cue["speaker"] = speaker.strip()
         link = seg.get("source_deep_link") or seg.get("youtube_deep_link")
         if isinstance(link, str) and link.startswith(("http://", "https://")):
-            cue["deep_link"] = link
+            cue["deep_link"] = cited_url(link, cue.get("start"))
         words = []
         for word in seg.get("words") or []:
             if not isinstance(word, dict):

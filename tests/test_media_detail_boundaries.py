@@ -129,3 +129,22 @@ def test_saved_time_aliases_are_preserved(item):
     details=data['details']
     for rows in (details['transcript'],details['segments'],details['diarization']['segments']):
         assert rows[0]['start_seconds']==34 and rows[0]['end_seconds']==46
+
+
+@pytest.mark.parametrize("empty_lists", [False, True], ids=["absent", "empty"])
+def test_diarization_only_reader_clock_links_from_the_stored_start(item, empty_lists):
+    path, _, request = item
+    saved = {"diarization": {"segments": [
+        {"start_seconds": 34.8, "end_seconds": 46, "speaker": "A", "content": "Watch the shuttle."},
+    ]}}
+    if empty_lists:
+        saved.update(transcript=[], segments=[])
+    path.write_text(json.dumps(saved), encoding="utf8")
+    status, data = request()
+    assert status == 200
+    details = data["details"]
+    html = node("process.stdout.write(JSON.stringify(ctx.readerTranscriptHtml({}, "
+                + json.dumps(details) + ")));")
+    assert 'href="https://youtube.com/watch?v=saved-media&amp;t=32s"' in html
+    assert '>0:34</a>' in html and 'Watch the shuttle.' in html
+    assert json.loads(path.read_text(encoding="utf8")) == saved

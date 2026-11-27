@@ -149,7 +149,7 @@ def test_automatic_captions(idx):
     data = timed_cues.get_item(idx, "tpautocaps01")
     assert data["timing"]["source"] == "auto_captions"
     assert data["cues"] == [{"start": 1.0, "end": 2.0, "text": "uh so crabs",
-                             "deep_link": "https://www.youtube.com/watch?v=tpautocaps01&t=1s"}]
+                             "deep_link": "https://www.youtube.com/watch?v=tpautocaps01&t=0s"}]
     assert data["item"]["published_at"] == "2024-01-10"     # from yt-dlp's YYYYMMDD
 
 

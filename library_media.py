@@ -115,11 +115,12 @@ import time
 import unicodedata
 from contextlib import suppress
 from pathlib import Path
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlsplit
 
 import clips as _clips
 import library_cards as _cards
 import library_resources as _resources
+from moments import citation_link, cited_url
 
 CONTRACT_VERSION = "phase6-v1"
 SCHEMA_MIGRATION = "0030_media_depth"
@@ -828,20 +829,17 @@ def _escape_markdown(value, limit: int = MAX_TITLE_CODEPOINTS * 2) -> str:
     return "".join(out)
 
 
-def _seek_link(playback: dict | None, video_id: str, start) -> tuple[str | None, int | None]:
+def _seek_link(playback: dict | None, video_id: str, start, *, lead=2) -> tuple[str | None, int | None]:
     """Seek link and player command from validated playback metadata only."""
     if not playback or start is None or not _is_number(start):
         return None, None
-    seconds = math.floor(start)
+    seconds = max(0, math.floor(start) - lead)
     url = playback.get("seek_url")
     kind = playback.get("seek_kind")
     if kind == "youtube" and _resources.safe_url(url) == url and _youtube_video_id(url) == video_id:
-        parts = urlsplit(url)
-        query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if k not in ("v", "t")]
-        query = [("v", video_id)] + query + [("t", f"{seconds}s")]
-        return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), "")), seconds
+        return citation_link(url, start, youtube=True, lead=lead), seconds
     if kind == "media_fragment" and _resources.safe_url(url) == url:
-        return f"{url.split('#', 1)[0]}#t={seconds}", seconds
+        return citation_link(url, start, lead=lead), seconds
     return None, None
 
 
@@ -868,7 +866,7 @@ def render_markdown(item: dict, cues: list[dict], *, chapters, annotations) -> s
     lines: list[str] = ["## Chapters", ""]
     if chapters:
         for chapter in chapters:
-            link, _ = _seek_link(playback, video_id, chapter["start"])
+            link, _ = _seek_link(playback, video_id, chapter["start"], lead=0)
             lines.append(f"- {_span_text(chapter['start'], chapter['end'], link)}: "
                          f"{_escape_markdown(chapter['title'])}")
     else:
@@ -883,7 +881,7 @@ def render_markdown(item: dict, cues: list[dict], *, chapters, annotations) -> s
     run_by_id = {run["run_id"]: run for run in block["runs"]} if block else {}
     annotated = block["cues"] if block else None
     for index, cue in enumerate(cues):
-        link = _resources.safe_url(cue.get("source_deep_link"))
+        link = _resources.safe_url(cited_url(cue.get("source_deep_link"), cue.get("timestamp_start")))
         heading = "### " + _span_text(cue.get("timestamp_start"), cue.get("timestamp_end"), link)
         annotation = annotated[index] if annotated is not None else None
         if annotation is not None and annotation["speaker"] is not None:
@@ -1503,13 +1501,7 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
     if entries and not explicit and any(a or b for a, b in flags):
         raise _invalid("sidecar_link_fields_mixed")
 
-    def seconds(value):
-        try:
-            return max(0, int(float(value)))
-        except (TypeError, ValueError):
-            return 0
-
-    def rows(mode: str, coerce: bool) -> list[dict]:
+    def rows(mode: str, coerce: bool, lead=2) -> list[dict]:
         out = []
         for index, entry in enumerate(entries):
             start, end = entry.get("start"), entry.get("end")
@@ -1522,10 +1514,10 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
                 source_url, deep = url, url
             elif mode == "fragment":
                 source_url = url
-                deep = f"{url.split('#', 1)[0]}#t={seconds(start)}" if url else None
+                deep = citation_link(url, start, lead=lead) if url else None
             else:
                 source_url = url or f"https://youtube.com/watch?v={video_id}"
-                deep = f"https://youtube.com/watch?v={video_id}&t={seconds(start)}s"
+                deep = citation_link(f"https://youtube.com/watch?v={video_id}", start, youtube=True, lead=lead)
             youtube_link = entry.get("youtube_deep_link") if "youtube_deep_link" in entry else (deep or "")
             out.append({"kind": "transcript_chunk", "seq": index, "timestamp_start": start,
                         "timestamp_end": end, "text": entry.get("text"), "file_path": None,
@@ -1540,8 +1532,9 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
     else:
         chosen = None
         for mode in modes:
-            for coerce in (False, True):
-                candidate = rows(mode, coerce)
+            # Pre-3.18.1 manifests bind the exact start-time URL in their hash.
+            for coerce, lead in ((False, 2), (True, 2), (False, 0), (True, 0)):
+                candidate = rows(mode, coerce, lead)
                 if cue_revision(video_id, [cue_core(c) for c in candidate]) == block["cue_revision"]:
                     chosen = candidate
                     break
@@ -2851,7 +2844,7 @@ def _export_range(snap: _Snapshot, request: dict, check) -> dict:
     citation = {
         "evidence_kind": "transcript_range", "timing": "source_cues", "start": start, "end": end,
         "verbatim_text": verbatim, "text_basis": "stored_cues", "separator": "\n",
-        "source_deep_link": _resources.safe_url(first.get("source_deep_link")),
+        "source_deep_link": _resources.safe_url(cited_url(first.get("source_deep_link"), start)),
         "seek_link": seek_link, "player_seek_seconds": seek_seconds, "truncated": False,
     }
     return {"citation": citation, "units": units, "chapters": _chapter_objects(block, start, end),
@@ -2915,7 +2908,7 @@ def _export_excerpt(snap: _Snapshot, request: dict, check) -> dict:
     citation = {
         "evidence_kind": "timed_clip", "timing": "source_cues", "start": clip["start"], "end": clip["end"],
         "verbatim_text": text, "text_basis": "clip_projection", "separator": None,
-        "source_deep_link": link, "seek_link": seek_link, "player_seek_seconds": seek_seconds,
+        "source_deep_link": cited_url(link, clip["start"]), "seek_link": seek_link, "player_seek_seconds": seek_seconds,
         "truncated": False,
     }
     return {"citation": citation, "units": units,

@@ -229,6 +229,49 @@ test("copy choices keep the first-save clipboard wording", async () => {
   assert.doesNotMatch(w.env.notifications.at(-1).message, /first corpus/i);
 });
 
+for (const choice of ["stay", "copy"]) {
+  test(`pinned ${choice} save keeps the first-save sentence until the notification succeeds`, async () => {
+    const w = await worker({ capture: { ...CAPTURE, pinned_seconds: 872 }, settings: { after_save: choice } });
+    const create = w.env.chrome.notifications.create;
+    w.env.chrome.notifications.create = (_options, callback) => callback(undefined);
+    await saveViaQueue(w);
+    assert.ok(!w.store.local.has_completed_first_yoink);
+    w.env.chrome.notifications.create = create;
+    await saveViaQueue(w);
+    const first = choice === "stay" ? "Once Uoink is connected" : "Copied to your clipboard.";
+    const message = w.env.notifications.at(-1).message;
+    assert.ok(message.includes(first), message);
+    assert.match(message, /\. Pinned 14:32\.?$/);
+    const popupMessage = w.store.session.popup_capture_results[0].message;
+    const popupHint = choice === "stay" ? "Saved to your library." : "Copied. Paste it in your AI.";
+    assert.ok(popupMessage.includes(popupHint), popupMessage);
+    assert.match(popupMessage, /\. Pinned 14:32\.?$/);
+    assert.equal(w.store.local.has_completed_first_yoink, true);
+    await saveViaQueue(w);
+    const later = w.env.notifications.at(-1).message;
+    assert.ok(!later.includes(first), later);
+    assert.match(later, /Pinned 14:32\.?$/);
+  });
+}
+
+test("queued popup capture keeps the retry message and reports the pin", async () => {
+  const w = await worker({ capture: { ok: true, queued: true, pinned_seconds: 0 } });
+  await saveViaQueue(w);
+  const result = w.store.session.popup_capture_results[0];
+  assert.equal(result.queued, true);
+  assert.match(result.message, /^Queued.*retry.*Pinned 0:00/);
+  assert.equal(w.env.notifications.at(-1).message, result.message);
+  assert.ok(!w.store.local.has_completed_first_yoink);
+});
+
+test("a pinned background session add names the session and video count", async () => {
+  const w = await worker({ helperFetch: url => jsonResponse(pathOf(url) === "/session/add"
+    ? { ok: true, video_count: 2, pinned_seconds: 872 } : { ok: true }) });
+  await w.env.ctx.runSessionAddJob({ session_id: "loom", session_name: "Weaving", url: YT_URL, interval: 30 });
+  assert.match(w.env.notifications.at(-1).message, /Weaving · 2 videos.*Pinned 14:32/);
+  assert.ok(!w.store.local.has_completed_first_yoink);
+});
+
 // ---- the setting lives in the helper's /settings, chrome.storage is a cache -------
 test("the helper's after_save wins over an empty cache and refreshes it", async () => {
   const w = await worker({ settings: { after_save: "claude" } });
@@ -461,13 +504,13 @@ for (const [choice, want] of Object.entries(CHOICES)) {
 }
 
 // ---- the in-page YouTube button -------------------------------------------------
-async function inPage(choice, { firstDone = false } = {}) {
+async function inPage(choice, { firstDone = false, capture = CAPTURE, session } = {}) {
   const bg = await worker(firstDone ? { store: { local: { has_completed_first_yoink: true }, sync: {}, session: {} } } : {});
   const env = makeEnv({
     href: YT_URL,
     onSend: (msg) => {
       if (msg.type === "stcPing") return { ok: true };
-      if (msg.type === "stcExtract") return { data: { ...CAPTURE, video_count: 1 } };
+      if (msg.type === "stcExtract" || msg.type === "stcSessionAdd") return { data: { ...capture, video_count: 1 } };
       return bg.env.dispatch(msg);
     },
     fetch: (url) => {
@@ -478,6 +521,7 @@ async function inPage(choice, { firstDone = false } = {}) {
     },
   });
   if (choice) env.store.local.after_save = choice;
+  if (session) env.store.local.active_session = session;
   if (firstDone) env.store.local.has_completed_first_yoink = true;
   // Same storage for the background: the setting is read from chrome.storage.local.
   Object.assign(bg.store.local, env.store.local);
@@ -496,6 +540,21 @@ async function inPage(choice, { firstDone = false } = {}) {
   await settle(200);
   return { env, bg, btn };
 }
+
+test("a pinned in-page session add keeps the session instructions", async () => {
+  const { bg } = await inPage("stay", { capture: { ...CAPTURE, pinned_seconds: 872 },
+    session: { id: "loom", name: "Weaving" } });
+  const message = bg.env.notifications.at(-1).message;
+  assert.match(message, /Weaving · 1 video so far\. End the session in the popup.*Pinned 14:32/);
+  assert.ok(!bg.store.local.has_completed_first_yoink);
+});
+
+test("a queued in-page pin shows the retry and clock in the extension notification", async () => {
+  const { bg, btn } = await inPage("stay", { capture: { ok: true, queued: true, pinned_seconds: 872 } });
+  assert.match(bg.env.notifications.at(-1)?.message || "", /Queued.*retry.*popup.*Pinned 14:32/);
+  assert.doesNotMatch(btn.title + btn.textContent, /14:32/);
+  assert.ok(!bg.store.local.has_completed_first_yoink);
+});
 
 for (const [choice, want] of Object.entries(CHOICES)) {
   test(`in-page button, After a save = ${choice}`, async () => {

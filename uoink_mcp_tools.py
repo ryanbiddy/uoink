@@ -482,6 +482,11 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(yoinks=yoinks, unfinished_capture_count=0)
 
 
+def _item_pins(idx, video_id):
+    read = getattr(idx, "get_pins", None)
+    return read(video_id) if read and video_id else []
+
+
 def _search_source_availability(idx, rows) -> dict:
     """One local lookup per search page; availability never blocks saved text."""
     try:
@@ -527,6 +532,7 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             "slug": r.get("slug"),
             "title": r.get("title"),
             "snippet": (r.get("_snippet") or "").strip(),
+            "pins": _item_pins(idx, r.get("video_id")),
             # FTS5 bm25 is lower-is-better; negate so a higher score means a
             # better match, matching the old term-count score's direction.
             "score": -score if isinstance(score, (int, float)) else 0.0,
@@ -568,11 +574,22 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     # Sprint 15: include the citation map alongside the markdown. Optional
     # field -- markdown-only consumers are unaffected.
     citations: list[dict[str, Any]] = []
+    pins = []
     if video_id:
+        idx = None
         try:
-            citations = _b()._get_index().get_citations(video_id)
+            idx = _b()._get_index()
+            citations = idx.get_citations(video_id)
+            for cue in citations:
+                if cue.get("kind") == "transcript_chunk":
+                    for key in ("source_deep_link", "youtube_deep_link"):
+                        cue[key] = cited_url(cue.get(key), cue.get("timestamp_start"))
         except Exception:
             citations = []
+        try:
+            pins = _item_pins(idx, video_id)
+        except Exception:
+            pins = []
     extra: dict[str, Any] = {}
     # Context-layer item 3: for an image uoink, the corpus markdown carries the
     # caption + source, but the pixels live in the image file. Hand a vision-
@@ -614,6 +631,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         video_url=video_url,
         source_url=source_url,
         citations=citations,
+        pins=pins,
         **extra,
     )
 
@@ -647,8 +665,7 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
                 "timestamp_end": r.get("timestamp_end"),
                 "text": r.get("text"),
                 "source_url": r.get("source_url"),
-                "deep_link": (r.get("source_deep_link")
-                              or r.get("youtube_deep_link")),
+                "deep_link": cited_url(r.get("source_deep_link") or r.get("youtube_deep_link"), r.get("timestamp_start")),
             })
     return _ok(
         video_id=video_id,
@@ -664,6 +681,7 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
 
 _SLUG_RE = re.compile(r"^[A-Za-z0-9_-]{1,160}$")
 from library_cards import build_card, read_corpus_head
+from moments import cited_url
 
 
 def _clean_text(value: Any) -> str | None:
@@ -706,7 +724,8 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
             "start": r.get("start"),
             "end": r.get("end"),
             "text": r.get("text"),
-            "deep_link": r.get("source_deep_link"),
+            "deep_link": cited_url(r.get("source_deep_link"), r.get("start")),
+            "pins": _item_pins(idx, r.get("video_id")),
             "timing": r.get("timing", "unknown"),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
             # bm25 is lower-is-better; negate so higher means better, the
@@ -747,7 +766,8 @@ def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
                           profile=profile, n_clips=n_clips, display_channel=display.get("channel"))
     except ValueError as exc:
         return _err(str(exc))
-    return _ok(**card)
+    pins = _item_pins(idx, row["video_id"])
+    return _ok(**card, **({"pins": pins} if pins else {}))
 
 
 def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
@@ -4672,6 +4692,7 @@ OUTPUT_SCHEMAS = {
     }, optional=("stage_url", "truncated")),
     "get_uoink_corpus": _output({
         "corpus_md": _field("string", "Complete saved Markdown document."),
+        "pins": _field("array", "Pinned times, links and nearby transcript lines.", items={"type": "object"}),
         "folder": _field("string", "Absolute local folder holding the corpus."),
         "video_id": _field(["string", "null"], "Saved source-item identifier when available."),
         "video_url": _field(["string", "null"], "YouTube watch URL when the source is a YouTube item."),

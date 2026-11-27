@@ -30,6 +30,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Transcript review keeps lyrics between musical notes, confidently spoken repetitions and a closing “Thank you” on older saves that lack speech scores.
 - Run `uoink connect claude-code --write` to add Uoink through the Claude CLI. For Claude Desktop, Cursor, Cline and other clients with a known JSON file, `--write` previews the edit and backs up existing settings before saving. Use `--yes` in scripts, or omit `--write` to print the recipe.
 - Claude Desktop setup now finds the Microsoft Store config on Windows. If the Store and roaming config files both exist, the CLI and dashboard update both.
+- Saving a YouTube video after the first 15 seconds pins the moment you’re watching. A timestamped link can pin an earlier moment too. Each item keeps up to 20 pins. Open it to copy a quote and link or remove a pin. Claude and `uoink get` can read them too.
+- When a passage overlaps the 45 seconds on either side of a pin, forgiving keyword search gives it a 2% score boost among the selected results.
+- The extension now shows the pinned time alongside first-save help, session details and queue updates. Re-pinning a moment keeps it among your 20 most recent pins.
+- Transcript links in search, research reports and copied quotes open two seconds before the cited line.
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.

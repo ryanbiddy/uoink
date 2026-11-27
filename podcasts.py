@@ -46,6 +46,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import source_subscriptions
+from moments import citation_link
 
 log = logging.getLogger("uoink.podcasts")
 
@@ -1461,11 +1462,7 @@ def _timestamp_label(seconds: float) -> str:
 
 
 def _source_deep_link(source_url: str, seconds: float | int | None) -> str:
-    try:
-        timestamp = max(0, int(float(seconds or 0)))
-    except (TypeError, ValueError):
-        timestamp = 0
-    return f"{source_url.split('#', 1)[0]}#t={timestamp}"
+    return citation_link(source_url, seconds)
 
 
 def _valid_words(raw) -> list[dict] | None:
