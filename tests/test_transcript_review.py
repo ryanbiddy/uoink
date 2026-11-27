@@ -38,6 +38,205 @@ def test_two_signals_and_clear_speech_veto():
     assert why("(je suis ici)") is None
 
 
+@pytest.mark.parametrize("whisper", [False, True])
+def test_note_wrapped_lyrics_survive_review(whisper):
+    import transcript_review as review
+    lyrics = ["♪ The last light finds the river ♪", "♫ Le jour se lève ♫",
+              "♪ Thank you ♪", "♪ 風が吹く ♪"]
+    labels = ["♪", "♫ … ♫", "♪ ... ♪", "♪ [Applause] ♪", "♫ instrumental ♫"]
+    rows = [dict(text=text, no_speech_prob=.91, avg_logprob=-1.4) for text in lyrics + labels]
+    kept, held = review.partition(rows, whisper=whisper)
+    assert [r["text"] for r in kept] == lyrics
+    assert [h["segment"]["text"] for h in held] == labels
+    assert review.all_rows(kept, held) == rows
+
+
+@pytest.mark.parametrize("text", ["Thanks for watching!", "Thank you."])
+def test_confident_phrase_stays_even_at_the_end(text):
+    import transcript_review as review
+    row = dict(text=text, end=10, no_speech_prob=.45, avg_logprob=-.2)
+    assert review.reasons([row], whisper=True, duration=10) == [None]
+
+
+@pytest.mark.parametrize("ratio,logprob", [(1.5, -.3), (3.1, -.3), (1.5, -.8)])
+def test_repetition_requires_compression_and_respects_confidence(ratio, logprob):
+    import transcript_review as review
+    rows = [dict(text=text, no_speech_prob=.65, avg_logprob=logprob, compression_ratio=ratio)
+            for text in ["Yes."] * 3 + ["Count me in. " * 4]]
+    assert review.reasons(rows, whisper=True) == [None] * 4
+
+
+@pytest.fixture
+def library(tmp_path, monkeypatch):
+    from tests.test_transcript_backfill import Library
+    lib = Library(tmp_path, monkeypatch)
+    try:
+        yield lib
+    finally:
+        lib.idx.close()
+
+
+def add_talk(lib, words, vid="abcde123456"):
+    folder = lib.add_video(vid, video_id=vid, url="https://www.youtube.com/watch?v=" + vid,
+                           title="Talk", duration=10, saved_at="2026-01-01", words=words, media=True)
+    return folder / (vid + ".json")
+
+
+def test_tidy_releases_previously_held_lyric_to_search_and_citations(library, monkeypatch):
+    import server
+    import transcript_review as review
+    lyric = "♪ I saw the river rising ♪"
+    path = add_talk(library, [(0, 2, lyric), (3, 4, "[Music]")])
+    with monkeypatch.context() as m:
+        m.setattr(review, "reasons", lambda rows, **kw: ["non_speech"] * len(rows))
+        assert review.tidy(server, apply=True)["held_count"] == 2
+    assert not library.idx.search("river")
+    assert review.tidy(server)["held_count"] == 1
+    assert not library.idx.search("river")
+    assert review.tidy(server, apply=True)["changed"] == 1
+    assert library.idx.search("river")
+    side = json.loads(path.read_bytes())
+    assert [r["text"] for r in side["transcript"]] == [lyric]
+    assert [r["line"] for r in side["held_transcript_lines"]] == [2]
+    assert [c["text"] for c in library.idx.get_citations(path.stem) if c["kind"] == "transcript_chunk"] == [lyric]
+
+
+def test_scoreless_thank_you_stays_and_cli_explains_fallback(library, monkeypatch, capsys):
+    import server
+    import uoink_cli as cli
+    path = add_talk(library, [(8, 10, "Thank you.")])
+    side = json.loads(path.read_bytes())
+    side["transcript_source"] = "asr"
+    path.write_text(json.dumps(side), "utf-8")
+    monkeypatch.setattr(cli, "backend", lambda: server)
+    for mode in ("--dry-run", "--apply"):
+        assert cli.main(["tidy-transcripts", mode]) == 0
+        result = json.loads(capsys.readouterr().out)
+        assert result["held_count"] == 0
+        summary = result["review_summary"].lower()
+        assert all(word in summary for word in ("scores", "phrase", "end"))
+    assert json.loads(path.read_bytes())["transcript"] == side["transcript"]
+
+
+def test_library_blank_cues_preserve_held_line_numbers(library, monkeypatch):
+    import server
+    import transcript_review as review
+    import uoink_mcp_tools as tools
+    vid = "abcde123456"
+    path = add_talk(library, [(0, 1, " "), (1, 2, "[Music]"), (2, 3, "Hello"),
+                              (3, 4, ""), (4, 5, "[Applause]")], vid)
+    side = json.loads(path.read_bytes())
+    side.update(review.reviewed_fields(side["transcript"], whisper=False))
+    path.write_text(json.dumps(side), "utf-8")
+    monkeypatch.setattr(tools, "_backend", server)
+    args = {"url": vid, "include_timestamps": True}
+    assert [r["text"] for r in tools.get_transcript(args)["segments"]] == ["Hello"]
+    rows = tools.get_transcript(dict(args, include_held=True))["segments"]
+    assert [(r["text"], r.get("held_line")) for r in rows] == [
+        ("[Music]", 2), ("Hello", None), ("[Applause]", 5)]
+
+
+def test_corpus_returns_valid_held_rows_with_a_damaged_timestamp(library, monkeypatch):
+    import server
+    import uoink_mcp_tools as tools
+    path = add_talk(library, [(0, 1, "Kept words")])
+    side = json.loads(path.read_bytes())
+    bad = [{"text": "Missing"}, {"start": "later", "text": "String"},
+           {"start": True, "text": "Boolean"}, {"start": 0}]
+    good = {"text": "[Music]", "start": 4}
+    side["held_transcript_lines"] = [dict(line=n, reason="non_speech", segment=row)
+                                     for n, row in enumerate([*bad, good], 2)]
+    path.write_text(json.dumps(side), "utf-8")
+    monkeypatch.setattr(tools, "_backend", server)
+    result = tools.get_uoink_corpus({"slug": path.stem, "include_held": True})
+    assert result["ok"] and "Kept words" in result["corpus_md"]
+    assert result["corpus_md"].split("## Held transcript lines")[1].strip() == "- Line 6 [0:04] [Music]"
+
+
+def test_failed_citation_publication_resumes_at_unfinished_item(library, monkeypatch):
+    import server
+    import transcript_review as review
+    first = add_talk(library, [(0, 1, "[Music]")], "abcde123450")
+    second = add_talk(library, [(0, 1, "[Applause]")], "abcde123451")
+    checkpoint = library.data / "transcript-review-apply.json"
+    publish = library.idx.publish_media_snapshot
+
+    def fail_second(video_id, **kwargs):
+        if video_id == second.stem:
+            raise OSError("citation publication interrupted")
+        return publish(video_id, **kwargs)
+
+    with monkeypatch.context() as m:
+        m.setattr(library.idx, "publish_media_snapshot", fail_second)
+        failed = review.tidy(server, apply=True)
+    assert not failed["ok"] and "citation publication interrupted" in str(failed["errors"])
+    assert json.loads(checkpoint.read_bytes())["cursor"] == first.stem
+    assert library.idx.search("applause")
+    assert any(c["text"] == "[Applause]" for c in library.idx.get_citations(second.stem))
+    pending = json.loads(second.read_bytes())
+    assert pending["held_transcript_lines"][0]["segment"]["text"] == "[Applause]"
+    assert pending["pending_transcript_review"]
+    queued = {"folder": second.parent, "sidecar_path": second, "corpus_path": second.with_suffix(".md"),
+              "url": pending["url"]}
+    assert server._transcript_backfill_apply(queued, [(0, 1, "Other words")], "captions") == "busy"
+    assert json.loads(second.read_bytes()) == pending
+    done = review.tidy(server, apply=True)
+    assert done["ok"] and done["held_count"] == done["changed"] == 2
+    assert not checkpoint.exists() and not library.idx.search("applause")
+    assert all(c.get("text") != "[Applause]" for c in library.idx.get_citations(second.stem))
+    assert "pending_transcript_review" not in json.loads(second.read_bytes())
+
+
+@pytest.mark.parametrize("old_backfill", [False, True])
+def test_all_held_capture_can_backfill_words(library, old_backfill):
+    import threading
+    import library_media
+    import server
+    import transcript_review as review
+    if old_backfill:
+        path = add_talk(library, [])
+        item, = server._transcript_backfill_scan()["items"]
+        assert server._transcript_backfill_apply(item, [(1, 2, "[Applause]")], "captions") == "applied"
+        # Older no-words backfills could omit the chapter list when all cues were held.
+        side = json.loads(path.read_bytes())
+        side.pop("source_chapters", None)
+        path.write_text(json.dumps(side), "utf-8")
+    else:
+        path = add_talk(library, [(1, 2, "[Applause]")])
+        assert review.tidy(server, apply=True)["ok"]
+    before = json.loads(path.read_bytes())
+    assert not before["transcript"] and before["held_transcript_lines"]
+    items = server._transcript_backfill_scan()["items"]
+    assert [item["key"] for item in items] == [path.stem]
+    library.caption_urls.add(items[0]["url"])
+    outcome = server._transcript_backfill_item(items[0], lambda position, wait: None,
+                                              threading.Event(), lambda host: True)
+    assert outcome["outcome"] == "transcribed"
+    after = json.loads(path.read_bytes())
+    assert [s["text"] for s in after["transcript"]] == ["caption words from the source"]
+    assert not after.get("held_transcript_lines") and library.idx.search("caption words")
+    assert not server._transcript_backfill_scan()["items"]
+    backup = path.parent / library_media.MEDIA_INPUTS_DIR / ("transcript-before-" + after["transcript_backup"][:16] + ".json")
+    assert json.loads(backup.read_bytes()) == before
+    restored = server.retranscribe_item(path.stem, "base", restore=after["transcript_backup"])
+    assert restored["restored"]
+    assert json.loads(path.read_bytes())["held_transcript_lines"] == before["held_transcript_lines"]
+    assert [i["key"] for i in server._transcript_backfill_scan()["items"]] == [path.stem]
+
+
+@pytest.mark.parametrize("mode,payload", [("--dry-run", b'{"cursor":'), ("--apply", b'["invalid"]')])
+def test_invalid_checkpoint_explains_how_to_resume(library, monkeypatch, capsys, mode, payload):
+    import server
+    import uoink_cli as cli
+    monkeypatch.setattr(cli, "backend", lambda: server)
+    path = library.data / f"transcript-review-{mode[2:]}.json"
+    path.write_bytes(payload)
+    assert cli.main(["tidy-transcripts", mode]) != 0
+    message = json.loads(capsys.readouterr().out)["error"]
+    assert str(path) in message and "repair" in message.lower() and mode in message
+    assert path.read_bytes() == payload
+
+
 def test_caption_cache_all_held_never_falls_through(tmp_path, monkeypatch):
     import server
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
@@ -49,6 +248,23 @@ def test_caption_cache_all_held_never_falls_through(tmp_path, monkeypatch):
     assert server.get_transcript_cascade(record["video_id"])["segments"] == []
     raw = server.get_transcript_cascade(record["video_id"], include_held=True)
     assert raw["segments"] == [(0., 1., "[Music]")] and raw["cached"]
+
+
+def test_cached_lyrics_from_the_previous_review_are_available_offline(tmp_path, monkeypatch):
+    import server
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "_library_transcript", lambda _: None)
+    vid = "abcde123456"
+    lyric = "♪ The last light finds the river ♪"
+    held = [{"line": 1, "reason": "non_speech", "segment": {"start": 0, "end": 1, "text": lyric}},
+            {"line": 3, "reason": "non_speech", "segment": {"start": 3, "end": 4, "text": "[Music]"}}]
+    record = {"video_id": vid, "version": 2, "source": "captions", "held_transcript_lines": held,
+              "segments": [[1, 2, "Thank you."]]}
+    server._write_transcript_cache(record, None)
+    cached = server.get_transcript_cascade(vid)
+    assert cached["cached"] and cached["segments"] == [(0, 1, lyric), (1, 2, "Thank you.")]
+    assert cached["held_count"] == 1
+    assert server.get_transcript_cascade(vid, include_held=True)["segments"][-1] == (3, 4, "[Music]")
 
 
 @pytest.mark.parametrize("interrupt", [False, True])
@@ -182,8 +398,17 @@ def test_podcast_review_preserves_speaker_and_restored_line(tmp_path, monkeypatc
         record = podcasts.episode_to_corpus(idx, episode_id, data_root=tmp_path)
         vid = record["video_id"]
         assert idx.search("applause")
+        with monkeypatch.context() as m:
+            def stopped(*args, **kwargs):
+                raise OSError("episode publication interrupted")
+            m.setattr(podcasts, "episode_to_corpus", stopped)
+            failed = review.tidy(server, apply=True)
+            assert not failed["ok"] and "episode publication interrupted" in str(failed["errors"])
+        checkpoint = tmp_path / "transcript-review-apply.json"
+        assert json.loads(checkpoint.read_bytes())["cursor"] == ""
         result = review.tidy(server, apply=True)
         assert result["ok"] and result["changed"] == 1, result
+        assert not checkpoint.exists()
         assert not idx.search("applause")
         handler = server.Handler.__new__(server.Handler)
         handler._send_json = lambda status, data: (status, data)

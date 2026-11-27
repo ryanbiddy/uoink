@@ -491,9 +491,14 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         import transcript_review
         extra["review_note"] = transcript_review.notice(held)
         if args.get("include_held") is True:
-            md += "\n\n## Held transcript lines\n\n" + "\n".join(
-                f"- Line {h['line']} [{_transcript_clock(h['segment']['start'])}] {h['segment']['text']}"
-                for h in held)
+            lines = []
+            for h in held:
+                cue = transcript_review.held_cue(h.get("segment"))
+                if cue is not None:
+                    start, _, text = cue
+                    lines.append(f"- Line {h['line']} [{_transcript_clock(start)}] {text}")
+            if lines:
+                md += "\n\n## Held transcript lines\n\n" + "\n".join(lines)
     return _ok(
         corpus_md=md,
         folder=str(folder),
@@ -3969,8 +3974,8 @@ def _split_long_segments(segments: list, held_reasons: dict) -> list:
     """Split an over-long cue (an unpunctuated ASR run) so one page can hold it."""
     out = []
     size = GET_TRANSCRIPT_SEGMENT_MAX_CHARS
-    for line, (start, end, text) in enumerate(segments, 1):
-        reason = held_reasons.get(line)
+    for position, (start, end, text) in enumerate(segments, 1):
+        line, reason = held_reasons.get(position, (position, None))
         # A long cue can span pages. Each part retains the original review decision.
         out.extend((start, end, text[i:i + size], line, reason)
                    for i in range(0, max(1, len(text)), size))

@@ -18,6 +18,16 @@ from tests.mcp_wire import StdioClient
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_connect_guide_documents_transcript_review_default():
+    guide = (ROOT / "docs/connect-your-agent.md").read_text(encoding="utf-8")
+    row = next((line for line in guide.splitlines() if line.startswith("|")
+                and "`include_held`" in line), "")
+    schema = uoink_mcp_tools.TOOL_REGISTRY["get_transcript"].input_schema
+    assert schema["properties"]["include_held"]["default"] is False
+    assert "default" in row.lower() and "true" in row and "held" in row
+    assert "returns every word" not in guide.lower()
+
+
 def _documented_count(label: str) -> int:
     text = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
     match = re.search(rf"{re.escape(label)}:\s+\*\*(\d+) tools\*\*", text)

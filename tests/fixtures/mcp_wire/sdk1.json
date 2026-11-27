@@ -307,6 +307,11 @@
           "slug": {
             "type": "string",
             "description": "Saved item's folder slug from list_recent_uoinks or search_uoinks."
+          },
+          "include_held": {
+            "type": "boolean",
+            "default": false,
+            "description": "Append held transcript lines in a separate review section."
           }
         },
         "required": [
@@ -1275,6 +1280,11 @@
             "default": false,
             "description": "When true, each line starts with [m:ss] and segments carries start/end seconds."
           },
+          "include_held": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show suspected Whisper lines and non-speech labels for review."
+          },
           "next_cursor": {
             "type": "integer",
             "minimum": 0,
@@ -1282,7 +1292,7 @@
           },
           "strip_ads": {
             "type": "boolean",
-            "description": "Accepted for compatibility with other transcript servers and ignored: Uoink returns every word."
+            "description": "Accepted for compatibility with other transcript servers and ignored."
           }
         },
         "required": [

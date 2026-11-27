@@ -1,6 +1,7 @@
 """Keep the original cue and its position while publishing only reviewed speech."""
 from __future__ import annotations
 
+from contextlib import contextmanager
 from itertools import groupby
 from pathlib import Path
 import hashlib
@@ -40,9 +41,11 @@ def _normalized(text):
     return " ".join(re.findall(r"\w+", unicodedata.normalize("NFKC", text).casefold()))
 
 
-def _label(text):
-    if text and text[0] in "♪♫" and text[-1] in "♪♫":
-        return True
+def _label(text, note_wrapped):
+    if note_wrapped:
+        text = text[1:-1].strip()
+        if not text.strip("♪♫… .\t\n") or text.casefold() in _SOUNDS:
+            return True
     matches = _LABEL.findall(text)
     return bool(matches and not _LABEL.sub("", text).strip()
                 and all(_normalized(label) in _SOUNDS for label in matches))
@@ -63,8 +66,6 @@ def reasons(rows, *, whisper, duration=None):
     """One decision per original ordinal. Missing scores are unknown, never zero."""
     result = []
     repeats = []
-    last_silent = None
-    silent_run = 0
     for i, row in enumerate(rows):
         if not isinstance(row, dict):
             row = {}
@@ -76,44 +77,38 @@ def reasons(rows, *, whisper, duration=None):
         silence = score.get("no_speech_prob")
         confidence = score.get("avg_logprob")
         ratio = score.get("compression_ratio", 0)
-        # Last cue only, ending within 2 s of the actual audio end. Silence
-        # <= .20, or < .40 with logprob >= -.50, protects a spoken sign-off.
+        # Low silence (<= .20) or a healthy logprob (>= -.50) independently
+        # protects speech. The last cue must end within 2 s of the audio end.
         end = row.get("end")
-        at_end = (i == len(rows) - 1 and _number(end) and _number(duration)
-                  and duration > 0 and abs(duration - end) <= 2)
+        # The decoder can know the audio duration before the library does.
+        at_end = i == len(rows) - 1 and (
+            (_number(end) and _number(duration) and duration > 0 and abs(duration - end) <= 2)
+            or (duration is None and row.get("held_reason") == "outro"))
         reason = None
-        clear = silence is not None and (silence <= .20 or
-                                         (silence < .40 and confidence is not None and confidence >= -.50))
-        if restored:
-            pass
-        elif _label(text):
+        clear = ((silence is not None and silence <= .20)
+                 or (confidence is not None and confidence >= -.50))
+        note_wrapped = bool(text and text[0] in "♪♫" and text[-1] in "♪♫")
+        if not restored and _label(text, note_wrapped):
             reason = "non_speech"
-        elif whisper:
-            if row.get("held_reason") in ("outro", "silent_phrase", "repetition", "low_confidence"):
-                reason = row["held_reason"]
-            elif silence is not None and silence > .60 and confidence is not None and confidence < -1:
+        # Words enclosed in musical notes are lyrics, even on a noisy recording.
+        candidate = whisper and not restored and not note_wrapped and not clear and reason is None
+        if candidate:
+            if silence is not None and silence > .60 and confidence is not None and confidence < -1:
                 reason = "low_confidence"
-            elif key in _PHRASES and not clear:
-                if silence is not None and silence >= .40:
+            elif key in _PHRASES:
+                if silence is not None and silence >= .40 and confidence is not None and confidence < -1:
                     reason = "silent_phrase"
-                elif at_end:
+                elif at_end and key != "thank you":
                     reason = "outro"
-            # Keep the earlier loop guard reversible. Over likely silence,
-            # four cycles inside one cue, or a third identical short cue,
-            # can indicate a loop even when the compression score is missing.
-            if (silence is not None and silence > .60 and not _emphasis_or_count(tokens)
-                    and repeated_phrase(tokens)):
+            # Four cycles inside one cue also need silence and high compression.
+            if (ratio > 2.4 and silence is not None and silence > .60
+                    and not _emphasis_or_count(tokens) and repeated_phrase(tokens)):
                 reason = "repetition"
-        short = whisper and not restored and 0 < len(key) <= 80 and len(tokens) <= 8 and not _emphasis_or_count(tokens)
-        silent_key = key if short and silence is not None and silence > .60 else None
-        silent_run = silent_run + 1 if silent_key and silent_key == last_silent else 1
-        last_silent = silent_key
-        if silent_key and silent_run >= 3:
-            reason = reason or "repetition"
         result.append(reason)
         # Three consecutive copies, each short (<=8 words / 80 characters)
         # and each over 2.4 compression. Clear speech breaks the run.
-        repeats.append(key if short and not clear and ratio > 2.4 else None)
+        short = 0 < len(key) <= 80 and len(tokens) <= 8 and not _emphasis_or_count(tokens)
+        repeats.append(key if candidate and short and ratio > 2.4 else None)
     for key, group in groupby(enumerate(repeats), key=lambda item: item[1]):
         indices = [i for i, _ in group]
         if key and len(indices) >= 3:
@@ -153,6 +148,16 @@ def reviewed_fields(rows, *, whisper, duration=None, field="transcript"):
     return {field: kept, **({"held_transcript_lines": held} if held else {})}
 
 
+def held_cue(segment):
+    """Return the original timed text if a saved held segment is readable."""
+    if not isinstance(segment, dict):
+        return None
+    start, end, text = segment.get("start"), segment.get("end"), segment.get("text")
+    if not _number(start) or not isinstance(text, str) or not text.strip():
+        return None
+    return start, end if _number(end) else start, text
+
+
 def notice(held):
     invented = sum(h["reason"] != "non_speech" for h in held)
     labels = len(held) - invented
@@ -169,9 +174,7 @@ def _decision(record, field, whisper, duration, restore):
     kept = record.get(field) or []
     held = record.get("held_transcript_lines") or []
     if restore is None:
-        if held:
-            return kept, held
-        return partition(kept, whisper=whisper, duration=duration)
+        return partition(all_rows(kept, held) if held else kept, whisper=whisper, duration=duration)
     if not any(h["line"] == restore for h in held):
         raise ValueError("That line is not held in this item.")
     original = all_rows(kept, held)
@@ -191,6 +194,22 @@ def last_summary(root):
 
 def _digest(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _changed_lines(before, after):
+    return len({h["line"] for h in before} ^ {h["line"] for h in after})
+
+
+class _PublicationPending(RuntimeError):
+    """The edited files are on disk and this item still needs to be indexed."""
+
+
+@contextmanager
+def _publishing():
+    try:
+        yield
+    except Exception as exc:
+        raise _PublicationPending(str(exc)) from exc
 
 
 def _review_capture(server, item, path, side, kept, held, pending):
@@ -224,6 +243,7 @@ def _review_capture(server, item, path, side, kept, held, pending):
             raise ValueError("The saved transcript section has edits. Its files were kept.")
         updated = md.replace(old_block, plan["markdown"].rstrip(), 1)
         pending = {"after": _digest(updated),
+                   "changed": _changed_lines(side.get("held_transcript_lines") or [], held),
                    "old_block": old_block, "new_block": plan["markdown"].rstrip(),
                    "old_plain": _digest(old_text.strip())}
         new["pending_transcript_review"] = pending
@@ -247,7 +267,8 @@ def _review_capture(server, item, path, side, kept, held, pending):
             if _digest(current) != pending["old_plain"]:
                 raise ValueError("The plain transcript changed during review.")
             server._atomic_write_text(plain, target)
-    server._index_yoink(folder, side, corpus, path, require_media_update=True)
+    with _publishing():
+        server._index_yoink(folder, side, corpus, path, require_media_update=True)
     latest = json.loads(path.read_text("utf-8"))
     if latest.get("pending_transcript_review") != pending:
         raise ValueError("The transcript changed during review.")
@@ -279,7 +300,8 @@ def _episode_review(server, item, side, restore, write):
     # versions; the next apply finishes publishing the producer.
     pending = [h["line"] for h in before] != [h["line"] for h in published]
     if pending and restore is not None:
-        podcasts.episode_to_corpus(idx, episode_id, data_root=server.DATA_ROOT)
+        with _publishing():
+            podcasts.episode_to_corpus(idx, episode_id, data_root=server.DATA_ROOT)
         if not any(h["line"] == restore for h in before):
             if any(h["line"] == restore for h in published):
                 return len(before), 1  # finish an interrupted restore of this very line
@@ -296,8 +318,9 @@ def _episode_review(server, item, side, restore, write):
             if valid:
                 run["artifact_sha256"] = hashlib.sha256(library_media.transcript_artifact_bytes(raw)).hexdigest()
             server._atomic_write_text(producer, json.dumps(raw, ensure_ascii=False, indent=2))
-        podcasts.episode_to_corpus(idx, episode_id, data_root=server.DATA_ROOT)
-    return len(held), abs(len(held) - len(published))
+        with _publishing():
+            podcasts.episode_to_corpus(idx, episode_id, data_root=server.DATA_ROOT)
+    return len(held), _changed_lines(published, held)
 
 
 def _item_review(server, item, restore, write):
@@ -354,7 +377,7 @@ def _item_review(server, item, restore, write):
                                    side.get("duration_seconds"), restore)
         if write and (held != before or pending):
             _review_capture(server, item, path, side, kept, held, pending)
-        return len(held), abs(len(held) - len(before))
+        return len(held), pending.get("changed", 0) if pending else _changed_lines(before, held)
 
 
 def tidy(server, *, apply=False, restore=None):
@@ -371,7 +394,7 @@ def tidy(server, *, apply=False, restore=None):
             raise ValueError("Line numbers start at 1.")
         try:
             _item_review(server, item, line, True)
-        except (MediaError, sqlite3.Error) as exc:
+        except (MediaError, sqlite3.Error, _PublicationPending) as exc:
             raise ValueError(str(exc)) from exc
         return {"ok": True, "review_summary": f"Restored line {line} to the transcript and search."}
     lock = CaptureLock.try_acquire(server.DATA_ROOT, "tidy-transcripts")
@@ -382,7 +405,15 @@ def tidy(server, *, apply=False, restore=None):
     with lock:
         progress = {"cursor": "", "held": 0, "changed": 0, "errors": [], "root": str(server.DESKTOP_ROOT)}
         if checkpoint.is_file():
-            previous = json.loads(checkpoint.read_text("utf-8"))
+            try:
+                previous = json.loads(checkpoint.read_text("utf-8"))
+                if (not isinstance(previous, dict)
+                        or any(type(previous.get(k)) is not type(v) for k, v in progress.items())
+                        or previous["held"] < 0 or previous["changed"] < 0):
+                    raise ValueError("invalid progress")
+            except ValueError as exc:
+                raise ValueError(f"Repair or remove the damaged checkpoint {checkpoint} "
+                                 f"and run uoink tidy-transcripts --{mode} again.") from exc
             if previous.get("root") == progress["root"]:
                 progress = previous
         # Commit progress between pages. Replaying a partial page is safe:
@@ -401,6 +432,14 @@ def tidy(server, *, apply=False, restore=None):
                         count, difference = _item_review(server, dict(item), None, apply)
                         progress["held"] += count
                         progress["changed"] += difference
+                    except _PublicationPending as exc:
+                        # Cursor and totals still describe the last completed item.
+                        server._atomic_write_text(checkpoint, json.dumps(progress))
+                        message = (f"Publication stopped at {item['video_id']}. "
+                                   f"Run uoink tidy-transcripts --{mode} to resume.")
+                        return {"ok": False, "review_summary": message, "error": message,
+                                "errors": [*progress["errors"], {"item": item["video_id"], "error": str(exc)}],
+                                "held_count": progress["held"], "changed": progress["changed"]}
                     except (OSError, ValueError, KeyError, RuntimeError, sqlite3.Error, MediaError) as exc:
                         progress["errors"].append({"item": item["video_id"], "error": str(exc)})
                     progress["cursor"] = item["video_id"]
@@ -409,8 +448,11 @@ def tidy(server, *, apply=False, restore=None):
             server._atomic_write_text(checkpoint, json.dumps(progress))
             raise ValueError(f"Review stopped. Run uoink tidy-transcripts --{mode} to resume.") from None
         total, changed, errors = progress["held"], progress["changed"], progress["errors"]
-        summary = (f"Last review found {total} held or suspect lines. "
-                   + (f"{changed} newly held." if apply else f"{changed} would be newly held."))
+        action = "Changed" if apply else "Would change"
+        summary = (f"Last review found {total} held or suspect {'line' if total == 1 else 'lines'}. "
+                   f"{action} {changed} {'line' if changed == 1 else 'lines'}. "
+                   "Without Whisper scores, only a known phrase at the end can be flagged as invented. "
+                   "A scoreless closing ‘Thank you’ stays.")
         if errors:
             summary += f" {len(errors)} saves need another look."
         server._atomic_write_text(Path(server.DATA_ROOT) / "transcript-review-summary.txt", summary)

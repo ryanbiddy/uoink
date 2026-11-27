@@ -2450,6 +2450,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
                 "INSERT INTO yoinks_fts(video_id, slug, channel, title, topic, hook_type, content) "
                 "SELECT video_id, slug, channel, title, topic, hook_type, ? FROM yoinks WHERE video_id=?",
                 (owned[corpus_path].decode("utf-8"), video_id))
+            if isinstance(sidecar.get("health"), dict):
+                conn.execute("UPDATE yoinks SET health_score_json=? WHERE video_id=?",
+                             (_json(sidecar["health"]), video_id))
             if sidecar.get("transcript_source"):
                 metadata = _metadata(item)
                 metadata["transcript_source"] = sidecar["transcript_source"]
@@ -2602,7 +2605,8 @@ def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], a
                      corpus_revision: str, playback: dict, transcript_kind: str = "captions",
                      transcript_provider: str = "youtube_captions", language: str | None = None,
                      chapter_rows: list[dict] | None = None, chapter_provider: str = "youtube_metadata",
-                     recorded_at: str | None = None, item: dict | None = None) -> tuple[dict, str]:
+                     recorded_at: str | None = None, item: dict | None = None,
+                     retain_empty_artifact: bool = False) -> tuple[dict, str]:
     """Build the sealed block for a capture whose caption cues and source
     chapter list are already held in one archived JSON artifact
     (``artifact_bytes``: the capture record whose ``chapters`` member is the
@@ -2648,7 +2652,7 @@ def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], a
         "provenance": {
             "chapter_source": chapter_source,
             "transcript_source": {"kind": transcript_kind if cores else "none",
-                                  "artifact_sha256": digest if cores else None,
+                                  "artifact_sha256": digest if cores or retain_empty_artifact else None,
                                   "provider": transcript_provider if cores else None,
                                   "model": None, "language": language if cores else None},
             "active_diarization_run_id": None,
