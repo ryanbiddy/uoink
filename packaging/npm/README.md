@@ -26,8 +26,12 @@ Already installed? `npx uoink <command>` runs the installed CLI, so `npx uoink s
 npx uoink --dry-run          print the plan and URLs, download nothing
 npx uoink --yes              skip the question
 npx uoink --version 3.16.3   install a specific version
+npx uoink install --version 3.16.3 --allow-downgrade
+                             go back to an older version than you have (asks first)
 npx uoink --no-connect       skip the agent hints
 ```
+
+Before it downloads anything it says whether this is an update, a reinstall of the version you have, or a downgrade. After installing, it waits up to 90 seconds for Uoink to answer on this computer (`127.0.0.1:5179/health`). If Uoink does not come back, it exits with an error and says what to try next.
 
 ## Privacy and safety
 

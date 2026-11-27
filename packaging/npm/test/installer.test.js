@@ -52,9 +52,15 @@ function setup(t, extra = {}) {
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const out = sink();
   const err = sink();
-  const calls = { run: [], capture: [] };
+  const calls = { run: [], capture: [], health: [] };
   const deps = {
     platform: 'win32',
+    // Never probe the real helper port from a test. The fake helper answers
+    // with the release's version, as a helper that came back would.
+    helperHealth: async (timeoutMs) => {
+      calls.health.push(timeoutMs);
+      return { ok: true, version: '9.9.9' };
+    },
     arch: 'x64',
     env: { PATH: '', LOCALAPPDATA: path.join(root, 'local') },
     homedir: home,
@@ -627,12 +633,17 @@ for (const [name, options] of [
   ['the helper stays stopped', { startFails: true }],
   ['status still reports the old version', { startVersion: '9.9.8' }],
 ]) {
-  test(`mac update: says to open Uoink from Applications when ${name}`, async (t) => {
+  // 3.18.1: a relaunch that does not come back is a failure (exit 1), not a
+  // success with a hint. These used to expect exit 0 and the hint on stdout.
+  test(`mac update: fails honestly and says to open Uoink from Applications when ${name}`, async (t) => {
     const s = await macInstallSetup(t, options);
-    assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+    assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 1, s.err.text());
     assert.equal(s.marker(), 'new', 'the install itself succeeded');
-    assert.match(s.out.text(), /Open Uoink from Applications/);
+    assert.match(s.err.text(), /9\.9\.9 is installed, but its helper did not answer within 90 seconds/);
+    assert.match(s.err.text(), /Open Uoink from Applications/);
+    assert.match(s.err.text(), /npx uoink serve doctor/);
     assert.doesNotMatch(s.out.text(), /Started Uoink/);
+    assert.ok(s.elapsed() <= 90000 + 1000, `bounded wait, waited ${s.elapsed()} ms`);
   });
 }
 
@@ -745,4 +756,242 @@ test('counter: a redirect to a different file than the verified one aborts', asy
   assert.match(s.err.text(), /checksum list names/);
   assert.equal(s.calls.run.length, 0);
   assert.ok(!rel.hits.some((h) => h.url.endsWith('.exe')));
+});
+
+// ---- 3.18.1: honest words for update, reinstall and downgrade ----
+
+function fakeWindowsInstall(s) {
+  for (const file of ['cli/uoink.cmd', 'python/python.exe', 'uoink_cli.py']) {
+    const p = path.join(s.deps.env.LOCALAPPDATA, 'Uoink', file);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, '');
+  }
+}
+
+// The installed CLI reports `before` until the installer runs, then `after`.
+function versionedCapture(s, before, after = '9.9.9', running = true) {
+  s.deps.capture = async (cmd, args) => {
+    s.calls.capture.push({ cmd, args });
+    if (args.includes('status')) {
+      const version = s.calls.run.length ? after : before;
+      return { code: 0, stdout: JSON.stringify({ ok: true, version, helper_running: running }), stderr: '' };
+    }
+    return { code: 0, stdout: 'claude-code\n', stderr: '' };
+  };
+}
+
+test('planAction names install, update, reinstall, downgrade and unknown', () => {
+  const { planAction } = require('../lib/main.js');
+  assert.equal(planAction('3.18.1', null, null, null).title, 'Install Uoink 3.18.1');
+  assert.equal(planAction('3.18.1', {}, '3.17.0', 1).title, 'Update Uoink to 3.18.1 (you have 3.17.0)');
+  assert.equal(planAction('3.18.1', {}, '3.18.1', 0).title, 'Reinstall Uoink 3.18.1 (the version you have)');
+  const down = planAction('3.17.0', {}, '3.18.1', -1);
+  assert.equal(down.title, 'Downgrade Uoink to 3.17.0 (you have 3.18.1)');
+  assert.match(down.note, /library stays in place/);
+  assert.match(planAction('3.18.1', {}, null, null).title, /could not be read/);
+  for (const a of [planAction('3.18.1', {}, '3.17.0', 1), planAction('3.17.0', {}, '3.18.1', -1)]) {
+    assert.doesNotMatch(a.title + (a.note || ''), /[—;]/, 'no em dashes or semicolons in UI copy');
+  }
+});
+
+test('prerelease ordering drives the words: an rc of the same version is a downgrade', () => {
+  const { planAction } = require('../lib/main.js');
+  const order = cmpVersion('3.18.1-rc.1', '3.18.1');
+  assert.equal(order, -1);
+  assert.match(planAction('3.18.1-rc.1', {}, '3.18.1', order).title, /^Downgrade Uoink to 3\.18\.1-rc\.1 \(you have 3\.18\.1\)/);
+  assert.match(planAction('3.18.1', {}, '3.18.1-rc.1', cmpVersion('3.18.1', '3.18.1-rc.1')).title, /^Update Uoink to 3\.18\.1/);
+});
+
+test('update from an older version says Update ... (you have ...)', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.9.8');
+  assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /Update Uoink to 9\.9\.9 \(you have 9\.9\.8\)/);
+  assert.match(s.out.text(), /Started Uoink 9\.9\.9/);
+});
+
+test('installing the version you have says Reinstall, never Update', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  assert.equal(await main(['install', '--version', '9.9.9', '--dry-run'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /Reinstall Uoink 9\.9\.9 \(the version you have\)/);
+  assert.doesNotMatch(s.out.text(), /Update Uoink/);
+});
+
+test('an unreadable installed version is said plainly, not called an update', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base, capture: async () => ({ code: 1, stdout: '', stderr: 'broken' }) });
+  fakeWindowsInstall(s);
+  assert.equal(await main(['update', '--dry-run'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /Install Uoink 9\.9\.9 over your current copy \(its version could not be read\)/);
+  assert.doesNotMatch(s.out.text(), /Update Uoink/);
+});
+
+test('a downgrade without --allow-downgrade keeps your copy and says how to go back', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.12.0');
+  assert.equal(await main(['install', '--version', '9.9.9', '--yes'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /Keeping your copy/);
+  assert.match(s.out.text(), /npx uoink install --version 9\.9\.9 --allow-downgrade/);
+  assert.doesNotMatch(s.out.text(), /Update Uoink|Downgrade Uoink/);
+  assert.equal(s.calls.run.length, 0);
+  assert.ok(rel.hits.every((h) => h.url.endsWith('SHA256SUMS.txt')));
+});
+
+test('a downgrade with --allow-downgrade says Downgrade ... (you have ...) and still asks first', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const asked = [];
+  const s = setup(t, { base: rel.base, isTTY: true, ask: async (q) => { asked.push(q); return 'n'; } });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.12.0');
+  assert.equal(await main(['install', '--version', '9.9.9', '--allow-downgrade'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /Downgrade Uoink to 9\.9\.9 \(you have 9\.12\.0\)/);
+  assert.match(s.out.text(), /older Uoink may not understand changes 9\.12\.0 made/);
+  assert.equal(asked.length, 1, 'the confirmation question is asked');
+  assert.match(s.out.text(), /Cancelled/);
+  assert.equal(s.calls.run.length, 0);
+});
+
+test('a confirmed downgrade installs and checks the helper came back on the old version', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.12.0');
+  assert.equal(await main(['install', '--version', '9.9.9', '--allow-downgrade', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.equal(s.calls.run.length, 1);
+  assert.match(s.out.text(), /Downgrade Uoink to 9\.9\.9/);
+  assert.match(s.out.text(), /Started Uoink 9\.9\.9/);
+  assert.ok(s.calls.health.length >= 1);
+});
+
+// ---- 3.18.1: the helper must really come back after an install ----
+
+function fakeClock(s) {
+  let now = 0;
+  s.deps.now = () => now;
+  s.deps.sleep = async (ms) => { now += ms; };
+  return () => now;
+}
+
+test('windows: a helper that never answers after the install is a failure, with next steps, in bounded time', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.9.8');
+  const elapsed = fakeClock(s);
+  s.deps.helperHealth = async (timeoutMs) => { s.calls.health.push(timeoutMs); return null; };
+  assert.equal(await main(['update', '--yes'], s.deps), 1);
+  assert.equal(s.calls.run.length, 1, 'the installer did run');
+  assert.match(s.err.text(), /9\.9\.9 is installed, but its helper did not answer within 90 seconds/);
+  assert.match(s.err.text(), /Open Uoink from the Start menu/);
+  assert.match(s.err.text(), /npx uoink serve doctor/);
+  assert.doesNotMatch(s.out.text(), /Started Uoink/);
+  assert.doesNotMatch(s.out.text(), /Connect your AI agent/, 'no cheerful next steps after a failure');
+  assert.equal(elapsed(), 90000, 'gives up at the deadline');
+  assert.ok(s.calls.health.length > 10, 'kept polling');
+  assert.ok(s.calls.health.every((ms) => ms > 0 && ms <= 5000), 'every probe is bounded');
+});
+
+test('windows: the old helper still answering with the old version does not count as back', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.9.8');
+  fakeClock(s);
+  s.deps.helperHealth = async () => ({ ok: true, version: '9.9.8' });
+  assert.equal(await main(['update', '--yes'], s.deps), 1);
+  assert.match(s.err.text(), /did not answer within 90 seconds/);
+});
+
+test('windows: a helper that takes a few seconds to come back is reported started', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.9.8');
+  const elapsed = fakeClock(s);
+  s.deps.helperHealth = async () => (elapsed() >= 7000 ? { ok: true, version: '9.9.9' } : null);
+  assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /Started Uoink 9\.9\.9/);
+  assert.ok(elapsed() >= 7000 && elapsed() < 90000);
+});
+
+test('windows: a helper that was stopped before the update stays stopped and that is not a failure', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.9.8', '9.9.9', false);
+  const elapsed = fakeClock(s);
+  s.deps.helperHealth = async (timeoutMs) => { s.calls.health.push(timeoutMs); return null; };
+  assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 0, s.err.text());
+  assert.match(s.out.text(), /not running before, so it was left stopped/);
+  assert.equal(s.calls.health.length, 0, 'does not wait for a helper the installer does not start');
+  assert.equal(elapsed(), 0);
+});
+
+test('windows: an installer that left the old version in place is reported, not called installed', async (t) => {
+  const rel = await fakeRelease(exeFiles());
+  t.after(rel.close);
+  const s = setup(t, { base: rel.base });
+  fakeWindowsInstall(s);
+  versionedCapture(s, '9.9.8', '9.9.8');
+  assert.equal(await main(['update', '--yes'], s.deps), 1);
+  assert.match(s.err.text(), /still reports version 9\.9\.8, not 9\.9\.9/);
+  assert.doesNotMatch(s.out.text(), /9\.9\.9 is installed/);
+});
+
+test('mac: the process is up but /health never answers, so the update is not called started', async (t) => {
+  const s = await macInstallSetup(t);
+  s.deps.helperHealth = async () => null;
+  assert.equal(await main(['update', '--yes', '--no-connect'], s.deps), 1);
+  assert.equal(s.marker(), 'new');
+  assert.match(s.err.text(), /did not answer within 90 seconds/);
+  assert.doesNotMatch(s.out.text(), /Started Uoink/);
+  assert.ok(s.elapsed() <= 91000);
+});
+
+test('the default health probe reads /health on the helper port, follows no redirects and is bounded', async (t) => {
+  const { defaultDeps, HELPER_PORT } = require('../lib/main.js');
+  assert.equal(HELPER_PORT, 5179);
+  let reply = { status: 200, body: JSON.stringify({ ok: true, version: '9.9.9' }) };
+  const server = http.createServer((req, res) => {
+    if (reply.hang) return;
+    res.writeHead(reply.status, reply.status === 302 ? { location: 'http://127.0.0.1:1/health' } : {});
+    res.end(reply.body || '');
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  t.after(() => new Promise((r) => { server.closeAllConnections(); server.close(r); }));
+  const seen = [];
+  const realGet = http.get;
+  // Send the request to the local test server, never the real helper port.
+  t.mock.method(http, 'get', (opts, cb) => {
+    seen.push({ ...opts });
+    return realGet({ ...opts, port: server.address().port }, cb);
+  });
+  const deps = defaultDeps();
+  assert.deepEqual(await deps.helperHealth(2000), { ok: true, version: '9.9.9' });
+  assert.deepEqual(seen[0], { hostname: '127.0.0.1', port: 5179, path: '/health' });
+  reply = { status: 302 };
+  assert.equal(await deps.helperHealth(2000), null);
+  reply = { status: 200, body: 'not json' };
+  assert.equal(await deps.helperHealth(2000), null);
+  reply = { hang: true };
+  const start = Date.now();
+  assert.equal(await deps.helperHealth(100), null);
+  assert.ok(Date.now() - start < 2000, 'times out');
+  assert.equal(seen.length, 4, 'a redirect does not create another request');
 });

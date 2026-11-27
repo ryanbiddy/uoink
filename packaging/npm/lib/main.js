@@ -21,6 +21,11 @@ const PKG_DIR = path.resolve(__dirname, '..');
 // Set on every child process. If a launcher starts with it already set, an
 // earlier launcher started it, so it must not pass through again.
 const LAUNCHER_ENV = 'UOINK_NPM_LAUNCHER';
+// The port an installed Uoink helper listens on (server.py PORT).
+const HELPER_PORT = 5179;
+// How long to wait for a freshly installed helper to answer /health. First
+// start after an update can run library migrations, so this is generous.
+const HELPER_START_WAIT_MS = 90000;
 
 const HELP = `uoink: install Uoink, or run the installed Uoink CLI
 
@@ -33,6 +38,7 @@ Options (install and update only)
   --yes             skip the confirmation question
   --dry-run         print the plan and URLs, download nothing
   --version <v>     install a specific version, e.g. 3.16.3
+  --allow-downgrade allow --version to install an older version than you have
   --no-connect      skip the agent connection hints at the end
   --help            show this help
 
@@ -266,7 +272,7 @@ function defaultDeps() {
     quitHelper: (token, timeoutMs) =>
       new Promise((resolve) => {
         const req = http.request({
-          hostname: '127.0.0.1', port: 5179, path: '/helper/quit', method: 'POST',
+          hostname: '127.0.0.1', port: HELPER_PORT, path: '/helper/quit', method: 'POST',
           headers: { 'X-Uoink-Token': token, 'Content-Type': 'application/json', 'Content-Length': 2 },
         }, (res) => {
           res.resume();
@@ -276,6 +282,43 @@ function defaultDeps() {
         req.on('close', () => { clearTimeout(timer); resolve(false); });
         req.on('error', () => resolve(false));
         req.end('{}');
+      }),
+    // The helper's public liveness probe on the port the installed app uses.
+    // Resolves to the parsed JSON body, or null when nothing answers in time.
+    // Sends nothing but the request line; follows no redirects.
+    helperHealth: (timeoutMs) =>
+      new Promise((resolve) => {
+        let done = false;
+        const finish = (value) => {
+          if (!done) {
+            done = true;
+            resolve(value);
+          }
+        };
+        const req = http.get({ hostname: '127.0.0.1', port: HELPER_PORT, path: '/health' }, (res) => {
+          if (res.statusCode !== 200) {
+            res.resume();
+            finish(null);
+            return;
+          }
+          const chunks = [];
+          let size = 0;
+          res.on('data', (c) => {
+            size += c.length;
+            if (size > 1024 * 1024) req.destroy(new Error('Health reply too large.'));
+            else chunks.push(c);
+          });
+          res.on('end', () => {
+            try {
+              finish(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+            } catch {
+              finish(null);
+            }
+          });
+        });
+        const timer = setTimeout(() => req.destroy(new Error('Health check timed out.')), timeoutMs);
+        req.on('close', () => { clearTimeout(timer); finish(null); });
+        req.on('error', () => finish(null));
       }),
     ask: (question) =>
       new Promise((resolve) => {
@@ -325,12 +368,13 @@ function makeUi(deps) {
 // ---------- args ----------
 
 function parseOwnArgs(argv) {
-  const o = { yes: false, dryRun: false, noConnect: false, help: false, version: null, versionFlag: false, command: null };
+  const o = { yes: false, dryRun: false, noConnect: false, help: false, version: null, versionFlag: false, command: null, allowDowngrade: false };
   const rest = [...argv];
   if (rest[0] === 'update' || rest[0] === 'install') o.command = rest.shift();
   while (rest.length) {
     const a = rest.shift();
     if (a === '--yes' || a === '-y') o.yes = true;
+    else if (a === '--allow-downgrade') o.allowDowngrade = true;
     else if (a === '--dry-run') o.dryRun = true;
     else if (a === '--no-connect') o.noConnect = true;
     else if (a === '--help' || a === '-h') o.help = true;
@@ -689,8 +733,9 @@ async function installFlow(opts, deps, ui, ctx = {}) {
   const plan = await resolvePlan(opts, deps);
   const installed = ctx.installed || null;
   const order = ctx.installedVersion ? cmpVersion(plan.version, ctx.installedVersion) : null;
-  if (order !== null && order < 0) {
+  if (order !== null && order < 0 && !opts.allowDowngrade) {
     ui.say(`Your installed Uoink ${ctx.installedVersion} is newer than the offered version ${plan.version}. Keeping your copy.`);
+    ui.say(`To go back to ${plan.version} anyway, run: npx uoink install --version ${plan.version} --allow-downgrade`);
     return 0;
   }
   if (ctx.onlyIfNewer && order === 0) {
@@ -699,15 +744,16 @@ async function installFlow(opts, deps, ui, ctx = {}) {
   }
   const where = deps.platform === 'win32' ? '%LOCALAPPDATA%\\Uoink (per user, no admin needed)' : '/Applications/Uoink.app (or ~/Applications if /Applications is not writable)';
   const big = deps.platform === 'win32' ? 'about 550 MB' : 'about 515 MB';
+  const action = planAction(plan.version, installed, ctx.installedVersion, order);
 
   if (opts.dryRun) {
-    ui.say(bannerPlan(ui, plan, where, big, installed));
+    ui.say(bannerPlan(ui, plan, where, big, action));
     ui.say('');
     ui.say('Dry run: nothing was downloaded or installed.');
     return 0;
   }
 
-  ui.say(bannerPlan(ui, plan, where, big, installed));
+  ui.say(bannerPlan(ui, plan, where, big, action));
   ui.say('');
   if (!opts.yes) {
     if (!deps.isTTY) {
@@ -756,16 +802,35 @@ async function installFlow(opts, deps, ui, ctx = {}) {
     deps.fs.rmSync(file, { force: true });
 
     if (appDir) linkMacCli(appDir, deps, ui);
-    await afterInstall(opts, deps, ui, plan, appDir);
-    return 0;
+    return await afterInstall(opts, deps, ui, plan, appDir, {
+      fresh: !installed,
+      wasRunning: ctx.installedStatus ? ctx.installedStatus.helper_running : null,
+    });
   } finally {
     deps.fs.rmSync(tmp, { recursive: true, force: true });
   }
 }
 
-function bannerPlan(ui, plan, where, big, installed) {
+// What this run does to the installed copy, in words for the banner.
+// order is cmpVersion(offered, installed), or null when either is unknown.
+function planAction(version, installed, installedVersion, order) {
+  if (!installed) return { kind: 'install', title: `Install Uoink ${version}` };
+  if (order === null) {
+    return { kind: 'unknown', title: `Install Uoink ${version} over your current copy (its version could not be read)` };
+  }
+  if (order > 0) return { kind: 'update', title: `Update Uoink to ${version} (you have ${installedVersion})` };
+  if (order === 0) return { kind: 'reinstall', title: `Reinstall Uoink ${version} (the version you have)` };
+  return {
+    kind: 'downgrade',
+    title: `Downgrade Uoink to ${version} (you have ${installedVersion})`,
+    note: `Your library stays in place. An older Uoink may not understand changes ${installedVersion} made to it.`,
+  };
+}
+
+function bannerPlan(ui, plan, where, big, action) {
   const lines = [
-    `${ui.bold(installed ? `Update Uoink to ${plan.version}` : `Install Uoink ${plan.version}`)}`,
+    `${ui.bold(action.title)}`,
+    ...(action.note ? [`  ${action.note}`] : []),
     `  Downloads ${plan.name} (${big}) from GitHub, checks its SHA-256 against the release's SHA256SUMS.txt,`,
     `  then runs the official installer. Installs to ${where}.`,
     `  Needs about twice the download size free in your temp folder while it works.`,
@@ -775,40 +840,87 @@ function bannerPlan(ui, plan, where, big, installed) {
   return lines.join('\n');
 }
 
-async function afterInstall(opts, deps, ui, plan, appDir) {
+// Poll the helper's /health until it reports the wanted version or the
+// deadline passes. Each probe is bounded by the time left.
+async function waitForHelper(deps, version, deadline) {
+  while (deps.now() < deadline) {
+    let health = null;
+    try {
+      health = await deps.helperHealth(Math.max(1, Math.min(5000, Math.ceil(deadline - deps.now()))));
+    } catch {
+      health = null;
+    }
+    if (health && health.ok === true && health.version === version) return true;
+    const remaining = deadline - deps.now();
+    if (remaining <= 0) break;
+    await deps.sleep(Math.min(1000, remaining));
+  }
+  return false;
+}
+
+function notStartedMessage(version, where) {
+  return (
+    `Uoink ${version} is installed, but its helper did not answer within ${HELPER_START_WAIT_MS / 1000} seconds.\n` +
+    `  Open Uoink from ${where} to start it.\n` +
+    '  If it still does not start, run: npx uoink serve doctor\n' +
+    `  and include what it prints in a report at https://github.com/${REPO}/issues`
+  );
+}
+
+// Returns the exit code: 0 when Uoink is installed and, if it was meant to
+// start, its helper answered /health with the new version. 1 otherwise.
+async function afterInstall(opts, deps, ui, plan, appDir, before = {}) {
   // Check the bundle just installed, even if another Uoink CLI is on PATH.
   const inst = appDir ? { kind: 'posix', cli: path.join(appDir, 'Contents', 'Helpers', 'uoink') } : findInstalled(deps);
-  if (!inst) {
-    ui.say('');
-    ui.say(`Uoink ${plan.version} is installed. Open a new terminal so the uoink command is on your PATH.`);
-    return;
-  }
   if (deps.platform === 'darwin' && appDir) {
     ui.say('');
-    ui.say(`Uoink ${plan.version} is installed.`);
-    const deadline = deps.now() + MAC_HELPER_WAIT_MS;
+    ui.say(`Uoink ${plan.version} is installed. Starting it and waiting for it to answer...`);
+    const deadline = deps.now() + HELPER_START_WAIT_MS;
     let started = false;
     try {
       const opened = await deps.capture('/usr/bin/open', ['-a', appDir], { timeoutMs: MAC_HELPER_WAIT_MS });
       if (opened.code === 0) {
         started = await waitForMacStatus(inst, deps, deadline,
-          ({ version, status }) => version === plan.version && status && status.helper_running === true);
+          ({ version, status }) => version === plan.version && status && status.helper_running === true)
+          && await waitForHelper(deps, plan.version, deadline);
       }
     } catch {
       /* The install succeeded, but opening or confirming the helper did not. */
     }
-    ui.say(started ? `Started Uoink ${plan.version} (it runs in the menu bar).`
-      : `Open Uoink from Applications to start version ${plan.version}.`);
-  } else {
-    const { version, status } = await installedVersion(inst, deps);
-    ui.say('');
-    ui.say(version ? `Uoink ${version} is installed.` : `Uoink ${plan.version} is installed.`);
-    if (status && status.helper_running === false) {
-      ui.say('Open Uoink from the Start menu to start it.');
+    if (!started) {
+      ui.fail(notStartedMessage(plan.version, 'Applications'));
+      return 1;
     }
+    ui.say(`Started Uoink ${plan.version} (it runs in the menu bar).`);
+  } else if (deps.platform === 'win32') {
+    const { version } = inst ? await installedVersion(inst, deps) : { version: null };
+    if (version && version !== plan.version) {
+      ui.fail(
+        `The installer finished, but the installed Uoink still reports version ${version}, not ${plan.version}.\n` +
+          '  Quit Uoink from the tray icon and run the same command again.'
+      );
+      return 1;
+    }
+    ui.say('');
+    ui.say(`Uoink ${plan.version} is installed.`);
+    // The installer starts the helper on a fresh install, and after an update
+    // only when it was running before. A helper that was stopped stays stopped.
+    if (before.fresh || before.wasRunning === true) {
+      ui.say(`Waiting for Uoink to start (up to ${HELPER_START_WAIT_MS / 1000} seconds)...`);
+      if (!await waitForHelper(deps, plan.version, deps.now() + HELPER_START_WAIT_MS)) {
+        ui.fail(notStartedMessage(plan.version, 'the Start menu'));
+        return 1;
+      }
+      ui.say(`Started Uoink ${plan.version}.`);
+    } else {
+      ui.say('Uoink was not running before, so it was left stopped. Open Uoink from the Start menu to start it.');
+    }
+    ui.say('Open a new terminal so the uoink command is on your PATH.');
+  } else {
+    ui.say('');
+    ui.say(`Uoink ${plan.version} is installed.`);
   }
-  if (deps.platform === 'win32') ui.say('Open a new terminal so the uoink command is on your PATH.');
-  if (!opts.noConnect) {
+  if (!opts.noConnect && inst) {
     ui.say('');
     ui.say(ui.bold('Connect your AI agent'));
     const inv = cliInvocation(inst);
@@ -817,6 +929,7 @@ async function afterInstall(opts, deps, ui, plan, appDir) {
     ui.say('Pick one and run, for example: npx uoink connect claude-code');
     ui.say(`More: ${CONNECT_DOCS}`);
   }
+  return 0;
 }
 
 async function passthrough(inst, args, deps) {
@@ -866,7 +979,7 @@ async function main(argv, injected = {}) {
     }
 
     if (inst) {
-      const { version } = await installedVersion(inst, deps);
+      const { version, status } = await installedVersion(inst, deps);
       if (opts.command !== 'update' && opts.command !== 'install') {
         ui.say(`Uoink ${version || '(version unknown)'} is installed.`);
         ui.say('Run: npx uoink update      to check for a newer version');
@@ -880,6 +993,7 @@ async function main(argv, injected = {}) {
       return await installFlow(opts, deps, ui, {
         installed: inst,
         installedVersion: version,
+        installedStatus: status,
         onlyIfNewer: opts.command === 'update' && !opts.version,
       });
     }
@@ -901,6 +1015,9 @@ module.exports = {
   pickAsset,
   assetFor,
   cmpVersion,
+  planAction,
+  HELPER_PORT,
+  HELPER_START_WAIT_MS,
   findInstalled,
   parseOwnArgs,
   isOwnInvocation,
