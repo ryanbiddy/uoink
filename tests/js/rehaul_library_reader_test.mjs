@@ -602,6 +602,37 @@ function readerFiles(details, markdown = "# Agent loops explained\n\nBody") {
 }
 
 async function groupReader() {
+  await scenario("HTML comment markers in saved code stay visible", async () => {
+    const markdown = ["# An HN thread", "<!-- private marker", "```", "-->",
+      "````html", "<!-- sample -->", "```", "<!-- open", "````", "The next reply.",
+      "Inline `<!--` example.", "<!-- hidden -->Visible ending.",
+      "Before<!-- a file marker", "over two lines --> and after."].join("\n");
+    const p = makePage({ files: readerFiles({}, markdown) });
+    await p.page.openYoinkDetail({ ...READER_ROW, platform: "hn", source_type: "hn_thread" });
+    const html = p.els.yoinkDetail.innerHTML;
+    check(html.includes("<pre><code>&lt;!-- sample --&gt;\n```\n&lt;!-- open</code></pre>"), "fenced HTML markers survive verbatim", html);
+    check(html.includes("The next reply.") && html.includes("Inline <code>&lt;!--</code> example."), "unclosed markers in code preserve subsequent text", html);
+    check(html.includes("Visible ending.") && !html.includes("private marker") && !html.includes("hidden --"), "file comments outside code are removed", html);
+    check(html.includes("<p>Before and after.</p>"), "a multiline file marker preserves the surrounding paragraph", html);
+  });
+  await scenario("a Hacker News reply and its linked story in the reader", async () => {
+    const story = "https://www.youtube.com/watch?v=clock000001";
+    const markdown = "# Tide clock\n\n#### foamloop · [permalink](https://news.ycombinator.com/item?id=903)\n\n```\na < b\n```";
+    const p = makePage({ files: readerFiles({ story_url: story }, markdown) });
+    await p.page.openYoinkDetail({ ...READER_ROW, platform: "hn", source_type: "hn_thread" });
+    const html = p.els.yoinkDetail.innerHTML;
+    const button = p.run('document.getElementById("yoinkSaveHnStory")');
+    check(html.includes("<h5>foamloop") && html.includes("<pre><code>a &lt; b</code></pre>"), "reply headings and code are readable", html);
+    check(!button.classList.contains("hidden") && button.title === story && !p.count("/extract"), "the linked story waits for a click");
+    button.onclick();
+    await settle();
+    check(p.held.length === 1 && JSON.parse(p.held[0].body).url === story, "the click sends the video through normal capture");
+    p.held[0]?.answer({ ok: true, video_id: "clock000001" });
+    await settle();
+    p.state.selectedYoink = null;
+    p.page.renderYoinkDetail();
+    check(button.classList.contains("hidden") && button.onclick === null, "an empty reader clears the previous story action");
+  });
   await scenario("the transcript reads as paragraphs with linked times and inline screenshots", async () => {
     const details = {
       title: "Agent loops explained", channel: "Example Channel", duration_seconds: 754, transcript_source: "captions",

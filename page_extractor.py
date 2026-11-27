@@ -113,7 +113,7 @@ PLATFORM_NOTE = "note"
 # source network, but it slots into the same platform facet so an image filters
 # like any other uoink. Kept 1:1 with source_type='image'.
 PLATFORM_IMAGE = "image"
-KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_X, PLATFORM_REDDIT,
+KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_X, PLATFORM_REDDIT, "hn",
                    PLATFORM_PODCAST, PLATFORM_WEB, PLATFORM_TIKTOK,
                    PLATFORM_INSTAGRAM, PLATFORM_NOTE, PLATFORM_IMAGE)
 
@@ -128,6 +128,7 @@ _SOURCE_TYPE_PLATFORM = {
     "x_thread": PLATFORM_X,
     "x_article": PLATFORM_X,
     "reddit_thread": PLATFORM_REDDIT,
+    "hn_thread": "hn",
     "page": PLATFORM_WEB,
     "episode": PLATFORM_PODCAST,
     "note": PLATFORM_NOTE,
@@ -939,8 +940,10 @@ def persist_page_yoink(idx, extract_result: dict, *,
             raise ValueError(f"capture folder outside the library: {slug!r}")
         folder = Path(folder_path)
         folder.mkdir(parents=True, exist_ok=True)
-        corpus_path = folder / f"{slug_prefix}.md"
-        sidecar_path = folder / f"{slug_prefix}.json"
+        # Folder-based readers resolve <slug>.md and <slug>.json.
+        stem = slug if source_type == "hn_thread" else slug_prefix
+        corpus_path = folder / f"{stem}.md"
+        sidecar_path = folder / f"{stem}.json"
         attribution = ""
         if source_type == SOURCE_TYPE_PAGE:
             for label, key in (("Author", "author"), ("Published", "published_date"), ("Site", "site_name")):
@@ -953,12 +956,13 @@ def persist_page_yoink(idx, extract_result: dict, *,
                 body_md = rest.lstrip()
         # A page title is page data: no "<" in it may open a tag in the file.
         heading = re.sub(r"<(?=[A-Za-z/!?])", "&lt;", str(title).replace("\n", " "))
-        corpus_path.write_text(
-            f"# {heading}\n\n**Source:** {url}\n\n" + attribution + body_md,
-            encoding="utf-8")
+        if source_type != "hn_thread":  # HN already renders its title and source.
+            body_md = f"# {heading}\n\n**Source:** {url}\n\n" + attribution + body_md
+        corpus_path.write_text(body_md, encoding="utf-8")
         import json as _json
         sidecar_path.write_text(_json.dumps({
             "schema_version": 2,
+            **({"video_id": video_id} if source_type == "hn_thread" else {}),
             "source_type": source_type,
             "platform": platform,
             "author": author,

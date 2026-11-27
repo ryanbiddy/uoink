@@ -88,6 +88,32 @@ def reddit(**fields):
     return [{"data": {"children": [{"data": {"author": "someone", "selftext": "hello", **fields}}]}}]
 
 
+@pytest.mark.parametrize("reply,expected", [
+    (response(200, {"id": 901, "type": "story", "deleted": True}), "deleted"),
+    (response(200, {"id": 901, "type": "story", "dead": True}), "deleted"),
+    (response(200, {"id": 901, "type": "story"}), "available"),
+    (response(404), "deleted"),
+    (response(200, {"id": 903, "type": "comment", "dead": True}), "unknown"),
+    (response(200, b'{"id":901,'), "unknown"),
+    (response(302, headers={"Location": "https://example.test/moved"}), "unknown"),
+], ids=["deleted", "dead", "live", "missing", "wrong-item", "incomplete", "redirect"])
+def test_hn_availability_checks_only_the_saved_story(idx, reply, expected):
+    save(idx, platform="hn", source_type="hn_thread", url="https://news.ycombinator.com/item?id=901",
+         source_url="https://news.ycombinator.com/item?id=903", story_url="https://example.test/article")
+    fetch = Fetch(reply)
+    assert run(idx, fetch)["requests"] == 1
+    call, = fetch.calls
+    assert (call.method, call.url) == ("GET", "https://hn.algolia.com/api/v1/items/901")
+    assert 0 < call.max_bytes <= availability.MAX_BODY_BYTES
+    record = idx.availability_record("item")
+    assert record["checker"] == "hn"
+    if expected == "deleted":
+        assert record["pending_status"] == "deleted"
+        run(idx, Fetch(reply), T0 + timedelta(days=1))
+        record = idx.availability_record("item")
+    assert record["status"] == expected
+
+
 @pytest.mark.parametrize("platform,url,answers,expected", [
     ("youtube", "https://youtu.be/abcdefghijk", [response(200)], "available"),
     ("youtube", "https://www.youtube.com/shorts/abcdefghijk", [response(404)], "deleted"),

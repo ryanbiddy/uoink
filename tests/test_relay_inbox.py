@@ -352,6 +352,14 @@ def test_uses_the_shared_capture_map(poll_rig):
     assert poll_rig.tools.calls == [("add_podcast_feed", {"feed_url": "https://example.com/feed.xml"})]
 
 
+def test_hn_comment_relay_preserves_the_selected_item(poll_rig):
+    url = "https://news.ycombinator.com/item?id=903"
+    poll_rig.relay.add(url + "&utm_source=phone")
+    server._relay_poll_once()
+    assert poll_rig.tools.calls == [("uoink_page", {"url": url})]
+    assert poll_rig.relay.links == []
+
+
 def test_a_failed_capture_becomes_a_note_then_leaves_the_relay(poll_rig):
     poll_rig.relay.add(PAGE, note="Read later")
     poll_rig.tools.results[PAGE] = {"ok": False, "error": "fetch failed for C:\\Users\\x\\file.txt"}

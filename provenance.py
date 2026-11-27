@@ -170,6 +170,8 @@ def derive_source_type(*, platform=None, metadata_json=None,
         return "x_article" if "/i/article/" in path else "x_thread"
     if platform_name == "reddit":
         return "reddit_thread"
+    if platform_name == "hn":
+        return "hn_thread"
     if platform_name == "youtube":
         return "short_video" if path.startswith("/shorts/") else "video"
     if platform_name == "web":

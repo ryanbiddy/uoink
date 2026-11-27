@@ -10,9 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Save a Hacker News discussion with nested replies and a link to each comment. Saving a comment link puts that reply first. Open the saved discussion and choose **Save linked story** to capture the article or video too.
+
 ### Fixed
 
 - Updated HTTPX2 and HTTPCore2 to 2.16.2. The bundled MCP HTTP client now honors wildcard proxy exceptions such as `*.example.com`. Updated Pydantic and python-multipart too, including a fix that keeps each multipart parser’s callbacks separate.
+- Hacker News stories keep their own shelves when you save another reply. The reader preserves HTML comments in code samples and the replies that follow them.
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.

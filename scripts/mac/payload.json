@@ -59,6 +59,7 @@
     "podcasts.py",
     "provenance.py",
     "reddit_extractor.py",
+    "hn_extractor.py",
     "requirements.txt",
     "research_playbooks.py",
     "scripts.py",

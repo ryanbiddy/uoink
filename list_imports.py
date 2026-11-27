@@ -938,6 +938,8 @@ def fetch_source(spec: dict, *, offset: int, limit: int,
                 "total": int(total) if isinstance(total, (int, float)) else None,
                 "credit": HACKERTUBE_CREDIT}
     if kind == SOURCE_HN:
+        from hn_extractor import wait_for_algolia
+        wait_for_algolia()
         title, items = parse_hn_thread(fetch_json(HN_ALGOLIA_ITEM.format(id=spec["id"])))
         return {"title": title, "items": _slice(items, offset, limit),
                 "total": len(items), "credit": None}

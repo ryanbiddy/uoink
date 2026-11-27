@@ -391,7 +391,7 @@
     },
     {
       "name": "uoink_url",
-      "description": "Capture a supported video URL through platform routing, with metadata/transcript fallback for other yt-dlp sites. Use for non-YouTube videos or long-video modes; use uoink_video for a single standard YouTube capture, uoink_page for webpage prose, uoink_x for X text chains, or uoink_reddit_thread for discussion comments. Requires the local media runtime. Saves a local corpus; generic fallback has no screenshots, comment fetch or hook classification. Recapturing a source can replace its saved corpus and metadata."
+      "description": "Capture a supported video or Hacker News item. Hacker News links save the discussion through Algolia's public API. A comment link highlights that reply. Video capture requires the local media runtime and supports non-YouTube videos and long-video modes. Use uoink_video for a standard YouTube capture, uoink_page for webpage prose, uoink_x for X post chains or uoink_reddit_thread for Reddit comments. Generic video fallback saves metadata and available transcript text. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_note",
@@ -407,7 +407,7 @@
     },
     {
       "name": "uoink_page",
-      "description": "Fetch an allowed webpage as Markdown and save it as a local corpus item. Use for articles and documentation; use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available; static fallback has no screenshot. Returns extracted content and metadata; video_id is null if extraction succeeded but persistence failed. Recapturing a source can replace its saved corpus and metadata."
+      "description": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For other pages, add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available. Static fallback has no screenshot. Returns content, metadata and the saved item ID. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_reddit_thread",

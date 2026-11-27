@@ -262,7 +262,8 @@ function isXArticleTab(url) {
 }
 
 async function updateArticleMenuTitle(url) {
-  const title = isXArticleTab(url) ? "Uoink this article" : "Uoink this page";
+  const title = STC.normalizeHnUrl(url) ? "Uoink this thread"
+    : isXArticleTab(url) ? "Uoink this article" : "Uoink this page";
   try {
     await new Promise((resolve) =>
       chrome.contextMenus.update(MENU_ARTICLE_PAGE, { title }, () => {
@@ -1732,6 +1733,8 @@ async function readPageFromTab(job) {
 // The tab's text goes to the helper (POST /extract/page/dom, local only). An
 // older helper without that route answers 404: use the URL path instead.
 async function capturePage(job) {
+  const hn = STC.normalizeHnUrl(job.url);
+  if (hn) return STC.postExtractPage(hn);
   const capture = await readPageFromTab(job);
   if (capture) {
     const data = await STC.postExtractPageDom(capture);

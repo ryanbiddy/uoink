@@ -1268,6 +1268,8 @@ def http_get_json(url: str) -> Any:
 
 
 def fetch_hn(query, limit):
+    from hn_extractor import wait_for_algolia
+    wait_for_algolia()
     return http_get_json("https://hn.algolia.com/api/v1/search?" + urlencode(
         {"query": query, "tags": "story", "hitsPerPage": limit}))
 
