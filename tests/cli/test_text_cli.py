@@ -212,6 +212,24 @@ def test_unknown_command_points_at_help(capsys):
     assert "Run 'uoink --help'" in capsys.readouterr().err
 
 
+@pytest.mark.parametrize("options,preview", [([], True), (["--dry-run"], True), (["--apply"], False)])
+@pytest.mark.parametrize("removed", [16, 0])
+def test_repair_captions_defaults_to_preview(monkeypatch, capsys, options, preview, removed):
+    def repair(vid, dry_run):
+        assert vid == "talk0000001" and dry_run is preview
+        return {"ok": True, "dry_run": dry_run, "removed_words": removed, "original_sidecar": "item/original.bak"}
+    monkeypatch.setattr(cli, "backend", lambda: SimpleNamespace(repair_rolling_captions=repair))
+    queued = []
+    monkeypatch.setattr(runtime, "helper_running", lambda server: True)
+    monkeypatch.setattr(cli, "_helper_post", lambda server, path, body, **kwargs:
+                        queued.append((path, body)) or {"ok": True})
+    assert cli.main(["repair-captions", "talk0000001", "--text", *options]) == 0
+    out = capsys.readouterr().out
+    assert out == (f"Found {removed} repeated caption words.\n" if preview else
+                   f"Removed {removed} repeated caption words.\nOriginal transcript saved in item/original.bak\n")
+    assert queued == ([] if preview else [("/search/refresh-item", {"video_id": "talk0000001"})])
+
+
 def test_get_text_prints_full_admitted_item(tmp_path, monkeypatch, capsys):
     import index
     from tests.phase4_fixtures import seed_shelf, seed_yoink_item

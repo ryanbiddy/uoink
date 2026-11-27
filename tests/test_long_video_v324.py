@@ -109,7 +109,8 @@ def test_chunked_extraction_path(tmp: Path):
             for i in range(1, count + 1):
                 (tmp / f"video-chunk-{i:03d}.mp4").write_bytes(b"media")
         elif "--skip-download" in cmd:
-            (tmp / "video.en.srt").write_text(
+            template = str(cmd[cmd.index("-o") + 1])
+            Path(template.replace("%(ext)s", "en.srt")).write_text(
                 "1\n00:00:00,000 --> 00:00:01,000\nhello\n",
                 encoding="utf-8")
         return subprocess.CompletedProcess(cmd, 0, b"", b"")

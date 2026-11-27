@@ -65,11 +65,12 @@ def test_lite_extraction_path(tmp: Path):
             Path(base).write_bytes(b"jpeg")
             Path(cmd[-1].replace("%04d", "0002")).write_bytes(b"jpeg")
         elif any(a == "--write-subs" or a == "--write-auto-subs" for a in cmd):
-            # Full single-file media command also writes subs in this pipeline.
-            (tmp / "video.mp4").write_bytes(b"media")
-            (tmp / "video.en.srt").write_text(
+            template = cmd[cmd.index("-o") + 1]
+            Path(template.replace("%(ext)s", "en.srt")).write_text(
                 "1\n00:00:00,000 --> 00:00:02,000\nhello world\n",
                 encoding="utf-8")
+        elif "-o" in cmd:
+            (tmp / "video.mp4").write_bytes(b"media")
         return subprocess.CompletedProcess(cmd, 0, b"", b"")
 
     phases = []
@@ -117,9 +118,10 @@ def test_lite_extraction_path(tmp: Path):
                    if c[:1] != ["ffmpeg"] and "-o" in c and "video.%(ext)s"
                    in " ".join(c)]
     _assert(media_calls, "lite downloads a single media file")
-    _assert(any("--write-subs" in c or "--write-auto-subs" in c
-                for c in media_calls),
-            "lite still requests the full subtitle track (transcript kept)")
+    subtitle_calls = [c for c in calls if "--write-subs" in c or "--write-auto-subs" in c]
+    _assert(len(subtitle_calls) == 1 and "--skip-download" in subtitle_calls[0]
+            and calls.index(media_calls[0]) < calls.index(subtitle_calls[0]),
+            "lite requests the full subtitle track separately after the media download")
 
     # Sparse screenshots: exactly one ffmpeg pass, at >= 5-min interval.
     ffmpeg_calls = [c for c in calls if c and c[0] == "ffmpeg"]
@@ -147,8 +149,8 @@ def test_lite_extraction_path(tmp: Path):
             f"comments marked skipped, not pending: {sidecar['comments_status']}")
     _assert(sidecar["hook_type_status"] == "skipped",
             f"hook typing marked skipped: {sidecar['hook_type_status']}")
-    _assert(sidecar["caption_count"] >= 1 if "caption_count" in sidecar
-            else True, "transcript preserved")
+    _assert([row["text"] for row in sidecar["transcript"]] == ["hello world"],
+            "transcript preserved")
     # Transcript file written from the kept captions.
     _assert((tmp / "transcript.txt").exists(),
             "lite still writes the transcript from kept captions")

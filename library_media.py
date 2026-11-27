@@ -2048,14 +2048,15 @@ def _freeze_input_files(files) -> tuple:
         raise _request("input_files_type")
     frozen = []
     for raw_path, data in files.items():
-        if not isinstance(raw_path, (str, Path)) or not isinstance(data, (bytes, bytearray)):
+        if (not isinstance(raw_path, (str, Path))
+                or (data is not None and not isinstance(data, (bytes, bytearray)))):
             raise _request("input_file_bytes")
-        frozen.append((str(Path(raw_path).resolve()), bytes(data)))
+        frozen.append((str(Path(raw_path).resolve()), bytes(data) if data is not None else None))
     return tuple(frozen)
 
 
 def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
-                                     disk_raw=_REREAD_SIDECAR) -> None:
+                                     disk_raw=_REREAD_SIDECAR, written=None) -> None:
     """Refuse changed, removed, or conflicting consumed inputs inside publication.
 
     Disk may still match the frozen mint binding (intentional replacement of
@@ -2063,8 +2064,8 @@ def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
     after that carrier was already replaced). ``published_binding`` is the
     pre-merge artifact binding; non-owned disk keys must not be adopted into
     it. Any other consumed-input state is a conflict: do not replace the
-    current sidecar or adopt the new dependency. Extra bound input files
-    must still be the exact bytes consumed at mint.
+    current sidecar or adopt the new dependency. Extra bound files must
+    still contain the consumed bytes, or the bytes we just published.
     """
     if disk_raw is _REREAD_SIDECAR:
         disk_raw, owned = _sidecar_from_disk(Path(sidecar_path))
@@ -2089,7 +2090,7 @@ def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
         if Path(sidecar_path).resolve() != Path(ticket.sidecar_path).resolve():
             raise _stale("publication_input_changed")
     for path, expected in ticket.input_bindings:
-        require_unchanged_input_bytes(path, expected)
+        require_unchanged_input_bytes(path, (written or {}).get(Path(path), expected))
 
 
 def _plan_cue_binding(cue: dict) -> tuple:
@@ -2143,7 +2144,7 @@ def capture_plan_matches(plan: dict, owned_plan: dict) -> bool:
     return capture_plan_inputs(plan) == capture_plan_inputs(owned_plan)
 
 
-def require_unchanged_input_bytes(path, expected: bytes) -> None:
+def require_unchanged_input_bytes(path, expected: bytes | None) -> None:
     """Refuse when a mutable publication input file no longer matches the
     exact bytes consumed under the ownership fence."""
     raw = _read_bytes(Path(path), required=False)
@@ -2281,7 +2282,7 @@ def purge_artifacts(folder) -> int:
     return removed
 
 
-def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, ticket=None) -> dict:
+def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, ticket=None, dry_run=False) -> dict:
     """Publish one coherent snapshot: validated inputs, the ownership fence
     rechecked under ``BEGIN IMMEDIATE`` before any file is touched, the
     ledger claim written first, owned files replaced atomically with the
@@ -2366,7 +2367,8 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         if disk_corpus is not None and disk_corpus != corpus_bytes:
             recorded = (current_block.get("provenance") or {}).get("corpus_revision") \
                 if current_block is not None and isinstance(current_block.get("provenance"), dict) else None
-            if recorded != _sha256(disk_corpus):
+            expected = dict(ticket.input_bindings).get(str(corpus_path)) if ticket else None
+            if recorded != _sha256(disk_corpus) and expected != disk_corpus:
                 raise _stale("corpus_edited")
         generation, current, ledger = _publication_state(conn, video_id, folder)
         history = list(ledger["history"]) if ledger is not None else []
@@ -2406,6 +2408,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         # files are rechecked here under the lock before any publication
         # write. A caller check before this operation is not this lock.
         require_bound_publication_inputs(ticket, sidecar_path, published_binding)
+        if dry_run:
+            conn.rollback()
+            return {"ok": True}
 
         # Files: the ledger claim first, then inputs, corpus, other owned
         # artifacts and the complete sidecar last.
@@ -2419,9 +2424,16 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         ordered = ([p for p in owned if p.parent.name == MEDIA_INPUTS_DIR]
                    + ([corpus_path] if corpus_path in owned else [])
                    + [p for p in owned if p.parent.name != MEDIA_INPUTS_DIR and p not in (corpus_path, sidecar_path)])
+        bound_files = {Path(p): data for p, data in ticket.input_bindings}
+        # An original promised at an absent backup path precedes every replacement.
+        ordered.sort(key=lambda p: 0 if p in bound_files and bound_files[p] is None else 1)
+        written = {}
         for path in ordered:
             data = owned[path]
             existing = _read_bytes(path, required=False)
+            if path in bound_files and existing != bound_files[path]:
+                raise _stale("publication_input_changed")
+            written[path] = data
             if existing == data:
                 continue
             _atomic_replace(path, data)
@@ -2434,7 +2446,7 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         sidecar_data = owned[sidecar_path]
         existing_sidecar = _read_bytes(sidecar_path, required=False)
         require_bound_publication_inputs(
-            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar)
+            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar, written=written)
         if existing_sidecar != sidecar_data:
             _atomic_replace(sidecar_path, sidecar_data)
 

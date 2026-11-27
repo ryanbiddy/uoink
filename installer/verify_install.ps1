@@ -87,6 +87,7 @@ $requiredFiles = @(
     'library_cards.py',
     'library_faithfulness.py',
     'library_media.py',
+    'caption_repair.py',
     'library_mirror.py',
     'library_mirror_vault_io.py',
     'library_prompts.py',

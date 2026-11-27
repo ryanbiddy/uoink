@@ -149,7 +149,7 @@ class Library:
                 raise subprocess.CalledProcessError(
                     1, cmd, stderr=b"ERROR: Unable to download video subtitles: HTTP Error 429: Too Many Requests")
             if url in self.caption_urls:
-                (target.parent / "video.en.srt").write_text(
+                Path(str(target).replace("%(ext)s", "en.srt")).write_text(
                     "1\n00:00:00,000 --> 00:00:03,000\ncaption words from the source\n\n", encoding="utf-8")
             return subprocess.CompletedProcess(cmd, 0, b"", b"")
         if "bestaudio/best" in cmd:
@@ -758,6 +758,7 @@ def test_youtube_save_gets_captions_before_any_asr(lib):
     sidecar = json.loads((folder / "yt-refused.json").read_text(encoding="utf-8"))
     assert sidecar["transcript_source"] == "captions"
     assert sidecar["transcript"][0]["text"] == "caption words from the source"
+    assert sidecar["caption_kind"] == "captions"
     assert "caption words from the source" in (folder / "yt-refused.md").read_text(encoding="utf-8")
 
 

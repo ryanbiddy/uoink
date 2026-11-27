@@ -80,6 +80,11 @@ def parser():
     get = command("get", help="look up a saved item by ID, or read it in full with --text")
     get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
+    repair = command("repair-captions", help="check one saved YouTube video for repeated caption words")
+    repair.add_argument("id", help="item id from search or recent")
+    mode = repair.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="count repeated words without saving (default)")
+    mode.add_argument("--apply", action="store_true", help="save the cleaned transcript and keep the original")
     cues = command("cues", help="timed transcript cues for one item, or list items by show "
                    "and publish date")
     cues.add_argument("id", nargs="?", help="item id from search or recent; omit to list items")
@@ -466,9 +471,8 @@ def shelves_check(ns):
 SHELF_BODY_BYTES = 56 * 1024  # the helper refuses a body over 64 KB
 
 
-def _helper_shelves(server, path, body):
-    """POST one /library/shelves route to the running helper. Raises OSError
-    when it can't be reached."""
+def _helper_post(server, path, body, *, timeout=60):
+    """Post to the authenticated resident helper after checking its identity."""
     import urllib.error
     import urllib.request
     request = urllib.request.Request(
@@ -476,7 +480,7 @@ def _helper_shelves(server, path, body):
         headers={"Content-Type": "application/json", "X-Uoink-Token": server._current_token()},
         method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         try:
@@ -484,6 +488,24 @@ def _helper_shelves(server, path, body):
         except ValueError:
             payload = None
         return payload if isinstance(payload, dict) else {"ok": False, "error": f"helper returned HTTP {exc.code}"}
+
+
+_helper_shelves = _helper_post
+
+
+def repair_caption_command(ns, server):
+    import uoink_agent_runtime as runtime
+    result = server.repair_rolling_captions(ns.id, dry_run=not ns.apply)
+    # A previous invocation may have committed the repair and stopped before
+    # notifying the resident helper. Repeating that notification is safe.
+    if ns.apply and runtime.helper_running(server):
+        try:
+            queued = _helper_post(server, "/search/refresh-item", {"video_id": ns.id}, timeout=5)
+        except (OSError, ValueError):
+            queued = None
+        if not isinstance(queued, dict) or not queued.get("ok"):
+            result["note"] = "Restart Uoink to refresh semantic search for this item."
+    return result
 
 
 def _move_parts(moves):
@@ -903,6 +925,14 @@ def text_item(payload, index):
 
 
 def human(payload, *, index=None):
+    if "removed_words" in payload and payload.get("ok"):
+        action = "Found" if payload["dry_run"] else "Removed"
+        message = f"{action} {payload['removed_words']} repeated caption words."
+        if not payload["dry_run"]:
+            message += "\nOriginal transcript saved in " + terminal_label(payload["original_sidecar"])
+        if payload.get("note"):
+            message += "\n" + terminal_label(payload["note"])
+        return message
     if "prompt" in payload and "run_id" in payload:
         lines = [f"Research run: {payload['run_id']}"]
         if payload.get("status"):
@@ -1205,7 +1235,9 @@ def main(argv=None):
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
-            if ns.command == "research":
+            if ns.command == "repair-captions":
+                payload = repair_caption_command(ns, server)
+            elif ns.command == "research":
                 payload = research_command(ns, server)
             elif ns.command == "cues":
                 payload = cues_command(ns, server)

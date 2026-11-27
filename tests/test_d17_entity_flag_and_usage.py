@@ -159,14 +159,15 @@ def _fake_run_subprocess(cmd, **kwargs):
         shot = Path(out.replace("%04d", "0001"))
         shot.parent.mkdir(parents=True, exist_ok=True)
         shot.write_bytes(b"\xff\xd8\xff\xe0jpg")
+    elif out and "--skip-download" in parts:
+        Path(out.replace("%(ext)s", "en.srt")).write_text(
+            "1\n00:00:00,000 --> 00:00:02,000\nAda Lovelace wrote it\n\n"
+            "2\n00:00:02,000 --> 00:00:04,000\nabout ai agents\n",
+            encoding="utf-8")
     elif out:
         base_dir = Path(out).parent
         base_dir.mkdir(parents=True, exist_ok=True)
         (base_dir / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4")
-        (base_dir / "video.en.srt").write_text(
-            "1\n00:00:00,000 --> 00:00:02,000\nAda Lovelace wrote it\n\n"
-            "2\n00:00:02,000 --> 00:00:04,000\nabout ai agents\n",
-            encoding="utf-8")
     return types.SimpleNamespace(returncode=0, stdout="", stderr=b"")
 
 

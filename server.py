@@ -95,7 +95,8 @@ _BIN_DIR = HERE / "bin"
 if _BIN_DIR.is_dir():
     os.environ["PATH"] = str(_BIN_DIR) + os.pathsep + os.environ.get("PATH", "")
 
-from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
+import yt_extract  # noqa: E402
+from yt_extract import slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
@@ -459,7 +460,7 @@ TRANSCRIPT_UNFINISHED_MESSAGE = (
     "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
 # What a transcript-only attempt itself leaves in a folder (captions, a
 # partial download); these never count as a saved capture.
-_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".part", ".ytdl", ".json", ".tmp")
+_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".json3", ".part", ".ytdl", ".json", ".tmp")
 # Lite mode forces the screenshot interval to at least this (1 per 5 min), so
 # a 2-hour video yields a couple dozen frames instead of hundreds.
 LITE_SHOT_INTERVAL_SEC = 5 * 60
@@ -3725,7 +3726,7 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
 # on any fallback, why in one plain sentence.
 
 TRANSCRIPT_CACHE_DIRNAME = "transcript-cache"
-_TRANSCRIPT_CACHE_VERSION = 1
+_TRANSCRIPT_CACHE_VERSION = 2
 _TRANSCRIPT_LANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,2}$")
 _TRANSCRIPT_BARE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 _TRANSCRIPT_TRACK_KEY_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{1,8}){0,3}$")
@@ -3797,8 +3798,12 @@ def _caption_track_candidates(metadata: dict, lang: str | None) -> list[dict]:
         return isinstance(key, str) and key != "live_chat" and bool(
             _TRANSCRIPT_TRACK_KEY_RE.fullmatch(key))
 
-    manual = {k: v for k, v in (metadata.get("subtitles") or {}).items() if usable(k) and v}
-    auto = {k: v for k, v in (metadata.get("automatic_captions") or {}).items() if usable(k) and v}
+    def track_map(name):
+        table = metadata.get(name)
+        return {k: v for k, v in table.items() if usable(k) and v} if isinstance(table, dict) else {}
+
+    manual = track_map("subtitles")
+    auto = track_map("automatic_captions")
     orig_keys = [k for k in auto if k.endswith("-orig")]
     spoken = (_transcript_clean_lang(orig_keys[0]) if orig_keys
               else str(metadata.get("language") or "")) or None
@@ -3884,37 +3889,19 @@ def _caption_failure_reason(e: BaseException, prefix: str = "captions") -> str:
 def _download_caption_track(url: str, track: dict, tmp_dir: Path,
                             duration: object) -> list[tuple[float, float, str]]:
     """Download exactly one named caption track; raise on refusal."""
-    for old in tmp_dir.glob("captions.*"):
-        try:
-            old.unlink()
-        except OSError:
-            pass
-    cmd = [
-            *YTDLP_CMD,
-            "--skip-download",
-            "--write-auto-subs" if track["kind"] == "auto_captions" else "--write-subs",
-            # One exact key, never a pattern: "en.*" also matches YouTube's
-            # rate-limited auto-translated tracks (see _fetch_video_subtitles).
-            "--sub-lang", track["key"],
-            "--convert-subs", "srt",
-            "-o", str(tmp_dir / "captions.%(ext)s"),
-            url,
-    ]
-    done = _run_subprocess(
-        cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
-        timeout=COMMENTS_TIMEOUT_SEC)
-    files = sorted(tmp_dir.glob("captions*.srt"))
-    if not files:
+    def fetch(selected, prefix, text_only):
+        cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(selected, text_only),
+               "-o", str(tmp_dir / f"{prefix}.%(ext)s"), url]
+        done = _run_subprocess(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                               timeout=COMMENTS_TIMEOUT_SEC)
         stderr = getattr(done, "stderr", None) or b""
         # yt-dlp can log a subtitle 429 as a warning and still exit 0.
-        if re.search(rb"\b429\b" if isinstance(stderr, bytes) else r"\b429\b", stderr):
+        if yt_extract.caption_rate_warning(stderr, tmp_dir, prefix, selected, text_only):
             raise subprocess.CalledProcessError(1, cmd, stderr=stderr)
-        return []
-    try:
-        length = float(duration) if duration else None
-    except (TypeError, ValueError):
-        length = None
-    return list(parse_srt(files[0], duration=length))
+
+    prefix = "captions.auto" if track["kind"] == "auto_captions" else "captions.manual"
+    entries, _ = yt_extract.read_caption_track(tmp_dir, prefix, track, _as_float(duration), fetch)
+    return entries
 
 
 def _transcript_cache_path(video_id: str, lang: str | None) -> Path:
@@ -3938,7 +3925,8 @@ def _write_transcript_cache(record: dict, lang: str | None) -> None:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(f".{os.getpid()}.tmp")
-        tmp.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        payload = dict(record, segments=[uoink_reliability.entry_to_json(e) for e in record["segments"]])
+        tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
         os.replace(tmp, path)
     except OSError as e:
         log.warning("transcript cache write skipped: %s", _sanitize_error(str(e)))
@@ -3959,7 +3947,8 @@ def _library_transcript(video_id: str) -> dict | None:
             continue
         start = _as_float(seg.get("start")) or 0.0
         end = _as_float(seg.get("end"))
-        segments.append((start, end if end is not None else start, str(seg["text"]).strip()))
+        segments.append(uoink_reliability.TranscriptEntry(
+            start, end if end is not None else start, str(seg["text"]), seg.get("words")))
     if not segments:
         return None
     provider = sidecar.get("transcript_source")
@@ -4055,7 +4044,8 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
 
     cached = _read_transcript_cache(video_id, lang)
     if cached:
-        return {**cached, "segments": [tuple(s) for s in cached["segments"]], "cached": True}
+        return {**cached, "segments": [uoink_reliability.entry_from_json(s) for s in cached["segments"]],
+                "cached": True}
 
     refusal = _platform.capability_refusal(_platform.media_capability())
     if refusal is not None:
@@ -4316,8 +4306,7 @@ def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
         youtube_link, citation_source, deep_link = links(s)
         row = {"start": s, "end": e, "text": t, "source_url": citation_source,
                "source_deep_link": deep_link, "youtube_deep_link": youtube_link}
-        # 3.18: local Whisper's word timings ({word, start, end}), for tools
-        # that cut on a word. Captions and older items have none.
+        # JSON3 and local Whisper may supply timings for each spoken word.
         words = getattr(entry, "words", None)
         if words:
             row["words"] = words
@@ -5255,7 +5244,7 @@ def _splice_transcript_markdown(md: str, block: str, header: str | None) -> str:
 
 
 def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
-                               captions_reason=None) -> str:
+                               captions_reason=None, caption_kind=None) -> str:
     """Save new words into the sidecar, transcript.txt, corpus and index.
 
     The sidecar is written first with a "saving" mark and cleared last, so a
@@ -5306,6 +5295,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                         sidecar["source_chapters"] = chapters
                 sidecar["transcript"] = _transcript_entries_with_links(sidecar, entries)
                 sidecar["transcript_source"] = source
+                sidecar["caption_kind"] = caption_kind if source == "captions" else None
                 sidecar["asr_fallback"] = asr or {"status": "not_needed"}
                 if captions_reason:
                     sidecar["captions_skipped_reason"] = captions_reason
@@ -5420,6 +5410,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
     asr_check()
     refused = None
     captions_reason = None
+    caption_kind = None
     entries, source, asr = [], None, None
     for stale in folder.glob(".asr-*"):
         # Audio a stopped run left behind (Uoink's own temporary files only).
@@ -5432,15 +5423,10 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
         tmp = Path(tmp)
         if host == "youtube" and url and network_ok("youtube"):
             # Captions first: no CPU, and the best words when they exist.
-            reason = _fetch_video_subtitles(url, tmp, long_video_mode=LONG_VIDEO_MODE_FULL,
-                                            cancel_event=stop_event)
+            entries, caption_kind, reason = _capture_caption_entries(
+                url, tmp, {}, duration, long_video_mode=LONG_VIDEO_MODE_FULL, cancel_event=stop_event)
             if reason is None:
                 network_hosts.append("youtube")
-                order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
-                srts = sorted(tmp.glob("video*.srt"), key=lambda p: (
-                    order.index(p.name) if p.name in order else len(order), p.name))
-                if srts:
-                    entries = list(parse_srt(srts[0], duration=duration))
             elif reason in (CAPTIONS_RATE_LIMITED, CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
                 captions_reason = reason
                 refused = {"host": "youtube",
@@ -5489,7 +5475,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
     if source is None and status not in ("no_speech", "no_audio"):
         return {"outcome": "failed",
                 "reason": (asr or {}).get("error") or "The transcript step did not work."}
-    applied = _transcript_backfill_apply(item, entries, source, asr, captions_reason)
+    applied = _transcript_backfill_apply(item, entries, source, asr, captions_reason, caption_kind)
     if applied != "applied":
         return {"outcome": applied}
     outcome = "transcribed" if source else status
@@ -8540,6 +8526,7 @@ def _youtube_bot_check_cooldown_active() -> bool:
 
 def _fetch_video_subtitles(url: str, output_folder: Path, *,
                            long_video_mode: str,
+                           track=None, prefix="video", text_only=False,
                            cancel_event: threading.Event | None = None) -> str | None:
     """Fetch optional captions; return None, or why they were not fetched.
 
@@ -8552,27 +8539,19 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
                  CAPTIONS_BOT_CHECK_COOLDOWN)
         return CAPTIONS_BOT_CHECK_COOLDOWN
     try:
-        _run_subprocess(
-            [
-                *YTDLP_CMD,
-                "--skip-download",
-                "--write-auto-subs",
-                "--write-subs",
-                # Named tracks only. "en.*" also matched YouTube's
-                # auto-translated tracks (en-de, en-de-DE...), which are
-                # rate-limited separately; one 429 there made yt-dlp exit
-                # before --convert-subs, so no transcript was saved.
-                "--sub-lang", "en,en-US,en-GB,en-orig",
-                "--convert-subs", "srt",
-                "-o", str(output_folder / "video.%(ext)s"),
-                url,
-            ],
+        cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(track, text_only),
+               "-o", str(output_folder / f"{prefix}.%(ext)s"), url]
+        done = _run_subprocess(
+            cmd,
             cancel_event=cancel_event,
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
             timeout=COMMENTS_TIMEOUT_SEC,
         )
+        stderr = getattr(done, "stderr", None) or b""
+        if is_youtube and yt_extract.caption_rate_warning(stderr, output_folder, prefix, track, text_only):
+            raise subprocess.CalledProcessError(1, cmd, stderr=stderr)
     except PlaylistJobCancelled:
         raise
     except (OSError, subprocess.CalledProcessError,
@@ -8590,6 +8569,17 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         log.warning("%s subtitle fetch unavailable: %s", long_video_mode, reason)
         return reason
     return None
+
+
+def _capture_caption_entries(url, folder, metadata, duration, *, long_video_mode,
+                             cancel_event=None, reuse=False):
+    def fetch(track, prefix, text_only):
+        return _fetch_video_subtitles(url, folder, long_video_mode=long_video_mode,
+                                      cancel_event=cancel_event, track=track,
+                                      prefix=prefix, text_only=text_only)
+
+    return yt_extract.capture_captions(folder, metadata, _detect_platform_from_url(url) == PLATFORM_YOUTUBE,
+                                       duration, fetch, reuse=reuse)
 
 
 # ---------------------------------------------------------------------------
@@ -8665,7 +8655,7 @@ def _clear_transcript_leftovers(folder: Path) -> None:
     """Before a transcript-only attempt: remove what an earlier attempt that
     never finished left (its captions, metadata and thumbnail). The folder
     and its ownership claim stay."""
-    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt"):
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt", "video*.json3"):
         for path in folder.glob(pattern):
             if path.is_file() and not path.is_symlink():
                 with contextlib.suppress(OSError):
@@ -8676,7 +8666,7 @@ def _discard_transcript_attempt(folder: Path) -> None:
     """Remove what a failed transcript-only attempt wrote into its own fresh
     folder, so a show with many caption-less videos leaves no empty shells.
     Only the attempt's known files go; anything else keeps the folder."""
-    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt",
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt", "video*.json3",
                     ".capture-source.json", "capture-not-finished.txt"):
         for path in folder.glob(pattern):
             if path.is_file() and not path.is_symlink():
@@ -8684,23 +8674,6 @@ def _discard_transcript_attempt(folder: Path) -> None:
                     path.unlink()
     with contextlib.suppress(OSError):
         folder.rmdir()
-
-
-def _caption_kind_for(metadata: dict, srt_path: Path) -> str | None:
-    """'captions' when the saved track was uploaded by the creator,
-    'auto_captions' when it is YouTube's automatic one, None when unknown.
-    yt-dlp writes the uploaded track for a language when both exist."""
-    name = srt_path.name
-    if not (name.startswith("video.") and name.endswith(".srt")):
-        return None
-    lang = name[len("video."):-len(".srt")]
-    uploaded = metadata.get("subtitles")
-    automatic = metadata.get("automatic_captions")
-    if isinstance(uploaded, dict) and lang in uploaded:
-        return "captions"
-    if isinstance(automatic, dict) and lang in automatic:
-        return "auto_captions"
-    return None
 
 
 def _source_published_at(metadata: dict) -> str | None:
@@ -9572,25 +9545,15 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if phase_callback:
             phase_callback("transcript")
-        if reused_media and any(asset_folder.glob("video*.srt")):
-            captions_skipped_reason = None
-        else:
-            captions_skipped_reason = _fetch_video_subtitles(
-                url, asset_folder,
-                long_video_mode=effective_long_video_mode,
-                cancel_event=cancel_event,
-            )
+        entries, caption_kind, captions_skipped_reason = _capture_caption_entries(
+            url, asset_folder, metadata, duration, long_video_mode=effective_long_video_mode,
+            cancel_event=cancel_event, reuse=reused_media)
         # Only a captions 429 counts as "refused" for the ASR fallback and the
         # retry pacing; a bot check or cooldown is recorded by its own reason.
         captions_refused = captions_skipped_reason == CAPTIONS_RATE_LIMITED
 
         video_files = [f for f in sorted(asset_folder.glob(media_glob))
                        if f.suffix in (".mp4", ".webm", ".mkv")]
-        # Uploaded English captions first, then auto-captions. glob order
-        # differs between filesystems.
-        srt_order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
-        srt_files = sorted(asset_folder.glob("video*.srt"), key=lambda p: (
-            srt_order.index(p.name) if p.name in srt_order else len(srt_order), p.name))
         if not video_files and not transcript_only:
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
                 raise ExtractionPhaseError(
@@ -9685,7 +9648,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if not shot_times:
             shot_times = [i * interval for i in range(len(shots))]
 
-        entries = list(parse_srt(srt_files[0], duration=duration)) if srt_files else []
         platform_caption_count = len(entries)
         if not entries and phase_callback:
             phase_callback("transcript")
@@ -9720,10 +9682,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
                    if finish_on_disk else {}),
             )
-        # Uploaded captions or YouTube's automatic ones, when the source's
-        # caption tables say which track the saved file came from.
-        caption_kind = (_caption_kind_for(metadata, srt_files[0])
-                        if srt_files and transcript_source == "captions" else None)
         if not shelf_hint:
             # One more routing pass now that the words spoken are known.
             topic = _reroute_with_transcript(topic, metadata, entries, url=url)
@@ -14168,6 +14126,32 @@ def _plain_transcript_bytes(folder):
     if path.is_symlink() or path.resolve().parent != folder.resolve():
         raise ValueError("The transcript file has moved.")
     return path.read_bytes() if path.exists() else None
+
+
+def repair_rolling_captions(video_id: str, *, dry_run=True) -> dict:
+    """Preview or apply a local caption repair for one explicit item."""
+    import caption_repair
+    import library_media
+    folder, item = _folder_for_video_id(video_id)
+    if folder is None:
+        raise ValueError("Saved item not found.")
+    try:
+        idx = _get_index()
+        result = caption_repair.repair(idx, item, _capture_media_plan, dry_run=dry_run)
+        if result["removed_words"] == 0:
+            # A settled retry writes nothing. Check the same corpus, citations
+            # and archived evidence that consumers read before reporting success.
+            with idx.detached_snapshot() as conn:
+                snapshot = library_media._read_snapshot(conn, video_id)
+            plain = _plain_transcript_bytes(folder)
+            if plain is not None:
+                expected = "\n".join(cue["text"] for cue in snapshot.cues)
+                if plain.decode("utf-8").replace("\r\n", "\n") != expected:
+                    raise ValueError("The repaired transcript.txt has changed. Your edits were kept.")
+        return result
+    except library_media.MediaError as exc:
+        reason = (exc.details or {}).get("reason", exc.code)
+        raise ValueError(f"Caption repair could not finish ({reason}).") from exc
 
 
 def _replace_transcript(video_id, model, folder, item, cancel_event, progress, restore):
@@ -26216,6 +26200,15 @@ class Handler(BaseHTTPRequestHandler):
         if bare.startswith("/library/transcript-backfill/"):
             action = bare[len("/library/transcript-backfill/"):]
             return self._handle_transcript_backfill(action if "/" not in action else "", body)
+        if bare == "/search/refresh-item":
+            # The CLI already updated the on-disk index. Only this helper
+            # owns its live semantic engine; an enabled engine queues one ID.
+            video_id = body.get("video_id") if isinstance(body, dict) else None
+            if not isinstance(video_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+                return self._send_json(400, {"ok": False, "error": "Expected a YouTube video ID."})
+            if _local_search_singleton is not None:
+                _local_search_singleton.update_source(video_id)
+            return self._send_json(200, {"ok": True})
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
         if bare == "/notes":

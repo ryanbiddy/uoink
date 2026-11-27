@@ -1582,13 +1582,18 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
         # yt-dlp runs as `yt-dlp` on Windows/Linux and as the bundle's
         # `python -m yt_dlp` on macOS; both are the same downloader here.
         is_ytdlp = command[0] == "yt-dlp" or list(command[1:3]) == ["-m", "yt_dlp"]
-        if is_ytdlp and "--get-title" in command:
-            return "Synthetic Video"
+        if is_ytdlp and "--dump-single-json" in command:
+            return json.dumps({"title": "Synthetic Video", "extractor_key": "Youtube",
+                               "duration": 20, "subtitles": {"en": [{"ext": "srt"}]}})
         if is_ytdlp:
             folder = output / "Synthetic_Video"
             folder.mkdir(parents=True, exist_ok=True)
-            (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
-            (folder / "video.en.srt").write_text("1\n00:00:00,000 --> 00:00:20,000\nA caption.\n", encoding="utf-8")
+            if "--skip-download" in command:
+                template = command[command.index("-o") + 1]
+                Path(template.replace("%(ext)s", "en.srt")).write_text(
+                    "1\n00:00:00,000 --> 00:00:20,000\nA caption.\n", encoding="utf-8")
+            else:
+                (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
         return SimpleNamespace(returncode=0)
 
     with env.patch.context() as patch:
@@ -1603,9 +1608,12 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
     downloads = [cmd for cmd in commands if tool(cmd) == "yt-dlp" and "--write-subs" in cmd]
     assert len(downloads) == 1
     command = downloads[0]
-    assert command[command.index("--sub-lang") + 1] == "en,en-US,en-GB,en-orig"
-    assert not any(flag in command for flag in ("--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
-    assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
+    assert command[command.index("--sub-lang") + 1] == "en"
+    assert "--skip-download" in command and "--write-auto-subs" not in command
+    assert not any(flag in cmd for cmd in commands for flag in (
+        "--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
+    assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg", "yt-dlp"]
+    assert (output / "Synthetic_Video" / "transcript.txt").read_text(encoding="utf-8") == "A caption."
     # X's existing same-author bounded parent traversal is the only supplied
     # status transport. It gains neither watcher nor media acquisition.
     x_requests = []
