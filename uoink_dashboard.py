@@ -436,6 +436,9 @@ def _hand_off(api, name: str, url: str | None, wait_s: float) -> bool:
         api.allow_foreground(pid)
         api.send(pipe, json.dumps({"uoink": "dashboard-focus", "v": 1, "url": url}).encode("utf-8"))
         raw = api.recv(pipe, _REPLY_WAIT_S)
+        # Hang up now so the open window can answer the next launch.
+        api.close(pipe)
+        pipe = None
         reply = json.loads(raw.decode("utf-8")) if raw else None
         if not isinstance(reply, dict) or reply.get("ok") is not True:
             return False
