@@ -468,8 +468,10 @@ def test_upgrade_restores_untitled_unpolled_follow_in_place(tmp_path, monkeypatc
     if reverse_updates:
         swapped = tmp_path / migration.name
         swapped.write_text(ddl + ";" + updates + trigger, encoding="utf-8")
-        monkeypatch.setattr(index_mod, "_discover_migrations",
-                            lambda: [(n, swapped if n == 39 else p) for n, p in migrations])
+        migration = swapped
+    # This test checks 0039 in isolation. 0040 also restores previously polled feeds.
+    monkeypatch.setattr(index_mod, "_discover_migrations",
+                        lambda: [(n, migration if n == 39 else p) for n, p in migrations if n <= 39])
     with index_mod.Index.open(path) as idx:
         conn = idx._conn
         before = conn.total_changes

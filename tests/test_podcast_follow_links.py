@@ -101,6 +101,7 @@ def test_bad_paste_leaves_no_subscription(library, monkeypatch, link, kwargs, me
 
 
 def test_name_is_read_in_background_after_feed_type_check(library, monkeypatch):
+    monkeypatch.setattr(server, "_TOKEN_OWNED", True)
     title_requested, allow_title, title_read = (threading.Event() for _ in range(3))
     calls = []
 
@@ -148,7 +149,7 @@ with redirect_stdout(sys.stderr):
 server._get_index = lambda: idx
 server._podcast_suggestion_setup_problem = lambda: None
 runtime.helper_running = lambda backend: False
-podcasts.fetch_title_in_background = lambda *args: None
+podcasts.fetch_title_in_background = lambda *args: (root / 'client-title-worker').touch()
 def fetch(url, **kwargs):
     fixture = 'podcast_apple_show.xml' if url == FEED else 'podcast_apple_lookup.json'
     return Response((DATA / fixture).read_bytes())
@@ -167,6 +168,7 @@ raise SystemExit(exit_code)
     assert done.returncode == 0, (done.stdout, done.stderr)
     result = json.loads(done.stdout)
     assert result["ok"] and (tmp_path / "started").is_file()
+    assert not (tmp_path / "client-title-worker").exists()
     if url == FEED:
         idx = index.Index.open(tmp_path / "index.db")
         try:

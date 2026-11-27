@@ -93,6 +93,7 @@ def test_subscribe_preserves_custom_name_and_never_tries_an_offline_feed(feed_en
 
 
 def test_explicit_follow_checks_feed_before_registering_and_requests_title(feed_env, monkeypatch):
+    monkeypatch.setattr(server, "_TOKEN_OWNED", True)
     _, _, calls, handler = feed_env
     probes = []
     title_requests = []

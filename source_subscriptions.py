@@ -946,6 +946,31 @@ class PodcastFeedError(ValueError):
     """A feed format error with a message safe to show the user."""
 
 
+class BodyTooLarge(ValueError):
+    """The response contained more than the caller's byte budget."""
+
+
+def bounded_http_chunks(stream, *, max_bytes, deadline):
+    # HTTPResponse.read(n) may block across many successive socket reads.
+    # read1 returns after a single buffered read so trickling data cannot
+    # reset the wall-clock deadline. The opener also sets a socket timeout.
+    read = stream.read1 if isinstance(stream, http.client.HTTPResponse) else stream.read
+    remaining = max_bytes
+    while time.monotonic() < deadline:
+        chunk = read(min(16 * 1024, remaining + 1))
+        if time.monotonic() >= deadline:
+            break
+        if not chunk:
+            return
+        if len(chunk) > remaining:
+            if remaining:
+                yield chunk[:remaining]
+            raise BodyTooLarge("The download exceeds the size limit.")
+        yield chunk
+        remaining -= len(chunk)
+    raise TimeoutError("The download took too long.")
+
+
 class PodcastTreeBuilder(ET.TreeBuilder):
     """Accept feed data only. XML declarations of entities and document types are unnecessary."""
 
@@ -958,9 +983,10 @@ class PodcastTreeBuilder(ET.TreeBuilder):
 class _PodcastTree(PodcastTreeBuilder):
     """Build just the prefix of one RSS channel or Atom feed that we use."""
 
-    def __init__(self, limit: int):
+    def __init__(self, limit: int, on_entry=None):
         super().__init__()
         self.limit = limit
+        self.on_entry = on_entry
         self.stack = []
         self.root = self.container = None
         self.entry_tag = None
@@ -993,38 +1019,36 @@ class _PodcastTree(PodcastTreeBuilder):
         self.stack.pop()
         if self.stack and self.stack[-1] is self.container and _localname(tag) == self.entry_tag:
             self.count += 1
+            if self.on_entry is not None:
+                self.on_entry(node)
+                self.container.remove(node)
+                node.clear()
         return node
 
 
-def read_podcast_window(stream, limit: int, *, max_bytes: int = FEED_MAX_BYTES) -> tuple[ET.Element, bool]:
+def read_podcast_window(stream, limit: int, *, max_bytes: int = FEED_MAX_BYTES,
+                        on_entry=None, deadline=None) -> tuple[ET.Element, bool]:
     """Read complete entries in publisher order. A zero limit validates the root only."""
-    tree = _PodcastTree(limit)
+    tree = _PodcastTree(limit, on_entry)
     parser = ET.XMLParser(target=tree)
-    remaining = max_bytes
     prefix = b""
-    read = stream.read1 if isinstance(stream, http.client.HTTPResponse) else stream.read
+    if deadline is None:
+        deadline = time.monotonic() + FEED_FETCH_TIMEOUT_SEC
     try:
-        while True:
-            chunk = read(min(16 * 1024, remaining + 1))
-            if not chunk:
-                root = parser.close()
-                if tree.container is None:
-                    raise PodcastFeedError("That RSS feed is missing its channel.")
-                return root, False
+        for chunk in bounded_http_chunks(stream, max_bytes=max_bytes, deadline=deadline):
             if tree.root is None and len(prefix) < 512:
                 prefix += chunk[:512 - len(prefix)]
-            parser.feed(chunk[:remaining])
-            if tree.stack and tree.count >= limit and tree.container is not None:
-                # We have a full window without its closing feed tag. Don't
-                # wait for another chunk just to inspect the rest of the archive.
-                return tree.root, True
-            if len(chunk) > remaining:
-                if tree.count >= limit and tree.container is not None:
-                    return tree.root, True
-                raise ServiceError("feed_too_large",
-                                   f"The feed exceeds the {max_bytes // (1024 * 1024)} MiB limit "
-                                   f"before Uoink can read {limit} episodes.")
-            remaining -= len(chunk)
+            parser.feed(chunk)
+        root = parser.close()
+        if tree.container is None:
+            raise PodcastFeedError("That RSS feed is missing its channel.")
+        return root, False
+    except BodyTooLarge:
+        if tree.count >= limit and tree.container is not None:
+            return tree.root, True
+        raise ServiceError("feed_too_large",
+                           f"The feed exceeds the {max_bytes // (1024 * 1024)} MiB limit "
+                           f"before Uoink can read {limit} episodes.") from None
     except _WindowReady:
         return tree.root, True
     except ET.ParseError:
@@ -2940,9 +2964,12 @@ class SourceSubscriptionService:
                 conn.execute("UPDATE source_subscriptions SET detection_enabled=1,follow_feed=1, "
                              "display_name=coalesce(nullif(trim(display_name),''),?) WHERE source_id=?",
                              (display_name, source_id))
-                conn.execute("UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''),?) "
-                             "WHERE id=(SELECT legacy_feed_id FROM source_subscriptions WHERE source_id=?)",
-                             (display_name, source_id))
+                updated = conn.execute(
+                    "UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''),?) "
+                    "WHERE id=(SELECT legacy_feed_id FROM source_subscriptions WHERE source_id=?)",
+                    (display_name, source_id))
+                if not updated.rowcount:
+                    raise ValueError("Uoink couldn't find the podcast feed for this subscription.")
             source = self._source(conn, source_id)
             return success(created=existing is None, source=self._summary(conn, source, now),
                            **({"receipt": receipt} if existing is not None else {}))
@@ -3011,6 +3038,9 @@ class SourceSubscriptionService:
         now = self._now()
         with self.store.write() as conn:
             source = self._source(conn, args["source_id"])
+            if source.get("legacy_feed_id") is not None:
+                conn.execute("UPDATE podcast_feeds SET enabled=0, auto_ingest=0 WHERE id=?",
+                             (source["legacy_feed_id"],))
             if source["archived"]:
                 return success(source_id=source["source_id"], changed=False,
                                revision=source["revision"])

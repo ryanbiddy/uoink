@@ -114,6 +114,13 @@ def test_capability_advertised_in_manifest_and_lease(env):
     assert "uoink.capture/1" in lease["capabilities"]
 
 
+def test_suite_refuses_podcast_episode_before_dispatch(env):
+    port, _, tools = env
+    status, payload = _post(port, {"url": "https://podcasts.apple.com/podcast/test/id42?i=71"})
+    assert status == 400 and payload["error"] == "unsupported_url"
+    assert "dashboard" in payload["message"].lower() and tools.calls == []
+
+
 def test_bad_or_missing_token_is_403(env):
     port, _idx, tools = env
     assert _post(port, {"url": PAGE}, token=False)[0] == 403

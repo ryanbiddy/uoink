@@ -124,7 +124,7 @@ class RunBlocked(Exception):
 
 class Backend(Protocol):
     def list_youtube(self, url: str, start: int, end: int) -> dict: ...
-    def fetch_feed(self, url: str) -> bytes: ...
+    def fetch_feed(self, url: str) -> dict | bytes: ...
     # True (or a reason string, such as REASON_REMOVED) when the episode is
     # not to be saved: an indexed library item, or one the user removed.
     def in_library(self, job: dict, episode: dict) -> bool | str: ...
@@ -511,7 +511,7 @@ def run_listing(data_root: Path, job_id: str, backend: Backend) -> dict:
         elif job["kind"] == KIND_PODCAST:
             body = backend.fetch_feed(job["url"])
             try:
-                parsed = podcasts.parse_feed_body(body, limit=MAX_EPISODES + 1)
+                parsed = body if isinstance(body, dict) else podcasts.parse_feed_body(body, limit=MAX_EPISODES + 1)
             except Exception:
                 raise ShowCaptureError("That link isn't a podcast feed Uoink can read.",
                                        "not_a_feed") from None

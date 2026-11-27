@@ -15739,7 +15739,7 @@
     function finishLibraryRun(run, data) {
       dropLibraryRun(run);
       if (run.source === "podcast_episode") {
-        setLibraryCaptureNote("Podcast episode queued. Track it in Activity.");
+        setLibraryCaptureNote(data.message || "Podcast episode queued.");
       } else if (data.queued) {
         const at = captureClock(data.retry_after);
         setLibraryCaptureNote(`YouTube asked Uoink to wait, so it's queued${at ? ` and retries on its own at ${at}` : ""}.`);
