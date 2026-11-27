@@ -155,6 +155,7 @@ from typing import Any, Callable, Iterator
 from urllib.parse import urlsplit
 
 import library_cards
+from moments import cited_url
 from clips import timing_kind
 
 log = logging.getLogger("uoink.library_resources")
@@ -1539,7 +1540,7 @@ class LibraryReader:
             if eid == excerpt_id:
                 return {"excerpt_id": eid, "evidence_kind": "timed_clip", "timing": row["timing"],
                         "start": row["start"], "end": row["end"], "seq": row["seq"],
-                        "text": row["text"], "deep_link": row["deep_link"]}
+                        "text": row["text"], "deep_link": cited_url(row["deep_link"], row["start"])}
         if bundle.prose_id is not None and excerpt_id == bundle.prose_id:
             return {"excerpt_id": excerpt_id, "evidence_kind": "text_only", "timing": "not_timed",
                     "start": None, "end": None, "seq": None, "text": bundle.prose,
@@ -2052,6 +2053,27 @@ class LibraryReader:
         bounded = text[:limit]
         return {"text": bounded, "truncated": len(bounded) < len(text), "codepoints": len(bounded)}
 
+    def _pins(self, op, item):
+        read = getattr(self.index, "get_pins", None)
+        if read is None:
+            return []
+        pins = self._index_call(op, lambda: read(item["video_id"]))
+        # Leave space for the card and every timestamp in a bounded agent response.
+        for pin in pins:
+            lines = []
+            remaining = 1300
+            for line in pin["lines"]:
+                text = self._redact(line["text"], item)[0]
+                snippet = text.encode("utf-8")[:remaining].decode("utf-8", "ignore")
+                if snippet:
+                    lines.append({**line, "text": snippet})
+                remaining -= len(snippet.encode("utf-8")) + 70
+                if remaining <= 0:
+                    pin["lines_truncated"] = len(lines) < len(pin["lines"]) or snippet != text
+                    break
+            pin["lines"] = lines
+        return pins
+
     def _hit(self, item_id: str, bundle: _ItemBundle, *, evidence_kind: str, preview: dict,
              excerpt_id: str | None, timing: str | None, start, end, deep_link) -> dict:
         card = bundle.card
@@ -2068,7 +2090,7 @@ class LibraryReader:
             "timing": timing,
             "start": start,
             "end": end,
-            "deep_link": safe_url(deep_link),
+            "deep_link": safe_url(cited_url(deep_link, start)),
             "excerpt_id": excerpt_id,
             "preview": preview,
             "uris": {"card": card_uri(item_id, card),
@@ -2253,6 +2275,14 @@ class LibraryReader:
                                           excerpt_id=None, timing=None, start=None, end=None, deep_link=None))
                 hits[-1]["_score"] = row.get("_search_order", row.get("_score", 0))
                 hits[-1].update({key: row[key] for key in CITATION_FIELDS if key in row})
+        for hit in hits:
+            pins = self._pins(op, self._bundle(op, hit["item_id"]).item)
+            hit["pins"] = pins
+            start = hit.get("start")
+            if match == "forgiving" and mode_info["search_mode"] == "keyword" and isinstance(start, (float, int)):
+                end = hit.get("end") if isinstance(hit.get("end"), (float, int)) else start
+                if any(start - 45 <= pin["seconds"] <= end + 45 for pin in pins):
+                    hit["_score"] -= abs(hit["_score"]) * .02
         if match == "forgiving":
             hits.sort(key=lambda hit: hit["_score"])
             hits = hits[:limit]
@@ -2333,6 +2363,7 @@ class LibraryReader:
                 "corpus": corpus,
             },
             corpus_admission=corpus_admission,
+            pins=self._pins(op, item),
             source_link=safe_url(card.get("url")),
         )
         _check_wire(result, what="get_library_item", next_step="search_library")

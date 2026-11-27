@@ -19,6 +19,7 @@ from urllib.parse import quote, urlparse
 
 import library_cards
 import library_resources
+from moments import cited_url
 from library_resources import LIMITS, ResourceError, _invalid, label, render_document, safe_url, wire_bytes
 
 CONTRACT_VERSION = "playbooks-v1-2026-10-15"
@@ -615,7 +616,7 @@ def _clips(scope, item, coverage, *, opening_only=False):
         seconds = int(start)
         key = f"[t:{_key_part(item['item_id'])}@{seconds // 60}:{seconds % 60:02d}]"
         result.append({"key": key, "seq": clip["seq"], "start": start, "end": _number(clip.get("end")),
-                       "text": text, "source_deep_link": safe_url(clip.get("source_deep_link")),
+                       "text": text, "source_deep_link": safe_url(cited_url(clip.get("source_deep_link"), start)),
                        "transcript_source": item.get("transcript_source"),
                        "opening": clip["seq"] == rows[0]["seq"], "last": clip["seq"] == rows[-1]["seq"]})
     return result
@@ -668,7 +669,7 @@ def _thesis_clips(scope, items, thesis, coverage):
         seen[item["item_id"]].add(seq)
         kept += 1
         item["clips"].append({"key": key, "seq": seq, "start": start, "end": _number(hit.get("end")),
-                              "text": text, "source_deep_link": safe_url(hit.get("source_deep_link")),
+                              "text": text, "source_deep_link": safe_url(cited_url(hit.get("source_deep_link"), start)),
                               "transcript_source": item.get("transcript_source"),
                               "opening": False, "last": False, "relevant": True})
     for item in items:
@@ -745,7 +746,7 @@ def _refs(items):
                 seconds = int(start)
                 key = f"[t:{_key_part(item['item_id'])}@{seconds // 60}:{seconds % 60:02d}]"
                 refs[key] = {**base, "kind": "clips", "end": excerpt.get("end"),
-                             "source_deep_link": safe_url(excerpt.get("deep_link")),
+                             "source_deep_link": safe_url(cited_url(excerpt.get("deep_link"), start)),
                              "excerpt_id": excerpt.get("excerpt_id")}
     return refs
 

@@ -874,6 +874,9 @@ def text_item(payload, index):
                         ("Saved", card.get("yoinked_at")), ("Topic", card.get("topic"))):
         if value:
             lines.append(f"{name}: {terminal_label(value)}")
+    for pin in payload.get("pins", []):
+        lines.append(f"Pinned {text_timestamp(pin['seconds'])}  {terminal_label(pin['deep_link'])}")
+        lines.extend(terminal_label(line["text"]) for line in pin["lines"])
     row = index.get_yoink(identity) if index is not None else None
     if row and not row.get("deleted_at"):
         with index.detached_snapshot() as db:

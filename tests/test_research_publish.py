@@ -107,7 +107,7 @@ def test_reanchors_third_cue_and_caption_folding(rig):
     run, excerpt = prepared(rig)
     result = publish(run, [claim(excerpt, "Evals catch regressions, before deployment!")])
     assert result["verification"]["stats"]["dropped"] == 0
-    assert Links(html_report(result)).hrefs == ["https://www.youtube.com/watch?v=talk0000001&t=27s"]
+    assert Links(html_report(result)).hrefs == ["https://www.youtube.com/watch?v=talk0000001&t=25s"]
     assert "00:27" in html_report(result)
 
 
@@ -264,7 +264,7 @@ def test_podcast_link_priority_and_time_labels():
               "enclosure_url": "https://audio.example.org/file.mp3"}
     assert verify.deep_link(source, 3601.9) == source["episode_url"]
     source.pop("episode_url")
-    assert verify.deep_link(source, 3601.9) == "https://audio.example.org/file.mp3#t=3601"
+    assert verify.deep_link(source, 3601.9) == "https://audio.example.org/file.mp3#t=3599"
     assert verify.time_label(3601.9) == "1:00:01"
 
 
@@ -501,19 +501,19 @@ def test_library_podcast_fallback_and_null_metadata_merge(rig):
     source.update(kind="podcast", source_url="https://audio.example.org/show.mp3", published="2026-10-30", duration_s=210)
     metadata = research._source_metadata(source, {})
     assert metadata["enclosure_url"] == source["source_url"]
-    assert verify.deep_link(source, 27.8) == source["source_url"] + "#t=27"
+    assert verify.deep_link(source, 27.8) == source["source_url"] + "#t=25"
     saved = research.load_run(rig.root, run["run_id"])
     saved["source_metadata"] = {source["item_id"]: {k: None for k in ("published", "duration_s", "episode_url", "enclosure_url")}}
     research.save_run(rig.root, saved)
     result = research.publish(rig.root, payload(run, [claim(excerpt)]), index=rig.idx, source_reader=lambda *_: source)
-    assert Links(html_report(result)).hrefs == [source["source_url"] + "#t=27"]
+    assert Links(html_report(result)).hrefs == [source["source_url"] + "#t=25"]
     assert "2026-10-30" in html_report(result) and "03:30" in html_report(result)
     source.update(episode_url="https://episodes.example.org/page", enclosure_url="https://audio.example.org/kept.mp3")
     result = research.publish(rig.root, payload(run, [claim(excerpt)]), index=rig.idx, source_reader=lambda *_: source)
     assert Links(html_report(result)).hrefs == [source["episode_url"]]
     assert "00:27" in html_report(result)
     source.update(kind="library", source_url="https://www.youtube.com/watch?v=talk0000001&t=1s")
-    assert verify.deep_link(source, 27.8) == "https://www.youtube.com/watch?v=talk0000001&t=27s"
+    assert verify.deep_link(source, 27.8) == "https://www.youtube.com/watch?v=talk0000001&t=25s"
 
 
 def test_listen_at_anchors_to_doubt_span_and_repeated_phrases_are_ambiguous():

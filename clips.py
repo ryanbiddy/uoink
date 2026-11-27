@@ -27,6 +27,8 @@ import sqlite3
 import time
 from contextlib import suppress
 
+from moments import citation_link
+
 log = logging.getLogger("uoink.clips")
 
 # Close a window once it is at least this long AND the cue that got it
@@ -171,15 +173,12 @@ def _deep_link(cue: dict, item: dict) -> str | None:
     if isinstance(link, str) and link.strip():
         if not (non_youtube and "youtube.com/watch" in link):
             return link.strip()
-    try:
-        t = max(0, int(float(cue.get("timestamp_start") or 0)))
-    except (TypeError, ValueError):
-        t = 0
+    start = cue.get("timestamp_start")
     if non_youtube:
         if isinstance(url, str) and url.startswith(("http://", "https://")):
-            return f"{url.split('#', 1)[0]}#t={t}"
+            return citation_link(url, start)
         return None
-    return f"https://youtube.com/watch?v={item.get('video_id')}&t={t}s"
+    return citation_link(f"https://youtube.com/watch?v={item.get('video_id')}", start, youtube=True)
 
 
 # --------------------------------------------------------------------------

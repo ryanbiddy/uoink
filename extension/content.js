@@ -497,7 +497,7 @@
 
   async function onClick(btn) {
     if (btn._afterSavePending) return copyPendingForClaude(btn);
-    const url = normalizedCurrentVideoUrl();
+    const url = STC.momentUrl(window.location.href, document.querySelector("video")?.currentTime);
     if (!url) return;
 
     // Gate by live server status: don't even attempt uoink while the helper
@@ -558,6 +558,14 @@
       return;
     }
 
+    if (data.reused && !data.yoink_md && Number.isInteger(data.pinned_seconds)) {
+      notify("Uoinked ★", STC.pinnedMessage(data));
+      setButtonState(btn, "success", "Saved");
+      btn.title = SAVED_TITLE;
+      resetButtonAfter(btn, 3000);
+      return;
+    }
+
     // Sprint 3: Smart Screenshot Picker intercept. Default off keeps v1
     // behavior byte-identical. When enabled, we hand the corpus off to the
     // popup via chrome.storage.local instead of clipboard + Claude tab.
@@ -565,7 +573,7 @@
       rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
       await STC.stashPickerCorpus(data);
       notify("Uoink ready",
-             "Click the Uoink icon to pick which screenshots to include.");
+             [STC.pinnedMessage(data), "Click the Uoink icon to pick which screenshots to include."].filter(Boolean).join(". "));
       setButtonState(btn, "success", "Pick screenshots →");
       btn.title = `${SAVED_TITLE} Click the Uoink icon to finish.`;
       resetButtonAfter(btn, 5000);
@@ -585,6 +593,7 @@
       try {
         await chrome.runtime.sendMessage({
           type: "afterSaveNotice", topic: data.topic || null, folder: data.folder || null,
+          pinned_seconds: data.pinned_seconds,
         });
       } catch (e) {
         console.warn("[Uoink] after-save notice failed", e);
@@ -680,7 +689,7 @@
     STC.forgetFailure(retryOf);
 
     notify("Added to session",
-           `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
+           STC.pinnedMessage(data) || `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
            `End the session in the popup to send to Claude or ChatGPT.`);
 
     setButtonState(btn, "success", `Added (${data.video_count})`);
@@ -881,6 +890,10 @@
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!sender || sender.id !== chrome.runtime.id) return;
+    if (msg && msg.type === "uoinkReadMoment" && msg.videoId === currentVideoId()) {
+      sendResponse({ videoId: msg.videoId, seconds: document.querySelector("video")?.currentTime });
+      return;
+    }
     if (msg && msg.type === "uoinkShortcutTriggered") {
       const btn = document.getElementById(BTN_ID);
       if (btn) {

@@ -1112,7 +1112,7 @@ def normalize_entity_name(name: str) -> str:
 
 
 def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
-                      metadata_json: str | None = None, source_url=None) -> str | None:
+                      metadata_json: str | None = None, source_url=None, lead=2) -> str | None:
     """Return a source-aware timestamp link for an entity mention."""
     vid = (video_id or "").strip()
     if source_url is None and metadata_json:
@@ -1121,15 +1121,12 @@ def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
             source_url = metadata.get("url") if isinstance(metadata, dict) else None
         except (TypeError, json.JSONDecodeError):
             pass
-    try:
-        t = max(0, int(float(seconds)))
-    except (TypeError, ValueError):
-        t = 0
+    from moments import citation_link
     if platform and platform != "youtube":
         if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
-            return f"{source_url.split('#', 1)[0]}#t={t}"
+            return citation_link(source_url, seconds, lead=lead)
         return None
-    return f"https://youtube.com/watch?v={vid}&t={t}s"
+    return citation_link(f"https://youtube.com/watch?v={vid}", seconds, youtube=True, lead=lead)
 
 
 # --------------------------------------------------------------------------
@@ -2390,6 +2387,10 @@ class Index:
         from uoink_core.search_service import citation_fields
         return [citation_fields({**r, "_snippet": _plain_snippet(r["_snippet"]),
                                  "passage_verified": True, "timing": timing_kind(r)}) for r in rows]
+
+    def get_pins(self, video_id: str) -> list[dict]:
+        import moments
+        return moments.for_item(self, video_id)
 
     def get_clips(self, video_id: str) -> list[dict]:
         """Every clip for one item, in timeline order."""
@@ -4411,10 +4412,11 @@ class Index:
                 if "passage" in d:
                     d["passage_verified"] = True
             d = citation_fields(d, copy_row=False)
-            # Keep the v1 annotation timestamp and link. Verified coordinates
-            # live only in the additive passage and timestamp_seconds fields.
+            # An annotation without a timed source line keeps its original playback position.
+            start = d.get("timestamp_seconds")
             d["deep_link"] = _entity_deep_link(
-                video_id, d["timestamp"], platform=d["platform"], metadata_json=metadata_json)
+                video_id, d["timestamp"] if start is None else start, platform=d["platform"],
+                metadata_json=metadata_json, lead=0 if start is None else 2)
             out.append(d)
         return out
 

@@ -887,8 +887,8 @@ def test_gate_6_exp_timed_source_cues(sandbox):
                             verbatim_text=f.cues[3]["text"] + "\n" + f.cues[4]["text"],
                             text_basis="stored_cues", separator="\n",
                             source_deep_link=f.cues[3]["source_deep_link"],
-                            seek_link="https://systems.example.fm/ep42.mp3#t=60",
-                            player_seek_seconds=60, truncated=False)
+                            seek_link="https://systems.example.fm/ep42.mp3#t=58",
+                            player_seek_seconds=58, truncated=False)
     assert result["units"] == [dict(cue_seq=i, cue_hash=f.block["cues"][i]["cue_hash"],
                                     start=f.cues[i]["timestamp_start"], end=f.cues[i]["timestamp_end"],
                                     text=f.cues[i]["text"], speaker="SPEAKER_01",
@@ -1127,8 +1127,8 @@ def test_gate_6_seek_player_equality(sandbox):
     """P6-11: supported seek arithmetic against a recording player command."""
     conn = _db(sandbox)
     for kind, key, url, expected in (
-        ("youtube", "abcdefghijk", "https://www.youtube.com/watch?v=abcdefghijk&t=999s", 22),
-        ("media_fragment", "direct-media", "https://systems.example.fm/ep42.mp3#old", 22),
+        ("youtube", "abcdefghijk", "https://www.youtube.com/watch?v=abcdefghijk&t=999s", 20),
+        ("media_fragment", "direct-media", "https://systems.example.fm/ep42.mp3#old", 20),
         ("none", "episode-page", "https://systems.example.fm/episodes/42#t=99", None),
         ("none", "unknown-provider", "https://vimeo.com/123456#t=99s", None),
     ):
@@ -1154,10 +1154,10 @@ def test_gate_6_seek_player_equality(sandbox):
         parsed = urlsplit(citation["seek_link"])
         if kind == "youtube":
             query = parse_qs(parsed.query)
-            assert query["v"] == [key] and query["t"] == ["22s"]
+            assert query["v"] == [key] and query["t"] == ["20s"]
             parsed_seconds = int(query["t"][0][:-1])
         else:
-            assert parsed.fragment == "t=22"
+            assert parsed.fragment == "t=20"
             parsed_seconds = int(parsed.fragment.removeprefix("t="))
         commands = []
         player = SimpleNamespace(seekTo=lambda seconds: commands.append(("seek", seconds)),
@@ -1165,8 +1165,8 @@ def test_gate_6_seek_player_equality(sandbox):
         player.seekTo(citation["player_seek_seconds"])
         player.stopAt(citation["end"])
         assert commands == [("seek", parsed_seconds), ("end", 48.125)]
-        assert parsed_seconds == math.floor(citation["start"])
-        assert 0 <= citation["start"] - parsed_seconds < 1
+        assert parsed_seconds == max(0, math.floor(citation["start"]) - 2)
+        assert 2 <= citation["start"] - parsed_seconds < 3
     # A watch URL for a different video cannot acquire seek authority.
     wrong = _fixture(sandbox, 2, key="wrong-watch", playback=dict(
         source_url="https://youtube.com/watch?v=abcdefghijk",

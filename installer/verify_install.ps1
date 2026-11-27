@@ -57,6 +57,7 @@ $requiredFiles = @(
     'list_imports.py',
     'show_capture.py',
     'timed_cues.py',
+    'moments.py',
     'shelf_router.py',
     'local_embed.py',
     'research.py',

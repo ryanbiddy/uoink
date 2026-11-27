@@ -132,8 +132,7 @@
   }
 
   // Canonicalize to the standard watch URL the server knows how to handle.
-  // Strips tracking junk (si, pp, feature, ...); preserves t (timestamp) so
-  // future features can use it.
+  // Keep the selected timestamp for the local helper and drop tracking parameters.
   function normalizeYouTubeUrl(rawUrl) {
     const id = extractVideoId(rawUrl);
     if (!id) return null;
@@ -147,6 +146,29 @@
     let normalized = `https://www.youtube.com/watch?v=${id}`;
     if (t) normalized += `&t=${encodeURIComponent(t)}`;
     return normalized;
+  }
+
+  function momentUrl(url, currentTime) {
+    const normalized = normalizeYouTubeUrl(url);
+    if (!normalized || !Number.isFinite(currentTime) || currentTime <= 15) return normalized;
+    const target = new URL(normalized);
+    target.searchParams.set("t", Math.floor(currentTime) + "s");
+    return target.href;
+  }
+
+  async function tabMomentUrl(tabId, url) {
+    if (!Number.isInteger(tabId) || !extractVideoId(url)) return url;
+    try {
+      const result = await chrome.tabs.sendMessage(tabId, { type: "uoinkReadMoment", videoId: extractVideoId(url) });
+      if (result && result.videoId === extractVideoId(url)) return momentUrl(url, result.seconds);
+    } catch { /* Use the timestamp in the link when the tab has no content script. */ }
+    return url;
+  }
+
+  function pinnedMessage(data) {
+    const n = data && data.pinned_seconds;
+    if (!Number.isInteger(n) || n < 0) return "";
+    return "Saved. Pinned " + Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
   }
 
   const TWITTER_HOSTS = new Set(["twitter.com", "www.twitter.com", "mobile.twitter.com", "x.com", "www.x.com"]);
@@ -382,7 +404,11 @@
         console.error("[Uoink] HTTP", res.status, "body:", text);
       }
       try {
-        return withHttpStatus(JSON.parse(text), res);
+        const data = withHttpStatus(JSON.parse(text), res);
+        if (data.reused && Number.isInteger(data.pinned_seconds) && data.video_slug) {
+          try { data.yoink_md = await getCorpusMarkdown(data.video_slug); } catch { /* Pin was saved. */ }
+        }
+        return data;
       } catch {
         console.error("[Uoink] JSON parse error, raw text:", text);
         return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
@@ -1040,6 +1066,7 @@
       }
     } catch { /* fall through to topic-aware copy */ }
 
+    if (pinnedMessage(data)) return pinnedMessage(data);
     if (stay) {
       if (firstTime) return FIRST_SAVE_MSG;
       const rawTopic = data && data.topic && data.topic !== "Uncategorized" ? String(data.topic).trim() : "";
@@ -1471,6 +1498,9 @@
     REQUEST_TIMEOUT_MS,
     extractVideoId,
     normalizeYouTubeUrl,
+    momentUrl,
+    tabMomentUrl,
+    pinnedMessage,
     normalizeTwitterUrl,
     normalizeXArticleUrl,
     isXArticleUrl,

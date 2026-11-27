@@ -142,7 +142,7 @@ chrome.commands.onCommand.addListener(async (command) => {
             const active = await getActiveFromStorage();
             const interval = await STC.getInterval();
             const kind = active && active.id ? "session_add" : "extract";
-            const job = { kind, url: normalized, interval, addedAt: Date.now() };
+            const job = { kind, url: await STC.tabMomentUrl(tab.id, normalized), interval, addedAt: Date.now() };
             if (kind === "session_add") {
               job.session_id = active.id;
               job.session_name = active.name;
@@ -348,7 +348,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 
   const interval = await STC.getInterval();
-  const job = { kind, url: normalized, interval, addedAt: Date.now() };
+  const selectedLink = info.linkUrl && raw === info.linkUrl;
+  const url = selectedLink ? normalized : await STC.tabMomentUrl(tab && tab.id, normalized);
+  const job = { kind, url, interval, addedAt: Date.now() };
   if (isTwitter) {
     job.useExtractAny = true;
   }
@@ -568,6 +570,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const data = {
       topic: typeof msg.topic === "string" ? msg.topic.slice(0, 80) : null,
       folder: typeof msg.folder === "string" ? msg.folder : null,
+      pinned_seconds: msg.pinned_seconds,
     };
     notifyAfterSaveFor(data).then((id) => sendResponse({ ok: true, id }), () => sendResponse({ ok: false }));
     return true;
@@ -1530,9 +1533,9 @@ async function runExtractJob(job) {
   // restoreQueue resumed waited behind the capture the helper was still
   // running). Say it's saved rather than copy nothing and open Claude.
   if (!data.corpus_md_paste && !data.yoink_md) {
-    const message = data.title
+    const message = STC.pinnedMessage(data) || (data.title
       ? `Saved "${data.title}" to your library. Use Copy Markdown in the Uoink popup to paste it.`
-      : "Saved to your library. Use Copy Markdown in the Uoink popup to paste it.";
+      : "Saved to your library. Use Copy Markdown in the Uoink popup to paste it.");
     notify("Uoinked ★", message);
     await publishPopupResult(job, { ok: true, message });
     return;
@@ -1545,9 +1548,9 @@ async function runExtractJob(job) {
     await rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
     await STC.stashPickerCorpus(data);
     notify("Uoink ready",
-           "Click the Uoink icon to pick which screenshots to include.");
+           [STC.pinnedMessage(data), "Click the Uoink icon to pick which screenshots to include."].filter(Boolean).join(". "));
     await publishPopupResult(job, {
-      ok: true, message: "Uoink ready. Pick screenshots in the popup.",
+      ok: true, message: STC.pinnedMessage(data) || "Uoink ready. Pick screenshots in the popup.",
     });
     return;
   }
@@ -1561,7 +1564,7 @@ async function runExtractJob(job) {
   if (afterSave === "stay") {
     // Default: the save is in the library; nothing is copied or opened.
     await notifyAfterSaveFor(data);
-    await publishPopupResult(job, { ok: true, message: "Saved to your library." });
+    await publishPopupResult(job, { ok: true, message: STC.pinnedMessage(data) || "Saved to your library." });
     return;
   }
   await rememberClipboardBudget(data, clipboardText);
@@ -1589,9 +1592,9 @@ async function runExtractJob(job) {
   notify("Uoinked ★", message);
   await publishPopupResult(job, {
     ok: true,
-    message: afterSave === "chatgpt" ? "Uoinked ★ Paste in ChatGPT."
+    message: STC.pinnedMessage(data) || (afterSave === "chatgpt" ? "Uoinked ★ Paste in ChatGPT."
       : afterSave === "copy" ? "Uoinked ★ Copied. Paste it in your AI."
-      : "Uoinked ★ Paste in Claude.",
+      : "Uoinked ★ Paste in Claude."),
   });
 }
 
@@ -1859,7 +1862,7 @@ async function runSessionAddJob(job) {
   });
 
   const sessionName = job.session_name || job.session_id;
-  notify("Added to session", `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"}`);
+  notify("Added to session", STC.pinnedMessage(data) || `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"}`);
 
   // Pull fresh active session state into local storage so popup + menu update.
   await refreshActiveSession();

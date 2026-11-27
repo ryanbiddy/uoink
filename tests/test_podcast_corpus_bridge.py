@@ -186,13 +186,13 @@ def test_episode_bridge_is_stable_searchable_and_source_aware(tmp_path, speakers
     assert sidecar["platform"] == "podcast"
     assert sidecar["host"] is None  # the feed does not identify a person
     assert sidecar["speakers"] == (["HOST", "GUEST"] if speakers else [])
-    assert "https://show.example/episodes/42#t=64" in markdown
+    assert "https://show.example/episodes/42#t=62" in markdown
     assert "youtube.com" not in markdown.lower()
 
     citations = idx.get_citations(first["video_id"])
     assert len(citations) == 2
     assert all(item["youtube_deep_link"] is None for item in citations)
-    assert citations[1]["source_deep_link"].endswith("#t=64")
+    assert citations[1]["source_deep_link"].endswith("#t=62")
     assert not any("youtube.com" in json.dumps(item) for item in citations)
     idx.close()
 
@@ -306,7 +306,7 @@ def test_bridge_is_available_through_http_and_full_mcp(tmp_path, monkeypatch):
     assert corpus["source_url"] == "https://show.example/episodes/42"
     assert "youtube.com" not in json.dumps(corpus).lower()
     assert citation_map["transcript_citations"][1]["deep_link"] == (
-        "https://show.example/episodes/42#t=64")
+        "https://show.example/episodes/42#t=62")
     assert "youtube.com" not in json.dumps(citation_map).lower()
     # Phase 6's 88 tools + get_playbook_input, discover_candidates, queue_discovered.
     assert len(uoink_mcp_tools.TOOL_REGISTRY) == 99

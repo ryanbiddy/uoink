@@ -6,7 +6,8 @@ from copy import deepcopy
 import math
 import re
 import unicodedata
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+from moments import citation_link
 
 LOW_OVERLAP_THRESHOLD = 0.15
 MAX_QUOTE_CHARS = 280
@@ -170,21 +171,18 @@ def deep_link(source, seconds):
     """Only stored source metadata supplies destinations; never claim payloads."""
     item_id = source["item_id"]
     if source.get("kind") == "youtube" and re.fullmatch(r"[A-Za-z0-9_-]{11}", item_id):
-        return f"https://www.youtube.com/watch?v={item_id}&t={math.floor(seconds)}s"
+        return citation_link(f"https://www.youtube.com/watch?v={item_id}", seconds, youtube=True)
     if source.get("kind") == "podcast":
         if source.get("episode_url"):
             return source["episode_url"]
         enclosure = source.get("enclosure_url") or source.get("source_url")
         if enclosure:
-            return enclosure.split("#", 1)[0] + f"#t={math.floor(seconds)}"
+            return citation_link(enclosure, seconds)
     if source.get("kind") == "library":
         from research import _youtube_id
         url = source.get("source_url") or ""
         if _youtube_id(url):
-            parsed = urlsplit(url)
-            query = [(k, v) for k, v in parse_qsl(parsed.query) if k not in {"t", "start"}]
-            query.append(("t", f"{math.floor(seconds)}s"))
-            return urlunsplit(parsed._replace(query=urlencode(query), fragment=""))
+            return citation_link(url, seconds, youtube=True)
     return source.get("source_url") or ""
 
 
