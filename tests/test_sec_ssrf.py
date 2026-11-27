@@ -15,9 +15,11 @@ import ipaddress
 import json
 import logging
 import re
+import shutil
 import socket
 import ssl
 import subprocess
+import tempfile
 import urllib.error
 import urllib.request
 from contextlib import nullcontext
@@ -31,6 +33,8 @@ from urllib.response import addinfourl
 
 import pytest
 import _platform
+import images
+from uoink_core.storage import atomic_output
 
 import podcasts
 import source_subscriptions as ss
@@ -40,6 +44,7 @@ import uoink_usage
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = "https://public.example/start"
 FINAL = "https://cdn.example/final"
+JPEG = b"\xff\xd8\xff" + b"0" * 16
 # Captured before any fixture patches it.
 REAL_BUILD_OPENER = urllib.request.build_opener
 
@@ -68,6 +73,7 @@ def network(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
     monkeypatch.setattr(socket, "create_connection", forbidden)
     addresses, routes, requests, responses, lookups = {}, {}, [], [], []
+    defaults = {"body": b"<title>Public page</title><p>Content</p>"}
     answered = []  # (name, answer addresses) for every lookup that answered
 
     def resolve(host, *args, **kwargs):
@@ -103,7 +109,7 @@ def network(monkeypatch):
         def http_open(self, req):
             requests.append(req)
             reply = routes.get(
-                req.full_url, (200, {}, b"<title>Public page</title><p>Content</p>"))
+                req.full_url, (200, {}, defaults["body"]))
             # Like HTTPConnection.getresponse(), the response transport can
             # raise raw socket/protocol errors that urllib does not wrap.
             if isinstance(reply, Exception):
@@ -130,7 +136,7 @@ def network(monkeypatch):
     # Exercise the old unguarded code too, without ever permitting real I/O.
     monkeypatch.setattr(urllib.request, "urlopen", build().open)
     return SimpleNamespace(addresses=addresses, routes=routes, requests=requests,
-                           responses=responses, lookups=lookups, answered=answered)
+                           responses=responses, lookups=lookups, answered=answered, defaults=defaults)
 
 
 @pytest.fixture
@@ -148,6 +154,7 @@ def dialer(network, monkeypatch):
       sni, check_hostname, verify_mode  the TLS wrapping, for HTTPS
     """
     dials, replies, unreachable = [], {}, set()
+    network.defaults["body"] = b"<title>Dialed</title><p>Content</p>"
 
     class FakeSocket:
         def __init__(self, dial):
@@ -171,7 +178,7 @@ def dialer(network, monkeypatch):
                                       for name, found in self.dial.prior_answers)
             self.dial.targets.append(target)
             status, headers, body = replies.get(
-                (self.dial.host, target), (200, {}, b"<title>Dialed</title><p>Content</p>"))
+                (self.dial.host, target), (200, {}, network.defaults["body"]))
             head = [b"HTTP/1.1 %d Fixture" % status]
             head += [name.encode("ascii") + b": "
                      + (value if isinstance(value, bytes) else value.encode("ascii"))
@@ -215,6 +222,8 @@ def dialer(network, monkeypatch):
 @pytest.fixture
 def consumers(network, monkeypatch, tmp_path):
     namespace = dict(_platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
+                     images=images, atomic_output=atomic_output, DESKTOP_ROOT=tmp_path,
+                     tempfile=tempfile, shutil=shutil,
                      urllib=urllib, log=logging.getLogger(__name__),
                      subprocess=subprocess, json=json, Path=Path, urlparse=urlparse,
                      parse_qs=parse_qs, re=re,
@@ -289,6 +298,8 @@ def consumers(network, monkeypatch, tmp_path):
     monkeypatch.setattr("uoink_processes.run_owned", audio_child)
 
     def invoke(kind, url):
+        if kind == "thumbnail":
+            network.defaults["body"] = JPEG
         if kind == "feed":
             return podcasts.fetch_feed({"feed_url": url})[0] is not None
         if kind == "standing":
@@ -489,15 +500,15 @@ def test_existing_audio_remains_available_without_network(network, consumers):
 def test_local_fixture_transport_requires_explicit_injection(network, consumers, tmp_path):
     local = "http://localhost:8765/fixture"
 
-    def fixture_open(url, **kwargs):
+    def fixture_open(url, *, body=b"<title>Fixture</title>", **kwargs):
         assert url == local
-        return addinfourl(io.BytesIO(b"<title>Fixture</title>"), Message(), url, 200)
+        return addinfourl(io.BytesIO(body), Message(), url, 200)
 
     assert podcasts.fetch_feed({"feed_url": local}, http_open=fixture_open)[0]
     assert consumers.page["_extract_stdlib"](
         local, include_screenshot=False, http_open=fixture_open)["ok"]
     assert consumers.server["_download_thumbnail"](
-        {"thumbnail": local}, tmp_path, http_open=fixture_open)
+        {"thumbnail": local}, tmp_path, http_open=lambda *a, **kw: fixture_open(*a, body=JPEG, **kw))
     assert consumers.server["_fetch_metadata"](local, resolve_url=lambda url, **kwargs: url)
     assert podcasts.download_episode_audio(
         None, 1, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"],

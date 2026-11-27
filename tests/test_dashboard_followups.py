@@ -142,7 +142,6 @@ def test_a_poster_that_fails_never_fails_the_post(x_route):
     post, _downloads, monkeypatch = x_route
 
     def no_ffmpeg(_metadata, folder, **_kw):
-        (Path(folder) / "thumbnail.raw").write_bytes(b"partial")
         raise FileNotFoundError("ffmpeg")
 
     monkeypatch.setattr(server, "_download_thumbnail", no_ffmpeg)

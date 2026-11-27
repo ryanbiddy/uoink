@@ -47,7 +47,8 @@ def test_playlist_url_follows_end_of_options():
 def test_public_diagnose_does_no_probes(monkeypatch):
     build = Mock(return_value={"ok": True})
     monkeypatch.setattr(server, "_build_diagnose_payload", build)
-    assert server._public_diagnose_payload()["ok"]
+    monkeypatch.setattr(server, "_diagnose_cache", None)
+    assert not server._public_diagnose_payload()["ok"]
     build.assert_not_called()
 
 

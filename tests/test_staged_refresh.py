@@ -641,6 +641,7 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
     # potentially long basetemp. The final JSON path is 259 characters.
     with tempfile.TemporaryDirectory(prefix="sr-") as temporary:
         root = Path(temporary)
+        monkeypatch.setitem(refresh.scope, "DESKTOP_ROOT", root)
         slug = "Long_video_" + "x" * 52
         assert len(slug) == 63
         topic_length = 190 - len(str(root)) - len(slug) - 2
@@ -704,6 +705,7 @@ def test_long_media_artifact_backup_does_not_exceed_original_path_length(
         refresh, monkeypatch, failure):
     with tempfile.TemporaryDirectory(prefix="sr-") as temporary:
         root = Path(temporary)
+        monkeypatch.setitem(refresh.scope, "DESKTOP_ROOT", root)
         slug = "Long_video_" + "x" * 52
         topic_length = 175 - len(str(root)) - len(slug) - 2
         assert topic_length >= 20

@@ -129,6 +129,9 @@ class UoinkTray:
         if diag is None:
             self._state = "offline"
             return
+        if diag.get("pending"):
+            self._state = "checking"
+            return
         ok = bool(diag.get("ok", True)) and all(
             c.get("status") != "error" for c in diag.get("checks", [])
         )
@@ -164,6 +167,7 @@ class UoinkTray:
     # ---- presentation ------------------------------------------------------
     def _status_text(self) -> str:
         return {
+            "checking": "Checking the helper…",
             "running": "Uoink: Running ✓",
             "yoinking": "Uoink: Saving…",
             "degraded": "Uoink: Running, with problems (open the dashboard)",
@@ -172,6 +176,7 @@ class UoinkTray:
 
     def _dot_color(self):
         return {
+            "checking": _DOT_GREY,
             "running": _DOT_GREEN,
             "yoinking": _DOT_AMBER,
             "degraded": _DOT_GREY,

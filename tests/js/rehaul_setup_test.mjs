@@ -222,6 +222,18 @@ const groups = {
     assert.ok(env.fetches.some(url => url.endsWith('/diagnose?refresh=1')));
     assert.equal(requests.at(-1).headers['X-Uoink-Token'], token);
   },
+  async slow_startup_diagnostics() {
+    let ready = false;
+    const env = await setup({fetch: path => {
+      if (path === '/health') return jsonResponse({ok:true});
+      if (!ready) throw new TypeError('First read timed out');
+      return jsonResponse({checks:[{name:'ffmpeg_available',status:'error'}]});
+    }});
+    ready = true;
+    await env.fireTimer(10000);
+    assert.match(env.el('diagnose-list').textContent,/Needs attention.*ffmpeg available/);
+    assert.ok(env.fetches.every(url=> !url.includes('refresh=') && !url.endsWith('/token')));
+  },
   async routes() {
     const destinations = [
       ['#mcp-settings', 'agents', 'mcpConfig'],

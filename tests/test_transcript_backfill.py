@@ -200,7 +200,7 @@ class Library:
             {"id": video_id, "title": title, "duration": duration, "webpage_url": url}), encoding="utf-8")
         if media:
             (folder / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4" + b"0" * 64)
-        assert server._index_yoink(folder, sidecar, corpus, sidecar_path)
+        assert server._index_yoink(folder, sidecar, corpus, sidecar_path, root=base or self.root)
         return folder
 
     def add_text_post(self, slug, *, url, video_id):

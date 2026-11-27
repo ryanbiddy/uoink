@@ -19,6 +19,7 @@ let platformArch = "";
 let funnelState = "checking";
 let downloadClicked = false;
 let helperUp = false;
+let diagnosisReceived = false;
 let pollTimer = null;
 let probe = null;
 let probeGeneration = 0;
@@ -240,7 +241,7 @@ async function checkConnection(refreshChecks = false) {
     if (generation !== probeGeneration) return;
     if (health.platform || health.os) setPlatform(health.platform || health.os);
     showConnection(true);
-    if (!wasUp || refreshChecks) {
+    if (!wasUp || !diagnosisReceived || refreshChecks) {
       try {
         const token = refreshChecks && await STC.getToken({ refresh: true });
         if (refreshChecks && !token) throw new Error("Could not authorize additional checks.");
@@ -251,10 +252,14 @@ async function checkConnection(refreshChecks = false) {
           await new Promise(resolve => setTimeout(resolve, 250));
           checks = await readJson("/diagnose", controller.signal);
         }
-        if (generation === probeGeneration) renderDiagnose(checks);
+        if (generation === probeGeneration && !controller.signal.aborted) {
+          renderDiagnose(checks);
+          diagnosisReceived = true;
+        }
       } catch {
         // A diagnostics error does not mean the successful health probe failed.
         if (generation === probeGeneration) {
+          diagnosisReceived = false;
           $("diagnose-list").textContent = "Additional checks are unavailable. The helper answered the connection check.";
           $("diagnose").hidden = false;
         }

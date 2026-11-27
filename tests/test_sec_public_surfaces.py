@@ -40,7 +40,8 @@ def surface_code():
         "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "_allowed_extension_ids", "_reports_live_extract", "Handler",
         "_diagnose_payload", "_public_diagnose_payload", "_build_diagnose_payload",
-        "_keyring_display_name", "_path_integrity_status", "_diagnose_lock", "_diagnose_cache", "_refresh_diagnose",
+        "_keyring_display_name", "_path_integrity_status", "_diagnose_lock", "_diagnose_cache",
+        "_refresh_diagnose", "_start_diagnose_refresh",
         "_library_health_payload", "_heartbeat_payload", "_parse_utc_stamp",
         "doctor_payload",
     }
@@ -301,6 +302,18 @@ def test_present_origin_never_gets_splash_key_readiness(helper, origin, site):
     helper["_get_saved_anthropic_key"].assert_not_called()
 
 
+@pytest.mark.parametrize("origin,expected", [
+    (f"http://127.0.0.1:{PORT}", True), ("https://example.test", None),
+    (f"http://localhost:{PORT}", None),
+])
+def test_authenticated_splash_with_explicit_origin(helper, origin, expected):
+    status, _, payload = request(helper, "/diagnose", headers={
+        "Host": f"127.0.0.1:{PORT}", "Sec-Fetch-Site": "same-origin",
+        "Origin": origin, "X-Uoink-Token": helper["TOKEN"],
+    })
+    assert status == 200 and payload.get("anthropic_key_valid") is expected
+
+
 @pytest.mark.parametrize("site", [None, "", "cross-site", "same-site", "null"])
 def test_no_origin_without_local_fetch_metadata_gets_no_key_readiness(helper, site):
     status, _, payload = request(helper, "/diagnose", headers={
@@ -353,7 +366,8 @@ def test_refresh_requires_token_and_coalesces_while_running(helper):
     helper["threading"] = SimpleNamespace(Thread=DeferredWorker)
     route = "/diagnose?refresh=1"
     for headers in ({}, {"X-Uoink-Token": "fixture-invalid"}):
-        assert request(helper, route, headers=headers)[2]["ok"]
+        payload = request(helper, route, headers=headers)[2]
+        assert not payload["ok"] and not payload["refreshing"]
     helper["_probe_command"].assert_not_called()
     assert not workers
     for _ in range(2):

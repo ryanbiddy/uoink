@@ -31,7 +31,7 @@ import pytest
 import _platform
 import uoink_usage
 from provenance import clamp_title
-from uoink_core.storage import open_regular, read_export_markdown
+from uoink_core.storage import checked_path, open_regular, read_export_markdown
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -140,7 +140,8 @@ def capture(tmp_path, monkeypatch):
         "_source_facts": lambda m: {"published_at": None, "description": None},
         "LITE_SHOT_INTERVAL_SEC": 120, "MAX_SCREENSHOTS": 100,
         "YTDLP_CMD": ["yt-dlp"], "YTDLP_MAX_FILESIZE_BYTES": 1024,
-        "CURRENT_SIDECAR_SCHEMA": 2, "DESKTOP_ROOT": tmp_path / "library",
+        "CURRENT_SIDECAR_SCHEMA": 2, "DESKTOP_ROOT": tmp_path,
+        "open_regular": open_regular, "checked_path": checked_path,
         "_get_index": lambda: idx, "_classify_topic": lambda m: "Test",
         "_normalize_long_video_mode": lambda mode: mode,
         "_screenshot_interval_for": lambda d, i: i,

@@ -84,6 +84,7 @@ def test_thumbnail_checks_size_and_type_before_conversion(tmp_path, monkeypatch,
     (b"\xff\xd8\xff", "jpeg_pipe"), (b"\x89PNG\r\n\x1a\n", "png_pipe"), (b"RIFF0000WEBP", "webp_pipe"),
 ])
 def test_thumbnail_limits_the_read_and_selects_the_image_reader(tmp_path, monkeypatch, header, demuxer):
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     data = header.ljust(16, b"0")
     response = io.BytesIO(data)
     read = Mock(wraps=response.read)

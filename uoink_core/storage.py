@@ -40,16 +40,32 @@ def _system_path(path: Path) -> Path:
     return path
 
 
-def checked_path(root: Path, path: Path) -> Path:
-    """Check lexical ownership and every component before following a path."""
+class LibraryPathError(OSError):
+    """A path does not satisfy the library's ownership or link policy."""
+
+
+def _rooted_path(root: Path, path: Path) -> tuple[Path, Path]:
+    """Follow the selected root once. Keep every component beneath it lexical."""
     root = Path(root).absolute()
     path = Path(path)
     if os.name == "nt" and any(":" in part for part in path.parts[1:]):
-        raise OSError("Choose a regular file.")
-    if not path.is_absolute() or not path.is_relative_to(root) or ".." in path.parts:
-        raise OSError("The file must be inside the library.")
-    original = path
-    root, path = _system_path(root), _system_path(path)
+        raise LibraryPathError("Choose a regular file.")
+    if not path.is_absolute() or ".." in path.parts:
+        raise LibraryPathError("The file must be inside the library.")
+    target = root.resolve()
+    if path.is_relative_to(root):
+        return target, _system_path(target / path.relative_to(root))
+    # Some older rows already store the physical spelling of the root.
+    if path.is_relative_to(target):
+        return target, path
+    raise LibraryPathError("The file must be inside the library.")
+
+
+def checked_path(root: Path, path: Path) -> Path:
+    """Check ownership and every component strictly inside the chosen root."""
+    selected = Path(root).absolute()
+    original = Path(path)
+    root, path = _rooted_path(selected, path)
     current = root
     for part in path.relative_to(root).parts:
         current /= part
@@ -58,10 +74,11 @@ def checked_path(root: Path, path: Path) -> Path:
         except FileNotFoundError:
             break
         if _redirected(entry):
-            raise OSError("The library path contains a link.")
+            raise LibraryPathError("The library path contains a link.")
     if not path.resolve().is_relative_to(root.resolve()):
-        raise OSError("The file must be inside the library.")
-    return original
+        raise LibraryPathError("The file must be inside the library.")
+    # Keep the configured spelling for paths returned to the UI and index.
+    return original if original.is_relative_to(selected) else selected / path.relative_to(root)
 
 
 @contextmanager
@@ -109,7 +126,7 @@ def _check_opened(root, path, fd):
 
 @contextmanager
 def open_regular(root, path, *, binary=False, newline=None):
-    path = Path(path)
+    root, path = _rooted_path(root, path)
     with _parent_directory(root, path) as parent:
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
         if not stat.S_ISREG(path.lstat().st_mode):
@@ -146,7 +163,7 @@ def read_export_markdown(path: Path, *, root=None) -> str:
 @contextmanager
 def atomic_output(path: Path, *, root=None, encoding=None, newline=None, mode=0o666):
     path = Path(path).absolute()
-    root = Path(root or path.anchor)
+    root, path = _rooted_path(root or path.anchor, path)
     with _parent_directory(root, path, create=True) as parent:
         tmp = path.with_name(f".{uuid.uuid4().hex}.tmp")
         flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0)
@@ -194,7 +211,8 @@ def _is_writable_dir(path: Path) -> bool:
         return False
     probe = path / f".yoink-write-test-{os.getpid()}-{uuid.uuid4().hex}.tmp"
     try:
-        with _parent_directory(path.absolute(), probe.absolute()) as parent:
+        root, probe = _rooted_path(path, probe.absolute())
+        with _parent_directory(root, probe) as parent:
             flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
             name = probe if parent is None else probe.name
             fd = os.open(name, flags, 0o600, dir_fd=parent)
@@ -208,6 +226,21 @@ def _is_writable_dir(path: Path) -> bool:
         return True
     except OSError:
         return False
+
+
+def move_library_folder(root: Path, source: Path, destination: Path) -> None:
+    """Pin both parents through the final checks and the same-volume rename."""
+    target_root, source = _rooted_path(root, source)
+    destination = target_root / checked_path(root, destination).relative_to(root)
+    with _parent_directory(target_root, source) as src_parent:
+        with _parent_directory(target_root, destination, create=True) as dst_parent:
+            checked_path(target_root, source)
+            if checked_path(target_root, destination).exists():
+                raise FileExistsError("The destination is occupied.")
+            if dst_parent is None:
+                source.rename(destination)
+            else:
+                os.rename(source.name, destination.name, src_dir_fd=src_parent, dst_dir_fd=dst_parent)
 
 
 def _topic_folder_name(topic: str) -> str:
