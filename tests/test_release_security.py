@@ -6,7 +6,7 @@ import pytest
 import server
 
 
-@pytest.mark.parametrize(("name", "data"), [("saved.txt", b"notes"), ("saved.md", b"\xff")])
+@pytest.mark.parametrize(("name", "data"), [("saved.txt", b"notes"), ("saved.md", b"\xff"), ("saved.md", b"header\0field")])
 def test_open_markdown_refuses_non_markdown_or_invalid_text(tmp_path, monkeypatch, name, data):
     path = tmp_path / name
     path.write_bytes(data)

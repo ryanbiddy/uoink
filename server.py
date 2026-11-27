@@ -25863,6 +25863,8 @@ class Handler(BaseHTTPRequestHandler):
                 with _corpus_update_lock, contextlib.ExitStack() as held:
                     source = held.enter_context(open_regular(DESKTOP_ROOT, path, newline=""))
                     original = source.read()
+                    if "\x00" in original:
+                        raise ValueError("The file contains binary data.")
                     normalized = normalize_export_comments(path, original, root=DESKTOP_ROOT)
                     if original != normalized:
                         held.close()
@@ -25871,7 +25873,7 @@ class Handler(BaseHTTPRequestHandler):
                         if source.read() != normalized:
                             raise OSError("The saved Markdown changed.")
                     _platform.open_in_os(path)
-            except (UnicodeError, OSError):
+            except (ValueError, OSError):
                 return self._send_json(400, {"ok": False, "error": "Could not read the saved Markdown as UTF-8 text."})
         except Exception as e:  # noqa: BLE001
             return self._send_json(200, {"ok": False, "error": str(e)})
