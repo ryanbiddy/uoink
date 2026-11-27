@@ -432,7 +432,7 @@ def test_each_seam_fires_once_when_enabled_and_never_when_disabled(tmp_path, mon
         def get_yoink(self, vid):
             return {
                 "video_id": vid,
-                "corpus_path": str(tmp_path / "gone" / "corpus.md"),
+                "slug": "gone", "corpus_path": str(tmp_path / "gone" / "corpus.md"),
                 "deleted_at": "2000-01-01T00:00:00",
             }
 

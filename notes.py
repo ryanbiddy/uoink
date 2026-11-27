@@ -30,6 +30,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from uoink_core.storage import _atomic_write_text
+
 # The taxonomy helpers (platform + source-type vocabulary) live in
 # page_extractor so every source agrees on one set of tags. A note is
 # source_type='note' on platform='note'.
@@ -185,11 +187,10 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
     sidecar_path = None
     if data_root is not None:
         folder = Path(data_root) / subfolder / slug
-        folder.mkdir(parents=True, exist_ok=True)
         corpus_path = folder / f"{slug}.md"
         sidecar_path = folder / f"{slug}.json"
-        corpus_path.write_text(f"# {title}\n\n" + (md or ""), encoding="utf-8")
-        sidecar_path.write_text(json.dumps({
+        _atomic_write_text(corpus_path, f"# {title}\n\n" + (md or ""), root=data_root)
+        _atomic_write_text(sidecar_path, json.dumps({
             "schema_version": 2,
             "source_type": SOURCE_TYPE,
             "platform": PLATFORM,
@@ -200,7 +201,7 @@ def persist_note(idx, note: dict, *, data_root: Path | None = None,
             "yoinked_at": yoinked_at,
             "extracted_at": yoinked_at,
             "health": health,
-        }, indent=2, ensure_ascii=False), encoding="utf-8")
+        }, indent=2, ensure_ascii=False), root=data_root)
 
     metadata_json = json.dumps({
         "author": author,

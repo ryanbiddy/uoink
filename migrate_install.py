@@ -118,13 +118,13 @@ def _dir_size_bytes(path: Path) -> int:
 # --------------------------------------------------------------------------
 # Status (consumed by `uoink doctor` / /diagnose and the dry-run printer)
 # --------------------------------------------------------------------------
-def migration_status() -> dict:
+def migration_status(*, include_legacy_key: bool = True) -> dict:
     new_root = _new_data_root()
     old_root = _old_data_root()
     desktop = _desktop_dir()
     legacy_desktop = desktop / "Yoink"
     new_desktop = desktop / "Uoink"
-    return {
+    status = {
         "app_data": {
             "old_root": str(old_root),
             "new_root": str(new_root),
@@ -139,8 +139,10 @@ def migration_status() -> dict:
             "legacy_present": legacy_desktop.is_dir(),
             "new_present": new_desktop.is_dir(),
         },
-        "keyring_legacy_present": _legacy_keyring_key_present(),
     }
+    if include_legacy_key:
+        status["keyring_legacy_present"] = _legacy_keyring_key_present()
+    return status
 
 
 def legacy_desktop_corpus_present() -> bool:

@@ -128,6 +128,7 @@ def test_http_contract_routes_and_attachment(tmp_path, monkeypatch):
     idx, _provider = regenerate.build_provider(tmp_path)
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "corpus")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "corpus")
     monkeypatch.setattr(server, "_read_settings", lambda: {})
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), _QuietHandler)
     httpd.daemon_threads = True

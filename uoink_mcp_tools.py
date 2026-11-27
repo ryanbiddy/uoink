@@ -29,8 +29,10 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from time import monotonic
+from uoink_core.storage import checked_path, open_regular
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import urlsplit
 from research import CANDIDATE_KEY_PATTERN, RUN_ID_PATTERN
 
 
@@ -102,7 +104,8 @@ def _limit_int(value: Any, *, default: int, low: int, high: int) -> int:
 
 def _read_json(path: Path) -> dict[str, Any]:
     try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        with open_regular(_b().DESKTOP_ROOT, path) as source:
+            raw = json.load(source)
         return raw if isinstance(raw, dict) else {}
     except (OSError, json.JSONDecodeError):
         return {}
@@ -139,9 +142,16 @@ def _iter_yoink_folders():
             continue
         if folder == trash or trash in folder.parents:
             continue
+        try:
+            checked_path(root, folder)
+        except OSError:
+            continue
         corpus = b._resolve_corpus_path(folder)
         if corpus is not None:
-            yield folder, corpus
+            try:
+                yield folder, checked_path(root, corpus)
+            except OSError:
+                continue
 
 
 def _yoink_summary(folder: Path, corpus: Path) -> dict[str, Any]:
@@ -220,7 +230,10 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     if row:
         corpus_path = row.get("corpus_path") or ""
         if corpus_path:
-            corpus = Path(corpus_path)
+            try:
+                corpus = checked_path(_b().DESKTOP_ROOT, Path(corpus_path))
+            except OSError:
+                return None, None
             if corpus.is_file():
                 return corpus.parent, corpus
         # Indexed row missing on disk (folder moved/deleted outside the
@@ -549,7 +562,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         return _not_found(slug)
     try:
         from uoink_core.storage import read_export_markdown
-        md = read_export_markdown(corpus)
+        md = read_export_markdown(corpus, root=_b().DESKTOP_ROOT)
     except OSError as e:
         return _err(f"corpus read failed: {e}")
     sidecar = _read_sidecar(folder)
@@ -1109,11 +1122,12 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     diarize = bool(args.get("diarize")
                      if args.get("diarize") is not None
                      else settings.get("diarization_default"))
-    consent_given = bool(args.get("consent_given"))
     language = args.get("language")
     result, _status = server._queue_podcast_transcription(
         episode_id, model=model, language=language, diarize=diarize,
-        consent_given=consent_given, defer_worker=not server._TOKEN_OWNED)
+        consent_given=False, defer_worker=not server._TOKEN_OWNED)
+    if result.get("consent_required"):
+        return {**result, "error": result["error"] + " Start the download in the Uoink dashboard."}
     return result
 
 
@@ -1777,25 +1791,23 @@ def add_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Writing Studio: add a Substack-style voice anchor (URL or
     raw text). Cap at 10 per Ryan's locked answer #4."""
     server = _b()
+    import page_extractor as pages
     import writing_studio as _ws  # noqa: WPS433
-    try:
-        url_fetcher = (server.Handler._writing_url_fetcher
-                        if False else None)  # MCP path doesn't have a Handler instance
-    except Exception:
-        url_fetcher = None
-    # The MCP call doesn't have a Handler instance, so we resolve the
-    # extractor directly. Falls back to None if Universal Site PR isn't
-    # in main yet (anchor still saves with raw_text=NULL for URLs).
-    url_fetcher = globals().get("_extract_page_to_prose_fn")
-    if url_fetcher is None:
-        url_fetcher = getattr(server, "_extract_page_to_prose", None)
+    idx = server._get_index()
+    source_type = (args.get("source_type") or "").strip()
+    if source_type == "url":
+        url = pages.normalize_page_url(args.get("source_value"))
+        if not url:
+            return _err("Enter a valid webpage URL for the style reference.")
+        if not pages.host_is_allowed(idx, url):
+            return pages.page_consent_required(urlsplit(url).hostname)
     try:
         row = _ws.add_style_anchor(
-            server._get_index(),
+            idx,
             name=args.get("name"),
-            source_type=(args.get("source_type") or "").strip(),
+            source_type=source_type,
             source_value=args.get("source_value"),
-            url_to_prose=url_fetcher)
+            url_to_prose=server._extract_page_to_prose)
     except ValueError as e:
         return _err(str(e))
     except Exception as e:
@@ -1850,7 +1862,8 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
 
     probe = RegistryCaptureHandler()
     try:
-        server.Handler._handle_extract_any(probe, dict(args))
+        fields = TOOL_REGISTRY["uoink_url"].input_schema["properties"]
+        server.Handler._handle_extract_any(probe, {k: args[k] for k in fields if k in args})
     except Exception as exc:
         return _err(f"uoink_url failed: {exc}")
     if isinstance(probe.payload, dict):
@@ -2002,7 +2015,7 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
 
     LOCKED LOCAL-FIRST: Crawl4AI runs on-device (lazy import); stdlib
     fallback when Crawl4AI isn't installed. Allowlist gate enforced --
-    add the host via add_allowed_site first if it's not seeded."""
+    the user approves additional sites in the dashboard."""
     server = _b()
     import page_extractor as _pe  # noqa: WPS433
     url = args.get("url")
@@ -2197,20 +2210,16 @@ def list_allowed_sites(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def add_allowed_site(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.2 Universal Site: add a hostname or wildcard pattern
-    ('*.docs.example.com'). Idempotent on UNIQUE url_pattern."""
-    server = _b()
+    """Only the dashboard may grant access to a site."""
     import page_extractor as _pe  # noqa: WPS433
     pattern = args.get("url_pattern") or args.get("pattern")
     if not isinstance(pattern, str) or not pattern.strip():
         return _err("url_pattern (string) is required")
     try:
-        return _ok(site=_pe.add_allowed(
-            server._get_index(), pattern.strip()))
+        pattern = _pe.normalize_site_pattern(pattern)
     except ValueError as e:
-        return _err(str(e))
-    except Exception as e:
-        return _err(f"add_allowed_site failed: {e}")
+        return {"ok": False, "code": "consent_required", "error": str(e)}
+    return _pe.page_consent_required(pattern)
 
 
 def remove_allowed_site(args: dict[str, Any]) -> dict[str, Any]:
@@ -4269,7 +4278,7 @@ DESCRIPTIONS = {
     "list_podcast_episodes": "List tracked podcast episodes newest published first, optionally scoped to a feed or lifecycle state. Use to obtain episode IDs and check download or transcription state; use list_podcast_feeds for feed settings or poll_podcast_feed to refresh observations. Returns episodes and count from local storage without fetching audio.",
     "download_podcast_episode": "Download a tracked podcast episode's audio to its canonical local MP3. Use after list_podcast_episodes, before transcribe_podcast_episode; use episode_to_corpus only after a transcript exists. Requires yt-dlp and ffmpeg, and blocks until download finishes or fails. Reuses an existing nonempty canonical file and records its path on the episode.",
     "get_whisperx_status": "Inspect local WhisperX availability, the selected model and the diarization default. Use before transcribe_podcast_episode to identify missing runtime prerequisites; use get_job_status to monitor an already queued transcription. Returns availability and supported model settings without downloading a model or starting transcription.",
-    "transcribe_podcast_episode": "Queue local WhisperX transcription for a downloaded podcast episode. Use after download_podcast_episode and get_whisperx_status; monitor the returned job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio. First-time model downloads require user consent: only reissue with consent_given after the dashboard records the opt-in. Missing runtime returns an error.",
+    "transcribe_podcast_episode": "Queue local WhisperX transcription for a downloaded podcast episode. Check get_whisperx_status for installed models. If the chosen model needs a download, ask the user to start it in the dashboard. Monitor the job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio.",
     "episode_to_corpus": "Publish a completed podcast transcript as a searchable local corpus with source-aware citations. Use after transcribe_podcast_episode completes; use download_podcast_episode for audio acquisition. Writes deterministic Markdown and sidecar files, replaces the prior corpus/index snapshot and repairs partial previous attempts. Missing audio or transcript prerequisites return an error; success identifies the published item.",
     "get_library_activity": "Report saved-library capture activity, shelf churn and standing-source observations for a time interval. Use for counts and revision-bound drill-down; use get_library_brief_input for a daily writing packet or source_status for one source's observations. Start with a summary, then reuse its report_revision for detail pages. Returns deterministic metrics and evidence; stale detail revisions require a fresh summary.",
     "search_library": "Retrieve a bounded, clip-first selection of saved-library matches with revision-bound card and excerpt URIs. Use for citation-ready research; use search_uoinks for whole-item filters or search_clips for more transcript windows. Check passage_verified before quoting; citation_reason explains missing passages. Follow resource URIs with read_library_resource and next_step for more retrieval. Results are not exhaustive; search-mode metadata explains keyword fallback.",
@@ -4327,18 +4336,18 @@ DESCRIPTIONS = {
     "write_blog": "Prepare grounding for a blog article, or save a credited Markdown draft in the local Writing Studio. Use for long prose; use write_tweet for tweets and threads or generate_script for video scripts. Without body, returns grounding unless direct generation is requested with the saved Anthropic key. With body, saves the agent's draft and returns soft Voice DNA warnings. Keep the required Source credit. Direct generation sends context to Anthropic and retries fatal phrase violations once before refusing to save; nothing is published to a website.",
     "list_writing_pieces": "List saved tweet, thread and blog drafts newest first, optionally filtered by kind or source item. Use to find a piece ID for get_writing_piece; use list_scripts for video-script versions. Returns pieces and count. The list contains local drafts, not posts fetched from social or publishing accounts.",
     "get_writing_piece": "Read one saved Writing Studio tweet, thread or blog draft. Use after list_writing_pieces; use write_tweet or write_blog to save another draft, or get_script for video scripts. Supply id or its piece_id alias; id takes precedence. Returns the piece object or a not-found error.",
-    "add_style_anchor": "Save a named writing-style reference from pasted text or a URL. Use to guide later write_tweet/write_blog drafts; use list_style_anchors to select existing references. URL references fetch prose through the page extractor and can retain null raw_text if extraction fails. Returns the anchor; more than ten anchors is refused. Style references do not authorize copying source facts or suppressing creator credit.",
+    "add_style_anchor": "Save a named writing-style reference from pasted text or an allowed webpage. Use list_style_anchors to select references for write_tweet or write_blog. New sites need dashboard approval. If extraction fails for an allowed URL, the anchor can have null raw_text. The library holds up to ten active anchors. Style references guide voice. Keep source facts and creator credit separate.",
     "list_style_anchors": "List saved writing-style references with active flags and the configured ten-anchor cap. Use to select style_anchor_ids for write_tweet or write_blog; use add_style_anchor to save a reference or remove_style_anchor to delete one. Returns anchors and count without refetching URL contents.",
     "remove_style_anchor": "Delete a saved writing-style reference. Use after list_style_anchors identifies the reference; use add_style_anchor to save a replacement. Supply anchor_id or its id alias; anchor_id takes precedence. Returns the selected ID and whether it was removed. Previously saved writing pieces remain.",
     "uoink_url": "Capture a supported video or Hacker News item. Hacker News links save the discussion through Algolia's public API. A comment link highlights that reply. Video capture requires the local media runtime and supports non-YouTube videos and long-video modes. Use uoink_video for a standard YouTube capture, uoink_page for webpage prose, uoink_x for X post chains or uoink_reddit_thread for Reddit comments. Generic video fallback saves metadata and available transcript text. Recapturing a source can replace its saved corpus and metadata.",
     "uoink_note": "Save user-provided text as a local searchable note with title and attribution. Use for pasted ideas or prose without fetching a source; use uoink_page for a web article or uoink_image for pixels. Returns the saved item ID, slug and metadata. Empty or invalid notes are refused; title can be derived from the text.",
     "uoink_image": "Save supplied PNG, JPEG or WebP bytes as a local image corpus item with optional caption and attribution. Use for screenshots, diagrams or images; use uoink_note for text or uoink_page to fetch a webpage. Accepts strict base64 or a data URL and returns the saved item ID, slug and metadata. Invalid images are refused. No cloud OCR or vision service runs.",
     "uoink_x": "Capture an X post and its author's earlier chain as a local text corpus item. Use for post text; use uoink_url for an X video capture or uoink_page for general webpage prose. Requires x_text_capture_enabled and public source access. Returns the saved item ID, title, captured-tweet count and metadata; disabled capture or extraction failure returns an error. Recapturing a source can replace its saved corpus and metadata.",
-    "uoink_page": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For other pages, add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available. Static fallback has no screenshot. Returns content, metadata and the saved item ID. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_page": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For an unlisted host, ask the user to allow the site in the dashboard. Use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Crawl4AI renders locally when available. Static capture omits the screenshot. Returns extracted content and metadata. A null video_id means the save failed. Recapturing a source can replace its saved corpus and metadata.",
     "uoink_reddit_thread": "Capture a Reddit post and filtered comment tree as a local discussion corpus. Use when replies matter; use uoink_page for general webpage prose or uoink_url for video extraction. Fetches Reddit's public JSON without API credentials or the page allowlist, then saves nested replies with source_type reddit_thread. Returns captured content, comment counts and the saved item ID; fetch or save failures return an error. Recapturing a source can replace its saved corpus and metadata.",
-    "list_allowed_sites": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages.",
-    "add_allowed_site": "Add a hostname pattern to the webpage-capture allowlist. Use for a user-authorized uoink_page destination; use list_allowed_sites to inspect rules or remove_allowed_site to revoke one. Plain hosts include subdomains; wildcard patterns match their specified subdomains. Returns the saved rule and reuses an existing pattern unchanged. This grants future page access but does not capture a page.",
-    "remove_allowed_site": "Remove a hostname pattern from the webpage-capture allowlist. Use to revoke a rule found by list_allowed_sites; use add_allowed_site to restore it. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
+    "list_allowed_sites": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access. The user adds sites in the dashboard. Use remove_allowed_site to revoke a rule, including a default. Returns sites, count and default seeds.",
+    "add_allowed_site": "Return dashboard instructions for approving a site for webpage capture. An MCP request returns consent_required. Ask the user to add the hostname or wildcard under Settings > Capture > Sites Uoink works on, then retry the original capture. Both plain and wildcard rules include the named host and its subdomains.",
+    "remove_allowed_site": "Remove a hostname pattern from the webpage-capture allowlist. Use list_allowed_sites to find the rule. The user can restore it in the dashboard. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
 }
 
 # Existing constraints, enums and defaults remain authoritative. These strings
@@ -4423,7 +4432,7 @@ PARAMETERS = {
     "model": "Local WhisperX model size; omit to use the saved model setting.",
     "language": "Whisper language code, such as en; omit for automatic language detection.",
     "diarize": "Request speaker diarization; omit to use the saved default and its runtime prerequisites.",
-    "consent_given": "True only after the user opted in through the dashboard to the required first-time model download.",
+    "consent_given": "Retained for compatibility. The user starts a first-time model download in the dashboard.",
     "run_id": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed.",
     "cursor": "Opaque cursor from the previous response; pass unchanged to continue the same listing.",
     "state": "Work-state filter; all includes every state rather than only ready assignments.",
@@ -4788,9 +4797,13 @@ for _name, _key, _meaning in (
     ("add_style_anchor", "anchor", "Saved style reference; URL extraction can leave raw_text null."),
     ("add_podcast_feed", "feed", "New or existing podcast feed registration."),
     ("add_monitored_playlist", "playlist", "New or existing playlist monitor registration."),
-    ("add_allowed_site", "site", "New or existing allowlist rule, unchanged on a duplicate."),
 ):
     OUTPUT_SCHEMAS[_name] = _output({_key: _field("object", _meaning)})
+
+OUTPUT_SCHEMAS["add_allowed_site"] = _output({
+    "code": _field("string", "consent_required when site approval must come from the dashboard."),
+})
+OUTPUT_SCHEMAS["add_allowed_site"]["properties"]["ok"]["const"] = False
 
 # Optional get_transcript fields: present only for some sources or options.
 OUTPUT_SCHEMAS["get_transcript"]["properties"].update({
@@ -6325,10 +6338,10 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_allowed_site": ToolSpec(
         name="add_allowed_site",
-        title="Add allowed site",
+        title="Request site access",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
-            "idempotentHint": True, "openWorldHint": True,
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
         },
         description=(
             DESCRIPTIONS["add_allowed_site"]
@@ -6919,6 +6932,11 @@ def _scrub_error_text(value: Any) -> str:
 # planted in a saved page reads as quoted data. The JSON text contract stays:
 # this is one added key, first in the object.
 UNTRUSTED_CONTENT_TOOL_NAMES = frozenset({
+    "uoink_page",
+    "uoink_url",
+    "uoink_video",
+    "uoink_x",
+    "uoink_reddit_thread",
     "research_evidence",
     "research_publish",
     "research_start",

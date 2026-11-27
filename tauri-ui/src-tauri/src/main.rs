@@ -58,8 +58,8 @@ fn open_url(url: String) -> Result<(), String> {
     }
     #[cfg(target_os = "windows")]
     let mut cmd = {
-        let mut c = Command::new("cmd");
-        c.args(["/C", "start", "", &url]);
+        let mut c = Command::new("explorer.exe");
+        c.arg(&url);
         c
     };
     #[cfg(target_os = "macos")]

@@ -78,9 +78,7 @@ def relay_state(monkeypatch):
         "last_poll_at": None, "last_ok_at": None, "last_error": None, "last_capture_error": None,
         "picked_up_total": 0, "last_pending_count": None, "polling": False, "generation": 0,
         "next_due": 0.0})
-    monkeypatch.setattr(server, "_relay_raises", {})
-    monkeypatch.setattr(server, "_relay_done", {})
-    monkeypatch.setattr(server, "_relay_fallback", {})
+    monkeypatch.setattr(server, "_relay_retries", {})
     monkeypatch.setattr(server, "_relay_wake", threading.Event())
     monkeypatch.setattr(server, "_relay_stop", threading.Event())
     monkeypatch.setattr(server, "_relay_cond", threading.Condition())
@@ -126,7 +124,7 @@ def test_defaults_are_off_and_the_token_is_write_only(settings_route):
     assert "relay_token" not in settings and TOKEN not in json.dumps(probe.payload)
     stored = (folder / "settings.json").read_text(encoding="utf-8")
     assert TOKEN not in stored and "relay_token" not in json.loads(stored)
-    assert fake.values == {(server._isolated_keyring_service(folder), "relay_pull_token"): TOKEN}
+    assert fake.values == {(server._isolated_keyring_service(folder), "relay_pull_token"): "https://my-relay.onrender.com:443\n" + TOKEN}
     assert all(service == server._isolated_keyring_service(folder) for _, service, _ in fake.calls)
     get = Probe("/settings", method="GET")
     get._handle_settings_get()
@@ -143,8 +141,15 @@ def test_null_or_empty_token_clears_it(settings_route, clear):
     assert fake.values == {}
 
 
+def test_changing_relay_origin_clears_pull_token(settings_route):
+    post_settings({"relay_url": "https://first.example", "relay_token": TOKEN})
+    result = post_settings({"relay_url": "https://second.example"})
+    assert result.payload["ok"]
+    assert not result.payload["settings"]["relay_token_set"]
+
+
 def test_saving_keeps_the_token_when_it_is_left_out(settings_route):
-    post_settings({"relay_token": TOKEN})
+    post_settings({"relay_url": "https://r.example:443/first", "relay_token": TOKEN})
     probe = post_settings({"relay_enabled": True, "relay_url": "https://r.example"})
     assert probe.payload["settings"]["relay_token_set"] is True
 
@@ -394,9 +399,9 @@ def test_a_raising_tool_keeps_the_link_once_then_saves_it_as_a_note(poll_rig, ca
     poll_rig.tools.raises.add(YOUTUBE)
     server._relay_poll_once()
     assert [link["id"] for link in poll_rig.relay.links] == [link_id]
-    assert server._relay_raises == {link_id: 1} and poll_rig.tools.notes() == []
+    assert server._relay_retries[link_id].attempts == 1 and poll_rig.tools.notes() == []
     server._relay_poll_once()
-    assert poll_rig.relay.links == [] and server._relay_raises == {}
+    assert poll_rig.relay.links == [] and server._relay_retries == {}
     assert [name for name, _ in poll_rig.tools.calls] == ["uoink_video", "uoink_video", "uoink_note"]
     note = poll_rig.tools.notes()[0]
     assert note["text"] == (f"the zoo one\n\n{YOUTUBE}\n\nUoink couldn't capture this link: "
@@ -423,11 +428,11 @@ def test_a_fallback_note_that_fails_keeps_the_link_and_retries_only_the_note(pol
     poll_rig.tools.note_result = failure
     status = server._relay_poll_once()
     assert [link["id"] for link in poll_rig.relay.links] == [link_id]
-    assert link_id in server._relay_fallback
+    assert server._relay_retries[link_id].stage == "fallback"
     assert "Uoink will try again" in status["last_capture_error"]
     poll_rig.tools.note_result = {"ok": True}
     server._relay_poll_once()
-    assert poll_rig.relay.links == [] and server._relay_fallback == {}
+    assert poll_rig.relay.links == [] and server._relay_retries == {}
     # The capture ran once; the second check only saved the owed note.
     assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page", "uoink_note", "uoink_note"]
     assert "isn't in Sites Uoink works on" in poll_rig.tools.notes()[-1]["text"]
@@ -438,7 +443,7 @@ def test_a_note_is_saved_after_a_successful_capture(poll_rig):
     server._relay_poll_once()
     assert poll_rig.tools.calls == [
         ("uoink_video", {"url": YOUTUBE}),
-        ("uoink_note", {"title": "From my phone", "text": f"Watch the opening\n\n{YOUTUBE}"})]
+        ("uoink_note", {"title": "From my phone", "author": "Phone inbox", "text": f"Watch the opening\n\n{YOUTUBE}"})]
 
 
 def test_a_registry_rate_limit_leaves_the_link_for_the_next_check(poll_rig):
@@ -456,10 +461,10 @@ def test_a_failed_delete_is_retried_without_capturing_twice(poll_rig):
     link_id = poll_rig.relay.add(YOUTUBE)
     poll_rig.relay.delete_status = 500
     server._relay_poll_once()
-    assert link_id in server._relay_done and len(poll_rig.relay.links) == 1
+    assert server._relay_retries[link_id].stage == "delete" and len(poll_rig.relay.links) == 1
     poll_rig.relay.delete_status = None
     server._relay_poll_once()
-    assert poll_rig.relay.links == [] and server._relay_done == {}
+    assert poll_rig.relay.links == [] and server._relay_retries == {}
     assert len(poll_rig.tools.calls) == 1
 
 
@@ -519,7 +524,7 @@ def test_the_real_relay_app_round_trip(poll_rig, monkeypatch):
         poll_rig.settings["relay_url"] = f"http://127.0.0.1:{httpd.server_address[1]}/"
         status = server._relay_poll_once()
         assert status["picked_up_total"] == 1 and httpd.inbox.list() == []
-        assert poll_rig.tools.calls[-1] == ("uoink_note", {"title": "From my phone",
+        assert poll_rig.tools.calls[-1] == ("uoink_note", {"title": "From my phone", "author": "Phone inbox",
                                                           "text": f"From the bus\n\n{YOUTUBE}"})
     finally:
         httpd.shutdown()
@@ -588,3 +593,86 @@ def test_poll_logs_hold_no_token_url_or_note(poll_rig, caplog):
     for secret in (TOKEN, "wrong-token-", YOUTUBE, "jNQXAC9IVRw", PAGE, "private words", poll_rig.relay.base):
         assert secret not in caplog.text
     assert "relay: checked 2 link(s)" in caplog.text
+
+
+def test_poll_inspects_at_most_one_hundred_links(poll_rig, monkeypatch):
+    links = [{"id": f"1800000000000-{n:012x}"} for n in range(101)]
+    monkeypatch.setattr(server, "_relay_http", lambda *a: (200, {"ok": True, "links": links}))
+    seen = []
+    monkeypatch.setattr(server, "_relay_handle_link", lambda link, *a: seen.append(link) or "skipped")
+    server._relay_poll_once()
+    assert seen == links[:100]
+
+
+@pytest.mark.parametrize("captured", [True, False])
+def test_note_rate_limit_pauses_poll_and_retries_only_the_note(poll_rig, captured):
+    first = poll_rig.relay.add(PAGE, "Read later")
+    second = poll_rig.relay.add(YOUTUBE)
+    poll_rig.tools.results[PAGE] = {"ok": captured}
+    poll_rig.tools.note_result = {"ok": False, "error": "rate limit exceeded: max 30/minute"}
+    server._relay_poll_once()
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page", "uoink_note"]
+    assert [link["id"] for link in poll_rig.relay.links] == [first, second]
+    poll_rig.tools.note_result = {"ok": True}
+    server._relay_poll_once()
+    assert [name for name, _ in poll_rig.tools.calls[2:]] == ["uoink_note", "uoink_video"]
+    assert not poll_rig.relay.links
+
+
+def test_delete_rate_limit_defers_the_rest_of_the_batch(poll_rig):
+    poll_rig.relay.add(PAGE)
+    poll_rig.relay.add(YOUTUBE)
+    poll_rig.relay.delete_status = 429
+    server._relay_poll_once()
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page"]
+    poll_rig.relay.delete_status = None
+    server._relay_poll_once()
+    assert [name for name, _ in poll_rig.tools.calls] == ["uoink_page", "uoink_video"]
+    assert not poll_rig.relay.links
+
+
+@pytest.mark.parametrize("stage", ["raises", "fallback", "delete"])
+@pytest.mark.parametrize("limit", ["age", "count"])
+def test_old_retry_state_expires_and_evicts_oldest(poll_rig, monkeypatch, stage, limit):
+    monkeypatch.setattr(server, "RELAY_RETRY_LIMIT", 2, raising=False)
+    if stage == "raises":
+        poll_rig.tools.raises.add(PAGE)
+    if stage == "fallback":
+        poll_rig.tools.results[PAGE] = {"ok": False}
+        poll_rig.tools.note_result = {"ok": False}
+    poll_rig.relay.delete_status = 503
+    for n in range(3 if limit == "count" else 1):
+        poll_rig.relay.add(PAGE, n=n)
+    server._relay_poll_once()
+    if limit == "age":
+        monkeypatch.setattr(server, "RELAY_DONE_TTL_SEC", 0)
+    poll_rig.relay.links[:] = poll_rig.relay.links[:1]
+    poll_rig.tools.calls.clear()
+    server._relay_poll_once()
+    assert [name for name, _ in poll_rig.tools.calls] == (
+        ["uoink_page", "uoink_note"] if stage == "fallback" else ["uoink_page"])
+
+
+def test_oversize_relay_response_is_refused_before_json_decode(monkeypatch):
+    from unittest.mock import Mock
+    cap = 1024 * 1024
+    body = b'{"ok": true}'.ljust(cap + 1)
+    response = io.BytesIO(body)
+    response.status = 200
+    read = Mock(wraps=response.read)
+    monkeypatch.setattr(response, "read", read)
+    opener = Mock()
+    opener.open.return_value = response
+    monkeypatch.setattr(server.urllib.request, "build_opener", lambda *a: opener)
+    with pytest.raises(server._RelayError, match="too large"):
+        server._relay_http("GET", "https://relay.example.test/v1/links", TOKEN)
+    read.assert_called_once_with(cap + 1)
+    assert response.closed
+
+
+def test_both_phone_note_paths_record_the_inbox_as_author(poll_rig):
+    poll_rig.relay.add(PAGE, "Read later")
+    poll_rig.relay.add(YOUTUBE)
+    poll_rig.tools.results[YOUTUBE] = {"ok": False}
+    server._relay_poll_once()
+    assert [note.get("author") for note in poll_rig.tools.notes()] == ["Phone inbox", "Phone inbox"]

@@ -821,45 +821,72 @@ def _windows_desktop_dir() -> Path:
     return fallback
 
 
-def _windows_toast(title: str, body: str, icon_path: str | None = None) -> None:
-    # Single-quote escape for PowerShell single-quoted strings.
-    t = title.replace("'", "''")
-    b = body.replace("'", "''")
-    # v2.1: brand the balloon with the bundled uoink.ico when it's available,
-    # so the notification carries the rust U rather than the generic blue
-    # OS information icon. Fall back to SystemIcons::Information if the icon
-    # is missing or can't be loaded (e.g. a corrupt file) -- a failed icon
-    # load must never suppress the notification itself.
+# Fixed PowerShell source for the Windows balloon. Titles, bodies and the icon
+# path are untrusted (a saved video's title comes from the web), so they are
+# NEVER spliced into this script. They travel as environment variables and the
+# script reads them as plain data. PowerShell treats the curly quotes U+2018 to
+# U+201B as quote marks too, so escaping only ASCII apostrophes let a title
+# break out of a single-quoted string and run code (3.18.1 security fix).
+_WINDOWS_TOAST_SCRIPT = (
+    "Add-Type -AssemblyName System.Windows.Forms;"
+    "Add-Type -AssemblyName System.Drawing;"
+    "$n = New-Object System.Windows.Forms.NotifyIcon;"
+    # v2.1: brand the balloon with the bundled uoink.ico when it's available.
+    # A failed icon load must never suppress the notification itself.
+    "$ip = $env:UOINK_TOAST_ICON;"
+    "if ($ip -and (Test-Path -LiteralPath $ip -PathType Leaf)) {"
+    " try { $n.Icon = New-Object System.Drawing.Icon($ip) }"
+    " catch { $n.Icon = [System.Drawing.SystemIcons]::Information } }"
+    " else { $n.Icon = [System.Drawing.SystemIcons]::Information };"
+    "$n.BalloonTipIcon = 'Info';"
+    "$n.BalloonTipTitle = [string]$env:UOINK_TOAST_TITLE;"
+    "$n.BalloonTipText = [string]$env:UOINK_TOAST_BODY;"
+    "$n.Visible = $true;"
+    "$n.ShowBalloonTip(5000);"
+    # Keep the tray icon alive long enough for Windows to render the
+    # balloon (the timeout arg is advisory; Windows uses a fixed ~5s).
+    "Start-Sleep -Seconds 6;"
+    "$n.Dispose()"
+)
+
+# Windows caps balloon text (title 63, body 255 chars); trim so a huge title
+# never bloats the child environment.
+_TOAST_TITLE_MAX = 63
+_TOAST_BODY_MAX = 255
+
+
+def _toast_env_value(value, limit: int) -> str:
+    text = "" if value is None else str(value)
+    # NUL cannot live in an environment block; drop other C0 controls too.
+    text = "".join(ch if (ch >= " " or ch in "\t\n") else " " for ch in text)
+    return text[:limit]
+
+
+def _windows_toast_command(title: str, body: str,
+                           icon_path: str | None = None) -> tuple[list[str], dict]:
+    """Return the fixed PowerShell argv and the environment carrying the data."""
+    env = dict(os.environ)
+    env["UOINK_TOAST_TITLE"] = _toast_env_value(title, _TOAST_TITLE_MAX)
+    env["UOINK_TOAST_BODY"] = _toast_env_value(body, _TOAST_BODY_MAX)
     if icon_path and os.path.isfile(icon_path):
-        ip = icon_path.replace("'", "''")
-        icon_line = (
-            "try { $n.Icon = New-Object System.Drawing.Icon('" + ip + "') } "
-            "catch { $n.Icon = [System.Drawing.SystemIcons]::Information };"
-        )
+        env["UOINK_TOAST_ICON"] = _toast_env_value(icon_path, 1024)
     else:
-        icon_line = "$n.Icon = [System.Drawing.SystemIcons]::Information;"
-    ps = (
-        "Add-Type -AssemblyName System.Windows.Forms;"
-        "Add-Type -AssemblyName System.Drawing;"
-        "$n = New-Object System.Windows.Forms.NotifyIcon;"
-        + icon_line +
-        "$n.BalloonTipIcon = 'Info';"
-        f"$n.BalloonTipTitle = '{t}';"
-        f"$n.BalloonTipText = '{b}';"
-        "$n.Visible = $true;"
-        "$n.ShowBalloonTip(5000);"
-        # Keep the tray icon alive long enough for Windows to render the
-        # balloon (the timeout arg is advisory; Windows uses a fixed ~5s).
-        "Start-Sleep -Seconds 6;"
-        "$n.Dispose()"
-    )
+        env.pop("UOINK_TOAST_ICON", None)
+    argv = ["powershell.exe", "-NoProfile", "-NonInteractive",
+            "-WindowStyle", "Hidden", "-Command", _WINDOWS_TOAST_SCRIPT]
+    return argv, env
+
+
+def _windows_toast(title: str, body: str, icon_path: str | None = None) -> None:
+    argv, env = _windows_toast_command(title, body, icon_path)
     # CREATE_NO_WINDOW prevents a console flash; not portable so we set it
     # locally rather than importing server.py's SUBPROCESS_KW (avoids a
     # circular import at module-load time).
     creationflags = 0x08000000  # CREATE_NO_WINDOW
     subprocess.Popen(
-        ["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", ps],
+        argv,
         creationflags=creationflags,
+        env=env,
         **_DETACHED_IO,
     )
 
@@ -882,7 +909,7 @@ def _macos_toast(title: str, body: str) -> None:
 # --------------------------------------------------------------------------
 def _linux_toast(title: str, body: str) -> None:
     try:
-        subprocess.Popen(["notify-send", title, body], **_DETACHED_IO)
+        subprocess.Popen(["notify-send", "--", title, body], **_DETACHED_IO)
     except FileNotFoundError:
         # libnotify isn't installed -- this is fine, the helper still
         # boots, the user just doesn't see a desktop notification.

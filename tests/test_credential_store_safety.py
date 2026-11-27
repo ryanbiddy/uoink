@@ -37,6 +37,7 @@ TOKEN_D = "pull-token-d-" + "d" * 32
 API_KEY = "sk-ant-synthetic-fixture-" + "k" * 20
 SC_KEY = "synthetic-sc-key-never-a-real-credential"
 RELAY = "https://relay.example.com"
+BOUND_TOKEN_A = RELAY + ":443\n" + TOKEN_A
 TIMEOUT = 1.0
 DIDNT_ANSWER = {"ok": False, "code": "credential_store_unavailable",
                 "error": ("The system credential store didn't answer. "
@@ -193,10 +194,10 @@ def test_a_stuck_save_never_freezes_health_or_settings_and_says_what_happened(st
     port = helper
     # Warm the health caches so the timed calls below measure waiting only.
     assert _request(port, "GET", "/health")[0] == 200
-    store.fake.hold(TOKEN_A)
+    store.fake.hold(BOUND_TOKEN_A)
     save, result = in_thread(_request, port, "POST", "/settings",
                              {"relay_url": RELAY, "relay_token": TOKEN_A, "relay_enabled": True})
-    assert store.fake.entered[TOKEN_A].wait(5)
+    assert store.fake.entered[BOUND_TOKEN_A].wait(5)
 
     for path in ("/health", "/settings"):
         status, payload, seconds = _request(port, "GET", path, timeout=5)
@@ -258,7 +259,7 @@ def test_a_normal_save_works_and_the_settings_lock_is_free_during_the_call(store
     settings = probe.payload["settings"]
     assert (settings["relay_url"], settings["relay_enabled"], settings["relay_token_set"]) == (RELAY, True, True)
     assert lock_free == [True]
-    assert store.fake.values == {(store.service, "relay_pull_token"): TOKEN_A}
+    assert store.fake.values == {(store.service, "relay_pull_token"): BOUND_TOKEN_A}
     assert TOKEN_A not in (store.folder / "settings.json").read_text(encoding="utf-8")
 
 
@@ -396,7 +397,7 @@ def test_saving_the_relay_token_in_an_isolated_profile_uses_the_file(tmp_path, m
     assert probe.status == 200 and probe.payload["ok"] is True, probe.payload
     assert probe.payload["settings"]["relay_token_set"] is True
     entries = json.loads((tmp_path / "credentials.json").read_text(encoding="utf-8"))["entries"]
-    assert entries == {"relay_pull_token": TOKEN_A}
+    assert entries == {"relay_pull_token": BOUND_TOKEN_A}
     assert TOKEN_A not in (tmp_path / "settings.json").read_text(encoding="utf-8")
     assert touched == []
 

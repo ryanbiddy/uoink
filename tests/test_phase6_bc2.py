@@ -981,6 +981,8 @@ def _server_namespace(idx=None) -> dict:
     """Production function bodies from server.py with injected pure
     dependencies; the server module itself is never imported."""
     import page_extractor
+    from functools import partial
+    from uoink_core.storage import _atomic_write_text, open_regular
     ns = {
         "page_extractor": page_extractor, "json": json, "hashlib": hashlib, "Path": Path,
         "log": logging.getLogger("bc2.server"), "_get_index": (lambda: idx), "_mirror_event": (lambda *a, **k: None),
@@ -990,6 +992,10 @@ def _server_namespace(idx=None) -> dict:
         "fmt_time": (lambda s: "00:00:00"), "format_count": (lambda v: "0"),
         "COMMENTS_START_MARK": "<!-- yoink:comments-start -->", "COMMENTS_END_MARK": "<!-- yoink:comments-end -->",
     }
+    if idx is not None:
+        root = idx._path.parent
+        ns.update(DESKTOP_ROOT=root, open_regular=open_regular,
+                  _atomic_write_text=partial(_atomic_write_text, root=root))
     for name in ("_as_float", "_parse_hms", "_youtube_deep_link", "_source_deep_link", "_sidecar_link_builder",
                  "_transcript_entries_with_links", "_citations_from_sidecar", "_capture_media_plan",
                  "_publish_capture_media", "_index_yoink", "_build_yoink_md"):

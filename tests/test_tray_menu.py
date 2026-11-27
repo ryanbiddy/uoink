@@ -124,6 +124,17 @@ def _walk(menu):
     return lines
 
 
+def test_cold_diagnostics_show_checking_then_the_result(tmp_path):
+    tray = _tray(tmp_path)
+    result = {"ok": False, "pending": True, "refreshing": True}
+    tray._get = lambda path, **kwargs: (result if path == "/diagnose" else {}, 200)
+    tray._refresh_status()
+    assert "checking" in tray._status_text().lower()
+    result = {"ok": False, "checks": [{"name": "ffmpeg_available", "status": "error"}]}
+    tray._refresh_status()
+    assert tray._state == "degraded"
+
+
 SAVED = [
     {"title": "Talk one", "folder": "C:/library/youtube/talk-one"},
     {"title": "Q&A two", "folder": "C:/library/x/qa-two"},

@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - When a passage overlaps the 45 seconds on either side of a pin, forgiving keyword search gives it a 2% score boost among the selected results.
 - The extension now shows the pinned time alongside first-save help, session details and queue updates. Re-pinning a moment keeps it among your 20 most recent pins.
 - Transcript links in search, research reports and copied quotes open two seconds before the cited line.
+- Security fixes from a full review cover opening Markdown, saves and exports in linked library folders, media links and thumbnails, startup diagnostics, phone pairing and inbox limits, private session names, and dashboard approval for new capture sites.
 - Settings shows the same rough transcription time in both places and recommends an English model that fits a ten-minute budget per hour of audio, falling back to the bundled model. `uoink models` now describes how the helper runs transcription.
 - Library gives Select and “What's a hook?” more space, hides Select in an empty library, and makes the search clear button and Saved dot easier to see.
 - When you save a page from its browser tab, Uoink only requests a Library thumbnail from the page's own site. It skips images and redirects hosted elsewhere.

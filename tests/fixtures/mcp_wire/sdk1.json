@@ -722,7 +722,7 @@
         "openWorldHint": true,
         "readOnlyHint": false
       },
-      "description": "Queue local WhisperX transcription for a downloaded podcast episode. Use after download_podcast_episode and get_whisperx_status; monitor the returned job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio. First-time model downloads require user consent: only reissue with consent_given after the dashboard records the opt-in. Missing runtime returns an error.",
+      "description": "Queue local WhisperX transcription for a downloaded podcast episode. Check get_whisperx_status for installed models. If the chosen model needs a download, ask the user to start it in the dashboard. Monitor the job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio.",
       "inputSchema": {
         "properties": {
           "episode_id": {
@@ -751,7 +751,7 @@
           },
           "consent_given": {
             "type": "boolean",
-            "description": "True only after the user opted in through the dashboard to the required first-time model download."
+            "description": "Retained for compatibility. The user starts a first-time model download in the dashboard."
           }
         },
         "required": [
@@ -4496,7 +4496,7 @@
         "openWorldHint": true,
         "readOnlyHint": false
       },
-      "description": "Save a named writing-style reference from pasted text or a URL. Use to guide later write_tweet/write_blog drafts; use list_style_anchors to select existing references. URL references fetch prose through the page extractor and can retain null raw_text if extraction fails. Returns the anchor; more than ten anchors is refused. Style references do not authorize copying source facts or suppressing creator credit.",
+      "description": "Save a named writing-style reference from pasted text or an allowed webpage. Use list_style_anchors to select references for write_tweet or write_blog. New sites need dashboard approval. If extraction fails for an allowed URL, the anchor can have null raw_text. The library holds up to ten active anchors. Style references guide voice. Keep source facts and creator credit separate.",
       "inputSchema": {
         "properties": {
           "name": {
@@ -4722,7 +4722,7 @@
         "openWorldHint": true,
         "readOnlyHint": false
       },
-      "description": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For other pages, add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available. Static fallback has no screenshot. Returns content, metadata and the saved item ID. Recapturing a source can replace its saved corpus and metadata.",
+      "description": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For an unlisted host, ask the user to allow the site in the dashboard. Use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Crawl4AI renders locally when available. Static capture omits the screenshot. Returns extracted content and metadata. A null video_id means the save failed. Recapturing a source can replace its saved corpus and metadata.",
       "inputSchema": {
         "properties": {
           "url": {
@@ -4864,7 +4864,7 @@
         "openWorldHint": false,
         "readOnlyHint": true
       },
-      "description": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages.",
+      "description": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access. The user adds sites in the dashboard. Use remove_allowed_site to revoke a rule, including a default. Returns sites, count and default seeds.",
       "inputSchema": {
         "properties": {
           "active_only": {
@@ -4884,10 +4884,10 @@
       "annotations": {
         "destructiveHint": false,
         "idempotentHint": true,
-        "openWorldHint": true,
-        "readOnlyHint": false
+        "openWorldHint": false,
+        "readOnlyHint": true
       },
-      "description": "Add a hostname pattern to the webpage-capture allowlist. Use for a user-authorized uoink_page destination; use list_allowed_sites to inspect rules or remove_allowed_site to revoke one. Plain hosts include subdomains; wildcard patterns match their specified subdomains. Returns the saved rule and reuses an existing pattern unchanged. This grants future page access but does not capture a page.",
+      "description": "Return dashboard instructions for approving a site for webpage capture. An MCP request returns consent_required. Ask the user to add the hostname or wildcard under Settings > Capture > Sites Uoink works on, then retry the original capture. Both plain and wildcard rules include the named host and its subdomains.",
       "inputSchema": {
         "properties": {
           "url_pattern": {
@@ -4902,7 +4902,7 @@
         "additionalProperties": false
       },
       "name": "add_allowed_site",
-      "title": "Add allowed site"
+      "title": "Request site access"
     },
     {
       "annotations": {
@@ -4911,7 +4911,7 @@
         "openWorldHint": false,
         "readOnlyHint": false
       },
-      "description": "Remove a hostname pattern from the webpage-capture allowlist. Use to revoke a rule found by list_allowed_sites; use add_allowed_site to restore it. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
+      "description": "Remove a hostname pattern from the webpage-capture allowlist. Use list_allowed_sites to find the rule. The user can restore it in the dashboard. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
       "inputSchema": {
         "properties": {
           "url_pattern": {

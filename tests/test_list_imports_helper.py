@@ -43,6 +43,7 @@ def helper(tmp_path, monkeypatch):
     idx = index_mod.Index.open(tmp_path / "index.db")
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "lib")
     monkeypatch.setattr(server, "SETTINGS_PATH", tmp_path / "settings.json")
     monkeypatch.setattr(li, "http_get_json", fake_fetch)
     (tmp_path / "data").mkdir()

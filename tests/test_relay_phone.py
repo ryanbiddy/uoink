@@ -193,7 +193,7 @@ const ctx = {
     if (r.reject) throw new Error('offline');
     return { status: r.status, json: async () => r.json || {} };
   },
-  URLSearchParams, AbortController, Promise, JSON, setTimeout, clearTimeout,
+  URL, URLSearchParams, AbortController, Promise, JSON, setTimeout, clearTimeout,
 };
 vm.createContext(ctx);
 vm.runInContext(script, ctx);
@@ -315,6 +315,11 @@ def test_pasted_pairing_link_stores_the_new_key_on_submit(stored):
     assert after["pairResult"] == "Paired with the new key" and after["pairNoticeHidden"] is False
     assert after["pairChoiceHidden"] is True and after["pill"] == "Paired"
     assert out["pairlinkAfter"] == "" and out["calls"] == []
+
+
+def test_pasted_link_has_to_belong_to_this_relay():
+    out = run_page(pairlink="https://another.example.test/phone#t=" + NEW_TOKEN)
+    assert out["afterPaste"]["writes"] == []
 
 
 def test_pasting_a_link_clears_any_pending_fragment_key():

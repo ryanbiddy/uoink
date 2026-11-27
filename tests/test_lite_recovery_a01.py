@@ -161,6 +161,7 @@ def test_lite_extraction_path(tmp: Path):
 def test_old_lite_export_on_read(tmp_path, monkeypatch):
     import uoink_mcp_tools
     from unittest.mock import Mock
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     pending = "*Fetching comments... they'll appear here when ready.*"
     path = tmp_path / f"{tmp_path.name}.md"
     saved = f"Quoted text: {pending}\n{server.COMMENTS_START_MARK}\n{pending}\n{server.COMMENTS_END_MARK}"

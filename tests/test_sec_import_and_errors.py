@@ -388,7 +388,7 @@ def test_machine_details_are_sanitized_before_return_and_storage(helper, error):
     row = helper["_get_index"]().upsert_job.call_args.args[0]
     assert json.loads(row["metadata_json"])["error_detail"] == detail
     raw_logs = "\n".join(str(call) for call in helper["_error_detail_log"].mock_calls)
-    assert KEY in raw_logs and "synthetic-password" in raw_logs
+    assert KEY not in raw_logs and "synthetic-password" not in raw_logs
     assert KEY not in str(helper["log"].mock_calls)
 
 
@@ -594,7 +594,8 @@ def test_redaction_happens_before_truncation(helper):
     assert helper["_sanitize_error"](sanitized, max_len=6000) == sanitized
 
 
-def test_raw_detail_logger_writes_only_server_log(source_tree, tmp_path):
+def test_detail_logger_writes_redacted_text_only_to_server_log(source_tree, tmp_path):
+    import server
     # Exercise the real file-handler/logger wiring, never the server bootstrap.
     names = {"_server_log_handler", "_error_detail_log"}
     nodes = [n for n in source_tree.body if
@@ -619,8 +620,10 @@ def test_raw_detail_logger_writes_only_server_log(source_tree, tmp_path):
     exec(compile(ast.Module(body=nodes, type_ignores=[]), "logging-setup", "exec"),
          namespace)
     try:
+        namespace["_server_log_handler"].setFormatter(server._server_log_handler.formatter)
         namespace["_error_detail_log"].error("%s", PRIVATE)
-        assert PRIVATE in path.read_text(encoding="utf-8")
+        saved = path.read_text(encoding="utf-8")
+        assert "tool failed" in saved and KEY not in saved and "synthetic-password" not in saved
         assert stream.getvalue() == ""
         assert logger.propagate is False
     finally:
@@ -791,8 +794,8 @@ def test_podcast_transcription_failure_stores_and_prints_only_sanitized_text(
     # text go only to the file-only logger.
     helper["log"].exception.assert_not_called()
     assert_no_secrets(str(helper["log"].mock_calls))
-    helper["_error_detail_log"].exception.assert_called()
-    assert KEY in str(helper["_error_detail_log"].mock_calls)
+    helper["_error_detail_log"].error.assert_called()
+    assert KEY not in str(helper["_error_detail_log"].mock_calls)
 
 
 def test_deferred_podcast_publish_error_is_sanitized(helper, podcast_job):
@@ -806,7 +809,7 @@ def test_deferred_podcast_publish_error_is_sanitized(helper, podcast_job):
     assert_no_secrets(json.dumps(helper["_get_index"]().upsert_job.call_args.args[0]))
     helper["log"].exception.assert_not_called()
     assert_no_secrets(str(helper["log"].mock_calls))
-    helper["_error_detail_log"].exception.assert_called()
+    helper["_error_detail_log"].error.assert_called()
     helper["_settle_source_capture"].assert_called_once_with(
         "job_podcast", video_id=None, failure_code="publish_failed")
 
@@ -985,7 +988,7 @@ def test_command_credentials_are_removed_before_formatting(helper, monkeypatch,
     assert formatter.called, "Both subprocess errors must format a redacted argument list"
     for call in formatter.call_args_list:
         assert all(secret not in str(arg) for arg in call.args[0])
-    assert "SECRET" in str(helper["_error_detail_log"].mock_calls)
+    assert "SECRET" not in str(helper["_error_detail_log"].mock_calls)
 
 
 @pytest.mark.parametrize("path", [
@@ -1254,9 +1257,9 @@ def test_optional_video_worker_errors_keep_raw_details_off_console(
                    "fixtureSTDERR", "fixtureOS", "--video-password", "--token="):
         assert secret not in visible
     raw = raw_stream.getvalue()
-    assert str(error) in raw
-    if failure.startswith("exit"):
-        assert "fixtureSTDERR" in raw
+    assert raw.strip()
+    for secret in (str(output), "fixture SECRET", "fixtureTOKEN", "fixtureSTDERR", "fixtureOS"):
+        assert secret not in raw
 
 
 @pytest.mark.parametrize("path", ["docs/security.md", "CHANGELOG.md"])

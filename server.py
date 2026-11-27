@@ -42,6 +42,7 @@ import urllib.error
 import urllib.request
 import uuid
 import webbrowser
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -147,12 +148,8 @@ import media_handoff  # noqa: E402  -- authenticated kept-media boundary
 import suite_service  # noqa: E402  -- suite discovery/health/runtime lease
 
 
-def _extract_page_to_prose(url: str) -> str | None:
-    """v3.2 synergy bridge: Writing Studio's URL anchor ingestion calls
-    this to convert a URL into prose. We wrap page_extractor.extract_page
-    with enforce_allowlist=False (user-explicit save is consent enough)
-    and return the markdown body. Returns None on failure so the anchor
-    still saves with raw_text=NULL."""
+def _extract_page_to_prose(url: str, *, enforce_allowlist: bool = True) -> str | None:
+    """Fetch a style reference. Only an explicit dashboard save grants one-off access."""
     try:
         if hn_extractor.item_id(url):
             return hn_extractor.extract_hn_thread(url).get("markdown")
@@ -161,7 +158,7 @@ def _extract_page_to_prose(url: str) -> str | None:
             render_mode=page_extractor.RENDER_MODE_STATIC,
             include_screenshot=False,
             follow_links_depth=0,
-            enforce_allowlist=False)
+            enforce_allowlist=enforce_allowlist)
     except Exception as e:
         log.warning("style anchor URL extraction failed: %s", e)
         return None
@@ -173,9 +170,9 @@ def _extract_page_to_prose(url: str) -> str | None:
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
-    _atomic_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
+    _atomic_write_text as _storage_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
     COMMENTS_START_MARK, COMMENTS_END_MARK,
-    _is_writable_dir,
+    atomic_output, checked_path, open_regular, move_library_folder, LibraryPathError, _is_writable_dir,
     _path_under_any,
     _topic_folder_name,
 )
@@ -618,7 +615,14 @@ ANTHROPIC_HOOK_EST_OUTPUT_TOKENS = 80
 
 def _read_token_file() -> str:
     try:
-        return TOKEN_PATH.read_text(encoding="utf-8").strip()
+        with open_regular(TOKEN_PATH.parent, TOKEN_PATH) as source:
+            if os.name == "posix":
+                info = os.fstat(source.fileno())
+                if info.st_uid != os.getuid() or info.st_nlink != 1:
+                    return ""
+                if info.st_mode & 0o777 != 0o600:
+                    os.fchmod(source.fileno(), 0o600)
+            return source.read().strip()
     except (OSError, UnicodeError):
         return ""
 
@@ -642,14 +646,8 @@ def _persist_token(fresh: str) -> None:
     if _read_token_file() == fresh:
         return
     try:
-        TOKEN_PATH.write_text(fresh, encoding="utf-8")
-        # Best-effort: tighten file perms on POSIX. On Windows, ACLs default
-        # to user-only for files in %LOCALAPPDATA%, so chmod is a no-op but
-        # harmless.
-        try:
-            os.chmod(TOKEN_PATH, 0o600)
-        except OSError:
-            pass
+        with atomic_output(TOKEN_PATH, root=TOKEN_PATH.parent, encoding="utf-8", mode=0o600) as target:
+            target.write(fresh)
     except OSError:
         # Non-fatal: keep an in-memory token for the session. Persistence is
         # nice-to-have; auth still works within this server's lifetime.
@@ -1506,7 +1504,7 @@ if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         log.warning("output folder picker unavailable: %s", e)
         return None
     if result.returncode != 0:
-        log.warning("output folder picker failed: %s", result.stderr.strip())
+        log.warning("output folder picker failed with exit code %s", result.returncode)
         return None
     return result.stdout.strip() or None
 
@@ -1755,13 +1753,15 @@ def _keyring_call(fn, *, read: bool = False):
     return outcome.get("value")
 
 
-def _keyring_read(username: str, services: tuple[str, ...]) -> str:
+def _keyring_read(username: str, services: tuple[str, ...], *, decode=None) -> str:
     """The first non-empty value among `services`. When the store doesn't
     answer in time, the last value this process saw. Other errors raise."""
     def op(backend) -> str:
         value = ""
         for service in services:
             found = backend.get_password(service, username)
+            if found and decode:
+                found = decode(backend, service, found)
             if isinstance(found, str) and found:
                 value = found
                 break
@@ -1925,20 +1925,109 @@ def _store_saved_scrapecreators_key(key: str) -> None:
         raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
 
 
+def _relay_origin(value: str) -> str:
+    parts = urlparse((value or "").strip())
+    if not parts.hostname:
+        return ""
+    port = parts.port if parts.port is not None else (443 if parts.scheme == "https" else 80)
+    return f"{parts.scheme}://{parts.hostname.lower()}:{port}"
+
+
+_relay_config_lock = threading.RLock()
+
+
+def _relay_connection():
+    with _relay_config_lock:
+        settings = _read_settings()
+        return settings, settings.get("relay_url") or "", _get_saved_relay_token()
+
+
+# WinVault stores at most 2560 bytes per password (UTF-16). A space in this
+# marker distinguishes it from every accepted plain token and saved origin.
+_RELAY_PARTS = re.compile(r"relay parts ([ab]) ([1-9][0-9]?) ([0-9a-f]{64})")
+_MAX_RELAY_PARTS = 16  # Includes the normalized origin and the 4096-character token.
+
+
+def _relay_part_service(service, slot, i):
+    return f"{service}.relay.{slot}.{i}"
+
+
+def _decode_relay_password(backend, service, saved):
+    if not saved.startswith("relay parts "):
+        return saved
+    header = _RELAY_PARTS.fullmatch(saved)
+    if not header or int(header[2]) > _MAX_RELAY_PARTS:
+        return ""
+    slot, count, digest = header.groups()
+    parts = [backend.get_password(_relay_part_service(service, slot, i), KEYRING_RELAY_USERNAME)
+             for i in range(int(count))]
+    if not all(parts):
+        return ""
+    value = "".join(parts)
+    return value if hashlib.sha256(value.encode()).hexdigest() == digest else ""
+
+
+def _set_relay_password(backend, service, value):
+    user = KEYRING_RELAY_USERNAME
+    previous = backend.get_password(service, user) or ""
+    active = _RELAY_PARTS.fullmatch(previous)
+    header = value
+    if len(value.encode("utf-16le")) > 2560:
+        slot = "b" if active and active[1] == "a" else "a"
+        # Even a supplementary Unicode character fits in four UTF-16 bytes.
+        parts = [value[i:i + 640] for i in range(0, len(value), 640)]
+        if len(parts) > _MAX_RELAY_PARTS:
+            return False
+        for i, part in enumerate(parts):
+            target = _relay_part_service(service, slot, i)
+            backend.set_password(target, user, part)
+            if backend.get_password(target, user) != part:
+                return False
+        header = f"relay parts {slot} {len(parts)} {hashlib.sha256(value.encode()).hexdigest()}"
+    # Switch the main entry only after all parts are readable. A retry uses
+    # the same inactive slot, even after an interrupted write.
+    if header:
+        backend.set_password(service, user, header)
+    elif previous:
+        backend.delete_password(service, user)
+    if (backend.get_password(service, user) or "") != header:
+        return False
+    if active or not value or header != value:
+        # Remove old and interrupted generations, including on explicit clear.
+        current = _RELAY_PARTS.fullmatch(header)
+        for slot in ("a", "b"):
+            start = int(current[2]) if current and current[1] == slot else 0
+            for i in range(start, _MAX_RELAY_PARTS):
+                target = _relay_part_service(service, slot, i)
+                if backend.get_password(target, user) is not None:
+                    backend.delete_password(target, user)
+    return True
+
+
 def _get_saved_relay_token() -> str:
     """The relay pull token from this profile's store only."""
     try:
         if _credential_store_mode() == "file":
-            return _file_credential_get(KEYRING_RELAY_USERNAME)
-        return _keyring_read(KEYRING_RELAY_USERNAME, (_keyring_service_name(),))
+            saved = _file_credential_get(KEYRING_RELAY_USERNAME)
+        else:
+            saved = _keyring_read(KEYRING_RELAY_USERNAME, (_keyring_service_name(),),
+                                  decode=_decode_relay_password)
+        origin, marker, token = (saved or "").partition("\n")
+        if marker:
+            return token if origin == _relay_origin(_read_settings().get("relay_url")) else ""
+        return saved or ""  # Credentials saved before origin binding.
     except Exception:
         # Credential backends can include the secret in their exception text.
         return ""
 
 
-def _store_saved_relay_token(token: str) -> None:
+def _store_saved_relay_token(token: str, *, relay_url=None) -> None:
     """Save or clear the pull token. A backend that accepts the write but
     cannot read it back (the null keyring) counts as unavailable."""
+    if token:
+        origin = _relay_origin(relay_url if relay_url is not None else _read_settings().get("relay_url"))
+        if origin:
+            token = origin + "\n" + token
     _bump_credential_generation(KEYRING_RELAY_USERNAME)
     if _credential_store_mode() == "file":
         _file_credential_put(KEYRING_RELAY_USERNAME, token)
@@ -1946,13 +2035,7 @@ def _store_saved_relay_token(token: str) -> None:
     service = _keyring_service_name()
 
     def op(backend) -> bool:
-        if token:
-            backend.set_password(service, KEYRING_RELAY_USERNAME, token)
-            readable = backend.get_password(service, KEYRING_RELAY_USERNAME) == token
-        else:
-            if backend.get_password(service, KEYRING_RELAY_USERNAME) is not None:
-                backend.delete_password(service, KEYRING_RELAY_USERNAME)
-            readable = True
+        readable = _set_relay_password(backend, service, token)
         _remember_credential(service, KEYRING_RELAY_USERNAME, token if readable else "")
         return readable
 
@@ -2583,10 +2666,15 @@ _CREDENTIAL_VALUE_SANITIZE_RE = re.compile(
 _ERROR_SANITIZE_INPUT_LIMIT = 64 * 1024
 
 
-def _redact_error_credentials(line: str) -> str:
+def _redact_error_credentials(line: str, *, pattern=None, clean_url=None) -> str:
     pieces = []
     pos = 0
-    while match := _CREDENTIAL_SANITIZE_RE.search(line, pos):
+    pattern = pattern or _CREDENTIAL_SANITIZE_RE
+    while match := pattern.search(line, pos):
+        if clean_url and match.lastgroup == "log_url":
+            pieces.extend((line[pos:match.start()], clean_url(match)))
+            pos = match.end()
+            continue
         start = end = match.end()
         flag_quote = match.group("flag_quote")
         quote = flag_quote or (line[start:start + 1] if line[start:start + 1] in ("'", '"') else "")
@@ -2913,6 +3001,14 @@ _LOCALAPPDATA_OUTPUT = DATA_ROOT / "output"
 
 DESKTOP_ROOT = _get_output_root()
 SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
+
+
+def _atomic_write_text(path, text, *, root=None, encoding="utf-8", newline=None):
+    """Server writes belong to the active library unless a caller selected another root."""
+    _storage_write_text(path, text, root=DESKTOP_ROOT if root is None else root,
+                        encoding=encoding, newline=newline)
+
+
 # Set True by _apply_output_root_fallback when the active root has been
 # moved to _LOCALAPPDATA_OUTPUT. Surfaced in /health and /diagnose so the
 # popup can warn the user their yoinks are no longer on the Desktop.
@@ -2993,19 +3089,62 @@ LOG_PATH = (
     else _platform.app_state_path(HERE, DATA_ROOT, "server.log")
 )
 # One rotating file handler: the root logger and the file-only machine-error
-# detail logger share it, so raw diagnostics rotate with server.log.
+# detail logger share it, so both use the same redaction rules.
 _server_log_handler = RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024,
                                           backupCount=3, encoding="utf-8")
+class _LogFormatter(logging.Formatter):
+    """Scrub URLs after argument interpolation and traceback formatting."""
+    _log_fields = re.compile(r"(?P<log_url>https?://[^\s<>]+|(?<![\w/])/[^\s<>]+)|"
+                             + _CREDENTIAL_SANITIZE_RE.pattern, re.I)
+    _sensitive = re.compile(r"(?:(?:access|refresh|id|auth|oauth)[-_]?)?token|sig|signature|"
+                            r"(?:x-|anthropic[-_])?api[-_ ]?key|anthropic[-_]key|x-(?:uoink|yoink)-token|"
+                            r"key|auth|authorization|password|client[-_]?secret|"
+                            r"expires(?:[-_]?at)?|expiry|x-amz-.*", re.I)
+
+    @classmethod
+    def _clean_url_fields(cls, fields, *, phone_fragment=False):
+        from urllib.parse import unquote_plus
+        parts = re.split("([&;])", fields)
+        for i in range(0, len(parts), 2):
+            name, equals, _ = parts[i].partition("=")
+            key = unquote_plus(name)
+            if equals and (cls._sensitive.fullmatch(key) or (phone_fragment and key == "t")):
+                parts[i] = name + "=[redacted]"
+        return "".join(parts)
+
+    @classmethod
+    def _clean_url(cls, match):
+        url, fragment_mark, fragment = match.group().partition("#")
+        base, mark, query = url.partition("?")
+        scheme, sep, rest = base.partition("://")
+        if base.startswith("//"):
+            scheme, sep, rest = "", "//", base[2:]
+        if sep:
+            host, slash, path = rest.partition("/")
+            base = scheme + sep + host.rsplit("@", 1)[-1] + slash + path
+        if fragment_mark:
+            fragment = cls._clean_url_fields(fragment, phone_fragment=base.rstrip("/").endswith("/phone"))
+        return base + mark + cls._clean_url_fields(query) + fragment_mark + fragment
+
+    def format(self, record):
+        message = _KEY_SANITIZE_RE.sub("[redacted]", super().format(record))
+        return "\n".join(_redact_error_credentials(line, pattern=self._log_fields, clean_url=self._clean_url)
+                         for line in message.split("\n"))
+
+
+_console_log_handler = logging.StreamHandler(sys.stdout)
+for _handler in (_server_log_handler, _console_log_handler):
+    _handler.setFormatter(_LogFormatter("%(asctime)s %(levelname)s %(message)s"))
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
         _server_log_handler,
-        logging.StreamHandler(sys.stdout),
+        _console_log_handler,
     ],
 )
 log = logging.getLogger("uoink")
-# Raw machine diagnostics belong only in server.log, never stdout or a job.
+# Write sanitized machine diagnostics to the rotating file.
 _error_detail_log = logging.getLogger("uoink.error_detail")
 _error_detail_log.propagate = False
 _error_detail_log.addHandler(_server_log_handler)
@@ -3133,6 +3272,7 @@ def _get_index() -> "index.Index":
                 _index_recovering = True
         elif getattr(_index_singleton, "_existing_read_only", False):
             _index_singleton.initialize_for_write()
+        _index_singleton.corpus_root = DESKTOP_ROOT
         return _index_singleton
 
 
@@ -3638,7 +3778,8 @@ def _folder_for_video_id(video_id: str) -> tuple[Path | None, dict | None]:
 def _read_sidecar_for_folder(folder: Path) -> tuple[Path, dict]:
     sidecar_path = folder / f"{folder.name}.json"
     try:
-        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        with open_regular(DESKTOP_ROOT, sidecar_path) as source:
+            data = json.load(source)
         if not isinstance(data, dict):
             data = {}
     except (OSError, json.JSONDecodeError):
@@ -3681,7 +3822,8 @@ def _render_reliability_summary(reliability: dict) -> str:
 
 def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
     try:
-        md = corpus_path.read_text(encoding="utf-8")
+        with open_regular(DESKTOP_ROOT, corpus_path) as source:
+            md = source.read()
     except OSError as e:
         log.warning("reliability md update: read failed (%s)", e)
         return
@@ -3702,8 +3844,7 @@ def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
 
 def _download_reliability_audio(url: str, tmp_dir: Path,
                                 cancel_event: threading.Event | None = None) -> Path:
-    if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
-        url = source_subscriptions.check_public_http_url(url)
+    url = source_subscriptions.check_public_http_url(url)
     _platform.require_media()
     _run_subprocess(
         [
@@ -4509,7 +4650,7 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
 
 
 def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
-                           sidecar_path: Path, plan: dict | None = None, *, include_corpus=False) -> bool:
+                           sidecar_path: Path, plan: dict | None = None, *, include_corpus=False, root=None) -> bool:
     """Phase 6 (BC-2/BC-3e/BC-3f): publish the helper capture through the shared
     media publisher. The consumed sidecar binding is frozen, then the
     ownership ticket is minted carrying that original binding. Every input
@@ -4544,7 +4685,8 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     elif not library_media.capture_plan_matches(plan, owned_plan):
         raise library_media.MediaError(
             "revision_unavailable", details={"reason": "publication_input_changed"})
-    corpus_bytes = corpus_path.read_bytes()
+    with open_regular(root or DESKTOP_ROOT, corpus_path, binary=True) as source:
+        corpus_bytes = source.read()
     media_item = library_media._merge_item(row)
     head = corpus_bytes[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
     source_revision = library_cards.build_card(
@@ -4580,7 +4722,7 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
 
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
-                 sidecar_path: Path, *, require_media_update=False) -> bool:
+                 sidecar_path: Path, *, require_media_update=False, root=None) -> bool:
     """Upsert one yoink + its citations into the library index idempotently.
     Returns True if the row was indexed, False if its identity is missing.
     Storage errors propagate so capture callers can report a failed save.
@@ -4599,14 +4741,16 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         if corpus_path is None:
             raise ValueError("The saved transcript has no corpus file.")
         idx = _get_index()
-        _publish_capture_media(idx, folder, sidecar, corpus_path, sidecar_path, include_corpus=True)
+        _publish_capture_media(idx, folder, sidecar, corpus_path, sidecar_path, include_corpus=True, root=root)
         _mirror_event("capture", video_id=video_id)
         return True
-    try:
-        content = (corpus_path.read_text(encoding="utf-8")
-                   if corpus_path and corpus_path.exists() else "")
-    except OSError:
-        content = ""
+    content = ""
+    if corpus_path:
+        try:
+            with open_regular(root or DESKTOP_ROOT, corpus_path) as source:
+                content = source.read()
+        except FileNotFoundError:
+            pass
     # Phase 2 taxonomy on the video / sidecar-driven path. YouTube's channel
     # is already the real uploader, so author = channel; platform derives from
     # the sidecar's source_type (None/'video' -> youtube).
@@ -4683,7 +4827,7 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                     entries and all("source_url" in e and "source_deep_link" in e for e in entries))
                 if phase6_writer:
                     published = _publish_capture_media(
-                        idx, folder, sidecar, corpus_path, sidecar_path)
+                        idx, folder, sidecar, corpus_path, sidecar_path, root=root)
         except ImportError:
             published = None
         except Exception as exc:
@@ -4795,8 +4939,8 @@ def _run_backfill(root: Path | None = None) -> None:
             _backfill_state["current"] = done
         sidecar_path = folder / f"{folder.name}.json"
         try:
-            sidecar = (json.loads(sidecar_path.read_text(encoding="utf-8"))
-                       if sidecar_path.exists() else {})
+            with open_regular(root or DESKTOP_ROOT, sidecar_path) as source:
+                sidecar = json.load(source)
         except (OSError, json.JSONDecodeError):
             sidecar = {}
         video_id = (sidecar.get("video_id") or "").strip() if isinstance(sidecar, dict) else ""
@@ -4808,7 +4952,7 @@ def _run_backfill(root: Path | None = None) -> None:
                 log.warning("backfill: skipped %s: folder name already used by %s (video %s)",
                             conflict["path"], conflict["other_path"], conflict["video_id"])
                 continue
-            if _index_yoink(folder, sidecar, corpus, sidecar_path):
+            if _index_yoink(folder, sidecar, corpus, sidecar_path, root=root):
                 indexed += 1
                 known.add(video_id)
         except Exception:
@@ -5020,8 +5164,9 @@ def _transcript_backfill_scan() -> dict:
                 if not _transcript_backfill_inside_library(corpus_path):
                     continue
                 try:
-                    if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
-                        continue
+                    with open_regular(DESKTOP_ROOT, corpus_path) as source:
+                        if _corpus_has_words(source.read()):
+                            continue
                 except (OSError, UnicodeError):
                     continue  # unreadable is "do not touch", never "no words"
         folder = sidecar_path.parent
@@ -5388,8 +5533,9 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                     return "skipped"  # never touch a save that has words
                 if not saving and corpus_path is not None and corpus_path.exists():
                     try:
-                        if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
-                            return "skipped"  # words only in the Markdown still count
+                        with open_regular(DESKTOP_ROOT, corpus_path) as markdown:
+                            if _corpus_has_words(markdown.read()):
+                                return "skipped"  # words only in the Markdown still count
                     except (OSError, UnicodeError):
                         return "skipped"  # unreadable: do not touch
                 if "source_chapters" not in sidecar:
@@ -5437,7 +5583,8 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
             _atomic_write_text(folder / "transcript.txt", text)
         if corpus_path is not None and corpus_path.is_file():
             with _corpus_update_lock:
-                md = corpus_path.read_text(encoding="utf-8")
+                with open_regular(DESKTOP_ROOT, corpus_path) as markdown:
+                    md = markdown.read()
                 block, header = _transcript_backfill_render(folder, sidecar)
                 updated = _splice_transcript_markdown(md, block, header)
                 if updated != md:
@@ -6372,7 +6519,7 @@ def _shelf_sync_one(row: dict | None, shelf: str | None, by_hand: bool | None) -
         return True
     try:
         shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"),
-                                shelf or _shelf_fallback(), by_hand=by_hand)
+                                shelf or _shelf_fallback(), by_hand=by_hand, root=DESKTOP_ROOT)
         return True
     except OSError as exc:
         log.warning("shelf files for %s not updated (%s)", row.get("video_id"), exc)
@@ -7123,33 +7270,38 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
         return opener(target, headers={"User-Agent": user_agent}, **kwargs)
 
     deadline = time.monotonic() + 30
+    jpg_path = output_folder / "thumbnail.jpg"
     try:
-        with tempfile.TemporaryDirectory(dir=output_folder, prefix=".thumbnail-") as temp:
+        with tempfile.TemporaryDirectory(prefix="uoink-thumbnail-") as temp:
             raw_path = Path(temp) / "image"
-            jpg_path = Path(temp) / "thumbnail.jpg"
+            converted = Path(temp) / "thumbnail.jpg"
             try:
                 with browser_open(url, timeout=8) as resp, raw_path.open("wb") as dest:
                     for chunk in source_subscriptions.bounded_http_chunks(
                             resp, max_bytes=8 * 1024 * 1024, deadline=deadline):
                         dest.write(chunk)
             except Exception as exc:
-                log.warning("thumbnail download failed: %s", exc)
+                log.warning("thumbnail download failed: %s", _sanitize_error(str(exc), max_len=500))
                 return None
             _run_subprocess(
                 [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
-                 "-loglevel", "error", "-y", "-f", "image2pipe", "-max_pixels", "16777216",
-                 "-i", str(raw_path), "-frames:v", "1", str(jpg_path)],
+                 "-loglevel", "error", "-y", "-protocol_whitelist", "file", "-f", "image2pipe",
+                 "-max_pixels", "16777216",
+                 "-i", str(raw_path), "-frames:v", "1", str(converted)],
                 cancel_event=cancel_event, check=True, timeout=15, stderr=subprocess.PIPE,
             )
-            if jpg_path.is_file() and jpg_path.stat().st_size:
-                return jpg_path.replace(output_folder / "thumbnail.jpg")
+            if not (converted.is_file() and converted.stat().st_size):
+                return None
+            with converted.open("rb") as src, atomic_output(jpg_path, root=DESKTOP_ROOT) as out:
+                shutil.copyfileobj(src, out)
+            return jpg_path
     except subprocess.TimeoutExpired:
         log.warning("thumbnail conversion timed out")
-    except subprocess.CalledProcessError as exc:
-        stderr = (exc.stderr or b"").decode("utf-8", errors="ignore").strip()
-        log.warning("ffmpeg thumbnail convert failed: %s", stderr)
-    except OSError as exc:
-        log.warning("could not save thumbnail: %s", exc)
+    except subprocess.CalledProcessError as e:
+        log.warning("ffmpeg thumbnail convert failed with exit code %s: %s",
+                    e.returncode, _sanitize_error(_subprocess_output(e), max_len=2000, preserve_lines=True))
+    except OSError as e:
+        log.warning("thumbnail could not be saved: %s", e)
     return None
 
 
@@ -7180,19 +7332,15 @@ def _save_x_video_poster(video_id: str, extract_result: dict) -> Path | None:
     poster = _x_video_poster_url(extract_result)
     if not poster:
         return None
-    folder = None
     try:
         row = _get_index().get_yoink(video_id) or {}
         if not row.get("corpus_path"):
             return None
-        folder = Path(row["corpus_path"]).parent
+        folder = checked_path(DESKTOP_ROOT, Path(row["corpus_path"])).parent
         return _download_thumbnail({"thumbnail": poster}, folder)
     except Exception as e:  # no ffmpeg, a full disk: never fail the capture
         log.warning("X video poster not saved for %s: %s", video_id, e)
         return None
-    finally:
-        if folder is not None:
-            (folder / "thumbnail.raw").unlink(missing_ok=True)
 
 
 def _is_x_channel_url(channel_url: str) -> bool:
@@ -7243,9 +7391,10 @@ def _fetch_channel_context(channel_url: str, *,
         target = target + "/videos"
 
     try:
+        target = source_subscriptions.check_public_http_url(target)
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
-             "--playlist-end", "5", target],
+             "--playlist-end", "5", "--", target],
             cancel_event=cancel_event, stdout=subprocess.PIPE,
             text=True, stderr=subprocess.PIPE, encoding="utf-8", errors="replace",
             # It holds the single YouTube slot: a hung child must not block
@@ -7319,10 +7468,8 @@ def _replace_comments_section(yoink_path: Path, body: str) -> None:
             log.warning("comments markers not found in yoink.md; skipping update")
             return
 
-        tmp = yoink_path.with_suffix(".md.tmp")
         try:
-            tmp.write_text(new_text, encoding="utf-8")
-            tmp.replace(yoink_path)
+            _atomic_write_text(yoink_path, new_text)
         except OSError as e:
             log.warning("could not write yoink.md to update comments: %s", e)
 
@@ -7360,13 +7507,8 @@ def _update_sidecar_comments(output_folder: Path, comments: list | None,
             return
         data["comments"] = comments
         data["comments_status"] = status
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(
-                json.dumps(data, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar comments update: write failed (%s)", e)
 
@@ -7779,10 +7921,8 @@ def _replace_hook_analysis_section(yoink_path: Path, body: str) -> None:
             else:
                 new_text = text.rstrip() + "\n\n" + body.rstrip() + "\n"
 
-        tmp = yoink_path.with_suffix(".md.tmp")
         try:
-            tmp.write_text(new_text, encoding="utf-8")
-            tmp.replace(yoink_path)
+            _atomic_write_text(yoink_path, new_text)
         except OSError as e:
             log.warning("could not write Hook Type section: %s", e)
 
@@ -7807,10 +7947,8 @@ def _update_sidecar_hook_type(output_folder: Path, *, status: str,
         data["hook_type_confidence"] = confidence
         data["hook_type_error"] = error
         data["hook_type_updated_at"] = _now_iso()
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar Hook Type update: write failed (%s)", e)
 
@@ -7837,11 +7975,8 @@ def _record_correction_in_sidecar(sidecar_path: Path, original: str,
             "corrected_at": _now_iso(),
         })
         data["hook_type_corrections"] = log_entries
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2),
-                           encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar correction update: write failed (%s)", e)
 
@@ -8070,10 +8205,8 @@ def _replace_comment_intelligence_section(yoink_path: Path, body: str) -> None:
         else:
             new_text = text.rstrip() + "\n\n" + block + "\n"
 
-        tmp = yoink_path.with_suffix(".md.tmp")
         try:
-            tmp.write_text(new_text, encoding="utf-8")
-            tmp.replace(yoink_path)
+            _atomic_write_text(yoink_path, new_text)
         except OSError as e:
             log.warning("could not write Comment Intelligence section: %s", e)
 
@@ -8095,10 +8228,8 @@ def _update_sidecar_comment_intelligence(output_folder: Path, *,
         data["comment_intelligence"] = analysis
         data["comment_intelligence_error"] = error
         data["comment_intelligence_updated_at"] = _now_iso()
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar CI update: write failed (%s)", e)
 
@@ -8204,11 +8335,8 @@ def _update_sidecar_entity_extraction(output_folder: Path, *, status: str,
         data["entity_extraction_status"] = status
         data["entity_extraction_error"] = error
         data["entity_extraction_updated_at"] = _now_iso()
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2),
-                           encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar entity update: write failed (%s)", e)
 
@@ -8366,7 +8494,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
              "--extractor-args",
              f"youtube:max_comments={max_comments},all,all,all",
              "-o", str(info_template),
-             url],
+             "--", url],
             check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             timeout=COMMENTS_TIMEOUT_SEC,
         )
@@ -8399,14 +8527,14 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         log.info("comments appended to %s (%d of %d)",
                  yoink_path, len(ranked), len(raw_comments))
     except subprocess.CalledProcessError as e:
-        _error_detail_log.warning("comments yt-dlp failed: %s\n%s", e, _subprocess_output(e))
+        machine_error_detail(e)
         log.warning("comments yt-dlp failed: %s", _error_summary(e))
         _replace_comments_section(yoink_path,
             "*Comments are disabled on this video.*")
         _update_sidecar_comments(output_folder, [], "disabled")
         _start_hook_after_comments()
     except Exception as e:
-        _error_detail_log.exception("comments worker crashed")
+        machine_error_detail(e)
         log.warning("comments worker crashed: %s", type(e).__name__)
         _replace_comments_section(yoink_path,
             "*Comments could not be retrieved.*")
@@ -8683,10 +8811,7 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         raise
     except (OSError, subprocess.CalledProcessError,
             subprocess.TimeoutExpired) as e:
-        output = (_subprocess_output(e) if isinstance(
-            e, (subprocess.CalledProcessError, subprocess.TimeoutExpired)) else "")
-        _error_detail_log.warning("%s subtitle fetch unavailable: %s\n%s",
-                                  long_video_mode, e, output)
+        machine_error_detail(e)
         reason = CAPTIONS_FAILED
         if is_youtube:
             found = _caption_failure_reason(e)
@@ -8942,6 +9067,7 @@ def _verify_video_capture_folder(folder: Path, url: str, metadata: dict,
 
 def _create_video_entry_folder(folder: Path, url: str, metadata: dict) -> Path:
     """Reserve a fresh session/playlist entry without refreshing older entries."""
+    folder = checked_path(DESKTOP_ROOT, folder)
     folder.parent.mkdir(parents=True, exist_ok=True)
     target = folder
     number = 2
@@ -8964,6 +9090,7 @@ def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict,
     existing = _indexed_video_capture(url, metadata) if refresh_existing else None
     if existing is not None:
         folder = Path(existing["corpus_path"]).parent
+    folder = checked_path(DESKTOP_ROOT, folder)
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     folder.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -9571,10 +9698,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 key: value for key, value in metadata.items()
                 if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
             }
-            (asset_folder / "metadata.json").write_text(
-                json.dumps(cached_metadata, indent=2, ensure_ascii=False),
-                encoding="utf-8",
-            )
+            _atomic_write_text(asset_folder / "metadata.json",
+                               json.dumps(cached_metadata, indent=2, ensure_ascii=False))
         except OSError as e:
             log.warning("could not write metadata.json: %s", e)
             if refreshing:
@@ -9604,7 +9729,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
             media_cmd.extend([
                 "-o", str(asset_folder / "video-chunk-%(section_number)03d.%(ext)s"),
-                url,
+                "--", url,
             ])
         else:
             media_cmd.extend([
@@ -9613,7 +9738,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # sections already bound the downloaded media work.
                 "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
                 "-o", str(asset_folder / "video.%(ext)s"),
-                url,
+                "--", url,
             ])
 
         media_glob = (
@@ -9854,7 +9979,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if entries:
             plain = "\n".join(text for _, _, text in entries)
-            (asset_folder / "transcript.txt").write_text(plain, encoding="utf-8")
+            _atomic_write_text(asset_folder / "transcript.txt", plain)
 
         if phase_callback:
             phase_callback("write")
@@ -10549,11 +10674,10 @@ def _redact_command_args(cmd):
 
 
 def machine_error_detail(e: BaseException) -> str:
-    """Log raw diagnostics locally; return only sanitized disclosure detail."""
+    """Sanitize process diagnostics before logging or returning them."""
     is_failed_process = isinstance(e, subprocess.CalledProcessError)
     if is_failed_process or isinstance(e, subprocess.TimeoutExpired):
         output = _subprocess_output(e) if is_failed_process else ""
-        _error_detail_log.error("%s\n%s", e, output)
         pieces = []
         if e.cmd:
             try:
@@ -10571,9 +10695,10 @@ def machine_error_detail(e: BaseException) -> str:
     else:
         detail = str(e or "")
         max_len = 3000
-        _error_detail_log.error("%s", detail)
     # Redact before truncating so a cut cannot leave a partial credential.
-    return _sanitize_error(detail, max_len=max_len, preserve_lines=True)
+    detail = _sanitize_error(detail, max_len=max_len, preserve_lines=True)
+    _error_detail_log.error("%s", detail)
+    return detail
 
 
 def _error_summary(e: BaseException) -> str:
@@ -11433,9 +11558,8 @@ def _suite_capture_start(body) -> tuple[int, dict]:
     if source in _SUITE_CAPTURE_PAGE_SOURCES \
             and not page_extractor.host_is_allowed(_get_index(), canonical):
         host = urlparse(canonical).hostname or "this site"
-        return _suite_capture_error(
-            409, "consent_required",
-            f"Allow {host} in Uoink under Settings, Allowed sites, then try again.")
+        refusal = page_extractor.page_consent_required(host)
+        return _suite_capture_error(409, refusal["code"], refusal["error"])
     if source in _SUITE_CAPTURE_MEDIA_SOURCES:
         refusal = _platform.capability_refusal(_platform.media_capability())
         if refusal is not None:
@@ -11644,7 +11768,7 @@ def _generate_paste_corpus(folder: Path) -> str:
     corpus_path = _resolve_corpus_path(folder)
     if corpus_path is None:
         return ""
-    md = _read_export_markdown(corpus_path)
+    md = _read_export_markdown(corpus_path, root=DESKTOP_ROOT)
 
     try:
         from PIL import Image  # noqa: F401  -- import probe
@@ -11830,8 +11954,7 @@ def _regenerate_index() -> None:
     is O(N) in the library size; the incremental path is the steady state."""
     try:
         entries = _scan_yoinks()
-        DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
-        _index_path().write_text(_render_index(entries), encoding="utf-8")
+        _atomic_write_text(_index_path(), _render_index(entries))
         # v2.1 rename: supersede a leftover Yoink-era index so the Desktop
         # folder doesn't show two near-identical index files.
         legacy_index = DESKTOP_ROOT / INDEX_FILENAME_LEGACY
@@ -12427,22 +12550,19 @@ def _session_folder(slug: str) -> Path:
 
 def _read_session(slug: str) -> dict | None:
     path = _session_folder(slug) / "session.json"
-    if not path.exists():
-        return None
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        with open_regular(SESSIONS_ROOT.parent, path) as source:
+            return json.load(source)
+    except FileNotFoundError:
+        return None
     except (OSError, json.JSONDecodeError) as e:
         log.warning("Failed to read session %s: %s", slug, e)
         return None
 
 
 def _write_session(slug: str, data: dict) -> None:
-    folder = _session_folder(slug)
-    folder.mkdir(parents=True, exist_ok=True)
-    path = folder / "session.json"
-    tmp = folder / "session.json.tmp"
-    tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    path = _session_folder(slug) / "session.json"
+    _atomic_write_text(path, json.dumps(data, indent=2), root=SESSIONS_ROOT.parent)
 
 
 def _all_sessions() -> list[dict]:
@@ -12513,7 +12633,8 @@ def _build_corpus(session: dict) -> str:
 
         if yoink_path is not None and yoink_path.exists():
             try:
-                body = yoink_path.read_text(encoding="utf-8")
+                with open_regular(SESSIONS_ROOT.parent, yoink_path) as source:
+                    body = source.read()
                 # Strip the per-video H1 (the title) -- we already emitted Video N: title.
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 # Strip the leading metadata lines we'd duplicate (URL/Uoinked/etc.).
@@ -12610,7 +12731,7 @@ def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
         return None, capability["code"], 501
     try:
         cp = _run_subprocess(
-            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", normalized],
+            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", "--", normalized],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -13321,11 +13442,7 @@ def _podcast_transcription_worker() -> None:
                     # The transcript is complete and durable. Leave it done so
                     # the next feed tick retries only the idempotent publisher,
                     # not an expensive transcription that already succeeded.
-                    # The raw error goes only to server.log; the job keeps
-                    # sanitized text.
-                    _error_detail_log.exception(
-                        "podcast watch: deferred corpus publish for episode %d",
-                        episode_id)
+                    machine_error_detail(exc)
                     corpus_error = _error_summary(exc)
                     log.warning(
                         "podcast watch: deferred corpus publish for episode "
@@ -13382,10 +13499,6 @@ def _podcast_transcription_worker() -> None:
                     uoink_usage.count("captures", "podcast", "failed")
                 except Exception:
                     pass
-            # Tracebacks and raw tool text go only to server.log. The console,
-            # the episode row and the job (shown by the dashboard) get the
-            # sanitized forms used for every other machine error detail.
-            _error_detail_log.exception("podcast transcription job %s failed", job_id)
             error = _error_summary(exc)
             error_detail = f"{type(exc).__name__}: {machine_error_detail(exc)}"
             log.error("podcast transcription job %s failed: %s", job_id, error)
@@ -14313,7 +14426,7 @@ def _run_retranscribe_job(job_id: str) -> None:
             _update_job(job_id, state="cancelled", current_video_phase=None,
                         completed_at=_now_iso(), message="Cancelled. The transcript is unchanged.")
     except Exception as exc:  # noqa: BLE001 - the old transcript is kept
-        _error_detail_log.exception("retranscribe job %s failed", job_id)
+        machine_error_detail(exc)
         _update_job(job_id, state="failed", current_video_phase=None, videos_failed=1,
                     completed_at=_now_iso(), error=_error_summary(exc),
                     message="Transcribing again did not finish. The transcript is unchanged.")
@@ -15797,6 +15910,9 @@ RELAY_CHECK_WAIT_SEC = 8.0
 RELAY_NOTE_TITLE = "From my phone"
 RELAY_FALLBACK_TITLE = "From my phone (not captured)"
 RELAY_DONE_TTL_SEC = 8 * 24 * 60 * 60   # past the relay's own 7-day expiry
+RELAY_RETRY_LIMIT = 1024                 # the relay holds at most 500 pending links
+RELAY_LINKS_PER_POLL = 100
+RELAY_MAX_RESPONSE_BYTES = 1024 * 1024
 _RELAY_ID_RE = re.compile(r"\A[0-9]{13}-[0-9a-f]{12}\Z")
 _RELAY_RATE_LIMITED_PREFIX = "rate limit exceeded"
 
@@ -15816,13 +15932,26 @@ _relay_state = {
     "generation": 0,
     "next_due": 0.0,
 }
-# In memory only: capture raises per link id, and ids already captured whose
-# DELETE has not succeeded yet (never captured twice).
-_relay_raises: dict[str, int] = {}
-_relay_done: dict[str, float] = {}
-# Links Uoink couldn't capture whose fallback note hasn't saved yet: the
-# reason to write, retried on the next check before the link is deleted.
-_relay_fallback: dict[str, str] = {}
+
+
+@dataclass(frozen=True)
+class _RelayRetry:
+    updated: float
+    stage: str
+    attempts: int = 0
+    reason: str = ""
+
+
+# Only the poller accesses this map, under _relay_poll_lock. Entries are
+# ordered by last update so expiry and capacity eviction remove the oldest.
+_relay_retries: dict[str, _RelayRetry] = {}
+
+
+def _relay_remember(link_id: str, stage: str, *, attempts: int = 0, reason: str = "") -> None:
+    _relay_retries.pop(link_id, None)
+    if len(_relay_retries) >= RELAY_RETRY_LIMIT:
+        del _relay_retries[next(iter(_relay_retries))]
+    _relay_retries[link_id] = _RelayRetry(time.monotonic(), stage, attempts, reason)
 
 
 class _RelayError(Exception):
@@ -15880,13 +16009,12 @@ def _relay_http(method: str, url: str, token: str,
     opener = urllib.request.build_opener(_RelayNoRedirect)
     try:
         with opener.open(request, timeout=timeout) as response:
-            status, raw = response.status, response.read(1024 * 1024)
+            status, raw = response.status, response.read(RELAY_MAX_RESPONSE_BYTES + 1)
+            if len(raw) > RELAY_MAX_RESPONSE_BYTES:
+                raise _RelayError("The relay response was too large. Uoink will try again later.")
     except urllib.error.HTTPError as e:
-        status = e.code
-        try:
-            raw = e.read(64 * 1024)
-        except Exception:
-            raw = b""
+        with e:
+            return e.code, {}
     try:
         payload = json.loads(raw.decode("utf-8")) if raw else {}
     except (UnicodeDecodeError, ValueError):
@@ -15935,9 +16063,7 @@ def _relay_pairing() -> dict:
     this function. `state` is one of: paired, old_relay, not_configured, error.
     A relay deployed before 3.17 answers 404 (no /v1/pairing); a pull-token
     listing tells that apart from a wrong address."""
-    settings = _read_settings()
-    base = settings.get("relay_url") or ""
-    token = _get_saved_relay_token()
+    settings, base, token = _relay_connection()
     if not base or not token:
         return {"ok": True, "state": "not_configured",
                 "message": "Add the relay address and pull token first."}
@@ -15957,17 +16083,19 @@ def _relay_pairing() -> dict:
     return {"ok": True, "state": "error", "message": _relay_status_error(status)}
 
 
-def _relay_delete(base: str, token: str, link_id: str) -> bool:
+def _relay_delete(base: str, token: str, link_id: str, outcome: str) -> str:
     try:
         status, _payload = _relay_http("DELETE", f"{base}/v1/links/{link_id}", token)
     except Exception as exc:
         log.warning("relay: delete failed (%s)", type(exc).__name__)
-        return False
+        return outcome
     if status in (200, 404):   # 404: already gone (expired, or deleted earlier)
-        _relay_done.pop(link_id, None)
-        return True
+        _relay_retries.pop(link_id, None)
+        return outcome
+    if status == 429:
+        return "deferred"
     log.warning("relay: delete answered HTTP %d", status)
-    return False
+    return outcome
 
 
 def _relay_capture_failure_reason(result: dict, url: str) -> str:
@@ -15982,41 +16110,62 @@ def _relay_capture_failure_reason(result: dict, url: str) -> str:
     return _sanitize_error(str(message or "the capture failed")) or "the capture failed"
 
 
-def _relay_save_fallback_note(tools, url: str, note, reason: str) -> bool:
+def _relay_rate_limited(result) -> bool:
+    if not isinstance(result, dict) or result.get("ok") is not False:
+        return False
+    error = result.get("error")
+    return (result.get("code") == "rate_limited"
+            or (isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX))
+            or (isinstance(error, dict) and error.get("code") == "rate_limited"))
+
+
+def _relay_save_note(tools, title: str, text: str) -> str:
+    try:
+        saved = tools.call_tool("uoink_note", {"title": title, "text": text, "author": "Phone inbox"})
+    except Exception as exc:
+        log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
+        return "kept"
+    if _relay_rate_limited(saved):
+        return "deferred"
+    return "noted" if isinstance(saved, dict) and saved.get("ok") is True else "kept"
+
+
+def _relay_save_fallback_note(tools, url: str, note, reason: str) -> str:
     """Keep a link Uoink couldn't capture as a Uoink note: the shared note,
     the URL, and one line saying why."""
     parts = [note.strip()] if isinstance(note, str) and note.strip() else []
     if url:
         parts.append(url)
     parts.append(f"Uoink couldn't capture this link: {reason}")
-    try:
-        saved = tools.call_tool("uoink_note", {
-            "title": RELAY_FALLBACK_TITLE, "text": "\n\n".join(parts)})
-    except Exception as exc:
-        log.warning("relay: the fallback note was not saved (%s)", type(exc).__name__)
-        return False
-    if isinstance(saved, dict) and saved.get("ok") is True:
-        return True
-    log.warning("relay: the fallback note was not saved")
-    return False
+    return _relay_save_note(tools, RELAY_FALLBACK_TITLE, "\n\n".join(parts))
 
 
 def _relay_settle_uncaptured(link_id: str, base: str, token: str, tools,
                              url: str, note, reason: str) -> str:
     """Nothing shared is lost: save the link as a note, then delete it from
     the relay. If the note can't be saved, keep the link for the next check."""
-    if not _relay_save_fallback_note(tools, url, note, reason):
-        _relay_fallback[link_id] = reason
+    outcome = _relay_save_fallback_note(tools, url, note, reason)
+    if outcome != "noted":
+        _relay_remember(link_id, "fallback", reason=reason)
         _relay_update(last_capture_error=_sanitize_error(
             "A shared link couldn't be captured or saved as a note. Uoink will "
             f"try again at the next check. {reason}"))
-        return "kept"
-    _relay_fallback.pop(link_id, None)
-    _relay_done[link_id] = time.time()
+        return outcome
+    _relay_remember(link_id, "delete")
     _relay_update(last_capture_error=_sanitize_error(
         f"A shared link couldn't be captured, so it was saved as a note: {reason}"))
-    _relay_delete(base, token, link_id)
-    return "noted"
+    return _relay_delete(base, token, link_id, "noted")
+
+
+def _relay_finish_capture(link_id: str, base: str, token: str, tools, url: str, note) -> str:
+    if isinstance(note, str) and note.strip():
+        outcome = _relay_save_note(tools, RELAY_NOTE_TITLE, f"{note.strip()}\n\n{url}")
+        if outcome != "noted":
+            _relay_remember(link_id, "shared_note")
+            _relay_update(last_capture_error="The link was captured. Uoink will retry its phone note.")
+            return outcome
+    _relay_remember(link_id, "delete")
+    return _relay_delete(base, token, link_id, "captured")
 
 
 def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
@@ -16025,16 +16174,18 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     link_id = link.get("id")
     if not isinstance(link_id, str) or not _RELAY_ID_RE.match(link_id):
         return "skipped"
-    if link_id in _relay_done:
+    retry = _relay_retries.get(link_id)
+    if retry and retry.stage == "delete":
         # Handled on an earlier check; only the DELETE is still owed.
-        _relay_delete(base, token, link_id)
-        return "skipped"
+        return _relay_delete(base, token, link_id, "skipped")
     url = link.get("url") if isinstance(link.get("url"), str) else ""
     note = link.get("note")
-    if link_id in _relay_fallback:
+    if retry and retry.stage == "shared_note":
+        return _relay_finish_capture(link_id, base, token, tools, url, note)
+    if retry and retry.stage == "fallback":
         # The capture already failed; only its fallback note is still owed.
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
-                                        _relay_fallback[link_id])
+                                        retry.reason)
     route = _classify_capture_url(url)
     capture_tools = _capture_tools()
     if not route.get("ok") or route.get("source") not in capture_tools:
@@ -16046,23 +16197,21 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     try:
         result = tools.call_tool(name, {key: route["canonical"]})
     except Exception as exc:
-        attempts = _relay_raises.get(link_id, 0) + 1
+        attempts = retry.attempts + 1 if retry else 1
         if attempts >= RELAY_MAX_RAISES:
-            _relay_raises.pop(link_id, None)
             log.warning("relay: capture failed %d times (%s); the link becomes a note",
                         attempts, type(exc).__name__)
             return _relay_settle_uncaptured(
                 link_id, base, token, tools, url, note,
                 f"the capture failed {attempts} times ({type(exc).__name__}).")
-        _relay_raises[link_id] = attempts
+        _relay_remember(link_id, "capture", attempts=attempts)
         log.warning("relay: capture raised %s; the link stays for the next check",
                     type(exc).__name__)
         return "kept"
-    _relay_raises.pop(link_id, None)
+    _relay_retries.pop(link_id, None)
     if not isinstance(result, dict):
         result = {"ok": False, "error": "capture returned no result"}
-    error = result.get("error")
-    if result.get("ok") is False and isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX):
+    if _relay_rate_limited(result):
         # The registry refused before trying. Not picked up: try next check.
         return "deferred"
     with _relay_cond:
@@ -16071,17 +16220,7 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     if result.get("ok") is not True:
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
                                         _relay_capture_failure_reason(result, url))
-    _relay_done[link_id] = time.time()
-    if isinstance(note, str) and note.strip():
-        try:
-            saved = tools.call_tool("uoink_note", {
-                "title": RELAY_NOTE_TITLE, "text": f"{note.strip()}\n\n{url}"})
-            if not (isinstance(saved, dict) and saved.get("ok") is True):
-                log.warning("relay: the shared note was not saved")
-        except Exception as exc:
-            log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
-    _relay_delete(base, token, link_id)
-    return "captured"
+    return _relay_finish_capture(link_id, base, token, tools, url, note)
 
 
 def _relay_poll_once() -> dict:
@@ -16089,22 +16228,25 @@ def _relay_poll_once() -> dict:
     first. Never raises; the outcome lands in the relay status."""
     with _relay_poll_lock:
         try:
-            settings = _read_settings()
-            base = settings.get("relay_url") or ""
-            token = _get_saved_relay_token()
+            settings, base, token = _relay_connection()
             if settings.get("relay_enabled") is not True or not base or not token:
                 return _relay_status_payload(settings)
             _relay_update(polling=True, last_poll_at=_now_iso())
-            cutoff = time.time() - RELAY_DONE_TTL_SEC
-            for done_id in [k for k, at in _relay_done.items() if at < cutoff]:
-                _relay_done.pop(done_id, None)
+            cutoff = time.monotonic() - RELAY_DONE_TTL_SEC
+            while _relay_retries:
+                oldest = next(iter(_relay_retries))
+                if _relay_retries[oldest].updated > cutoff:
+                    break
+                del _relay_retries[oldest]
             status, payload = _relay_http("GET", f"{base}/v1/links", token)
             links = payload.get("links")
             if status != 200 or payload.get("ok") is not True or not isinstance(links, list):
                 raise _RelayError(_relay_status_error(status) if status != 200
                                   else "The relay sent an answer Uoink doesn't understand.")
-            links = [link for link in links if isinstance(link, dict)]
-            links.sort(key=lambda link: str(link.get("id") or ""))
+            links = [link for link in links[:RELAY_LINKS_PER_POLL]
+                     if isinstance(link, dict) and isinstance(link.get("id"), str)
+                     and _RELAY_ID_RE.fullmatch(link["id"])]
+            links.sort(key=lambda link: link["id"])
             _relay_update(last_pending_count=len(links), last_error=None)
             tools = _mcp_tools_module() if links else None
             outcomes = []
@@ -16115,7 +16257,7 @@ def _relay_poll_once() -> dict:
                 outcomes.append(outcome)
                 if outcome == "deferred":
                     break
-            if outcomes and not {"noted", "kept"} & set(outcomes):
+            if outcomes and not {"noted", "kept", "deferred"} & set(outcomes):
                 _relay_update(last_capture_error=None)
             _relay_update(last_ok_at=_now_iso())
             if outcomes:
@@ -16347,7 +16489,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
         if item.get("ok") or item.get("status") == "saved_with_errors":
             md_path = item.get("md_path")
             try:
-                body = _read_export_markdown(Path(md_path))
+                body = _read_export_markdown(Path(md_path), root=DESKTOP_ROOT)
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 body = re.sub(r"^(\*\*[^*]+:\*\*[^\n]*\n)+", "", body)
                 if text_only:
@@ -17448,16 +17590,33 @@ def _fs_safe_ts(iso: str) -> str:
     return (iso or "").replace(":", "")
 
 
+def _owned_item_folder(row: dict) -> Path:
+    value = row.get("corpus_path")
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("This item has no saved folder.")
+    path = checked_path(DESKTOP_ROOT, Path(value))
+    folder = path.parent
+    relative = folder.relative_to(DESKTOP_ROOT)
+    special = relative.parts[:1] in (("_exports",), ("_yoink-trash",))
+    session_root = relative.parts[:1] == ("_sessions",) and len(relative.parts) < 3
+    if (not relative.parts or special or session_root
+            or folder.name != row.get("slug") or path.suffix.lower() != ".md"):
+        raise ValueError("This folder does not belong to the saved item.")
+    return folder
+
+
 def _trash_folder_for(row: dict) -> Path:
     """The trash destination for a soft-deleted yoink row:
     _yoink-trash/<topic-folder>/<slug>__deleted-<deleted_at>. Derived from
     corpus_path so it mirrors the on-disk topic folder exactly, and from
     deleted_at so delete / restore / purge all agree on the same path."""
-    original = Path(row["corpus_path"]).parent
+    original = _owned_item_folder(row)
     topic_folder = original.parent.name
     slug = original.name
     ts = _fs_safe_ts(row.get("deleted_at") or "")
-    return _trash_root() / topic_folder / f"{slug}__deleted-{ts}"
+    if not ts or any(ch in ts for ch in "/\\\\"):
+        raise ValueError("Invalid deletion date.")
+    return checked_path(DESKTOP_ROOT, _trash_root() / topic_folder / f"{slug}__deleted-{ts}")
 
 
 # Trash purge cadence: a pass at startup, then once a day.
@@ -18014,13 +18173,56 @@ def _diagnose_payload() -> dict:
     return _build_diagnose_payload(public=False)
 
 
-def _public_diagnose_payload(*, local_ui: bool = False) -> dict:
+_diagnose_lock = threading.Lock()
+_diagnose_cache = None
+
+
+def _refresh_diagnose() -> None:
+    global _diagnose_cache
+    try:
+        _diagnose_cache = _build_diagnose_payload(public=True)
+    except Exception:
+        log.exception("Diagnostic refresh failed")
+    finally:
+        _diagnose_lock.release()
+
+
+def _start_diagnose_refresh() -> None:
+    if not _diagnose_lock.acquire(blocking=False):
+        return
+    started = False
+    try:
+        threading.Thread(target=_refresh_diagnose, daemon=True, name="diagnose").start()
+        started = True
+    except Exception:
+        log.exception("Could not start diagnostic checks")
+    finally:
+        if not started:
+            _diagnose_lock.release()
+
+
+def _public_diagnose_payload(*, local_ui: bool = False, refresh: bool = False) -> dict:
     """HTTP self-check, redacted by default.
 
     Only the HTTP handler's splash metadata check may enable local_ui,
     which adds the splash's key-ready boolean without paths or key checks.
     """
-    return _build_diagnose_payload(public=True, local_ui=local_ui)
+    if refresh:
+        _start_diagnose_refresh()
+    refreshing = _diagnose_lock.locked()
+    payload = dict(_diagnose_cache or {
+        "ok": False, "pending": refreshing, "version": VERSION, "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
+        "checks": [{"name": "diagnostics", "status": "warning",
+                    "detail": "Checks are running." if refreshing else "Checks are unavailable."}],
+        "warnings": [], "migration": {},
+    })
+    payload["refreshing"] = refreshing
+    if local_ui:
+        if _read_settings().get("anthropic_key_invalid"):
+            payload["anthropic_key_valid"] = False
+        elif (_get_saved_anthropic_key() or "").strip():
+            payload["anthropic_key_valid"] = True
+    return payload
 
 
 def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
@@ -18193,7 +18395,8 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
     # Keep migration readiness booleans, but explicitly project the public
     # fields: migration_status also contains local roots and legacy-key state.
     try:
-        status = migrate_install.migration_status()
+        status = (migrate_install.migration_status(include_legacy_key=False) if public
+                  else migrate_install.migration_status())
         migration = {
             section: {flag: status.get(section, {}).get(flag) is True for flag in flags}
             for section, flags in (
@@ -19091,7 +19294,7 @@ def _list_import_ytdlp(url: str, start: int, end: int) -> dict:
     try:
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
-             "--playlist-items", f"{int(start)}:{int(end)}", url],
+             "--playlist-items", f"{int(start)}:{int(end)}", "--", url],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             encoding="utf-8", errors="replace", timeout=COMMENTS_TIMEOUT_SEC)
         return json.loads(cp.stdout)
@@ -20431,7 +20634,8 @@ class Handler(BaseHTTPRequestHandler):
                 or self.headers.get("X-Yoink-Token") or "").strip()
 
     def _check_token(self) -> bool:
-        return secrets.compare_digest(self._request_token(), TOKEN)
+        supplied = self._request_token()
+        return bool(supplied) and supplied.isascii() and secrets.compare_digest(supplied, TOKEN)
 
     def _host_allowed(self) -> bool:
         """C-04: reject any request whose Host header isn't loopback. This is
@@ -20507,9 +20711,13 @@ class Handler(BaseHTTPRequestHandler):
         a token mint or a private route.
         """
         site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
-        return (self.headers.get("Origin") is None
-                and site in ("same-origin", "none")
-                and bool(self.headers.get("Host")) and self._host_allowed())
+        host = self.headers.get("Host")
+        if not host or not self._host_allowed():
+            return False
+        origin = self.headers.get("Origin")
+        if origin is None:
+            return site in ("same-origin", "none")
+        return site == "same-origin" and origin == "http://" + host
 
     def _has_yoink_client_header(self) -> bool:
         """Defense-in-depth header that the extension sets on /token. A
@@ -20593,9 +20801,13 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
 
-    def _send_file(self, path: Path, mime: str, *, dashboard_load=False):
+    def _send_file(self, path: Path, mime: str, *, dashboard_load=False, root=None):
         try:
-            body = path.read_bytes()
+            if root is None:
+                body = path.read_bytes()
+            else:
+                with open_regular(root, path, binary=True) as source:
+                    body = source.read()
         except OSError:
             return self._send_json(404, {"ok": False, "error": "file not found"})
         marker = b'<meta name="uoink-dashboard-load" content="">'
@@ -20611,6 +20823,7 @@ class Handler(BaseHTTPRequestHandler):
             body = dashboard_html(body)
         self.send_response(200)
         self.send_header("Content-Type", mime)
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Content-Length", str(len(body)))
         # Revalidate every load: an upgrade replaces these files, and a cached
         # copy kept an open tab on the old dashboard for up to five minutes.
@@ -20765,8 +20978,10 @@ class Handler(BaseHTTPRequestHandler):
             # Keep splash readiness's existing metadata rule separate from
             # the stricter token bootstrap. Explicit extension origins get the
             # public projection; request parameters cannot select CLI details.
-            local_ui = self._is_local_diagnose_request()
-            return self._send_json(200, _public_diagnose_payload(local_ui=local_ui))
+            authorized = self._check_token()
+            refresh = authorized and urlparse(self.path).query == "refresh=1"
+            local_ui = authorized and self._is_local_diagnose_request()
+            return self._send_json(200, _public_diagnose_payload(local_ui=local_ui, refresh=refresh))
         if bare == "/sources/manifest":
             # Public product metadata (no user data) so the static site can
             # bake it at build time and the dashboard Sources tab can read it
@@ -21502,7 +21717,7 @@ class Handler(BaseHTTPRequestHandler):
         return corpus_provider.UoinkCorpusProvider(
             _get_index(),
             DATA_ROOT,
-            facet_labeler=_humanize_facet,
+            output_root=DESKTOP_ROOT, facet_labeler=_humanize_facet,
             vault_path=self._memory_vault_path(),
         )
 
@@ -21690,7 +21905,7 @@ class Handler(BaseHTTPRequestHandler):
                 retryable=True,
             )
             return self._send_corpus_v1_error("get", error)
-        return self._send_file(path, mime)
+        return self._send_file(path, mime, root=DESKTOP_ROOT)
 
     def _handle_corpus_v1_kept_media(self, bare: str):
         from urllib.parse import unquote
@@ -23359,13 +23574,8 @@ class Handler(BaseHTTPRequestHandler):
     #   POST /writing/style-anchors/<id>/remove  -> delete
 
     def _writing_url_fetcher(self):
-        """Return a callable that, given a URL, returns extracted prose.
-        Bridges Writing Studio's style anchor URL ingestion to whatever
-        page extractor is currently shipped (Universal Site PR / Crawl4AI
-        wrapper). Falls back to None when no extractor is bound -- the
-        anchor still saves, just with raw_text=NULL."""
-        fetcher = globals().get("_extract_page_to_prose")
-        return fetcher if callable(fetcher) else None
+        """A dashboard save authorizes this one style reference."""
+        return lambda url: _extract_page_to_prose(url, enforce_allowlist=False)
 
     def _handle_writing_style_anchors_list(self):
         if not self._require_token():
@@ -23802,15 +24012,17 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        action = (body.get("action") or "").strip().lower()
-        pattern = (body.get("url_pattern") or "").strip()
+        action = body.get("action")
+        action = action.strip().lower() if isinstance(action, str) else ""
+        pattern = body.get("url_pattern")
         if action not in ("add", "remove"):
             return self._send_json(400, {
                 "ok": False,
                 "error": "action must be 'add' or 'remove'"})
-        if not pattern:
+        if not isinstance(pattern, str) or not pattern.strip():
             return self._send_json(400, {
                 "ok": False, "error": "url_pattern required"})
+        pattern = pattern.strip()
         try:
             if action == "add":
                 row = page_extractor.add_allowed(_get_index(), pattern)
@@ -24187,11 +24399,16 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False, "error": ("relay_token must be the relay's pull token: 32 to 4096 "
                                            "characters with no spaces, or null to clear")})
 
-        if not self._settings_post_store_credentials(body):
-            return None
-        with _settings_lock:
-            data = self._settings_post_apply(body, boolean_fields=boolean_fields,
-                                             relay_url=relay_url, defer_stop=defer_stop)
+        relay_change = "relay_url" in body or "relay_token" in body
+        with _relay_config_lock if relay_change else contextlib.nullcontext():
+            if relay_url is not None and "relay_token" not in body:
+                if _relay_origin(relay_url) != _relay_origin(_read_settings().get("relay_url")):
+                    body = {**body, "relay_token": ""}
+            if not self._settings_post_store_credentials(body):
+                return None
+            with _settings_lock:
+                data = self._settings_post_apply(body, boolean_fields=boolean_fields,
+                                                 relay_url=relay_url, defer_stop=defer_stop)
         if data is None:
             return None
         if any(f in body for f in ("relay_enabled", "relay_url", "relay_token", "relay_poll_minutes")):
@@ -24211,7 +24428,7 @@ class Handler(BaseHTTPRequestHandler):
             if "scrapecreators_key" in body:
                 _store_saved_scrapecreators_key((body["scrapecreators_key"] or "").strip())
             if "relay_token" in body:
-                _store_saved_relay_token((body["relay_token"] or "").strip())
+                _store_saved_relay_token((body["relay_token"] or "").strip(), relay_url=body.get("relay_url"))
             if "anthropic_key" in body:
                 raw_key = body.get("anthropic_key")
                 _store_saved_anthropic_key("" if raw_key is None else raw_key.strip())
@@ -25943,13 +26160,22 @@ class Handler(BaseHTTPRequestHandler):
                 "error": "This uoink has no saved markdown on disk yet.",
                 "state": "no_markdown"})
         try:
-            p = Path(corpus_path).resolve()
-            p.relative_to(DESKTOP_ROOT.resolve())
-        except (ValueError, OSError):
+            p = checked_path(DESKTOP_ROOT, Path(corpus_path))
+            if p.suffix.lower() != ".md":
+                raise ValueError("expected Markdown")
+        except (ValueError, LibraryPathError):
             return None, (400, {"ok": False,
-                                 "error": "markdown path is outside the "
-                                          "Uoink folder"})
-        if not p.exists() or not p.is_file():
+                                 "error": "Choose a Markdown file saved directly in the Uoink library."})
+        except OSError:
+            return None, (500, {"ok": False, "error": "Could not access the saved Markdown file."})
+        import stat
+        try:
+            is_file = stat.S_ISREG(p.stat().st_mode)
+        except (FileNotFoundError, NotADirectoryError):
+            is_file = False
+        except OSError:
+            return None, (500, {"ok": False, "error": "Could not access the saved Markdown file."})
+        if not is_file:
             return None, (404, {
                 "ok": False,
                 "error": "The saved markdown file is missing. Re-capture to "
@@ -25971,8 +26197,8 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
-            text = _read_export_markdown(path)
-        except OSError as e:
+            text = _read_export_markdown(path, root=DESKTOP_ROOT)
+        except (OSError, UnicodeError) as e:
             log.warning("/yoinks/%s/markdown read failed: %s", video_id, e)
             return self._send_json(500, {"ok": False,
                                          "error": "could not read markdown"})
@@ -25990,24 +26216,32 @@ class Handler(BaseHTTPRequestHandler):
         if not video_id:
             return self._send_json(400, {"ok": False,
                                          "error": "video_id required"})
-        path, err = self._yoink_markdown_path(video_id)
-        if err:
-            return self._send_json(*err)
         try:
+            path, err = self._yoink_markdown_path(video_id)
+            if err:
+                return self._send_json(*err)
             # An external viewer reads the original path. Repair only the file
             # explicitly opened, under the same lock as the comments writer.
-            try:
-                with _corpus_update_lock:
-                    with path.open(encoding="utf-8", newline="") as source:
-                        original = source.read()
-                    normalized = normalize_export_comments(path, original)
-                    if original != normalized:
-                        _atomic_write_text(path, normalized, newline="")
-            except (UnicodeError, OSError) as exc:
-                log.debug("Could not update Lite comment status on open: %s", exc)
-            _platform.open_in_os(path)
-        except Exception as e:  # noqa: BLE001
-            return self._send_json(200, {"ok": False, "error": str(e)})
+            with _corpus_update_lock, contextlib.ExitStack() as held:
+                source = held.enter_context(open_regular(DESKTOP_ROOT, path, newline=""))
+                original = source.read()
+                if "\x00" in original:
+                    return self._send_json(400, {"ok": False, "error": "The saved Markdown contains binary data."})
+                normalized = normalize_export_comments(path, original, root=DESKTOP_ROOT)
+                if original != normalized:
+                    held.close()
+                    _atomic_write_text(path, normalized, newline="", root=DESKTOP_ROOT)
+                    source = held.enter_context(open_regular(DESKTOP_ROOT, path, newline=""))
+                    if source.read() != normalized:
+                        raise OSError("The saved Markdown changed.")
+                _platform.open_in_os(path)
+        except UnicodeDecodeError:
+            return self._send_json(400, {"ok": False, "error": "Could not read the saved Markdown as UTF-8 text."})
+        except OSError:
+            return self._send_json(500, {"ok": False, "error": "Could not access or open the saved Markdown file."})
+        except Exception:
+            log.exception("Open Markdown failed")
+            return self._send_json(500, {"ok": False, "error": "Could not open the saved Markdown file."})
         log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
         return self._send_json(200, {"ok": True, "path": str(path)})
 
@@ -27146,19 +27380,20 @@ class Handler(BaseHTTPRequestHandler):
         if row.get("deleted_at"):
             return self._send_json(409, {"ok": False, "error": "already deleted"})
 
-        src = Path(row.get("corpus_path") or "").parent
-        if not src.exists() or not src.is_dir():
-            return self._send_json(
-                409, {"ok": False, "error": "uoink folder missing on disk"})
+        try:
+            src = _owned_item_folder(row)
+            with open_regular(DESKTOP_ROOT, Path(row["corpus_path"])):
+                pass
+        except (OSError, ValueError):
+            return self._send_json(409, {"ok": False, "error": "This item has no library folder to move."})
 
         # Mark deleted first so the trash folder name derives from the same
         # deleted_at the index stores; roll the row back if the move fails.
         updated = idx.soft_delete_yoink(video_id)
-        dst = _trash_folder_for(updated)
         try:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(src), str(dst))
-        except (OSError, shutil.Error) as e:
+            dst = _trash_folder_for(updated)
+            move_library_folder(DESKTOP_ROOT, src, dst)
+        except (OSError, ValueError, shutil.Error) as e:
             idx.restore_yoink(video_id)
             log.warning("memory delete: move to trash failed: %s", e)
             return self._send_json(
@@ -27192,8 +27427,11 @@ class Handler(BaseHTTPRequestHandler):
         if not row.get("deleted_at"):
             return self._send_json(409, {"ok": False, "error": "uoink is not deleted"})
 
-        trash = _trash_folder_for(row)
-        dst = Path(row.get("corpus_path") or "").parent
+        try:
+            trash = _trash_folder_for(row)
+            dst = _owned_item_folder(row)
+        except (OSError, ValueError):
+            return self._send_json(409, {"ok": False, "error": "This item has no library folder to restore."})
         if not trash.exists():
             return self._send_json(
                 409, {"ok": False, "error": "trash folder not found"})
@@ -27201,8 +27439,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(
                 409, {"ok": False, "error": "original location is occupied"})
         try:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(trash), str(dst))
+            move_library_folder(DESKTOP_ROOT, trash, dst)
         except (OSError, shutil.Error) as e:
             log.warning("memory restore: move from trash failed: %s", e)
             return self._send_json(
@@ -28270,6 +28507,12 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
     so Ctrl+C still exits promptly."""
     request_queue_size = 16
 
+    def serve_forever(self, poll_interval=0.5):
+        # The listener is bound and startup is complete. The first setup GET
+        # can now poll a running check without having to authorize a refresh.
+        _start_diagnose_refresh()
+        return super().serve_forever(poll_interval)
+
     def server_bind(self):
         if _install_isolation.current_binding() is not None:
             if sys.platform == "darwin":
@@ -28960,11 +29203,9 @@ def export_corpus_data(*, output_root: Path | None = None) -> dict:
     payload = _get_index().export_payload()
     payload["app_version"] = VERSION
     exports_dir = root / EXPORTS_DIRNAME
-    exports_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     path = exports_dir / f"uoink-export-{stamp}.json"
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
-                    encoding="utf-8")
+    _atomic_write_text(path, json.dumps(payload, ensure_ascii=False, indent=2), root=root)
     counts = {table: len(rows) for table, rows in payload["tables"].items()}
     log.info("corpus export -> %s (%s)", path,
              ", ".join(f"{t}={n}" for t, n in counts.items()))

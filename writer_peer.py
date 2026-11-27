@@ -570,6 +570,11 @@ def _validate_writer_status(payload: Any) -> dict:
     return payload
 
 
+class _NoCredentialRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def _get_writer_status(
     base_url: str,
     token: str,
@@ -585,7 +590,8 @@ def _get_writer_status(
         method="GET",
     )
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoCredentialRedirect())
+        with opener.open(request, timeout=timeout) as response:
             status = int(response.status)
             content_type = response.headers.get_content_type()
             raw = response.read(MAX_RESPONSE_BYTES + 1)

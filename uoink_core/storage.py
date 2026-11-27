@@ -1,19 +1,13 @@
-r"""uoink_core.storage -- pure filesystem/path helpers (Sprint 21 split).
-
-Lifted verbatim from server.py with no behavior change: atomic text writes and
-the writable-directory probe. These depend only on the stdlib (no server-side
-mutable globals such as DESKTOP_ROOT), so they live cleanly here and are
-re-exported by server.py for backward compatibility. The only non-functional
-difference is the logger name (`uoink.storage`, a child of `uoink`, propagating
-to the same handlers) -- log text is unchanged.
-"""
+"""Filesystem helpers for checked library reads and atomic publication."""
 from __future__ import annotations
 
+from contextlib import ExitStack, contextmanager
 import json
 import logging
 import os
 import re
-import threading
+import stat
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -31,12 +25,125 @@ _PENDING_COMMENT = "*Fetching comments... they'll appear here when ready.*"
 _LITE_COMMENT = "*Lite captures skip comments.*"
 
 
-def normalize_export_comments(path: Path, text: str) -> str:
+def _redirected(entry):
+    # Windows cloud placeholders can be reparse points without redirecting a name.
+    name_surrogate = getattr(entry, "st_reparse_tag", 0) & 0x20000000
+    return stat.S_ISLNK(entry.st_mode) or bool(name_surrogate)
+
+
+def _system_path(path: Path) -> Path:
+    # macOS exposes its system temporary directories through these root aliases.
+    if sys.platform == "darwin" and path.anchor == "/" and path.parts[1:2] in (("var",), ("tmp",)):
+        alias = Path("/") / path.parts[1]
+        if alias.is_symlink() and alias.readlink() in (Path("private") / alias.name, Path("/private") / alias.name):
+            return Path("/private") / path.relative_to("/")
+    return path
+
+
+class LibraryPathError(OSError):
+    """A path does not satisfy the library's ownership or link policy."""
+
+
+def _rooted_path(root: Path, path: Path) -> tuple[Path, Path]:
+    """Follow the selected root once. Keep every component beneath it lexical."""
+    root = Path(root).absolute()
+    path = Path(path)
+    if os.name == "nt" and any(":" in part for part in path.parts[1:]):
+        raise LibraryPathError("Choose a regular file.")
+    if not path.is_absolute() or ".." in path.parts:
+        raise LibraryPathError("The file must be inside the library.")
+    target = root.resolve()
+    if path.is_relative_to(root):
+        return target, _system_path(target / path.relative_to(root))
+    # Some older rows already store the physical spelling of the root.
+    if path.is_relative_to(target):
+        return target, path
+    raise LibraryPathError("The file must be inside the library.")
+
+
+def checked_path(root: Path, path: Path) -> Path:
+    """Check ownership and every component strictly inside the chosen root."""
+    selected = Path(root).absolute()
+    original = Path(path)
+    root, path = _rooted_path(selected, path)
+    current = root
+    for part in path.relative_to(root).parts:
+        current /= part
+        try:
+            entry = current.lstat()
+        except FileNotFoundError:
+            break
+        if _redirected(entry):
+            raise LibraryPathError("The library path contains a link.")
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise LibraryPathError("The file must be inside the library.")
+    # Keep the configured spelling for paths returned to the UI and index.
+    return original if original.is_relative_to(selected) else selected / path.relative_to(root)
+
+
+@contextmanager
+def _parent_directory(root: Path, path: Path, *, create: bool = False):
+    """Hold each directory against replacement, or use directory-relative I/O."""
+    root = Path(root).absolute()
+    checked_path(root, path)
+    root, path = _system_path(root), _system_path(path)
+    if create:
+        root.mkdir(parents=True, exist_ok=True)
+    with ExitStack() as held:
+        directory = root
+        parent_fd = None
+        for part in ("", *path.parent.relative_to(root).parts):
+            directory /= part
+            if part and create:
+                try:
+                    if os.name == "nt":
+                        directory.mkdir()
+                    else:
+                        os.mkdir(part, dir_fd=parent_fd)
+                except FileExistsError:
+                    pass
+            if os.name == "nt":
+                import _winapi
+                # Open the directory itself and deny renaming until publication.
+                handle = _winapi.CreateFile(str(directory), 0, 3, 0, 3, 0x02200000, 0)
+                held.callback(_winapi.CloseHandle, handle)
+                if _redirected(directory.lstat()):
+                    raise OSError("The library path contains a link.")
+            else:
+                flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+                parent_fd = os.open(part or root, flags, dir_fd=parent_fd)
+                held.callback(os.close, parent_fd)
+        yield parent_fd
+
+
+def _check_opened(root, path, fd):
+    path = checked_path(root, path)
+    opened = os.fstat(fd)
+    if (not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1
+            or not os.path.samestat(opened, path.stat())):
+        raise OSError("Could not verify the opened file.")
+
+
+@contextmanager
+def open_regular(root, path, *, binary=False, newline=None):
+    root, path = _rooted_path(root, path)
+    with _parent_directory(root, path) as parent:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
+        if not stat.S_ISREG(path.lstat().st_mode):
+            raise OSError("Choose a regular file.")
+        fd = os.open(path if parent is None else path.name, flags, dir_fd=parent)
+        with os.fdopen(fd, "rb" if binary else "r", encoding=None if binary else "utf-8", newline=newline) as stream:
+            _check_opened(root, path, fd)
+            yield stream
+
+
+def normalize_export_comments(path: Path, text: str, *, root=None) -> str:
     if _PENDING_COMMENT not in text:
         return text
     sidecar = path.parent / (path.parent.name + ".json")
     try:
-        metadata = json.loads(sidecar.read_text(encoding="utf-8"))
+        with open_regular(root or Path(path.anchor), sidecar) as source:
+            metadata = json.load(source)
     except (OSError, ValueError):
         return text
     if (isinstance(metadata, dict) and metadata.get("long_video_mode") == "lite"
@@ -48,36 +155,56 @@ def normalize_export_comments(path: Path, text: str) -> str:
     return text
 
 
-def read_export_markdown(path: Path) -> str:
+def read_export_markdown(path: Path, *, root=None) -> str:
     from moments import export_links
-    return export_links(normalize_export_comments(path, path.read_text(encoding="utf-8")))
+    with open_regular(root or Path(path.absolute().anchor), path) as source:
+        return export_links(normalize_export_comments(path, source.read(), root=root))
 
 
-def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8", newline: str | None = None) -> None:
-    """Write text via temp file + replace so crashy exits don't leave partial files."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-    try:
-        tmp.write_text(text, encoding=encoding, newline=newline)
-        # Path.replace() can raise PermissionError when the destination file
-        # is momentarily held open by OneDrive sync -- and the default
-        # DESKTOP_ROOT lives under OneDrive. Retry with short backoff before
-        # giving up so a transient sync lock doesn't lose the write.
-        for delay in (0.05, 0.2, 0.5, None):
-            try:
-                tmp.replace(path)
-                break
-            except PermissionError:
-                if delay is None:
-                    log.warning("atomic write to %s failed after retries "
-                                "(destination locked?)", path)
-                    raise
-                time.sleep(delay)
-    finally:
+@contextmanager
+def atomic_output(path: Path, *, root=None, encoding=None, newline=None, mode=0o666):
+    path = Path(path).absolute()
+    root, path = _rooted_path(root or path.anchor, path)
+    with _parent_directory(root, path, create=True) as parent:
+        tmp = path.with_name(f".{uuid.uuid4().hex}.tmp")
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0)
+        fd = os.open(tmp if parent is None else tmp.name, flags, mode, dir_fd=parent)
+        published = False
+        identity = os.fstat(fd)
         try:
-            tmp.unlink(missing_ok=True)
-        except OSError:
-            pass
+            with os.fdopen(fd, "w" if encoding else "wb", encoding=encoding, newline=newline) as stream:
+                _check_opened(root, tmp, fd)
+                yield stream
+            for delay in (0.05, 0.2, 0.5, None):
+                try:
+                    checked_path(root, path)
+                    if not os.path.samestat(identity, tmp.lstat()):
+                        raise OSError("The temporary file changed before it was saved.")
+                    if parent is None:
+                        tmp.replace(path)
+                    else:
+                        os.replace(tmp.name, path.name, src_dir_fd=parent, dst_dir_fd=parent)
+                    published = True
+                    break
+                except PermissionError:
+                    if delay is None:
+                        raise
+                    time.sleep(delay)
+        finally:
+            if not published:
+                try:
+                    if os.path.samestat(identity, tmp.lstat()):
+                        if parent is None:
+                            tmp.unlink()
+                        else:
+                            os.unlink(tmp.name, dir_fd=parent)
+                except OSError:
+                    pass
+
+
+def _atomic_write_text(path: Path, text: str, *, encoding="utf-8", newline=None, root=None) -> None:
+    with atomic_output(path, root=root, encoding=encoding, newline=newline) as stream:
+        stream.write(text)
 
 
 def _is_writable_dir(path: Path) -> bool:
@@ -85,15 +212,36 @@ def _is_writable_dir(path: Path) -> bool:
         return False
     probe = path / f".yoink-write-test-{os.getpid()}-{uuid.uuid4().hex}.tmp"
     try:
-        probe.write_text("ok", encoding="utf-8")
-        probe.unlink(missing_ok=True)
+        root, probe = _rooted_path(path, probe.absolute())
+        with _parent_directory(root, probe) as parent:
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+            name = probe if parent is None else probe.name
+            fd = os.open(name, flags, 0o600, dir_fd=parent)
+            identity = os.fstat(fd)
+            try:
+                with os.fdopen(fd, "wb") as stream:
+                    stream.write(b"ok")
+            finally:
+                if os.path.samestat(identity, probe.lstat()):
+                    os.unlink(name, dir_fd=parent)
         return True
     except OSError:
-        try:
-            probe.unlink(missing_ok=True)
-        except OSError:
-            pass
         return False
+
+
+def move_library_folder(root: Path, source: Path, destination: Path) -> None:
+    """Pin both parents through the final checks and the same-volume rename."""
+    target_root, source = _rooted_path(root, source)
+    destination = target_root / checked_path(root, destination).relative_to(root)
+    with _parent_directory(target_root, source) as src_parent:
+        with _parent_directory(target_root, destination, create=True) as dst_parent:
+            checked_path(target_root, source)
+            if checked_path(target_root, destination).exists():
+                raise FileExistsError("The destination is occupied.")
+            if dst_parent is None:
+                source.rename(destination)
+            else:
+                os.rename(source.name, destination.name, src_dir_fd=src_parent, dst_dir_fd=dst_parent)
 
 
 def _topic_folder_name(topic: str) -> str:

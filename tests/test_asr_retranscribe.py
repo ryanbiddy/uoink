@@ -162,6 +162,7 @@ def test_model_routes_refuse_unknown_models(models_root):
 def saved(monkeypatch, tmp_path, settings_file):
     import index
     idx = index.Index.open(tmp_path / "index.db")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     item = seed_yoink_item(idx, tmp_path, video_id=VID, slug=VID, title="Daylight", channel="Example")
     side = {"video_id": VID, "url": "https://www.youtube.com/watch?v=" + VID,

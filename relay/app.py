@@ -266,7 +266,8 @@ def validate_url(value: str) -> str:
         raise ShareError("url is required")
     if len(value) > MAX_URL_CHARS:
         raise ShareError(f"url is longer than {MAX_URL_CHARS} characters")
-    if any(ch.isspace() or unicodedata.category(ch) == "Cc" for ch in value):
+    if any(ch.isspace() or unicodedata.category(ch) == "Cc"
+           or ch in _BIDI_CONTROLS or ch in "\u061c\u200e\u200f" for ch in value):
         raise ShareError("url contains spaces or control characters")
     try:
         parts = urlsplit(value)
@@ -646,7 +647,12 @@ _PHONE_SCRIPT = r"""
 
   $("pairform").addEventListener("submit", function (event) {
     event.preventDefault();
-    var token = tokenFrom($("pairlink").value);
+    var link;
+    try { link = new URL($("pairlink").value.trim()); } catch (e) {}
+    if (!link || link.origin !== window.location.origin) {
+      say($("pairresult"), "Use a pairing link from this relay.", "bad"); render(); return;
+    }
+    var token = tokenFrom(link.hash);
     if (!validToken(token)) { say($("pairresult"), "That isn't a pairing link from Uoink.", "bad"); render(); return; }
     write(token);
     pending = "";

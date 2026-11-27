@@ -52,6 +52,7 @@ from urllib.parse import urlparse
 
 import source_subscriptions
 import article_extractor
+from uoink_core.storage import _atomic_write_text
 
 log = logging.getLogger("uoink.page_extractor")
 
@@ -360,27 +361,65 @@ def normalize_page_url(raw: str) -> str | None:
 
 
 # ---- allowlist ---------------------------------------------------------
+# Common multi-label registries and shared hosting suffixes. The helper
+# ships without a public suffix database and must work offline.
+_PUBLIC_SUFFIXES = frozenset("""
+    ac.uk co.uk gov.uk ltd.uk me.uk net.uk nhs.uk org.uk plc.uk sch.uk
+    asn.au com.au edu.au gov.au id.au net.au org.au
+    ac.nz co.nz govt.nz net.nz org.nz school.nz
+    ac.jp co.jp go.jp ne.jp or.jp ac.kr co.kr ne.kr or.kr
+    ac.in co.in edu.in firm.in gen.in gov.in ind.in net.in org.in
+    com.ar com.br com.cn com.co com.hk com.mx com.my com.ph com.pk com.pl
+    com.sg com.tr com.tw com.ua com.vn co.id co.il co.th co.za org.za
+    net.br org.br gov.br edu.cn gov.cn net.cn org.cn
+    appspot.com azurewebsites.net blogspot.com cloudfront.net firebaseapp.com
+    github.io gitlab.io herokuapp.com netlify.app onrender.com pages.dev
+    vercel.app web.app wordpress.com workers.dev
+""".split())
+_HOST_LABEL = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")
+
+
+def _site_pattern_host(pattern: str) -> str:
+    """Return the allowed domain of a normalized rule, or an empty string."""
+    host = pattern.removeprefix("*.")
+    if (len(pattern) > 253 or "." not in host or host in _PUBLIC_SUFFIXES
+            or not all(_HOST_LABEL.fullmatch(label) for label in host.split("."))):
+        return ""
+    return host
+
+
+def normalize_site_pattern(value: str) -> str:
+    pattern = value.strip().lower() if isinstance(value, str) else ""
+    if not _site_pattern_host(pattern):
+        raise ValueError("Enter a site such as example.com or *.docs.example.com.")
+    return pattern
+
+
+def page_consent_required(pattern: str) -> dict:
+    return {"ok": False, "code": "consent_required",
+            "error": (f"Allow {pattern} in the Uoink dashboard under Settings > Capture > "
+                      "Sites Uoink works on, then retry the capture.")}
+
+
 def list_allowed(idx, *, active_only: bool = False) -> list[dict]:
     sql = "SELECT * FROM allowed_sites"
     if active_only:
         sql += " WHERE active = 1"
     sql += " ORDER BY added_at ASC"
-    rows = idx._conn.execute(sql).fetchall()
-    return [dict(r) for r in rows]
+    sites = []
+    for record in idx._conn.execute(sql):
+        row = dict(record)
+        if row["active"] and not _site_pattern_host(row["url_pattern"].lower()):
+            # Keep legacy rules visible for removal without granting access.
+            row["active"] = 0
+        if row["active"] or not active_only:
+            sites.append(row)
+    return sites
 
 
 def add_allowed(idx, url_pattern: str) -> dict:
     """Insert (idempotent on UNIQUE url_pattern). Returns the row."""
-    pattern = (url_pattern or "").strip().lower()
-    if not pattern:
-        raise ValueError("url_pattern required")
-    # Don't pre-validate as a strict hostname -- wildcards are explicit:
-    # '*.docs.example.com' is a legal pattern (and not a legal hostname).
-    # We just confirm it's not gibberish.
-    if len(pattern) > 253:
-        raise ValueError("url_pattern too long (max 253)")
-    if any(c in pattern for c in (" ", "\t", "\n", "\r")):
-        raise ValueError("url_pattern cannot contain whitespace")
+    pattern = normalize_site_pattern(url_pattern)
     with idx.write_transaction() as conn:
         cur = conn.execute(
             "INSERT OR IGNORE INTO allowed_sites "
@@ -418,13 +457,8 @@ def _host_matches(host: str, pattern: str) -> bool:
     matches exact host AND any subdomain of pattern (so 'example.com'
     matches 'www.example.com')."""
     host = (host or "").lower()
-    pattern = (pattern or "").lower()
-    if not host or not pattern:
-        return False
-    if pattern.startswith("*."):
-        suffix = pattern[2:]
-        return host == suffix or host.endswith("." + suffix)
-    return host == pattern or host.endswith("." + pattern)
+    suffix = _site_pattern_host((pattern or "").lower())
+    return bool(suffix) and (host == suffix or host.endswith("." + suffix))
 
 
 def host_is_allowed(idx, url: str) -> bool:
@@ -436,10 +470,8 @@ def host_is_allowed(idx, url: str) -> bool:
     host = (parsed.hostname or "").lower()
     if not host:
         return False
-    for row in list_allowed(idx, active_only=True):
-        if _host_matches(host, row["url_pattern"]):
-            return True
-    return False
+    rules = idx._conn.execute("SELECT url_pattern FROM allowed_sites WHERE active = 1")
+    return any(_host_matches(host, rule["url_pattern"]) for rule in rules)
 
 
 # ---- extraction --------------------------------------------------------
@@ -492,7 +524,8 @@ def extract_page(idx, url: str, *,
 
     result = _extract_article_page(
         canonical, render_mode=render_mode, include_screenshot=include_screenshot,
-        follow_links_depth=depth, check_url=check_url, http_open=http_open)
+        follow_links_depth=depth, check_url=check_url, http_open=http_open,
+        redirect_allowed=(lambda target: host_is_allowed(idx, target)) if enforce_allowlist else None)
     # Honest handling of X's login/nojs wall: a plain fetch of an x.com
     # Article or page comes back as "JavaScript is not available", not the
     # content. Fail cleanly with actionable copy instead of persisting the
@@ -549,12 +582,13 @@ def page_state(diagnostic: str) -> str:
     return "thin"
 
 
-def _fetch_page_html(url: str, http_open=None):
+def _fetch_page_html(url: str, http_open=None, redirect_allowed=None):
     """The sole static fetch boundary; admission and redirects stay in policy."""
     try:
         with (http_open or source_subscriptions.public_http_open)(
                 url, headers={"User-Agent": _USER_AGENT},
-                timeout=_PAGE_FETCH_TIMEOUT_SEC) as resp:
+                timeout=_PAGE_FETCH_TIMEOUT_SEC,
+                **({"redirect_allowed": redirect_allowed} if redirect_allowed else {})) as resp:
             if resp.status != 200:
                 return None, {"fetched_at": _now_iso(), "fetched_url": url}, {"code": "upstream_http_error",
                                         "error": f"upstream returned HTTP {resp.status}"}
@@ -583,8 +617,8 @@ def _engine_version(engine):
 
 
 def _extract_article_page(url, *, render_mode, include_screenshot,
-                          follow_links_depth, check_url=None, http_open=None):
-    raw, fetch_info, failure = _fetch_page_html(url, http_open)
+                          follow_links_depth, check_url=None, http_open=None, redirect_allowed=None):
+    raw, fetch_info, failure = _fetch_page_html(url, http_open, redirect_allowed)
     attempts = []
 
     def label(result, engine):
@@ -715,9 +749,12 @@ def _extract_crawl4ai(url: str, *, render_mode: str,
 
 
 # ---- stdlib fallback ---------------------------------------------------
-_TAG_RE = re.compile(r"<[^>]+>", re.S)
-_TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>",
-                          re.S | re.IGNORECASE)
+# The alternatives consume disjoint runs. A missing '>' never restarts a
+# scan of the remaining document at the next '<'.
+_LEGACY_TOKENS = re.compile(r"[^<]+|<+[^<>]*>?")
+_TAG_NAME = re.compile(r"<(/?)([a-zA-Z][\w:-]*)")
+_BLOCK_MARKS = {"p": "\n\n", "li": "\n- ", "br": "\n",
+                **{f"h{n}": "\n\n" + "#" * min(n, 4) + " " for n in range(1, 7)}}
 _META_RE = re.compile(
     r'<meta\s+(?:name|property)\s*=\s*["\'](?P<key>[^"\']+)["\']\s+'
     r'content\s*=\s*["\'](?P<val>[^"\']*)["\']',
@@ -728,39 +765,51 @@ _LINK_RE = re.compile(
 _IMG_RE = re.compile(
     r'<img\s+[^>]*src\s*=\s*["\'](?P<src>[^"\']+)["\']',
     re.S | re.IGNORECASE)
-_SCRIPT_STYLE_RE = re.compile(
-    r"<(?:script|style)[^>]*>.*?</(?:script|style)>",
-    re.S | re.IGNORECASE)
+
+def _legacy_page(html, url):
+    from html import unescape
+
+    body, title, links, images = [], [], [], []
+    metadata = {}
+    hidden = ""
+    in_title = False
+    for token in _LEGACY_TOKENS.finditer(html):
+        chunk = token.group()
+        if not chunk.startswith("<"):
+            if not hidden:
+                body.append(chunk)
+                if in_title:
+                    title.append(chunk)
+            continue
+        tag = _TAG_NAME.match(chunk)
+        if not tag or not chunk.endswith(">"):
+            continue
+        closing, name = tag.group(1), tag.group(2).lower()
+        if hidden:
+            if closing and name == hidden:
+                hidden = ""
+            continue
+        if name in ("script", "style") and not closing:
+            hidden = name
+        elif name == "title":
+            in_title = not closing
+        elif name in _BLOCK_MARKS:
+            body.append(_BLOCK_MARKS[name])
+        elif not closing and len(chunk) <= 8192:
+            if name == "meta" and (m := _META_RE.match(chunk)):
+                metadata[m["key"].strip().lower()] = m["val"].strip()
+            elif name == "a" and len(links) < 50 and (m := _LINK_RE.match(chunk)):
+                if href := article_extractor.safe_link(m["href"].strip(), url):
+                    links.append({"href": href})
+            elif name == "img" and len(images) < 50 and (m := _IMG_RE.match(chunk)):
+                images.append({"src": m["src"].strip()})
+    markdown = re.sub(r"[ \t]+", " ", unescape("".join(body)).replace("\xa0", " "))
+    markdown = re.sub(r"\n(?:[ \t]*\n)+", "\n\n", markdown).strip()
+    return markdown, "".join(title).strip() or None, metadata, links, images
 
 
 def _html_to_markdown(html: str) -> str:
-    """Cheap, defensive HTML -> markdown. Strips script/style first,
-    converts headings + links + paragraphs, collapses whitespace.
-    NOT a full Markdownify -- enough for an LLM to ingest cleanly when
-    Crawl4AI isn't available."""
-    if not html:
-        return ""
-    s = _SCRIPT_STYLE_RE.sub("", html)
-    # Headings + paragraphs + line breaks
-    s = re.sub(r"</?h1[^>]*>", "\n\n# ", s, flags=re.IGNORECASE)
-    s = re.sub(r"</?h2[^>]*>", "\n\n## ", s, flags=re.IGNORECASE)
-    s = re.sub(r"</?h3[^>]*>", "\n\n### ", s, flags=re.IGNORECASE)
-    s = re.sub(r"</?(h4|h5|h6)[^>]*>", "\n\n#### ", s, flags=re.IGNORECASE)
-    s = re.sub(r"</?p[^>]*>", "\n\n", s, flags=re.IGNORECASE)
-    s = re.sub(r"<br\s*/?>", "\n", s, flags=re.IGNORECASE)
-    s = re.sub(r"</?li[^>]*>", "\n- ", s, flags=re.IGNORECASE)
-    s = _TAG_RE.sub("", s)
-    # Decode a few common entities + collapse whitespace
-    s = (s.replace("&amp;", "&")
-         .replace("&lt;", "<")
-         .replace("&gt;", ">")
-         .replace("&quot;", '"')
-         .replace("&#39;", "'")
-         .replace("&nbsp;", " "))
-    s = re.sub(r"[ \t]+", " ", s)
-    s = re.sub(r"\n\s+\n", "\n\n", s)
-    s = re.sub(r"\n{3,}", "\n\n", s)
-    return s.strip()
+    return _legacy_page(html, "")[0]
 
 
 def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None, html=None) -> dict:
@@ -774,21 +823,7 @@ def _extract_stdlib(url: str, *, include_screenshot: bool, http_open=None, html=
             return {"ok": False, **failure, "url": url}
     if isinstance(html, bytes):
         html = html.decode("utf-8", errors="replace")
-    title_match = _TITLE_RE.search(html)
-    title = title_match.group(1).strip() if title_match else None
-    metadata: dict[str, str] = {}
-    for m in _META_RE.finditer(html):
-        key = m.group("key").strip().lower()
-        val = m.group("val").strip()
-        if key:
-            metadata[key] = val
-    links = [{"href": href}
-              for m in _LINK_RE.finditer(html)
-              if (href := article_extractor.safe_link(m.group("href").strip(), url))][:50]
-    images = [{"src": m.group("src").strip()}
-                for m in _IMG_RE.finditer(html)
-                if m.group("src").strip()][:50]
-    markdown = _html_to_markdown(html)
+    markdown, title, metadata, links, images = _legacy_page(html, url)
     return {
         "ok": True,
         "extraction_engine": ENGINE_STDLIB,
@@ -816,7 +851,7 @@ def _same_thumbnail_site(page_host: str, image_url: str) -> bool:
 
 
 def _save_page_thumbnail(image_url: str, page_url: str, folder: Path, *,
-                         same_site_only: bool = False, http_open=None) -> Path | None:
+                         root=None, same_site_only: bool = False, http_open=None) -> Path | None:
     """Best-effort Library thumbnail from the page's lead image (og:image,
     then twitter:image, then image_src) at <folder>/thumbnail.jpg, where a
     video capture keeps its own. Reuses the public-network fetch policy and
@@ -835,7 +870,6 @@ def _save_page_thumbnail(image_url: str, page_url: str, folder: Path, *,
         if not allowed(url):
             return None
         options["redirect_allowed"] = allowed
-    raw_path = folder / "thumbnail.raw"
     thumb_path = folder / "thumbnail.jpg"
     try:
         with (http_open or source_subscriptions.public_http_open)(
@@ -846,16 +880,10 @@ def _save_page_thumbnail(image_url: str, page_url: str, folder: Path, *,
             data = resp.read(images.MAX_IMAGE_BYTES + 1)
         if len(data) > images.MAX_IMAGE_BYTES or images.sniff_mime(data) is None:
             return None
-        raw_path.write_bytes(data)
-        width, _ = images._write_thumbnail(raw_path, thumb_path)
+        width, _ = images._write_thumbnail(data, thumb_path, root=root)
     except Exception as e:  # never fail a page save over its preview
         log.warning("page thumbnail failed: %s", e)
         return None
-    finally:
-        try:
-            raw_path.unlink(missing_ok=True)
-        except OSError:
-            pass
     return thumb_path if width else None
 
 
@@ -939,7 +967,6 @@ def persist_page_yoink(idx, extract_result: dict, *,
         if not folder_path.startswith(root):
             raise ValueError(f"capture folder outside the library: {slug!r}")
         folder = Path(folder_path)
-        folder.mkdir(parents=True, exist_ok=True)
         # Folder-based readers resolve <slug>.md and <slug>.json.
         stem = slug if source_type == "hn_thread" else slug_prefix
         corpus_path = folder / f"{stem}.md"
@@ -958,9 +985,9 @@ def persist_page_yoink(idx, extract_result: dict, *,
         heading = re.sub(r"<(?=[A-Za-z/!?])", "&lt;", str(title).replace("\n", " "))
         if source_type != "hn_thread":  # HN already renders its title and source.
             body_md = f"# {heading}\n\n**Source:** {url}\n\n" + attribution + body_md
-        corpus_path.write_text(body_md, encoding="utf-8")
+        _atomic_write_text(corpus_path, body_md, root=data_root)
         import json as _json
-        sidecar_path.write_text(_json.dumps({
+        _atomic_write_text(sidecar_path, _json.dumps({
             "schema_version": 2,
             **({"video_id": video_id} if source_type == "hn_thread" else {}),
             "source_type": source_type,
@@ -974,10 +1001,10 @@ def persist_page_yoink(idx, extract_result: dict, *,
             "images": extract_result.get("images") or [],
             "screenshot_path": extract_result.get("screenshot_path"),
             "extracted_at": extract_result.get("extracted_at"),
-        }, indent=2, ensure_ascii=False), encoding="utf-8")
+        }, indent=2, ensure_ascii=False), root=data_root)
         if source_type == SOURCE_TYPE_PAGE and isinstance(metadata.get("image"), str):
             _save_page_thumbnail(metadata["image"], extract_result.get("fetched_url") or url,
-                                 folder, same_site_only=metadata.get("capture_source") == DOM_CAPTURE_SOURCE,
+                                 folder, root=data_root, same_site_only=metadata.get("capture_source") == DOM_CAPTURE_SOURCE,
                                  http_open=http_open)
 
     import json as _json
