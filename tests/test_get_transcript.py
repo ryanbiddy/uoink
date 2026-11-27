@@ -223,7 +223,7 @@ def test_manual_english_captions_precede_auto_and_are_cached(transcript, tmp_pat
     cmd, kwargs = transcript.calls[0]
     assert "--write-subs" in cmd
     assert "--write-auto-subs" not in cmd
-    assert cmd[-1] == URL
+    assert cmd[-2:] == ["--", URL]
     assert kwargs["check"] is True
     cache_files = list((tmp_path / "data" / "transcript-cache").glob("*.json"))
     assert len(cache_files) == 1

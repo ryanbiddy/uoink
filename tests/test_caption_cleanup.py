@@ -1,8 +1,12 @@
 """Offline YouTube caption fixtures exercise dialogue, display windows and word clocks."""
 from __future__ import annotations
 
+import io
 import json
+import subprocess
 from pathlib import Path
+from time import perf_counter
+from unittest.mock import patch
 
 import pytest
 
@@ -26,7 +30,8 @@ def test_hard_spaces_and_the_censor_marker_become_readable(tmp_path):
         ("00:00:01,000", "00:00:03,000", "what\\hthe [\\h__\\h] is that"),
         ("00:00:10,000", "00:00:12,000", "<c>so</c>\\h\\hgood"),
     ])
-    assert [text for _, _, text in yt_extract.parse_srt(path)] == ["what the [__] is that", "so good"]
+    assert [text for _, _, text in yt_extract.parse_srt(path, automatic=True)] == [
+        "what the [__] is that", "so good"]
 
 
 def test_cues_past_the_video_are_dropped_and_ends_clamped(tmp_path, caplog):
@@ -58,7 +63,7 @@ def test_rolling_talk_preserves_every_spoken_word_in_order(fmt):
         assert [row[:2] for row in rows] == [(0, 3), (3, 5), (5, 8)]
         assert all(row[2].endswith(".") for row in rows)
     else:
-        raw = list(yt_extract.parse_srt(path))
+        raw = list(yt_extract.parse_srt(path, automatic=None))
         assert sum(text.split().count("wheel") for _, _, text in raw) == 3
         rows = list(yt_extract.parse_srt(path, automatic=True))
         assert len(rows) == len(raw)
@@ -76,6 +81,15 @@ def test_rolling_talk_preserves_every_spoken_word_in_order(fmt):
 def test_keep_repeated_speech_and_native_caption_bytes(name, auto, expected):
     rows = yt_extract.parse_srt(FIXTURES / name, automatic=auto)
     assert [text.encode("utf-8") for _, _, text in rows] == [t.encode("utf-8") for t in expected]
+
+
+def test_uploaded_vtt_keeps_markup_spacing_and_hard_spaces(tmp_path):
+    payload = b" Hello<c> there</c>\\hfriend\n<b>again</b><00:01.200>!"
+    path = tmp_path / "video.manual.en.vtt"
+    path.write_bytes(b"WEBVTT\n\n00:00.000 --> 00:02.000\n" + payload + b"\n")
+    track = {"kind": "captions", "key": "en"}
+    row, = yt_extract._read_caption_file(path, track, None)
+    assert row[2].encode() == payload
 
 
 @pytest.mark.parametrize("lines", [
@@ -98,7 +112,7 @@ def test_space_only_display_row_metadata_and_numeric_dialogue(tmp_path):
                     "first\n00:00.000 --> 00:01.000\n \nfirst words\n\n"
                     "00:08.000 --> 00:09.000\n42\n\n"
                     "00:10.000 --> 00:11.000\n \nlast words\n", encoding="utf-8")
-    assert [(s, e, t.strip()) for s, e, t in yt_extract.parse_srt(path, automatic=True)] == [
+    assert list(yt_extract.parse_srt(path, automatic=True)) == [
         (0, 1, "first words"), (8, 9, "42"), (10, 11, "last words")]
 
 
@@ -275,7 +289,7 @@ def test_vtt_keeps_explicit_word_clocks_on_freshly_retained_lines(tmp_path):
                     "<00:05.250>Stars<00:05.600> rise.\n", encoding="utf-8")
     rows = list(yt_extract.parse_srt(path, automatic=True))
     assert [row[:3] for row in rows] == [
-        (0, 3, "High tide."), (1, 4, "Red sky."), (2, 5, "Night falls."), (3, 6, "Stars rise.")]
+        (0, 3, "High tide."), (3.2, 4, "Red sky."), (2, 5, "Night falls."), (5.25, 6, "Stars rise.")]
     assert rows[0].words == [{"word": "High", "start": 0, "end": 1.1},
                              {"word": "tide.", "start": 1.1, "end": 3}]
     assert rows[1].words == [{"word": "Red", "start": 3.2, "end": 3.7},
@@ -297,3 +311,101 @@ def test_vtt_ambiguous_or_protected_word_clocks_stay_unset(tmp_path, raw):
     row, = yt_extract.parse_srt(path, automatic=True)
     assert row[0:2] == (0, 1)
     assert getattr(row, "words", None) is None
+
+
+def test_long_caption_windows_have_a_linear_comparison_budget(tmp_path, monkeypatch):
+    # Count words copied by slicing. This makes the cost check independent of CPU speed.
+    sliced_words = 0
+
+    class CountedWords(tuple):
+        def __getitem__(self, key):
+            nonlocal sliced_words
+            result = super().__getitem__(key)
+            if isinstance(key, slice):
+                sliced_words += len(result)
+            return result
+
+    make_window = yt_extract._caption_window
+
+    def counted_window(*args):
+        window = make_window(*args)
+        return window._replace(words=CountedWords(window.words))
+
+    monkeypatch.setattr(yt_extract, "_caption_window", counted_window)
+    lines = [" ".join(f"w{row}_{i}" for i in range(128)) for row in range(256)]
+    path = _srt(tmp_path, [(yt_extract.fmt_time(i) + ",000", yt_extract.fmt_time(i + 2) + ",000", line)
+                           for i, line in enumerate(lines)])
+    start = perf_counter()
+    rows = list(yt_extract.parse_srt(path, automatic=True))
+    elapsed = perf_counter() - start
+    assert [text for _, _, text in rows] == lines
+    assert sliced_words <= 8 * 128 * len(lines)
+    assert elapsed < 0.7, f"parsed the whole file in {elapsed:.3f}s"
+
+
+@pytest.mark.parametrize("ext", ["srt", "vtt", "json3"])
+def test_caption_reader_accepts_exact_byte_limit_and_refuses_one_extra(tmp_path, monkeypatch, ext):
+    data = ('{"events":[{"tStartMs":0,"dDurationMs":1000,"segs":[{"utf8":"café","tOffsetMs":0}]}]}'
+            if ext == "json3" else "00:00:00.000 --> 00:00:01.000\r\ncafé").encode("utf-8-sig")
+    path = tmp_path / ("video.auto.en." + ext)
+    track = {"key": "en", "kind": "auto_captions"}
+    monkeypatch.setattr(yt_extract, "MAX_CAPTION_BYTES", len(data), raising=False)
+    path.write_bytes(data)
+    assert yt_extract._read_caption_file(path, track, None) == [(0, 1, "café")]
+    path.write_bytes(data + b" ")
+    assert yt_extract._read_caption_file(path, track, None) == []
+
+
+def test_caption_read_uses_a_bounded_binary_read(tmp_path, monkeypatch):
+    class CheckedStream(io.BytesIO):
+        def read(self, size=-1):
+            assert 0 < size <= 65
+            return super().read(size)
+
+    track = {"kind": "captions", "key": "en"}
+    data = b"00:00.000 --> 00:01.000\nSpoken text"
+    path = tmp_path / "video.manual.en.vtt"
+    monkeypatch.setattr(yt_extract, "MAX_CAPTION_BYTES", 64, raising=False)
+    with patch.object(Path, "open", return_value=CheckedStream(data)) as opened:
+        assert yt_extract._read_caption_file(path, track, None) == [(0, 1, "Spoken text")]
+    opened.assert_called_once_with("rb")
+
+
+def test_oversized_native_subtitle_is_not_sent_to_conversion(tmp_path, monkeypatch):
+    track = {"kind": "captions", "key": "en"}
+    monkeypatch.setattr(yt_extract, "MAX_CAPTION_BYTES", 64, raising=False)
+    attempts = []
+
+    def fetch(selected, prefix, text_only):
+        attempts.append(text_only)
+        (tmp_path / f"{prefix}.en.ttml").write_bytes(b" " * 65)
+
+    rows, _ = yt_extract.read_caption_track(tmp_path, "video.manual", track, None, fetch)
+    assert rows == [] and attempts == [False]
+
+
+@pytest.mark.parametrize("message", [b"HTTP Error 429: Too Many Requests",
+                                     b"Sign in to confirm you're not a bot"])
+def test_standalone_stops_all_track_requests_on_youtube_refusal(tmp_path, monkeypatch, message):
+    import _platform
+
+    url = "https://www.youtube.com/watch?v=talk0000001"
+    monkeypatch.setattr(yt_extract.sys, "argv", ["yt_extract.py", url, "--out", str(tmp_path), "--keep-video"])
+    monkeypatch.setattr(_platform, "require_media", lambda: None)
+    monkeypatch.setattr(_platform, "media_binary", lambda name: name)
+    monkeypatch.setattr(subprocess, "check_output", lambda *a, **kw: json.dumps(
+        {"title": "fixture", "extractor_key": "Youtube",
+         "subtitles": {"en": [{}]}, "automatic_captions": {"en-orig": [{}]}}))
+    requests = []
+
+    def run(cmd, **kwargs):
+        if "--skip-download" in cmd:
+            requests.append(cmd[cmd.index("--sub-lang") + 1])
+            raise subprocess.CalledProcessError(1, cmd, stderr=message)
+        if "-o" in cmd:
+            (tmp_path / "fixture" / "video.mp4").write_bytes(b"placeholder")
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr(subprocess, "run", run)
+    yt_extract.main()
+    assert requests == ["en"]

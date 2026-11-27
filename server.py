@@ -3891,7 +3891,7 @@ def _download_caption_track(url: str, track: dict, tmp_dir: Path,
     """Download exactly one named caption track; raise on refusal."""
     def fetch(selected, prefix, text_only):
         cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(selected, text_only),
-               "-o", str(tmp_dir / f"{prefix}.%(ext)s"), url]
+               "-o", str(tmp_dir / f"{prefix}.%(ext)s"), "--", url]
         done = _run_subprocess(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
                                timeout=COMMENTS_TIMEOUT_SEC)
         stderr = getattr(done, "stderr", None) or b""
@@ -8540,7 +8540,7 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         return CAPTIONS_BOT_CHECK_COOLDOWN
     try:
         cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(track, text_only),
-               "-o", str(output_folder / f"{prefix}.%(ext)s"), url]
+               "-o", str(output_folder / f"{prefix}.%(ext)s"), "--", url]
         done = _run_subprocess(
             cmd,
             cancel_event=cancel_event,

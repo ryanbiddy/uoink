@@ -755,10 +755,11 @@ def test_youtube_save_gets_captions_before_any_asr(lib):
     job.start()
     _wait(lambda: lib.finished(), message="captions run")
     assert lib.asr_calls == [], "captions came back, so no CPU was spent"
+    assert lib.caption_fetches == [url]
     sidecar = json.loads((folder / "yt-refused.json").read_text(encoding="utf-8"))
     assert sidecar["transcript_source"] == "captions"
     assert sidecar["transcript"][0]["text"] == "caption words from the source"
-    assert sidecar["caption_kind"] == "captions"
+    assert sidecar["caption_kind"] == "auto_captions"
     assert "caption words from the source" in (folder / "yt-refused.md").read_text(encoding="utf-8")
 
 

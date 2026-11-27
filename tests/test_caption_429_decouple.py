@@ -247,9 +247,9 @@ def test_full_mode_media_command_has_no_subtitle_flags(extraction):
     assert media_kwargs["check"] is True
     assert caption_cmd == [
         *server.YTDLP_CMD,
-        "--skip-download", "--write-subs",
+        "--skip-download", "--max-filesize", str(32 * 1024 * 1024), "--write-subs",
         "--sub-lang", "en(?:-[A-Za-z0-9]+)*", "--sub-format", "vtt/srt",
-        "-o", str(extraction.folder / "video.manual.%(ext)s"), URL,
+        "-o", str(extraction.folder / "video.manual.%(ext)s"), "--", URL,
     ]
     assert caption_kwargs["check"] is True
     assert caption_kwargs["timeout"] == server.COMMENTS_TIMEOUT_SEC
@@ -286,6 +286,30 @@ def test_full_save_uses_json3_words_and_clamps_to_video_duration(extraction):
     assert last["words"][-1] == {"word": "slowly.", "start": 4.6, "end": 4.8}
     assert (folder / "transcript.txt").read_text(encoding="utf-8") == first["text"] + "\n" + last["text"]
     assert first["text"] in result["yoink_md"] and last["text"] in result["yoink_md"]
+    extraction.asr.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", [
+    subprocess.TimeoutExpired("yt-dlp", 1),
+    subprocess.CalledProcessError(1, "yt-dlp", stderr=b"track unavailable"),
+])
+def test_failed_uploaded_track_tries_the_listed_automatic_track(extraction, failure):
+    extraction.metadata.update(subtitles={"en-CA": [{}]}, automatic_captions={"en-orig": [{}]})
+    attempted = []
+
+    def captions(cmd, template):
+        language = cmd[cmd.index("--sub-lang") + 1]
+        attempted.append(language)
+        if language == "en-CA":
+            raise failure
+        Path(str(template).replace("%(ext)s", "en-orig.srt")).write_text(
+            "1\n00:00:00,000 --> 00:00:01,000\nAutomatic words.\n", encoding="utf-8")
+
+    extraction.caption_files = captions
+    result = extraction.run()
+    assert attempted == ["en-CA", "en-orig"]
+    assert result["transcript_source"] == "captions"
+    assert (extraction.folder / "transcript.txt").read_text(encoding="utf-8") == "Automatic words."
     extraction.asr.assert_not_called()
 
 

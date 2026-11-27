@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from pathlib import Path
 
 import clips
@@ -43,7 +44,50 @@ def _clean_rows(side):
     return [dict(row, text=text) for row, (_, _, text) in zip(rows, clean)], removed
 
 
-def _markdown_after_repair(corpus, old_sections, new, *, retry):
+_UNSUPPORTED_CHAPTERS = "Cannot verify this save's chapter layout. Its files were kept."
+_CHAPTER_SECTION_END = re.compile(rb"(?:\r?\n)*(?:\Z|---(?:\r?\n|\Z))")
+
+
+def _legacy_chapters(source, folder, inputs):
+    chapters = source.get("source_chapters") or source.get("chapters")
+    if chapters:
+        return chapters
+    # Older captures put yt-dlp's chapter ranges in the sibling metadata file.
+    path = folder / "metadata.json"
+    if path.is_symlink() or not path.is_file() or path.resolve().parent != folder.resolve():
+        raise ValueError(_UNSUPPORTED_CHAPTERS)
+    try:
+        inputs[path] = media._read_artifact_bytes(path, limit=yt_extract.MAX_CAPTION_BYTES)
+        data = json.loads(inputs[path])
+    except (media.MediaError, ValueError, RecursionError) as exc:
+        raise ValueError(_UNSUPPORTED_CHAPTERS) from exc
+    if not isinstance(data, dict) or data.get("id", source["video_id"]) != source["video_id"]:
+        raise ValueError(_UNSUPPORTED_CHAPTERS)
+    return data.get("chapters")
+
+
+def _legacy_chapter_section(rows, chapters):
+    """Render the old chapter headings with each cue in its verified range."""
+    if not chapters:
+        raise ValueError(_UNSUPPORTED_CHAPTERS)
+    lines = ["## Transcript", ""]
+    pos = 0
+    for chapter in chapters:
+        start, end = chapter["start"], chapter["end"]
+        lines.extend([f"### Chapter: {chapter['title']} ({yt_extract.fmt_time(start)})", ""])
+        while pos < len(rows) and rows[pos]["start"] < end:
+            row = rows[pos]
+            if row["start"] < start:
+                raise ValueError(_UNSUPPORTED_CHAPTERS)
+            lines.append(f"[{yt_extract.fmt_time(row['start'])}] {row['text']}")
+            pos += 1
+        lines.append("")
+    if pos != len(rows):
+        raise ValueError(_UNSUPPORTED_CHAPTERS)
+    return "\n".join(lines)
+
+
+def _markdown_after_repair(corpus, old_sections, new, *, retry, grouped=False):
     newline = b"\r\n" if b"\r\n" in corpus else b"\n"
     def section(text):
         return text.rstrip("\n").encode().replace(b"\n", newline)
@@ -53,10 +97,13 @@ def _markdown_after_repair(corpus, old_sections, new, *, retry):
         if candidate and corpus.count(candidate) == 1:
             start = corpus.index(candidate)
             end = start + len(candidate)
+            if grouped and not _CHAPTER_SECTION_END.match(corpus, end):
+                continue  # An additional chapter or cue is outside the verified layout.
             if (start == 0 or corpus[start - 1:start] == b"\n") and (
                     end == len(corpus) or corpus.startswith((b"\n", b"\r\n"), end)):
                 return corpus[:start] + new + corpus[end:]
-    raise ValueError("The saved caption section has changed. Your edits were kept.")
+    raise ValueError(_UNSUPPORTED_CHAPTERS if grouped else
+                     "The saved caption section has changed. Your edits were kept.")
 
 
 def repair(idx, item, build_plan, *, dry_run=True):
@@ -91,6 +138,13 @@ def repair(idx, item, build_plan, *, dry_run=True):
     _check_track(source, video_id)
     rows, removed = _clean_rows(source)
     target = dict(source, transcript=rows)
+    corpus_before = corpus_path.read_bytes()
+    old_block = source.get("media_depth")
+    grouped = old_block is None and re.search(
+        rb"(?m)^## Transcript\r?\n\r?\n### Chapter: ", corpus_before) is not None
+    inputs = {side_path: side_raw, corpus_path: corpus_before, backup_path: original if backups else None}
+    if grouped:
+        target["source_chapters"] = _legacy_chapters(source, folder, inputs)
     # A retry can find either carrier on disk. Reconstruct from the backup
     # every time so a second pass cannot trim a newly exposed spoken repeat.
     is_target = current.get("transcript") == rows
@@ -98,10 +152,8 @@ def repair(idx, item, build_plan, *, dry_run=True):
     if (current.get("transcript") != expected["transcript"]
             or media.capture_sidecar_inputs(current) != media.capture_sidecar_inputs(expected)):
         raise ValueError("The saved captions have changed since the original backup.")
-    old_block = source.get("media_depth")
-    # The old saver omitted source_chapters before media publication existed.
-    # Use its held data to build the first snapshot; preserve its original keys.
-    source_for_plan = {"source_chapters": [], **source}
+    # A legacy save needs an explicit chapter list to build its first snapshot.
+    source_for_plan = dict(source, source_chapters=target.get("source_chapters", []))
     old_plan = build_plan(source_for_plan, folder, item=item)
     old_sections = [old_plan["markdown"]]
     if old_block is not None:
@@ -110,12 +162,16 @@ def repair(idx, item, build_plan, *, dry_run=True):
                 or old_block["cue_revision"] != old_plan["block"]["cue_revision"]
                 or old_block["chapters"] != old_plan["block"]["chapters"]):
             raise ValueError("The saved captions or chapters have changed. Your edits were kept.")
-    elif not source.get("source_chapters"):
+    elif not grouped and not source.get("source_chapters"):
         old_sections.append("## Transcript\n\n" + "\n".join(
             f"[{yt_extract.fmt_time(int(r['start']))}] {r['text']}" for r in source["transcript"]))
     plan = build_plan(dict(source_for_plan, transcript=rows), folder, item=item)
-    corpus_before = corpus_path.read_bytes()
-    corpus = _markdown_after_repair(corpus_before, old_sections, plan["markdown"], retry=bool(backups))
+    new_section = plan["markdown"]
+    if grouped:
+        chapters = old_plan["block"]["chapters"]
+        old_sections = [_legacy_chapter_section(source["transcript"], chapters)]
+        new_section = _legacy_chapter_section(rows, chapters)
+    corpus = _markdown_after_repair(corpus_before, old_sections, new_section, retry=bool(backups), grouped=grouped)
     head = corpus[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
     row = media._merge_item(item)
     revision = library_cards.build_card(row, clips.merge_cues(plan["cues"], row), corpus_text=head)["source_revision"]
@@ -127,19 +183,21 @@ def repair(idx, item, build_plan, *, dry_run=True):
     expected_block = block if is_target else old_block
     if current.get("media_depth") != expected_block:
         raise ValueError("The published transcript has changed since this capture.")
+    repaired = dict(current, transcript=rows, media_depth=block)
+    if grouped:
+        repaired["source_chapters"] = target["source_chapters"]
     artifacts = {backup_path: original, corpus_path: corpus, archive / (digest + ".json"): plan["artifact"],
-                 side_path: json.dumps(dict(current, transcript=rows, media_depth=block),
-                                       ensure_ascii=False, indent=2).encode()}
-    inputs = {side_path: side_raw, corpus_path: corpus_before, backup_path: original if backups else None}
+                 side_path: json.dumps(repaired, ensure_ascii=False, indent=2).encode()}
     plain_before = plain.read_bytes() if plain.is_file() else None
     inputs[plain] = plain_before
     if plain_before is not None:
         newline = b"\r\n" if b"\r\n" in plain_before else b"\n"
-        old_plain = newline.join(r["text"].encode() for r in source["transcript"])
-        new_plain = newline.join(r["text"].encode() for r in rows)
-        if plain_before != old_plain and not (backups and plain_before == new_plain):
+        old_plain = "\n".join(r["text"] for r in source["transcript"]).encode()
+        new_plain = "\n".join(r["text"] for r in rows).encode()
+        normalized = plain_before.replace(b"\r\n", b"\n")
+        if normalized != old_plain and not (backups and normalized == new_plain):
             raise ValueError("The saved transcript.txt has changed. Your edits were kept.")
-        artifacts[plain] = new_plain
+        artifacts[plain] = new_plain.replace(b"\n", newline)
 
     ticket = idx.begin_media_publication(video_id, folder=folder,
                                          capture_binding=media.capture_sidecar_inputs(current), input_files=inputs)

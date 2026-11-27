@@ -1597,7 +1597,8 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
         return SimpleNamespace(returncode=0)
 
     with env.patch.context() as patch:
-        patch.setattr(yt_extract, "subprocess", SimpleNamespace(run=record_command, check_output=record_command))
+        patch.setattr(yt_extract.subprocess, "run", record_command)
+        patch.setattr(yt_extract.subprocess, "check_output", record_command)
         patch.setattr(yt_extract.sys, "argv", ["yt_extract.py", "https://www.youtube.com/watch?v=abcdefghijk", "--out", str(output), "--keep-video"])
         yt_extract.main()
     def tool(cmd):
@@ -1613,6 +1614,8 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
     assert not any(flag in cmd for cmd in commands for flag in (
         "--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
     assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg", "yt-dlp"]
+    assert [cmd[-2:] for cmd in commands if tool(cmd) == "yt-dlp"] == [
+        ["--", "https://www.youtube.com/watch?v=abcdefghijk"]] * 3
     assert (output / "Synthetic_Video" / "transcript.txt").read_text(encoding="utf-8") == "A caption."
     # X's existing same-author bounded parent traversal is the only supplied
     # status transport. It gains neither watcher nor media acquisition.

@@ -61,6 +61,7 @@ def fmt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
+MAX_CAPTION_BYTES = 32 * 1024 * 1024
 _CAPTION_TIME = r"(?:\d{1,6}:)?\d{2}:\d{2}[,.]\d{3}"
 _CAPTION_RANGE = re.compile(rf"^({_CAPTION_TIME})\s+-->\s+({_CAPTION_TIME})(?:\s|$)")
 _SRT_SEPARATOR = re.compile(rf"\n(?:\n+|[ \t]+\n(?=(?:[^\n]+\n)?[ \t]*{_CAPTION_TIME}\s+-->))")
@@ -99,6 +100,15 @@ def _clean_caption_text(text: str) -> str:
     text = _CAPTION_TAG.sub("", text)
     text = re.sub(r"\[(?:\\h)+__(?:\\h)+\]", "[__]", text)
     return re.sub(r"(?:\\h)+", " ", text)
+
+
+def _caption_text(path, *, errors="strict"):
+    with path.open("rb") as stream:
+        data = stream.read(MAX_CAPTION_BYTES + 1)
+    if len(data) > MAX_CAPTION_BYTES:
+        logging.getLogger(__name__).info("Skipping oversized caption file")
+        return None
+    return data.decode("utf-8-sig", errors=errors).replace("\r\n", "\n").replace("\r", "\n")
 
 
 class _CaptionWindow(NamedTuple):
@@ -150,24 +160,32 @@ def _window_overlap(previous, current, bridge_end):
         return 0
     before, after = previous.words, current.words
     # Very long rows are probably paragraphs. Don't guess their display layout.
-    if len(before) != len(after) or len(before) > 128:
+    if len(before) != len(after) or not 3 <= len(before) <= 128:
         return 0
-    for size in range(min(len(before), len(after)) - 1, 1, -1):
-        if before[-size:] == after[:size]:
-            if before[:size] != after[:size] and _two_spoken_words(after[:size]):
-                if any(c.isalnum() for word in after[size:] for c in word):
-                    return size
-            break
+    # The final KMP prefix length is the longest suffix of the previous
+    # window matching the new window's prefix. Exclude a whole-window echo.
+    sequence = after + (None,) + before[1:]
+    lengths = [0] * len(sequence)
+    matched = 0
+    for i in range(1, len(sequence)):
+        while matched and sequence[matched] != sequence[i]:
+            matched = lengths[matched - 1]
+        if sequence[matched] == sequence[i]:
+            matched += 1
+        lengths[i] = matched
+    if (matched >= 2 and before[:matched] != after[:matched] and _two_spoken_words(after[:matched])
+            and any(c.isalnum() for word in after[matched:] for c in word)):
+        return matched
     return 0
 
 
 def clean_caption_windows(entries, *, stored=False):
     """Keep every cue and its times. Trim carried words only in confirmed runs."""
     entries = list(entries)
-    output = [(start, end, raw if stored else _clean_caption_text(raw))
-              for start, end, raw in entries]
-    if any(protected_caption_text(text) for _, _, text in output):
-        return output
+    if any(protected_caption_text(raw) for _, _, raw in entries):
+        return entries
+    output = entries.copy() if stored else [
+        (start, end, _clean_caption_text(raw).strip()) for start, end, raw in entries]
     windows = [_caption_window(start, end, raw, text, stored)
                for (start, end, raw), (_, _, text) in zip(entries, output)]
     if not windows:
@@ -249,7 +267,8 @@ def _vtt_word_times(raw, row):
     for i, word in enumerate(words):
         word["end"] = words[i + 1]["start"] if i + 1 < len(words) else end
     from uoink_reliability import TranscriptEntry
-    return TranscriptEntry(start, end, text, words)
+    cue_start = words[0]["start"] if kept < len(original) else start
+    return TranscriptEntry(cue_start, end, text, words)
 
 
 def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False):
@@ -257,8 +276,13 @@ def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False)
 
     With a known ``duration``, cues that start at or after it are dropped and
     end times are clamped: uploaders sometimes attach captions for a longer cut.
+    Uploaded cues retain their payload. An unlabelled legacy track (None)
+    decodes display markup but supplies no evidence for rolling cleanup.
     """
-    content = srt_path.read_text(encoding="utf-8-sig", errors="replace").strip("\n")
+    content = _caption_text(srt_path, errors="replace")
+    if content is None:
+        return
+    content = content.strip("\n")
     entries: list[tuple[float, float, str]] = []
     # YouTube sometimes puts a space-only display line directly after the
     # timestamp. Splitting on blank *or whitespace* lines loses the next words.
@@ -273,7 +297,7 @@ def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False)
             if match:
                 start, end = map(_caption_seconds, match.groups())
                 raw = "\n".join(lines[i+1:])
-                if end >= start and _clean_caption_text(raw).strip():
+                if end >= start and raw.strip() and (automatic is False or _clean_caption_text(raw).strip()):
                     entries.append((start, end, raw))
                 break
 
@@ -290,6 +314,8 @@ def parse_srt(srt_path: Path, duration: float | None = None, *, automatic=False)
                 yield _vtt_word_times(raw, row)
         else:
             yield from rows
+    elif automatic is False:
+        yield from entries
     else:
         yield from ((s, e, _clean_caption_text(raw)) for s, e, raw in entries)
 
@@ -409,7 +435,10 @@ def _json3_entries(words, duration):
 def parse_json3(path: Path, duration: float | None = None):
     """Read a known auto track. An empty result asks the caller for VTT/SRT."""
     try:
-        data = json.loads(path.read_text(encoding="utf-8-sig"))
+        content = _caption_text(path)
+        if content is None:
+            return []
+        data = json.loads(content)
         if not isinstance(data, dict) or not isinstance(data.get("events"), list):
             return []
         return _json3_entries(_json3_words(data["events"]), duration)
@@ -469,19 +498,21 @@ def english_caption_tracks(metadata, youtube):
     if not isinstance(manual, dict) and not isinstance(auto, dict):
         # A resumed capture or a backfill may have no track list. Separate
         # requests keep a new automatic track distinguishable from an upload.
-        return [{"kind": "captions", "key": None}, {"kind": "auto_captions", "key": None}]
+        kinds = ("captions", "auto_captions") if metadata else ("auto_captions", "captions")
+        return [{"kind": kind, "key": None} for kind in kinds]
     return tracks
 
 
 def caption_args(track, text_only=False):
+    size_limit = ["--max-filesize", str(MAX_CAPTION_BYTES)]
     if track is None:
-        return ["--write-auto-subs", "--write-subs", "--sub-lang", ",".join(_ENGLISH_TRACKS),
+        return [*size_limit, "--write-auto-subs", "--write-subs", "--sub-lang", ",".join(_ENGLISH_TRACKS),
                 "--convert-subs", "srt"]
     automatic = track["kind"] == "auto_captions"
     # Never wildcard automatic tracks: it also downloads translated variants.
     key = track["key"] or (",".join(_ENGLISH_TRACKS) if automatic else "en(?:-[A-Za-z0-9]+)*")
     formats = "json3/vtt/srt" if automatic and not text_only else "vtt/srt"
-    args = ["--write-auto-subs" if automatic else "--write-subs", "--sub-lang", key,
+    args = [*size_limit, "--write-auto-subs" if automatic else "--write-subs", "--sub-lang", key,
             "--sub-format", track.get("convert") or formats]
     if track.get("convert"):
         args.extend(["--convert-subs", "srt"])
@@ -527,7 +558,7 @@ def _read_caption_file(path, track, duration):
     try:
         if path.suffix == ".json3":
             return parse_json3(path, duration=duration)
-        auto = bool(track and track["kind"] == "auto_captions")
+        auto = track["kind"] == "auto_captions" if track else None
         return list(parse_srt(path, duration=duration, automatic=auto))
     except (OSError, ValueError, OverflowError, RecursionError):
         return []
@@ -553,6 +584,11 @@ def read_caption_track(folder, prefix, track, duration, fetch, *, reuse=False):
     source = paths[0]
     same_track = dict(track, key=source.stem[len(prefix) + 1:])
     if source.suffix != ".json3":
+        try:
+            if source.stat().st_size > MAX_CAPTION_BYTES:
+                return [], "captions_failed"
+        except OSError:
+            return [], "captions_failed"
         same_track["convert"] = source.suffix[1:]
     reason = fetch(same_track, prefix, True)
     if reason:
@@ -566,6 +602,8 @@ def read_caption_track(folder, prefix, track, duration, fetch, *, reuse=False):
 
 def capture_captions(folder, metadata, youtube, duration, fetch, *, reuse=False):
     tracks = english_caption_tracks(metadata, youtube)
+    last_failure = None
+    stop_reasons = {"captions_rate_limited", "captions_bot_check", "captions_bot_check_cooldown"}
     if reuse:
         # Finish can use existing media offline. Recognize only our own
         # kind-specific prefixes; files from earlier versions remain unlabelled.
@@ -575,15 +613,17 @@ def capture_captions(folder, metadata, youtube, duration, fetch, *, reuse=False)
             if kind and track is None:
                 continue
             entries, reason = read_caption_track(folder, prefix, track, duration, fetch, reuse=True)
-            if entries or reason:
+            if entries or reason in stop_reasons:
                 return entries, kind if entries else None, reason
+            last_failure = reason or last_failure
     for track in tracks:
         kind = track and track["kind"]
         prefix = {"captions": "video.manual", "auto_captions": "video.auto"}.get(kind, "video")
         entries, reason = read_caption_track(folder, prefix, track, duration, fetch)
-        if entries or reason:
+        if entries or reason in stop_reasons:
             return entries, kind if entries else None, reason
-    return [], None, None
+        last_failure = reason or last_failure
+    return [], None, last_failure
 
 
 def main():
@@ -604,7 +644,7 @@ def main():
     ytdlp = ([sys.executable, "-m", "yt_dlp", *_platform.ytdlp_media_args()]
              if sys.platform == "darwin" else ["yt-dlp"])
     metadata = json.loads(subprocess.check_output(
-        [*ytdlp, "--dump-single-json", "--skip-download", args.url], text=True, encoding="utf-8"))
+        [*ytdlp, "--dump-single-json", "--skip-download", "--", args.url], text=True, encoding="utf-8"))
     title = metadata["title"]
     folder = out_root / slugify(title)
     folder.mkdir(exist_ok=True)
@@ -617,7 +657,7 @@ def main():
             "-f", (_platform.video_format("worst[height>=360]/worst")
                    if sys.platform == "darwin" else "worst[height>=360]/worst"),
             "-o", str(folder / "video.%(ext)s"),
-            args.url,
+            "--", args.url,
         ],
         check=True,
     )
@@ -643,17 +683,28 @@ def main():
     )
     shots = sorted(shots_dir.glob("shot_*.jpg"))
 
+    youtube = metadata.get("extractor_key") == "Youtube"
+
     def fetch(track, prefix, text_only):
+        cmd = [*ytdlp, "--skip-download", *caption_args(track, text_only),
+               "-o", str(folder / f"{prefix}.%(ext)s"), "--", args.url]
         try:
-            subprocess.run([*ytdlp, "--skip-download", *caption_args(track, text_only),
-                            "-o", str(folder / f"{prefix}.%(ext)s"), args.url], check=True)
+            done = subprocess.run(cmd, check=True, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as exc:
+            message = (exc.stderr or b"").decode("utf-8", errors="replace").lower()
+            if youtube and re.search(r"\b429\b", message):
+                return "captions_rate_limited"
+            if youtube and ("not a bot" in message or "confirm you" in message):
+                return "captions_bot_check"
+            return "captions_failed"
         except (OSError, subprocess.SubprocessError):
             return "captions_failed"
+        if youtube and caption_rate_warning(getattr(done, "stderr", None), folder, prefix, track, text_only):
+            return "captions_rate_limited"
         return None
 
     entries, _, _ = capture_captions(
-        folder, metadata, metadata.get("extractor_key") == "Youtube",
-        metadata.get("duration"), fetch)
+        folder, metadata, youtube, metadata.get("duration"), fetch)
 
     print("Writing transcript.txt and combined.md...")
     if entries:
