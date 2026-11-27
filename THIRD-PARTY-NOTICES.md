@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-11-22; regenerate with `python scripts/gen_third_party_notices.py`.
+The 3.18.1 inventory starts with the 3.18.0 installer. Updated entries use the selected release's package metadata. The Windows build regenerates this table from the installed distributions with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -9,7 +9,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | aiohttp | 3.14.5 | Apache-2.0 AND MIT | https://github.com/aio-libs/aiohttp |
 | aiosignal | 1.4.0 | Apache Software License | https://github.com/aio-libs/aiosignal |
 | alembic | 1.18.5 | MIT | https://alembic.sqlalchemy.org |
-| annotated-types | 0.7.0 | MIT License | https://github.com/annotated-types/annotated-types |
+| annotated-types | 0.8.0 | MIT | https://github.com/annotated-types/annotated-types |
 | antlr4-python3-runtime | 4.9.3 | BSD | http://www.antlr.org |
 | anyio | 4.16.0 | MIT | https://anyio.readthedocs.io/en/stable/versionhistory.html |
 | asteroid-filterbanks | 0.4.0 | MIT License | https://github.com/asteroid-team/asteroid-filterbanks |
@@ -17,12 +17,13 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | av | 18.0.0 | BSD-3-Clause | https://pyav.basswood.io |
 | bottle | 0.13.4 | MIT License | http://bottlepy.org/ |
 | certifi | 2026.10.23 | Mozilla Public License 2.0 (MPL 2.0) | https://github.com/certifi/python-certifi |
-| cffi | 2.1.0 | MIT-0 | https://cffi.readthedocs.io/en/latest/whatsnew.html |
+| cffi | 2.1.1 | MIT-0 | https://cffi.readthedocs.io/en/latest/whatsnew.html |
 | charset-normalizer | 3.5.2 | MIT | https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md |
 | click | 8.5.1 | BSD-3-Clause | https://github.com/pallets/click/ |
+| cloudpickle | 3.1.3 | BSD-3-Clause | https://github.com/cloudpipe/cloudpickle |
 | clr_loader | 0.2.10 | MIT License | UNKNOWN |
 | colorama | 0.4.6 | BSD License | https://github.com/tartley/colorama |
-| colorlog | 6.11.0 | MIT License | https://github.com/borntyping/python-colorlog |
+| colorlog | 6.12.0 | MIT License | https://github.com/borntyping/python-colorlog |
 | contourpy | 1.3.3 | BSD License | https://github.com/contourpy/contourpy |
 | cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause | https://github.com/pyca/cryptography |
 | ctranslate2 | 4.8.1 | MIT | https://opennmt.net |
@@ -30,24 +31,24 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | defusedxml | 0.7.1 | Python Software Foundation License | https://github.com/tiran/defusedxml |
 | einops | 0.8.2 | MIT License | https://github.com/arogozhnikov/einops |
 | faster-whisper | 1.2.1 | MIT License | https://github.com/SYSTRAN/faster-whisper |
-| filelock | 4.2.10 | MIT | https://github.com/tox-dev/filelock |
+| filelock | 4.2.12 | MIT | https://github.com/tox-dev/filelock |
 | flatbuffers | 25.12.19 | Apache Software License | https://google.github.io/flatbuffers/ |
 | fonttools | 4.63.0 | MIT | http://github.com/fonttools/fonttools |
 | frozenlist | 1.8.0 | Apache-2.0 | https://github.com/aio-libs/frozenlist |
-| fsspec | 2026.6.0 | BSD-3-Clause | https://github.com/fsspec/filesystem_spec |
+| fsspec | 2026.9.0 | BSD-3-Clause | https://github.com/fsspec/filesystem_spec |
 | googleapis-common-protos | 1.76.0 | Apache-2.0 | https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos |
-| greenlet | 3.5.4 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
-| grpcio | 1.85.1 | Apache-2.0 | https://grpc.io |
+| greenlet | 3.5.6 | MIT AND PSF-2.0 | https://greenlet.readthedocs.io |
+| grpcio | 1.85.3 | Apache-2.0 | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
-| httpcore2 | 2.16.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
-| httpx2 | 2.16.0 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
+| httpcore2 | 2.16.2 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
+| httpx2 | 2.16.2 | BSD-3-Clause | https://github.com/pydantic/httpx2 |
 | huggingface_hub | 0.36.2 | Apache Software License | https://github.com/huggingface/huggingface_hub |
 | idna | 3.20 | BSD-3-Clause | https://github.com/kjd/idna |
 | jaraco.classes | 3.4.0 | MIT License | https://github.com/jaraco/jaraco.classes |
 | jaraco.context | 6.1.2 | MIT | https://github.com/jaraco/jaraco.context |
 | jaraco.functools | 4.6.0 | MIT | https://github.com/jaraco/jaraco.functools |
 | Jinja2 | 3.1.6 | BSD License | https://github.com/pallets/jinja/ |
-| joblib | 1.5.3 | BSD-3-Clause | https://joblib.readthedocs.io |
+| joblib | 1.6.0 | BSD-3-Clause | https://joblib.readthedocs.io |
 | jsonschema | 4.26.0 | MIT | https://github.com/python-jsonschema/jsonschema |
 | jsonschema-specifications | 2025.9.1 | MIT | https://github.com/python-jsonschema/jsonschema-specifications |
 | julius | 0.2.8 | MIT License | https://github.com/adefossez/julius |
@@ -56,17 +57,17 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | lightning-utilities | 0.15.3 | Apache-2.0 | https://github.com/Lightning-AI/utilities |
 | Mako | 1.4.3 | MIT | https://www.makotemplates.org/ |
-| markdown-it-py | 4.2.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
+| markdown-it-py | 4.3.0 | MIT License | https://github.com/executablebooks/markdown-it-py |
 | MarkupSafe | 3.0.4 | BSD-3-Clause | https://github.com/pallets/markupsafe/ |
 | matplotlib | 3.11.1 | Python Software Foundation License | https://matplotlib.org |
 | mcp | 2.3.0 | MIT License | https://modelcontextprotocol.io |
 | mcp-types | 2.3.0 | MIT License | https://modelcontextprotocol.io |
 | mdurl | 0.1.2 | MIT License | https://github.com/executablebooks/mdurl |
-| more-itertools | 11.1.0 | MIT | https://github.com/more-itertools/more-itertools |
+| more-itertools | 11.2.1 | MIT | https://github.com/more-itertools/more-itertools |
 | mpmath | 1.3.0 | BSD License | http://mpmath.org/ |
 | multidict | 6.9.1 | Apache License 2.0 | https://github.com/aio-libs/multidict |
-| narwhals | 2.24.0 | MIT | https://github.com/narwhals-dev/narwhals |
-| networkx | 3.6.1 | BSD-3-Clause | https://networkx.org/ |
+| narwhals | 2.29.0 | MIT | https://github.com/narwhals-dev/narwhals |
+| networkx | 3.7 | BSD-3-Clause | https://networkx.org/ |
 | nltk | 3.10.4 | Apache Software License | https://www.nltk.org/ |
 | numpy | 2.4.6 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
@@ -86,7 +87,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pandas | 3.0.5 | BSD License | https://pandas.pydata.org |
 | pillow | 13.0.0 | MIT-CMU | https://python-pillow.org |
 | primePy | 1.3 | MIT License | https://github.com/janaindrajit/primePy |
-| propcache | 0.5.2 | Apache Software License | https://github.com/aio-libs/propcache |
+| propcache | 0.5.4 | Apache-2.0 | https://github.com/aio-libs/propcache |
 | protobuf | 7.36.2 | 3-Clause BSD License | https://developers.google.com/protocol-buffers/ |
 | proxy_tools | 0.1.0 | MIT License (metadata; see upstream conflict below) | http://github.com/jtushman/proxy_tools |
 | pyannote-audio | 4.0.7 | UNKNOWN | UNKNOWN |
@@ -95,15 +96,15 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pyannote-metrics | 4.1 | UNKNOWN | UNKNOWN |
 | pyannote-pipeline | 4.0.0 | UNKNOWN | UNKNOWN |
 | pyannoteai-sdk | 0.4.0 | UNKNOWN | UNKNOWN |
-| pycparser | 3.0 | BSD-3-Clause | https://github.com/eliben/pycparser |
-| pydantic | 2.14.3 | MIT | https://github.com/pydantic/pydantic |
-| pydantic_core | 2.50.4 | MIT | https://github.com/pydantic/pydantic |
+| pycparser | 3.12 | BSD-3-Clause | https://github.com/eliben/pycparser |
+| pydantic | 2.14.4 | MIT | https://github.com/pydantic/pydantic |
+| pydantic_core | 2.50.5 | MIT | https://github.com/pydantic/pydantic |
 | Pygments | 2.21.0 | BSD-2-Clause | https://pygments.org |
 | PyJWT | 2.15.1 | MIT | https://github.com/jpadilla/pyjwt |
-| pyparsing | 3.3.2 | MIT | https://github.com/pyparsing/pyparsing/ |
+| pyparsing | 3.3.3 | MIT | https://github.com/pyparsing/pyparsing/ |
 | pystray | 0.19.5 | GNU Lesser General Public License v3 (LGPLv3) | https://github.com/moses-palmer/pystray |
 | python-dateutil | 2.9.0.post0 | Apache Software License; BSD License | https://github.com/dateutil/dateutil |
-| python-multipart | 0.0.33 | Apache-2.0 | https://github.com/Kludex/python-multipart |
+| python-multipart | 0.0.34 | Apache-2.0 | https://github.com/Kludex/python-multipart |
 | pythonnet | 3.0.5 | MIT License | https://pythonnet.github.io/ |
 | pytorch-lightning | 2.6.6 | Apache Software License | https://github.com/Lightning-AI/lightning |
 | pytorch-metric-learning | 2.9.0 | MIT License | https://github.com/KevinMusgrave/pytorch-metric-learning |
@@ -112,10 +113,10 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | pywin32-ctypes | 0.2.3 | BSD-3-Clause | https://github.com/enthought/pywin32-ctypes |
 | PyYAML | 6.0.3 | MIT License | https://pyyaml.org/ |
 | referencing | 0.37.0 | MIT | https://github.com/python-jsonschema/referencing |
-| regex | 2026.11.9 | Apache-2.0 AND CNRI-Python | https://github.com/mrabarnett/mrab-regex |
+| regex | 2026.11.19 | Apache-2.0 AND CNRI-Python | https://github.com/mrabarnett/mrab-regex |
 | requests | 2.34.2 | Apache Software License | https://github.com/psf/requests |
 | rich | 15.0.0 | MIT License | https://github.com/Textualize/rich |
-| rpds-py | 2026.6.3 | MIT | https://github.com/crate-py/rpds |
+| rpds-py | 2026.9.1 | MIT | https://github.com/crate-py/rpds |
 | safetensors | 0.8.0 | Apache Software License | https://github.com/huggingface/safetensors |
 | scikit-learn | 1.9.0 | BSD-3-Clause | https://scikit-learn.org |
 | scipy | 1.17.1 | BSD License | https://scipy.org/ |
@@ -126,7 +127,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | sse-starlette | 3.7.0 | BSD-3-Clause | https://github.com/sysid/sse-starlette |
 | starlette | 1.10.0 | BSD-3-Clause | https://github.com/Kludex/starlette |
 | sympy | 1.14.0 | BSD License | https://sympy.org |
-| threadpoolctl | 3.6.0 | BSD License | https://github.com/joblib/threadpoolctl |
+| threadpoolctl | 3.8.0 | BSD-3-Clause | https://github.com/joblib/threadpoolctl |
 | tokenizers | 0.22.2 | Apache Software License | https://github.com/huggingface/tokenizers |
 | torch | 2.8.0 | BSD License | https://pytorch.org/ |
 | torch-audiomentations | 0.12.0 | MIT License | https://github.com/asteroid-team/torch-audiomentations |

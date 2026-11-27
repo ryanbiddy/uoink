@@ -341,7 +341,7 @@ jobs:
       - name: Install dependencies
         # Match the dual-era stdio runtime and its reviewed transport dependencies,
         # plus PyYAML (the installer lock's pin) so the Continue detection tests run.
-        run: pip install pytest Pillow "mcp==2.3.0" "mcp-types==2.3.0" "httpx2==2.16.0" "httpcore2==2.16.0" "truststore==0.10.5" "PyYAML==6.0.3"
+        run: pip install pytest Pillow -r requirements-mcp.txt "PyYAML==6.0.3"
       - name: Install the reader benchmark DOM (dev only, never shipped)
         # jsdom from the committed lock, scripts off. The benchmark and the
         # page capture tests then run offline against the fixtures.

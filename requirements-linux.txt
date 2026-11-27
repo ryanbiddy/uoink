@@ -13,3 +13,10 @@ yt-dlp-ejs==0.8.0
 Pillow==13.0.0
 PyYAML==6.0.3
 faster-whisper==1.2.1
+# The bundled model uses these decoders and model loaders.
+av==18.0.0
+ctranslate2==4.8.1
+numpy==2.4.6
+onnxruntime==1.27.0
+huggingface_hub==0.36.2
+tokenizers==0.22.2

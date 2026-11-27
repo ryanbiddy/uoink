@@ -116,10 +116,14 @@ def test_license_expression_preferred_with_legacy_fallback(tmp_path, monkeypatch
         assert f"| {output_name} | {row['Version']} | {expected} |" in text
 
 
-@pytest.mark.parametrize("name", ["proxy_tools", "antlr4-python3-runtime"])
-def test_changed_version_refuses_without_overwriting_old_index(tmp_path, monkeypatch, name):
+@pytest.mark.parametrize(("name", "version"), [
+    ("proxy_tools", "unreviewed-version"),
+    ("antlr4-python3-runtime", "unreviewed-version"),
+    ("antlr4-python3-runtime", "4.13.2"),
+])
+def test_changed_version_refuses_without_overwriting_old_index(tmp_path, monkeypatch, name, version):
     data = rows()
-    next(row for row in data if row["Name"] == name)["Version"] = "unreviewed-version"
+    next(row for row in data if row["Name"] == name)["Version"] = version
     target = output_for(tmp_path, monkeypatch, data)
     old = b"Existing index must not be relabeled as freshly generated.\n"
     target.write_bytes(old)
@@ -130,6 +134,9 @@ def test_changed_version_refuses_without_overwriting_old_index(tmp_path, monkeyp
 
 def test_exact_upstream_bytes_and_relative_links():
     folder = ROOT / "third-party-notices"
+    # Source reference for the declined update. The active notice below is for 4.9.3.
+    candidate = (folder / "antlr4-python3-runtime-4.13.2-LICENSE.txt").read_bytes()
+    assert hashlib.sha256(candidate).hexdigest() == "3db1fb3ee79a4b4f9918fc4d0f6133bf18a3cf787f126cd22f8aa9b862281c0c"
     expected = {
         "antlr4-python3-runtime-4.9.3-LICENSE.txt": (2699, "b1b379fcaf3219593a4c433feb1b35c780bed23fafaae440b1ae2771a9521e3a"),
         "proxy-tools-0.1.0-UPSTREAM-LICENSE.txt": (1436, "a428fb8a2e762af3eb0a6edbbb88e9b42ccfee80fd9b423958bcacf9b9abbfe4"),

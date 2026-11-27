@@ -4,6 +4,7 @@ import importlib.util
 from pathlib import Path
 
 import pytest
+from packaging.requirements import Requirement
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,7 +25,7 @@ def test_installer_lock_is_complete_and_exact() -> None:
     assert locked["pillow"] == "13.0.0"
     assert locked["mcp"] == "2.3.0"
     assert locked["mcp-types"] == "2.3.0"
-    assert locked["httpx2"] == locked["httpcore2"] == "2.16.0"
+    assert locked["httpx2"] == locked["httpcore2"] == "2.16.2"
     assert locked["truststore"] == "0.10.5"
     assert not {"httpx", "httpcore", "httpx-sse", "pydantic-settings", "python-dotenv"} & locked.keys()
     assert locked["faster-whisper"] == "1.2.1"
@@ -44,6 +45,47 @@ def test_installer_lock_matches_the_committed_notice_inventory() -> None:
             noticed[verify.canonical_name(name.strip())] = version.strip()
 
     assert noticed == locked
+
+
+@pytest.mark.parametrize("filename", [
+    "requirements.txt", "requirements-mcp.txt",
+    "requirements-linux.txt", "requirements-linux-whisperx.txt",
+])
+def test_runtime_entry_points_match_the_installer_pins(filename):
+    locked = verify.read_lock(LOCK)
+    for line in (ROOT / filename).read_text(encoding="utf-8").splitlines():
+        if line and not line.startswith(("#", "-")):
+            pin = Requirement(line)
+            assert str(pin.specifier) == f"=={locked[verify.canonical_name(pin.name)]}"
+
+
+def test_linux_diarization_reuses_the_base_model_loaders():
+    base = verify.read_lock(ROOT / "requirements-linux.txt")
+    assert {"faster-whisper", "av", "ctranslate2", "onnxruntime", "huggingface-hub", "tokenizers"} <= base.keys()
+    optional = (ROOT / "requirements-linux-whisperx.txt").read_text(encoding="utf-8").splitlines()
+    assert "-c requirements-linux.txt" in optional
+    selected = {Requirement(line).name for line in optional if line and not line.startswith(("#", "-"))}
+    assert {"torch", "torchaudio", "torchvision", "torchcodec", "transformers", "omegaconf", "pyannote-audio"} <= selected
+
+
+@pytest.mark.parametrize(("parent", "requirements"), [
+    ("whisperx==3.8.6", ("torch~=2.8.0", "torchaudio~=2.8.0", "torchvision~=0.23.0",
+                        "torchcodec>=0.6,<0.8", "huggingface-hub<1", "numpy>=2.1")),
+    ("faster-whisper==1.2.1", ("ctranslate2>=4,<5", "tokenizers>=0.13,<1", "onnxruntime>=1.14,<2")),
+    ("transformers==4.57.6", ("huggingface-hub>=0.34,<1", "tokenizers>=0.22,<=0.23.0", "safetensors>=0.4.3")),
+    ("omegaconf==2.3.1", ("antlr4-python3-runtime==4.9.*",)),
+    ("sympy==1.14.0", ("mpmath>=1.1,<1.4",)),
+    ("pythonnet==3.0.5", ("clr-loader>=0.2.7,<0.3",)),
+    ("joblib==1.6.0", ("cloudpickle>=3",)),
+    ("pydantic==2.14.4", ("pydantic-core==2.50.5",)),
+])
+def test_reviewed_runtime_edges(parent, requirements):
+    # These bounds come from the named parent's release metadata.
+    locked = verify.read_lock(LOCK)
+    for raw in (parent, *requirements):
+        req = Requirement(raw)
+        version = locked[verify.canonical_name(req.name)]
+        assert version in req.specifier, f"{parent}: selected {req.name}=={version}, expected {req}"
 
 
 def test_installer_lock_parser_rejects_ranges_and_duplicates(
@@ -143,8 +185,8 @@ def test_sdk2_hash_rows_and_version_constraint_export(tmp_path):
     assert hashes == {
         "mcp": "dd0c44c089d16453e8ae31a3877a0054d7a2314caaa81f5e0541b9b1734b2377",
         "mcp-types": "968efdbdaedfab06adae40d378a34395f1090c5921d4be3c9cde283aaf76d91d",
-        "httpx2": "fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a",
-        "httpcore2": "5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f",
+        "httpx2": "f05c13aade4c45dbf1c9060647a1058f0acad62398fad96e741269edb33d46f5",
+        "httpcore2": "16051ae2a42f776007543f32de9349a317b23d2cbb4e1456b4bac0e88b87419a",
         "truststore": "9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c",
         "yt-dlp-ejs": "79300e5fca7f937a1eeede11f0456862c1b41107ce1d726871e0207424f4bdb4",
         "nltk": "769ba5413f265b7d3e87cd163cc28efa01e29eeef8bb6080bc907949d9fcfb51",
