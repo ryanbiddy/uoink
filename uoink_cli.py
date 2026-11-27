@@ -1184,6 +1184,7 @@ def main(argv=None):
                 paths = claude_desktop_paths()
                 if paths != [roaming_dir() / "Claude/claude_desktop_config.json"]:
                     location = "\nFile: ".join(str(path) for path in paths)
+                    location += f"\nDefault location: {spec.location}"
             print(f"File: {location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
             verification = "yes" if spec.verified else "no: " + spec.reason
             print(f"Official docs verified: {verification}. Checked: {spec.checked}.", file=sys.stderr)

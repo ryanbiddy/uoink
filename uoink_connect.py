@@ -392,26 +392,104 @@ def _confirmed(yes: bool) -> bool:
     return sys.stdin.readline().strip().lower() in {"y", "yes"}
 
 
+def _path_folders():
+    cwd = Path.cwd().resolve()
+    for entry in os.get_exec_path():
+        if os.name == "nt" and entry.startswith('"') and entry.endswith('"'):
+            entry = entry[1:-1]
+        folder = Path(entry)
+        if folder.is_absolute() and folder.resolve() != cwd:
+            yield folder
+
+
+def _path_executable(name: str) -> str | None:
+    names = [name]
+    if os.name == "nt" and not Path(name).suffix:
+        # Python 3.11's which() does not apply PATHEXT to absolute paths.
+        extensions = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").lower().split(";")
+        names = [name + ext for ext in extensions if ext in {".exe", ".com", ".bat", ".cmd"}]
+    cwd = Path.cwd().resolve()
+    for folder in _path_folders():
+        for candidate in names:
+            path = folder / candidate
+            if (path.is_file() and shutil.which(str(path))
+                    and path.resolve().parent != cwd):
+                return str(path)
+    return None
+
+
+# npm's cmd-shim for a plain node shebang. Only bypass this exact launcher:
+# customized shims may set environment variables or supply their own arguments.
+_NPM_CLAUDE_CMD = r"""@ECHO off
+GOTO start
+:find_dp0
+SET dp0=%~dp0
+EXIT /b
+:start
+SETLOCAL
+CALL :find_dp0
+
+IF EXIST "%dp0%\node.exe" (
+  SET "_prog=%dp0%\node.exe"
+) ELSE (
+  SET "_prog=node"
+  SET PATHEXT=%PATHEXT:;.JS;=;%
+)
+
+endLocal & goto #_undefined_# 2>NUL || title %COMSPEC% & "%_prog%"  "%dp0%\node_modules\@anthropic-ai\claude-code\cli.js" %*
+"""
+
+
+def _npm_claude_command(shim: Path) -> list[str] | None:
+    script = shim.parent / "node_modules/@anthropic-ai/claude-code/cli.js"
+    if shim.name.lower() != "claude.cmd" or not script.is_file():
+        return None
+    with shim.open(encoding="ascii", errors="replace") as f:
+        if f.read(len(_NPM_CLAUDE_CMD) + 1) != _NPM_CLAUDE_CMD:
+            return None
+    local_node = shim.with_name("node.exe")
+    node = str(local_node) if local_node.is_file() else _path_executable("node.exe")
+    if not node or Path(node).resolve().parent == Path.cwd().resolve():
+        raise ValueError("The npm launcher needs node.exe. Add Node to PATH and try again.")
+    return [node, str(script)]
+
+
+def _batch_argument(arg: str) -> str:
+    # cmd splits even KEY=value at '=' unless quoted. The final backslashes
+    # must also survive the native argv parser when a shim forwards %*.
+    trailing = len(arg) - len(arg.rstrip("\\"))
+    return '"' + arg + "\\" * trailing + '"'
+
+
 def _run_add(argv: list[str], label: str, yes: bool) -> int:
-    # On Windows a bare which() may also search the current project ahead of PATH.
-    for folder in os.get_exec_path():
-        executable = shutil.which(str(Path(folder).absolute() / argv[0]))
-        if executable:
-            break
-    else:
+    executable = _path_executable(argv[0])
+    if executable is None:
         print(f"{argv[0]} was not found on PATH. Run the printed command after installing it.", file=sys.stderr)
         return 1
-    argv = [executable, *argv[1:]]
+    command = [executable, *argv[1:]]
+    options = {}
     if sys.platform == "win32" and Path(executable).suffix.lower() in {".bat", ".cmd"}:
-        # Windows itself interprets batch launchers, even with shell=False.
-        if any(set('&|<>^%"!()\r\n').intersection(arg) for arg in argv):
+        if any(c in arg for arg in command for c in ",;&|<>^%\"'!()\r\n"):
             print("Run the printed command in PowerShell to use this batch launcher with these paths.", file=sys.stderr)
             return 1
+        native = _npm_claude_command(Path(executable))
+        if native:
+            command = [*native, *argv[1:]]
+        else:
+            # /s removes the outer quote pair, leaving the shim and argument quotes intact.
+            system_root = Path(os.environ.get("SystemRoot", ""))
+            if not system_root.is_absolute():
+                raise ValueError("Couldn't locate the Windows command processor.")
+            options["executable"] = str(system_root / "System32/cmd.exe")
+            options["env"] = {**os.environ, "NoDefaultCurrentDirectoryInExePath": "1",
+                              "PATH": os.pathsep.join(map(str, _path_folders()))}
+            inner = " ".join(_batch_argument(arg) for arg in command)
+            command = f'cmd.exe /d /s /c "{inner}"'
     if not _confirmed(yes):
         print("Cancelled.", file=sys.stderr)
         return 1
     try:
-        result = subprocess.run(argv, shell=False, timeout=30)
+        result = subprocess.run(command, shell=False, timeout=30, **options)
     except subprocess.TimeoutExpired:
         print(f"{label} did not finish within 30 seconds. Check its server list before retrying.", file=sys.stderr)
         return 1
@@ -425,6 +503,26 @@ def _run_add(argv: list[str], label: str, yes: bool) -> int:
     return 0
 
 
+def _validate_odr_manifest(manifest: Path) -> None:
+    message = "Choose a valid manifest.json beside the files in the unpacked Uoink bundle."
+    try:
+        if manifest.is_symlink() or not manifest.is_file():
+            raise ValueError(message)
+        data = json.loads(manifest.read_text(encoding="utf-8-sig"))
+        server = data.get("server") if isinstance(data, dict) else None
+        entry = server.get("entry_point") if isinstance(server, dict) else None
+        if not isinstance(entry, str) or data.get("name") != "uoink":
+            raise ValueError(message)
+        relative = Path(entry)
+        target = manifest.parent / relative
+        if (relative.anchor or ".." in relative.parts or target.is_symlink()
+                or not target.is_file()
+                or not target.resolve(strict=True).is_relative_to(manifest.parent.resolve(strict=True))):
+            raise ValueError(message)
+    except (OSError, ValueError, RecursionError) as exc:
+        raise ValueError(message) from exc
+
+
 def connect_recipe(client: str, app_dir: Path, python: Path, isolation_args, toolset,
                    *, write: bool, yes: bool, manifest: Path | None = None) -> int:
     from agent_config_writer import apply_edits, claude_desktop_paths, plan_edit
@@ -436,18 +534,13 @@ def connect_recipe(client: str, app_dir: Path, python: Path, isolation_args, too
             print("Use --manifest <path to manifest.json> --write to register an unpacked Uoink bundle.", file=sys.stderr)
             return 1 if write else 0
         manifest = manifest.absolute()
+        _validate_odr_manifest(manifest)
         argv = ["odr.exe", "mcp", "add", str(manifest)]
         print("odr.exe mcp add '" + str(manifest).replace("'", "''") + "'", flush=True)
+        print("Run this command in PowerShell.", file=sys.stderr)
         if not write:
             print("Run with --write to add it for you.", file=sys.stderr)
             return 0
-        data = json.loads(manifest.read_text(encoding="utf-8-sig"))
-        server = data.get("server") if isinstance(data, dict) else None
-        entry_point = server.get("entry_point") if isinstance(server, dict) else None
-        if (not isinstance(entry_point, str) or data.get("name") != "uoink"
-                or Path(entry_point).anchor or ".." in Path(entry_point).parts
-                or not (manifest.parent / entry_point).is_file()):
-            raise ValueError("Choose the manifest.json beside the files in the unpacked Uoink bundle.")
         print("+ Register the Uoink MCP server with Windows ODR.", file=sys.stderr)
         return _run_add(argv, "Windows ODR", yes)
     path = _json_path(client, spec)

@@ -252,7 +252,13 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
             assert env["UOINK_MCP_TOOLSET"] == "core"
 
 
-def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
+def test_connect_stdout_only_config_and_notes_on_stderr(tmp_path, monkeypatch, capsys):
+    for key, directory in {"HOME": tmp_path, "USERPROFILE": tmp_path,
+                           "APPDATA": tmp_path / "Roaming", "LOCALAPPDATA": tmp_path / "Local",
+                           "XDG_CONFIG_HOME": tmp_path / ".config"}.items():
+        monkeypatch.setenv(key, str(directory))
+    store = tmp_path / "Local/Packages/Claude_fixture/LocalCache/Roaming/Claude"
+    store.mkdir(parents=True)
     for client in connect.CLIENTS:
         if sys.platform not in connect.CLIENTS[client].platforms:
             assert cli.main(["connect", client]) == 2
@@ -263,6 +269,8 @@ def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
         output = capsys.readouterr()
         assert "File:" in output.err and "not yet tested" in output.err
         assert connect.client_spec(client).location in output.err
+        if client == "claude-desktop" and sys.platform == "win32":
+            assert str(store / "claude_desktop_config.json") in output.err
         assert "Official docs verified:" in output.err and "Checked: 2026-10-21" in output.err
         if connect.CLIENTS[client].format != "shell":
             assert "Tested:" not in output.out

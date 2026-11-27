@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import sys
 import tempfile
 
@@ -97,69 +98,142 @@ def plan_edit(path: Path, label: str, section: str, entry: dict) -> ConfigEdit:
         action = "updated" if "uoink" in servers else "added"
         servers["uoink"] = entry
         replacement = (json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n").encode("utf-8")
+        if original and b"\r\n" in original:
+            replacement = replacement.replace(b"\n", b"\r\n")
     except ConfigError:
         raise
     except (ValueError, RecursionError) as exc:
-        raise ConfigError(f"Couldn't merge the {label} settings. Check the file for invalid JSON "
-                          "or duplicate keys and try again.", 422) from exc
+        raise ConfigError(f"Couldn't merge the {label} settings. Check for invalid JSON or duplicate keys. "
+                          "If it uses comments, run uoink connect without --write and merge the printed entry.", 422) from exc
     return ConfigEdit(path, original, replacement, action)
+
+
+def _discard(staged: Path):
+    try:
+        staged.unlink(missing_ok=True)
+    except PermissionError:
+        try:
+            if not staged.is_symlink():
+                staged.chmod(0o600)
+                staged.unlink(missing_ok=True)
+        except OSError:
+            pass
+    except OSError:
+        pass
 
 
 def _staged_file(path: Path, cleanup: ExitStack) -> Path:
     # A unique sibling makes replace atomic without following an old .tmp or .bak link.
     with tempfile.NamedTemporaryFile(dir=path.parent, prefix=path.name + ".", delete=False) as f:
         staged = Path(f.name)
-    cleanup.callback(staged.unlink, missing_ok=True)
+    cleanup.callback(_discard, staged)
     return staged
 
 
-def _check_original(edit: ConfigEdit, label: str):
-    if _read(edit.path) != edit.original:
+def _check_original(path: Path, expected: bytes | Path | None, label: str):
+    current = path.readlink() if isinstance(expected, Path) and path.is_symlink() else _read(path)
+    if current != expected:
         raise ConfigError(f"The {label} settings changed. Review the new settings and try again.", 409)
+
+
+def _stage_bytes(path: Path, data: bytes, cleanup: ExitStack) -> Path:
+    staged = _staged_file(path, cleanup)
+    with staged.open("wb") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    return staged
+
+
+def _stage_copy(path: Path, expected: bytes, cleanup: ExitStack, label: str) -> Path:
+    if not path.stat().st_mode & (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH):
+        raise ConfigError(f"The {label} settings or backup file is read-only. Check its permissions.")
+    staged = _staged_file(path, cleanup)
+    # Hold a writable descriptor for fsync even if copy2 copies a read-only attribute.
+    with staged.open("r+b") as f:
+        shutil.copy2(path, staged)
+        os.fsync(f.fileno())
+    _check_original(staged, expected, label)
+    return staged
+
+
+@dataclass
+class _PendingWrite:
+    path: Path
+    before: bytes | Path | None
+    after: bytes
+    staged: Path
+    restore: Path | None
+    backup: Path | None = None
+
+
+def _previous_backup(backup: Path, cleanup: ExitStack, label: str):
+    # The previous writer could replace a .bak symlink. Save the link itself
+    # for rollback without ever opening its target.
+    if backup.is_symlink():
+        target = backup.readlink()
+        attributes = getattr(backup.lstat(), "st_file_attributes", 0)
+        restore = _staged_file(backup, cleanup)
+        restore.unlink()
+        restore.symlink_to(target, target_is_directory=bool(attributes & stat.FILE_ATTRIBUTE_DIRECTORY))
+        return target, restore
+    before = _read(backup)
+    return before, None if before is None else _stage_copy(backup, before, cleanup, label)
 
 
 def apply_edits(edits: list[ConfigEdit], label: str) -> None:
     """Prepare every file and backup before replacing any settings."""
     with ExitStack() as cleanup:
-        staged = []
+        configs = []
+        backups = []
         applied = []
         try:
             for edit in edits:
-                _check_original(edit, label)
+                _check_original(edit.path, edit.original, label)
                 edit.path.parent.mkdir(parents=True, exist_ok=True)
-                new = _staged_file(edit.path, cleanup)
-                new.write_bytes(edit.replacement)
-                if edit.backup is not None:
-                    backup = _staged_file(edit.backup, cleanup)
+                new = _stage_bytes(edit.path, edit.replacement, cleanup)
+                restore = None
+                if edit.original is not None:
+                    backup = edit.backup
                     try:
-                        shutil.copy2(edit.path, backup)
-                        if backup.read_bytes() != edit.original:
-                            raise ConfigError(f"The {label} settings changed. Try again.", 409)
-                        backup.replace(edit.backup)
+                        original_copy = _stage_copy(edit.path, edit.original, cleanup, label)
+                        previous, previous_copy = _previous_backup(backup, cleanup, label)
                     except OSError as exc:
                         raise ConfigError(f"Couldn't back up the {label} settings.") from exc
+                    backups.append(_PendingWrite(backup, previous, edit.original, original_copy, previous_copy))
+                    restore = _stage_bytes(edit.path, edit.original, cleanup)
+                    shutil.copymode(edit.path, restore)
                     shutil.copymode(edit.path, new)
-                staged.append((edit, new))
-            for edit, new in staged:
-                _check_original(edit, label)
-                new.replace(edit.path)
-                applied.append(edit)
+                configs.append(_PendingWrite(edit.path, edit.original, edit.replacement, new, restore, edit.backup))
+
+            pending = backups + configs
+            for item in pending:
+                _check_original(item.path, item.before, label)
+            for item in pending:
+                _check_original(item.path, item.before, label)
+                item.staged.replace(item.path)
+                applied.append(item)
         except (OSError, ConfigError) as exc:
-            # A later destination may be locked by the client. Undo only our own edit.
-            for edit in reversed(applied):
+            # Restore configs before their backups. Keep the recovery copy if a restore fails.
+            keep_backups = set()
+            incomplete = False
+            for item in reversed(applied):
+                if item.path in keep_backups:
+                    continue
                 try:
-                    if _read(edit.path) != edit.replacement:
-                        raise OSError("file changed")
-                    if edit.backup is None:
-                        edit.path.unlink()
+                    _check_original(item.path, item.after, label)
+                    if item.restore is None:
+                        item.path.unlink()
                     else:
-                        restore = _staged_file(edit.path, cleanup)
-                        restore.write_bytes(edit.original)
-                        shutil.copymode(edit.path, restore)
-                        restore.replace(edit.path)
-                except (OSError, ConfigError) as rollback:
-                    raise ConfigError(f"Couldn't restore all {label} settings. "
-                                      "Check the config files and their .bak copies.") from rollback
+                        item.restore.replace(item.path)
+                except (OSError, ConfigError):
+                    incomplete = True
+                    if item.backup is not None:
+                        keep_backups.add(item.backup)
+            if incomplete:
+                message = str(exc) if isinstance(exc, ConfigError) else f"Couldn't save the {label} settings."
+                raise ConfigError(message + " Couldn't restore all files. Check the settings and their .bak copies.",
+                                  getattr(exc, "http_status", 500)) from exc
             if isinstance(exc, ConfigError):
                 raise
             raise ConfigError(f"Couldn't save the {label} settings. Check file permissions and try again.") from exc

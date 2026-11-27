@@ -573,8 +573,9 @@ Calls print one JSON envelope. Exit codes are 0 for `ok: true`, 1 for a tool
 refusal/failure, and 2 for CLI usage errors. Errors also go to stderr.
 `--text` gives a short human display. `tools` includes names and one-line
 descriptions; `--json` also includes the same client schemas as stdio.
-`connect` prints native config and `skill path` prints a path rather than an
-envelope. `call` can invoke any registry tool, including tools outside `core`.
+By default, `connect` prints the client's config or setup instructions. With
+`--write`, it reports the result of setup for supported clients. `skill path`
+prints a path. `call` can invoke any registry tool, including tools outside `core`.
 
 The CLI waits for capture workers started by its call, including playlist work,
 podcast transcription, and capture follow-up analysis. This keeps a one-shot
