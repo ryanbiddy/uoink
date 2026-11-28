@@ -190,7 +190,8 @@ def _copy_to_clipboard(text: str) -> bool:
         log.debug("clip.exe copy failed: %s", e)
     try:
         subprocess.run(
-            ["powershell", "-NoProfile", "-Command", "Set-Clipboard -Value $args[0]", text],
+            ["powershell", "-NoProfile", "-Command", "Set-Clipboard -Value $env:UOINK_CLIPBOARD_TEXT"],
+            env={**os.environ, "UOINK_CLIPBOARD_TEXT": text},
             capture_output=True,
             text=True,
             timeout=5,

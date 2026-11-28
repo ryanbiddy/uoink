@@ -57,12 +57,18 @@ Uoink makes these outbound requests:
 - **Source capture — when you ask for it.** A YouTube capture downloads
   public video data, thumbnails, transcripts, comments, and metadata from
   YouTube and its delivery hosts. A pasted Reddit thread uses Reddit's public
-  JSON endpoint. A pasted X post uses X's public syndication endpoint at
+  JSON endpoint. Saving a Hacker News thread sends the item ID to Algolia's
+  public API at `hn.algolia.com`. For a comment link, Uoink also requests
+  the parent story by ID. The linked article or video is a separate save.
+  A pasted X post uses X's public syndication endpoint at
   `cdn.syndication.twimg.com`, and an X video's post text comes from the same
   endpoint. When you save a post from an open X tab with the extension, it
   also reads that post's text from the page and sends it only to Uoink on
   your computer. A web-page or podcast capture requests the
-  user-supplied web page or podcast feed; a web-page capture also requests
+  user-supplied web page or podcast feed. When you paste an Apple Podcasts link,
+  Uoink sends the show ID to `itunes.apple.com` to find the publisher's feed.
+  For an episode link, it also requests the show's latest 200 episode listings
+  and matches the episode on your computer. A web-page capture also requests
   the preview image the page names for its thumbnail, which can be on another
   host. Import a list reads the list you paste from its source: HackerTube's
   public API at `hackertube.org`, the Algolia Hacker News API at
@@ -70,6 +76,9 @@ Uoink makes these outbound requests:
   only the list's address. Those services receive the ordinary
   request metadata needed to answer, such as your IP address and Uoink's user
   agent, and may redirect the request to their own CDN.
+- **Hacker News availability checks.** When source checks are enabled, Uoink
+  sends the saved story ID to `hn.algolia.com` to check whether the story
+  is still public. A save made from a comment link uses its parent story ID.
 - **Anthropic API requests — only with your own key.** Uoink has no
   Anthropic key of its own and calls Anthropic's API only with your key
   (the one you saved, or one you type to test it), in these cases:
@@ -340,8 +349,8 @@ you ask it to capture (for example YouTube, Reddit, X, or a supplied web/feed
 host), Anthropic for enabled automatic analysis, key tests or AI actions that
 you or a connected agent start with your key, ScrapeCreators for authorized
 discovery or balance checks after you enable it, the relay you deploy to your
-own Render account if you turn on the phone inbox, Apple's podcast search if
-you turn on podcast suggestions, FxTwitter if you turn on full long X posts,
+own Render account if you turn on the phone inbox, Apple when you paste an
+Apple Podcasts link or turn on podcast suggestions, FxTwitter if you turn on full long X posts,
 Hugging Face for model
 loading during requested speaker labeling, and GitHub when you request an
 update check. Their handling of request data is governed by their own

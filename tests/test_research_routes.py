@@ -132,7 +132,7 @@ def test_publish_adds_quote_free_dashboard_view(rig):
     view = research.run_view(rig.root, run["run_id"])
     assert view["exports"] == {"html": True, "md": True}
     assert view["report"]["claims"][0]["text"] == good["text"]
-    assert view["report"]["claims"][0]["receipts"][0]["deep_link"].endswith("&t=27s")
+    assert view["report"]["claims"][0]["receipts"][0]["deep_link"].endswith("&t=25s")
     assert view["verification"]["dropped"][0]["reasons"] == ["quote_not_found"]
     assert "fabricated quote" not in json.dumps(view)
     assert all("quote" not in ref for c in view["report"]["claims"] for ref in c["receipts"])

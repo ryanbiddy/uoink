@@ -171,7 +171,7 @@ minimum to macOS 15, the OS used for hosted runtime checks.
 
 | Job | Evidence |
 | --- | --- |
-| A, portable tests | `tests/` with `scripts/mac/portable-tests.txt` on Python 3.11/3.13. Disposable HOME and OS data/cache directories, without a global isolation binding. Individual tests retain explicit isolation. Each run uploads JUnit XML and environment details. |
+| A, portable tests | `tests/` with `scripts/mac/portable-tests.txt` on Python 3.11/3.13. PyAV and NumPy use the installer pins so the transcription tests can decode audio. Disposable HOME and OS data/cache directories, without a global isolation binding. Individual tests retain explicit isolation. Each run uploads JUnit XML and environment details. |
 | B, dependency graph | Builds the three reviewed local wheels, then probes included pins for CPython 3.13 at both `macosx_14_0_arm64` and `macosx_15_0_arm64`. Combined resolvers use `--find-links` for built wheels. Missing packages and failed builds remain failures. |
 | C, import smoke | Rejects missing pins or changed wheel hashes before installation. A fresh venv installs the complete selected set with `--no-index --no-deps`, runs `pip check`, imports, and actual `initialize`/`tools/list` exchanges for 91 full and 35 core tools. |
 

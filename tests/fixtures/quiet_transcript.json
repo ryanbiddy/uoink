@@ -1,0 +1,13 @@
+[
+  {"start":0,"end":3,"text":"Bonjour à toutes et à tous."},
+  {"start":4,"end":6,"text":"Thanks for watching!","no_speech_prob":0.02,"avg_logprob":-0.16},
+  {"start":10,"end":12,"text":"On repeat!","compression_ratio":3.1},
+  {"start":12,"end":14,"text":"On repeat.","compression_ratio":2.9},
+  {"start":14,"end":16,"text":"On repeat","compression_ratio":2.8},
+  {"start":17,"end":19,"text":"[Music]"},
+  {"start":20,"end":22,"text":"[Applause]"},
+  {"start":24,"end":26,"text":"(door closes)"},
+  {"start":28,"end":35,"text":"♪ ... ♪"},
+  {"start":40,"end":46,"text":"La discussion continue."},
+  {"start":58,"end":60,"text":"Thanks for watching!"}
+]

@@ -34,6 +34,7 @@ import base64
 import copy
 import hashlib
 import http.client
+import io
 import ipaddress
 import json
 import logging
@@ -473,14 +474,12 @@ def _is_nonpublic_address(address) -> bool:
 
 
 def _embedded_ipv4(address) -> list:
-    """IPv4 destinations carried inside an IPv6 address: IPv4-mapped, NAT64
-    well-known prefix and 6to4. Each one must pass the IPv4 rule as well,
+    """IPv4 destinations carried inside mapped and 6to4 addresses.
+    Each one must pass the IPv4 rule as well,
     whatever Python's flags say about the IPv6 form."""
     if address.version != 6:
         return []
     embedded = [address.ipv4_mapped, address.sixtofour]
-    if address in _NAT64_WELL_KNOWN:
-        embedded.append(ipaddress.IPv4Address(int(address) & 0xFFFFFFFF))
     return [ipv4 for ipv4 in embedded if ipv4 is not None]
 
 
@@ -489,6 +488,8 @@ def _reject_private_ip(host: str) -> None:
         address = ipaddress.ip_address(host.strip("[]"))
     except ValueError:
         return
+    if address.version == 6 and address in _NAT64_WELL_KNOWN:
+        address = ipaddress.IPv4Address(int(address) & 0xFFFFFFFF)
     if (_is_nonpublic_address(address)
             or (address.version == 6 and address in _NAT64_LOCAL_USE)
             or any(_is_nonpublic_address(ipv4) for ipv4 in _embedded_ipv4(address))):
@@ -661,6 +662,7 @@ class FetchResponse:
     status: int
     headers: dict
     body: bytes
+    podcast_window: tuple[ET.Element, bool] | None = None
 
 
 class _BoundedRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -795,7 +797,7 @@ def check_public_http_url(url: str) -> str:
     Shape-only registration validators intentionally remain separate. Repeat
     this check at fetch time, including for saved feeds and every redirect.
     """
-    return _admit_public_http_url(url)[0]
+    return _admit_public_http_url(url.partition("#")[0] if isinstance(url, str) else url)[0]
 
 
 def _admit_public_http_url(url: str) -> tuple[str, str, tuple[str, ...]]:
@@ -881,17 +883,21 @@ def resolve_public_http_url(url: str, *, user_agent: str = FEED_USER_AGENT,
 
 
 def default_http_fetch(url: str, headers: dict, *, timeout: float = FEED_FETCH_TIMEOUT_SEC,
-                       max_bytes: int = FEED_MAX_BYTES) -> FetchResponse:
+                       max_bytes: int = FEED_MAX_BYTES, podcast_limit: int | None = None) -> FetchResponse:
     """Bounded conditional GET. Never called by tests; inject a fake fetcher."""
     _parse_http_url(url)
     try:
         with public_http_open(url, headers=headers, timeout=timeout) as resp:
+            if podcast_limit is not None and resp.status == 200:
+                window = read_podcast_window(resp, limit=podcast_limit, max_bytes=max_bytes)
+                return FetchResponse(resp.status, dict(resp.headers.items()), b"", window)
             body = resp.read(max_bytes + 1)
             if len(body) > max_bytes:
                 raise ServiceError("feed_too_large", "Feed body exceeds the bounded byte budget")
             return FetchResponse(resp.status, dict(resp.headers.items()), body)
     except urllib.error.HTTPError as exc:
-        return FetchResponse(exc.code, dict(exc.headers.items()) if exc.headers else {}, b"")
+        with exc:
+            return FetchResponse(exc.code, dict(exc.headers.items()) if exc.headers else {}, b"")
 
 
 def _retry_after_ms(headers: dict) -> int | None:
@@ -932,12 +938,138 @@ def _localname(tag: str) -> str:
     return tag.split("}", 1)[-1] if "}" in tag else tag
 
 
+class _WindowReady(Exception):
+    """The next episode began, or a registration probe found its container."""
+
+
+class PodcastFeedError(ValueError):
+    """A feed format error with a message safe to show the user."""
+
+
+class BodyTooLarge(ValueError):
+    """The response contained more than the caller's byte budget."""
+
+
+def bounded_http_chunks(stream, *, max_bytes, deadline):
+    # HTTPResponse.read(n) may block across many successive socket reads.
+    # read1 returns after a single buffered read so trickling data cannot
+    # reset the wall-clock deadline. The opener also sets a socket timeout.
+    read = stream.read1 if isinstance(stream, http.client.HTTPResponse) else stream.read
+    remaining = max_bytes
+    while time.monotonic() < deadline:
+        chunk = read(min(16 * 1024, remaining + 1))
+        if time.monotonic() >= deadline:
+            break
+        if not chunk:
+            return
+        if len(chunk) > remaining:
+            if remaining:
+                yield chunk[:remaining]
+            raise BodyTooLarge("The download exceeds the size limit.")
+        yield chunk
+        remaining -= len(chunk)
+    raise TimeoutError("The download took too long.")
+
+
+class PodcastTreeBuilder(ET.TreeBuilder):
+    """Accept feed data only. XML declarations of entities and document types are unnecessary."""
+
+    def doctype(self, name, pubid, system):
+        if name.lower() == "html":
+            raise PodcastFeedError("That link is a web page, not a podcast feed")
+        raise PodcastFeedError("Uoink cannot read a podcast feed with an XML document type.")
+
+
+class _PodcastTree(PodcastTreeBuilder):
+    """Build just the prefix of one RSS channel or Atom feed that we use."""
+
+    def __init__(self, limit: int, on_entry=None):
+        super().__init__()
+        self.limit = limit
+        self.on_entry = on_entry
+        self.stack = []
+        self.root = self.container = None
+        self.entry_tag = None
+        self.count = 0
+
+    def start(self, tag, attrs):
+        name = _localname(tag)
+        parent = self.stack[-1] if self.stack else None
+        if self.container is not None and parent is self.container and name == self.entry_tag:
+            if self.count >= self.limit:
+                raise _WindowReady
+        node = super().start(tag, attrs)
+        if parent is None:
+            self.root = node
+            if name == "feed":
+                self.container, self.entry_tag = node, "entry"
+            elif name.lower() == "html":
+                raise PodcastFeedError("That link is a web page, not a podcast feed")
+            elif name != "rss":
+                raise PodcastFeedError("That link does not contain an RSS or Atom podcast feed.")
+        elif parent is self.root and self.container is None and name == "channel":
+            self.container, self.entry_tag = node, "item"
+        if self.limit == 0 and self.container is not None:
+            raise _WindowReady
+        self.stack.append(node)
+        return node
+
+    def end(self, tag):
+        node = super().end(tag)
+        self.stack.pop()
+        if self.stack and self.stack[-1] is self.container and _localname(tag) == self.entry_tag:
+            self.count += 1
+            if self.on_entry is not None:
+                self.on_entry(node)
+                self.container.remove(node)
+                node.clear()
+        return node
+
+
+def read_podcast_window(stream, limit: int, *, max_bytes: int = FEED_MAX_BYTES,
+                        on_entry=None, deadline=None) -> tuple[ET.Element, bool]:
+    """Read complete entries in publisher order. A zero limit validates the root only."""
+    tree = _PodcastTree(limit, on_entry)
+    parser = ET.XMLParser(target=tree)
+    prefix = b""
+    if deadline is None:
+        deadline = time.monotonic() + FEED_FETCH_TIMEOUT_SEC
+    try:
+        for chunk in bounded_http_chunks(stream, max_bytes=max_bytes, deadline=deadline):
+            if tree.root is None and len(prefix) < 512:
+                prefix += chunk[:512 - len(prefix)]
+            parser.feed(chunk)
+        root = parser.close()
+        if tree.container is None:
+            raise PodcastFeedError("That RSS feed is missing its channel.")
+        return root, False
+    except BodyTooLarge:
+        if tree.count >= limit and tree.container is not None:
+            return tree.root, True
+        raise ServiceError("feed_too_large",
+                           f"The feed exceeds the {max_bytes // (1024 * 1024)} MiB limit "
+                           f"before Uoink can read {limit} episodes.") from None
+    except _WindowReady:
+        return tree.root, True
+    except ET.ParseError:
+        # HTML's lowercase doctype is invalid XML, so Expat can reject it
+        # before a root element or doctype callback. Preserve the useful diagnosis.
+        if tree.root is None and re.match(br"(?:\xef\xbb\xbf)?\s*<!doctype\s+html\b", prefix, re.I):
+            raise PodcastFeedError("That link is a web page, not a podcast feed") from None
+        raise
+
+
 def _child_text(parent, *names) -> str | None:
     for child in parent:
         if _localname(child.tag) in names:
             text = (child.text or "").strip()
             return text or None
     return None
+
+
+def podcast_published_text(entry, primary: str, fallback: str) -> str | None:
+    """Prefer the publisher's release date regardless of XML child order."""
+    return _child_text(entry, primary) or _child_text(entry, fallback)
 
 
 def _child_attr(parent, name: str, attr: str) -> str | None:
@@ -965,7 +1097,10 @@ class HttpFeedAdapter:
     """Shared fetch/parse skeleton for the three Atom/RSS detectors."""
 
     def __init__(self, fetch: Callable[..., FetchResponse] | None = None):
-        self.fetch = fetch or default_http_fetch
+        self.fetch = fetch or self.default_fetch
+
+    def default_fetch(self, url, headers):
+        return default_http_fetch(url, headers)
 
     def feed_url(self, source: dict) -> str:
         raise NotImplementedError
@@ -973,35 +1108,47 @@ class HttpFeedAdapter:
     def parse(self, body: bytes, source: dict) -> AdapterResult:
         raise NotImplementedError
 
+    def parse_response(self, response: FetchResponse, source: dict) -> AdapterResult:
+        if len(response.body or b"") > FEED_MAX_BYTES:
+            raise ServiceError("feed_too_large", "This feed exceeds the 8 MiB limit.")
+        return self.parse(response.body, source)
+
     def poll(self, source: dict, cursor: dict | None, *, conditional: bool) -> AdapterResult:
         headers = _conditional_headers(cursor, conditional)
         try:
             response = self.fetch(self.feed_url(source), headers)
         except ServiceError as exc:
             return AdapterResult("error", error_code=exc.code, error_message=exc.message)
+        except (ET.ParseError, ValueError) as exc:
+            return self.parse_error(exc)
         except (urllib.error.URLError, socket.timeout, TimeoutError, OSError) as exc:
             code = "poll_timeout" if isinstance(exc, (socket.timeout, TimeoutError)) else "feed_unreachable"
-            return AdapterResult("error", error_code=code, error_message=type(exc).__name__)
-        except Exception as exc:  # adapter bug or unexpected transport failure
-            return AdapterResult("error", error_code="feed_unreachable", error_message=type(exc).__name__)
+            message = "The feed took too long to respond." if code == "poll_timeout" else "Uoink could not reach the feed."
+            return AdapterResult("error", error_code=code, error_message=message)
+        except Exception:  # adapter bug or unexpected transport failure
+            return AdapterResult("error", error_code="feed_unreachable", error_message="Uoink could not reach the feed.")
         retry_after = _retry_after_ms(response.headers or {})
         if response.status == 304:
             return AdapterResult("not_modified", etag=_header(response.headers, "ETag"),
                                  last_modified=_header(response.headers, "Last-Modified"))
         if response.status != 200:
             code = "rate_limited" if response.status == 429 else f"http_{int(response.status)}"
-            return AdapterResult("error", error_code=code, error_message=f"HTTP {int(response.status)}",
+            return AdapterResult("error", error_code=code, error_message=f"The host returned HTTP {int(response.status)}.",
                                  retry_after_ms=retry_after)
-        if len(response.body or b"") > FEED_MAX_BYTES:
-            return AdapterResult("error", error_code="feed_too_large",
-                                 error_message="Feed body exceeds the bounded byte budget")
         try:
-            result = self.parse(response.body, source)
+            result = self.parse_response(response, source)
+        except ServiceError as exc:
+            return AdapterResult("error", error_code=exc.code, error_message=exc.message)
         except (ET.ParseError, ValueError) as exc:
-            return AdapterResult("error", error_code="malformed_feed", error_message=type(exc).__name__)
+            return self.parse_error(exc)
         result.etag = _header(response.headers, "ETag")
         result.last_modified = _header(response.headers, "Last-Modified")
         return result
+
+    @staticmethod
+    def parse_error(exc) -> AdapterResult:
+        message = str(exc) if isinstance(exc, PodcastFeedError) else "Uoink could not read the feed's XML."
+        return AdapterResult("error", error_code="malformed_feed", error_message=message)
 
 
 class YouTubeAtomAdapter(HttpFeedAdapter):
@@ -1050,8 +1197,18 @@ class PodcastRssAdapter(HttpFeedAdapter):
     def feed_url(self, source: dict) -> str:
         return source["source_key"]
 
+    def default_fetch(self, url, headers):
+        return default_http_fetch(url, headers, podcast_limit=PODCAST_ENTRIES_PER_POLL)
+
+    def parse_response(self, response: FetchResponse, source: dict) -> AdapterResult:
+        if response.podcast_window is not None:
+            return self._parse_window(*response.podcast_window)
+        return self.parse(response.body, source)
+
     def parse(self, body: bytes, source: dict) -> AdapterResult:
-        root = ET.fromstring(body)
+        return self._parse_window(*read_podcast_window(io.BytesIO(body), PODCAST_ENTRIES_PER_POLL))
+
+    def _parse_window(self, root, truncated) -> AdapterResult:
         root_name = _localname(root.tag)
         entries: list[tuple[str | None, str, dict]] = []
         feed_title = artwork_url = None
@@ -1074,7 +1231,7 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 entries.append((guid or link, method or "missing", {
                     "title": _child_text(item, "title"),
                     "page": link, "audio": _child_attr(item, "enclosure", "url"),
-                    "published": _child_text(item, "pubDate", "published"),
+                    "published": podcast_published_text(item, "pubDate", "published"),
                     "duration": _child_text(item, "duration"),
                 }))
         elif root_name == "feed":
@@ -1095,16 +1252,15 @@ class PodcastRssAdapter(HttpFeedAdapter):
                 entry_id = _child_text(entry, "id")
                 entries.append((entry_id, "atom_id" if entry_id else "missing", {
                     "title": _child_text(entry, "title"), "page": page, "audio": audio,
-                    "published": _child_text(entry, "published", "updated"),
+                    "published": podcast_published_text(entry, "published", "updated"),
                     "duration": None,
                 }))
         else:
             raise ValueError(f"unrecognised feed root element: {root_name!r}")
-        truncated = len(entries) > PODCAST_ENTRIES_PER_POLL
         result = AdapterResult("snapshot", coverage="window" if truncated else "complete",
                                truncated=truncated, feed_title=_safe_text(feed_title, 200))
         seen: dict[str, Observation] = {}
-        for raw_id, method, meta in entries[:PODCAST_ENTRIES_PER_POLL]:
+        for raw_id, method, meta in entries:
             entry_id = validate_entry_id(raw_id)
             if entry_id is None:
                 result.rejected += 1
@@ -2774,7 +2930,14 @@ class SourceSubscriptionService:
     # ======================================================================
     @endpoint
     def register_source(self, context, args):
-        args = validate_arguments("register_source", args)
+        return self._register_source(validate_arguments("register_source", args))
+
+    def follow_podcast(self, url: str, *, title=None, interval=60):
+        """Explicit metadata follow. Registration and reactivation share one transaction."""
+        return self._register_source({"kind": "podcast_rss", "url": url,
+                                      "display_name": title, "poll_interval_min": interval}, follow=True)
+
+    def _register_source(self, args, *, follow=False):
         source_key, canonical_url = parse_source_url(args["kind"], args["url"])
         display_name = _safe_text(args.get("display_name"), 200)
         interval = int(args.get("poll_interval_min", DEFAULT_POLL_INTERVAL_MIN))
@@ -2784,27 +2947,32 @@ class SourceSubscriptionService:
             existing = _row(conn.execute(
                 "SELECT * FROM source_subscriptions WHERE kind=? AND source_key=?",
                 (args["kind"], source_key)).fetchone())
-            if existing is not None:
-                receipt = None
-                if existing["archived"]:
-                    # Contract: re-registration unarchives with capture off and a receipt;
-                    # it preserves history and caps and cannot replenish anything.
-                    receipt = self._unarchive(conn, existing, now)
-                    existing = self._source(conn, existing["source_id"])
-                summary = self._summary(conn, existing, now)
-                return success(created=False, source=summary, receipt=receipt)
-            legacy_feed_id = None
-            if args["kind"] == "podcast_rss":
-                # Compatibility projection: the existing download/transcribe/publish
-                # pipeline keys on podcast_feeds/podcast_episodes rows. The row is
-                # created with auto_ingest=0; consent lives only in this service.
-                legacy_feed_id = self._legacy_feed_projection(conn, source_key, interval)
-            self._insert_source(conn, source_id=source_id, kind=args["kind"], source_key=source_key,
-                                canonical_url=canonical_url, display_name=display_name,
-                                interval=interval, now=now, detection_enabled=True,
-                                legacy_feed_id=legacy_feed_id)
+            receipt = None
+            if existing is None:
+                feed_id = (self._legacy_feed_projection(conn, source_key, interval)
+                           if args["kind"] == "podcast_rss" else None)
+                self._insert_source(conn, source_id=source_id, kind=args["kind"], source_key=source_key,
+                                    canonical_url=canonical_url, display_name=display_name,
+                                    interval=interval, now=now, detection_enabled=True,
+                                    legacy_feed_id=feed_id)
+            elif existing["archived"]:
+                receipt = self._unarchive(conn, existing, now)
+            if follow:
+                if existing and (existing["archived"] or not existing.get("follow_feed")):
+                    conn.execute("UPDATE source_detection_cursors SET next_poll_at_ms=? WHERE source_id=? "
+                                 "AND poll_owner_token IS NULL", (now, source_id))
+                conn.execute("UPDATE source_subscriptions SET detection_enabled=1,follow_feed=1, "
+                             "display_name=coalesce(nullif(trim(display_name),''),?) WHERE source_id=?",
+                             (display_name, source_id))
+                updated = conn.execute(
+                    "UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''),?) "
+                    "WHERE id=(SELECT legacy_feed_id FROM source_subscriptions WHERE source_id=?)",
+                    (display_name, source_id))
+                if not updated.rowcount:
+                    raise ValueError("Uoink couldn't find the podcast feed for this subscription.")
             source = self._source(conn, source_id)
-            return success(created=True, source=self._summary(conn, source, now))
+            return success(created=existing is None, source=self._summary(conn, source, now),
+                           **({"receipt": receipt} if existing is not None else {}))
 
     @staticmethod
     def _legacy_feed_projection(conn, feed_url: str, interval: int) -> int | None:
@@ -2870,6 +3038,9 @@ class SourceSubscriptionService:
         now = self._now()
         with self.store.write() as conn:
             source = self._source(conn, args["source_id"])
+            if source.get("legacy_feed_id") is not None:
+                conn.execute("UPDATE podcast_feeds SET enabled=0, auto_ingest=0 WHERE id=?",
+                             (source["legacy_feed_id"],))
             if source["archived"]:
                 return success(source_id=source["source_id"], changed=False,
                                revision=source["revision"])
@@ -3173,7 +3344,7 @@ class SourceSubscriptionService:
         if source["kind"] == "podcast_rss":
             latest = _row(conn.execute(
                 "SELECT * FROM source_items WHERE source_id=? AND state!='deleted' "
-                "ORDER BY (state='committed') DESC, published_at_ms DESC, first_seen_ms DESC, item_id LIMIT 1",
+                "ORDER BY published_at_ms DESC, first_seen_ms DESC, item_id LIMIT 1",
                 (source["source_id"],)).fetchone())
             if latest:
                 latest_episode = self._item_record(conn, latest)
@@ -3187,6 +3358,7 @@ class SourceSubscriptionService:
             "consent_state": source["consent_state"], "revision": int(source["revision"]),
             "consent_epoch": int(source["consent_epoch"]),
             "detection_enabled": bool(source["detection_enabled"]),
+            "follow_feed": bool(source.get("follow_feed")),
             "archived": bool(source["archived"]),
             "poll_interval_min": int(source["poll_interval_min"]),
             "boundary": source["boundary"],
@@ -3560,9 +3732,10 @@ class SourceSubscriptionService:
                 # Contract: reject late results from an expired/replaced owner.
                 return {"ok": False, "outcome": "stale_owner", **base}
             if int(cursor["poll_lease_expires_ms"]) <= now:
+                message = "The feed check timed out."
                 self._record_poll_failure(conn, source, cursor, AdapterResult(
-                    "error", error_code="poll_timeout", error_message="lease expired"), now)
-                return {"ok": False, "outcome": "stale_owner", "code": "poll_timeout", **base}
+                    "error", error_code="poll_timeout", error_message=message), now)
+                return {"ok": False, "outcome": "stale_owner", "code": "poll_timeout", "message": message, **base}
             stale_epoch = int(source["consent_epoch"]) != int(cursor["poll_consent_epoch"])
             if result.status == "error":
                 self._record_poll_failure(conn, source, cursor, result, now)
@@ -3578,6 +3751,7 @@ class SourceSubscriptionService:
                     "poll_owner_token=NULL, poll_consent_epoch=NULL, poll_lease_expires_ms=NULL "
                     "WHERE source_id=?",
                     (now, self._next_due(source, now), result.etag, result.last_modified, source_id))
+                self._record_feed_success(conn, source, now)
                 return {"ok": True, "outcome": "not_modified", "inserted": 0, **base}
             scan_revision = int(cursor["revision"]) + 1
             if source["kind"] == "podcast_rss" and result.feed_title:
@@ -3600,11 +3774,13 @@ class SourceSubscriptionService:
             if result.coverage == "partial":
                 # Contract: incomplete batches persist metadata but advance no success
                 # cursor or enrollment and create no eligibility.
+                message = "The host returned an incomplete list."
                 self._record_poll_failure(conn, source, cursor, AdapterResult(
-                    "error", error_code="partial_listing", error_message="incomplete enumeration",
+                    "error", error_code="partial_listing", error_message=message,
                     coverage="partial", truncated=result.truncated), now,
                     observed_count=len(result.observations))
                 return {"ok": False, "outcome": "partial", "code": "partial_listing",
+                        "message": message,
                         "stale_epoch": stale_epoch, **stats, **base}
             enrollment = None
             if on_current:
@@ -3622,10 +3798,18 @@ class SourceSubscriptionService:
                 (scan_revision, now, next_due, result.etag, result.last_modified,
                  result.coverage if result.coverage in ("window", "complete") else "unknown",
                  len(result.observations), 1 if result.truncated else 0, source_id))
+            self._record_feed_success(conn, source, now)
             return {"ok": True, "outcome": "snapshot", "scan_revision": scan_revision,
                     "coverage": result.coverage, "truncated": bool(result.truncated),
                     "rejected": result.rejected, "conflicts": result.conflicts,
                     "stale_epoch": stale_epoch, "enrollment": enrollment, **stats, **base}
+
+    @staticmethod
+    def _record_feed_success(conn, source, now):
+        if source.get("legacy_feed_id") is not None:
+            stamp = datetime.fromtimestamp(now / 1000, timezone.utc).isoformat().replace("+00:00", "Z")
+            conn.execute("UPDATE podcast_feeds SET last_polled_at=?, last_error=NULL, error_count=0 WHERE id=?",
+                         (stamp, source["legacy_feed_id"]))
 
     def _next_due(self, source: dict, now: int) -> int:
         # Contract: success schedules completion plus interval; jitter only delays.
@@ -3649,9 +3833,13 @@ class SourceSubscriptionService:
              now + delay + self._jitter(),
              result.coverage if result.coverage in ("partial",) else cursor["coverage"],
              1 if result.truncated else cursor["truncated"], observed_count, source["source_id"]))
+        if source.get("legacy_feed_id") is not None:
+            message = sanitize_message(result.error_message or "Uoink could not check this feed.")
+            conn.execute("UPDATE podcast_feeds SET error_count=?, last_error=? WHERE id=?",
+                         (n, message, source["legacy_feed_id"]))
 
     def _expire_poll_leases(self, conn, now: int, *, limit: int | None = None) -> int:
-        sql = ("SELECT c.*, s.poll_interval_min, s.source_id AS sid FROM source_detection_cursors c "
+        sql = ("SELECT c.*, s.poll_interval_min, s.legacy_feed_id, s.source_id AS sid FROM source_detection_cursors c "
                "JOIN source_subscriptions s ON s.source_id=c.source_id "
                "WHERE c.poll_owner_token IS NOT NULL AND c.poll_lease_expires_ms<=? "
                "ORDER BY c.poll_lease_expires_ms, s.source_id")
@@ -3664,9 +3852,10 @@ class SourceSubscriptionService:
             cursor = dict(row)
             # Contract: a poll timeout records failure and schedules another due time.
             self._record_poll_failure(conn, {"source_id": cursor["sid"],
+                                             "legacy_feed_id": cursor["legacy_feed_id"],
                                              "poll_interval_min": cursor["poll_interval_min"]},
                                       cursor, AdapterResult("error", error_code="poll_timeout",
-                                                            error_message="lease expired"), now)
+                                                            error_message="The feed check timed out."), now)
         return len(rows)
 
     def _persist_observations(self, conn, source: dict, observations: list[Observation],
@@ -3714,6 +3903,10 @@ class SourceSubscriptionService:
                 "WHERE item_id=?",
                 (now, title, url, obs.published_at_ms, metadata_json, 1 if reset_preflight else 0,
                  item_id))
+            if existing.get("legacy_episode_id") is not None:
+                _refresh_podcast_date(conn, existing["legacy_episode_id"], (obs.metadata or {}).get("published_raw"))
+            else:
+                self._project_legacy(conn, source, item_id, obs, now)
             updated += 1
         return {"inserted": inserted, "updated": updated, "linked": linked}
 
@@ -4782,6 +4975,8 @@ class SourceSubscriptionService:
             detection_enabled=bool(feed.get("enabled", 1)), legacy_feed_id=feed["id"],
             etag=feed.get("last_etag"), last_modified=feed.get("last_modified"),
             hold_until_ms=hold_until)
+        if feed.get("enabled") and "follow_feed" in self._source(conn, source_id):
+            conn.execute("UPDATE source_subscriptions SET follow_feed=1 WHERE source_id=?", (source_id,))
         if feed.get("auto_ingest"):
             # Contract: an existing auto_ingest=1 is an explicit opt-in; preserve it
             # as on with a legacy receipt and the initial boundary pending.
@@ -5068,6 +5263,9 @@ def legacy_set_detection(conn, *, enabled: bool, feed_id: int | None = None,
     if source_id is None:
         return False
     now = int(time.time() * 1000) if now is None else int(now)
+    if enabled and feed_id is not None:
+        conn.execute("UPDATE source_subscriptions SET follow_feed=1 WHERE source_id=? AND archived=0",
+                     (source_id,))
     cur = conn.execute(
         "UPDATE source_subscriptions SET detection_enabled=?, updated_at_ms=? "
         "WHERE source_id=? AND archived=0", (1 if enabled else 0, now, source_id))
@@ -5160,6 +5358,24 @@ def legacy_started_episode_ids(conn, feed_id: int) -> list[int]:
     return [int(r[0]) for r in rows]
 
 
+def _refresh_podcast_date(conn, episode_id: int, raw) -> None:
+    """Apply a newly supplied or corrected date without erasing a known date."""
+    ms = parse_published_ms(raw)
+    if ms is None:
+        return
+    try:
+        conn.execute("UPDATE podcast_episodes SET published_at=?, published_at_ms=? WHERE id=? "
+                     "AND (published_at IS NOT ? OR published_at_ms IS NOT ?)",
+                     (raw, ms, episode_id, raw, ms))
+    except sqlite3.OperationalError as exc:
+        if "no such column: published_at_ms" not in str(exc):
+            raise
+        # A pre-0040 library stores the feed date as text. Its migration
+        # derives the sortable timestamp from this value.
+        conn.execute("UPDATE podcast_episodes SET published_at=? WHERE id=? AND published_at IS NOT ?",
+                     (raw, episode_id, raw))
+
+
 def project_podcast_episode(conn, source: dict, item_id: str, entry_id: str, title,
                             audio_url, page_url, published_raw, duration_raw, now_iso: str) -> int | None:
     """Keep the old podcast_episodes projection in step for a legacy-linked
@@ -5185,6 +5401,8 @@ def project_podcast_episode(conn, source: dict, item_id: str, entry_id: str, tit
                  _duration_seconds(duration_raw), published_raw, now_iso))
             row = conn.execute("SELECT id FROM podcast_episodes WHERE feed_id=? AND guid=?",
                                (int(feed_id), entry_id)).fetchone()
+            if row is not None:
+                _refresh_podcast_date(conn, row[0], published_raw)
     except sqlite3.OperationalError:
         return None
     if row is None:
@@ -5315,6 +5533,7 @@ def adopt_suggested_podcast_episode(conn, feed_id: int, guid: Any, *, audio_url:
         "UPDATE podcast_episodes SET guid=?, episode_page_url=COALESCE(episode_page_url, ?) "
         "WHERE id=? AND yoink_video_id IS NULL AND COALESCE(transcript_status, '')<>'done'",
         (guid, _http_link(page_url), int(match["id"])))
+    _refresh_podcast_date(conn, int(match["id"]), published)
     if cur.rowcount and candidates is not None:
         candidates.remove(match)
     return int(match["id"])
@@ -5328,7 +5547,7 @@ def _duration_seconds(raw) -> int | None:
         if ":" not in text:
             return int(float(text))
         parts = [int(p) for p in text.split(":")]
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if len(parts) == 2:
         return parts[0] * 60 + parts[1]

@@ -15,9 +15,12 @@ import ipaddress
 import json
 import logging
 import re
+import shutil
 import socket
 import ssl
 import subprocess
+import tempfile
+import time
 import urllib.error
 import urllib.request
 from contextlib import nullcontext
@@ -31,6 +34,8 @@ from urllib.response import addinfourl
 
 import pytest
 import _platform
+import images
+from uoink_core.storage import atomic_output
 
 import podcasts
 import source_subscriptions as ss
@@ -40,6 +45,7 @@ import uoink_usage
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = "https://public.example/start"
 FINAL = "https://cdn.example/final"
+JPEG = b"\xff\xd8\xff" + b"0" * 16
 # Captured before any fixture patches it.
 REAL_BUILD_OPENER = urllib.request.build_opener
 
@@ -68,6 +74,7 @@ def network(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
     monkeypatch.setattr(socket, "create_connection", forbidden)
     addresses, routes, requests, responses, lookups = {}, {}, [], [], []
+    defaults = {"body": b"<title>Public page</title><p>Content</p>"}
     answered = []  # (name, answer addresses) for every lookup that answered
 
     def resolve(host, *args, **kwargs):
@@ -103,7 +110,7 @@ def network(monkeypatch):
         def http_open(self, req):
             requests.append(req)
             reply = routes.get(
-                req.full_url, (200, {}, b"<title>Public page</title><p>Content</p>"))
+                req.full_url, (200, {}, defaults["body"]))
             # Like HTTPConnection.getresponse(), the response transport can
             # raise raw socket/protocol errors that urllib does not wrap.
             if isinstance(reply, Exception):
@@ -130,7 +137,7 @@ def network(monkeypatch):
     # Exercise the old unguarded code too, without ever permitting real I/O.
     monkeypatch.setattr(urllib.request, "urlopen", build().open)
     return SimpleNamespace(addresses=addresses, routes=routes, requests=requests,
-                           responses=responses, lookups=lookups, answered=answered)
+                           responses=responses, lookups=lookups, answered=answered, defaults=defaults)
 
 
 @pytest.fixture
@@ -148,6 +155,7 @@ def dialer(network, monkeypatch):
       sni, check_hostname, verify_mode  the TLS wrapping, for HTTPS
     """
     dials, replies, unreachable = [], {}, set()
+    network.defaults["body"] = b"<title>Dialed</title><p>Content</p>"
 
     class FakeSocket:
         def __init__(self, dial):
@@ -171,7 +179,7 @@ def dialer(network, monkeypatch):
                                       for name, found in self.dial.prior_answers)
             self.dial.targets.append(target)
             status, headers, body = replies.get(
-                (self.dial.host, target), (200, {}, b"<title>Dialed</title><p>Content</p>"))
+                (self.dial.host, target), (200, {}, network.defaults["body"]))
             head = [b"HTTP/1.1 %d Fixture" % status]
             head += [name.encode("ascii") + b": "
                      + (value if isinstance(value, bytes) else value.encode("ascii"))
@@ -213,10 +221,13 @@ def dialer(network, monkeypatch):
 
 
 @pytest.fixture
-def consumers(network, monkeypatch, tmp_path):
-    namespace = dict(_platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
+def consumers(network, monkeypatch, tmp_path, request):
+    import server
+    namespace = dict(_sanitize_error=server._sanitize_error, _platform=_platform, source_subscriptions=ss, uoink_usage=uoink_usage,
+                     images=images, atomic_output=atomic_output, DESKTOP_ROOT=tmp_path,
+                     tempfile=tempfile, shutil=shutil,
                      urllib=urllib, log=logging.getLogger(__name__),
-                     subprocess=subprocess, json=json, Path=Path, urlparse=urlparse,
+                     subprocess=subprocess, time=time, json=json, Path=Path, urlparse=urlparse,
                      parse_qs=parse_qs, re=re,
                      YTDLP_CMD=["synthetic-yt-dlp"], COMMENTS_TIMEOUT_SEC=10,
                      PLATFORM_YOUTUBE="youtube", PLATFORM_TWITTER="twitter",
@@ -254,7 +265,7 @@ def consumers(network, monkeypatch, tmp_path):
     # Use the real parsing regexes without importing Crawl4AI.
     page["re"] = re
     tree = source_tree("page_extractor.py")
-    patterns = {"_TITLE_RE", "_META_RE", "_LINK_RE", "_IMG_RE", "_GENERIC_HOST_RE",
+    patterns = {"_LEGACY_TOKENS", "_TAG_NAME", "_BLOCK_MARKS", "_META_RE", "_LINK_RE", "_IMG_RE", "_GENERIC_HOST_RE",
                 "_USER_AGENT"}
     nodes = [n for n in tree.body if isinstance(n, ast.Assign)
              and any(isinstance(t, ast.Name) and t.id in patterns for t in n.targets)]
@@ -268,20 +279,21 @@ def consumers(network, monkeypatch, tmp_path):
     import article_extractor
     page.update(article_extractor=article_extractor, ENGINE_READABILITY=article_extractor.ENGINE,
                 ENGINE_CRAWL4AI="crawl4ai", _X_HOSTS={"x.com"}, _engine_version=lambda engine: "test")
-    load_functions("page_extractor.py", ("_extract_stdlib", "extract_page",
+    load_functions("page_extractor.py", ("_legacy_page", "_extract_stdlib", "extract_page",
                                          "normalize_page_url", "_fetch_page_html",
                                          "_extract_article_page"), page)
     # The relaxed /extract/any and /live/status validator's generic step.
     namespace["page_extractor"].normalize_page_url = page["normalize_page_url"]
-    episode ={"feed_id": 1, "audio_url": PUBLIC, "status": "new"}
-    monkeypatch.setattr(podcasts, "get_episode", lambda *args: episode)
-    monkeypatch.setattr(podcasts, "get_feed", lambda *args: {"id": 1})
-    monkeypatch.setattr(podcasts, "_episode_audio_path", lambda *args: tmp_path / "episode.mp3")
-    monkeypatch.setattr(podcasts, "_record_audio_result", Mock())
-    monkeypatch.setattr(podcasts, "set_episode_status", Mock())
+    import index
+    idx = index.Index.open(tmp_path / "index.db")
+    request.addfinalizer(idx.close)
+    feed = podcasts.add_feed(idx, "https://feed.example/rss")
+    podcasts.upsert_episodes(idx, feed["id"], [{"guid": "one", "title": "Episode", "audio_url": PUBLIC}])
+    episode, = podcasts.list_episodes(idx)
+    audio_path = podcasts._episode_audio_path(tmp_path, feed, episode)
 
     def audio_run(args, **kwargs):
-        (tmp_path / "episode.mp3").write_bytes(b"synthetic audio")
+        Path(args[args.index("-o") + 1].replace("%(ext)s", audio_path.suffix[1:])).write_bytes(b"synthetic audio")
         return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
 
     audio_child = Mock(side_effect=audio_run)
@@ -289,6 +301,8 @@ def consumers(network, monkeypatch, tmp_path):
     monkeypatch.setattr("uoink_processes.run_owned", audio_child)
 
     def invoke(kind, url):
+        if kind == "thumbnail":
+            network.defaults["body"] = JPEG
         if kind == "feed":
             return podcasts.fetch_feed({"feed_url": url})[0] is not None
         if kind == "standing":
@@ -299,12 +313,13 @@ def consumers(network, monkeypatch, tmp_path):
             return namespace["_download_thumbnail"]({"thumbnail": url}, tmp_path) is not None
         if kind == "generic":
             return bool(namespace["_fetch_metadata"](url))
-        episode["audio_url"] = url
+        with idx.write_transaction() as db:
+            db.execute("UPDATE podcast_episodes SET audio_url=? WHERE id=?", (url, episode["id"]))
         return podcasts.download_episode_audio(
-            None, 1, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"])["ok"]
+            idx, episode["id"], data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"])["ok"]
 
     return SimpleNamespace(invoke=invoke, child=child, audio_child=audio_child,
-                           server=namespace, page=page, audio_path=tmp_path / "episode.mp3")
+                           server=namespace, page=page, audio_path=audio_path, idx=idx, episode_id=episode["id"])
 
 
 CONSUMERS = ["feed", "standing", "page", "thumbnail", "generic", "enclosure"]
@@ -481,6 +496,9 @@ def test_failed_preflight_never_starts_ytdlp(kind, network, consumers):
 
 def test_existing_audio_remains_available_without_network(network, consumers):
     consumers.audio_path.write_bytes(b"existing local audio")
+    with consumers.idx.write_transaction() as db:
+        db.execute("UPDATE podcast_episodes SET audio_local_path=? WHERE id=?",
+                   (str(consumers.audio_path), consumers.episode_id))
     assert consumers.invoke("enclosure", "http://127.0.0.1/audio")
     assert network.requests == network.lookups == []
     consumers.audio_child.assert_not_called()
@@ -489,18 +507,18 @@ def test_existing_audio_remains_available_without_network(network, consumers):
 def test_local_fixture_transport_requires_explicit_injection(network, consumers, tmp_path):
     local = "http://localhost:8765/fixture"
 
-    def fixture_open(url, **kwargs):
+    def fixture_open(url, *, body=b"<title>Fixture</title>", **kwargs):
         assert url == local
-        return addinfourl(io.BytesIO(b"<title>Fixture</title>"), Message(), url, 200)
+        return addinfourl(io.BytesIO(body), Message(), url, 200)
 
     assert podcasts.fetch_feed({"feed_url": local}, http_open=fixture_open)[0]
     assert consumers.page["_extract_stdlib"](
         local, include_screenshot=False, http_open=fixture_open)["ok"]
     assert consumers.server["_download_thumbnail"](
-        {"thumbnail": local}, tmp_path, http_open=fixture_open)
+        {"thumbnail": local}, tmp_path, http_open=lambda *a, **kw: fixture_open(*a, body=JPEG, **kw))
     assert consumers.server["_fetch_metadata"](local, resolve_url=lambda url, **kwargs: url)
     assert podcasts.download_episode_audio(
-        None, 1, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"],
+        consumers.idx, consumers.episode_id, data_root=tmp_path, ytdlp_cmd=["synthetic-yt-dlp"],
         resolve_url=lambda url, **kwargs: local)["ok"]
     assert network.requests == network.lookups == []
 
@@ -542,6 +560,30 @@ def test_public_ipv6_resolution_is_allowed(network):
     assert ss.default_http_fetch(PUBLIC, {}).status == 200
 
 
+@pytest.mark.parametrize("address,allowed", [
+    ("64:ff9b::808:808", True), ("64:ff9b::a00:1", False),
+])
+def test_dns64_mixed_answers_check_embedded_destination(network, address, allowed):
+    network.addresses["public.example"] = ["8.8.8.8", address]
+    if allowed:
+        assert ss.check_public_http_url(PUBLIC) == PUBLIC
+    else:
+        with pytest.raises(ss.ServiceError, match="refused"):
+            ss.check_public_http_url(PUBLIC)
+
+
+@pytest.mark.parametrize("url", [
+    "https://www.youtube.com/watch?v=abcdef12345#t=1m30s",
+    "https://x.com/example/status/1234567890123456789#:~:text=quote",
+])
+def test_platform_metadata_drops_fragment_before_dispatch(url, network, consumers):
+    canonical = url.partition("#")[0]
+    assert consumers.server["_normalize_video_url"](url)[0] == canonical
+    assert consumers.server["_fetch_metadata"](url)
+    assert network.lookups == [urlparse(canonical).hostname] and not network.requests
+    assert consumers.child.call_args.args[0][-2:] == ["--", canonical]
+
+
 @pytest.mark.parametrize("answer,status", [
     (["127.0.0.1"], "error"),
     (socket.gaierror(socket.EAI_NONAME, "fixture DNS failure"), "new"),
@@ -550,7 +592,7 @@ def test_audio_policy_refusal_and_transient_failure_keep_distinct_statuses(
         answer, status, network, consumers):
     network.addresses["public.example"] = answer
     assert_refused(consumers, "enclosure", PUBLIC)
-    assert podcasts._record_audio_result.call_args.kwargs["status"] == status
+    assert podcasts.get_episode(consumers.idx, consumers.episode_id)["status"] == status
 
 
 @pytest.mark.parametrize("host", [
@@ -561,7 +603,8 @@ def test_youtube_metadata_keeps_original_url_without_unpaced_get(host, network, 
     url = f"https://{host}/watch?v=abcdef12345"
     assert consumers.server["_is_youtube_ytdlp_call"](["synthetic-yt-dlp", url])
     assert consumers.server["_fetch_metadata"](url)
-    assert network.requests == network.lookups == []
+    assert network.requests == []
+    assert [name.rstrip(".").lower() for name in network.lookups] == [urlparse(url).hostname.rstrip(".").lower()]
     assert consumers.child.call_args.args[0][-2:] == ["--", url]
 
 
@@ -690,7 +733,7 @@ def test_extract_any_url_admission_errors_return_400(failure, network, consumers
 def test_enclosure_response_errors_leave_episode_retryable(error_type, network, consumers):
     network.routes[PUBLIC] = error_type("fixture response failure")
     assert_refused(consumers, "enclosure", PUBLIC)
-    assert podcasts._record_audio_result.call_args.kwargs["status"] == "new"
+    assert podcasts.get_episode(consumers.idx, consumers.episode_id)["status"] == "new"
 
 
 def load_handler_method(namespace, name):
@@ -787,9 +830,9 @@ def test_enclosure_unencodable_host_is_a_refusal_not_a_retry(host, hop, network,
     url = f"https://{host}/audio.mp3" if hop == "initial" else PUBLIC
     network.routes[PUBLIC] = (302, {"Location": f"http://{host}/audio.mp3"}, b"")
     assert_refused(consumers, "enclosure", url)
-    recorded = podcasts._record_audio_result.call_args.kwargs
+    recorded = podcasts.get_episode(consumers.idx, consumers.episode_id)
     assert recorded["status"] == "error"
-    assert "Malformed URL host" in recorded["error"]
+    assert "Malformed URL host" in recorded["audio_download_error"]
 
 
 # Relaxed URLs on the X/Twitter and Instagram hosts that the strict validator
@@ -845,7 +888,8 @@ def test_non_strict_platform_url_goes_through_checked_get(url, network, consumer
 def test_strict_platform_url_keeps_existing_ytdlp_flow(url, network, consumers):
     assert consumers.server["_normalize_video_url"](url)[0] == url
     assert consumers.server["_fetch_metadata"](url)
-    assert network.requests == network.lookups == []
+    assert network.requests == []
+    assert [name.rstrip(".").lower() for name in network.lookups] == [urlparse(url).hostname.rstrip(".").lower()]
     assert consumers.child.call_args.args[0][-2:] == ["--", url]
 
 
@@ -884,7 +928,8 @@ def test_live_status_strict_platform_url_keeps_existing_flow(url, network, consu
     status, body = live_status(url)
     assert status == 200
     assert body["ok"] is True and body["url"] == url
-    assert network.requests == network.lookups == []
+    assert network.requests == []
+    assert [name.rstrip(".").lower() for name in network.lookups] == [urlparse(url).hostname.rstrip(".").lower()]
     assert consumers.child.call_args.args[0][-2:] == ["--", url]
 
 

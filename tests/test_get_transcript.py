@@ -91,6 +91,7 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
         },
         settings=server._default_settings(),
         caption_errors={},
+        caption_fixture=None,
         caption_text={
             "en": "Manual English captions.",
             "en-orig": "Original automatic captions.",
@@ -108,10 +109,13 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
         assert folder.is_relative_to(scratch)
         if key in state.caption_errors:
             raise subprocess.CalledProcessError(1, cmd, stderr=state.caption_errors[key])
-        (folder / f"captions.{key}.srt").write_text(
-            f"1\n00:00:00,000 --> 00:00:02,000\n{state.caption_text[key]}\n",
-            encoding="utf-8",
-        )
+        template = cmd[cmd.index("-o") + 1]
+        if state.caption_fixture:
+            path = state.caption_fixture
+            Path(template.replace("%(ext)s", key + path.suffix)).write_bytes(path.read_bytes())
+        else:
+            Path(template.replace("%(ext)s", f"{key}.srt")).write_text(
+                f"1\n00:00:00,000 --> 00:00:02,000\n{state.caption_text[key]}\n", encoding="utf-8")
         return subprocess.CompletedProcess(cmd, 0, b"", b"")
 
     def fake_audio(url, folder):
@@ -129,8 +133,8 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
         return [(0.0, 2.0, "hello world")]
 
     def save_library(segments, **fields):
-        state.folder = tmp_path / "saved-video"
-        state.folder.mkdir(exist_ok=True)
+        state.folder = server.DESKTOP_ROOT / "saved-video"
+        state.folder.mkdir(exist_ok=True, parents=True)
         state.row = {"title": "Saved transcript"}
         sidecar = {
             "title": "Saved transcript", "duration_seconds": 120,
@@ -158,6 +162,7 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
     monkeypatch.setattr(server.tempfile, "tempdir", str(scratch))
     monkeypatch.setattr(server, "_folder_for_video_id", state.lookup)
     monkeypatch.setattr(server, "_get_index", unexpected_io)
+    monkeypatch.setattr(server.source_subscriptions, "_check_resolved_host", lambda host: ["8.8.8.8"])
     monkeypatch.setattr(server, "_fetch_metadata", state.metadata_fetch)
     monkeypatch.setattr(server, "_run_subprocess", fake_run)
     monkeypatch.setattr(server, "_download_reliability_audio", state.download_audio)
@@ -173,6 +178,14 @@ def transcript(monkeypatch, tmp_path, transcript_backend):
 
     yield state
     unexpected_io.assert_not_called()
+
+
+def test_saved_transcript_outside_current_library_is_ignored(transcript, monkeypatch, tmp_path):
+    transcript.save_library([(0, 1, "Words from the previous library.")])
+    monkeypatch.setattr(transcript.server, "DESKTOP_ROOT", tmp_path / "new-library")
+    result = transcript.tools.get_transcript({"url": URL})
+    assert result["source"] == "captions"
+    assert result["transcript"] == "Manual English captions."
 
 
 def caption_keys(transcript):
@@ -219,7 +232,7 @@ def test_manual_english_captions_precede_auto_and_are_cached(transcript, tmp_pat
     cmd, kwargs = transcript.calls[0]
     assert "--write-subs" in cmd
     assert "--write-auto-subs" not in cmd
-    assert cmd[-1] == URL
+    assert cmd[-2:] == ["--", URL]
     assert kwargs["check"] is True
     cache_files = list((tmp_path / "data" / "transcript-cache").glob("*.json"))
     assert len(cache_files) == 1
@@ -252,6 +265,48 @@ def test_original_auto_captions_report_clean_language(transcript):
     assert "--write-auto-subs" in cmd
     assert "--write-subs" not in cmd
     transcript.asr.assert_not_called()
+
+
+def test_json3_cache_round_trip_keeps_cues_and_word_clocks(transcript):
+    transcript.metadata["subtitles"] = {}
+    transcript.caption_fixture = Path(__file__).parent / "fixtures" / "captions" / "rolling.en.json3"
+    live = transcript.server.get_transcript_cascade(URL)
+    cached = transcript.server.get_transcript_cascade(URL)
+    assert caption_keys(transcript) == ["en-orig"]
+    for result in (live, cached):
+        assert [r[:2] for r in result["segments"]] == [(0, 3), (3, 5), (5, 8)]
+        words = [w for row in result["segments"] for w in row.words]
+        assert len(words) == 24
+        assert words[-1] == {"word": "shade.", "start": 7.6, "end": 8.0}
+
+
+def test_finish_reads_an_unlabelled_srt_without_inventing_its_kind(tmp_path):
+    import yt_extract
+
+    # A filename is not permission to use its contents as a yt-dlp language
+    # selector. The regular legacy file can still finish this save offline.
+    (tmp_path / "video.auto.--all.json3").write_bytes(b"{}")
+    (tmp_path / "video.en.srt").write_text(
+        "1\n00:00:00,000 --> 00:00:02,000\nWe repeat.\n\n"
+        "2\n00:00:01,000 --> 00:00:03,000\nWe repeat.\n", encoding="utf-8")
+    download = Mock(side_effect=AssertionError("Finish already has usable words"))
+    rows, kind, reason = yt_extract.capture_captions(tmp_path, {}, True, 3, download, reuse=True)
+    assert (rows, kind, reason) == ([(0, 2, "We repeat."), (1, 3, "We repeat.")], None, None)
+    download.assert_not_called()
+
+
+@pytest.mark.parametrize(("lang", "kind", "fixture", "lines"), [
+    ("ar", "captions", "manual.ar.srt", ["\u200fصوت الماء\nعند  الجسر", "عند  الجسر\n\u200fصوت الماء"]),
+    ("ja", "auto_captions", "auto.ja.vtt", ["朝の川\n水面に光が差す", "水面に光が差す\n鳥が鳴く", "鳥が鳴く\n橋を渡る"]),
+])
+def test_transcript_keeps_native_text(transcript, lang, kind, fixture, lines):
+    transcript.metadata.update(language=lang, subtitles={}, automatic_captions={})
+    table = "subtitles" if kind == "captions" else "automatic_captions"
+    transcript.metadata[table][lang] = TRACK
+    transcript.caption_fixture = Path(__file__).parent / "fixtures" / "captions" / fixture
+    result = transcript.server.get_transcript_cascade(URL, lang)
+    assert result["source"] == kind
+    assert [row[2].encode() for row in result["segments"]] == [line.encode() for line in lines]
 
 
 @pytest.mark.parametrize("stderr", [CAPTION_429, CAPTION_429.encode()], ids=["text", "bytes"])

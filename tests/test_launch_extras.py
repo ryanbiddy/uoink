@@ -92,10 +92,17 @@ def test_subscribe_preserves_custom_name_and_never_tries_an_offline_feed(feed_en
     assert calls == []
 
 
-def test_legacy_subscribe_does_not_fetch_feed_title(feed_env):
+def test_explicit_follow_checks_feed_before_registering_and_requests_title(feed_env, monkeypatch):
+    monkeypatch.setattr(server, "_TOKEN_OWNED", True)
     _, _, calls, handler = feed_env
+    probes = []
+    title_requests = []
+    monkeypatch.setattr(podcasts, "fetch_feed", lambda row, *, limit:
+                        (probes.append((row["feed_url"], limit)) or b"<rss><channel/></rss>", {}))
+    monkeypatch.setattr(podcasts, "fetch_title_in_background", lambda idx, feed: title_requests.append(feed["id"]))
     code, result = handler._handle_podcasts_feed_add({"feed_url": FEED_URL})
     assert code == 200 and result["feed"]["title"] == "show.example"
+    assert probes == [(FEED_URL, 0)] and title_requests == [result["feed"]["id"]]
     assert calls == []
 
 
@@ -237,9 +244,10 @@ def test_podcast_artwork_reaches_job_and_published_library_row(feed_env, tmp_pat
     turn_on(service, registered["source"]["source_id"])
     service.detection_pass()
     episode = podcasts.list_episodes(idx)[0]
-    audio = tmp_path / "audio.mp3"
+    # The episode's own folder under DATA_ROOT/Podcasts, as a real download names it.
+    audio = podcasts._episode_audio_path(tmp_path, podcasts.get_feed(idx, episode["feed_id"]), episode)
     audio.write_bytes(b"fixture")
-    transcript = tmp_path / "audio.transcript.json"
+    transcript = audio.with_suffix(".transcript.json")
     transcript.write_text(json.dumps({"segments": [{"start": 0, "end": 1, "text": "First flight"}]}))
     with idx.write_transaction() as conn:
         conn.execute("UPDATE podcast_episodes SET audio_local_path=?, transcript_local_path=?, "
@@ -409,7 +417,7 @@ def test_sources_do_not_fast_poll_without_progress(extra):
     assert result["timers"] == []
     if extra.get("consent_state") == "off":
         assert "Looking for episodes" not in result["html"]
-        assert "Turn on automatic capture to check for episodes." in result["html"]
+        assert "Scheduled checks are off. Use Check now to look for episodes." in result["html"]
 
 
 def test_sources_fast_refresh_stops_even_if_progress_is_stuck():

@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.18.0",
+  "version": "3.18.1",
   "description": "Search and cite your saved YouTube and podcast transcripts in Claude, from your local Uoink library on Windows.",
   "long_description": "Use Uoink when you want Claude to find what a saved video or podcast said, cite the timestamp, capture a new link or save a research note. This bundle connects Claude Desktop to the local MCP server in your installed Uoink app for Windows 10/11, which reads your Markdown and JSON library, including YouTube transcripts, frames and comments. Install Uoink from https://uoink.app/install first. Core capture is local and needs no API key; optional AI features use your own Anthropic key. Clients that cap tool counts can set UOINK_MCP_TOOLSET=core.",
   "author": {
@@ -123,7 +123,7 @@
     },
     {
       "name": "add_podcast_feed",
-      "description": "Register a podcast RSS feed for ongoing metadata monitoring. Use for the podcast feed and episode workflow; use register_source for the general standing-source interface or list_podcast_feeds to find an existing feed. Returns the existing row for a duplicate URL. Audio auto-ingest is a separate explicit opt-in, off by default; standing capture still requires source consent through the dashboard."
+      "description": "Follow an RSS or Atom feed or an Apple Podcasts show for new episode metadata. Pasting an Apple episode link queues just that episode for local transcription and returns its episode_id and show_job_id. Following a show returns its feed and leaves automatic audio capture off until you grant consent in the dashboard. Use list_podcast_feeds to see followed shows."
     },
     {
       "name": "list_podcast_feeds",
@@ -151,7 +151,7 @@
     },
     {
       "name": "transcribe_podcast_episode",
-      "description": "Queue local WhisperX transcription for a downloaded podcast episode. Use after download_podcast_episode and get_whisperx_status; monitor the returned job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio. First-time model downloads require user consent: only reissue with consent_given after the dashboard records the opt-in. Missing runtime returns an error."
+      "description": "Queue local WhisperX transcription for a downloaded podcast episode. Check get_whisperx_status for installed models. If the chosen model needs a download, ask the user to start it in the dashboard. Monitor the job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio."
     },
     {
       "name": "episode_to_corpus",
@@ -379,7 +379,7 @@
     },
     {
       "name": "add_style_anchor",
-      "description": "Save a named writing-style reference from pasted text or a URL. Use to guide later write_tweet/write_blog drafts; use list_style_anchors to select existing references. URL references fetch prose through the page extractor and can retain null raw_text if extraction fails. Returns the anchor; more than ten anchors is refused. Style references do not authorize copying source facts or suppressing creator credit."
+      "description": "Save a named writing-style reference from pasted text or an allowed webpage. Use list_style_anchors to select references for write_tweet or write_blog. New sites need dashboard approval. If extraction fails for an allowed URL, the anchor can have null raw_text. The library holds up to ten active anchors. Style references guide voice. Keep source facts and creator credit separate."
     },
     {
       "name": "list_style_anchors",
@@ -391,7 +391,7 @@
     },
     {
       "name": "uoink_url",
-      "description": "Capture a supported video URL through platform routing, with metadata/transcript fallback for other yt-dlp sites. Use for non-YouTube videos or long-video modes; use uoink_video for a single standard YouTube capture, uoink_page for webpage prose, uoink_x for X text chains, or uoink_reddit_thread for discussion comments. Requires the local media runtime. Saves a local corpus; generic fallback has no screenshots, comment fetch or hook classification. Recapturing a source can replace its saved corpus and metadata."
+      "description": "Capture a supported video or Hacker News item. Hacker News links save the discussion through Algolia's public API. A comment link highlights that reply. Video capture requires the local media runtime and supports non-YouTube videos and long-video modes. Use uoink_video for a standard YouTube capture, uoink_page for webpage prose, uoink_x for X post chains or uoink_reddit_thread for Reddit comments. Generic video fallback saves metadata and available transcript text. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_note",
@@ -407,7 +407,7 @@
     },
     {
       "name": "uoink_page",
-      "description": "Fetch an allowed webpage as Markdown and save it as a local corpus item. Use for articles and documentation; use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available; static fallback has no screenshot. Returns extracted content and metadata; video_id is null if extraction succeeded but persistence failed. Recapturing a source can replace its saved corpus and metadata."
+      "description": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For an unlisted host, ask the user to allow the site in the dashboard. Use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Crawl4AI renders locally when available. Static capture omits the screenshot. Returns extracted content and metadata. A null video_id means the save failed. Recapturing a source can replace its saved corpus and metadata."
     },
     {
       "name": "uoink_reddit_thread",
@@ -419,15 +419,15 @@
     },
     {
       "name": "list_allowed_sites",
-      "description": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages."
+      "description": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access. The user adds sites in the dashboard. Use remove_allowed_site to revoke a rule, including a default. Returns sites, count and default seeds."
     },
     {
       "name": "add_allowed_site",
-      "description": "Add a hostname pattern to the webpage-capture allowlist. Use for a user-authorized uoink_page destination; use list_allowed_sites to inspect rules or remove_allowed_site to revoke one. Plain hosts include subdomains; wildcard patterns match their specified subdomains. Returns the saved rule and reuses an existing pattern unchanged. This grants future page access but does not capture a page."
+      "description": "Return dashboard instructions for approving a site for webpage capture. An MCP request returns consent_required. Ask the user to add the hostname or wildcard under Settings > Capture > Sites Uoink works on, then retry the original capture. Both plain and wildcard rules include the named host and its subdomains."
     },
     {
       "name": "remove_allowed_site",
-      "description": "Remove a hostname pattern from the webpage-capture allowlist. Use to revoke a rule found by list_allowed_sites; use add_allowed_site to restore it. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host."
+      "description": "Remove a hostname pattern from the webpage-capture allowlist. Use list_allowed_sites to find the rule. The user can restore it in the dashboard. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host."
     },
     {
       "name": "research_start",

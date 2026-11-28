@@ -70,48 +70,44 @@ def lean_linux(monkeypatch):
 
 
 @pytest.mark.parametrize("platform", ["linux", "win32", "darwin"])
-def test_server_refuses_without_engine(lean_linux, monkeypatch, tmp_path, platform):
+def test_server_refuses_without_engine(lean_linux, monkeypatch, tmp_path, platform, recorded_episode):
     monkeypatch.setattr(runner, "sys", SimpleNamespace(platform=platform))
     monkeypatch.setattr(_platform, "sys", SimpleNamespace(platform=platform))
     monkeypatch.setattr(_platform, "mac_bundle_contents", lambda: None)
     monkeypatch.setattr(runner.importlib.util, "find_spec", lambda name: None)
-    audio = tmp_path / "episode.mp3"
-    audio.write_bytes(b"placeholder; never decoded")
-    monkeypatch.setattr(server, "_get_index", lambda: None)
+    idx, episode_id = recorded_episode
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     monkeypatch.setattr(server, "_jobs", {})
-    monkeypatch.setattr(server.podcasts, "get_episode", lambda *args: {
-        "audio_local_path": str(audio)})
     monkeypatch.setattr(runner, "is_model_downloaded", lambda *args:
                         pytest.fail("Model consent must follow engine admission"))
-    payload, status = server._queue_podcast_transcription(1)
+    payload, status = server._queue_podcast_transcription(episode_id)
     assert status == 503
     assert payload["ok"] is False
     assert payload["whisperx_available"] is False
     assert payload["transcription_engine"] is None
     backend = object.__new__(server._ServerCaptureBackend)
     outcome = backend.preflight({
-        "legacy_episode_id": 1,
+        "legacy_episode_id": episode_id,
         "metadata_json": json.dumps({"audio_url": "https://example.com/episode.mp3"}),
     }, {"kind": "podcast_rss"})
     assert outcome.code == "missing_transcription_setup"
 
 
 def test_linux_fallback_passes_admission_and_preserves_consent(
-        lean_linux, monkeypatch, tmp_path):
-    audio = tmp_path / "episode.mp3"
-    audio.touch()
-    monkeypatch.setattr(server, "_get_index", lambda: None)
+        lean_linux, monkeypatch, tmp_path, recorded_episode):
+    idx, episode_id = recorded_episode
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
     monkeypatch.setattr(server, "_jobs", {})
     monkeypatch.setattr(server, "_read_settings", lambda: {})
-    monkeypatch.setattr(server.podcasts, "get_episode", lambda *args: {
-        "audio_local_path": str(audio)})
     monkeypatch.setattr(runner, "is_model_downloaded", lambda *args: False)
-    payload, status = server._queue_podcast_transcription(1)
+    payload, status = server._queue_podcast_transcription(episode_id)
     assert status == 412 and payload["consent_required"] is True
     monkeypatch.setattr(runner, "is_model_downloaded", lambda *args: True)
     backend = object.__new__(server._ServerCaptureBackend)
     assert backend.preflight({
-        "legacy_episode_id": 1,
+        "legacy_episode_id": episode_id,
         "metadata_json": json.dumps({"audio_url": "https://example.com/episode.mp3"}),
     }, {"kind": "podcast_rss"}) is None
 

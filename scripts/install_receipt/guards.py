@@ -309,6 +309,14 @@ def _wrap_podcasts(mod):
                 body = response.read(4096)
         root = os.path.abspath(str(data_root))
         audio = os.path.join(root, "fixture.mp3")
+        try:
+            # Store it where a real download does: the episode's own folder
+            # under Podcasts, which transcription and publication check.
+            feed = mod.get_feed(idx, episode["feed_id"])
+            from pathlib import Path as _Path
+            audio = str(mod._episode_audio_path(_Path(root), feed, episode))
+        except Exception:
+            pass
         with open(audio, "wb") as handle:
             handle.write(body)
         if episode is not None:
@@ -326,7 +334,7 @@ def _wrap_podcasts(mod):
 
     original_fetch = getattr(mod, "fetch_feed", None)
 
-    def fetch_feed(feed_row):
+    def fetch_feed(feed_row, **kwargs):
         url = (feed_row or {}).get("feed_url") if isinstance(feed_row, dict) else None
         if url and _is_synthetic_url(str(url)):
             rewritten, mode = _rewrite_synthetic(str(url))
@@ -336,7 +344,7 @@ def _wrap_podcasts(mod):
             with urllib.request.urlopen(req, timeout=5) as resp:
                 return resp.read(), dict(resp.headers.items())
         if original_fetch is not None:
-            return original_fetch(feed_row)
+            return original_fetch(feed_row, **kwargs)
         raise RuntimeError("podcasts.fetch_feed missing")
 
     mod.download_episode_audio = download

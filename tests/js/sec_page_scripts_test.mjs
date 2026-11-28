@@ -56,6 +56,14 @@ async function content(platform, options = {}) {
   return { env, btn };
 }
 
+test("the YouTube button keeps research names in the popup", async () => {
+  const { btn } = await content("youtube", {
+    local: { active_session: { id: "fixture-id", name: "Field notes" } },
+  });
+  assert.equal(btn.querySelector(".stc-yt-label")?.textContent || btn.textContent, "Add to session");
+  assert.doesNotMatch(btn.title || "", /Field notes|fixture-id/);
+});
+
 function captures(env) {
   return env.sent.filter((msg) => CAPTURE_TYPES.has(msg.type));
 }

@@ -189,6 +189,24 @@ def merge_media(left, right):
     return out
 
 
+def _ends_with_ellipsis(text):
+    if text.endswith(("…", "...")):
+        return True
+    # Only the last whitespace-delimited token can contain the trailing short link.
+    tail = text.rsplit(None, 1)
+    if not tail:
+        return False
+    token = tail[-1]
+    for match in re.finditer(r"https?://t\.co/", token):
+        if match.end() == len(token):
+            continue
+        pos = match.start()
+        prefix = token[max(0, pos - 3):pos] if pos else (tail[0][-3:] if len(tail) == 2 else "")
+        if prefix.endswith(("…", "...")):
+            return True
+    return False
+
+
 def shape(payload, provider="syndication"):
     """Normalize one post, including quotes, without trimming display ranges."""
     payload = sanitize_urls(_dict(payload))
@@ -205,7 +223,7 @@ def shape(payload, provider="syndication"):
     if isinstance(note_text, str) and len(note_text) > len(text):
         text = note_text.strip()
     truncated = bool(payload.get("truncated") or (note and not note_text))
-    truncated = truncated or bool(re.search(r"(?:\u2026|\.\.\.)\s*(?:https?://t\.co/\S+)?$", text))
+    truncated = truncated or _ends_with_ellipsis(text)
     completeness = "truncated" if truncated else (
         "complete" if provider == "FxTwitter" and (isinstance(payload.get("text"), str) or raw_text) else "unknown")
     reason = ("response marks omitted text" if payload.get("truncated") or (note and not note_text)

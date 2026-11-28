@@ -24,7 +24,7 @@ a different story, for example 07 to show the finished setup.
   (see below). They match the shipped setup page and popup.
 - 01, 02, 03 and 10 are the 3.12.0 captures from 2026-10-31. They need a real
   helper and a captured library, which a build lane cannot make, so they were
-  not retaken. Before submitting, open the 3.18.0 app, look at the Library and
+  not retaken. Before submitting, open the 3.18.1 app, look at the Library and
   reader, and swap in a fresh capture if the look has changed enough to mislead.
   Their sources and licenses are in `screenshots/SOURCES.md`.
 

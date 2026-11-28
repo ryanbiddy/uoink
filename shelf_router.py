@@ -949,7 +949,7 @@ def _proposal_item(row: dict, reason: str, source: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def sync_files(sidecar_path: Any, corpus_path: Any, shelf: str, *,
-               by_hand: bool | None = None) -> list[str]:
+               by_hand: bool | None = None, root=None) -> list[str]:
     """Write the new shelf into the save's sidecar (when it records one) and
     the corpus note's Topic line (when it has one). Folders stay where they
     are. by_hand=True also records in the sidecar that the user placed it
@@ -957,13 +957,17 @@ def sync_files(sidecar_path: Any, corpus_path: Any, shelf: str, *,
     files changed. A file that exists but can't be read or written raises
     OSError, so the caller can say the files are behind."""
     changed = []
-    from uoink_core.storage import _atomic_write_text
+    from uoink_core.storage import _atomic_write_text, checked_path, open_regular
+    paths = [Path(value) for value in (sidecar_path, corpus_path) if value]
+    for path in paths:
+        checked_path(root or Path(path.anchor), path)
     if sidecar_path:
         path = Path(sidecar_path)
         data = None
         if path.is_file():
             try:
-                data = json.loads(path.read_text(encoding="utf-8"))
+                with open_regular(root or Path(path.anchor), path) as source:
+                    data = json.load(source)
             except ValueError:
                 data = None
         if isinstance(data, dict):
@@ -975,16 +979,19 @@ def sync_files(sidecar_path: Any, corpus_path: Any, shelf: str, *,
             elif by_hand is False:
                 data.pop("shelf_by_hand", None)
             if data != before:
-                _atomic_write_text(path, json.dumps(data, indent=2, ensure_ascii=False))
+                _atomic_write_text(path, json.dumps(data, indent=2, ensure_ascii=False), root=root)
                 changed.append(str(path))
     if corpus_path:
         path = Path(corpus_path)
-        text = path.read_text(encoding="utf-8") if path.is_file() else None
+        text = None
+        if path.is_file():
+            with open_regular(root or Path(path.anchor), path) as source:
+                text = source.read()
         if text is not None:
             line = f"**Topic:** {shelf}"
             match = _TOPIC_LINE_RE.search(text)
             if match and match.group(0) != line:
-                _atomic_write_text(path, text[:match.start()] + line + text[match.end():])
+                _atomic_write_text(path, text[:match.start()] + line + text[match.end():], root=root)
                 changed.append(str(path))
     return changed
 
@@ -1077,25 +1084,8 @@ def _read_json(path: Path, default):
 
 
 def _write_json(path: Path, value) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-    try:
-        tmp.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        for attempt in range(20):
-            try:
-                os.replace(tmp, path)
-                return
-            except PermissionError:
-                # Windows refuses the swap while another program (a virus
-                # scanner, an editor) holds the file open for a moment.
-                if os.name != "nt" or attempt == 19:
-                    raise
-                time.sleep(0.05)
-    finally:
-        try:
-            tmp.unlink()
-        except OSError:
-            pass
+    from uoink_core.storage import _atomic_write_text
+    _atomic_write_text(path, json.dumps(value, ensure_ascii=False, separators=(",", ":")))
 
 
 def move_log_path(data_root: Path) -> Path:
@@ -1258,6 +1248,11 @@ def url_key(url: Any) -> str | None:
         match = re.search(r"/comments/([A-Za-z0-9]+)", path)
         if match:
             return "reddit:" + match.group(1).lower()
+    if host == "news.ycombinator.com":
+        from hn_extractor import item_id
+        item = item_id(raw)
+        if item:
+            return "hn:" + item
     if not host or not re.fullmatch(r"[\w.-]+", host) or "." not in host.strip("."):
         return None  # not a web address ("not a url at all")
     return "url:" + host + path.rstrip("/").lower()

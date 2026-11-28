@@ -114,6 +114,13 @@ def test_capability_advertised_in_manifest_and_lease(env):
     assert "uoink.capture/1" in lease["capabilities"]
 
 
+def test_suite_refuses_podcast_episode_before_dispatch(env):
+    port, _, tools = env
+    status, payload = _post(port, {"url": "https://podcasts.apple.com/podcast/test/id42?i=71"})
+    assert status == 400 and payload["error"] == "unsupported_url"
+    assert "dashboard" in payload["message"].lower() and tools.calls == []
+
+
 def test_bad_or_missing_token_is_403(env):
     port, _idx, tools = env
     assert _post(port, {"url": PAGE}, token=False)[0] == 403
@@ -252,7 +259,8 @@ def test_web_page_needs_allowlist(env):
     port, _idx, tools = env
     status, body = _post(port, {"url": PAGE})
     assert status == 409 and body["error"] == "consent_required"
-    assert body["message"] == "Allow example.org in Uoink under Settings, Allowed sites, then try again."
+    assert body["message"] == ("Allow example.org in the Uoink dashboard under Settings > Capture > "
+                               "Sites Uoink works on, then retry the capture.")
     assert body["contract"] == "uoink.capture" and body["version"] == 1
     assert tools.calls == []
 

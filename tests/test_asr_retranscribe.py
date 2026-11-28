@@ -162,6 +162,7 @@ def test_model_routes_refuse_unknown_models(models_root):
 def saved(monkeypatch, tmp_path, settings_file):
     import index
     idx = index.Index.open(tmp_path / "index.db")
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     item = seed_yoink_item(idx, tmp_path, video_id=VID, slug=VID, title="Daylight", channel="Example")
     side = {"video_id": VID, "url": "https://www.youtube.com/watch?v=" + VID,
@@ -203,7 +204,15 @@ def _unchanged(saved):
     return {name: path.read_bytes() for name, path in saved.files.items()} == saved.before
 
 
-def test_a_new_transcript_replaces_the_old_one_with_word_timings(saved):
+def test_a_new_transcript_replaces_the_old_one_with_word_timings(saved, monkeypatch):
+    begin = saved.idx.begin_media_publication
+
+    def begin_in_library(*args, **kwargs):
+        ticket = begin(*args, **kwargs)
+        assert ticket.root == server.DESKTOP_ROOT
+        return ticket
+
+    monkeypatch.setattr(saved.idx, "begin_media_publication", begin_in_library)
     result = server.retranscribe_item(VID, "small")
     assert result["segments"] == 2 and result["model"] == "small"
     assert saved.calls[0]["model_name"] == "small"

@@ -12,7 +12,7 @@ from tests.test_phase4_av5m4b5_lifetime import _competitor_mutex
 
 @pytest.mark.skipif(sys.platform != "win32",
                     reason="Windows process handles, Job Objects and destination mutex")
-def test_cancelled_prepare_releases_without_requiring_a_future_launch(env):
+def test_cancelled_prepare_releases_without_requiring_a_future_launch(env, isolated_mirror_mutex):
     session = m._VaultIoSession.prepare(str(env.vault))
     try:
         started = time.monotonic()

@@ -551,11 +551,28 @@ class Rig:
         return allowance
 
 
-@pytest.fixture
-def rig(phase3_isolation, migration_dir, phase3_module):
-    fixture = Rig(phase3_isolation, phase3_module)
+def _open_rig(root, module):
+    fixture = Rig(root, module)
     try:
         yield fixture
         assert fixture.idx._conn.execute('PRAGMA foreign_key_check').fetchall() == []
     finally:
         fixture.close()
+
+
+@pytest.fixture
+def rig(phase3_isolation, migration_dir, phase3_module):
+    yield from _open_rig(phase3_isolation, phase3_module)
+
+
+@pytest.fixture
+def podcast_rig(phase3_isolation, phase3_module):
+    """The current episode writer uses migrations after the frozen Phase 3 contract."""
+    yield from _open_rig(phase3_isolation, phase3_module)
+
+
+def transcript_path_for_episode(rig, episode_id):
+    import podcasts
+    episode = podcasts.get_episode_with_feed(rig.idx, episode_id)
+    feed = podcasts.get_feed(rig.idx, episode["feed_id"])
+    return podcasts._episode_audio_path(rig.root, feed, episode).with_suffix(".transcript.json")

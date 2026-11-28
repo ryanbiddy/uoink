@@ -197,10 +197,10 @@ recipes, including ones for other platforms. An unsupported recipe refuses
 to print a config on Linux. See the [client table](connect-your-agent.md#client-recipes-and-documentation-checks)
 for platform coverage.
 
-`connect` prints Linux paths and does not edit client files. Config goes to
-stdout; the destination and notes go to stderr. For example,
-`uoink connect cursor` prints this shape for `~/.cursor/mcp.json`, with your
-actual install paths in place of `/home/you`.
+By default, `connect` prints the config to stdout and its destination to stderr.
+For example, `uoink connect cursor` previews the entry for `~/.cursor/mcp.json`
+with your install paths in place of `/home/you`. Run `uoink connect cursor --write`
+to review the change and save it.
 
 ```json
 {

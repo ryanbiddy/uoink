@@ -645,7 +645,7 @@ class LibraryWorkService:
             if not excerpt or evidence["kind"] != excerpt["evidence_kind"] or not quote or quote not in normalize(excerpt["text"]):
                 fail("invalid_evidence", "Quote must occur in one specified excerpt", field="evidence.quote")
             # Description/summary prose cannot be promoted to original source evidence.
-            if evidence["kind"] == "text_only" and card.get("source_type") not in {"page", "x_article", "x_thread", "reddit_thread", "note"}:
+            if evidence["kind"] == "text_only" and card.get("source_type") not in {"page", "x_article", "x_thread", "reddit_thread", "hn_thread", "note"}:
                 fail("unsupported_evidence", "Source origin does not support original-prose evidence", field="evidence.kind")
             memberships.append(dict(membership, evidence=dict(evidence, start=excerpt["start"], end=excerpt["end"],
                 timing=excerpt["timing"], truncated=excerpt["truncated"])))

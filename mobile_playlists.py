@@ -167,12 +167,14 @@ def _fetch_playlist_video_ids(playlist_url: str, *,
     default extractor behaviour on us."""
     if not ytdlp_cmd:
         raise RuntimeError("yt-dlp command not configured")
+    from source_subscriptions import check_public_http_url
+    playlist_url = check_public_http_url(playlist_url)
     args = list(ytdlp_cmd) + [
         "--flat-playlist",
         "--dump-json",
         "--no-warnings",
         "--skip-download",
-        playlist_url,
+        "--", playlist_url,
     ]
     run = run_subprocess if run_subprocess is not None else subprocess.run
     if run_subprocess is None and os.name != "nt":

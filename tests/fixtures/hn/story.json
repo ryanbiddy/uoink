@@ -1,0 +1,88 @@
+{
+  "id": 901,
+  "type": "story",
+  "author": "orbit_plum",
+  "title": "Show HN: A pocket tide clock",
+  "text": "We built a clock for docks &amp; boats.",
+  "created_at": "2026-05-01T10:00:00.000Z",
+  "points": 28,
+  "url": "https://example.test/tide-clock",
+  "story_id": 901,
+  "parent_id": null,
+  "children": [
+    {
+      "id": 902,
+      "type": "comment",
+      "author": "mossquill",
+      "text": "Waves &amp; currents. <p>See <a href=\"https://example.test/a(b)?x=1&amp;y=2\">the table</a>.<pre><code>if a &lt; b:\n    tick()</code></pre><script>discard-code</script>&lt;b&gt;literal&lt;/b&gt;<a href=\"javascript:void(0)\">plain words</a>",
+      "parent_id": 901,
+      "story_id": 901,
+      "created_at": "2026-05-01T11:00:00.000Z",
+      "children": [
+        {
+          "id": 903,
+          "type": "comment",
+          "author": "mossquill",
+          "text": "The tidewheel rotates twice.",
+          "parent_id": 902,
+          "story_id": 901,
+          "created_at": "2026-05-01T11:00:00.000Z",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": 904,
+      "type": "comment",
+      "author": "mossquill",
+      "text": "deleted body",
+      "parent_id": 901,
+      "story_id": 901,
+      "created_at": "2026-05-01T11:00:00.000Z",
+      "children": [
+        {
+          "id": 905,
+          "type": "comment",
+          "author": "mossquill",
+          "text": "Surviving reply.",
+          "parent_id": 904,
+          "story_id": 901,
+          "created_at": "2026-05-01T11:00:00.000Z",
+          "children": []
+        }
+      ],
+      "deleted": true
+    },
+    {
+      "id": 906,
+      "type": "comment",
+      "author": "mossquill",
+      "text": "dead body",
+      "parent_id": 901,
+      "story_id": 901,
+      "created_at": "2026-05-01T11:00:00.000Z",
+      "children": [],
+      "dead": true
+    },
+    {
+      "id": 907,
+      "type": "comment",
+      "author": "mossquill",
+      "text": "[deleted]",
+      "parent_id": 901,
+      "story_id": 901,
+      "created_at": "2026-05-01T11:00:00.000Z",
+      "children": []
+    },
+    {
+      "id": 908,
+      "type": "comment",
+      "author": null,
+      "text": null,
+      "parent_id": 901,
+      "story_id": 901,
+      "created_at": "2026-05-01T11:00:00.000Z",
+      "children": []
+    }
+  ]
+}

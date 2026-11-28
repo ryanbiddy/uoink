@@ -76,6 +76,23 @@ test("the tab is checked before anything is injected: wrong page, other query, n
 const readsTab = (payload) => async (spec) => (spec.files ? [{ result: undefined }]
   : [{ result: payload === null ? null : { ok: true, payload } }]);
 
+test("HN tab saves from the popup and context menu use the helper without reading the DOM", async () => {
+  const url = "https://news.ycombinator.com/item?id=903";
+  for (const origin of ["popup", "context"]) {
+    const w = await worker({ scripting: readsTab(CAPTURE), tabUrl: url });
+    if (origin === "context") {
+      await w.env.clickContextMenu({ menuItemId: "stc-extract-article-page", pageUrl: url }, { id: 4, url });
+    } else {
+      const sender = { id: "test-extension-id", url: "chrome-extension://test-extension-id/popup.html" };
+      const source = w.env.ctx.STC.classifyCaptureUrl(url);
+      await w.env.dispatch({ type: "popupCapture", job: { route: source.action, url, tabId: 4 } }, sender);
+    }
+    await settle(200);
+    assert.equal(w.calls.length, 0);
+    assert.deepEqual(w.posts.map((p) => [p.path, p.body.url]), [["/extract/page", url]]);
+  }
+});
+
 test("context menu: the page is read in the clicked tab and only its text goes to the helper", async () => {
   const w = await worker({ scripting: readsTab(CAPTURE) });
   await w.env.clickContextMenu({ menuItemId: "stc-extract-article-page", pageUrl: PAGE }, { id: 7, url: PAGE });

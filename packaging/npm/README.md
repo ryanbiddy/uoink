@@ -26,8 +26,14 @@ Already installed? `npx uoink <command>` runs the installed CLI, so `npx uoink s
 npx uoink --dry-run          print the plan and URLs, download nothing
 npx uoink --yes              skip the question
 npx uoink --version 3.16.3   install a specific version
+npx uoink install --version 3.16.3 --allow-downgrade
+                             allow an older version or replace a copy whose version is unknown
 npx uoink --no-connect       skip the agent hints
 ```
+
+The installer checks the version in the destination folder. Use `--allow-downgrade` to replace a newer copy or one whose version it cannot read. Add `--yes` to skip the usual confirmation. A refused version pin exits with an error. A plain `update` succeeds if you already have a newer copy.
+
+When the helper should restart, the installer waits up to 90 seconds and checks the process and version answering `/health` on this computer. If the check fails, it exits with an error and tells you how to open Uoink.
 
 ## Privacy and safety
 

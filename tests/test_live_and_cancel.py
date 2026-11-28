@@ -432,10 +432,7 @@ def test_cancel_during_metadata_terminates_child_and_never_restarts(retry, monke
     pending_id = _enqueue(retry)
     _load(ROOT / "server.py", {"_fetch_metadata", "_run_subprocess", "_terminate_process"},
           retry.scope, constants={"COMMENTS_TIMEOUT_SEC"})
-    retry.scope.update({
-        "SUBPROCESS_KW": {},
-        "source_subscriptions": SimpleNamespace(current_capture_context=lambda: None),
-    })
+    retry.scope["SUBPROCESS_KW"] = {}
     proc = Mock(returncode=0)
 
     def communicate(*, timeout):
@@ -612,10 +609,7 @@ def test_cancelled_retry_refresh_preserves_capture(retry, monkeypatch, phase):
     if phase in {"media", "screenshots"}:
         run = retry.scope["_run_subprocess"]
         _load(ROOT / "server.py", {"_run_subprocess", "_terminate_process"}, retry.scope)
-        retry.scope.update({
-            "SUBPROCESS_KW": {},
-            "source_subscriptions": SimpleNamespace(current_capture_context=lambda: None),
-        })
+        retry.scope["SUBPROCESS_KW"] = {}
         children = []
 
         def spawn(cmd, **kwargs):

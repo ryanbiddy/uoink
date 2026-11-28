@@ -11,6 +11,8 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 
+import hn_extractor
+
 STATUSES = {"available", "deleted", "private", "region_blocked", "unknown"}
 GONE = {"deleted", "private", "region_blocked"}
 MAX_REQUESTS_PER_RUN = 25
@@ -92,6 +94,8 @@ def _on_host(host: str, domain: str) -> bool:
 def _checker(row, url):
     platform = str(row.get("platform") or "").strip().lower()
     host = (urlsplit(url).hostname or "").lower().rstrip(".")
+    if platform == "hn" or row.get("source_type") == hn_extractor.SOURCE_TYPE:
+        return "hn"
     if platform == "podcast" or str(row.get("source_type") or "").strip().lower() == "episode":
         return "podcast"
     if platform == "youtube" or any(_on_host(host, d) for d in ("youtube.com", "youtu.be", "youtube-nocookie.com")):
@@ -170,6 +174,19 @@ def _check(row, request):
         code, _, _ = request("GET", "https://publish.twitter.com/oembed?" +
                              urlencode({"url": url, "omit_script": 1}), max_bytes=64 * 1024)
         observed = {200: "available", 404: "deleted", 403: "private"}.get(code, "unknown")
+    elif checker == "hn":
+        story_id = hn_extractor.item_id(url)
+        if not story_id:
+            return "unknown", None, "No Hacker News story ID", checker
+        api_url = f"https://{hn_extractor.API_HOST}/api/v1/items/{story_id}"
+        code, _, body = request("GET", api_url, max_bytes=MAX_BODY_BYTES, follow_redirects=False)
+        observed = "unknown"
+        if code == 404:
+            observed = "deleted"
+        elif code == 200:
+            story = _json(body)
+            if isinstance(story, dict) and str(story.get("id")) == story_id and story.get("type") == "story":
+                observed = "deleted" if story.get("deleted") or story.get("dead") else "available"
     elif checker == "reddit":
         parsed = urlsplit(url)
         match = re.search(r"/comments/([a-zA-Z0-9]+)(?:/|$)", parsed.path)
@@ -251,7 +268,7 @@ class _Requests:
         self.logical_now = max(self.logical_now, _utc(self.clock()))
         return self.logical_now
 
-    def __call__(self, method, url, *, headers=None, max_bytes=MAX_BODY_BYTES):
+    def __call__(self, method, url, *, headers=None, max_bytes=MAX_BODY_BYTES, follow_redirects=True):
         from source_subscriptions import ServiceError
 
         for _ in range(11):  # Redirects consume the same run budget as every other request.
@@ -276,6 +293,8 @@ class _Requests:
                     self.logical_now = now + timedelta(seconds=delay)
                     now = self.moment()
             try:
+                if host == hn_extractor.API_HOST:
+                    hn_extractor.wait_for_algolia()
                 code, response_headers, body = self.fetch(
                     method, url, {"User-Agent": USER_AGENT, "Accept-Encoding": "identity", **(headers or {})},
                     TIMEOUT_SEC, max_bytes)
@@ -303,7 +322,7 @@ class _Requests:
             self.index.set_availability_host(
                 host, strikes=0 if 200 <= code < 300 else state.get("strikes", 0),
                 last_request_at=_iso(now))
-            if code in (301, 302, 303, 307, 308) and response_headers.get("location"):
+            if follow_redirects and code in (301, 302, 303, 307, 308) and response_headers.get("location"):
                 try:
                     target = _http_url(urljoin(url, response_headers["location"]))
                 except ValueError:

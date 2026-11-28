@@ -42,6 +42,7 @@ import urllib.error
 import urllib.request
 import uuid
 import webbrowser
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -83,7 +84,10 @@ def _read_version() -> str:
             # import before it can bind the port. Degrade to a sentinel so the
             # post-install verifier can report a concrete mismatch.
             return "0.0.0-unknown"
-    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+    number = r"(?:0|[1-9][0-9]*)"
+    identifier = rf"(?:{number}|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+    semver = rf"{number}\.{number}\.{number}(?:-{identifier}(?:\.{identifier})*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    if not re.fullmatch(semver, version):
         raise RuntimeError(f"Invalid VERSION file value: {version!r}")
     return version
 
@@ -95,12 +99,15 @@ _BIN_DIR = HERE / "bin"
 if _BIN_DIR.is_dir():
     os.environ["PATH"] = str(_BIN_DIR) + os.pathsep + os.environ.get("PATH", "")
 
-from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
+import yt_extract  # noqa: E402
+from yt_extract import slugify, fmt_time  # noqa: E402
+import moments  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
+import transcript_review
 import asr_worker  # noqa: E402  -- 3.18 models run in a child process that exits when idle
 import asr_models  # noqa: E402  -- 3.18 pinned speech model catalog + downloader
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
@@ -128,6 +135,7 @@ import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
 import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
+import hn_extractor  # noqa: E402
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 import x_text_repair  # noqa: E402  -- 3.18.0 fix cut-off X posts job
@@ -140,19 +148,17 @@ import media_handoff  # noqa: E402  -- authenticated kept-media boundary
 import suite_service  # noqa: E402  -- suite discovery/health/runtime lease
 
 
-def _extract_page_to_prose(url: str) -> str | None:
-    """v3.2 synergy bridge: Writing Studio's URL anchor ingestion calls
-    this to convert a URL into prose. We wrap page_extractor.extract_page
-    with enforce_allowlist=False (user-explicit save is consent enough)
-    and return the markdown body. Returns None on failure so the anchor
-    still saves with raw_text=NULL."""
+def _extract_page_to_prose(url: str, *, enforce_allowlist: bool = True) -> str | None:
+    """Fetch a style reference. Only an explicit dashboard save grants one-off access."""
     try:
+        if hn_extractor.item_id(url):
+            return hn_extractor.extract_hn_thread(url).get("markdown")
         result = page_extractor.extract_page(
             _get_index(), url,
             render_mode=page_extractor.RENDER_MODE_STATIC,
             include_screenshot=False,
             follow_links_depth=0,
-            enforce_allowlist=False)
+            enforce_allowlist=enforce_allowlist)
     except Exception as e:
         log.warning("style anchor URL extraction failed: %s", e)
         return None
@@ -164,9 +170,9 @@ def _extract_page_to_prose(url: str) -> str | None:
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
-    _atomic_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
+    _atomic_write_text as _storage_write_text, read_export_markdown as _read_export_markdown, normalize_export_comments,
     COMMENTS_START_MARK, COMMENTS_END_MARK,
-    _is_writable_dir,
+    atomic_output, checked_path, open_regular, read_checked_json, read_checked_bytes, move_library_folder, LibraryPathError, _is_writable_dir,
     _path_under_any,
     _topic_folder_name,
 )
@@ -226,7 +232,7 @@ LENGTH_BUCKET_ENUM = ("short", "medium", "long", "deep")  # <4m | 4-15 | 15-30 |
 # alongside the raw value so the frontend never hardcodes its own map.
 _FACET_LABELS = {
     "platform": {
-        "youtube": "YouTube", "x": "X", "reddit": "Reddit",
+        "youtube": "YouTube", "x": "X", "reddit": "Reddit", "hn": "Hacker News",
         "podcast": "Podcast", "web": "Web", "note": "Note",
         "tiktok": "TikTok", "instagram": "Instagram", "image": "Image",
         # legacy metadata_json tags a stray row might still carry.
@@ -235,7 +241,7 @@ _FACET_LABELS = {
     "source_type": {
         "video": "Video", "short_video": "Short video",
         "x_thread": "X post", "x_article": "X article",
-        "reddit_thread": "Reddit thread", "page": "Web page",
+        "reddit_thread": "Reddit thread", "hn_thread": "Hacker News thread", "page": "Web page",
         "episode": "Podcast episode", "note": "Note", "image": "Image",
     },
     "format": {
@@ -459,7 +465,7 @@ TRANSCRIPT_UNFINISHED_MESSAGE = (
     "This video's folder has an unfinished full save, so this transcript-only save left it alone.")
 # What a transcript-only attempt itself leaves in a folder (captions, a
 # partial download); these never count as a saved capture.
-_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".part", ".ytdl", ".json", ".tmp")
+_TRANSCRIPT_ATTEMPT_SUFFIXES = (".srt", ".vtt", ".json3", ".part", ".ytdl", ".json", ".tmp")
 # Lite mode forces the screenshot interval to at least this (1 per 5 min), so
 # a 2-hour video yields a couple dozen frames instead of hundreds.
 LITE_SHOT_INTERVAL_SEC = 5 * 60
@@ -609,7 +615,14 @@ ANTHROPIC_HOOK_EST_OUTPUT_TOKENS = 80
 
 def _read_token_file() -> str:
     try:
-        return TOKEN_PATH.read_text(encoding="utf-8").strip()
+        with open_regular(TOKEN_PATH.parent, TOKEN_PATH) as source:
+            if os.name == "posix":
+                info = os.fstat(source.fileno())
+                if info.st_uid != os.getuid() or info.st_nlink != 1:
+                    return ""
+                if info.st_mode & 0o777 != 0o600:
+                    os.fchmod(source.fileno(), 0o600)
+            return source.read().strip()
     except (OSError, UnicodeError):
         return ""
 
@@ -633,14 +646,8 @@ def _persist_token(fresh: str) -> None:
     if _read_token_file() == fresh:
         return
     try:
-        TOKEN_PATH.write_text(fresh, encoding="utf-8")
-        # Best-effort: tighten file perms on POSIX. On Windows, ACLs default
-        # to user-only for files in %LOCALAPPDATA%, so chmod is a no-op but
-        # harmless.
-        try:
-            os.chmod(TOKEN_PATH, 0o600)
-        except OSError:
-            pass
+        with atomic_output(TOKEN_PATH, root=TOKEN_PATH.parent, encoding="utf-8", mode=0o600) as target:
+            target.write(fresh)
     except OSError:
         # Non-fatal: keep an in-memory token for the session. Persistence is
         # nice-to-have; auth still works within this server's lifetime.
@@ -1497,7 +1504,7 @@ if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         log.warning("output folder picker unavailable: %s", e)
         return None
     if result.returncode != 0:
-        log.warning("output folder picker failed: %s", result.stderr.strip())
+        log.warning("output folder picker failed with exit code %s", result.returncode)
         return None
     return result.stdout.strip() or None
 
@@ -1746,13 +1753,15 @@ def _keyring_call(fn, *, read: bool = False):
     return outcome.get("value")
 
 
-def _keyring_read(username: str, services: tuple[str, ...]) -> str:
+def _keyring_read(username: str, services: tuple[str, ...], *, decode=None) -> str:
     """The first non-empty value among `services`. When the store doesn't
     answer in time, the last value this process saw. Other errors raise."""
     def op(backend) -> str:
         value = ""
         for service in services:
             found = backend.get_password(service, username)
+            if found and decode:
+                found = decode(backend, service, found)
             if isinstance(found, str) and found:
                 value = found
                 break
@@ -1916,20 +1925,109 @@ def _store_saved_scrapecreators_key(key: str) -> None:
         raise CredentialStoreError("ScrapeCreators credential store unavailable") from None
 
 
+def _relay_origin(value: str) -> str:
+    parts = urlparse((value or "").strip())
+    if not parts.hostname:
+        return ""
+    port = parts.port if parts.port is not None else (443 if parts.scheme == "https" else 80)
+    return f"{parts.scheme}://{parts.hostname.lower()}:{port}"
+
+
+_relay_config_lock = threading.RLock()
+
+
+def _relay_connection():
+    with _relay_config_lock:
+        settings = _read_settings()
+        return settings, settings.get("relay_url") or "", _get_saved_relay_token()
+
+
+# WinVault stores at most 2560 bytes per password (UTF-16). A space in this
+# marker distinguishes it from every accepted plain token and saved origin.
+_RELAY_PARTS = re.compile(r"relay parts ([ab]) ([1-9][0-9]?) ([0-9a-f]{64})")
+_MAX_RELAY_PARTS = 16  # Includes the normalized origin and the 4096-character token.
+
+
+def _relay_part_service(service, slot, i):
+    return f"{service}.relay.{slot}.{i}"
+
+
+def _decode_relay_password(backend, service, saved):
+    if not saved.startswith("relay parts "):
+        return saved
+    header = _RELAY_PARTS.fullmatch(saved)
+    if not header or int(header[2]) > _MAX_RELAY_PARTS:
+        return ""
+    slot, count, digest = header.groups()
+    parts = [backend.get_password(_relay_part_service(service, slot, i), KEYRING_RELAY_USERNAME)
+             for i in range(int(count))]
+    if not all(parts):
+        return ""
+    value = "".join(parts)
+    return value if hashlib.sha256(value.encode()).hexdigest() == digest else ""
+
+
+def _set_relay_password(backend, service, value):
+    user = KEYRING_RELAY_USERNAME
+    previous = backend.get_password(service, user) or ""
+    active = _RELAY_PARTS.fullmatch(previous)
+    header = value
+    if len(value.encode("utf-16le")) > 2560:
+        slot = "b" if active and active[1] == "a" else "a"
+        # Even a supplementary Unicode character fits in four UTF-16 bytes.
+        parts = [value[i:i + 640] for i in range(0, len(value), 640)]
+        if len(parts) > _MAX_RELAY_PARTS:
+            return False
+        for i, part in enumerate(parts):
+            target = _relay_part_service(service, slot, i)
+            backend.set_password(target, user, part)
+            if backend.get_password(target, user) != part:
+                return False
+        header = f"relay parts {slot} {len(parts)} {hashlib.sha256(value.encode()).hexdigest()}"
+    # Switch the main entry only after all parts are readable. A retry uses
+    # the same inactive slot, even after an interrupted write.
+    if header:
+        backend.set_password(service, user, header)
+    elif previous:
+        backend.delete_password(service, user)
+    if (backend.get_password(service, user) or "") != header:
+        return False
+    if active or not value or header != value:
+        # Remove old and interrupted generations, including on explicit clear.
+        current = _RELAY_PARTS.fullmatch(header)
+        for slot in ("a", "b"):
+            start = int(current[2]) if current and current[1] == slot else 0
+            for i in range(start, _MAX_RELAY_PARTS):
+                target = _relay_part_service(service, slot, i)
+                if backend.get_password(target, user) is not None:
+                    backend.delete_password(target, user)
+    return True
+
+
 def _get_saved_relay_token() -> str:
     """The relay pull token from this profile's store only."""
     try:
         if _credential_store_mode() == "file":
-            return _file_credential_get(KEYRING_RELAY_USERNAME)
-        return _keyring_read(KEYRING_RELAY_USERNAME, (_keyring_service_name(),))
+            saved = _file_credential_get(KEYRING_RELAY_USERNAME)
+        else:
+            saved = _keyring_read(KEYRING_RELAY_USERNAME, (_keyring_service_name(),),
+                                  decode=_decode_relay_password)
+        origin, marker, token = (saved or "").partition("\n")
+        if marker:
+            return token if origin == _relay_origin(_read_settings().get("relay_url")) else ""
+        return saved or ""  # Credentials saved before origin binding.
     except Exception:
         # Credential backends can include the secret in their exception text.
         return ""
 
 
-def _store_saved_relay_token(token: str) -> None:
+def _store_saved_relay_token(token: str, *, relay_url=None) -> None:
     """Save or clear the pull token. A backend that accepts the write but
     cannot read it back (the null keyring) counts as unavailable."""
+    if token:
+        origin = _relay_origin(relay_url if relay_url is not None else _read_settings().get("relay_url"))
+        if origin:
+            token = origin + "\n" + token
     _bump_credential_generation(KEYRING_RELAY_USERNAME)
     if _credential_store_mode() == "file":
         _file_credential_put(KEYRING_RELAY_USERNAME, token)
@@ -1937,13 +2035,7 @@ def _store_saved_relay_token(token: str) -> None:
     service = _keyring_service_name()
 
     def op(backend) -> bool:
-        if token:
-            backend.set_password(service, KEYRING_RELAY_USERNAME, token)
-            readable = backend.get_password(service, KEYRING_RELAY_USERNAME) == token
-        else:
-            if backend.get_password(service, KEYRING_RELAY_USERNAME) is not None:
-                backend.delete_password(service, KEYRING_RELAY_USERNAME)
-            readable = True
+        readable = _set_relay_password(backend, service, token)
         _remember_credential(service, KEYRING_RELAY_USERNAME, token if readable else "")
         return readable
 
@@ -2066,6 +2158,7 @@ def _public_settings(data: dict | None = None) -> dict:
     )
     return {
         "usage_sharing": data.get("usage_sharing") is True and not uoink_usage.forced_off(),
+        "transcript_review_summary": transcript_review.last_summary(DATA_ROOT),
         "usage_sharing_forced_off": uoink_usage.forced_off(),
         "usage_sharing_prompt_seen": data.get("usage_sharing_prompt_seen") is True,
         "usage_sharing_disclosure": uoink_usage.disclosure(),
@@ -2573,10 +2666,15 @@ _CREDENTIAL_VALUE_SANITIZE_RE = re.compile(
 _ERROR_SANITIZE_INPUT_LIMIT = 64 * 1024
 
 
-def _redact_error_credentials(line: str) -> str:
+def _redact_error_credentials(line: str, *, pattern=None, clean_url=None) -> str:
     pieces = []
     pos = 0
-    while match := _CREDENTIAL_SANITIZE_RE.search(line, pos):
+    pattern = pattern or _CREDENTIAL_SANITIZE_RE
+    while match := pattern.search(line, pos):
+        if clean_url and match.lastgroup == "log_url":
+            pieces.extend((line[pos:match.start()], clean_url(match)))
+            pos = match.end()
+            continue
         start = end = match.end()
         flag_quote = match.group("flag_quote")
         quote = flag_quote or (line[start:start + 1] if line[start:start + 1] in ("'", '"') else "")
@@ -2903,6 +3001,14 @@ _LOCALAPPDATA_OUTPUT = DATA_ROOT / "output"
 
 DESKTOP_ROOT = _get_output_root()
 SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
+
+
+def _atomic_write_text(path, text, *, root=None, encoding="utf-8", newline=None):
+    """Server writes belong to the active library unless a caller selected another root."""
+    _storage_write_text(path, text, root=DESKTOP_ROOT if root is None else root,
+                        encoding=encoding, newline=newline)
+
+
 # Set True by _apply_output_root_fallback when the active root has been
 # moved to _LOCALAPPDATA_OUTPUT. Surfaced in /health and /diagnose so the
 # popup can warn the user their yoinks are no longer on the Desktop.
@@ -2983,19 +3089,62 @@ LOG_PATH = (
     else _platform.app_state_path(HERE, DATA_ROOT, "server.log")
 )
 # One rotating file handler: the root logger and the file-only machine-error
-# detail logger share it, so raw diagnostics rotate with server.log.
+# detail logger share it, so both use the same redaction rules.
 _server_log_handler = RotatingFileHandler(LOG_PATH, maxBytes=5 * 1024 * 1024,
                                           backupCount=3, encoding="utf-8")
+class _LogFormatter(logging.Formatter):
+    """Scrub URLs after argument interpolation and traceback formatting."""
+    _log_fields = re.compile(r"(?P<log_url>https?://[^\s<>]+|(?<![\w/])/[^\s<>]+)|"
+                             + _CREDENTIAL_SANITIZE_RE.pattern, re.I)
+    _sensitive = re.compile(r"(?:(?:access|refresh|id|auth|oauth)[-_]?)?token|sig|signature|"
+                            r"(?:x-|anthropic[-_])?api[-_ ]?key|anthropic[-_]key|x-(?:uoink|yoink)-token|"
+                            r"key|auth|authorization|password|client[-_]?secret|"
+                            r"expires(?:[-_]?at)?|expiry|x-amz-.*", re.I)
+
+    @classmethod
+    def _clean_url_fields(cls, fields, *, phone_fragment=False):
+        from urllib.parse import unquote_plus
+        parts = re.split("([&;])", fields)
+        for i in range(0, len(parts), 2):
+            name, equals, _ = parts[i].partition("=")
+            key = unquote_plus(name)
+            if equals and (cls._sensitive.fullmatch(key) or (phone_fragment and key == "t")):
+                parts[i] = name + "=[redacted]"
+        return "".join(parts)
+
+    @classmethod
+    def _clean_url(cls, match):
+        url, fragment_mark, fragment = match.group().partition("#")
+        base, mark, query = url.partition("?")
+        scheme, sep, rest = base.partition("://")
+        if base.startswith("//"):
+            scheme, sep, rest = "", "//", base[2:]
+        if sep:
+            host, slash, path = rest.partition("/")
+            base = scheme + sep + host.rsplit("@", 1)[-1] + slash + path
+        if fragment_mark:
+            fragment = cls._clean_url_fields(fragment, phone_fragment=base.rstrip("/").endswith("/phone"))
+        return base + mark + cls._clean_url_fields(query) + fragment_mark + fragment
+
+    def format(self, record):
+        message = _KEY_SANITIZE_RE.sub("[redacted]", super().format(record))
+        return "\n".join(_redact_error_credentials(line, pattern=self._log_fields, clean_url=self._clean_url)
+                         for line in message.split("\n"))
+
+
+_console_log_handler = logging.StreamHandler(sys.stdout)
+for _handler in (_server_log_handler, _console_log_handler):
+    _handler.setFormatter(_LogFormatter("%(asctime)s %(levelname)s %(message)s"))
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
         _server_log_handler,
-        logging.StreamHandler(sys.stdout),
+        _console_log_handler,
     ],
 )
 log = logging.getLogger("uoink")
-# Raw machine diagnostics belong only in server.log, never stdout or a job.
+# Write sanitized machine diagnostics to the rotating file.
 _error_detail_log = logging.getLogger("uoink.error_detail")
 _error_detail_log.propagate = False
 _error_detail_log.addHandler(_server_log_handler)
@@ -3123,6 +3272,7 @@ def _get_index() -> "index.Index":
                 _index_recovering = True
         elif getattr(_index_singleton, "_existing_read_only", False):
             _index_singleton.initialize_for_write()
+        _index_singleton.corpus_root = DESKTOP_ROOT
         return _index_singleton
 
 
@@ -3237,23 +3387,15 @@ def _parse_hms(value) -> float | None:
     return float(secs)
 
 
-def _youtube_deep_link(video_id: str, seconds) -> str:
-    """A watch URL deep-linked to a timestamp -- the citations contract."""
-    vid = (video_id or "").strip()
-    try:
-        t = max(0, int(float(seconds)))
-    except (TypeError, ValueError):
-        t = 0
-    return f"https://youtube.com/watch?v={vid}&t={t}s"
+def _youtube_deep_link(video_id: str, seconds, *, lead=2) -> str:
+    from moments import citation_link
+    return citation_link(f"https://youtube.com/watch?v={(video_id or '').strip()}", seconds,
+                         youtube=True, lead=lead)
 
 
-def _source_deep_link(source_url: str, seconds) -> str:
-    """A generic timestamp fragment for sources without a native URL form."""
-    try:
-        t = max(0, int(float(seconds)))
-    except (TypeError, ValueError):
-        t = 0
-    return f"{source_url.split('#', 1)[0]}#t={t}"
+def _source_deep_link(source_url: str, seconds, *, lead=2) -> str:
+    from moments import citation_link
+    return citation_link(source_url, seconds, lead=lead)
 
 
 # Sections a capture kind never produces. They report "skipped", as a note's
@@ -3264,6 +3406,7 @@ _HEALTH_NOT_APPLICABLE = {
     "x_article": ("transcript", "screenshots", "comments"),
     "x_thread": ("transcript", "screenshots", "comments"),
     "reddit_thread": ("transcript", "screenshots", "comments"),
+    "hn_thread": ("transcript", "screenshots", "comments"),
     "image": ("transcript", "screenshots", "comments"),
     "episode": ("screenshots", "comments"),
 }
@@ -3543,11 +3686,16 @@ def _resolve_video_transcript(
                 if media_chunks:
                     # ASR timestamps are local to each sampled section. Bound
                     # them to that section before linking to the source video.
-                    entries.extend(
-                        (offset + max(0.0, start), offset + min(end, length), text)
-                        for start, end, text in local_entries
-                        if min(end, length) > max(0.0, start)
-                    )
+                    for entry in local_entries:
+                        start, end, text = entry
+                        if min(end, length) <= max(0.0, start):
+                            continue
+                        words = [dict(w, start=w["start"] + offset, end=w["end"] + offset)
+                                 for w in getattr(entry, "words", None) or []]
+                        # A sampled section's end is not the end of the recording.
+                        entries.append(uoink_reliability.TranscriptEntry(
+                            offset + max(0.0, start), offset + min(end, length), text,
+                            words, getattr(entry, "scores", None)))
                 else:
                     entries.extend(local_entries)
     except PlaylistJobCancelled:
@@ -3614,6 +3762,12 @@ def _transcript_text_from_sidecar(sidecar: dict) -> str:
     )
 
 
+def _item_storage_root(row, idx=None):
+    if row and row.get("source_type") == "episode":
+        return podcasts.corpus_storage(idx or _get_index(), row, DATA_ROOT)
+    return DESKTOP_ROOT
+
+
 def _folder_for_video_id(video_id: str) -> tuple[Path | None, dict | None]:
     vid = (video_id or "").strip()
     if not vid:
@@ -3621,28 +3775,36 @@ def _folder_for_video_id(video_id: str) -> tuple[Path | None, dict | None]:
     row = _get_index().get_yoink(vid)
     if not row or row.get("deleted_at"):
         return None, None
-    sidecar_path = Path(row.get("sidecar_path") or "")
+    try:
+        sidecar_path = checked_path(_item_storage_root(row), Path(row.get("sidecar_path") or ""))
+    except OSError:
+        return None, None
     if not sidecar_path.is_file():
         return None, None
     return sidecar_path.parent, row
 
 
-def _read_sidecar_for_folder(folder: Path) -> tuple[Path, dict]:
+def _read_sidecar_for_folder(folder: Path, *, root=None) -> tuple[Path, dict]:
     sidecar_path = folder / f"{folder.name}.json"
     try:
-        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        data = read_checked_json(root or DESKTOP_ROOT, sidecar_path)
         if not isinstance(data, dict):
             data = {}
-    except (OSError, json.JSONDecodeError):
+    except (OSError, ValueError):
         data = {}
     return sidecar_path, data
 
 
-def _write_reliability_to_sidecar(folder: Path, reliability: dict) -> dict:
+def _write_reliability_to_sidecar(folder: Path, reliability: dict, *, root=None) -> dict:
+    root = DESKTOP_ROOT if root is None else root
     with _sidecar_update_lock:
-        sidecar_path, data = _read_sidecar_for_folder(folder)
+        sidecar_path = folder / f"{folder.name}.json"
+        try:
+            data = read_checked_json(root, sidecar_path)
+        except FileNotFoundError:
+            data = {}
         data["reliability"] = reliability
-        _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
+        _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2), root=root)
         return data
 
 
@@ -3673,7 +3835,8 @@ def _render_reliability_summary(reliability: dict) -> str:
 
 def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
     try:
-        md = corpus_path.read_text(encoding="utf-8")
+        with open_regular(DESKTOP_ROOT, corpus_path) as source:
+            md = source.read()
     except OSError as e:
         log.warning("reliability md update: read failed (%s)", e)
         return
@@ -3694,15 +3857,14 @@ def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
 
 def _download_reliability_audio(url: str, tmp_dir: Path,
                                 cancel_event: threading.Event | None = None) -> Path:
-    if _platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
-        url = source_subscriptions.check_public_http_url(url)
+    url = source_subscriptions.check_public_http_url(url)
     _platform.require_media()
     _run_subprocess(
         [
             *YTDLP_CMD,
             "-f", "bestaudio/best",
             "-o", str(tmp_dir / "audio.%(ext)s"),
-            url,
+            "--", url,
         ],
         cancel_event=cancel_event,
         check=True,
@@ -3725,7 +3887,7 @@ def _download_reliability_audio(url: str, tmp_dir: Path,
 # on any fallback, why in one plain sentence.
 
 TRANSCRIPT_CACHE_DIRNAME = "transcript-cache"
-_TRANSCRIPT_CACHE_VERSION = 1
+_TRANSCRIPT_CACHE_VERSION = 4
 _TRANSCRIPT_LANG_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,2}$")
 _TRANSCRIPT_BARE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 _TRANSCRIPT_TRACK_KEY_RE = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{1,8}){0,3}$")
@@ -3797,8 +3959,12 @@ def _caption_track_candidates(metadata: dict, lang: str | None) -> list[dict]:
         return isinstance(key, str) and key != "live_chat" and bool(
             _TRANSCRIPT_TRACK_KEY_RE.fullmatch(key))
 
-    manual = {k: v for k, v in (metadata.get("subtitles") or {}).items() if usable(k) and v}
-    auto = {k: v for k, v in (metadata.get("automatic_captions") or {}).items() if usable(k) and v}
+    def track_map(name):
+        table = metadata.get(name)
+        return {k: v for k, v in table.items() if usable(k) and v} if isinstance(table, dict) else {}
+
+    manual = track_map("subtitles")
+    auto = track_map("automatic_captions")
     orig_keys = [k for k in auto if k.endswith("-orig")]
     spoken = (_transcript_clean_lang(orig_keys[0]) if orig_keys
               else str(metadata.get("language") or "")) or None
@@ -3884,37 +4050,20 @@ def _caption_failure_reason(e: BaseException, prefix: str = "captions") -> str:
 def _download_caption_track(url: str, track: dict, tmp_dir: Path,
                             duration: object) -> list[tuple[float, float, str]]:
     """Download exactly one named caption track; raise on refusal."""
-    for old in tmp_dir.glob("captions.*"):
-        try:
-            old.unlink()
-        except OSError:
-            pass
-    cmd = [
-            *YTDLP_CMD,
-            "--skip-download",
-            "--write-auto-subs" if track["kind"] == "auto_captions" else "--write-subs",
-            # One exact key, never a pattern: "en.*" also matches YouTube's
-            # rate-limited auto-translated tracks (see _fetch_video_subtitles).
-            "--sub-lang", track["key"],
-            "--convert-subs", "srt",
-            "-o", str(tmp_dir / "captions.%(ext)s"),
-            url,
-    ]
-    done = _run_subprocess(
-        cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
-        timeout=COMMENTS_TIMEOUT_SEC)
-    files = sorted(tmp_dir.glob("captions*.srt"))
-    if not files:
+    def fetch(selected, prefix, text_only):
+        admitted = source_subscriptions.check_public_http_url(url)
+        cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(selected, text_only),
+               "-o", str(tmp_dir / f"{prefix}.%(ext)s"), "--", admitted]
+        done = _run_subprocess(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                               timeout=COMMENTS_TIMEOUT_SEC)
         stderr = getattr(done, "stderr", None) or b""
         # yt-dlp can log a subtitle 429 as a warning and still exit 0.
-        if re.search(rb"\b429\b" if isinstance(stderr, bytes) else r"\b429\b", stderr):
+        if yt_extract.caption_rate_warning(stderr, tmp_dir, prefix, selected, text_only):
             raise subprocess.CalledProcessError(1, cmd, stderr=stderr)
-        return []
-    try:
-        length = float(duration) if duration else None
-    except (TypeError, ValueError):
-        length = None
-    return list(parse_srt(files[0], duration=length))
+
+    prefix = "captions.auto" if track["kind"] == "auto_captions" else "captions.manual"
+    entries, _ = yt_extract.read_caption_track(tmp_dir, prefix, track, _as_float(duration), fetch)
+    return entries
 
 
 def _transcript_cache_path(video_id: str, lang: str | None) -> Path:
@@ -3923,23 +4072,38 @@ def _transcript_cache_path(video_id: str, lang: str | None) -> Path:
 
 def _read_transcript_cache(video_id: str, lang: str | None) -> dict | None:
     try:
-        data = json.loads(_transcript_cache_path(video_id, lang).read_text(encoding="utf-8"))
+        data = read_checked_json(DATA_ROOT, _transcript_cache_path(video_id, lang))
     except (OSError, ValueError):
         return None
-    if (not isinstance(data, dict) or data.get("version") != _TRANSCRIPT_CACHE_VERSION
+    if (not isinstance(data, dict) or data.get("version") not in (2, _TRANSCRIPT_CACHE_VERSION)
             or data.get("video_id") != video_id or not isinstance(data.get("segments"), list)
-            or not data["segments"]):
+            or not (data["segments"] or data.get("held_transcript_lines"))):
         return None
+    if data["version"] == 2 and data.get("held_transcript_lines"):
+        # Old cache entries kept scores only on the held rows. Reconsider
+        # those dictionaries offline. Already visible cues are plain triples.
+        previous = {h["line"]: h for h in data["held_transcript_lines"]}
+        original = transcript_review.all_rows(data["segments"], data["held_transcript_lines"])
+        decisions = transcript_review.reasons(original, whisper=data.get("source") == "whisper",
+                                              duration=data.get("duration_seconds"))
+        kept, held = [], []
+        for line, (segment, reason) in enumerate(zip(original, decisions), 1):
+            if line in previous:
+                cue = transcript_review.held_cue(segment)
+                if reason or cue is None:
+                    held.append(dict(previous[line], reason=reason or previous[line]["reason"]))
+                    continue
+                segment = cue
+            kept.append(segment)
+        data.update(segments=kept, held_transcript_lines=held, version=_TRANSCRIPT_CACHE_VERSION)
     return data
 
 
 def _write_transcript_cache(record: dict, lang: str | None) -> None:
     path = _transcript_cache_path(record["video_id"], lang)
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(f".{os.getpid()}.tmp")
-        tmp.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
-        os.replace(tmp, path)
+        payload = dict(record, segments=[uoink_reliability.entry_to_json(e) for e in record["segments"]])
+        _atomic_write_text(path, json.dumps(payload, ensure_ascii=False), root=DATA_ROOT)
     except OSError as e:
         log.warning("transcript cache write skipped: %s", _sanitize_error(str(e)))
 
@@ -3952,15 +4116,19 @@ def _library_transcript(video_id: str) -> dict | None:
         return None
     if folder is None:
         return None
-    _path, sidecar = _read_sidecar_for_folder(folder)
+    _path, sidecar = _read_sidecar_for_folder(folder, root=_item_storage_root(row))
+    held = sidecar.get("held_transcript_lines") or []
     segments = []
     for seg in sidecar.get("transcript") or []:
         if not isinstance(seg, dict) or not str(seg.get("text") or "").strip():
+            if held:
+                segments.append(None)  # Held ordinals include every original slot.
             continue
         start = _as_float(seg.get("start")) or 0.0
         end = _as_float(seg.get("end"))
-        segments.append((start, end if end is not None else start, str(seg["text"]).strip()))
-    if not segments:
+        segments.append(uoink_reliability.TranscriptEntry(
+            start, end if end is not None else start, str(seg["text"]), seg.get("words")))
+    if not segments and not held:
         return None
     provider = sidecar.get("transcript_source")
     asr = sidecar.get("asr_fallback") if isinstance(sidecar.get("asr_fallback"), dict) else {}
@@ -3977,6 +4145,7 @@ def _library_transcript(video_id: str) -> dict | None:
         "video_id": video_id,
         "title": sidecar.get("title") or (row or {}).get("title"),
         "segments": segments,
+        "held_transcript_lines": held,
         "transcribed_by": transcribed_by,
         "language": language,
         "slug": folder.name,
@@ -4025,7 +4194,33 @@ def _whisper_transcript(url: str, *, settings: dict, title: str | None = None,
                      "language": info.get("language") or "und"}
 
 
-def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
+def get_transcript_cascade(raw_url: object, lang: object = None, *, include_held=False) -> dict:
+    record = _get_transcript_record(raw_url, lang)
+    held = record.pop("held_transcript_lines", None)
+    if held:
+        record["held_count"] = len(held)
+        note = transcript_review.notice(held)
+        record["why"] = " ".join(filter(None, [record.get("why"), note,
+            "Held lines included." if include_held else "Set include_held to show them."]))
+        if include_held:
+            rows = transcript_review.all_rows(record["segments"], held)
+            reasons = {h["line"]: h["reason"] for h in held}
+            segments, marks = [], {}
+            for line, row in enumerate(rows, 1):
+                if line in reasons:
+                    row = transcript_review.held_cue(row)
+                    if row is None:
+                        continue
+                    marks[len(segments) + 1] = (line, reasons[line])
+                if row is not None:
+                    segments.append(row)
+            record["segments"], record["held_reasons"] = segments, marks
+        else:
+            record["segments"] = [s for s in record["segments"] if s is not None]
+    return record
+
+
+def _get_transcript_record(raw_url, lang):
     """Return one YouTube transcript record or raise TranscriptUnavailable.
 
     The record has ``video_id``, ``url``, ``title``, ``source`` (library,
@@ -4055,7 +4250,8 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
 
     cached = _read_transcript_cache(video_id, lang)
     if cached:
-        return {**cached, "segments": [tuple(s) for s in cached["segments"]], "cached": True}
+        return {**cached, "segments": [uoink_reliability.entry_from_json(s) for s in cached["segments"]],
+                "cached": True}
 
     refusal = _platform.capability_refusal(_platform.media_capability())
     if refusal is not None:
@@ -4124,6 +4320,7 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
             "why": why, "segments": entries, "duration_seconds": duration,
             "fetched_at": _now_iso(), "version": _TRANSCRIPT_CACHE_VERSION,
         }
+        _review_transcript_record(record)
         if not (lang and mismatch):
             # A stand-in language is not cached, so a later call retries the
             # requested one.
@@ -4159,8 +4356,24 @@ def get_transcript_cascade(raw_url: object, lang: object = None) -> dict:
         "duration_seconds": duration, "whisper_model": asr["model"],
         "fetched_at": _now_iso(), "version": _TRANSCRIPT_CACHE_VERSION,
     }
+    _review_transcript_record(record)
     _write_transcript_cache(record, lang)
     return {**record, "cached": False}
+
+
+def _review_transcript_record(record):
+    kept, held = _review_entries(record["segments"], record["source"] == "whisper",
+                                 record.get("duration_seconds"))
+    record["segments"] = kept
+    if held:
+        record["held_transcript_lines"] = held
+
+
+def _review_entries(entries, whisper, duration):
+    rows = [uoink_reliability.segment_dict(e) for e in entries]
+    _, held = transcript_review.partition(rows, whisper=whisper, duration=duration)
+    withheld = {h["line"] for h in held}
+    return [e for i, e in enumerate(entries, 1) if i not in withheld], held
 
 
 def _compute_transcript_reliability(
@@ -4182,12 +4395,19 @@ def _compute_transcript_reliability(
     if (_platform.sys.platform == "darwin" and _platform.mac_bundle_contents() is not None
             and not _VIDEO_ID_RE.fullmatch(video_id or "")):
         return {"ok": False, "error": "video id invalid"}
-    if folder is None:
-        folder, _row = _folder_for_video_id(video_id)
+    row = None
+    if folder is None or video_id.startswith("episode_"):
+        indexed, row = _folder_for_video_id(video_id)
+        if folder is not None and folder != indexed:
+            return {"ok": False, "error": "Podcast episode folder does not match the index."}
+        folder = indexed
     if folder is None:
         return {"ok": False, "error": "uoink not found"}
 
-    sidecar_path, sidecar = _read_sidecar_for_folder(folder)
+    root = _item_storage_root(row)
+    sidecar_path, sidecar = _read_sidecar_for_folder(folder, root=root)
+    if not sidecar:
+        return {"ok": False, "error": "Saved transcript is unreadable."}
     vid = (sidecar.get("video_id") or video_id or "").strip()
     if not vid:
         return {"ok": False, "error": "uoink has no video_id"}
@@ -4207,7 +4427,7 @@ def _compute_transcript_reliability(
             "span_count": 0,
             "computed_at": _now_iso(),
         }
-        _write_reliability_to_sidecar(folder, reliability)
+        _write_reliability_to_sidecar(folder, reliability, root=root)
         return {"ok": True, "reliability": reliability, "cached": False}
 
     reliability_model = _selected_reliability_model()
@@ -4221,7 +4441,7 @@ def _compute_transcript_reliability(
             "span_count": 0,
             "computed_at": _now_iso(),
         }
-        _write_reliability_to_sidecar(folder, reliability)
+        _write_reliability_to_sidecar(folder, reliability, root=root)
         return {"ok": False, "error": "Whisper model not downloaded", "reliability": reliability}
 
     def run_detection(path: Path) -> dict:
@@ -4250,6 +4470,9 @@ def _compute_transcript_reliability(
             url = (sidecar.get("url") or "").strip()
             if not url:
                 return {"ok": False, "error": "uoink has no source URL"}
+            if (sidecar.get("platform") == "podcast" or sidecar.get("source_type") == "episode"
+                    or vid.startswith("episode_")):
+                url = source_subscriptions.resolve_public_http_url(url)
             with tempfile.TemporaryDirectory(prefix="uoink-reliability-") as tmp:
                 audio = _download_reliability_audio(url, Path(tmp))
                 reliability = run_detection(audio)
@@ -4263,10 +4486,13 @@ def _compute_transcript_reliability(
             "span_count": 0,
             "computed_at": _now_iso(),
         }
-        _write_reliability_to_sidecar(folder, reliability)
+        _write_reliability_to_sidecar(folder, reliability, root=root)
         return {"ok": False, "error": reliability["error"], "reliability": reliability}
 
-    sidecar = _write_reliability_to_sidecar(folder, reliability)
+    sidecar = _write_reliability_to_sidecar(folder, reliability, root=root)
+    if row and row.get("source_type") == "episode":
+        # The episode publisher owns its sealed Markdown and citation snapshot.
+        return {"ok": True, "reliability": reliability, "cached": False}
     corpus = _resolve_corpus_path(folder)
     if corpus:
         _replace_reliability_section(corpus, reliability)
@@ -4289,9 +4515,9 @@ def _sidecar_link_builder(sidecar: dict):
         sidecar.get("source_type"), source_url or ""
     ) == page_extractor.PLATFORM_YOUTUBE
 
-    def links(timestamp):
+    def links(timestamp, *, lead=2):
         if is_youtube:
-            deep = _youtube_deep_link(video_id, timestamp)
+            deep = _youtube_deep_link(video_id, timestamp, lead=lead)
             base = (
                 source_url if isinstance(source_url, str)
                 and source_url.startswith(("http://", "https://"))
@@ -4299,7 +4525,7 @@ def _sidecar_link_builder(sidecar: dict):
             )
             return deep, base, deep
         if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
-            return None, source_url, _source_deep_link(source_url, timestamp)
+            return None, source_url, _source_deep_link(source_url, timestamp, lead=lead)
         return None, None, None
 
     return links
@@ -4314,10 +4540,10 @@ def _transcript_entries_with_links(sidecar: dict, entries) -> list[dict]:
     for entry in entries:
         s, e, t = entry
         youtube_link, citation_source, deep_link = links(s)
-        row = {"start": s, "end": e, "text": t, "source_url": citation_source,
+        row = {"start": s, "end": e, "text": t, **getattr(entry, "scores", {}),
+               "source_url": citation_source,
                "source_deep_link": deep_link, "youtube_deep_link": youtube_link}
-        # 3.18: local Whisper's word timings ({word, start, end}), for tools
-        # that cut on a word. Captions and older items have none.
+        # JSON3 and local Whisper may supply timings for each spoken word.
         words = getattr(entry, "words", None)
         if words:
             row["words"] = words
@@ -4364,7 +4590,7 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             continue
         ts = _parse_hms(shot.get("timestamp"))
         rel = shot.get("path") or shot.get("filename") or ""
-        youtube_link, citation_source, deep_link = links(ts)
+        youtube_link, citation_source, deep_link = links(ts, lead=0)
         out.append({
             "kind": "screenshot",
             "seq": i,
@@ -4423,6 +4649,9 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
         "transcript": [{"start": c["timestamp_start"], "end": c["timestamp_end"], "text": c["text"]}
                        for c in cues],
     }
+    restored = [i for i, entry in enumerate(entries) if entry.get("review_restored")]
+    if restored:
+        record["review_restored"] = restored
     artifact = library_media.canonical_json(record).encode("utf-8")
     provider = sidecar.get("transcript_source")
     provider = provider if isinstance(provider, str) and provider.strip() else "youtube_captions"
@@ -4431,14 +4660,18 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
         video_id=video_id, source_revision="0" * 64, cues=cues, artifact_bytes=artifact,
         corpus_revision="0" * 64, playback=playback, transcript_kind=kind, transcript_provider=provider,
         chapter_rows=chapter_rows, recorded_at=sidecar.get("yoinked_at"), item=item)
+    markdown = library_media.render_markdown(
+        {"video_id": video_id}, cues, chapters=block["chapters"], annotations=block)
+    if sidecar.get("held_transcript_lines"):
+        import transcript_review
+        markdown += "\n" + transcript_review.notice(sidecar["held_transcript_lines"]) + "\n"
     return {"cues": cues, "artifact": artifact, "digest": digest, "chapter_rows": chapter_rows,
             "playback": playback, "block": block, "transcript_kind": kind, "transcript_provider": provider,
-            "markdown": library_media.render_markdown(
-                {"video_id": video_id}, cues, chapters=block["chapters"], annotations=block)}
+            "markdown": markdown}
 
 
 def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
-                           sidecar_path: Path, plan: dict | None = None) -> bool:
+                           sidecar_path: Path, plan: dict | None = None, *, include_corpus=False, root=None) -> bool:
     """Phase 6 (BC-2/BC-3e/BC-3f): publish the helper capture through the shared
     media publisher. The consumed sidecar binding is frozen, then the
     ownership ticket is minted carrying that original binding. Every input
@@ -4459,8 +4692,9 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     video_id = (sidecar.get("video_id") or "").strip()
     consumed_binding = library_media.capture_sidecar_inputs(sidecar)
     ticket = idx.begin_media_publication(
-        video_id, folder=folder, capture_binding=consumed_binding)
-    library_media.require_capture_binding(sidecar_path, consumed_binding)
+        video_id, folder=folder, root=root or DESKTOP_ROOT, capture_binding=consumed_binding)
+    with library_media.publication_storage(root or DESKTOP_ROOT):
+        library_media.require_capture_binding(sidecar_path, consumed_binding)
     row = idx.get_yoink(video_id)
     if row is None:
         raise library_media.MediaError("resource_not_found")
@@ -4473,7 +4707,8 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     elif not library_media.capture_plan_matches(plan, owned_plan):
         raise library_media.MediaError(
             "revision_unavailable", details={"reason": "publication_input_changed"})
-    corpus_bytes = corpus_path.read_bytes()
+    with open_regular(root or DESKTOP_ROOT, corpus_path, binary=True) as source:
+        corpus_bytes = source.read()
     media_item = library_media._merge_item(row)
     head = corpus_bytes[:library_cards.CORPUS_READ_BYTES].decode("utf-8", "replace")
     source_revision = library_cards.build_card(
@@ -4488,8 +4723,9 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     # disk and rebuild the owned plan from those bytes before the publisher
     # writes. Sealed artifact overrides remain allowed only while this
     # consumed-input binding still holds.
-    library_media.require_capture_binding(sidecar_path, consumed_binding)
-    disk_side = library_media.read_owned_sidecar(sidecar_path, fallback=None)
+    with library_media.publication_storage(root or DESKTOP_ROOT):
+        library_media.require_capture_binding(sidecar_path, consumed_binding)
+        disk_side = library_media.read_owned_sidecar(sidecar_path, fallback=None)
     if disk_side is not None:
         disk_plan = _capture_media_plan(disk_side, folder, item=row)
         if disk_plan is None or not library_media.capture_plan_matches(plan, disk_plan):
@@ -4499,6 +4735,7 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
     idx.publish_media_snapshot(
         video_id, cues=plan["cues"], media_block=block,
         artifacts={
+            **({str(corpus_path): corpus_bytes} if include_corpus else {}),
             str(folder / library_media.MEDIA_INPUTS_DIR / (digest + ".json")): plan["artifact"],
             str(sidecar_path): json.dumps(published, ensure_ascii=False, indent=2).encode("utf-8"),
         },
@@ -4508,7 +4745,7 @@ def _publish_capture_media(idx, folder: Path, sidecar: dict, corpus_path: Path,
 
 
 def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
-                 sidecar_path: Path) -> bool:
+                 sidecar_path: Path, *, require_media_update=False, root=None) -> bool:
     """Upsert one yoink + its citations into the library index idempotently.
     Returns True if the row was indexed, False if its identity is missing.
     Storage errors propagate so capture callers can report a failed save.
@@ -4521,11 +4758,22 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         # video_id is the yoinks primary key + citations FK -- can't index.
         log.warning("index skip: no video_id for %s", folder)
         return False
-    try:
-        content = (corpus_path.read_text(encoding="utf-8")
-                   if corpus_path and corpus_path.exists() else "")
-    except OSError:
-        content = ""
+    if require_media_update:
+        # Tidy edits a previously indexed save. Publish FTS and citations in
+        # one transaction and keep the index metadata for this existing item.
+        if corpus_path is None:
+            raise ValueError("The saved transcript has no corpus file.")
+        idx = _get_index()
+        _publish_capture_media(idx, folder, sidecar, corpus_path, sidecar_path, include_corpus=True, root=root)
+        _mirror_event("capture", video_id=video_id)
+        return True
+    content = ""
+    if corpus_path:
+        try:
+            with open_regular(root or DESKTOP_ROOT, corpus_path) as source:
+                content = source.read()
+        except FileNotFoundError:
+            pass
     # Phase 2 taxonomy on the video / sidecar-driven path. YouTube's channel
     # is already the real uploader, so author = channel; platform derives from
     # the sidecar's source_type (None/'video' -> youtube).
@@ -4602,7 +4850,7 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                     entries and all("source_url" in e and "source_deep_link" in e for e in entries))
                 if phase6_writer:
                     published = _publish_capture_media(
-                        idx, folder, sidecar, corpus_path, sidecar_path)
+                        idx, folder, sidecar, corpus_path, sidecar_path, root=root)
         except ImportError:
             published = None
         except Exception as exc:
@@ -4714,8 +4962,8 @@ def _run_backfill(root: Path | None = None) -> None:
             _backfill_state["current"] = done
         sidecar_path = folder / f"{folder.name}.json"
         try:
-            sidecar = (json.loads(sidecar_path.read_text(encoding="utf-8"))
-                       if sidecar_path.exists() else {})
+            with open_regular(root or DESKTOP_ROOT, sidecar_path) as source:
+                sidecar = json.load(source)
         except (OSError, json.JSONDecodeError):
             sidecar = {}
         video_id = (sidecar.get("video_id") or "").strip() if isinstance(sidecar, dict) else ""
@@ -4727,7 +4975,7 @@ def _run_backfill(root: Path | None = None) -> None:
                 log.warning("backfill: skipped %s: folder name already used by %s (video %s)",
                             conflict["path"], conflict["other_path"], conflict["video_id"])
                 continue
-            if _index_yoink(folder, sidecar, corpus, sidecar_path):
+            if _index_yoink(folder, sidecar, corpus, sidecar_path, root=root):
                 indexed += 1
                 known.add(video_id)
         except Exception:
@@ -4807,8 +5055,8 @@ _transcript_backfill_instance_lock = threading.Lock()
 def _capture_incomplete_record(folder: Path) -> dict:
     """The url and start time _run_extraction wrote in capture-not-finished.txt."""
     try:
-        text = (folder / CAPTURE_INCOMPLETE_NAME).read_text(encoding="utf-8")
-    except (OSError, UnicodeError):
+        text = read_checked_bytes(DESKTOP_ROOT, folder / CAPTURE_INCOMPLETE_NAME, limit=16 * 1024).decode("utf-8")
+    except (OSError, ValueError):
         return {}
     record = {}
     for line in text.splitlines():
@@ -4847,6 +5095,22 @@ def _transcript_backfill_media_file(folder: Path, sidecar: dict | None = None) -
 def _sidecar_has_words(sidecar: dict) -> bool:
     return any(isinstance(e, dict) and str(e.get("text") or "").strip()
                for e in (sidecar.get("transcript") or []))
+
+
+def _transcript_backup_path(folder: Path, original: bytes) -> Path:
+    import library_media
+    backup_dir = folder / library_media.MEDIA_INPUTS_DIR
+    if backup_dir.is_symlink() or backup_dir.resolve().parent != folder.resolve():
+        raise ValueError("The transcript backup folder has moved.")
+    digest = hashlib.sha256(original).hexdigest()
+    backup = backup_dir / ("transcript-before-" + digest[:16] + ".json")
+    try:
+        existing = read_checked_bytes(DESKTOP_ROOT, backup)
+    except FileNotFoundError:
+        return backup
+    if existing != original:
+        raise ValueError("The transcript backup file has changed.")
+    return backup
 
 
 def _corpus_transcript_bounds(md: str) -> tuple[int, int] | None:
@@ -4904,10 +5168,10 @@ def _transcript_backfill_scan() -> dict:
         if not (row.get("sidecar_path") and _transcript_backfill_inside_library(sidecar_path)):
             continue  # a stale or outside path is never written to
         try:
-            sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+            sidecar = read_checked_json(DESKTOP_ROOT, sidecar_path)
         except (OSError, ValueError):
             continue
-        if not isinstance(sidecar, dict):
+        if not isinstance(sidecar, dict) or sidecar.get("pending_transcript_review"):
             continue
         marker = sidecar.get("transcript_backfill")
         repair = isinstance(marker, dict) and marker.get("status") == "saving"
@@ -4927,8 +5191,9 @@ def _transcript_backfill_scan() -> dict:
                 if not _transcript_backfill_inside_library(corpus_path):
                     continue
                 try:
-                    if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
-                        continue
+                    with open_regular(DESKTOP_ROOT, corpus_path) as source:
+                        if _corpus_has_words(source.read()):
+                            continue
                 except (OSError, UnicodeError):
                     continue  # unreadable is "do not touch", never "no words"
         folder = sidecar_path.parent
@@ -4975,6 +5240,11 @@ def _transcript_backfill_half_captures(indexed_folders: set) -> list[dict]:
             dirnames[:] = []
             continue
         folder = Path(dirpath)
+        try:
+            checked_path(root, folder)
+        except OSError:
+            dirnames[:] = []
+            continue
         names = set(filenames)
         claimed = ".capture-source.json" in names or CAPTURE_INCOMPLETE_NAME in names
         legacy = "metadata.json" in names and (
@@ -4997,7 +5267,7 @@ def _transcript_backfill_half_item(folder: Path, names: set) -> dict | None:
         if name not in names:
             return {}
         try:
-            value = json.loads((folder / name).read_text(encoding="utf-8"))
+            value = read_checked_json(DESKTOP_ROOT, folder / name)
         except (OSError, ValueError):
             return {}
         return value if isinstance(value, dict) else {}
@@ -5113,9 +5383,7 @@ def _transcript_backfill_release_identity(held) -> None:
 def _transcript_backfill_inside_library(path) -> bool:
     """True for a real folder or file inside the library (not its trash)."""
     try:
-        candidate = Path(path)
-        if candidate.is_symlink():
-            return False
+        candidate = checked_path(DESKTOP_ROOT, Path(path))
         root = DESKTOP_ROOT.resolve()
         resolved = candidate.resolve()
         trash = _trash_root().resolve()
@@ -5255,7 +5523,7 @@ def _splice_transcript_markdown(md: str, block: str, header: str | None) -> str:
 
 
 def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
-                               captions_reason=None) -> str:
+                               captions_reason=None, caption_kind=None) -> str:
     """Save new words into the sidecar, transcript.txt, corpus and index.
 
     The sidecar is written first with a "saving" mark and cleared last, so a
@@ -5277,11 +5545,14 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
     try:
         with _sidecar_update_lock:
             try:
-                sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                original = read_checked_bytes(DESKTOP_ROOT, sidecar_path, limit=64 * 1024 * 1024)
+                sidecar = json.loads(original)
             except (OSError, ValueError):
                 return "skipped"
             if not isinstance(sidecar, dict):
                 return "skipped"
+            if sidecar.get("pending_transcript_review"):
+                return "busy"
             marker = sidecar.get("transcript_backfill")
             saving = isinstance(marker, dict) and marker.get("status") == "saving"
             if entries is None:
@@ -5292,20 +5563,38 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
                     return "skipped"  # never touch a save that has words
                 if not saving and corpus_path is not None and corpus_path.exists():
                     try:
-                        if _corpus_has_words(corpus_path.read_text(encoding="utf-8")):
-                            return "skipped"  # words only in the Markdown still count
+                        with open_regular(DESKTOP_ROOT, corpus_path) as markdown:
+                            if _corpus_has_words(markdown.read()):
+                                return "skipped"  # words only in the Markdown still count
                     except (OSError, UnicodeError):
                         return "skipped"  # unreadable: do not touch
                 if "source_chapters" not in sidecar:
                     try:
-                        held_meta = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+                        held_meta = read_checked_json(DESKTOP_ROOT, folder / "metadata.json")
                         chapters = held_meta.get("chapters") if isinstance(held_meta, dict) else None
                     except (OSError, ValueError):
                         chapters = None
                     if isinstance(chapters, list) and chapters:
                         sidecar["source_chapters"] = chapters
+                entries, held_lines = _review_entries(entries, source == "asr", sidecar.get("duration_seconds"))
+                previous_held = sidecar.get("held_transcript_lines")
+                if previous_held or held_lines:
+                    # A legacy capture with no public cues still needs an
+                    # explicit media snapshot, including after a restore.
+                    sidecar.setdefault("source_chapters", [])
+                if previous_held and (entries or held_lines) and previous_held != held_lines:
+                    # This pass has its own line numbers. Preserve the previous
+                    # transcript in the same backup used by Restore transcript.
+                    backup = _transcript_backup_path(folder, original)
+                    _atomic_write_text(backup, original.decode("utf-8"), newline="")
+                    sidecar["transcript_backup"] = hashlib.sha256(original).hexdigest()
+                    sidecar["transcript_backup_plain"] = None
+                    sidecar.pop("held_transcript_lines")
+                if held_lines:
+                    sidecar["held_transcript_lines"] = held_lines
                 sidecar["transcript"] = _transcript_entries_with_links(sidecar, entries)
                 sidecar["transcript_source"] = source
+                sidecar["caption_kind"] = caption_kind if source == "captions" else None
                 sidecar["asr_fallback"] = asr or {"status": "not_needed"}
                 if captions_reason:
                     sidecar["captions_skipped_reason"] = captions_reason
@@ -5324,7 +5613,8 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
             _atomic_write_text(folder / "transcript.txt", text)
         if corpus_path is not None and corpus_path.is_file():
             with _corpus_update_lock:
-                md = corpus_path.read_text(encoding="utf-8")
+                with open_regular(DESKTOP_ROOT, corpus_path) as markdown:
+                    md = markdown.read()
                 block, header = _transcript_backfill_render(folder, sidecar)
                 updated = _splice_transcript_markdown(md, block, header)
                 if updated != md:
@@ -5332,7 +5622,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
         with _sidecar_update_lock:
             # Index what is on disk now, with any edit made meanwhile.
             try:
-                latest = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                latest = read_checked_json(DESKTOP_ROOT, sidecar_path)
             except (OSError, ValueError):
                 latest = None
         latest = latest if isinstance(latest, dict) else sidecar
@@ -5341,7 +5631,7 @@ def _transcript_backfill_apply(item: dict, entries=None, source=None, asr=None,
             raise RuntimeError("the library index did not take the new transcript")
         with _sidecar_update_lock:
             try:
-                current = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                current = read_checked_json(DESKTOP_ROOT, sidecar_path)
             except (OSError, ValueError):
                 current = None
             marker = current.get("transcript_backfill") if isinstance(current, dict) else None
@@ -5401,7 +5691,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
         if result != "applied":
             return {"outcome": result}
         try:
-            saved = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+            saved = read_checked_json(DESKTOP_ROOT, Path(item["sidecar_path"]))
             stored = (saved.get("transcript_backfill") or {}).get("result")
         except (OSError, ValueError, AttributeError):
             stored = None
@@ -5410,16 +5700,19 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
     url, host, duration = item.get("url"), item.get("host") or "other", item.get("duration")
     network_hosts = []
     try:
-        sidecar = json.loads(Path(item["sidecar_path"]).read_text(encoding="utf-8"))
+        sidecar = read_checked_json(DESKTOP_ROOT, Path(item["sidecar_path"]))
     except (OSError, ValueError):
         return {"outcome": "skipped", "reason": "The save was moved or removed."}
     if not isinstance(sidecar, dict) or _sidecar_has_words(sidecar):
         return {"outcome": "skipped"}
+    if sidecar.get("pending_transcript_review"):
+        return {"outcome": "busy"}
     settings = dict(_read_settings(), asr_fallback_enabled=True)
     asr_check = _transcript_backfill_checkpoint(checkpoint, url)
     asr_check()
     refused = None
     captions_reason = None
+    caption_kind = None
     entries, source, asr = [], None, None
     for stale in folder.glob(".asr-*"):
         # Audio a stopped run left behind (Uoink's own temporary files only).
@@ -5432,15 +5725,10 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
         tmp = Path(tmp)
         if host == "youtube" and url and network_ok("youtube"):
             # Captions first: no CPU, and the best words when they exist.
-            reason = _fetch_video_subtitles(url, tmp, long_video_mode=LONG_VIDEO_MODE_FULL,
-                                            cancel_event=stop_event)
+            entries, caption_kind, reason = _capture_caption_entries(
+                url, tmp, {}, duration, long_video_mode=LONG_VIDEO_MODE_FULL, cancel_event=stop_event)
             if reason is None:
                 network_hosts.append("youtube")
-                order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
-                srts = sorted(tmp.glob("video*.srt"), key=lambda p: (
-                    order.index(p.name) if p.name in order else len(order), p.name))
-                if srts:
-                    entries = list(parse_srt(srts[0], duration=duration))
             elif reason in (CAPTIONS_RATE_LIMITED, CAPTIONS_BOT_CHECK, CAPTIONS_BOT_CHECK_COOLDOWN):
                 captions_reason = reason
                 refused = {"host": "youtube",
@@ -5489,7 +5777,7 @@ def _transcript_backfill_item(item: dict, checkpoint, stop_event, network_ok) ->
     if source is None and status not in ("no_speech", "no_audio"):
         return {"outcome": "failed",
                 "reason": (asr or {}).get("error") or "The transcript step did not work."}
-    applied = _transcript_backfill_apply(item, entries, source, asr, captions_reason)
+    applied = _transcript_backfill_apply(item, entries, source, asr, captions_reason, caption_kind)
     if applied != "applied":
         return {"outcome": applied}
     outcome = "transcribed" if source else status
@@ -5514,7 +5802,7 @@ def _transcript_backfill_finish(item: dict, checkpoint, stop_event, network_ok) 
         if (folder / f"{folder.name}.json").exists() or _resolve_corpus_path(folder):
             return {"outcome": "skipped", "reason": "This capture already finished."}
         try:
-            metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+            metadata = read_checked_json(DESKTOP_ROOT, folder / "metadata.json")
         except (OSError, ValueError):
             metadata = None
         if not isinstance(metadata, dict) or not metadata.get("title"):
@@ -6261,7 +6549,7 @@ def _shelf_sync_one(row: dict | None, shelf: str | None, by_hand: bool | None) -
         return True
     try:
         shelf_router.sync_files(row.get("sidecar_path"), row.get("corpus_path"),
-                                shelf or _shelf_fallback(), by_hand=by_hand)
+                                shelf or _shelf_fallback(), by_hand=by_hand, root=DESKTOP_ROOT)
         return True
     except OSError as exc:
         log.warning("shelf files for %s not updated (%s)", row.get("video_id"), exc)
@@ -6962,12 +7250,15 @@ def _fetch_metadata(url: str, *,
     # X/Twitter, TikTok and Instagram skip it only for the strict validator's
     # own output. Any other URL on those hosts, such as a relaxed /live/status
     # probe that keeps its full path and query, is admitted like a generic URL.
+    url = url.partition("#")[0]
     strict_url, strict_platform = _normalize_video_url(url)
     strict_platform_url = strict_url == url and strict_platform in (
         PLATFORM_TWITTER, PLATFORM_TIKTOK, PLATFORM_INSTAGRAM)
     if not _is_youtube_ytdlp_call([*YTDLP_CMD, url]) and not strict_platform_url:
         url = (resolve_url or source_subscriptions.resolve_public_http_url)(
             url, user_agent=page_extractor._USER_AGENT)
+    else:
+        url = source_subscriptions.check_public_http_url(url)
     cp = _run_subprocess(
         [*YTDLP_CMD, "--dump-single-json", "--no-download", "--", url],
         cancel_event=cancel_event,
@@ -7011,33 +7302,45 @@ def _download_thumbnail(metadata: dict, output_folder: Path, *,
     def browser_open(target, **kwargs):
         return opener(target, headers={"User-Agent": user_agent}, **kwargs)
 
-    raw_path = output_folder / "thumbnail.raw"
-    try:
-        with browser_open(
-                url, timeout=30) as resp, open(raw_path, "wb") as f:
-            f.write(resp.read())
-    except Exception as e:
-        log.warning("thumbnail download failed: %s", e)
-        return None
-
+    deadline = time.monotonic() + 30
     jpg_path = output_folder / "thumbnail.jpg"
     try:
-        _run_subprocess(
-            [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
-             "-loglevel", "error", "-y",
-             "-i", str(raw_path), str(jpg_path)],
-            cancel_event=cancel_event,
-            check=True,
-            stderr=subprocess.PIPE,
-        )
+        with tempfile.TemporaryDirectory(prefix="uoink-thumbnail-") as temp:
+            raw_path = Path(temp) / "image"
+            converted = Path(temp) / "thumbnail.jpg"
+            try:
+                with browser_open(url, timeout=8) as resp, raw_path.open("wb") as dest:
+                    for chunk in source_subscriptions.bounded_http_chunks(
+                            resp, max_bytes=min(images.MAX_IMAGE_BYTES, 8 * 1024 * 1024), deadline=deadline):
+                        dest.write(chunk)
+            except Exception as exc:
+                log.warning("thumbnail download failed: %s", _sanitize_error(str(exc), max_len=500))
+                return None
+            with raw_path.open("rb") as source:
+                mime = images.sniff_mime(source.read(12))
+            demuxer = {"image/jpeg": "jpeg_pipe", "image/png": "png_pipe", "image/webp": "webp_pipe"}.get(mime)
+            if not demuxer:
+                return None
+            _run_subprocess(
+                [_platform.media_binary("ffmpeg") if _platform.sys.platform == "darwin" else "ffmpeg",
+                 "-loglevel", "error", "-y", "-protocol_whitelist", "file", "-f", demuxer,
+                 "-max_pixels", "16777216",
+                 "-i", str(raw_path), "-frames:v", "1", str(converted)],
+                cancel_event=cancel_event, check=True, timeout=15, stderr=subprocess.PIPE,
+            )
+            if not (converted.is_file() and converted.stat().st_size):
+                return None
+            with converted.open("rb") as src, atomic_output(jpg_path, root=DESKTOP_ROOT) as out:
+                shutil.copyfileobj(src, out)
+            return jpg_path
+    except subprocess.TimeoutExpired:
+        log.warning("thumbnail conversion timed out")
     except subprocess.CalledProcessError as e:
-        stderr = (e.stderr or b"").decode("utf-8", errors="ignore").strip()
-        log.warning("ffmpeg thumbnail convert failed: %s", stderr)
-        return None
-    finally:
-        raw_path.unlink(missing_ok=True)
-
-    return jpg_path if jpg_path.exists() else None
+        log.warning("ffmpeg thumbnail convert failed with exit code %s: %s",
+                    e.returncode, _sanitize_error(_subprocess_output(e), max_len=2000, preserve_lines=True))
+    except OSError as e:
+        log.warning("thumbnail could not be saved: %s", e)
+    return None
 
 
 def _x_video_poster_url(extract_result: dict) -> str | None:
@@ -7067,19 +7370,15 @@ def _save_x_video_poster(video_id: str, extract_result: dict) -> Path | None:
     poster = _x_video_poster_url(extract_result)
     if not poster:
         return None
-    folder = None
     try:
         row = _get_index().get_yoink(video_id) or {}
         if not row.get("corpus_path"):
             return None
-        folder = Path(row["corpus_path"]).parent
+        folder = checked_path(DESKTOP_ROOT, Path(row["corpus_path"])).parent
         return _download_thumbnail({"thumbnail": poster}, folder)
     except Exception as e:  # no ffmpeg, a full disk: never fail the capture
         log.warning("X video poster not saved for %s: %s", video_id, e)
         return None
-    finally:
-        if folder is not None:
-            (folder / "thumbnail.raw").unlink(missing_ok=True)
 
 
 def _is_x_channel_url(channel_url: str) -> bool:
@@ -7130,9 +7429,10 @@ def _fetch_channel_context(channel_url: str, *,
         target = target + "/videos"
 
     try:
+        target = source_subscriptions.check_public_http_url(target)
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
-             "--playlist-end", "5", target],
+             "--playlist-end", "5", "--", target],
             cancel_event=cancel_event, stdout=subprocess.PIPE,
             text=True, stderr=subprocess.PIPE, encoding="utf-8", errors="replace",
             # It holds the single YouTube slot: a hung child must not block
@@ -7206,10 +7506,8 @@ def _replace_comments_section(yoink_path: Path, body: str) -> None:
             log.warning("comments markers not found in yoink.md; skipping update")
             return
 
-        tmp = yoink_path.with_suffix(".md.tmp")
         try:
-            tmp.write_text(new_text, encoding="utf-8")
-            tmp.replace(yoink_path)
+            _atomic_write_text(yoink_path, new_text)
         except OSError as e:
             log.warning("could not write yoink.md to update comments: %s", e)
 
@@ -7247,13 +7545,8 @@ def _update_sidecar_comments(output_folder: Path, comments: list | None,
             return
         data["comments"] = comments
         data["comments_status"] = status
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(
-                json.dumps(data, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar comments update: write failed (%s)", e)
 
@@ -7666,10 +7959,8 @@ def _replace_hook_analysis_section(yoink_path: Path, body: str) -> None:
             else:
                 new_text = text.rstrip() + "\n\n" + body.rstrip() + "\n"
 
-        tmp = yoink_path.with_suffix(".md.tmp")
         try:
-            tmp.write_text(new_text, encoding="utf-8")
-            tmp.replace(yoink_path)
+            _atomic_write_text(yoink_path, new_text)
         except OSError as e:
             log.warning("could not write Hook Type section: %s", e)
 
@@ -7694,10 +7985,8 @@ def _update_sidecar_hook_type(output_folder: Path, *, status: str,
         data["hook_type_confidence"] = confidence
         data["hook_type_error"] = error
         data["hook_type_updated_at"] = _now_iso()
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar Hook Type update: write failed (%s)", e)
 
@@ -7724,11 +8013,8 @@ def _record_correction_in_sidecar(sidecar_path: Path, original: str,
             "corrected_at": _now_iso(),
         })
         data["hook_type_corrections"] = log_entries
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2),
-                           encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar correction update: write failed (%s)", e)
 
@@ -7957,10 +8243,8 @@ def _replace_comment_intelligence_section(yoink_path: Path, body: str) -> None:
         else:
             new_text = text.rstrip() + "\n\n" + block + "\n"
 
-        tmp = yoink_path.with_suffix(".md.tmp")
         try:
-            tmp.write_text(new_text, encoding="utf-8")
-            tmp.replace(yoink_path)
+            _atomic_write_text(yoink_path, new_text)
         except OSError as e:
             log.warning("could not write Comment Intelligence section: %s", e)
 
@@ -7982,10 +8266,8 @@ def _update_sidecar_comment_intelligence(output_folder: Path, *,
         data["comment_intelligence"] = analysis
         data["comment_intelligence_error"] = error
         data["comment_intelligence_updated_at"] = _now_iso()
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar CI update: write failed (%s)", e)
 
@@ -8091,11 +8373,8 @@ def _update_sidecar_entity_extraction(output_folder: Path, *, status: str,
         data["entity_extraction_status"] = status
         data["entity_extraction_error"] = error
         data["entity_extraction_updated_at"] = _now_iso()
-        tmp = sidecar_path.with_suffix(".json.tmp")
         try:
-            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2),
-                           encoding="utf-8")
-            tmp.replace(sidecar_path)
+            _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
         except OSError as e:
             log.warning("sidecar entity update: write failed (%s)", e)
 
@@ -8245,6 +8524,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         info_template = output_folder / "%(id)s_yoink_comments.%(ext)s"
         # Cached JSON cannot restore yt-dlp's lazy comment extractor. Keep
         # this separate extraction on the shared YouTube limiter.
+        url = source_subscriptions.check_public_http_url(url)
         _run_subprocess(
             [*YTDLP_CMD,
              "--write-info-json",
@@ -8253,7 +8533,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
              "--extractor-args",
              f"youtube:max_comments={max_comments},all,all,all",
              "-o", str(info_template),
-             url],
+             "--", url],
             check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             timeout=COMMENTS_TIMEOUT_SEC,
         )
@@ -8286,14 +8566,14 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         log.info("comments appended to %s (%d of %d)",
                  yoink_path, len(ranked), len(raw_comments))
     except subprocess.CalledProcessError as e:
-        _error_detail_log.warning("comments yt-dlp failed: %s\n%s", e, _subprocess_output(e))
+        machine_error_detail(e)
         log.warning("comments yt-dlp failed: %s", _error_summary(e))
         _replace_comments_section(yoink_path,
             "*Comments are disabled on this video.*")
         _update_sidecar_comments(output_folder, [], "disabled")
         _start_hook_after_comments()
     except Exception as e:
-        _error_detail_log.exception("comments worker crashed")
+        machine_error_detail(e)
         log.warning("comments worker crashed: %s", type(e).__name__)
         _replace_comments_section(yoink_path,
             "*Comments could not be retrieved.*")
@@ -8540,6 +8820,7 @@ def _youtube_bot_check_cooldown_active() -> bool:
 
 def _fetch_video_subtitles(url: str, output_folder: Path, *,
                            long_video_mode: str,
+                           track=None, prefix="video", text_only=False,
                            cancel_event: threading.Event | None = None) -> str | None:
     """Fetch optional captions; return None, or why they were not fetched.
 
@@ -8552,35 +8833,25 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
                  CAPTIONS_BOT_CHECK_COOLDOWN)
         return CAPTIONS_BOT_CHECK_COOLDOWN
     try:
-        _run_subprocess(
-            [
-                *YTDLP_CMD,
-                "--skip-download",
-                "--write-auto-subs",
-                "--write-subs",
-                # Named tracks only. "en.*" also matched YouTube's
-                # auto-translated tracks (en-de, en-de-DE...), which are
-                # rate-limited separately; one 429 there made yt-dlp exit
-                # before --convert-subs, so no transcript was saved.
-                "--sub-lang", "en,en-US,en-GB,en-orig",
-                "--convert-subs", "srt",
-                "-o", str(output_folder / "video.%(ext)s"),
-                url,
-            ],
+        url = source_subscriptions.check_public_http_url(url)
+        cmd = [*YTDLP_CMD, "--skip-download", *yt_extract.caption_args(track, text_only),
+               "-o", str(output_folder / f"{prefix}.%(ext)s"), "--", url]
+        done = _run_subprocess(
+            cmd,
             cancel_event=cancel_event,
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
             timeout=COMMENTS_TIMEOUT_SEC,
         )
+        stderr = getattr(done, "stderr", None) or b""
+        if is_youtube and yt_extract.caption_rate_warning(stderr, output_folder, prefix, track, text_only):
+            raise subprocess.CalledProcessError(1, cmd, stderr=stderr)
     except PlaylistJobCancelled:
         raise
     except (OSError, subprocess.CalledProcessError,
             subprocess.TimeoutExpired) as e:
-        output = (_subprocess_output(e) if isinstance(
-            e, (subprocess.CalledProcessError, subprocess.TimeoutExpired)) else "")
-        _error_detail_log.warning("%s subtitle fetch unavailable: %s\n%s",
-                                  long_video_mode, e, output)
+        machine_error_detail(e)
         reason = CAPTIONS_FAILED
         if is_youtube:
             found = _caption_failure_reason(e)
@@ -8590,6 +8861,17 @@ def _fetch_video_subtitles(url: str, output_folder: Path, *,
         log.warning("%s subtitle fetch unavailable: %s", long_video_mode, reason)
         return reason
     return None
+
+
+def _capture_caption_entries(url, folder, metadata, duration, *, long_video_mode,
+                             cancel_event=None, reuse=False):
+    def fetch(track, prefix, text_only):
+        return _fetch_video_subtitles(url, folder, long_video_mode=long_video_mode,
+                                      cancel_event=cancel_event, track=track,
+                                      prefix=prefix, text_only=text_only)
+
+    return yt_extract.capture_captions(folder, metadata, _detect_platform_from_url(url) == PLATFORM_YOUTUBE,
+                                       duration, fetch, reuse=reuse)
 
 
 # ---------------------------------------------------------------------------
@@ -8665,7 +8947,7 @@ def _clear_transcript_leftovers(folder: Path) -> None:
     """Before a transcript-only attempt: remove what an earlier attempt that
     never finished left (its captions, metadata and thumbnail). The folder
     and its ownership claim stay."""
-    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt"):
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt", "video*.json3"):
         for path in folder.glob(pattern):
             if path.is_file() and not path.is_symlink():
                 with contextlib.suppress(OSError):
@@ -8676,7 +8958,7 @@ def _discard_transcript_attempt(folder: Path) -> None:
     """Remove what a failed transcript-only attempt wrote into its own fresh
     folder, so a show with many caption-less videos leaves no empty shells.
     Only the attempt's known files go; anything else keeps the folder."""
-    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt",
+    for pattern in ("metadata.json", "thumbnail.jpg", "video*.srt", "video*.vtt", "video*.json3",
                     ".capture-source.json", "capture-not-finished.txt"):
         for path in folder.glob(pattern):
             if path.is_file() and not path.is_symlink():
@@ -8684,23 +8966,6 @@ def _discard_transcript_attempt(folder: Path) -> None:
                     path.unlink()
     with contextlib.suppress(OSError):
         folder.rmdir()
-
-
-def _caption_kind_for(metadata: dict, srt_path: Path) -> str | None:
-    """'captions' when the saved track was uploaded by the creator,
-    'auto_captions' when it is YouTube's automatic one, None when unknown.
-    yt-dlp writes the uploaded track for a language when both exist."""
-    name = srt_path.name
-    if not (name.startswith("video.") and name.endswith(".srt")):
-        return None
-    lang = name[len("video."):-len(".srt")]
-    uploaded = metadata.get("subtitles")
-    automatic = metadata.get("automatic_captions")
-    if isinstance(uploaded, dict) and lang in uploaded:
-        return "captions"
-    if isinstance(automatic, dict) and lang in automatic:
-        return "auto_captions"
-    return None
 
 
 def _source_published_at(metadata: dict) -> str | None:
@@ -8842,6 +9107,7 @@ def _verify_video_capture_folder(folder: Path, url: str, metadata: dict,
 
 def _create_video_entry_folder(folder: Path, url: str, metadata: dict) -> Path:
     """Reserve a fresh session/playlist entry without refreshing older entries."""
+    folder = checked_path(DESKTOP_ROOT, folder)
     folder.parent.mkdir(parents=True, exist_ok=True)
     target = folder
     number = 2
@@ -8864,6 +9130,7 @@ def _prepare_video_capture_folder(folder: Path, url: str, metadata: dict,
     existing = _indexed_video_capture(url, metadata) if refresh_existing else None
     if existing is not None:
         folder = Path(existing["corpus_path"]).parent
+    folder = checked_path(DESKTOP_ROOT, folder)
     video_id = existing["video_id"] if existing else _video_capture_id(url, metadata)
     folder.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -9213,6 +9480,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if phase_callback:
             phase_callback("metadata")
         metadata = _fetch_metadata(url, cancel_event=cancel_event)
+    else:
+        url = source_subscriptions.check_public_http_url(url)
     # 3.18.0: an X video's Description is the post's whole text (X only).
     if isinstance(metadata, dict) and str(
             metadata.get("extractor") or metadata.get("extractor_key") or "").lower().startswith("twitter"):
@@ -9471,10 +9740,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 key: value for key, value in metadata.items()
                 if key not in ("formats", "requested_formats", "automatic_captions", "subtitles")
             }
-            (asset_folder / "metadata.json").write_text(
-                json.dumps(cached_metadata, indent=2, ensure_ascii=False),
-                encoding="utf-8",
-            )
+            _atomic_write_text(asset_folder / "metadata.json",
+                               json.dumps(cached_metadata, indent=2, ensure_ascii=False))
         except OSError as e:
             log.warning("could not write metadata.json: %s", e)
             if refreshing:
@@ -9504,7 +9771,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
             media_cmd.extend([
                 "-o", str(asset_folder / "video-chunk-%(section_number)03d.%(ext)s"),
-                url,
+                "--", url,
             ])
         else:
             media_cmd.extend([
@@ -9513,7 +9780,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # sections already bound the downloaded media work.
                 "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
                 "-o", str(asset_folder / "video.%(ext)s"),
-                url,
+                "--", url,
             ])
 
         media_glob = (
@@ -9533,6 +9800,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             media_before_download = set(asset_folder.glob(media_glob))
             try:
                 if not reused_media and not transcript_only:
+                    media_cmd[-1] = source_subscriptions.check_public_http_url(url)
                     _run_subprocess(
                         media_cmd,
                         cancel_event=cancel_event,
@@ -9572,25 +9840,15 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if phase_callback:
             phase_callback("transcript")
-        if reused_media and any(asset_folder.glob("video*.srt")):
-            captions_skipped_reason = None
-        else:
-            captions_skipped_reason = _fetch_video_subtitles(
-                url, asset_folder,
-                long_video_mode=effective_long_video_mode,
-                cancel_event=cancel_event,
-            )
+        entries, caption_kind, captions_skipped_reason = _capture_caption_entries(
+            url, asset_folder, metadata, duration, long_video_mode=effective_long_video_mode,
+            cancel_event=cancel_event, reuse=reused_media)
         # Only a captions 429 counts as "refused" for the ASR fallback and the
         # retry pacing; a bot check or cooldown is recorded by its own reason.
         captions_refused = captions_skipped_reason == CAPTIONS_RATE_LIMITED
 
         video_files = [f for f in sorted(asset_folder.glob(media_glob))
                        if f.suffix in (".mp4", ".webm", ".mkv")]
-        # Uploaded English captions first, then auto-captions. glob order
-        # differs between filesystems.
-        srt_order = ["video.en.srt", "video.en-US.srt", "video.en-GB.srt", "video.en-orig.srt"]
-        srt_files = sorted(asset_folder.glob("video*.srt"), key=lambda p: (
-            srt_order.index(p.name) if p.name in srt_order else len(srt_order), p.name))
         if not video_files and not transcript_only:
             if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
                 raise ExtractionPhaseError(
@@ -9685,7 +9943,6 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         if not shot_times:
             shot_times = [i * interval for i in range(len(shots))]
 
-        entries = list(parse_srt(srt_files[0], duration=duration)) if srt_files else []
         platform_caption_count = len(entries)
         if not entries and phase_callback:
             phase_callback("transcript")
@@ -9720,10 +9977,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 **({"settings": dict(_read_settings() or {}, asr_fallback_enabled=True)}
                    if finish_on_disk else {}),
             )
-        # Uploaded captions or YouTube's automatic ones, when the source's
-        # caption tables say which track the saved file came from.
-        caption_kind = (_caption_kind_for(metadata, srt_files[0])
-                        if srt_files and transcript_source == "captions" else None)
+        entries, held_lines = _review_entries(entries, transcript_source == "asr", duration)
         if not shelf_hint:
             # One more routing pass now that the words spoken are known.
             topic = _reroute_with_transcript(topic, metadata, entries, url=url)
@@ -9768,7 +10022,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
         if entries:
             plain = "\n".join(text for _, _, text in entries)
-            (asset_folder / "transcript.txt").write_text(plain, encoding="utf-8")
+            _atomic_write_text(asset_folder / "transcript.txt", plain)
 
         if phase_callback:
             phase_callback("write")
@@ -9792,6 +10046,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         held_chapters = metadata.get("chapters") if isinstance(metadata.get("chapters"), list) else []
         capture_seed = {
             "video_id": video_id, "url": url, "source_type": source_type,
+            **({"held_transcript_lines": held_lines} if held_lines else {}),
             "transcript": [], "source_chapters": held_chapters,
             "transcript_source": transcript_source,
             "asr_fallback": asr_fallback,
@@ -9901,6 +10156,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # link values, and the held chapter metadata travels with the
                 # capture so reconstruction never re-derives either.
                 "transcript": capture_seed["transcript"],
+                **({"held_transcript_lines": held_lines} if held_lines else {}),
                 "source_chapters": held_chapters,
                 # CM-11: provenance is explicit whenever transcript rows exist.
                 # A null source means the capture honestly remains caption-less;
@@ -10461,11 +10717,10 @@ def _redact_command_args(cmd):
 
 
 def machine_error_detail(e: BaseException) -> str:
-    """Log raw diagnostics locally; return only sanitized disclosure detail."""
+    """Sanitize process diagnostics before logging or returning them."""
     is_failed_process = isinstance(e, subprocess.CalledProcessError)
     if is_failed_process or isinstance(e, subprocess.TimeoutExpired):
         output = _subprocess_output(e) if is_failed_process else ""
-        _error_detail_log.error("%s\n%s", e, output)
         pieces = []
         if e.cmd:
             try:
@@ -10483,9 +10738,10 @@ def machine_error_detail(e: BaseException) -> str:
     else:
         detail = str(e or "")
         max_len = 3000
-        _error_detail_log.error("%s", detail)
     # Redact before truncating so a cut cannot leave a partial credential.
-    return _sanitize_error(detail, max_len=max_len, preserve_lines=True)
+    detail = _sanitize_error(detail, max_len=max_len, preserve_lines=True)
+    _error_detail_log.error("%s", detail)
+    return detail
 
 
 def _error_summary(e: BaseException) -> str:
@@ -10661,6 +10917,8 @@ _PLATFORM_HOST_HINTS: dict[str, str] = {
     "www.reddit.com": "reddit",
     "old.reddit.com": "reddit",
     "new.reddit.com": "reddit",
+    "news.ycombinator.com": "hn",
+    "www.news.ycombinator.com": "hn",
     # Vimeo, Dailymotion, etc. are TBD -- left to Codex's chip work
     # so this PR stays focused on the helper-side extractor surface.
 }
@@ -11055,12 +11313,24 @@ _CAPTURE_SOURCES = {
         "payload_key": "url",
         "note": "",
     },
+    "hn_thread": {
+        "label": "Hacker News thread",
+        "endpoint": "/extract/page",
+        "payload_key": "url",
+        "note": "Saves the story and its discussion.",
+    },
     "podcast_feed": {
         "label": "Podcast feed",
         "endpoint": "/podcasts/feeds",
         "payload_key": "feed_url",
         "note": ("Adds the RSS feed and watches for new episode metadata. "
                  "Audio processing stays off until Auto-ingest is enabled."),
+    },
+    "podcast_episode": {
+        "label": "Podcast episode",
+        "endpoint": "/podcasts/feeds",
+        "payload_key": "feed_url",
+        "note": "Looks up this episode on Apple Podcasts and queues its audio for local transcription.",
     },
     "web_page": {
         "label": "Article / web page",
@@ -11129,6 +11399,13 @@ def _classify_capture_url(raw: str) -> dict:
         return _result("x_article", canonical)
     if reddit_extractor.is_reddit_thread_url(text):
         return _result("reddit_thread", text.strip())
+    hn_id = hn_extractor.item_id(text)
+    if hn_id:
+        return _result("hn_thread", hn_extractor.ITEM_URL + hn_id)
+    apple_ids = podcasts.apple_link_ids(text)
+    if apple_ids:
+        return _result("podcast_episode" if apple_ids[1] is not None else "podcast_feed",
+                       podcasts._validate_feed_url(text))
     if _looks_like_feed_url(text):
         canonical, _platform = _normalize_any_url(text)
         return _result("podcast_feed", canonical or text.strip())
@@ -11301,6 +11578,11 @@ def _suite_capture_start(body) -> tuple[int, dict]:
             "Reddit threads and most web pages work.")
     canonical = route["canonical"]
 
+    if source == "podcast_episode":
+        return _suite_capture_error(
+            400, "unsupported_url", "Paste this episode link in the Uoink dashboard. "
+            "Suite capture cannot track podcast episode downloads.")
+
     # Already saved: never recapture.
     try:
         row = _suite_capture_find_saved(source, canonical)
@@ -11319,9 +11601,8 @@ def _suite_capture_start(body) -> tuple[int, dict]:
     if source in _SUITE_CAPTURE_PAGE_SOURCES \
             and not page_extractor.host_is_allowed(_get_index(), canonical):
         host = urlparse(canonical).hostname or "this site"
-        return _suite_capture_error(
-            409, "consent_required",
-            f"Allow {host} in Uoink under Settings, Allowed sites, then try again.")
+        refusal = page_extractor.page_consent_required(host)
+        return _suite_capture_error(409, refusal["code"], refusal["error"])
     if source in _SUITE_CAPTURE_MEDIA_SOURCES:
         refusal = _platform.capability_refusal(_platform.media_capability())
         if refusal is not None:
@@ -11530,7 +11811,7 @@ def _generate_paste_corpus(folder: Path) -> str:
     corpus_path = _resolve_corpus_path(folder)
     if corpus_path is None:
         return ""
-    md = _read_export_markdown(corpus_path)
+    md = _read_export_markdown(corpus_path, root=DESKTOP_ROOT)
 
     try:
         from PIL import Image  # noqa: F401  -- import probe
@@ -11716,8 +11997,7 @@ def _regenerate_index() -> None:
     is O(N) in the library size; the incremental path is the steady state."""
     try:
         entries = _scan_yoinks()
-        DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
-        _index_path().write_text(_render_index(entries), encoding="utf-8")
+        _atomic_write_text(_index_path(), _render_index(entries))
         # v2.1 rename: supersede a leftover Yoink-era index so the Desktop
         # folder doesn't show two near-identical index files.
         legacy_index = DESKTOP_ROOT / INDEX_FILENAME_LEGACY
@@ -12313,22 +12593,19 @@ def _session_folder(slug: str) -> Path:
 
 def _read_session(slug: str) -> dict | None:
     path = _session_folder(slug) / "session.json"
-    if not path.exists():
-        return None
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        with open_regular(SESSIONS_ROOT.parent, path) as source:
+            return json.load(source)
+    except FileNotFoundError:
+        return None
     except (OSError, json.JSONDecodeError) as e:
         log.warning("Failed to read session %s: %s", slug, e)
         return None
 
 
 def _write_session(slug: str, data: dict) -> None:
-    folder = _session_folder(slug)
-    folder.mkdir(parents=True, exist_ok=True)
-    path = folder / "session.json"
-    tmp = folder / "session.json.tmp"
-    tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    path = _session_folder(slug) / "session.json"
+    _atomic_write_text(path, json.dumps(data, indent=2), root=SESSIONS_ROOT.parent)
 
 
 def _all_sessions() -> list[dict]:
@@ -12399,7 +12676,8 @@ def _build_corpus(session: dict) -> str:
 
         if yoink_path is not None and yoink_path.exists():
             try:
-                body = yoink_path.read_text(encoding="utf-8")
+                with open_regular(SESSIONS_ROOT.parent, yoink_path) as source:
+                    body = source.read()
                 # Strip the per-video H1 (the title) -- we already emitted Video N: title.
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 # Strip the leading metadata lines we'd duplicate (URL/Uoinked/etc.).
@@ -12496,7 +12774,8 @@ def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
         return None, capability["code"], 501
     try:
         cp = _run_subprocess(
-            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", normalized],
+            [*YTDLP_CMD, "--dump-single-json", "--flat-playlist", "--",
+             source_subscriptions.check_public_http_url(normalized)],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -12743,7 +13022,8 @@ def _restore_jobs_from_disk() -> None:
     Named for historical continuity; the source is now index.db, not
     jobs.json (which _migrate_jobs_json_to_index folds in once)."""
     try:
-        rows = _get_index().list_jobs(limit=1000)
+        idx = _get_index()
+        rows = idx.list_jobs(limit=1000)
     except Exception as e:
         log.warning("job restore from the index failed: %s", e)
         return
@@ -12756,9 +13036,22 @@ def _restore_jobs_from_disk() -> None:
             public = None
         if not isinstance(public, dict):
             continue
+        if public.get("kind") == "podcast_transcribe" and public.get("current_video_phase") == "awaiting_helper":
+            # These may still be cancelled by the submitting client during
+            # startup. Claim them under the episode lock after normal restore.
+            continue
         job = _validate_persisted_job(public)
         if job is not None:
             restored[job["id"]] = job
+    if len(rows) == 1000:
+        # Activity history is capped. A still-active transcription can be
+        # older than all 1,000 visible rows and must also resume after boot.
+        for saved in podcasts.active_transcription_jobs(idx):
+            if saved.get("id") in restored or saved.get("current_video_phase") == "awaiting_helper":
+                continue
+            job = _validate_persisted_job(saved)
+            if job is not None:
+                restored[job["id"]] = job
     with _jobs_lock:
         _jobs.clear()
         _jobs.update(restored)
@@ -13029,6 +13322,8 @@ def _get_public_job(job_id: str) -> dict | None:
         public = _public_job(job) if job else None
         if public and isinstance(public.get("result"), dict):
             public["result"] = dict(public["result"])
+    if public is None:
+        return podcasts.saved_transcription_job(_get_index(), job_id)
     # Only an individual job request loads corpus text. Lists, SSE snapshots,
     # and the retained job record stay small; file I/O never holds _jobs_lock.
     if public and public["state"] in _JOB_TERMINAL_STATES:
@@ -13100,11 +13395,15 @@ def _podcast_transcription_worker() -> None:
                 continue
             model = whisper_runner.normalize_model(job.get("model"))
             _raise_if_cancelled(job.get("_cancel_event"))
-            audio_path = Path(job["audio_path"])
+            idx = _get_index()
+            root = podcasts.podcast_storage(DATA_ROOT)
+            audio_path = podcasts.episode_media_path(idx, episode_id, DATA_ROOT)
+            if checked_path(root, Path(job["audio_path"])) != audio_path:
+                raise ValueError("The recording changed after this job was queued.")
             reusable = None
             try:
                 reusable = podcasts.load_completed_episode_transcript(
-                    _get_index(), episode_id)
+                    idx, episode_id, data_root=DATA_ROOT)
             except (FileNotFoundError, ValueError) as exc:
                 log.warning(
                     "podcast job %s could not reuse its DONE transcript; "
@@ -13133,7 +13432,7 @@ def _podcast_transcription_worker() -> None:
                     vocabulary_hint = _podcast_initial_prompt(episode_id)
                 except Exception:
                     vocabulary_hint = None  # a hint is never worth a failed job
-                with (source_subscriptions.capture_context(
+                with open_regular(root, audio_path, binary=True), (source_subscriptions.capture_context(
                         standing_start, source_subscriptions.process_incarnation(DATA_ROOT))
                         if standing_start else contextlib.nullcontext()):
                     transcript = whisper_runner.transcribe_audio(
@@ -13148,8 +13447,10 @@ def _podcast_transcription_worker() -> None:
                 _update_job(
                     job_id, current_video_phase="writing", progress=90,
                     message="Writing the transcript to disk.")
+                if podcasts.episode_media_path(idx, episode_id, DATA_ROOT) != audio_path:
+                    raise ValueError("The recording changed during transcription.")
                 out_path = whisper_runner.write_transcript(
-                    transcript, audio_path=audio_path)
+                    transcript, audio_path=audio_path, root=root)
                 whisper_runner.update_episode_transcript_state(
                     _get_index(), episode_id,
                     status=whisper_runner.STATUS_DONE,
@@ -13187,11 +13488,7 @@ def _podcast_transcription_worker() -> None:
                     # The transcript is complete and durable. Leave it done so
                     # the next feed tick retries only the idempotent publisher,
                     # not an expensive transcription that already succeeded.
-                    # The raw error goes only to server.log; the job keeps
-                    # sanitized text.
-                    _error_detail_log.exception(
-                        "podcast watch: deferred corpus publish for episode %d",
-                        episode_id)
+                    machine_error_detail(exc)
                     corpus_error = _error_summary(exc)
                     log.warning(
                         "podcast watch: deferred corpus publish for episode "
@@ -13248,10 +13545,6 @@ def _podcast_transcription_worker() -> None:
                     uoink_usage.count("captures", "podcast", "failed")
                 except Exception:
                     pass
-            # Tracebacks and raw tool text go only to server.log. The console,
-            # the episode row and the job (shown by the dashboard) get the
-            # sanitized forms used for every other machine error detail.
-            _error_detail_log.exception("podcast transcription job %s failed", job_id)
             error = _error_summary(exc)
             error_detail = f"{type(exc).__name__}: {machine_error_detail(exc)}"
             log.error("podcast transcription job %s failed: %s", job_id, error)
@@ -13753,6 +14046,7 @@ def _admit_podcast_transcription(
         episode_id: int, *, model: str | None = None,
         language: str | None = None, diarize: bool = False,
         consent_given: bool = False,
+        defer_worker: bool = False,
         publish_to_corpus: bool = False,
         source_start_id: str | None = None,
         source_owner_token: str | None = None) -> tuple[dict, int]:
@@ -13762,7 +14056,8 @@ def _admit_podcast_transcription(
     capture ledger row; the worker completes or fails that row with the owner
     token when the job ends (Phase 3, "Atomic starts": the start id is the
     job's idempotency identity)."""
-    episode = podcasts.get_episode(_get_index(), episode_id)
+    idx = _get_index()
+    episode = podcasts.get_episode(idx, episode_id)
     if episode is None:
         return {"ok": False, "error": "episode not found"}, 404
     audio_path_raw = episode.get("audio_local_path")
@@ -13772,7 +14067,10 @@ def _admit_podcast_transcription(
             "error": ("episode has no audio_local_path -- run "
                       "/podcasts/episodes/download first"),
         }, 400
-    audio_path = Path(audio_path_raw)
+    try:
+        audio_path = podcasts.episode_media_path(idx, episode_id, DATA_ROOT)
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "error": str(exc)}, 400
     if not audio_path.is_file():
         return {"ok": False, "error": f"audio file missing: {audio_path}"}, 404
     if _platform.sys.platform == "darwin" and language is not None and not isinstance(language, str):
@@ -13782,29 +14080,51 @@ def _admit_podcast_transcription(
         return refusal, 501
     with _jobs_lock:
         existing = next((
-            _public_job(job) for job in _jobs.values()
+            job for job in _jobs.values()
             if job.get("kind") == "podcast_transcribe"
             and job.get("episode_id") == episode_id
             and job.get("state") not in _JOB_TERMINAL_STATES
         ), None)
-    if existing:
-        if publish_to_corpus and not existing.get("publish_to_corpus"):
-            existing = _update_job(
-                existing["id"], publish_to_corpus=True,
-                message="Podcast transcription queued for corpus publish.")
-        if source_start_id and not existing.get("source_start_id"):
-            # A manual job already owns this episode: the standing start adopts
-            # it (one pipeline per canonical item) and is completed by it.
-            existing = _update_job(
-                existing["id"], source_start_id=source_start_id,
-                publish_to_corpus=True)
-            with _jobs_lock:
-                if existing and existing["id"] in _jobs:
-                    _jobs[existing["id"]]["_source_owner_token"] = source_owner_token
-        return {
-            "ok": True, "job_id": existing["id"], "job": existing,
-            "reused_existing": True,
-        }, 202
+        if existing:
+            if source_start_id and not existing.get("source_start_id"):
+                existing.update(source_start_id=source_start_id, _source_owner_token=source_owner_token)
+            if publish_to_corpus or source_start_id:
+                existing.update(publish_to_corpus=True, updated_at=_now_iso())
+                _persist_jobs_locked(existing)
+            public = _public_job(existing)
+            return {"ok": True, "job_id": public["id"], "job": public, "reused_existing": True}, 202
+    if defer_worker or episode.get("transcript_status") in ("queued", "running"):
+        saved = podcasts.active_transcription_jobs(idx, episode_id=episode_id)
+        if saved:
+            job = saved[0]
+            if source_start_id and not job.get("source_start_id"):
+                job["source_start_id"] = source_start_id
+            if publish_to_corpus or source_start_id:
+                job.update(publish_to_corpus=True, updated_at=_now_iso())
+            if not defer_worker:
+                owner = source_owner_token if job.get("source_start_id") == source_start_id else None
+                job = _start_waiting_podcast_job(job, owner_token=owner)
+            elif _validate_persisted_job(job) is None:
+                job = None
+            elif publish_to_corpus or source_start_id:
+                # The episode lock fences awaiting_helper pickup. For other
+                # phases also fence restoration by a helper that is starting.
+                with contextlib.ExitStack() as held:
+                    if job.get("current_video_phase") != "awaiting_helper":
+                        owner = source_subscriptions.CaptureLock.try_acquire(DATA_ROOT, podcasts.PODCAST_WORKER_LOCK)
+                        if owner is None:
+                            return {"ok": False, "error": "The helper is starting. Try this episode again."}, 409
+                        held.enter_context(owner)
+                        current = podcasts.saved_transcription_job(idx, job["id"])
+                        if not current or current.get("state") in _JOB_TERMINAL_STATES:
+                            return {"ok": False, "error": "The transcription job has finished."}, 409
+                        current.update(publish_to_corpus=True, updated_at=_now_iso(),
+                                       source_start_id=current.get("source_start_id") or source_start_id)
+                        job = current
+                    idx.upsert_job(_index_job_row(job))
+            if job is None:
+                return {"ok": False, "error": "The saved transcription job could not be read."}, 409
+            return {"ok": True, "job_id": job["id"], "job": job, "reused_existing": True}, 202
     if not whisper_runner.is_transcription_available():
         return {
             "ok": False, "whisperx_available": False,
@@ -13854,6 +14174,12 @@ def _admit_podcast_transcription(
         "source_start_id": source_start_id,
         "_source_owner_token": source_owner_token,
     }
+    if defer_worker:
+        job.update(current_video_phase="awaiting_helper",
+                   message="Queued. Waiting for the Uoink helper to start transcription.")
+        public = _public_job(job)
+        podcasts.store_waiting_transcription(_get_index(), public)
+        return {"ok": True, "job_id": job_id, "job": public}, 202
     whisper_runner.update_episode_transcript_state(
         _get_index(), episode_id, status=whisper_runner.STATUS_QUEUED,
         model_used=selected_model)
@@ -13861,6 +14187,35 @@ def _admit_podcast_transcription(
     _podcast_transcription_queue.put(job_id)
     _ensure_podcast_transcription_worker()
     return {"ok": True, "job_id": job_id, "job": public}, 202
+
+
+def _start_waiting_podcast_job(saved, *, owner_token=None):
+    """Caller holds the episode admission lock. Hand the disk row to the worker."""
+    job = _validate_persisted_job(saved)
+    if job is None:
+        return None
+    job["_source_owner_token"] = owner_token
+    job["message"] = "Podcast transcription queued."
+    public = _add_job_record(job)
+    _podcast_transcription_queue.put(job["id"])
+    _ensure_podcast_transcription_worker()
+    return public
+
+
+def _pickup_waiting_podcast_jobs():
+    # Also covers a client submission that crossed helper startup.
+    idx = _get_index()
+    for job in podcasts.active_transcription_jobs(idx, waiting_only=True):
+        episode_id = job.get("episode_id")
+        if type(episode_id) is not int or not job.get("id"):
+            continue
+        lock = source_subscriptions.CaptureLock.acquire(
+            DATA_ROOT, f"podcast-queue:{episode_id}", timeout=0)
+        if lock is not None:
+            with lock:
+                saved = podcasts.saved_transcription_job(idx, job["id"]) or {}
+                if saved.get("current_video_phase") == "awaiting_helper":
+                    _start_waiting_podcast_job(saved)
 
 
 def _resume_podcast_transcription_jobs() -> int:
@@ -14120,7 +14475,7 @@ def _run_retranscribe_job(job_id: str) -> None:
             _update_job(job_id, state="cancelled", current_video_phase=None,
                         completed_at=_now_iso(), message="Cancelled. The transcript is unchanged.")
     except Exception as exc:  # noqa: BLE001 - the old transcript is kept
-        _error_detail_log.exception("retranscribe job %s failed", job_id)
+        machine_error_detail(exc)
         _update_job(job_id, state="failed", current_video_phase=None, videos_failed=1,
                     completed_at=_now_iso(), error=_error_summary(exc),
                     message="Transcribing again did not finish. The transcript is unchanged.")
@@ -14167,7 +14522,36 @@ def _plain_transcript_bytes(folder):
     path = folder / "transcript.txt"
     if path.is_symlink() or path.resolve().parent != folder.resolve():
         raise ValueError("The transcript file has moved.")
-    return path.read_bytes() if path.exists() else None
+    try:
+        return read_checked_bytes(DESKTOP_ROOT, path)
+    except FileNotFoundError:
+        return None
+
+
+def repair_rolling_captions(video_id: str, *, dry_run=True) -> dict:
+    """Preview or apply a local caption repair for one explicit item."""
+    import caption_repair
+    import library_media
+    folder, item = _folder_for_video_id(video_id)
+    if folder is None:
+        raise ValueError("Saved item not found.")
+    try:
+        idx = _get_index()
+        result = caption_repair.repair(idx, item, _capture_media_plan, root=DESKTOP_ROOT, dry_run=dry_run)
+        if result["removed_words"] == 0:
+            # A settled retry writes nothing. Check the same corpus, citations
+            # and archived evidence that consumers read before reporting success.
+            with idx.detached_snapshot() as conn, library_media.publication_storage(DESKTOP_ROOT):
+                snapshot = library_media._read_snapshot(conn, video_id)
+            plain = _plain_transcript_bytes(folder)
+            if plain is not None:
+                expected = "\n".join(cue["text"] for cue in snapshot.cues)
+                if plain.decode("utf-8").replace("\r\n", "\n") != expected:
+                    raise ValueError("The repaired transcript.txt has changed. Your edits were kept.")
+        return result
+    except library_media.MediaError as exc:
+        reason = (exc.details or {}).get("reason", exc.code)
+        raise ValueError(f"Caption repair could not finish ({reason}).") from exc
 
 
 def _replace_transcript(video_id, model, folder, item, cancel_event, progress, restore):
@@ -14185,8 +14569,9 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
 
     idx = _get_index()
     side_path = Path(item["sidecar_path"])
-    side = media.read_owned_sidecar(side_path)
-    if not side or side.get("video_id") != video_id:
+    original = read_checked_bytes(DESKTOP_ROOT, side_path, limit=64 * 1024 * 1024)
+    side = media._parse_json_object(original, "sidecar")
+    if side.get("video_id") != video_id:
         raise ValueError("This save's details file is missing.")
     url = side.get("source_url") or side.get("url")
     if not isinstance(url, str) or not url.startswith(("http://", "https://")):
@@ -14199,7 +14584,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
     if not old_plan or not old_block:
         raise ValueError("This save predates the transcript history needed to replace it safely.")
     corpus_path = Path(item["corpus_path"])
-    corpus = corpus_path.read_bytes()
+    corpus = read_checked_bytes(DESKTOP_ROOT, corpus_path)
     newline = b"\r\n" if b"\r\n" in corpus else b"\n"
     old = old_plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
     if not old or corpus.count(old) != 1:
@@ -14212,7 +14597,6 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
                               if isinstance(r, dict)).strip()
         if saved_plain != old_plain:
             raise ValueError("transcript.txt was edited after saving. Your edits were kept.")
-    original = side_path.read_bytes()
     original_id = hashlib.sha256(original).hexdigest()
     backup_dir = folder / media.MEDIA_INPUTS_DIR
     if backup_dir.is_symlink() or backup_dir.resolve().parent != folder.resolve():
@@ -14225,14 +14609,14 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         archived = backup_dir / ("transcript-before-" + restore[:16] + ".json")
         if archived.is_symlink() or not archived.is_file():
             raise ValueError("The previous transcript is unavailable.")
-        raw = archived.read_bytes()
+        raw = read_checked_bytes(DESKTOP_ROOT, archived, limit=64 * 1024 * 1024)
         if hashlib.sha256(raw).hexdigest() != restore:
             raise ValueError("The previous transcript backup has changed.")
         previous = json.loads(raw)
         if previous.get("video_id") != video_id:
             raise ValueError("The previous transcript belongs to another item.")
         new_side = dict(side)
-        for key in ("transcript", "asr_fallback", "transcript_note", "transcript_source"):
+        for key in ("transcript", "asr_fallback", "transcript_note", "transcript_source", "held_transcript_lines"):
             new_side[key] = previous.get(key)
         new_plain = _transcript_text_from_sidecar(previous).encode()
         plain_hash = side.get("transcript_backup_plain")
@@ -14242,7 +14626,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
             path = backup_dir / ("transcript-before-" + plain_hash + ".txt")
             if path.is_symlink() or not path.is_file():
                 raise ValueError("The text backup is unavailable.")
-            new_plain = path.read_bytes()
+            new_plain = read_checked_bytes(DESKTOP_ROOT, path)
             if hashlib.sha256(new_plain).hexdigest() != plain_hash:
                 raise ValueError("The text backup has changed.")
         meta = new_side.get("asr_fallback") or {}
@@ -14263,6 +14647,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
                 raise ValueError("Whisper found no speech, so the transcript is unchanged.")
             raise ValueError(meta.get("error") or meta.get("reason") or "Transcription failed.")
 
+        entries, held_lines = _review_entries(entries, True, side.get("duration_seconds"))
         chars = sum(len("".join(text.split())) for _, _, text in entries)
         old_chars = len("".join(_transcript_text_from_sidecar(side).split()))
         old_coverage = (side.get("asr_fallback") or {}).get("coverage")
@@ -14274,16 +14659,18 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         if meta.get("requested_model"):
             note += f" (the language check selected it in place of {meta['requested_model']})"
         new_side = dict(side, transcript=_transcript_entries_with_links(side, entries),
+                        held_transcript_lines=held_lines,
                         transcript_source="asr", asr_fallback=meta, transcript_note=note)
         new_plain = "\n".join(text for _, _, text in entries).encode()
     new_side["transcript_backup"] = original_id if shorter else None
+    new_side["health"] = compute_health(new_side)
     new_side["transcript_backup_plain"] = (
         hashlib.sha256(plain_before).hexdigest() if shorter and plain_before is not None else None)
     binding = media.capture_sidecar_inputs(side)
     plan = _capture_media_plan(new_side, folder, item=item)
     if not plan:
         raise ValueError("The replacement transcript could not be prepared.")
-    if corpus_path.read_bytes() != corpus or _plain_transcript_bytes(folder) != plain_before:
+    if read_checked_bytes(DESKTOP_ROOT, corpus_path) != corpus or _plain_transcript_bytes(folder) != plain_before:
         raise ValueError("The transcript changed while transcribing. Your edits were kept.")
     new = plan["markdown"].rstrip("\n").encode().replace(b"\n", newline)
     corpus = corpus.replace(old, new, 1)
@@ -14299,7 +14686,10 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         video_id=video_id, source_revision=revision, cues=plan["cues"], artifact_bytes=plan["artifact"],
         corpus_revision=hashlib.sha256(corpus).hexdigest(), playback=plan["playback"],
         transcript_kind=plan["transcript_kind"], transcript_provider=plan["transcript_provider"],
-        chapter_rows=plan["chapter_rows"], recorded_at=side.get("yoinked_at"), item=item)
+        chapter_rows=plan["chapter_rows"], recorded_at=side.get("yoinked_at"), item=item,
+        # An all-held restore has no public cues. Its backup digest still
+        # distinguishes this intentional restore from replaying an old snapshot.
+        retain_empty_artifact=restore is not None)
     artifacts = {corpus_path: corpus,
                  folder / media.MEDIA_INPUTS_DIR / (digest + ".json"): plan["artifact"],
                  side_path: json.dumps(dict(new_side, media_depth=block), ensure_ascii=False).encode()}
@@ -14308,10 +14698,7 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
         artifacts[backup_dir / ("transcript-before-" + new_side["transcript_backup_plain"] + ".txt")] = plain_before
     # Keep the exact old details file next to the media inputs, so the old
     # transcript can be recovered by hand. Retention prunes only <sha256>.json.
-    backup = backup_dir / (
-        "transcript-before-" + hashlib.sha256(original).hexdigest()[:16] + ".json")
-    if backup.is_symlink() or (backup.exists() and backup.read_bytes() != original):
-        raise ValueError("The transcript backup file has changed.")
+    backup = _transcript_backup_path(folder, original)
     artifacts[backup] = original
     _raise_if_cancelled(cancel_event)
     try:
@@ -14325,9 +14712,9 @@ def _replace_transcript(video_id, model, folder, item, cancel_event, progress, r
                 raise ValueError("A capture of this item is running. Try restoring again when it finishes.")
             time.sleep(0.1)
         with lock:
-            if side_path.read_bytes() != original or _plain_transcript_bytes(folder) != plain_before:
+            if read_checked_bytes(DESKTOP_ROOT, side_path) != original or _plain_transcript_bytes(folder) != plain_before:
                 raise ValueError("The transcript changed while transcribing. Your edits were kept.")
-            ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding)
+            ticket = idx.begin_media_publication(video_id, folder=folder, capture_binding=binding, root=DESKTOP_ROOT)
             if ticket.base_media_revision != old_block.get("media_revision"):
                 raise ValueError("A newer capture replaced this transcript.")
             idx.publish_media_snapshot(video_id, cues=plan["cues"], media_block=block,
@@ -15153,6 +15540,55 @@ def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
     return result
 
 
+def _follow_podcast_link(feed_url: str, *, poll_interval_min=60, auto_ingest=False, display_name=None) -> dict:
+    """Resolve a pasted show or episode before creating anything in the library."""
+    apple = podcasts.apple_link_ids(feed_url)
+    show_title = selected = None
+    if apple:
+        feed_url, show_title, selected = podcasts.resolve_apple_podcast(*apple)
+    try:
+        url = source_subscriptions.normalize_podcast_feed_url(podcasts._validate_feed_url(feed_url) or "")
+    except source_subscriptions.ServiceError as exc:
+        raise ValueError(str(exc)) from exc
+    # A follow only needs to recognize the RSS channel or Atom root on this
+    # thread. Looking up an individual episode needs the bounded episode list.
+    parsed = podcasts.read_pasted_feed(url, limit=200 if selected else 0)
+    title = (str(display_name or show_title or parsed["feed"]["title"] or "").strip() or None)
+    idx = _get_index()
+    if selected:
+        episode = podcasts.match_apple_episode(parsed["episodes"], selected)
+        if not podcasts._is_http_url(episode.get("audio_url")):
+            raise ValueError("This episode has no audio to save.")
+        problem = _podcast_suggestion_setup_problem()
+        if problem:
+            raise ValueError(problem)
+        row = _register_show_episode(idx, url, title, episode)
+        feed = podcasts.get_feed(idx, row["feed_id"])
+        job = show_capture.create(DATA_ROOT, url, title=title, selected_episode=episode)
+        if _TOKEN_OWNED:
+            _show_capture_wake.set()
+        return {"ok": True, "feed": feed, "episode_id": row["id"], "show_job_id": job["id"],
+                "message": ("This episode capture is paused. Resume it in Sources under Save a whole show."
+                            if job["state"] == show_capture.PAUSED else
+                            "Episode queued. Track it in Sources under Save a whole show.")}
+    registered = _source_service().follow_podcast(url, title=title, interval=int(poll_interval_min))
+    source = registered["source"]
+    feed_id = (source.get("legacy") or {}).get("feed_id")
+    feed = podcasts.get_feed(idx, feed_id) if feed_id is not None else None
+    if feed is None:
+        raise ValueError("Uoink couldn't find the podcast feed for this subscription.")
+    feed["source_id"] = source["source_id"]
+    if auto_ingest:
+        feed["consent_required"] = True
+    hostname = urlparse(url).hostname
+    title_pending = str(feed.get("title") or "").strip().casefold() in ("", "untitled podcast", hostname)
+    if title_pending:
+        feed["title"] = hostname
+        if _TOKEN_OWNED:
+            podcasts.fetch_title_in_background(idx, feed)
+    return {"ok": True, "feed": feed, "created": registered["created"], "title_pending": title_pending}
+
+
 # ---- 3.17 podcast suggestions ---------------------------------------------
 _podcast_suggestion_saves: dict[str, dict] = {}
 _podcast_suggestion_saves_lock = threading.Lock()
@@ -15497,6 +15933,7 @@ def _start_podcast_feed_scheduler_thread() -> threading.Thread:
     def _runner():
         while True:
             try:
+                _pickup_waiting_podcast_jobs()
                 _podcast_feed_scheduler_tick()
                 _source_availability_tick()
             except Exception:
@@ -15525,6 +15962,9 @@ RELAY_CHECK_WAIT_SEC = 8.0
 RELAY_NOTE_TITLE = "From my phone"
 RELAY_FALLBACK_TITLE = "From my phone (not captured)"
 RELAY_DONE_TTL_SEC = 8 * 24 * 60 * 60   # past the relay's own 7-day expiry
+RELAY_RETRY_LIMIT = 1024                 # the relay holds at most 500 pending links
+RELAY_LINKS_PER_POLL = 100
+RELAY_MAX_RESPONSE_BYTES = 1024 * 1024
 _RELAY_ID_RE = re.compile(r"\A[0-9]{13}-[0-9a-f]{12}\Z")
 _RELAY_RATE_LIMITED_PREFIX = "rate limit exceeded"
 
@@ -15544,13 +15984,26 @@ _relay_state = {
     "generation": 0,
     "next_due": 0.0,
 }
-# In memory only: capture raises per link id, and ids already captured whose
-# DELETE has not succeeded yet (never captured twice).
-_relay_raises: dict[str, int] = {}
-_relay_done: dict[str, float] = {}
-# Links Uoink couldn't capture whose fallback note hasn't saved yet: the
-# reason to write, retried on the next check before the link is deleted.
-_relay_fallback: dict[str, str] = {}
+
+
+@dataclass(frozen=True)
+class _RelayRetry:
+    updated: float
+    stage: str
+    attempts: int = 0
+    reason: str = ""
+
+
+# Only the poller accesses this map, under _relay_poll_lock. Entries are
+# ordered by last update so expiry and capacity eviction remove the oldest.
+_relay_retries: dict[str, _RelayRetry] = {}
+
+
+def _relay_remember(link_id: str, stage: str, *, attempts: int = 0, reason: str = "") -> None:
+    _relay_retries.pop(link_id, None)
+    if len(_relay_retries) >= RELAY_RETRY_LIMIT:
+        del _relay_retries[next(iter(_relay_retries))]
+    _relay_retries[link_id] = _RelayRetry(time.monotonic(), stage, attempts, reason)
 
 
 class _RelayError(Exception):
@@ -15608,13 +16061,12 @@ def _relay_http(method: str, url: str, token: str,
     opener = urllib.request.build_opener(_RelayNoRedirect)
     try:
         with opener.open(request, timeout=timeout) as response:
-            status, raw = response.status, response.read(1024 * 1024)
+            status, raw = response.status, response.read(RELAY_MAX_RESPONSE_BYTES + 1)
+            if len(raw) > RELAY_MAX_RESPONSE_BYTES:
+                raise _RelayError("The relay response was too large. Uoink will try again later.")
     except urllib.error.HTTPError as e:
-        status = e.code
-        try:
-            raw = e.read(64 * 1024)
-        except Exception:
-            raw = b""
+        with e:
+            return e.code, {}
     try:
         payload = json.loads(raw.decode("utf-8")) if raw else {}
     except (UnicodeDecodeError, ValueError):
@@ -15663,9 +16115,7 @@ def _relay_pairing() -> dict:
     this function. `state` is one of: paired, old_relay, not_configured, error.
     A relay deployed before 3.17 answers 404 (no /v1/pairing); a pull-token
     listing tells that apart from a wrong address."""
-    settings = _read_settings()
-    base = settings.get("relay_url") or ""
-    token = _get_saved_relay_token()
+    settings, base, token = _relay_connection()
     if not base or not token:
         return {"ok": True, "state": "not_configured",
                 "message": "Add the relay address and pull token first."}
@@ -15685,17 +16135,19 @@ def _relay_pairing() -> dict:
     return {"ok": True, "state": "error", "message": _relay_status_error(status)}
 
 
-def _relay_delete(base: str, token: str, link_id: str) -> bool:
+def _relay_delete(base: str, token: str, link_id: str, outcome: str) -> str:
     try:
         status, _payload = _relay_http("DELETE", f"{base}/v1/links/{link_id}", token)
     except Exception as exc:
         log.warning("relay: delete failed (%s)", type(exc).__name__)
-        return False
+        return outcome
     if status in (200, 404):   # 404: already gone (expired, or deleted earlier)
-        _relay_done.pop(link_id, None)
-        return True
+        _relay_retries.pop(link_id, None)
+        return outcome
+    if status == 429:
+        return "deferred"
     log.warning("relay: delete answered HTTP %d", status)
-    return False
+    return outcome
 
 
 def _relay_capture_failure_reason(result: dict, url: str) -> str:
@@ -15710,41 +16162,62 @@ def _relay_capture_failure_reason(result: dict, url: str) -> str:
     return _sanitize_error(str(message or "the capture failed")) or "the capture failed"
 
 
-def _relay_save_fallback_note(tools, url: str, note, reason: str) -> bool:
+def _relay_rate_limited(result) -> bool:
+    if not isinstance(result, dict) or result.get("ok") is not False:
+        return False
+    error = result.get("error")
+    return (result.get("code") == "rate_limited"
+            or (isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX))
+            or (isinstance(error, dict) and error.get("code") == "rate_limited"))
+
+
+def _relay_save_note(tools, title: str, text: str) -> str:
+    try:
+        saved = tools.call_tool("uoink_note", {"title": title, "text": text, "author": "Phone inbox"})
+    except Exception as exc:
+        log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
+        return "kept"
+    if _relay_rate_limited(saved):
+        return "deferred"
+    return "noted" if isinstance(saved, dict) and saved.get("ok") is True else "kept"
+
+
+def _relay_save_fallback_note(tools, url: str, note, reason: str) -> str:
     """Keep a link Uoink couldn't capture as a Uoink note: the shared note,
     the URL, and one line saying why."""
     parts = [note.strip()] if isinstance(note, str) and note.strip() else []
     if url:
         parts.append(url)
     parts.append(f"Uoink couldn't capture this link: {reason}")
-    try:
-        saved = tools.call_tool("uoink_note", {
-            "title": RELAY_FALLBACK_TITLE, "text": "\n\n".join(parts)})
-    except Exception as exc:
-        log.warning("relay: the fallback note was not saved (%s)", type(exc).__name__)
-        return False
-    if isinstance(saved, dict) and saved.get("ok") is True:
-        return True
-    log.warning("relay: the fallback note was not saved")
-    return False
+    return _relay_save_note(tools, RELAY_FALLBACK_TITLE, "\n\n".join(parts))
 
 
 def _relay_settle_uncaptured(link_id: str, base: str, token: str, tools,
                              url: str, note, reason: str) -> str:
     """Nothing shared is lost: save the link as a note, then delete it from
     the relay. If the note can't be saved, keep the link for the next check."""
-    if not _relay_save_fallback_note(tools, url, note, reason):
-        _relay_fallback[link_id] = reason
+    outcome = _relay_save_fallback_note(tools, url, note, reason)
+    if outcome != "noted":
+        _relay_remember(link_id, "fallback", reason=reason)
         _relay_update(last_capture_error=_sanitize_error(
             "A shared link couldn't be captured or saved as a note. Uoink will "
             f"try again at the next check. {reason}"))
-        return "kept"
-    _relay_fallback.pop(link_id, None)
-    _relay_done[link_id] = time.time()
+        return outcome
+    _relay_remember(link_id, "delete")
     _relay_update(last_capture_error=_sanitize_error(
         f"A shared link couldn't be captured, so it was saved as a note: {reason}"))
-    _relay_delete(base, token, link_id)
-    return "noted"
+    return _relay_delete(base, token, link_id, "noted")
+
+
+def _relay_finish_capture(link_id: str, base: str, token: str, tools, url: str, note) -> str:
+    if isinstance(note, str) and note.strip():
+        outcome = _relay_save_note(tools, RELAY_NOTE_TITLE, f"{note.strip()}\n\n{url}")
+        if outcome != "noted":
+            _relay_remember(link_id, "shared_note")
+            _relay_update(last_capture_error="The link was captured. Uoink will retry its phone note.")
+            return outcome
+    _relay_remember(link_id, "delete")
+    return _relay_delete(base, token, link_id, "captured")
 
 
 def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
@@ -15753,16 +16226,18 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     link_id = link.get("id")
     if not isinstance(link_id, str) or not _RELAY_ID_RE.match(link_id):
         return "skipped"
-    if link_id in _relay_done:
+    retry = _relay_retries.get(link_id)
+    if retry and retry.stage == "delete":
         # Handled on an earlier check; only the DELETE is still owed.
-        _relay_delete(base, token, link_id)
-        return "skipped"
+        return _relay_delete(base, token, link_id, "skipped")
     url = link.get("url") if isinstance(link.get("url"), str) else ""
     note = link.get("note")
-    if link_id in _relay_fallback:
+    if retry and retry.stage == "shared_note":
+        return _relay_finish_capture(link_id, base, token, tools, url, note)
+    if retry and retry.stage == "fallback":
         # The capture already failed; only its fallback note is still owed.
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
-                                        _relay_fallback[link_id])
+                                        retry.reason)
     route = _classify_capture_url(url)
     capture_tools = _capture_tools()
     if not route.get("ok") or route.get("source") not in capture_tools:
@@ -15774,23 +16249,21 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     try:
         result = tools.call_tool(name, {key: route["canonical"]})
     except Exception as exc:
-        attempts = _relay_raises.get(link_id, 0) + 1
+        attempts = retry.attempts + 1 if retry else 1
         if attempts >= RELAY_MAX_RAISES:
-            _relay_raises.pop(link_id, None)
             log.warning("relay: capture failed %d times (%s); the link becomes a note",
                         attempts, type(exc).__name__)
             return _relay_settle_uncaptured(
                 link_id, base, token, tools, url, note,
                 f"the capture failed {attempts} times ({type(exc).__name__}).")
-        _relay_raises[link_id] = attempts
+        _relay_remember(link_id, "capture", attempts=attempts)
         log.warning("relay: capture raised %s; the link stays for the next check",
                     type(exc).__name__)
         return "kept"
-    _relay_raises.pop(link_id, None)
+    _relay_retries.pop(link_id, None)
     if not isinstance(result, dict):
         result = {"ok": False, "error": "capture returned no result"}
-    error = result.get("error")
-    if result.get("ok") is False and isinstance(error, str) and error.startswith(_RELAY_RATE_LIMITED_PREFIX):
+    if _relay_rate_limited(result):
         # The registry refused before trying. Not picked up: try next check.
         return "deferred"
     with _relay_cond:
@@ -15799,17 +16272,7 @@ def _relay_handle_link(link: dict, base: str, token: str, tools) -> str:
     if result.get("ok") is not True:
         return _relay_settle_uncaptured(link_id, base, token, tools, url, note,
                                         _relay_capture_failure_reason(result, url))
-    _relay_done[link_id] = time.time()
-    if isinstance(note, str) and note.strip():
-        try:
-            saved = tools.call_tool("uoink_note", {
-                "title": RELAY_NOTE_TITLE, "text": f"{note.strip()}\n\n{url}"})
-            if not (isinstance(saved, dict) and saved.get("ok") is True):
-                log.warning("relay: the shared note was not saved")
-        except Exception as exc:
-            log.warning("relay: the shared note was not saved (%s)", type(exc).__name__)
-    _relay_delete(base, token, link_id)
-    return "captured"
+    return _relay_finish_capture(link_id, base, token, tools, url, note)
 
 
 def _relay_poll_once() -> dict:
@@ -15817,22 +16280,25 @@ def _relay_poll_once() -> dict:
     first. Never raises; the outcome lands in the relay status."""
     with _relay_poll_lock:
         try:
-            settings = _read_settings()
-            base = settings.get("relay_url") or ""
-            token = _get_saved_relay_token()
+            settings, base, token = _relay_connection()
             if settings.get("relay_enabled") is not True or not base or not token:
                 return _relay_status_payload(settings)
             _relay_update(polling=True, last_poll_at=_now_iso())
-            cutoff = time.time() - RELAY_DONE_TTL_SEC
-            for done_id in [k for k, at in _relay_done.items() if at < cutoff]:
-                _relay_done.pop(done_id, None)
+            cutoff = time.monotonic() - RELAY_DONE_TTL_SEC
+            while _relay_retries:
+                oldest = next(iter(_relay_retries))
+                if _relay_retries[oldest].updated > cutoff:
+                    break
+                del _relay_retries[oldest]
             status, payload = _relay_http("GET", f"{base}/v1/links", token)
             links = payload.get("links")
             if status != 200 or payload.get("ok") is not True or not isinstance(links, list):
                 raise _RelayError(_relay_status_error(status) if status != 200
                                   else "The relay sent an answer Uoink doesn't understand.")
-            links = [link for link in links if isinstance(link, dict)]
-            links.sort(key=lambda link: str(link.get("id") or ""))
+            links = [link for link in links[:RELAY_LINKS_PER_POLL]
+                     if isinstance(link, dict) and isinstance(link.get("id"), str)
+                     and _RELAY_ID_RE.fullmatch(link["id"])]
+            links.sort(key=lambda link: link["id"])
             _relay_update(last_pending_count=len(links), last_error=None)
             tools = _mcp_tools_module() if links else None
             outcomes = []
@@ -15843,7 +16309,7 @@ def _relay_poll_once() -> dict:
                 outcomes.append(outcome)
                 if outcome == "deferred":
                     break
-            if outcomes and not {"noted", "kept"} & set(outcomes):
+            if outcomes and not {"noted", "kept", "deferred"} & set(outcomes):
                 _relay_update(last_capture_error=None)
             _relay_update(last_ok_at=_now_iso())
             if outcomes:
@@ -16003,6 +16469,12 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
 def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
     """Cancel a running async job. Returns (job, error, status)."""
     with _jobs_lock:
+        known = job_id in _jobs
+    if not known:
+        cancelled = podcasts.cancel_saved_transcription(_get_index(), job_id, DATA_ROOT)
+        if cancelled:
+            return cancelled
+    with _jobs_lock:
         job = _jobs.get(job_id)
         if not job:
             return None, "job not found", 404
@@ -16069,7 +16541,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
         if item.get("ok") or item.get("status") == "saved_with_errors":
             md_path = item.get("md_path")
             try:
-                body = _read_export_markdown(Path(md_path))
+                body = _read_export_markdown(Path(md_path), root=DESKTOP_ROOT)
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 body = re.sub(r"^(\*\*[^*]+:\*\*[^\n]*\n)+", "", body)
                 if text_only:
@@ -16342,6 +16814,10 @@ def _reyoink_source(idx, video_id: str) -> tuple[str, int | None] | None:
         try:
             sidecar = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
             url = (sidecar.get("url") or "").strip()
+            if sidecar.get("source_type") == "hn_thread":
+                requested = (sidecar.get("metadata") or {}).get("source_url")
+                if hn_extractor.item_id(requested):
+                    url = requested
             raw_interval = sidecar.get("interval_seconds")
             interval = int(raw_interval) if raw_interval else None
         except (OSError, json.JSONDecodeError, TypeError, ValueError):
@@ -16608,29 +17084,24 @@ def _mcp_config_payload() -> dict:
 AGENT_CLIENTS = ("claude-desktop", "cursor", "cline", "continue")
 
 
-def _env_dir(var: str) -> Path | None:
-    val = os.environ.get(var)
-    return Path(val) if val else None
-
-
 def _agent_client_specs() -> list[dict]:
     """Per-client detection spec: the config file we'd edit, plus the marker
     paths whose existence means "this client is installed". Continue's current
     YAML config needs manual merging; the JSON writer must not modify it."""
+    from agent_config_writer import claude_desktop_paths, cline_config, cline_storage, roaming_dir
     home = Path.home()
-    appdata = _env_dir("APPDATA") or (home / "AppData" / "Roaming")
-    local = _env_dir("LOCALAPPDATA") or (home / "AppData" / "Local")
-    code_user = appdata / "Code" / "User"
+    appdata = roaming_dir()
+    local = Path(os.environ.get("LOCALAPPDATA") or home / "AppData/Local")
     if sys.platform == "darwin":
-        appdata = home / "Library/Application Support"
         local = home / "Applications"
-        code_user = appdata / "Code/User"
+    claude_paths = claude_desktop_paths()
     return [
         {
             "name": "claude-desktop",
             "label": "Claude Desktop",
-            "config_path": appdata / "Claude" / "claude_desktop_config.json",
-            "markers": [appdata / "Claude",
+            "config_path": claude_paths[0],
+            "config_paths": claude_paths,
+            "markers": [claude_paths[0].parent, appdata / "Claude",
                         local / "AnthropicClaude",
                         local / "Programs" / "claude"] + (
                             [Path("/Applications/Claude.app"), home / "Applications/Claude.app"]
@@ -16649,12 +17120,10 @@ def _agent_client_specs() -> list[dict]:
             "name": "cline",
             "label": "Cline",
             # Cline (VS Code extension) keeps its MCP servers here.
-            "config_path": (code_user / "globalStorage"
-                            / "saoudrizwan.claude-dev" / "settings"
-                            / "cline_mcp_settings.json"),
+            "config_path": cline_config(),
             # Plain VS Code is not Cline. Require Cline's own extension
             # storage marker so detection does not offer a false connect.
-            "markers": [code_user / "globalStorage" / "saoudrizwan.claude-dev"],
+            "markers": [cline_storage()],
         },
         {
             "name": "continue",
@@ -16744,7 +17213,7 @@ def _client_is_connected(config_path: Path) -> bool:
     try:
         if not config_path.exists():
             return False
-        data = json.loads(config_path.read_text(encoding="utf-8"))
+        data = json.loads(config_path.read_text(encoding="utf-8-sig"))
     except (OSError, UnicodeError, ValueError, RecursionError):
         return False
     servers = data.get("mcpServers") if isinstance(data, dict) else None
@@ -16810,7 +17279,9 @@ def _detect_ai_clients() -> list[dict]:
             cfg, connected, reason = _continue_connection(spec)
             details["connected_reason"] = reason
         else:
-            connected = _client_is_connected(cfg)
+            paths = spec.get("config_paths", [cfg])
+            connected = all(_client_is_connected(path) for path in paths)
+            details["config_paths"] = [str(path) for path in paths]
         out.append({
             "name": spec["name"],
             "label": spec["label"],
@@ -16824,113 +17295,31 @@ def _detect_ai_clients() -> list[dict]:
 
 
 def _connect_ai_client(name: str) -> dict:
-    """Add Uoink's MCP server entry to a client's config file in place.
-
-    Validates existing JSON before touching it (a malformed config is left
-    untouched and reported, never clobbered), writes a `.bak` copy first, then
-    atomically rewrites the file with the `uoink` entry merged into
-    `mcpServers`. Returns a result dict; raises ValueError (mapped to 4xx) for
-    an unknown client or a missing parent directory ("not installed")."""
+    """Merge Uoink into every active config selected by the dashboard."""
+    from agent_config_writer import ConfigError, apply_edits, plan_edit
     spec = _agent_client_spec(name)
     if spec is None:
-        e = ValueError("That AI client is not supported.")
-        e.http_status = 404
-        raise e
+        raise ConfigError("That AI client is not supported.", 404)
     if spec.get("manual_only"):
-        e = ValueError("Continue uses YAML configuration. Run 'uoink connect continue' "
-                       "and follow its merge instructions. Nothing was changed.")
-        e.http_status = 409
-        raise e
-    cfg: Path = spec["config_path"]
-    installed = any(p.exists() for p in spec["markers"])
-    if not installed and not cfg.parent.exists():
-        e = ValueError(
-            f"{spec['label']} doesn't look installed on this machine.")
-        e.http_status = 409
-        raise e
-
-    existed = cfg.exists()
-    data: dict = {}
-    if existed:
-        try:
-            raw = cfg.read_text(encoding="utf-8")
-        except OSError as exc:
-            log.warning("agent connect: config read failed (%s)", exc)
-            e = ValueError(
-                f"Couldn't read the {spec['label']} settings. "
-                "Nothing was changed.")
-            e.http_status = 500
-            raise e
-        if raw.strip():
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                e = ValueError(
-                    f"{spec['label']} settings aren't valid JSON; "
-                    "left it untouched. Open it and fix the syntax, then "
-                    "try connecting again.")
-                e.http_status = 422
-                raise e
-            if not isinstance(parsed, dict):
-                e = ValueError(
-                    f"{spec['label']} config isn't a JSON object; "
-                    "left it untouched.")
-                e.http_status = 422
-                raise e
-            data = parsed
-
-    servers = data.get("mcpServers")
-    if not isinstance(servers, dict):
-        servers = {}
-    already = "uoink" in servers
-    servers["uoink"] = _uoink_mcp_entry()
-    data["mcpServers"] = servers
-
-    backup_path = cfg.with_suffix(cfg.suffix + ".bak")
-    try:
-        cfg.parent.mkdir(parents=True, exist_ok=True)
-    except OSError as exc:
-        log.warning("agent connect: settings directory unavailable (%s)", exc)
-        e = ValueError(
-            f"Couldn't prepare the {spec['label']} settings folder. "
-            "Nothing was changed.")
-        e.http_status = 500
-        raise e
-    if existed:
-        try:
-            shutil.copy2(cfg, backup_path)
-        except OSError as exc:
-            log.warning("agent connect: backup failed (%s)", exc)
-            e = ValueError(
-                f"Couldn't back up the {spec['label']} settings, so Uoink "
-                "refused to change them.")
-            e.http_status = 500
-            raise e
-    else:
-        backup_path = None
-
-    tmp = cfg.with_suffix(cfg.suffix + ".tmp")
-    try:
-        tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False),
-                       encoding="utf-8")
-        tmp.replace(cfg)
-    except OSError as exc:
-        log.warning("agent connect: config write failed (%s)", exc)
-        tmp.unlink(missing_ok=True)
-        e = ValueError(
-            f"Couldn't update the {spec['label']} settings. "
-            "The original settings were left in place.")
-        e.http_status = 500
-        raise e
-    log.info("agent connect: wrote uoink mcpServers entry to %s", cfg)
+        raise ConfigError("Continue uses YAML configuration. Run 'uoink connect continue' "
+                          "and follow its merge instructions. Nothing was changed.", 409)
+    paths = spec.get("config_paths", [spec["config_path"]])
+    if not any(p.exists() for p in spec["markers"]) and not paths[0].parent.exists():
+        raise ConfigError(f"{spec['label']} doesn't look installed on this machine.", 409)
+    entry = _uoink_mcp_entry()
+    edits = [plan_edit(path, spec["label"], "mcpServers", entry) for path in paths]
+    apply_edits(edits, spec["label"])
+    first = edits[0]
     return {
         "client": spec["name"],
         "label": spec["label"],
-        "config_path": str(cfg),
-        "backup_path": (str(backup_path) if backup_path else None),
-        "action": "updated" if already else "added",
-        "created_config": not existed,
-        "entry": servers["uoink"],
+        "config_path": str(first.path),
+        "config_paths": [str(edit.path) for edit in edits],
+        "backup_path": str(first.backup) if first.backup else None,
+        "backup_paths": [str(edit.backup) for edit in edits if edit.backup],
+        "action": first.action,
+        "created_config": first.original is None,
+        "entry": entry,
     }
 
 
@@ -17253,16 +17642,33 @@ def _fs_safe_ts(iso: str) -> str:
     return (iso or "").replace(":", "")
 
 
+def _owned_item_folder(row: dict) -> Path:
+    value = row.get("corpus_path")
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("This item has no saved folder.")
+    path = checked_path(DESKTOP_ROOT, Path(value))
+    folder = path.parent
+    relative = folder.relative_to(DESKTOP_ROOT)
+    special = relative.parts[:1] in (("_exports",), ("_yoink-trash",))
+    session_root = relative.parts[:1] == ("_sessions",) and len(relative.parts) < 3
+    if (not relative.parts or special or session_root
+            or folder.name != row.get("slug") or path.suffix.lower() != ".md"):
+        raise ValueError("This folder does not belong to the saved item.")
+    return folder
+
+
 def _trash_folder_for(row: dict) -> Path:
     """The trash destination for a soft-deleted yoink row:
     _yoink-trash/<topic-folder>/<slug>__deleted-<deleted_at>. Derived from
     corpus_path so it mirrors the on-disk topic folder exactly, and from
     deleted_at so delete / restore / purge all agree on the same path."""
-    original = Path(row["corpus_path"]).parent
+    original = _owned_item_folder(row)
     topic_folder = original.parent.name
     slug = original.name
     ts = _fs_safe_ts(row.get("deleted_at") or "")
-    return _trash_root() / topic_folder / f"{slug}__deleted-{ts}"
+    if not ts or any(ch in ts for ch in "/\\\\"):
+        raise ValueError("Invalid deletion date.")
+    return checked_path(DESKTOP_ROOT, _trash_root() / topic_folder / f"{slug}__deleted-{ts}")
 
 
 # Trash purge cadence: a pass at startup, then once a day.
@@ -17819,13 +18225,56 @@ def _diagnose_payload() -> dict:
     return _build_diagnose_payload(public=False)
 
 
-def _public_diagnose_payload(*, local_ui: bool = False) -> dict:
+_diagnose_lock = threading.Lock()
+_diagnose_cache = None
+
+
+def _refresh_diagnose() -> None:
+    global _diagnose_cache
+    try:
+        _diagnose_cache = _build_diagnose_payload(public=True)
+    except Exception:
+        log.exception("Diagnostic refresh failed")
+    finally:
+        _diagnose_lock.release()
+
+
+def _start_diagnose_refresh() -> None:
+    if not _diagnose_lock.acquire(blocking=False):
+        return
+    started = False
+    try:
+        threading.Thread(target=_refresh_diagnose, daemon=True, name="diagnose").start()
+        started = True
+    except Exception:
+        log.exception("Could not start diagnostic checks")
+    finally:
+        if not started:
+            _diagnose_lock.release()
+
+
+def _public_diagnose_payload(*, local_ui: bool = False, refresh: bool = False) -> dict:
     """HTTP self-check, redacted by default.
 
     Only the HTTP handler's splash metadata check may enable local_ui,
     which adds the splash's key-ready boolean without paths or key checks.
     """
-    return _build_diagnose_payload(public=True, local_ui=local_ui)
+    if refresh:
+        _start_diagnose_refresh()
+    refreshing = _diagnose_lock.locked()
+    payload = dict(_diagnose_cache or {
+        "ok": False, "pending": refreshing, "version": VERSION, "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
+        "checks": [{"name": "diagnostics", "status": "warning",
+                    "detail": "Checks are running." if refreshing else "Checks are unavailable."}],
+        "warnings": [], "migration": {},
+    })
+    payload["refreshing"] = refreshing
+    if local_ui:
+        if _read_settings().get("anthropic_key_invalid"):
+            payload["anthropic_key_valid"] = False
+        elif (_get_saved_anthropic_key() or "").strip():
+            payload["anthropic_key_valid"] = True
+    return payload
 
 
 def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
@@ -17998,7 +18447,8 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
     # Keep migration readiness booleans, but explicitly project the public
     # fields: migration_status also contains local roots and legacy-key state.
     try:
-        status = migrate_install.migration_status()
+        status = (migrate_install.migration_status(include_legacy_key=False) if public
+                  else migrate_install.migration_status())
         migration = {
             section: {flag: status.get(section, {}).get(flag) is True for flag in flags}
             for section, flags in (
@@ -18038,7 +18488,7 @@ def _build_diagnose_payload(*, public: bool, local_ui: bool = False) -> dict:
 # Requests without them keep the index's path unchanged.
 _LIBRARY_KINDS = {
     "videos": ("video", "short_video"),
-    "posts": ("x_thread", "x_article", "reddit_thread", "page"),
+    "posts": ("x_thread", "x_article", "reddit_thread", "hn_thread", "page"),
     "notes": ("note", "image"),
     "podcasts": ("episode",),
 }
@@ -18563,6 +19013,31 @@ def _persist_reddit_thread(result: dict, *, topic: str | None = None):
         topic_classifier=_route_topic)
 
 
+def _capture_hn_thread(body):
+    url = body["url"]
+    shelf, error = _shelf_from_body(body)
+    if error:
+        return 400, {"ok": False, "error": error}
+    result = hn_extractor.extract_hn_thread(url)
+    if not result.get("ok"):
+        return 400, result
+    try:
+        # Two different comment links can update the same story's files.
+        with _corpus_update_lock:
+            if shelf:
+                _remember_capture_shelf(result["url"], shelf, by_hand=body.get("shelf") is not None)
+            saved = page_extractor.persist_page_yoink(
+                _get_index(), result, topic=shelf, data_root=DESKTOP_ROOT,
+                source_type=hn_extractor.SOURCE_TYPE, subfolder="Hacker News", slug_prefix="hn",
+                topic_classifier=_route_topic)
+    except Exception:
+        log.exception("Hacker News thread save failed")
+        saved = None
+    if not saved:
+        return 500, {"ok": False, "error": "Could not save the Hacker News thread locally."}
+    return 200, {**result, "video_id": saved}
+
+
 def _saves_capture_one(now=None) -> bool:
     """Capture the oldest due saved post. ``now`` is a Unix timestamp for tests.
 
@@ -18783,6 +19258,9 @@ def _research_url_key(url) -> str | None:
     if reddit_extractor.is_reddit_thread_url(url):
         canonical = reddit_extractor.canonical_json_url(url)
         return "reddit:" + canonical.lower().removesuffix("/.json").removesuffix(".json") if canonical else None
+    hn_id = hn_extractor.item_id(url)
+    if hn_id:
+        return "hn:" + hn_id
     canonical = page_extractor.normalize_page_url(url)
     if not canonical:
         return None
@@ -18837,12 +19315,12 @@ def _research_status(args: dict) -> dict:
 def _research_library_transcript(video_id: str) -> dict | None:
     """Read saved research evidence without assuming missing provenance is captions."""
     try:
-        folder, _row = _folder_for_video_id(video_id)
+        folder, row = _folder_for_video_id(video_id)
+        if folder is None:
+            return None
+        _path, sidecar = _read_sidecar_for_folder(folder, root=_item_storage_root(row))
     except Exception:
         return None
-    if folder is None:
-        return None
-    _path, sidecar = _read_sidecar_for_folder(folder)
     if not any(isinstance(segment, dict) and str(segment.get("text") or "").strip()
                for segment in sidecar.get("transcript") or []):
         return None
@@ -18868,7 +19346,7 @@ def _list_import_ytdlp(url: str, start: int, end: int) -> dict:
     try:
         cp = _run_subprocess(
             [*YTDLP_CMD, "--dump-single-json", "--flat-playlist",
-             "--playlist-items", f"{int(start)}:{int(end)}", url],
+             "--playlist-items", f"{int(start)}:{int(end)}", "--", source_subscriptions.check_public_http_url(url)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             encoding="utf-8", errors="replace", timeout=COMMENTS_TIMEOUT_SEC)
         return json.loads(cp.stdout)
@@ -19052,14 +19530,13 @@ def _register_show_episode(idx, feed_url: str, show_title, episode: dict) -> dic
     """Put one feed episode in the podcast tables under its real GUID
     without following the show (the same rule as a suggestion save: a show
     not already followed is added switched off, so nothing polls it)."""
-    existed = _show_podcast_feed(idx, feed_url) is not None
-    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False)
+    feed = podcasts.add_feed(idx, feed_url, auto_ingest=False, enabled=False, title=show_title)
     feed_id = int(feed["id"])
-    if not existed:
-        podcasts.set_feed_enabled(idx, feed_id, False)
-        podcasts.record_feed_meta(
-            idx, feed_id, title=show_title or None, description=None,
-            homepage=None, etag=None, last_modified=None, ok=True)
+    with idx._lock:
+        exact = idx._conn.execute("SELECT * FROM podcast_episodes WHERE feed_id=? AND guid=?",
+                                  (feed_id, episode.get("guid"))).fetchone()
+    if exact is not None:
+        return dict(exact)
     same = podcasts.find_feed_episode(
         idx, feed_id, audio_url=episode.get("audio_url"), title=episode.get("title"),
         published=episode.get("published_at"))
@@ -19149,13 +19626,12 @@ class _ServerShowBackend:
 
     def fetch_feed(self, url):
         try:
-            body, _headers = podcasts.fetch_feed({"feed_url": url})
+            return podcasts.fetch_show_feed(url, show_capture.MAX_EPISODES + 1)
+        except (TimeoutError, source_subscriptions.ServiceError, source_subscriptions.PodcastFeedError) as exc:
+            raise show_capture.ShowCaptureError(str(exc), "fetch_failed") from None
         except Exception:
             raise show_capture.ShowCaptureError(
                 "Uoink couldn't open that feed. Check the link.", "fetch_failed") from None
-        if not body:
-            raise show_capture.ShowCaptureError("That feed came back empty.", "fetch_failed")
-        return body
 
     def in_library(self, job, episode):
         if episode.get("video_id"):
@@ -20210,7 +20686,8 @@ class Handler(BaseHTTPRequestHandler):
                 or self.headers.get("X-Yoink-Token") or "").strip()
 
     def _check_token(self) -> bool:
-        return secrets.compare_digest(self._request_token(), TOKEN)
+        supplied = self._request_token()
+        return bool(supplied) and supplied.isascii() and secrets.compare_digest(supplied, TOKEN)
 
     def _host_allowed(self) -> bool:
         """C-04: reject any request whose Host header isn't loopback. This is
@@ -20286,9 +20763,13 @@ class Handler(BaseHTTPRequestHandler):
         a token mint or a private route.
         """
         site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
-        return (self.headers.get("Origin") is None
-                and site in ("same-origin", "none")
-                and bool(self.headers.get("Host")) and self._host_allowed())
+        host = self.headers.get("Host")
+        if not host or not self._host_allowed():
+            return False
+        origin = self.headers.get("Origin")
+        if origin is None:
+            return site in ("same-origin", "none")
+        return site == "same-origin" and origin == "http://" + host
 
     def _has_yoink_client_header(self) -> bool:
         """Defense-in-depth header that the extension sets on /token. A
@@ -20372,9 +20853,13 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
 
-    def _send_file(self, path: Path, mime: str, *, dashboard_load=False):
+    def _send_file(self, path: Path, mime: str, *, dashboard_load=False, root=None):
         try:
-            body = path.read_bytes()
+            if root is None:
+                body = path.read_bytes()
+            else:
+                with open_regular(root, path, binary=True) as source:
+                    body = source.read()
         except OSError:
             return self._send_json(404, {"ok": False, "error": "file not found"})
         marker = b'<meta name="uoink-dashboard-load" content="">'
@@ -20390,6 +20875,7 @@ class Handler(BaseHTTPRequestHandler):
             body = dashboard_html(body)
         self.send_response(200)
         self.send_header("Content-Type", mime)
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Content-Length", str(len(body)))
         # Revalidate every load: an upgrade replaces these files, and a cached
         # copy kept an open tab on the old dashboard for up to five minutes.
@@ -20479,6 +20965,8 @@ class Handler(BaseHTTPRequestHandler):
             settings = _read_settings() or {}
             whisper_model = whisper_runner.normalize_model(
                 settings.get("whisper_model"))
+            model_downloaded = whisper_runner.is_model_downloaded(
+                DATA_ROOT, whisper_model)
             latest_migration = index.latest_schema_version()
             return self._send_json(200, {
                 "ok": True,
@@ -20499,8 +20987,12 @@ class Handler(BaseHTTPRequestHandler):
                 "whisperx_available": whisper_runner.is_whisperx_available(),
                 "transcription_engine": whisper_runner.transcription_engine(),
                 "whisper_model": whisper_model,
-                "whisperx_model_loaded": whisper_runner.is_model_downloaded(
-                    DATA_ROOT, whisper_model),
+                # 3.18.1: whether the selected model's files are on this
+                # computer. Whether one is in memory is transcription_worker.
+                "whisper_model_downloaded": model_downloaded,
+                # Deprecated alias of whisper_model_downloaded, kept for old
+                # readers. Despite the name it never meant "in memory".
+                "whisperx_model_loaded": model_downloaded,
                 # 3.18: whether a transcription process holds model memory now
                 # (state not_loaded / loaded / running) and when it frees it.
                 "transcription_worker": {**_asr.status(), "line": _asr.status_line()},
@@ -20538,8 +21030,10 @@ class Handler(BaseHTTPRequestHandler):
             # Keep splash readiness's existing metadata rule separate from
             # the stricter token bootstrap. Explicit extension origins get the
             # public projection; request parameters cannot select CLI details.
-            local_ui = self._is_local_diagnose_request()
-            return self._send_json(200, _public_diagnose_payload(local_ui=local_ui))
+            authorized = self._check_token()
+            refresh = authorized and urlparse(self.path).query == "refresh=1"
+            local_ui = authorized and self._is_local_diagnose_request()
+            return self._send_json(200, _public_diagnose_payload(local_ui=local_ui, refresh=refresh))
         if bare == "/sources/manifest":
             # Public product metadata (no user data) so the static site can
             # bake it at build time and the dashboard Sources tab can read it
@@ -21122,7 +21616,7 @@ class Handler(BaseHTTPRequestHandler):
         Always 200: an unsupported URL is a valid answer, not an error."""
         raw = (parse_qs(urlparse(self.path).query).get("url") or [""])[0]
         result = _classify_capture_url(raw)
-        if result.get("endpoint") == "/extract/page":
+        if result.get("source") in _SUITE_CAPTURE_PAGE_SOURCES:
             result["needs_allow"] = not page_extractor.host_is_allowed(
                 _get_index(), result["canonical"])
         self._send_json(200, result)
@@ -21275,7 +21769,7 @@ class Handler(BaseHTTPRequestHandler):
         return corpus_provider.UoinkCorpusProvider(
             _get_index(),
             DATA_ROOT,
-            facet_labeler=_humanize_facet,
+            output_root=DESKTOP_ROOT, facet_labeler=_humanize_facet,
             vault_path=self._memory_vault_path(),
         )
 
@@ -21463,7 +21957,7 @@ class Handler(BaseHTTPRequestHandler):
                 retryable=True,
             )
             return self._send_corpus_v1_error("get", error)
-        return self._send_file(path, mime)
+        return self._send_file(path, mime, root=DESKTOP_ROOT)
 
     def _handle_corpus_v1_kept_media(self, bare: str):
         from urllib.parse import unquote
@@ -22434,17 +22928,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False, "error": "auto_ingest (boolean) required"})
         try:
-            row = podcasts.add_feed(_get_index(), feed_url,
-                                       poll_interval_min=int(interval),
-                                       auto_ingest=auto_ingest)
-            if not row.get("title"):
-                row["title"] = urlparse(row["feed_url"]).hostname
+            result = _follow_podcast_link(feed_url, poll_interval_min=interval, auto_ingest=auto_ingest,
+                                          display_name=body.get("display_name"))
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:
             log.exception("/podcasts/feeds POST failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
-        return self._send_json(200, {"ok": True, "feed": row})
+        return self._send_json(200, result)
 
     def _handle_podcasts_feed_remove(self, body):
         if not isinstance(body, dict):
@@ -22745,22 +23236,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             feed_url = suggestions.resolve_feed_url(DATA_ROOT, sid)
             item = suggestions.get_item(DATA_ROOT, sid) or {}
-            title = (str(item.get("show") or "").strip() or urlparse(feed_url).hostname or "")[:200]
-            register = _source_service().register_source(_source_operator_context(), {
-                "kind": "podcast_rss", "url": feed_url, "display_name": title})
-            if not register.get("ok"):
-                raise ValueError("This feed could not be scheduled for checks.")
-            source = register["source"]
-            feed_id = source["legacy"]["feed_id"]
-            with _get_index().write_transaction() as conn:
-                if not feed_id or not conn.execute(
-                        "UPDATE source_subscriptions SET detection_enabled=1, follow_feed=1, "
-                        "display_name=coalesce(nullif(trim(display_name),''), ?) "
-                        "WHERE source_id=? AND archived=0 AND legacy_feed_id=?",
-                        (title, source["source_id"], feed_id)).rowcount:
-                    raise ValueError("This feed could not be scheduled for checks.")
-                conn.execute("UPDATE podcast_feeds SET enabled=1, title=coalesce(nullif(trim(title),''), ?) "
-                             "WHERE id=?", (title, feed_id))
+            result = _follow_podcast_link(feed_url, display_name=item.get("show"))
+            feed_id = result["feed"]["id"]
         except suggestions.SuggestionError as exc:
             status = 404 if exc.code == "not_found" else 502 if exc.code == "fetch_failed" else 422
             return self._send_json(status, {"ok": False, "error": str(exc)})
@@ -23149,13 +23626,8 @@ class Handler(BaseHTTPRequestHandler):
     #   POST /writing/style-anchors/<id>/remove  -> delete
 
     def _writing_url_fetcher(self):
-        """Return a callable that, given a URL, returns extracted prose.
-        Bridges Writing Studio's style anchor URL ingestion to whatever
-        page extractor is currently shipped (Universal Site PR / Crawl4AI
-        wrapper). Falls back to None when no extractor is bound -- the
-        anchor still saves, just with raw_text=NULL."""
-        fetcher = globals().get("_extract_page_to_prose")
-        return fetcher if callable(fetcher) else None
+        """A dashboard save authorizes this one style reference."""
+        return lambda url: _extract_page_to_prose(url, enforce_allowlist=False)
 
     def _handle_writing_style_anchors_list(self):
         if not self._require_token():
@@ -23592,15 +24064,17 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        action = (body.get("action") or "").strip().lower()
-        pattern = (body.get("url_pattern") or "").strip()
+        action = body.get("action")
+        action = action.strip().lower() if isinstance(action, str) else ""
+        pattern = body.get("url_pattern")
         if action not in ("add", "remove"):
             return self._send_json(400, {
                 "ok": False,
                 "error": "action must be 'add' or 'remove'"})
-        if not pattern:
+        if not isinstance(pattern, str) or not pattern.strip():
             return self._send_json(400, {
                 "ok": False, "error": "url_pattern required"})
+        pattern = pattern.strip()
         try:
             if action == "add":
                 row = page_extractor.add_allowed(_get_index(), pattern)
@@ -23623,6 +24097,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
         url = (body.get("url") or "").strip()
+        if hn_extractor.item_id(url):
+            return self._send_json(*_capture_hn_thread(body))
         render_mode = (body.get("render_mode")
                          or page_extractor.RENDER_MODE_JS).strip().lower()
         include_screenshot = bool(body.get("include_screenshot", True))
@@ -23689,6 +24165,8 @@ class Handler(BaseHTTPRequestHandler):
         /extract/page. The tab supplies the text. The helper can fetch a
         same-site lead image for the Library thumbnail."""
         url = page_extractor.normalize_page_url(str((body or {}).get("url") or ""))
+        if hn_extractor.item_id(url):
+            return self._send_json(*_capture_hn_thread(body))
         if url and not page_extractor.host_is_allowed(_get_index(), url):
             return self._send_json(403, page_extractor.host_not_allowed_result(url))
         result = page_dom_capture.build_extract_result(body)
@@ -23749,7 +24227,7 @@ class Handler(BaseHTTPRequestHandler):
         folder, _row = _folder_for_video_id(video_id)
         if folder is None:
             return self._send_json(404, {"ok": False, "error": "uoink not found"})
-        _sidecar_path, sidecar = _read_sidecar_for_folder(folder)
+        _sidecar_path, sidecar = _read_sidecar_for_folder(folder, root=_item_storage_root(_row))
         reliability = sidecar.get("reliability")
         if not isinstance(reliability, dict):
             reliability = {
@@ -23973,11 +24451,16 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False, "error": ("relay_token must be the relay's pull token: 32 to 4096 "
                                            "characters with no spaces, or null to clear")})
 
-        if not self._settings_post_store_credentials(body):
-            return None
-        with _settings_lock:
-            data = self._settings_post_apply(body, boolean_fields=boolean_fields,
-                                             relay_url=relay_url, defer_stop=defer_stop)
+        relay_change = "relay_url" in body or "relay_token" in body
+        with _relay_config_lock if relay_change else contextlib.nullcontext():
+            if relay_url is not None and "relay_token" not in body:
+                if _relay_origin(relay_url) != _relay_origin(_read_settings().get("relay_url")):
+                    body = {**body, "relay_token": ""}
+            if not self._settings_post_store_credentials(body):
+                return None
+            with _settings_lock:
+                data = self._settings_post_apply(body, boolean_fields=boolean_fields,
+                                                 relay_url=relay_url, defer_stop=defer_stop)
         if data is None:
             return None
         if any(f in body for f in ("relay_enabled", "relay_url", "relay_token", "relay_poll_minutes")):
@@ -23997,7 +24480,7 @@ class Handler(BaseHTTPRequestHandler):
             if "scrapecreators_key" in body:
                 _store_saved_scrapecreators_key((body["scrapecreators_key"] or "").strip())
             if "relay_token" in body:
-                _store_saved_relay_token((body["relay_token"] or "").strip())
+                _store_saved_relay_token((body["relay_token"] or "").strip(), relay_url=body.get("relay_url"))
             if "anthropic_key" in body:
                 raw_key = body.get("anthropic_key")
                 _store_saved_anthropic_key("" if raw_key is None else raw_key.strip())
@@ -25708,6 +26191,8 @@ class Handler(BaseHTTPRequestHandler):
                 "error": ("This uoink has no saved source link to re-capture. "
                           "Grab it again from the original page.")})
         body = {"url": url}
+        if hn_extractor.item_id(url):
+            return self._send_json(*_capture_hn_thread(body))
         if isinstance(interval, int) and interval > 0:
             body["interval"] = interval
         log.info("POST /yoinks/%s/reyoink -> re-extract %s", video_id, url)
@@ -25727,13 +26212,22 @@ class Handler(BaseHTTPRequestHandler):
                 "error": "This uoink has no saved markdown on disk yet.",
                 "state": "no_markdown"})
         try:
-            p = Path(corpus_path).resolve()
-            p.relative_to(DESKTOP_ROOT.resolve())
-        except (ValueError, OSError):
+            p = checked_path(_item_storage_root(row), Path(corpus_path))
+            if p.suffix.lower() != ".md":
+                raise ValueError("expected Markdown")
+        except (ValueError, LibraryPathError):
             return None, (400, {"ok": False,
-                                 "error": "markdown path is outside the "
-                                          "Uoink folder"})
-        if not p.exists() or not p.is_file():
+                                 "error": "Choose a Markdown file saved directly in the Uoink library."})
+        except OSError:
+            return None, (500, {"ok": False, "error": "Could not access the saved Markdown file."})
+        import stat
+        try:
+            is_file = stat.S_ISREG(p.stat().st_mode)
+        except (FileNotFoundError, NotADirectoryError):
+            is_file = False
+        except OSError:
+            return None, (500, {"ok": False, "error": "Could not access the saved Markdown file."})
+        if not is_file:
             return None, (404, {
                 "ok": False,
                 "error": "The saved markdown file is missing. Re-capture to "
@@ -25755,8 +26249,8 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(*err)
         try:
-            text = _read_export_markdown(path)
-        except OSError as e:
+            text = _read_export_markdown(path, root=_item_storage_root(_get_index().get_yoink(video_id)))
+        except (OSError, UnicodeError) as e:
             log.warning("/yoinks/%s/markdown read failed: %s", video_id, e)
             return self._send_json(500, {"ok": False,
                                          "error": "could not read markdown"})
@@ -25774,31 +26268,39 @@ class Handler(BaseHTTPRequestHandler):
         if not video_id:
             return self._send_json(400, {"ok": False,
                                          "error": "video_id required"})
-        path, err = self._yoink_markdown_path(video_id)
-        if err:
-            return self._send_json(*err)
         try:
+            path, err = self._yoink_markdown_path(video_id)
+            if err:
+                return self._send_json(*err)
             # An external viewer reads the original path. Repair only the file
             # explicitly opened, under the same lock as the comments writer.
-            try:
-                with _corpus_update_lock:
-                    with path.open(encoding="utf-8", newline="") as source:
-                        original = source.read()
-                    normalized = normalize_export_comments(path, original)
-                    if original != normalized:
-                        _atomic_write_text(path, normalized, newline="")
-            except (UnicodeError, OSError) as exc:
-                log.debug("Could not update Lite comment status on open: %s", exc)
-            _platform.open_in_os(path)
-        except Exception as e:  # noqa: BLE001
-            return self._send_json(200, {"ok": False, "error": str(e)})
+            root = _item_storage_root(_get_index().get_yoink(video_id))
+            with _corpus_update_lock, contextlib.ExitStack() as held:
+                source = held.enter_context(open_regular(root, path, newline=""))
+                original = source.read()
+                if "\x00" in original:
+                    return self._send_json(400, {"ok": False, "error": "The saved Markdown contains binary data."})
+                normalized = normalize_export_comments(path, original, root=root)
+                if original != normalized:
+                    held.close()
+                    _atomic_write_text(path, normalized, newline="", root=root)
+                    source = held.enter_context(open_regular(root, path, newline=""))
+                    if source.read() != normalized:
+                        raise OSError("The saved Markdown changed.")
+                _platform.open_in_os(path)
+        except UnicodeDecodeError:
+            return self._send_json(400, {"ok": False, "error": "Could not read the saved Markdown as UTF-8 text."})
+        except OSError:
+            return self._send_json(500, {"ok": False, "error": "Could not access or open the saved Markdown file."})
+        except Exception:
+            log.exception("Open Markdown failed")
+            return self._send_json(500, {"ok": False, "error": "Could not open the saved Markdown file."})
         log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
         return self._send_json(200, {"ok": True, "path": str(path)})
 
     def _handle_yoink_details(self, bare: str):
         """GET /yoinks/<id>/details -- bounded authenticated saved-media-detail read path.
-        Resolves the item's registered sidecar path from the index, sandboxed to
-        DESKTOP_ROOT, rejecting escapes and symlinks, and bounds the JSON read.
+        Reads the indexed sidecar under the capture or episode's storage root.
         Returns only saved fields needed by the dashboard."""
         from urllib.parse import unquote
         video_id = unquote(
@@ -25810,67 +26312,26 @@ class Handler(BaseHTTPRequestHandler):
         if row is None:
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
+        def unavailable(status, message, **fields):
+            pins = _get_index().get_pins(video_id)
+            if pins:
+                fields["pins"] = pins
+            return self._send_json(status, {"ok": False, "error": message, **fields})
+
         sidecar_raw = (row.get("sidecar_path") or "").strip()
         if not sidecar_raw:
-            return self._send_json(404, {
-                "ok": False,
-                "error": "This uoink has no saved details on disk yet.",
-                "state": "no_sidecar"})
-        if _path_has_parent_ref(sidecar_raw):
-            return self._send_json(400, {"ok": False,
-                                         "error": "sidecar path escapes Uoink root"})
+            return unavailable(404, "This uoink has no saved details on disk yet.", state="no_sidecar")
         try:
-            p = Path(sidecar_raw)
-            if not p.is_absolute():
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar path escapes Uoink root"})
-            # Lexical containment must precede metadata probes on this path.
-            p.relative_to(DESKTOP_ROOT.absolute())
-            cur = p
-            while True:
-                if cur.is_symlink():
-                    return self._send_json(400, {"ok": False,
-                                                 "error": "symlink sidecar rejected"})
-                try:
-                    if getattr(cur.lstat(), "st_file_attributes", 0) & 0x400:
-                        return self._send_json(400, {"ok": False,
-                                                     "error": "symlink sidecar rejected"})
-                except OSError:
-                    pass
-                if cur == cur.parent:
-                    break
-                cur = cur.parent
-
-            root = DESKTOP_ROOT.resolve()
-            resolved = p.resolve()
-            if any(part == ".." for part in resolved.parts):
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar path escapes Uoink root"})
-            resolved.relative_to(root)
-        except (ValueError, OSError):
-            return self._send_json(400, {"ok": False,
-                                         "error": "sidecar path escapes Uoink root"})
-
-        if not resolved.exists() or not resolved.is_file():
-            return self._send_json(404, {"ok": False,
-                                         "error": "sidecar file not found"})
-
-        try:
-            if resolved.stat().st_size > MAX_SIDECAR_BYTES:
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar file too large"})
-            with open(resolved, "rb") as f:
-                content = f.read(MAX_SIDECAR_BYTES + 1)
+            details_root = _item_storage_root(row)
+            resolved = checked_path(details_root, Path(sidecar_raw))
+            with open_regular(details_root, resolved, binary=True) as source:
+                content = source.read(MAX_SIDECAR_BYTES + 1)
             if len(content) > MAX_SIDECAR_BYTES:
-                return self._send_json(400, {"ok": False,
-                                             "error": "sidecar file too large"})
-        except UnicodeDecodeError:
-            return self._send_json(400, {"ok": False,
-                                         "error": "malformed sidecar JSON"})
-        except OSError as e:
-            log.warning("/yoinks/%s/details read failed: %s", video_id, e)
-            return self._send_json(500, {"ok": False,
-                                         "error": "could not read sidecar"})
+                return unavailable(400, "sidecar file too large")
+        except FileNotFoundError:
+            return unavailable(404, "sidecar file not found")
+        except OSError:
+            return self._send_json(400, {"ok": False, "error": "sidecar path escapes Uoink root or is unavailable"})
 
         def finite_float(value):
             number = float(value)
@@ -26018,7 +26479,17 @@ class Handler(BaseHTTPRequestHandler):
                     clean_shots.append(clean_shot)
             filtered["screenshots"] = clean_shots
 
+        filtered["pins"] = _get_index().get_pins(video_id)
         raw_transcript = data.get("transcript")
+        held = data.get("held_transcript_lines")
+        if isinstance(held, list):
+            held = [h for h in held if isinstance(h, dict) and type(h.get("line")) is int
+                    and isinstance(h.get("segment"), dict) and isinstance(h.get("reason"), str)]
+            if held:
+                filtered["review_note"] = transcript_review.notice(held)
+                if parse_qs(urlsplit(getattr(self, "path", bare)).query).get("include_held") == ["1"]:
+                    filtered["held_transcript_lines"] = [
+                        {"line": h["line"], "text": h["segment"].get("text", "")} for h in held]
         if isinstance(raw_transcript, str):
             filtered["transcript"] = raw_transcript
         elif isinstance(raw_transcript, list):
@@ -26079,12 +26550,29 @@ class Handler(BaseHTTPRequestHandler):
                 for s in raw_diar["segments"]:
                     if isinstance(s, dict):
                         clean_diar_segs.append({
-                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "speaker",
+                            k: s[k] for k in ("start", "start_seconds", "end", "end_seconds", "text", "content", "speaker",
                                              "speaker_label", "speaker_id")
                             if k in s and isinstance(s[k], (str, int, float))
                         })
                 clean_diar["segments"] = clean_diar_segs
             filtered["diarization"] = clean_diar
+
+        if row.get("source_type") == "hn_thread" and isinstance(data.get("metadata"), dict):
+            story_url = data["metadata"].get("story_url")
+            if isinstance(story_url, str) and page_extractor.normalize_page_url(story_url):
+                filtered["story_url"] = story_url
+
+        # Use the same line link as search, including for captures made by older helpers.
+        saved_url = data.get("url") or data.get("source_url")
+        if row.get("platform") == "youtube" or (isinstance(saved_url, str) and _normalize_youtube_url(saved_url)):
+            for entries in (filtered.get("transcript"), filtered.get("segments"),
+                            filtered.get("diarization", {}).get("segments")):
+                if isinstance(entries, list):
+                    for segment in entries:
+                        if isinstance(segment, dict):
+                            start = _as_float(segment.get("start", segment.get("start_seconds")))
+                            if start is not None:
+                                segment["deep_link"] = _youtube_deep_link(video_id, start)
 
         # 3.18.0: an X save that holds only part of the post's text.
         cut_off = _x_cut_off_detail(data)
@@ -26207,6 +26695,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_playlist_start(body)
         if bare.startswith("/jobs/") and bare.endswith("/cancel"):
             return self._handle_job_cancel(bare)
+        if bare.startswith("/yoinks/") and bare.endswith("/moments/remove"):
+            video_id = bare[len("/yoinks/"):-len("/moments/remove")]
+            second = body.get("seconds")
+            if type(second) is not int or not 0 <= second <= 2147483647:
+                return self._send_json(400, {"ok": False, "error": "Invalid pin time."})
+            moments.remove(_get_index(), video_id, second)
+            return self._send_json(200, {"ok": True})
         if bare == "/extract":
             return self._handle_extract(body)
         if bare == "/extract/any":
@@ -26216,6 +26711,15 @@ class Handler(BaseHTTPRequestHandler):
         if bare.startswith("/library/transcript-backfill/"):
             action = bare[len("/library/transcript-backfill/"):]
             return self._handle_transcript_backfill(action if "/" not in action else "", body)
+        if bare == "/search/refresh-item":
+            # The CLI already updated the on-disk index. Only this helper
+            # owns its live semantic engine; an enabled engine queues one ID.
+            video_id = body.get("video_id") if isinstance(body, dict) else None
+            if not isinstance(video_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+                return self._send_json(400, {"ok": False, "error": "Expected a YouTube video ID."})
+            if _local_search_singleton is not None:
+                _local_search_singleton.update_source(video_id)
+            return self._send_json(200, {"ok": True})
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
         if bare == "/notes":
@@ -26489,6 +26993,7 @@ class Handler(BaseHTTPRequestHandler):
         # video, so the existing YouTube/X paths are untouched.
         if isinstance(body, dict):
             body["__platform"] = platform
+            body["__moment"] = moments.requested_time(url) if platform == "youtube" else None
             body["__source_type"] = (
                 SOURCE_TYPE_SHORT_VIDEO if _is_short_video_url(url) else None)
         return normalized, interval, None
@@ -26881,19 +27386,20 @@ class Handler(BaseHTTPRequestHandler):
         if row.get("deleted_at"):
             return self._send_json(409, {"ok": False, "error": "already deleted"})
 
-        src = Path(row.get("corpus_path") or "").parent
-        if not src.exists() or not src.is_dir():
-            return self._send_json(
-                409, {"ok": False, "error": "uoink folder missing on disk"})
+        try:
+            src = _owned_item_folder(row)
+            with open_regular(DESKTOP_ROOT, Path(row["corpus_path"])):
+                pass
+        except (OSError, ValueError):
+            return self._send_json(409, {"ok": False, "error": "This item has no library folder to move."})
 
         # Mark deleted first so the trash folder name derives from the same
         # deleted_at the index stores; roll the row back if the move fails.
         updated = idx.soft_delete_yoink(video_id)
-        dst = _trash_folder_for(updated)
         try:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(src), str(dst))
-        except (OSError, shutil.Error) as e:
+            dst = _trash_folder_for(updated)
+            move_library_folder(DESKTOP_ROOT, src, dst)
+        except (OSError, ValueError, shutil.Error) as e:
             idx.restore_yoink(video_id)
             log.warning("memory delete: move to trash failed: %s", e)
             return self._send_json(
@@ -26927,8 +27433,11 @@ class Handler(BaseHTTPRequestHandler):
         if not row.get("deleted_at"):
             return self._send_json(409, {"ok": False, "error": "uoink is not deleted"})
 
-        trash = _trash_folder_for(row)
-        dst = Path(row.get("corpus_path") or "").parent
+        try:
+            trash = _trash_folder_for(row)
+            dst = _owned_item_folder(row)
+        except (OSError, ValueError):
+            return self._send_json(409, {"ok": False, "error": "This item has no library folder to restore."})
         if not trash.exists():
             return self._send_json(
                 409, {"ok": False, "error": "trash folder not found"})
@@ -26936,8 +27445,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(
                 409, {"ok": False, "error": "original location is occupied"})
         try:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(trash), str(dst))
+            move_library_folder(DESKTOP_ROOT, trash, dst)
         except (OSError, shutil.Error) as e:
             log.warning("memory restore: move from trash failed: %s", e)
             return self._send_json(
@@ -27062,6 +27570,8 @@ class Handler(BaseHTTPRequestHandler):
         ffmpeg screenshots once we know which sites benefit."""
         raw = (body.get("url") or "").strip()
         canonical, platform = _normalize_any_url(raw)
+        if platform == "hn" and hn_extractor.item_id(raw):
+            return self._send_json(*_capture_hn_thread(body))
         if not canonical:
             return self._send_json(400, {
                 "ok": False,
@@ -27130,6 +27640,7 @@ class Handler(BaseHTTPRequestHandler):
         # Best-effort transcript reconstruction from yt-dlp's
         # subtitles/automatic_captions map (when present).
         transcript_entries = _extract_generic_transcript(metadata)
+        transcript_entries, held_lines = transcript_review.partition(transcript_entries, whisper=False)
         if not shelf:
             topic = _reroute_with_transcript(topic, metadata, transcript_entries, url=canonical)
 
@@ -27153,6 +27664,7 @@ class Handler(BaseHTTPRequestHandler):
             "like_count": metadata.get("like_count"),
             "video_id": existing["video_id"] if existing else _video_capture_id(canonical, metadata),
             "transcript": transcript_entries,
+            **({"held_transcript_lines": held_lines} if held_lines else {}),
             # Comments/screenshots/hook are explicit nulls so the
             # dashboard knows they're unavailable rather than missing.
             "comments_status": "skipped_generic",
@@ -27189,12 +27701,16 @@ class Handler(BaseHTTPRequestHandler):
                     f"- [{fmt_time(int(ent.get('start') or 0))}] "
                     f"{ent.get('text') or ''}")
             corpus_lines.append("")
+        elif held_lines:
+            corpus_lines.extend(["## Transcript", ""])
         else:
             corpus_lines += ["## Transcript",
                               "",
                               "_No transcript available (site did not "
                               "expose subtitles / yt-dlp could not parse)._",
                               ""]
+        if held_lines:
+            corpus_lines.extend([transcript_review.notice(held_lines), ""])
         corpus_path = Path(existing["corpus_path"]) if existing else folder / "corpus.md"
         _atomic_write_text(corpus_path, "\n".join(corpus_lines))
 
@@ -27246,7 +27762,7 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _handle_live_extract_dispatch(self, url, interval, live_state,
-                                      metadata, long_video_mode):
+                                      metadata, long_video_mode, *, moment=None):
         """v3.1 live stream branch. Returns True after sending a response;
         returns False when the caller should proceed with the normal
         download (post_live with a recording exposed).
@@ -27319,6 +27835,7 @@ class Handler(BaseHTTPRequestHandler):
             "pending_id": pending_id,
             "retry_after": retry_after,
             "reason": "live_stream",
+            **(moments.add(_get_index(), *moment, pending_id=pending_id) if moment else {}),
             "live_state": live_state,
             "behavior": behavior,
             "title": live_title,
@@ -27372,6 +27889,9 @@ class Handler(BaseHTTPRequestHandler):
         if shelf_error:
             return self._send_json(400, {"ok": False, "error": shelf_error})
 
+        pin = body.get("__moment")
+        video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url) if pin is not None else None
+
         # Waiting for the capture lock until the `with` below takes it.
         refusal = _platform.capability_refusal(_platform.media_capability())
         if refusal is not None:
@@ -27397,6 +27917,20 @@ class Handler(BaseHTTPRequestHandler):
                 log.info("POST /extract -> 409 (%s)", ownership.conflict)
                 return self._send_json(409, {"ok": False, "error": ownership.conflict,
                                              "identity_conflict": True})
+            if video_id:
+                idx = _get_index()
+                row = ownership.corpus_row(video_id)
+                if row:
+                    return self._send_json(200, {
+                        "ok": True, "reused": True, "video_id": video_id, "title": row.get("title"),
+                        "video_slug": row.get("slug"),
+                        "folder": str(Path(row["corpus_path"]).parent) if row.get("corpus_path") else None,
+                        **moments.add(idx, video_id, pin)})
+                pending = moments.pending_capture(idx, url)
+                if pending:
+                    return self._send_json(200, {
+                        "ok": True, "queued": True, **pending,
+                        **moments.add(idx, video_id, pin, pending_id=pending["pending_id"])})
             if ownership.completed_while_waiting and ownership.reused:
                 _record_single_extract_job(url, started_at, result=ownership.reused)
                 log.info("POST /extract -> ok (reused capture of %s)", ownership.already_captured)
@@ -27413,7 +27947,8 @@ class Handler(BaseHTTPRequestHandler):
                 if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
                                     LIVE_STATE_POST_LIVE):
                     if self._handle_live_extract_dispatch(
-                            url, interval, live_state, metadata, long_video_mode):
+                            url, interval, live_state, metadata, long_video_mode,
+                            **({"moment": (video_id, pin)} if video_id else {})):
                         return
                 title = metadata.get("title") or "Untitled"
                 topic = shelf or _route_topic(metadata, url=url)
@@ -27431,6 +27966,8 @@ class Handler(BaseHTTPRequestHandler):
                                           long_video_mode=long_video_mode,
                                           phase_callback=phase_cb,
                                           shelf_hint=shelf)
+                if video_id and result.get("ok"):
+                    result.update(moments.add(_get_index(), video_id, pin))
             except BaseException as e:
                 # Sprint 19 / C4: YouTube 429 or bot check -> queue for retry
                 # instead of surfacing an error. The retry worker takes over.
@@ -27471,6 +28008,7 @@ class Handler(BaseHTTPRequestHandler):
                             "reason": ("youtube_rate_limit" if _is_youtube_rate_limit(e)
                                        else "youtube_bot_check"),
                             "long_video_mode": long_video_mode,
+                            **(moments.add(_get_index(), video_id, pin, pending_id=pending_id) if video_id else {}),
                         })
                 msg = friendly_error(e)
                 detail = (_youtube_rate_limit_detail(e) if _is_youtube_rate_limit(e)
@@ -27577,6 +28115,16 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(409, {"ok": False, "error": ownership.conflict,
                                              "identity_conflict": True,
                                              "session_id": session_id})
+            pin = body.get("__moment")
+            video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url) if pin is not None else None
+            if video_id and ownership.already_captured:
+                current = _read_session(session_id) or session
+                if any(member.get("url") == url for member in current.get("videos", [])):
+                    return self._send_json(200, {
+                        "ok": True, "session_id": session_id, "video_count": len(current["videos"]),
+                        **moments.add(_get_index(), video_id, pin)})
+                if not ownership.reused:
+                    ownership.recheck(video_id, ownership.corpus_row(video_id), existed_before=False)
             try:
                 if ownership.completed_while_waiting and ownership.reused:
                     # AS-03 (run AT-4): the capture this request waited behind
@@ -27623,17 +28171,20 @@ class Handler(BaseHTTPRequestHandler):
                 # publication retries. Its corpus already exists on disk.
                 _record_single_extract_job(url, _now_iso(), result=result)
 
-        with _session_lock:
-            session = _read_session(session_id) or session
-            session.setdefault("videos", []).append({
-                "url": url,
-                "title": result["title"],
-                "video_slug": result["video_slug"],
-                "screenshot_count": result["screenshot_count"],
-                "caption_count": result.get("caption_count", 0),
-                "added_at": _now_iso(),
-            })
-            _write_session(session_id, session)
+            if video_id:
+                result.update(moments.add(_get_index(), video_id, pin))
+
+            with _session_lock:
+                session = _read_session(session_id) or session
+                session.setdefault("videos", []).append({
+                    "url": url,
+                    "title": result["title"],
+                    "video_slug": result["video_slug"],
+                    "screenshot_count": result["screenshot_count"],
+                    "caption_count": result.get("caption_count", 0),
+                    "added_at": _now_iso(),
+                })
+                _write_session(session_id, session)
 
         if result.get("status") == "saved_with_errors":
             # Membership is committed. Callers use ok=False to offer a new
@@ -27909,8 +28460,8 @@ def _is_installed_layout() -> bool:
 
 def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
+    url = _install_isolation.helper_url("/dashboard") + ("#settings" if settings else "")
     if sys.platform.startswith("linux"):
-        url = _install_isolation.helper_url("/dashboard") + ("#settings" if settings else "")
         log.info("dashboard: %s (%s)", url, reason)
         return True
     try:
@@ -27918,7 +28469,7 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         # spawner requires the installed app's interpreter.
         if sys.platform == "darwin" and _platform.mac_bundle_contents() is not None:
             from helper.mac_ui import spawn
-            spawn("uoink_dashboard", _install_isolation.helper_url("/dashboard") + ("#settings" if settings else ""))
+            spawn("uoink_dashboard", url)
             log.info("dashboard: spawned (%s)", reason)
             return True
         script = HERE / "uoink_dashboard.py"
@@ -27928,7 +28479,7 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
             env = os.environ.copy()
             env.update(_install_isolation.child_environ())
             subprocess.Popen(
-                [str(exe), str(script), *_install_isolation.child_argv()],
+                [str(exe), str(script), url, *_install_isolation.child_argv()],
                 cwd=str(HERE),
                 creationflags=creationflags,
                 env=env,
@@ -27939,9 +28490,6 @@ def _spawn_dashboard_window(*, reason: str, settings: bool = False) -> bool:
         log.warning("dashboard: window spawn failed (%s): %s", reason, e)
 
     try:
-        url = _install_isolation.helper_url("/dashboard")
-        if sys.platform == "darwin" and settings:
-            url += "#settings"
         opened = bool(webbrowser.open(url))
         log.info("dashboard: browser fallback %s (%s)", "opened" if opened else "unavailable", reason)
         return opened
@@ -27964,6 +28512,12 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
     accept()s. Worker threads stay daemonic (inherited from ThreadingHTTPServer)
     so Ctrl+C still exits promptly."""
     request_queue_size = 16
+
+    def serve_forever(self, poll_interval=0.5):
+        # The listener is bound and startup is complete. The first setup GET
+        # can now poll a running check without having to authorize a refresh.
+        _start_diagnose_refresh()
+        return super().serve_forever(poll_interval)
 
     def server_bind(self):
         if _install_isolation.current_binding() is not None:
@@ -27989,7 +28543,7 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
 
 
 def main(*, show_dashboard: bool = False, quiet: bool = False):
-    global _active_migration_version, _TOKEN_OWNED
+    global _TOKEN_OWNED
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
     # writers all mkdir(parents=True, exist_ok=True) their own parents).
@@ -28002,7 +28556,12 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
     # try to bind 5179. Probe the canonical /health endpoint first.
     if _existing_server_responds():
         if show_dashboard:
-            _spawn_dashboard_window(reason="existing-server")
+            if sys.platform == "win32" and not os.environ.get("UOINK_SUPERVISOR_RUN_ID"):
+                # The isolated installer shortcut invokes this script directly.
+                import uoink_dashboard
+                uoink_dashboard.main()
+            else:
+                _spawn_dashboard_window(reason="existing-server")
         log.info("Uoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 
@@ -28046,7 +28605,23 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         else:
             log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
         sys.exit(1)
-    # This process owns the port, so its token is the one clients must read.
+    owner = source_subscriptions.CaptureLock.acquire(DATA_ROOT, podcasts.PODCAST_WORKER_LOCK, timeout=10)
+    if owner is None:
+        server.server_close()
+        raise RuntimeError("Another helper is using this library's podcast transcription queue.")
+    with owner:
+        try:
+            _serve_owned_library(server, show_dashboard=show_dashboard, quiet=quiet)
+        finally:
+            _TOKEN_OWNED = False
+            server.server_close()
+
+
+def _serve_owned_library(server, *, show_dashboard, quiet):
+    global _active_migration_version, _TOKEN_OWNED
+    import atexit
+
+    # The port and the library belong to this helper.
     _persist_token(TOKEN)
     _TOKEN_OWNED = True
     # 3.18: the helper never loads a speech model itself. Each transcription
@@ -28138,7 +28713,6 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
     except OSError:
         pass
-    import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
     if isolated is not None:
         try:
@@ -28320,7 +28894,6 @@ def main(*, show_dashboard: bool = False, quiet: bool = False):
             # close(), not pause(): a pause here was saved and kept semantic
             # search paused after every orderly restart.
             _local_search_singleton.close()
-        server.server_close()
 
 
 def _print_json(payload: dict) -> None:
@@ -28636,11 +29209,9 @@ def export_corpus_data(*, output_root: Path | None = None) -> dict:
     payload = _get_index().export_payload()
     payload["app_version"] = VERSION
     exports_dir = root / EXPORTS_DIRNAME
-    exports_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     path = exports_dir / f"uoink-export-{stamp}.json"
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
-                    encoding="utf-8")
+    _atomic_write_text(path, json.dumps(payload, ensure_ascii=False, indent=2), root=root)
     counts = {table: len(rows) for table, rows in payload["tables"].items()}
     log.info("corpus export -> %s (%s)", path,
              ", ".join(f"{t}={n}" for t, n in counts.items()))

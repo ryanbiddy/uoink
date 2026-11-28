@@ -348,7 +348,8 @@ def pod(helper, monkeypatch):
             target, args = state.spawned.pop(0)
             target(*args)
 
-    monkeypatch.setattr(server.podcasts, "fetch_feed", lambda row, **_k: (podcast_rss(), {}))
+    monkeypatch.setattr(server.podcasts, "fetch_show_feed", lambda url, limit:
+                        server.podcasts.parse_feed_body(podcast_rss(), limit=limit))
     monkeypatch.setattr(server.podcasts, "download_episode_audio", fake_download)
     monkeypatch.setattr(server.podcasts, "list_episodes",
                         Mock(side_effect=AssertionError("register looks the episode up directly")))

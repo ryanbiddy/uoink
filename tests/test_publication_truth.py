@@ -22,6 +22,7 @@ import uuid
 
 import pytest
 
+import fd_paths
 import index
 import library_media
 from uoink_core.storage import _atomic_write_text
@@ -136,14 +137,17 @@ def _assert_failed_save(state, response):
 
 
 def _fail_sidecar(state, monkeypatch):
-    replace = Path.replace
+    # Path.replace calls os.replace, and the POSIX storage writer calls it by
+    # name inside a held directory, so lock the sidecar at os.replace.
+    replace = os.replace
+    sidecar = (state.folder / f"{state.folder.name}.json").resolve()
 
-    def locked(source, target):
-        if Path(target) == state.folder / f"{state.folder.name}.json":
+    def locked(source, target, **kwargs):
+        if fd_paths.replace_target(target, kwargs).resolve() == sidecar:
             raise PermissionError("injected sidecar lock")
-        return replace(source, target)
+        return replace(source, target, **kwargs)
 
-    monkeypatch.setattr(Path, "replace", locked)
+    monkeypatch.setattr(os, "replace", locked)
 
 
 def test_locked_sidecar_returns_save_failure_and_durable_retry(publication, monkeypatch):
@@ -724,6 +728,7 @@ def test_standing_save_failure_is_terminal_for_downloads(publication, monkeypatc
                               _ensure_ownership=Mock(), holds_execution=lambda start: True,
                               release=Mock())
     source_api = SimpleNamespace(
+        check_public_http_url=state.scope["source_subscriptions"].check_public_http_url,
         video_watch_url=lambda video_id: URL_A,
         CompletionProof=lambda *args: args,
         CaptureOutcome=lambda status: SimpleNamespace(status=status),

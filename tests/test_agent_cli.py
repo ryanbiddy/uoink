@@ -58,41 +58,31 @@ def test_note_text_is_not_the_output_mode():
     assert ns.text == "a note" and ns.text_output is True
 
 
-@pytest.mark.parametrize("tool", ["uoink_playlist", "transcribe_podcast_episode"])
-def test_one_shot_call_finishes_background_capture(tool, tmp_path):
+def test_one_shot_call_finishes_playlist_capture(tmp_path):
     # A real subprocess would discard unfinished daemon work at exit. Use only
     # synthetic workers, including a finite child spawned by the playlist.
     marker = tmp_path / "finished.txt"
     code = r'''
-import json, queue, sys, threading, time
+import sys, threading, time
 from pathlib import Path
 from types import SimpleNamespace
 import uoink_cli as cli
 import uoink_agent_runtime as runtime
-tool, marker = sys.argv[1], Path(sys.argv[2])
-jobs = queue.Queue()
+marker = Path(sys.argv[1])
 def finish():
     time.sleep(0.05)
     marker.write_text('completed', encoding='utf-8')
 def worker():
-    if tool == 'transcribe_podcast_episode':
-        jobs.get()
-        finish()
-        jobs.task_done()
-    else:
-        time.sleep(0.05)
-        threading.Thread(target=finish, name='hook-type-cli-test', daemon=True).start()
+    time.sleep(0.05)
+    threading.Thread(target=finish, name='hook-type-cli-test', daemon=True).start()
 def dispatch(*args):
-    if tool == 'transcribe_podcast_episode':
-        jobs.put('synthetic-job')
-    name = 'uoink-podcast-transcription' if tool == 'transcribe_podcast_episode' else 'playlist-cli-test'
-    threading.Thread(target=worker, name=name, daemon=True).start()
+    threading.Thread(target=worker, name='playlist-cli-test', daemon=True).start()
     return {'ok': True, 'job_id': 'synthetic-job'}
-cli.backend = lambda: SimpleNamespace(_podcast_transcription_queue=jobs)
+cli.backend = SimpleNamespace
 runtime.call_tool = dispatch
-raise SystemExit(cli.main(['call', tool]))
+raise SystemExit(cli.main(['call', 'uoink_playlist']))
 '''
-    result = subprocess.run([sys.executable, "-B", "-c", code, tool, str(marker)],
+    result = subprocess.run([sys.executable, "-B", "-c", code, str(marker)],
                             capture_output=True, text=True, timeout=15)
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {"ok": True, "job_id": "synthetic-job"}
@@ -252,7 +242,13 @@ def test_connect_formats_parse_and_paths_are_absolute(tmp_path, client):
             assert env["UOINK_MCP_TOOLSET"] == "core"
 
 
-def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
+def test_connect_stdout_only_config_and_notes_on_stderr(tmp_path, monkeypatch, capsys):
+    for key, directory in {"HOME": tmp_path, "USERPROFILE": tmp_path,
+                           "APPDATA": tmp_path / "Roaming", "LOCALAPPDATA": tmp_path / "Local",
+                           "XDG_CONFIG_HOME": tmp_path / ".config"}.items():
+        monkeypatch.setenv(key, str(directory))
+    store = tmp_path / "Local/Packages/Claude_fixture/LocalCache/Roaming/Claude"
+    store.mkdir(parents=True)
     for client in connect.CLIENTS:
         if sys.platform not in connect.CLIENTS[client].platforms:
             assert cli.main(["connect", client]) == 2
@@ -263,6 +259,8 @@ def test_connect_stdout_only_config_and_notes_on_stderr(capsys):
         output = capsys.readouterr()
         assert "File:" in output.err and "not yet tested" in output.err
         assert connect.client_spec(client).location in output.err
+        if client == "claude-desktop" and sys.platform == "win32":
+            assert str(store / "claude_desktop_config.json") in output.err
         assert "Official docs verified:" in output.err and "Checked: 2026-10-21" in output.err
         if connect.CLIENTS[client].format != "shell":
             assert "Tested:" not in output.out

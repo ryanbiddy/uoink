@@ -588,7 +588,7 @@ function makePage({ hash = "", platform = "Win32", uaPlatform = "", library = [D
   window.document = document;
   vm.createContext(ctx);
   vm.runInContext(`${SCRIPT}
-;globalThis.__page = { state, els, parseRoute, routeForTab, applyHashRoute, navigateTo, switchTab,
+;globalThis.__page = { state, els, parseRoute, routeForTab, applyHashRoute, navigateTo, switchTab, syncThreadInput,
   openYoinkDetail, openEvidenceFor, goBack, wireRoutes, renderQueue, refreshHealth,
   lookupPage: ITEM_LOOKUP_PAGE, lookupRetryMs: ITEM_LOOKUP_RETRY_MS, lookupRetries: ITEM_LOOKUP_RETRIES,
   route: () => currentRoute };`, ctx);
@@ -597,6 +597,7 @@ function makePage({ hash = "", platform = "Win32", uaPlatform = "", library = [D
 
   return {
     page,
+    window,
     state: page.state,
     els: page.els,
     calls: ctx.__calls,
@@ -648,6 +649,17 @@ function loadPage(options) {
 
 // ---------------------------------------------------------------------------
 async function groupRoutes() {
+  await scenario("a native deep link keeps the unsaved Writing Studio editor", async () => {
+    const p = loadPage({ hash: "#generate" });
+    p.page.syncThreadInput({ dataset: { threadText: "0" }, value: "This line has not been saved.", closest: () => null });
+    const route = p.window.uoinkOpenDashboardLink;
+    const base = p.location.origin + "/dashboard";
+    check(route(base + "?tab=library", Date.now() + 5000) && p.shown() === "library", "query tab uses the page router");
+    check(!route(base + "#settings", Date.now() - 1) && p.shown() === "library", "renderer drops a late request");
+    check(!route(base + "#unknown", Date.now() + 5000), "unknown destination returns failure");
+    check(route(base + "#generate", Date.now() + 5000) && p.shown() === "writing", "hash returns to Writing Studio");
+    check(p.state.writingDrafts[0] === "This line has not been saved.", "unsaved text survives both moves");
+  });
   await scenario("every SPEC route and older link names one screen", async () => {
     const p = makePage();
     const cases = [

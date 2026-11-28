@@ -18,6 +18,7 @@ def test_x_profile_urls_are_skipped_without_running_ytdlp(monkeypatch):
 
 
 def test_other_failures_log_at_debug_not_warning(monkeypatch, caplog):
+    monkeypatch.setattr(server.source_subscriptions, "_check_resolved_host", lambda host: ["192.0.2.1"])
     def fail(*_a, **_k):
         raise subprocess.CalledProcessError(1, "yt-dlp")
     monkeypatch.setattr(server, "_run_subprocess", fail)

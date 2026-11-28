@@ -18,7 +18,7 @@ aiohappyeyeballs==2.7.1
 aiohttp==3.14.5
 aiosignal==1.4.0
 alembic==1.18.5
-annotated-types==0.7.0
+annotated-types==0.8.0
 antlr4-python3-runtime==4.9.3
 anyio==4.16.0
 asteroid-filterbanks==0.4.0
@@ -26,12 +26,13 @@ attrs==26.1.0
 av==18.0.0
 bottle==0.13.4
 certifi==2026.10.23
-cffi==2.1.0
+cffi==2.1.1
 charset-normalizer==3.5.2
 click==8.5.1
+cloudpickle==3.1.3
 clr_loader==0.2.10
 colorama==0.4.6
-colorlog==6.11.0
+colorlog==6.12.0
 contourpy==1.3.3
 cryptography==50.0.2
 ctranslate2==4.8.1
@@ -39,24 +40,24 @@ cycler==0.12.1
 defusedxml==0.7.1
 einops==0.8.2
 faster-whisper==1.2.1
-filelock==4.2.10
+filelock==4.2.12
 flatbuffers==25.12.19
 fonttools==4.63.0
 frozenlist==1.8.0
-fsspec==2026.6.0
+fsspec==2026.9.0
 googleapis-common-protos==1.76.0
-greenlet==3.5.4
-grpcio==1.85.1
+greenlet==3.5.6
+grpcio==1.85.3
 h11==0.16.0
-httpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f
-httpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a
+httpcore2==2.16.2 --hash=sha256:16051ae2a42f776007543f32de9349a317b23d2cbb4e1456b4bac0e88b87419a
+httpx2==2.16.2 --hash=sha256:f05c13aade4c45dbf1c9060647a1058f0acad62398fad96e741269edb33d46f5
 huggingface_hub==0.36.2
 idna==3.20
 jaraco.classes==3.4.0
 jaraco.context==6.1.2
 jaraco.functools==4.6.0
 Jinja2==3.1.6
-joblib==1.5.3
+joblib==1.6.0
 jsonschema-specifications==2025.9.1
 jsonschema==4.26.0
 julius==0.2.8
@@ -65,17 +66,17 @@ kiwisolver==1.5.0
 lightning-utilities==0.15.3
 lightning==2.6.6
 Mako==1.4.3
-markdown-it-py==4.2.0
+markdown-it-py==4.3.0
 MarkupSafe==3.0.4
 matplotlib==3.11.1
 mcp-types==2.3.0 --hash=sha256:968efdbdaedfab06adae40d378a34395f1090c5921d4be3c9cde283aaf76d91d
 mcp==2.3.0 --hash=sha256:dd0c44c089d16453e8ae31a3877a0054d7a2314caaa81f5e0541b9b1734b2377
 mdurl==0.1.2
-more-itertools==11.1.0
+more-itertools==11.2.1
 mpmath==1.3.0
 multidict==6.9.1
-narwhals==2.24.0
-networkx==3.6.1
+narwhals==2.29.0
+networkx==3.7
 nltk==3.10.4 --hash=sha256:769ba5413f265b7d3e87cd163cc28efa01e29eeef8bb6080bc907949d9fcfb51
 numpy==2.4.6
 omegaconf==2.3.1
@@ -95,7 +96,7 @@ packaging==26.3
 pandas==3.0.5
 pillow==13.0.0
 primePy==1.3
-propcache==0.5.2
+propcache==0.5.4
 protobuf==7.36.2
 proxy_tools==0.1.0
 pyannote-audio==4.0.7
@@ -104,15 +105,15 @@ pyannote-database==6.1.1
 pyannote-metrics==4.1
 pyannote-pipeline==4.0.0
 pyannoteai-sdk==0.4.0
-pycparser==3.0
-pydantic==2.14.3
-pydantic_core==2.50.4
+pycparser==3.12
+pydantic==2.14.4
+pydantic_core==2.50.5
 Pygments==2.21.0
 PyJWT==2.15.1
-pyparsing==3.3.2
+pyparsing==3.3.3
 pystray==0.19.5
 python-dateutil==2.9.0.post0
-python-multipart==0.0.33
+python-multipart==0.0.34
 pythonnet==3.0.5
 pytorch-lightning==2.6.6
 pytorch-metric-learning==2.9.0
@@ -121,10 +122,10 @@ pywin32-ctypes==0.2.3
 pywin32==312
 PyYAML==6.0.3
 referencing==0.37.0
-regex==2026.11.9
+regex==2026.11.19
 requests==2.34.2
 rich==15.0.0
-rpds-py==2026.6.3
+rpds-py==2026.9.1
 safetensors==0.8.0
 scikit-learn==1.9.0
 scipy==1.17.1
@@ -135,7 +136,7 @@ SQLAlchemy==2.0.51
 sse-starlette==3.7.0
 starlette==1.10.0
 sympy==1.14.0
-threadpoolctl==3.6.0
+threadpoolctl==3.8.0
 tokenizers==0.22.2
 torch-audiomentations==0.12.0
 torch==2.8.0

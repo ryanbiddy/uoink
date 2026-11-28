@@ -80,11 +80,23 @@ def parser():
     get = command("get", help="look up a saved item by ID, or read it in full with --text")
     get.add_argument("id", help="item id from search or recent")
     get.add_argument("--slug", action="store_true", help="interpret id as a slug")
+    repair = command("repair-captions", help="check one saved YouTube video for repeated caption words")
+    repair.add_argument("id", help="item id from search or recent")
+    mode = repair.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="count repeated words without saving (default)")
+    mode.add_argument("--apply", action="store_true", help="save the cleaned transcript and keep the original")
     cues = command("cues", help="timed transcript cues for one item, or list items by show "
                    "and publish date")
     cues.add_argument("id", nargs="?", help="item id from search or recent; omit to list items")
     cues.add_argument("--start", type=float, help="only cues from this second")
     cues.add_argument("--end", type=float, help="only cues up to this second")
+    cues.add_argument("--include-held", action="store_true", help="include lines held back for review")
+    review = command("tidy-transcripts", help="review saved transcripts on this computer")
+    action = review.add_mutually_exclusive_group(required=True)
+    action.add_argument("--dry-run", action="store_true", help="count lines that would be held")
+    action.add_argument("--apply", action="store_true", help="hold those lines and update search")
+    action.add_argument("--restore", nargs=2, metavar=("ITEM", "LINE"),
+                        help="return one held line to the transcript and search")
     cues.add_argument("--channel", help="list: only this show or channel (exact name)")
     cues.add_argument("--from", dest="published_from", help="list: published on or after YYYY-MM-DD")
     cues.add_argument("--to", dest="published_to", help="list: published on or before YYYY-MM-DD")
@@ -157,9 +169,12 @@ def parser():
     backfill.add_argument("action", choices=BACKFILL_ACTIONS, help="status, start, pause or resume")
     backfill.add_argument("--order", choices=("longest", "newest"),
                           help="with start: longest first (default) or newest saved first")
-    connect = command("connect", help="print local connection recipes; never writes client files")
+    connect = command("connect", help="preview a connection recipe or apply it with --write")
     connect.add_argument("client", nargs="?", help="client name; use --list to see them")
     connect.add_argument("--list", action="store_true", help="list the supported clients")
+    connect.add_argument("--write", action="store_true", help="add Uoink to a supported client after confirmation")
+    connect.add_argument("--yes", action="store_true", help="confirm --write without a prompt")
+    connect.add_argument("--manifest", type=Path, help="unpacked Uoink MCPB manifest for windows-odr")
     connect.add_argument("--deeplink", action="store_true", help="print a Cursor or VS Code install link")
     connect.add_argument("--toolset", choices=TOOLSETS, default=None,
                          help="tools to serve: full (99), core (36), search (9) or research (7); default full, core for Cursor")
@@ -248,7 +263,9 @@ CAPTURE_TOOLS = {
     "x_video": ("uoink_url", "url"),
     "x_article": ("uoink_page", "url"),
     "reddit_thread": ("uoink_reddit_thread", "url"),
+    "hn_thread": ("uoink_page", "url"),
     "podcast_feed": ("add_podcast_feed", "feed_url"),
+    "podcast_episode": ("add_podcast_feed", "feed_url"),
     "web_page": ("uoink_page", "url"),
 }
 
@@ -396,7 +413,8 @@ def cues_command(ns, server):
     """`uoink cues`: the timed cues read contract (timed_cues.py) in-process,
     the same envelopes GET /api/cues/v1/items returns. Local reads only."""
     import timed_cues
-    item_flags = {"start": ns.start, "end": ns.end}
+    item_flags = {"start": ns.start, "end": ns.end,
+                  "include_held": 1 if getattr(ns, "include_held", False) else None}
     list_flags = {"channel": ns.channel, "published_from": ns.published_from,
                   "published_to": ns.published_to, "q": ns.q}
     page_flags = {"limit": ns.limit, "offset": ns.offset}
@@ -439,7 +457,10 @@ def cues_text(payload):
     head = [terminal_label(item.get("title") or item.get("id") or "Item"),
             f"Published: {terminal_label(item.get('published_at') or 'unknown')} | "
             f"Timing: {source} | {len(cues)} cues"]
-    rows = [f"{text_timestamp(c['start'])}–{text_timestamp(c['end'])}  {text_excerpt(c['text'])}"
+    if data.get("review_note"):
+        head.append(data["review_note"] + " Use --include-held to see them.")
+    rows = [(f"[held line {c['held_line']}] " if "held_line" in c else "")
+            + f"{text_timestamp(c['start'])}–{text_timestamp(c['end'])}  {text_excerpt(c['text'])}"
             for c in cues[:40]]
     if len(cues) > 40:
         rows.append("More cues in JSON output.")
@@ -466,9 +487,8 @@ def shelves_check(ns):
 SHELF_BODY_BYTES = 56 * 1024  # the helper refuses a body over 64 KB
 
 
-def _helper_shelves(server, path, body):
-    """POST one /library/shelves route to the running helper. Raises OSError
-    when it can't be reached."""
+def _helper_post(server, path, body, *, timeout=60):
+    """Post to the authenticated resident helper after checking its identity."""
     import urllib.error
     import urllib.request
     request = urllib.request.Request(
@@ -476,7 +496,7 @@ def _helper_shelves(server, path, body):
         headers={"Content-Type": "application/json", "X-Uoink-Token": server._current_token()},
         method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         try:
@@ -484,6 +504,24 @@ def _helper_shelves(server, path, body):
         except ValueError:
             payload = None
         return payload if isinstance(payload, dict) else {"ok": False, "error": f"helper returned HTTP {exc.code}"}
+
+
+_helper_shelves = _helper_post
+
+
+def repair_caption_command(ns, server):
+    import uoink_agent_runtime as runtime
+    result = server.repair_rolling_captions(ns.id, dry_run=not ns.apply)
+    # A previous invocation may have committed the repair and stopped before
+    # notifying the resident helper. Repeating that notification is safe.
+    if ns.apply and runtime.helper_running(server):
+        try:
+            queued = _helper_post(server, "/search/refresh-item", {"video_id": ns.id}, timeout=5)
+        except (OSError, ValueError):
+            queued = None
+        if not isinstance(queued, dict) or not queued.get("ok"):
+            result["note"] = "Restart Uoink to refresh semantic search for this item."
+    return result
 
 
 def _move_parts(moves):
@@ -689,7 +727,7 @@ def text_kind(row):
                     ("ep_", "podcast"), ("episode_", "podcast")) if identity.startswith(prefix)), "item")
     return {"page": "article", "x_article": "article", "youtube": "video",
             "youtube_video": "video", "short_video": "video", "x_video": "video",
-            "x_thread": "thread", "reddit_thread": "thread"}.get(kind, kind)
+            "x_thread": "thread", "reddit_thread": "thread", "hn_thread": "thread"}.get(kind, kind)
 
 
 def text_source(row):
@@ -874,6 +912,9 @@ def text_item(payload, index):
                         ("Saved", card.get("yoinked_at")), ("Topic", card.get("topic"))):
         if value:
             lines.append(f"{name}: {terminal_label(value)}")
+    for pin in payload.get("pins", []):
+        lines.append(f"Pinned {text_timestamp(pin['seconds'])}  {terminal_label(pin['deep_link'])}")
+        lines.extend(terminal_label(line["text"]) for line in pin["lines"])
     row = index.get_yoink(identity) if index is not None else None
     if row and not row.get("deleted_at"):
         with index.detached_snapshot() as db:
@@ -881,6 +922,12 @@ def text_item(payload, index):
                 "SELECT n.name FROM item_shelves s JOIN shelf_nodes n USING(version_id,shelf_id) "
                 "WHERE s.video_id=? AND n.retired=0 ORDER BY s.is_primary DESC, n.name", (identity,))
             lines.append("Shelf: " + (", ".join(terminal_label(r[0]) for r in shelves) or "Unshelved"))
+        # 3.18.1: the original publish day and where the files are on disk.
+        if row.get("published_day"):
+            lines.append("Published: " + terminal_label(row["published_day"]))
+        saved_file = row.get("corpus_path") or row.get("sidecar_path")
+        if saved_file:
+            lines.append("Folder: " + terminal_label(str(Path(saved_file).parent)))
         admission = payload.get("corpus_admission") or {}
         if admission.get("ok") and row.get("corpus_path"):
             import library_resources
@@ -903,6 +950,14 @@ def text_item(payload, index):
 
 
 def human(payload, *, index=None):
+    if "removed_words" in payload and payload.get("ok"):
+        action = "Found" if payload["dry_run"] else "Removed"
+        message = f"{action} {payload['removed_words']} repeated caption words."
+        if not payload["dry_run"]:
+            message += "\nOriginal transcript saved in " + terminal_label(payload["original_sidecar"])
+        if payload.get("note"):
+            message += "\n" + terminal_label(payload["note"])
+        return message
     if "prompt" in payload and "run_id" in payload:
         lines = [f"Research run: {payload['run_id']}"]
         if payload.get("status"):
@@ -917,6 +972,8 @@ def human(payload, *, index=None):
         return error_text(payload)
     if "half_capture_count" in payload and "progress" in payload:
         return backfill_text(payload)
+    if "review_summary" in payload:
+        return payload["review_summary"]
     if payload.get("contract") == "uoink.cues.read":
         return cues_text(payload)
     if ("groups" in payload and "stays" in payload) or "restored" in payload or (
@@ -1053,7 +1110,6 @@ def install_skill(parent: Path, force=False):
 
 # These finite backend workers may outlive a registry call in a persistent MCP
 # session. A one-shot CLI must let them finish before its daemon threads exit.
-# The podcast worker is permanent, so drain its queue instead of joining it.
 CAPTURE_WORKERS = ("playlist-", "source-capture-", "comments-", "hook-type-",
                    "comment-intelligence-", "entity-extraction-")
 
@@ -1110,9 +1166,7 @@ def models_command(ns, server):
         return {"ok": False, "model": entry["id"], "error": str(exc)}
 
 
-def finish_call_work(server, name, payload, existing_threads):
-    if name == "transcribe_podcast_episode" and payload.get("ok") is True:
-        server._podcast_transcription_queue.join()
+def finish_call_work(existing_threads):
     while True:
         workers = [thread for thread in threading.enumerate()
                    if thread not in existing_threads
@@ -1152,7 +1206,13 @@ def main(argv=None):
             with redirect_stdout(sys.stderr):
                 return backend().run_cli([*isolation.child_argv(), *ns.server_args])
         if ns.command == "connect":
-            from uoink_connect import CLIENTS, client_spec, render, deeplink, python_command
+            from uoink_connect import CLIENTS, client_spec, connect_recipe, deeplink, python_command
+            if ns.manifest is not None and ns.client != "windows-odr":
+                raise UsageError("--manifest requires windows-odr")
+            if ns.yes and not ns.write:
+                raise UsageError("--yes requires --write")
+            if ns.write and (ns.list or ns.deeplink):
+                raise UsageError("--write requires a client and cannot be combined with --list or --deeplink")
             if ns.list and ns.client:
                 raise UsageError("choose a client or --list, not both")
             if ns.deeplink and (ns.list or ns.client not in ("cursor", "vscode")):
@@ -1169,7 +1229,14 @@ def main(argv=None):
                 raise UsageError(str(exc)) from exc
             python = python_command(APP_DIR)
             output_format = "install deeplink" if ns.deeplink else spec.format
-            print(f"File: {spec.location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
+            location = spec.location
+            if ns.client == "claude-desktop" and sys.platform == "win32":
+                from agent_config_writer import claude_desktop_paths, roaming_dir
+                paths = claude_desktop_paths()
+                if paths != [roaming_dir() / "Claude/claude_desktop_config.json"]:
+                    location = "\nFile: ".join(str(path) for path in paths)
+                    location += f"\nDefault location: {spec.location}"
+            print(f"File: {location}\nFormat: {output_format}. Status: not yet tested.", file=sys.stderr)
             verification = "yes" if spec.verified else "no: " + spec.reason
             print(f"Official docs verified: {verification}. Checked: {spec.checked}.", file=sys.stderr)
             print("Sources: " + ", ".join(spec.sources), file=sys.stderr)
@@ -1179,9 +1246,15 @@ def main(argv=None):
                 print("JSON-form YAML 1.2; the entire output is a valid YAML document.", file=sys.stderr)
             if spec.format == "shell" and sys.platform == "win32":
                 print("Run this command in PowerShell.", file=sys.stderr)
-            print(deeplink(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset) if ns.deeplink
-                  else render(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset))
-            return 0
+            if ns.deeplink:
+                print(deeplink(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset))
+                return 0
+            try:
+                return connect_recipe(ns.client, APP_DIR, python, isolation.child_argv(), ns.toolset,
+                                      write=ns.write, yes=ns.yes, manifest=ns.manifest)
+            except (ValueError, OSError) as exc:
+                print(f"uoink: {exc}", file=sys.stderr)
+                return 1
         if ns.command == "skill":
             if ns.skill_command == "path":
                 print(APP_DIR / "skills" / "uoink")
@@ -1205,10 +1278,15 @@ def main(argv=None):
         with redirect_stdout(sys.stderr):
             server = backend()
             import uoink_agent_runtime as runtime
-            if ns.command == "research":
+            if ns.command == "repair-captions":
+                payload = repair_caption_command(ns, server)
+            elif ns.command == "research":
                 payload = research_command(ns, server)
             elif ns.command == "cues":
                 payload = cues_command(ns, server)
+            elif ns.command == "tidy-transcripts":
+                import transcript_review
+                payload = transcript_review.tidy(server, apply=ns.apply, restore=ns.restore)
             elif ns.command == "shelves":
                 payload = shelves_command(ns, server)
             elif ns.command == "models":
@@ -1228,7 +1306,7 @@ def main(argv=None):
                 name, args = (ns.tool, call_args) if ns.command == "call" else friendly_call(ns, server)
                 existing_threads = set(threading.enumerate())
                 payload = runtime.call_tool(name, args, server)
-                finish_call_work(server, name, payload, existing_threads)
+                finish_call_work(existing_threads)
         return emit(payload, text_mode, index=(server._get_index() if text_mode
                     and ("hits" in payload or "yoinks" in payload or "card" in payload) else None))
     except UsageError as exc:

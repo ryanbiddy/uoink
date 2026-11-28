@@ -972,7 +972,7 @@ podcast transcription runs at a time, on a below-normal-priority worker on
 Windows. Call `get_job_status` with the returned `job_id` for queued, running,
 writing, completed, or failed progress. An interrupted non-terminal podcast
 job queues again after helper restart. A first model download returns
-`consent_required: true` unless `consent_given` is explicit.
+`consent_required: true`. The user starts the download in the dashboard.
 
 ### episode_to_corpus
 
@@ -1627,7 +1627,7 @@ Arguments: `id`, `piece_id`. The registry schema in `tools/list` defines require
 
 ### add_style_anchor
 
-Add a Substack-style voice anchor (URL or raw pasted text). User names each. Cap at 10 -- returns 422-shaped error when exceeded. URL ingestion extracts prose via the helper's page extractor (Universal Site PR); falls back to NULL raw_text when the extractor isn't bound yet.
+Save a named writing-style reference from pasted text or a URL. The library holds up to ten active references. URL references need an allowed site. The user can approve a new site in the dashboard. If an allowed page fails to load, the reference can have empty source text.
 
 Arguments: `name`, `source_type`, `source_value`. The registry schema in `tools/list` defines required fields and bounds.
 
@@ -1669,7 +1669,7 @@ Arguments: `url`. The registry schema in `tools/list` defines required fields an
 
 ### uoink_page
 
-Capture an allowed page as a yoink. Crawl4AI runs ON-DEVICE when available (JS render + screenshot); stdlib fallback otherwise (static HTML + markdown synthesis, no screenshot). Allowlist-gated -- add the host via add_allowed_site first if it's not in the defaults (youtube.com, youtu.be, x.com, twitter.com). Result auto-persists as a yoink with source_type='page'.
+Capture an allowed page as a yoink. Crawl4AI renders the page locally when available. The static fallback saves Markdown without a screenshot. The user approves additional hosts in the dashboard. The defaults are youtube.com, youtu.be, x.com and twitter.com. The saved item has `source_type='page'`.
 
 Arguments: `url`, `render_mode`, `include_screenshot`, `follow_links_depth`. The registry schema in `tools/list` defines required fields and bounds.
 
@@ -1730,7 +1730,7 @@ Arguments: `active_only`. The registry schema in `tools/list` defines required f
 
 ### add_allowed_site
 
-Add a hostname or wildcard pattern (`*.docs.example.com` matches all sub.docs.example.com subdomains). Idempotent on UNIQUE url_pattern. Plain hostnames also match their subdomains (so 'example.com' matches 'www.example.com').
+Returns `consent_required`. Ask the user to add the hostname in the dashboard under Settings > Capture > Sites Uoink works on, then retry the original capture. A plain hostname and its leading-wildcard form both include the named site and its subdomains. Rules must name a site below a recognized public suffix.
 
 Arguments: `url_pattern`. The registry schema in `tools/list` defines required fields and bounds.
 

@@ -31,6 +31,12 @@ if (!STC || typeof STC.classifyCaptureUrl !== "function") {
 
 const cases = [
   {
+    name: "Hacker News item",
+    url: "https://news.ycombinator.com/item?utm_source=test&id=000903",
+    source: "hn_thread", endpoint: "/extract/page", action: "page",
+    canonical: "https://news.ycombinator.com/item?id=903",
+  },
+  {
     name: "YouTube video (watch)",
     url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&si=abc",
     source: "youtube_video",

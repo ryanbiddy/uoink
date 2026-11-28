@@ -26,3 +26,29 @@ def isolated_usage_store(tmp_path, monkeypatch):
 @pytest.fixture
 def tmp(tmp_path: Path) -> Path:
     return tmp_path
+
+
+@pytest.fixture
+def recorded_episode(tmp_path):
+    import index
+    from tests.podcast_fixtures import _seed_downloaded_episodes
+
+    with index.Index.open(tmp_path / "index.db") as idx:
+        episode_id, = _seed_downloaded_episodes(idx, tmp_path, count=1)
+        yield idx, episode_id
+
+
+@pytest.fixture
+def public_dns(monkeypatch):
+    from tests.offline_dns import public_address
+    monkeypatch.setattr("socket.getaddrinfo", public_address)
+
+
+@pytest.fixture
+def isolated_mirror_mutex(monkeypatch):
+    """Keep the Windows writer gate shared by this test and its competitor."""
+    import uuid
+    import library_mirror
+
+    monkeypatch.setattr(library_mirror, "_WRITER_ADMISSION_MUTEX",
+                        "Local\\uoink-test-mirror-" + uuid.uuid4().hex)

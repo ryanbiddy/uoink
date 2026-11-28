@@ -85,7 +85,9 @@ def test_transcribe_media_applies_the_filter_and_decode_options(monkeypatch, med
     models(monkeypatch, base=looping)
     rows = rel.transcribe_media(media, model_name="base")
     assert [text for _s, _e, text in rows] == [
-        "Intro music.", "Thanks for watching.", "Thanks for watching.", "Thanks for watching."]
+        "Intro music.", "Thanks for watching.", "Thanks for watching.", "Thanks for watching.",
+        ("Thanks for watching. " * 6).strip()]
+    assert [r.held_reason for r in rows] == [None, None, None, None, "repetition"]
     options = looping.calls[0]
     assert options["vad_filter"] is True
     assert options["condition_on_previous_text"] is False

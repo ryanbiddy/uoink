@@ -66,7 +66,10 @@ http.shutdown()
 def supervisor(tmp_path, mode, **kw):
     script = tmp_path / 'fake.py'
     script.write_text(FAKE)
-    command = [sys.executable, str(script), mode, str(tmp_path)]
+    # The Windows venv redirector spawns another PID. Launch the interpreter
+    # directly so the supervisor owns the process answering the disposable port.
+    python = sys._base_executable if os.name == 'nt' else sys.executable
+    command = [python, str(script), mode, str(tmp_path)]
     def probe(_url, run_id, pid):
         try:
             port = int((tmp_path / 'port').read_text())
@@ -148,7 +151,19 @@ def test_manual_start_recovers_corrupt_state(tmp_path):
 
 def test_ready_slow_job_is_not_restarted(tmp_path):
     runner = supervisor(tmp_path, 'slow')
+    probe = runner.probe
+    identities = []
+
+    def observe(url, run_id, pid):
+        if not probe(url, run_id, pid):
+            return False
+        state = recovery.read_json(tmp_path / recovery.STATE_FILE)
+        identities.append((state.get('helper_pid'), state.get('supervisor_run_id'), pid, run_id))
+        return True
+
+    runner.probe = observe
     assert runner.run() == 0
+    assert identities and all((p, r) == (pid, run) for p, r, pid, run in identities)
     state = recovery.status(tmp_path)
     assert state['ready_at'] and state['restart_count'] == 0, state
     assert state['last_exit_code'] == 0, state

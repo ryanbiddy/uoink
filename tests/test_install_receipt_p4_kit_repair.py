@@ -19,7 +19,7 @@ sys.path.insert(0, str(KIT))
 
 import p4_collect_evidence as collect
 import p4_common as common
-import p4_prepare_fixture as prepare
+from tests.receipt_fixtures import prepare_receipt
 import p4_provision_isolation as provision
 import p4_session as session
 import p4_stdio_check as stdio_check
@@ -239,7 +239,7 @@ def test_prepare_writes_supported_isolation_root(tmp_path: Path):
         instrument_only=True,
         original_local=_original_local(),
     )
-    prepare.prepare(binding)
+    prepare_receipt(binding)
     assert (profile / "index.db").is_file()
     assert (profile / "settings.json").is_file()
     assert (profile / "token.txt").is_file()
@@ -319,7 +319,7 @@ def test_source_runtime_original_route_against_isolation_scratch(tmp_path: Path)
         original_local=_original_local(),
     )
     assert binding["installed_credit"] is False
-    prepare.prepare(binding)
+    prepare_receipt(binding)
     assert (profile / "index.db").is_file()
     env = common.isolation_env(binding, extra={"route_label": "original-installed"})
     result = stdio_check.run_installed(binding, profile, env, "original-installed")

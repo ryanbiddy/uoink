@@ -7,7 +7,7 @@ fn run_inno_silent(install_dir: String) -> Result<String, String> {
         .map_err(|e| e.to_string())?
         .parent()
         .ok_or("could not resolve prototype exe directory")?
-        .join("Uoink-Setup-3.18.0.exe");
+        .join("Uoink-Setup-3.18.1.exe");
 
     if !installer.exists() {
         return Ok(format!(
@@ -58,8 +58,8 @@ fn open_url(url: String) -> Result<(), String> {
     }
     #[cfg(target_os = "windows")]
     let mut cmd = {
-        let mut c = Command::new("cmd");
-        c.args(["/C", "start", "", &url]);
+        let mut c = Command::new("explorer.exe");
+        c.arg(&url);
         c
     };
     #[cfg(target_os = "macos")]

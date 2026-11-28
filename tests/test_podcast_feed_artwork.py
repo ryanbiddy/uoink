@@ -5,6 +5,7 @@ Run: python -m pytest -q tests/test_podcast_feed_artwork.py
 from __future__ import annotations
 
 import io
+import pytest
 import sys
 from pathlib import Path
 
@@ -45,6 +46,20 @@ def _opener(body, content_type, length=None, calls=None):
 
 
 FEED = {"id": 7, "title": "The Show"}
+
+
+@pytest.mark.parametrize("body,kind,name", [
+    (JPEG, "image/jpeg", "artwork.jpg"), (b"text", "text/plain", "artwork.refused"),
+], ids=["image", "refusal"])
+def test_artwork_publication_uses_podcast_storage(tmp_path, monkeypatch, body, kind, name):
+    from unittest.mock import Mock
+    writer = Mock(wraps=podcasts.atomic_output)
+    monkeypatch.setattr(podcasts, "atomic_output", writer)
+    podcasts.cache_feed_artwork(tmp_path, FEED, ART_URL, opener=_opener(body, kind))
+    target = tmp_path / "Podcasts" / "the-show" / name
+    assert writer.call_count == 1 and writer.call_args.args == (target,)
+    assert writer.call_args.kwargs["root"] == podcasts.podcast_storage(tmp_path)
+    assert target.read_bytes() == (JPEG if kind == "image/jpeg" else ART_URL.encode())
 
 
 def test_caches_one_copy_as_artwork_ext_and_the_library_finds_it(tmp_path):

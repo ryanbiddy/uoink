@@ -32,6 +32,12 @@ def _load_app():
 app = _load_app()
 
 
+@pytest.mark.parametrize("control", ["\u202e", "\u2067", "\u200f"])
+def test_url_rejects_bidirectional_formatting(control):
+    with pytest.raises(app.ShareError, match="control"):
+        app.validate_url("https://example.test/read" + control + "more")
+
+
 class Clock:
     def __init__(self, value=START):
         self.value = value

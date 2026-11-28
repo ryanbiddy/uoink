@@ -28,7 +28,7 @@
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.18.0"
+#define AppVersion    "3.18.1"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
@@ -177,6 +177,7 @@ Source: "staging\library_work.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_subscriptions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_availability.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\transcript_backfill.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\transcript_review.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_analysis.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_resources.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -187,11 +188,13 @@ Source: "staging\library_remember.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_mirror_vault_io.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_media.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\caption_repair.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_faithfulness.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_cli.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_connect.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\agent_config_writer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_agent_runtime.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts\install-watchdog.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
@@ -229,6 +232,7 @@ Source: "staging\article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_manifest.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\hn_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\suggestions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\asr_worker.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -245,6 +249,7 @@ Source: "staging\page_dom_capture.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\list_imports.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\show_capture.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\timed_cues.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\moments.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\shelf_router.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\local_embed.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\research.py"; DestDir: "{app}"; Flags: ignoreversion

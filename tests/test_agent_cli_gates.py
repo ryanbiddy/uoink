@@ -21,12 +21,12 @@ def transports(tmp_path):
         "def load_model(*args, **kwargs):\n    raise AssertionError('consent must precede model loading')\n", encoding="utf-8")
     env["PYTHONPATH"] = os.pathsep.join([str(stub), env.get("PYTHONPATH", "")])
     import index
-    from tests.test_podcast_background_jobs import _seed_downloaded_episodes
+    from tests.podcast_fixtures import _seed_downloaded_episodes
     idx = index.Index.open(tmp_path / "profile" / "index.db")
     import page_extractor
     page_extractor.add_allowed(idx, "192.168.1.2")
     idx._conn.commit()
-    episode_id = _seed_downloaded_episodes(idx, tmp_path, count=1)[0]
+    episode_id = _seed_downloaded_episodes(idx, tmp_path / "profile", count=1)[0]
     idx.close()
     client = _StdioClient([sys.executable, "-B", "-P", str(ROOT / "uoink_mcp.py")], tmp_path, env)
     client.send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {

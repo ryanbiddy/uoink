@@ -1,4 +1,4 @@
-﻿// Real setup and worker scripts with an in-memory DOM, storage and transport.
+// Real setup and worker scripts with an in-memory DOM, storage and transport.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -101,7 +101,7 @@ const groups = {
     const mac=await setup({os:'mac',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
     assert.equal(mac.el('download-btn').hidden,false);
     assert.equal(mac.el('manual-install').hidden,true);
-    assert.equal(mac.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.18.0&from=extension');
+    assert.equal(mac.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.18.1&from=extension');
     assert.equal(mac.el('download-btn').textContent,'Download for Mac');
     assert.match(mac.el('install-instructions').textContent,/drag Uoink to Applications/);
     const win=await setup({os:'win',setupSource:published,fetch:()=>jsonResponse({ok:false},503)});
@@ -145,7 +145,7 @@ const groups = {
     const arm=await setup({os:'mac',fetch:down});
     arm.ctx.chrome.runtime.getPlatformInfo=cb=>cb({os:'mac',arch:'arm'});
     assert.equal(arm.el('download-btn').hidden,false);
-    assert.equal(arm.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.18.0&from=extension');
+    assert.equal(arm.el('download-btn').href,'https://usage.uoink.app/get/mac?v=3.18.1&from=extension');
     assert.match(arm.el('funnel-os').textContent,/Apple silicon/);
     // Intel Mac: a clear note, no download, manual instructions.
     const intelSource=readFileSync(join(EXT,'setup.js'),'utf8').replace('chrome.runtime.getPlatformInfo(info => setPlatform(info && info.os, info && info.arch));','chrome.runtime.getPlatformInfo(info => setPlatform("mac", "x86-64"));');
@@ -161,7 +161,7 @@ const groups = {
     assert.match(linux.el('funnel-next').textContent,/no Linux installer/i);
     // Win: Windows download through the counted redirect.
     const win=await setup({os:'win',fetch:down});
-    assert.equal(win.el('download-btn').href,'https://usage.uoink.app/get/windows?v=3.18.0&from=extension');
+    assert.equal(win.el('download-btn').href,'https://usage.uoink.app/get/windows?v=3.18.1&from=extension');
   },
   async navigation_motion() {
     for (const reducedMotion of [true, false]) {
@@ -207,6 +207,32 @@ const groups = {
     const unavailable=await setup({fetch:path=>path==='/health'?jsonResponse({ok:true}):jsonResponse({},403)});
     assert.equal(unavailable.el('status-block').dataset.state,'running');
     assert.match(unavailable.el('diagnose-list').textContent,/unavailable/);
+  },
+  async manual_diagnostics() {
+    const token = 'fixture-helper-token';
+    const requests = [];
+    const env = await setup({fetch: (path, init) => {
+      requests.push({path, headers: init.headers});
+      if (path === '/token') return jsonResponse({token});
+      return jsonResponse({ok:true});
+    }});
+    assert.deepEqual(requests.map(r => r.path), ['/health', '/diagnose']);
+    env.el('verify-btn').click();
+    await settle();
+    assert.ok(env.fetches.some(url => url.endsWith('/diagnose?refresh=1')));
+    assert.equal(requests.at(-1).headers['X-Uoink-Token'], token);
+  },
+  async slow_startup_diagnostics() {
+    let ready = false;
+    const env = await setup({fetch: path => {
+      if (path === '/health') return jsonResponse({ok:true});
+      if (!ready) throw new TypeError('First read timed out');
+      return jsonResponse({checks:[{name:'ffmpeg_available',status:'error'}]});
+    }});
+    ready = true;
+    await env.fireTimer(10000);
+    assert.match(env.el('diagnose-list').textContent,/Needs attention.*ffmpeg available/);
+    assert.ok(env.fetches.every(url=> !url.includes('refresh=') && !url.endsWith('/token')));
   },
   async routes() {
     const destinations = [

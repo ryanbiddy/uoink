@@ -19,16 +19,17 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const input = JSON.parse(fs.readFileSync(0, 'utf8'));
 const page = fs.readFileSync('assets/dashboard/index.html', 'utf8');
-const escapeStart = page.indexOf('    function htmlEscape(');
-const escapeEnd = page.indexOf('\n    }', escapeStart) + 6;
-const start = page.indexOf('    function renderStandingSubscriptions()');
-const end = page.indexOf('    const CLASSIFICATION_LABELS', start);
-if ([escapeStart, escapeEnd, start, end].some(n => n < 0)) throw Error('Missing product renderer');
+function definition(name) {
+  const start = page.indexOf('    function ' + name + '(');
+  const end = page.indexOf('\n    }', start);
+  if (start < 0 || end < 0) throw Error('Missing dashboard function: ' + name);
+  return page.slice(start, end + 6);
+}
 const list = {innerHTML: '', querySelectorAll: () => []};
-const context = {state: {standingSources: [input]},
+const context = {URL, state: {standingSources: [input]},
   els: {standingSubscriptionList: list, standingSummaryBar: {} }};
 vm.createContext(context);
-vm.runInContext(page.slice(escapeStart, escapeEnd) + '\n' + page.slice(start, end)
+vm.runInContext(['htmlEscape', 'urlHostname', 'podcastDisplayName', 'renderStandingSubscriptions'].map(definition).join('\n')
   + '\nrenderStandingSubscriptions();', context);
 process.stdout.write(list.innerHTML);
 '''

@@ -142,7 +142,7 @@ chrome.commands.onCommand.addListener(async (command) => {
             const active = await getActiveFromStorage();
             const interval = await STC.getInterval();
             const kind = active && active.id ? "session_add" : "extract";
-            const job = { kind, url: normalized, interval, addedAt: Date.now() };
+            const job = { kind, url: await STC.tabMomentUrl(tab.id, normalized), interval, addedAt: Date.now() };
             if (kind === "session_add") {
               job.session_id = active.id;
               job.session_name = active.name;
@@ -262,7 +262,8 @@ function isXArticleTab(url) {
 }
 
 async function updateArticleMenuTitle(url) {
-  const title = isXArticleTab(url) ? "Uoink this article" : "Uoink this page";
+  const title = STC.normalizeHnUrl(url) ? "Uoink this thread"
+    : isXArticleTab(url) ? "Uoink this article" : "Uoink this page";
   try {
     await new Promise((resolve) =>
       chrome.contextMenus.update(MENU_ARTICLE_PAGE, { title }, () => {
@@ -348,7 +349,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 
   const interval = await STC.getInterval();
-  const job = { kind, url: normalized, interval, addedAt: Date.now() };
+  const selectedLink = info.linkUrl && raw === info.linkUrl;
+  const url = selectedLink ? normalized : await STC.tabMomentUrl(tab && tab.id, normalized);
+  const job = { kind, url, interval, addedAt: Date.now() };
   if (isTwitter) {
     job.useExtractAny = true;
   }
@@ -562,14 +565,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
-  // After a save = "Stay on the page", from the in-page button: only the slug
-  // arrives; the notification buttons fetch the text again when clicked.
+  // The in-page button sends only the fields needed for its save notice.
   if (msg.type === "afterSaveNotice") {
     const data = {
       topic: typeof msg.topic === "string" ? msg.topic.slice(0, 80) : null,
       folder: typeof msg.folder === "string" ? msg.folder : null,
+      pinned_seconds: msg.pinned_seconds,
     };
-    notifyAfterSaveFor(data).then((id) => sendResponse({ ok: true, id }), () => sendResponse({ ok: false }));
+    const copied = msg.copied === true;
+    notifyAfterSaveFor(data, copied ? "copy" : "stay", copied)
+      .then((id) => sendResponse({ ok: !!id, id }), () => sendResponse({ ok: false }));
     return true;
   }
 
@@ -688,7 +693,7 @@ function tryOpenPopup() {
 function notify(title, message, extraOptions = {}) {
   // Only capture outcomes interrupt the user. Content scripts still send
   // queued messages for older helpers; acknowledge them without a desktop toast.
-  const finished = /^(?:Uoinked(?: ★)?|Uoink ready|Posts saved|Added to session|Copied to clipboard)$/i.test(title);
+  const finished = /^(?:Uoinked(?: ★)?|Uoink ready|Posts saved|Added to session|Copied to clipboard|Moment pinned)$/i.test(title);
   const failed = /(?:failed|offline|blocked|queue full|invalid URL|lost track|still working|couldn't (?:read|capture))/i.test(title);
   if (!finished && !failed) return Promise.resolve(null);
   return new Promise((resolve) => {
@@ -700,7 +705,7 @@ function notify(title, message, extraOptions = {}) {
         message,
         priority: 1,
         ...extraOptions,
-      }, (id) => resolve(id));
+      }, (id) => resolve(chrome.runtime.lastError ? null : id));
     } catch (e) {
       console.warn("[stc] notification failed", e);
       resolve(null);
@@ -789,16 +794,27 @@ async function _forgetAfterSave(id) {
   if (id in map) { delete map[id]; await _writeAfterSaveSession(map); }
 }
 
-// Nothing is copied or opened. Says the capture is in the library and offers two
-// buttons (the very first save offers "See it in Claude" instead of the plain one).
-async function notifyAfterSaveFor(data) {
+// A page and a queue job can finish together. Let the first notice finish
+// updating storage before the next one decides which message to show.
+let pendingSaveNotice = Promise.resolve();
+function notifyAfterSaveFor(data, mode = "stay", copied = false) {
+  const notice = pendingSaveNotice.then(() => showSaveNotice(data, mode, copied));
+  pendingSaveNotice = notice.catch(() => {});
+  return notice;
+}
+
+async function showSaveNotice(data, mode, copied) {
   const first = await STC.isFirstSave();
-  const message = await STC.buildUoinkedMessage(data, false, "stay");
-  const slug = slugFromFolder(data && data.folder);
+  const message = await STC.buildUoinkedMessage(data, copied, mode, first);
+  const slug = mode === "stay" && slugFromFolder(data && data.folder);
   const options = slug ? {
     buttons: AFTER_SAVE_BUTTONS.map((b) => ({ title: first ? b.firstTitle : b.title })),
   } : {};
   const id = await notify("Uoinked ★", message, options);
+  if (id && first && (mode === "stay" || copied)) {
+    try { await chrome.storage.local.set({ has_completed_first_yoink: true }); }
+    catch (e) { console.warn("[stc] couldn't record the first save notice", e); }
+  }
   if (!id || !slug) return id;
   const map = await _readAfterSaveSession();
   map[id] = { slug, at: Date.now() };
@@ -1505,7 +1521,9 @@ async function runExtractJob(job) {
     return;
   }
   if (data.queued) {
-    await publishPopupResult(job, { ok: true, queued: true, message: queuedMessage(data) });
+    const message = STC.pinnedMessage(data, queuedMessage(data));
+    if (STC.pinnedMessage(data)) await notify("Moment pinned", message);
+    await publishPopupResult(job, { ok: true, queued: true, message });
     return;
   }
 
@@ -1530,9 +1548,9 @@ async function runExtractJob(job) {
   // restoreQueue resumed waited behind the capture the helper was still
   // running). Say it's saved rather than copy nothing and open Claude.
   if (!data.corpus_md_paste && !data.yoink_md) {
-    const message = data.title
+    const message = STC.pinnedMessage(data) || (data.title
       ? `Saved "${data.title}" to your library. Use Copy Markdown in the Uoink popup to paste it.`
-      : "Saved to your library. Use Copy Markdown in the Uoink popup to paste it.";
+      : "Saved to your library. Use Copy Markdown in the Uoink popup to paste it.");
     notify("Uoinked ★", message);
     await publishPopupResult(job, { ok: true, message });
     return;
@@ -1545,9 +1563,9 @@ async function runExtractJob(job) {
     await rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
     await STC.stashPickerCorpus(data);
     notify("Uoink ready",
-           "Click the Uoink icon to pick which screenshots to include.");
+           [STC.pinnedMessage(data), "Click the Uoink icon to pick which screenshots to include."].filter(Boolean).join(". "));
     await publishPopupResult(job, {
-      ok: true, message: "Uoink ready. Pick screenshots in the popup.",
+      ok: true, message: STC.pinnedMessage(data) || "Uoink ready. Pick screenshots in the popup.",
     });
     return;
   }
@@ -1561,7 +1579,7 @@ async function runExtractJob(job) {
   if (afterSave === "stay") {
     // Default: the save is in the library; nothing is copied or opened.
     await notifyAfterSaveFor(data);
-    await publishPopupResult(job, { ok: true, message: "Saved to your library." });
+    await publishPopupResult(job, { ok: true, message: STC.pinnedMessage(data, "Saved to your library.") });
     return;
   }
   await rememberClipboardBudget(data, clipboardText);
@@ -1582,16 +1600,12 @@ async function runExtractJob(job) {
   const tabUrl = destination.url && allowedTabUrl(destination.url);
   if (tabUrl) await chrome.tabs.create({ url: tabUrl, active: true });
 
-  // Shared helper handles first-yoink-vs-subsequent copy + atomically marks
-  // the has_completed_first_yoink flag. Same code is called from content.js
-  // so the in-page YouTube button gets the same first-time CTA.
-  const message = await STC.buildUoinkedMessage(data, copied);
-  notify("Uoinked ★", message);
+  await notifyAfterSaveFor(data, afterSave, copied);
   await publishPopupResult(job, {
     ok: true,
-    message: afterSave === "chatgpt" ? "Uoinked ★ Paste in ChatGPT."
+    message: STC.pinnedMessage(data, afterSave === "chatgpt" ? "Uoinked ★ Paste in ChatGPT."
       : afterSave === "copy" ? "Uoinked ★ Copied. Paste it in your AI."
-      : "Uoinked ★ Paste in Claude.",
+      : "Uoinked ★ Paste in Claude."),
   });
 }
 
@@ -1732,6 +1746,8 @@ async function readPageFromTab(job) {
 // The tab's text goes to the helper (POST /extract/page/dom, local only). An
 // older helper without that route answers 404: use the URL path instead.
 async function capturePage(job) {
+  const hn = STC.normalizeHnUrl(job.url);
+  if (hn) return STC.postExtractPage(hn);
   const capture = await readPageFromTab(job);
   if (capture) {
     const data = await STC.postExtractPageDom(capture);
@@ -1818,8 +1834,7 @@ async function captureXArticleFromTab(tabId, pageUrl) {
     const tabUrl = copied && destination.url && allowedTabUrl(destination.url);
     if (tabUrl) await chrome.tabs.create({ url: tabUrl, active: true });
     if (copied) await markClipboardYoinkNow();
-    const message = await STC.buildUoinkedMessage(pageData, copied);
-    notify("Uoinked ★", message);
+    await notifyAfterSaveFor(pageData, afterSave, copied);
   } else {
     notify("Uoinked ★", "Saved the article to your library.");
   }
@@ -1859,7 +1874,8 @@ async function runSessionAddJob(job) {
   });
 
   const sessionName = job.session_name || job.session_id;
-  notify("Added to session", `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"}`);
+  const message = `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"}`;
+  notify("Added to session", STC.pinnedMessage(data, message));
 
   // Pull fresh active session state into local storage so popup + menu update.
   await refreshActiveSession();

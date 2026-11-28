@@ -124,6 +124,17 @@ def _walk(menu):
     return lines
 
 
+def test_cold_diagnostics_show_checking_then_the_result(tmp_path):
+    tray = _tray(tmp_path)
+    result = {"ok": False, "pending": True, "refreshing": True}
+    tray._get = lambda path, **kwargs: (result if path == "/diagnose" else {}, 200)
+    tray._refresh_status()
+    assert "checking" in tray._status_text().lower()
+    result = {"ok": False, "checks": [{"name": "ffmpeg_available", "status": "error"}]}
+    tray._refresh_status()
+    assert tray._state == "degraded"
+
+
 SAVED = [
     {"title": "Talk one", "folder": "C:/library/youtube/talk-one"},
     {"title": "Q&A two", "folder": "C:/library/x/qa-two"},
@@ -170,8 +181,11 @@ def test_every_menu_item_does_something(fake_pystray, tmp_path, monkeypatch):
             for sub in item.submenu:
                 by_text[sub.text] = sub
 
-    by_text["Open dashboard"](icon)
-    assert len(spawned) == 1 and spawned[0][-1].endswith("uoink_dashboard.py")
+    import uoink_install_isolation as isolation
+    with isolation.bound_isolation(profile=tmp_path, port=18116):
+        by_text["Open dashboard"](icon)
+        assert len(spawned) == 1 and spawned[0][1].endswith("uoink_dashboard.py")
+        assert spawned[0][2:] == isolation.child_argv()
     by_text["Open folder"](icon)
     assert opened_paths == [tmp_path / "library"]
     # Each recent item opens its own folder (a closure made in the loop would

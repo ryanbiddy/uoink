@@ -28,10 +28,13 @@ import corpus_contract  # noqa: E402
 import index as index_mod  # noqa: E402
 import regenerate_corpus_contract_v1_fixture as regenerate  # noqa: E402
 import server  # noqa: E402
+import podcasts  # noqa: E402
 import timed_cues  # noqa: E402
 import uoink_cli as cli  # noqa: E402
 
 SHOW = "The Tidepool Hour"
+FEED_URL = "https://tidepool.example.com/feed"
+PODCAST_ID = podcasts._episode_corpus_id({"feed_url": FEED_URL, "guid": "tidepool-1"})[0]
 
 
 def _seg(start, end, text, video_id="tpcaptions1"):
@@ -73,7 +76,7 @@ ITEMS = {
                                               {"word": "reef", "start": 0.7, "end": 1.4}]},
                                    [2.0, 5.5, "No word timings here."]]},
     },
-    "tppodcast01": {
+    PODCAST_ID: {
         "row": {"channel": SHOW, "title": "Podcast episode", "yoinked_at": "2026-11-05T09:00:00",
                 "source_type": "episode", "platform": "podcast",
                 "meta": {"url": "https://tidepool.example.com/ep/1", "platform": "podcast",
@@ -99,16 +102,25 @@ def _build(root: Path):
     idx = index_mod.Index.open(root / "index.db")
     for video_id, spec in ITEMS.items():
         folder = root / "saves" / video_id
+        meta = dict(spec["row"]["meta"])
+        if video_id == PODCAST_ID:
+            feed = podcasts.add_feed(idx, FEED_URL, title=SHOW)
+            podcasts.upsert_episodes(idx, feed["id"], [{"guid": "tidepool-1", "title": spec["row"]["title"],
+                                                        "audio_url": "https://tidepool.example.com/1.mp3"}])
+            episode, = podcasts.list_episodes(idx, feed_id=feed["id"])
+            meta.update(episode_id=episode["id"], feed_url=FEED_URL, guid=episode["guid"])
+            folder = podcasts.episode_corpus_folder(podcasts.podcast_storage(root / "data"),
+                                                   podcasts.get_episode_with_feed(idx, episode["id"]))
         folder.mkdir(parents=True)
-        sidecar_path = folder / f"{video_id}.json"
+        sidecar_path = folder / f"{folder.name}.json"
         sidecar_path.write_text(json.dumps(spec["sidecar"]), encoding="utf-8")
-        corpus = folder / f"{video_id}.md"
+        corpus = folder / f"{folder.name}.md"
         corpus.write_text(f"# {spec['row']['title']}\n", encoding="utf-8")
         row = spec["row"]
         idx.upsert_yoink({
-            "video_id": video_id, "slug": video_id, "channel": row["channel"], "title": row["title"],
+            "video_id": video_id, "slug": folder.name, "channel": row["channel"], "title": row["title"],
             "topic": "Tides", "yoinked_at": row["yoinked_at"], "corpus_path": str(corpus),
-            "sidecar_path": str(sidecar_path), "metadata_json": json.dumps(row["meta"]),
+            "sidecar_path": str(sidecar_path), "metadata_json": json.dumps(meta),
             "source_type": row.get("source_type", "youtube"), "platform": row.get("platform", "youtube"),
             "author": row["channel"],
         }, content=" ".join(seg["text"] if isinstance(seg, dict) else seg[2]
@@ -117,7 +129,9 @@ def _build(root: Path):
 
 
 @pytest.fixture
-def idx(tmp_path):
+def idx(tmp_path, monkeypatch):
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "saves")
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "data")
     index = _build(tmp_path)
     try:
         yield index
@@ -149,7 +163,7 @@ def test_automatic_captions(idx):
     data = timed_cues.get_item(idx, "tpautocaps01")
     assert data["timing"]["source"] == "auto_captions"
     assert data["cues"] == [{"start": 1.0, "end": 2.0, "text": "uh so crabs",
-                             "deep_link": "https://www.youtube.com/watch?v=tpautocaps01&t=1s"}]
+                             "deep_link": "https://www.youtube.com/watch?v=tpautocaps01&t=0s"}]
     assert data["item"]["published_at"] == "2024-01-10"     # from yt-dlp's YYYYMMDD
 
 
@@ -164,7 +178,7 @@ def test_local_asr_with_word_timings(idx):
 
 
 def test_podcast_episode_asr_and_speakers(idx):
-    data = timed_cues.get_item(idx, "tppodcast01")
+    data = timed_cues.get_item(idx, PODCAST_ID)
     assert data["timing"]["source"] == "local_asr"
     assert data["item"]["published_at"] == "2025-03-03"
     assert data["item"]["title"] == "Podcast episode"
@@ -201,7 +215,7 @@ def test_item_errors(idx, item_id, query, code, status):
 
 
 def _sidecar_item(tmp_path, idx, video_id, sidecar, meta=None):
-    folder = tmp_path / "extra" / re.sub(r"[^A-Za-z0-9]", "_", video_id)
+    folder = tmp_path / "saves" / "extra" / re.sub(r"[^A-Za-z0-9]", "_", video_id)
     folder.mkdir(parents=True)
     path = folder / "item.json"
     path.write_text(json.dumps(sidecar), encoding="utf-8")
@@ -285,11 +299,11 @@ def _ids(data):
 
 def test_list_by_show_and_publish_date(idx):
     show = timed_cues.search(idx, {"channel": [SHOW]})
-    assert set(_ids(show)) == {"tpcaptions1", "tpautocaps01", "tppodcast01"}
+    assert set(_ids(show)) == {"tpcaptions1", "tpautocaps01", PODCAST_ID}
     assert show["page"]["total"] == 3
     in_2025 = timed_cues.search(idx, {"channel": [SHOW], "published_from": ["2025-01-01"],
                                       "published_to": ["2025-12-31"]})
-    assert set(_ids(in_2025)) == {"tpcaptions1", "tppodcast01"}
+    assert set(_ids(in_2025)) == {"tpcaptions1", PODCAST_ID}
     march_4 = timed_cues.search(idx, {"published_from": ["2025-03-04"], "published_to": ["2025-03-04"]})
     assert _ids(march_4) == ["tpcaptions1"]
     ref = march_4["items"][0]
@@ -365,7 +379,7 @@ def test_http_routes(http):
     status, raw = _get(http, f"/api/cues/v1/items?channel={SHOW.replace(' ', '%20')}"
                              "&published_from=2025-01-01")
     assert status == 200
-    assert set(_ids(json.loads(raw)["data"])) == {"tpcaptions1", "tppodcast01"}
+    assert set(_ids(json.loads(raw)["data"])) == {"tpcaptions1", PODCAST_ID}
 
     status, raw = _get(http, "/api/cues/v1/items/missing")
     assert status == 404 and json.loads(raw)["error"]["code"] == "not_found"
@@ -400,7 +414,7 @@ def test_cli_cues(idx, monkeypatch, capsys):
     assert "Published: 2025-03-04T15:00:00Z" in text
 
     assert cli.main(["cues", "--channel", SHOW, "--from", "2025-01-01"]) == 0
-    assert set(_ids(json.loads(capsys.readouterr().out)["data"])) == {"tpcaptions1", "tppodcast01"}
+    assert set(_ids(json.loads(capsys.readouterr().out)["data"])) == {"tpcaptions1", PODCAST_ID}
 
     assert cli.main(["cues", "missing"]) == 1
     assert json.loads(capsys.readouterr().out)["error"]["code"] == "not_found"
@@ -440,6 +454,7 @@ def _v1_bytes(port):
 
 def test_corpus_v1_unchanged_by_new_fields(tmp_path, monkeypatch):
     idx, _provider = regenerate.build_provider(tmp_path)
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path / "corpus")
     monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(server, "DATA_ROOT", tmp_path / "corpus")
     monkeypatch.setattr(server, "_read_settings", lambda: {})

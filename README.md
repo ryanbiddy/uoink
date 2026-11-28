@@ -34,7 +34,7 @@
 
 ```sh
 brew install --cask ryanbiddy/uoink/uoink
-uoink connect claude-code
+uoink connect claude-code --write
 ```
 
 Paste a YouTube link into an AI chat and it guesses. Paste the transcript and the timestamps are gone, so when it says "they mention this around the middle" you can't check.
@@ -66,7 +66,7 @@ AI:   Two of them. Talk A (08:15) argues for it. Talk B (41:02) says it breaks a
 ## Quick start
 
 1. **Install.** Download from **[uoink.app/get](https://uoink.app/get)**, or on a Mac run `brew install --cask ryanbiddy/uoink/uoink`. For Linux, see [the Linux guide](docs/linux.md).
-2. **Connect your AI.** Run `uoink connect claude-code`. For other clients, run `uoink connect --list`. Claude Desktop can open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
+2. **Connect your AI.** Run `uoink connect claude-code --write` and confirm. If `claude` is on PATH, Uoink adds the server for you. Restart Claude Code and ask “What's in my Uoink library?” For other clients, run `uoink connect --list`. Claude Desktop can also open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest).
 3. **Ask.** *"uoink https://youtu.be/… and tell me where they explain the eval setup."*
 
 Good to know: the Windows installer is unsigned, so SmartScreen asks first (choose **More info → Run anyway**). The Mac app is signed and notarized. The browser button loads from the app's setup screen while the Chrome Web Store listing is pending.
@@ -94,9 +94,9 @@ You can also import YouTube Watch Later, X bookmarks and Reddit saves, and [shar
 | Client | How to connect |
 |---|---|
 | **Claude Desktop** | Open the `.mcpb` file from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). [Details](docs/mcpb-bundle.md) |
-| **Claude Code** | `uoink connect claude-code`, or the plugin: `claude plugin marketplace add ryanbiddy/uoink-agent-kit` |
-| **Cursor** | `uoink connect cursor` (use the 36-tool core set, since Cursor caps tools) |
-| **Codex, VS Code and more** | `uoink connect --list` prints setup for 48 clients and integrations |
+| **Claude Code** | `uoink connect claude-code --write`, or the plugin: `claude plugin marketplace add ryanbiddy/uoink-agent-kit` |
+| **Cursor** | `uoink connect cursor --write` uses the 36-tool core set. |
+| **Codex, VS Code and more** | `uoink connect --list` lists 48 clients and integrations. Use `uoink connect <client>` to preview a recipe. |
 | **Any agent with a shell** | The `uoink` command: `uoink search "working memory" --limit 5` |
 | **ChatGPT or any chat box** | Click Uoink and paste. The transcript and key screenshots land on your clipboard |
 
@@ -114,13 +114,13 @@ The stdio transport is tested with **Claude Desktop and Cursor**, and Claude Cod
 
 ## Install, step by step
 
-1. **Download the installer.** Download `Uoink-Setup-3.18.0.exe` from the [v3.18.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.18.0). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
+1. **Download the installer.** Download `Uoink-Setup-3.18.1.exe` from the [v3.18.1 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.18.1). For Windows 10/11; Mac steps are below. The installer is unsigned: if SmartScreen shows "Windows protected your PC", choose **More info -> Run anyway**, and check the file against the SHA-256 listed on the release page.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 <!-- store-install:start -->
 3. **Load the bundled extension.** On the one-time setup splash, click **Open extensions page** to open your browser's extensions page. If you get a blank tab, enter the address shown on the splash. Click **Copy path** on the splash to copy the installed extension path. Turn on **Developer mode**, click **Load unpacked**, and select that folder. Pin **Uoink** from the browser's Extensions menu.
 <!-- store-install:end -->
 
-**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.18.0-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
+**On a Mac** (Apple Silicon, macOS 15 or later; preview): download `Uoink-3.18.1-macos-arm64.dmg` from the same release, drag Uoink to Applications, eject the disk and open Uoink from Applications. The app is signed and notarized, so macOS only asks its usual question about apps downloaded from the internet. Then load the extension from the setup splash as above. See [docs/mac/INSTALL.md](docs/mac/INSTALL.md).
 
 The store install link is controlled by [store-config.json](extension/store-config.json). When the listing is live, the setup splash and these steps offer **Add to Chrome**, with sideloading under **Advanced**. Release maintainers: follow [SUBMIT-NOW.md](docs/store/SUBMIT-NOW.md).
 

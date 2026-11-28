@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import shutil
 from pathlib import Path
 import sqlite3
@@ -19,10 +20,12 @@ from unittest.mock import Mock
 
 import pytest
 
+import fd_paths
 import index as index_module
 import library_media
+import uoink_reliability
 import yt_extract
-from uoink_core.storage import _atomic_write_text
+from uoink_core.storage import _atomic_write_text, read_checked_json
 
 from test_unique_capture_folders import ROOT, URL_A, _load, _metadata, _snapshot, capture
 
@@ -394,13 +397,15 @@ def phase6_refresh(refresh, tmp_path, monkeypatch):
     scope["_sidecar_update_lock"] = threading.Lock()
     scope["_selected_reliability_model"] = lambda: "tiny"
     scope["_reliability_model_status"] = lambda model: {"cached": True}
-    scope["uoink_reliability"] = SimpleNamespace(detect_unreliable_spans=Mock(return_value=[]))
+    monkeypatch.setattr(uoink_reliability, "detect_unreliable_spans", Mock(return_value=[]))
+    scope["read_checked_json"] = read_checked_json
+    scope["_atomic_write_text"] = _atomic_write_text
     scope["_download_reliability_audio"] = Mock(side_effect=AssertionError("unexpected download"))
     _load(ROOT / "server.py", {
         "_as_float", "_parse_hms", "_youtube_deep_link", "_source_deep_link",
         "_sidecar_link_builder", "_transcript_entries_with_links", "_citations_from_sidecar",
         "_capture_media_plan", "_publish_capture_media", "_compute_transcript_reliability",
-        "_transcript_text_from_sidecar", "_read_sidecar_for_folder",
+        "_transcript_text_from_sidecar", "_read_sidecar_for_folder", "_item_storage_root",
         "_write_reliability_to_sidecar", "_render_reliability_summary",
         "_replace_reliability_section",
     }, scope)
@@ -641,6 +646,7 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
     # potentially long basetemp. The final JSON path is 259 characters.
     with tempfile.TemporaryDirectory(prefix="sr-") as temporary:
         root = Path(temporary)
+        monkeypatch.setitem(refresh.scope, "DESKTOP_ROOT", root)
         slug = "Long_video_" + "x" * 52
         assert len(slug) == 63
         topic_length = 190 - len(str(root)) - len(slug) - 2
@@ -687,6 +693,22 @@ def test_long_topic_and_63_character_slug_keep_all_staged_paths_under_max_path(
 
         for method in ("open", "mkdir", "rename", "replace"):
             track(method)
+        # POSIX storage writes open and replace by name inside a held directory.
+        os_open, os_replace = os.open, os.replace
+
+        def opened(name, *args, dir_fd=None, **kwargs):
+            if dir_fd is not None:
+                observe(fd_paths.full_path(name, dir_fd), "open")
+            return os_open(name, *args, dir_fd=dir_fd, **kwargs)
+
+        def replaced(source, target, **kwargs):
+            if kwargs.get("dst_dir_fd") is not None:
+                observe(fd_paths.replace_source(source, kwargs), "replace")
+                observe(fd_paths.replace_target(target, kwargs), "replace")
+            return os_replace(source, target, **kwargs)
+
+        monkeypatch.setattr(os, "open", opened)
+        monkeypatch.setattr(os, "replace", replaced)
         if rollback:
             with pytest.raises(OSError, match="injected publication failure"):
                 refresh.run(mode)
@@ -704,6 +726,7 @@ def test_long_media_artifact_backup_does_not_exceed_original_path_length(
         refresh, monkeypatch, failure):
     with tempfile.TemporaryDirectory(prefix="sr-") as temporary:
         root = Path(temporary)
+        monkeypatch.setitem(refresh.scope, "DESKTOP_ROOT", root)
         slug = "Long_video_" + "x" * 52
         topic_length = 175 - len(str(root)) - len(slug) - 2
         assert topic_length >= 20

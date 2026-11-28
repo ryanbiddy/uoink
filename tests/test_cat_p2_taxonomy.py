@@ -24,6 +24,7 @@ import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -194,9 +195,10 @@ def _seed_corpus(idx, root: Path):
         "corpus_path": _cp("r1"), "sidecar_path": "", "source_type": "reddit_thread"})
 
 
-def test_http_facets_and_search_filters():
+@patch.object(server, "_get_index")
+def test_http_facets_and_search_filters(get_index):
     tmp, idx = _fresh_index()
-    server._get_index = lambda: idx  # type: ignore
+    get_index.return_value = idx
     httpd = ThreadingHTTPServer(("127.0.0.1", PORT), server.Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     try:
@@ -237,6 +239,7 @@ def test_http_facets_and_search_filters():
         print("ok  /memory/search filters by source_type and author")
     finally:
         httpd.shutdown()
+        httpd.server_close()
         idx.close()
         tmp.cleanup()
 

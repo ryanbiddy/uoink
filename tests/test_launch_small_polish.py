@@ -62,7 +62,8 @@ def test_subscription_feed_title_reaches_new_episodes(tmp_path, kind):
         assert service.detection_pass()[0]["ok"]
         episode = podcasts.list_episodes(idx)[0]
         assert podcasts.get_episode_with_feed(idx, episode["id"])["podcast_title"] == "Channel title"
-        transcript = tmp_path / "transcript.json"
+        feed = podcasts.get_feed(idx, episode["feed_id"])
+        transcript = podcasts._episode_audio_path(tmp_path, feed, episode).with_suffix(".transcript.json")
         transcript.write_text(json.dumps({"segments": [{"start": 0, "end": 2, "text": "Example."}]}), encoding="utf-8")
         with idx.write_transaction() as conn:
             conn.execute("UPDATE podcast_episodes SET transcript_local_path=? WHERE id=?",
@@ -259,7 +260,9 @@ def test_saved_show_name_displays_on_read_only_provider_without_writes(tmp_path,
         provider = corpus_provider.UoinkCorpusProvider(idx, tmp_path)
         assert provider.get(published["video_id"])["item"]["author"] == "The Grounded Show"
         assert _saved_podcast_state(idx, saved) == before
-        assert podcasts.list_feeds(idx)[0]["title"] is None
+        feed, = podcasts.list_feeds(idx)
+        assert feed["title"] == "show.example"
+        assert podcasts.get_feed(idx, feed["id"])["title"] is None
         assert not fetch.requests
     finally:
         idx.close()
@@ -300,7 +303,8 @@ def test_consented_poll_recovers_missing_show_without_republishing(tmp_path):
         turn_on(service, sid)
         assert service.detection_pass()[0]["ok"]
         episode = podcasts.list_episodes(idx)[0]
-        transcript = tmp_path / "transcript.json"
+        feed = podcasts.get_feed(idx, episode["feed_id"])
+        transcript = podcasts._episode_audio_path(tmp_path, feed, episode).with_suffix(".transcript.json")
         transcript.write_text('{"segments":[{"start":0,"end":2,"text":"Example."}]}', encoding="utf-8")
         with idx.write_transaction() as conn:
             conn.execute("UPDATE podcast_episodes SET transcript_local_path=? WHERE id=?",
@@ -394,7 +398,9 @@ def test_startup_uses_only_local_titles_and_leaves_saved_media_unchanged(tmp_pat
         server._repair_podcast_titles_at_boot()
         assert not fetch.requests
         assert _saved_podcast_state(idx, saved) == before
-        assert podcasts.list_feeds(idx)[0]["title"] == ("The Grounded Show" if local_title else None)
+        feed, = podcasts.list_feeds(idx)
+        assert feed["title"] == ("The Grounded Show" if local_title else "show.example")
+        assert podcasts.get_feed(idx, feed["id"])["title"] == ("The Grounded Show" if local_title else None)
         assert [tuple(r) for r in idx._conn.execute("SELECT * FROM source_detection_cursors")] == cursors
         assert [tuple(r) for r in idx._conn.execute("SELECT * FROM podcast_episodes")] == episodes
         changes = idx._conn.total_changes

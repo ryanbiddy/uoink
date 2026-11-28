@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 import index as index_mod  # noqa: E402
 import server  # noqa: E402
-from test_timed_cues import SHOW, _build  # noqa: E402
+from test_timed_cues import PODCAST_ID, SHOW, _build  # noqa: E402
 from uoink_core import search_service  # noqa: E402
 
 
@@ -152,14 +152,14 @@ def _ids(result):
 
 def test_memory_search_filters_by_publish_date(idx):
     got = idx.search_yoinks_for_memory(published_from="2025-01-01", published_to="2025-12-31")
-    assert _ids(got) == {"tpcaptions1", "tppodcast01"} and got["total"] == 2
+    assert _ids(got) == {"tpcaptions1", PODCAST_ID} and got["total"] == 2
     got = idx.search_yoinks_for_memory(channel="Other Show", published_to="2024-01-01")
     assert _ids(got) == {"tpasrvideo1"}
     got = idx.search_yoinks_for_memory(q="anemones", published_from="2025-03-04")
     assert _ids(got) == {"tpcaptions1"}
     # The capture-date bounds still mean the capture date.
     got = idx.search_yoinks_for_memory(date_from="2026-11-03", published_from="2024-01-01")
-    assert _ids(got) == {"tpautocaps01", "tppodcast01"}
+    assert _ids(got) == {"tpautocaps01", PODCAST_ID}
 
 
 def test_publish_bounds_route_to_keyword_search(idx):
@@ -206,10 +206,10 @@ def get(idx, tmp_path, monkeypatch):
 def test_library_route_filters_by_show_and_publish_date(get):
     status, body = get(channel=SHOW, published_from="2025-01-01")
     assert status == 200
-    assert {r["video_id"] for r in body["results"]} == {"tpcaptions1", "tppodcast01"}
+    assert {r["video_id"] for r in body["results"]} == {"tpcaptions1", PODCAST_ID}
     by_id = {r["video_id"]: r for r in body["results"]}
     assert by_id["tpcaptions1"]["published_at"] == "2025-03-04"
-    assert by_id["tppodcast01"]["published_at"] == "2025-03-03"
+    assert by_id[PODCAST_ID]["published_at"] == "2025-03-03"
     # The sorted Library path (_library_search) honours the same bounds.
     status, body = get(published_from="2024-01-01", published_to="2024-12-31", sort="oldest")
     assert status == 200 and [r["video_id"] for r in body["results"]] == ["tpautocaps01"]

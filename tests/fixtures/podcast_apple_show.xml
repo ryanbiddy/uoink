@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Signal Notes</title>
+  <item><guid>episode-one</guid><title>First episode</title><enclosure url="https://cdn.example.test/one.mp3"/></item>
+  <item><guid>episode-two</guid><title>Second episode</title><enclosure url="https://cdn.example.test/two.mp3"/></item>
+  <item><guid>episode-three</guid><title>Third episode</title><enclosure url="https://cdn.example.test/three.mp3"/></item>
+</channel></rss>

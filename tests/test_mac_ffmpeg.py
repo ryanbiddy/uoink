@@ -412,7 +412,8 @@ def test_podcast_download_uses_bundled_tools_and_wav(darwin_bundle, monkeypatch,
         assert command[command.index("--ffmpeg-location") + 1] == str(darwin_bundle / "Helpers")
         assert command.count("--ignore-config") == 1
         assert command.count("--ffmpeg-location") == 1
-        expected.write_bytes(b"generated WAV placeholder")
+        output = command[command.index("-o") + 1].replace("%(ext)s", "wav")
+        Path(output).write_bytes(b"generated WAV placeholder")
         return SimpleNamespace(returncode=0, stderr="", stdout="")
 
     import uoink_processes
@@ -425,7 +426,7 @@ def test_podcast_download_uses_bundled_tools_and_wav(darwin_bundle, monkeypatch,
         cmd += ["--ignore-config", "--ffmpeg-location=/opt/homebrew/bin"]
     result = podcasts.download_episode_audio(None, 1, data_root=tmp_path,
         ytdlp_cmd=cmd, resolve_url=lambda url, **kwargs: url)
-    assert result["ok"] is True and Path(result["local_path"]).suffix == ".wav"
+    assert result["ok"] is True and Path(result["local_path"]) == expected and expected.suffix == ".wav"
 
 
 @pytest.mark.parametrize("succeeds", [True, False])

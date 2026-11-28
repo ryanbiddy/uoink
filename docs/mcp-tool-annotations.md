@@ -35,7 +35,7 @@ saved analysis, transcripts or published corpora also use `destructiveHint=true`
 | `list_podcast_episodes` | List podcast episodes | true | false | true | false | Reads tracked episode rows. |
 | `download_podcast_episode` | Download podcast audio | false | false | true | true | Downloads episode audio; reuses an existing nonempty canonical file. |
 | `get_whisperx_status` | Get transcription status | true | false | true | false | Inspects local WhisperX availability and settings. |
-| `transcribe_podcast_episode` | Transcribe podcast episode | false | true | false | true | Queues transcription that can replace a transcript and download models with consent. |
+| `transcribe_podcast_episode` | Transcribe podcast episode | false | true | false | true | Queues transcription with an installed model and can replace a transcript. First-time downloads need dashboard approval. |
 | `episode_to_corpus` | Publish podcast corpus | false | true | true | false | Publishes deterministic local files and replaces the episode's prior corpus and index snapshot. |
 | `get_library_activity` | Get library activity | true | false | true | false | Reads local activity and source observations. |
 | `search_library` | Search library | true | false | true | false | Returns bounded local search results. |
@@ -109,7 +109,7 @@ saved analysis, transcripts or published corpora also use `destructiveHint=true`
 | `uoink_reddit_thread` | Capture Reddit thread | false | true | false | true | Fetches a public Reddit thread and saves filtered comments. Recapture can replace the existing source snapshot. |
 | `import_list` | Import a list of videos | false | false | false | true | Reads a public list and queues videos the library doesn't have; never replaces a saved capture. Repeats can record another import. |
 | `list_allowed_sites` | List allowed sites | true | false | true | false | Reads the saved site allowlist. |
-| `add_allowed_site` | Add allowed site | false | false | true | true | Adds a unique host pattern, authorizing later page fetches; repeats reuse it. |
+| `add_allowed_site` | Request site access | true | false | true | false | Returns instructions for the user to approve a site in the dashboard. |
 | `remove_allowed_site` | Remove allowed site | false | true | true | false | Removes a site pattern; repeating leaves it absent. |
 
 The MCPB 0.4 manifest tool schema permits only `name` and `description`.

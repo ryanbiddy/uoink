@@ -117,7 +117,12 @@ def login_session() -> str:
             needed = wintypes.DWORD()
             if not advapi.GetTokenInformation(handle, 10, buffer, len(buffer), ctypes.byref(needed)):
                 raise ctypes.WinError(ctypes.get_last_error())
-            return "windows:" + buffer.raw[8:16].hex()
+            logon = buffer.raw[8:16].hex()
+            session_id = wintypes.DWORD()
+            if not advapi.GetTokenInformation(handle, 12, ctypes.byref(session_id),
+                                              ctypes.sizeof(session_id), ctypes.byref(needed)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            return f"windows:{session_id.value}:{logon}"
         finally:
             kernel.CloseHandle(handle)
     if sys.platform == "darwin":
@@ -163,13 +168,16 @@ def admission(root: Path):
                 msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
 
 
-def ready(url: str, run_id: str, pid: int) -> bool:
+def ready(url: str, run_id: str | None = None, pid: int | None = None) -> bool:
     try:
         # Never use an HTTP proxy for loopback readiness.
         with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(url, timeout=0.5) as reply:
             body = json.loads(reply.read(32768))
-            return (reply.status == 200 and body.get("ok") is True
-                    and body.get("supervisor_run_id") == run_id and body.get("pid") == pid)
+            if reply.status != 200 or body.get("ok") is not True:
+                return False
+            if pid is None:  # A shortcut may open an already-running, unsupervised helper.
+                return type(body.get("pid")) is int and "transcription_worker" in body
+            return body.get("supervisor_run_id") == run_id and body.get("pid") == pid
     except (OSError, ValueError, AttributeError):
         return False
 
@@ -209,7 +217,8 @@ def show_running_dashboard(root: Path) -> bool:
         import webbrowser
         import uoink_install_isolation as isolation
         return bool(webbrowser.open(isolation.helper_url("/dashboard")))
-    subprocess.Popen([sys.executable, str(HERE / "uoink_dashboard.py")],
+    import uoink_install_isolation as isolation
+    subprocess.Popen([sys.executable, str(HERE / "uoink_dashboard.py"), *isolation.child_argv()],
                      creationflags=0x08000000 if os.name == "nt" else 0)
     return True
 
@@ -230,7 +239,7 @@ def request_dashboard_later(root: Path, opened_at: float | None = None,
                {"requested_at": requested, **({"session": session} if session else {})})
 
 
-def take_dashboard_request(root: Path) -> float | None:
+def take_dashboard_request(root: Path, *, session: str | None = None) -> float | None:
     """Claim a pending open atomically and return when it was made.
 
     Stale requests never pop a window later.
@@ -241,7 +250,10 @@ def take_dashboard_request(root: Path) -> float | None:
     except OSError:
         return None
     try:
-        requested = read_json(claimed).get("requested_at")
+        request = read_json(claimed)
+        if session is not None and request.get("session") != session:
+            return None
+        requested = request.get("requested_at")
     except (OSError, ValueError):
         requested = None
     finally:
@@ -249,6 +261,46 @@ def take_dashboard_request(root: Path) -> float | None:
     if isinstance(requested, (int, float)) and 0 <= time.monotonic() - requested < REQUEST_WINDOW:
         return float(requested)
     return None
+
+
+def open_windows_app(root: Path, quiet: bool) -> int:
+    """The shortcut process keeps the click, including while a cold helper starts."""
+    import uoink_dashboard
+    import uoink_install_isolation as isolation
+    health = isolation.helper_url("/health")
+    if ready(health):
+        return uoink_dashboard.main()
+
+    # The resident owns helper recovery. Keep the deferred open in this process
+    # so another Windows login sharing the data directory cannot consume it.
+    expires = time.monotonic() + REQUEST_WINDOW
+    try:
+        with admission(root) as free:
+            start_resident = free  # Release admission before the child tries to take it.
+        if start_resident:
+            command = [sys.executable, "-B", "-s", str(HERE / "uoink_supervisor.py"), "--resident"]
+            if quiet:
+                command.append("--quiet")
+            subprocess.Popen([*command, *isolation.child_argv()], cwd=HERE,
+                             creationflags=0x08000000, stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        session = login_session()
+    except (OSError, ValueError) as exc:
+        logging.getLogger(__name__).warning("Dashboard startup failed: %s", exc)
+        return uoink_dashboard.main()
+    if uoink_dashboard.has_window_candidate():
+        return uoink_dashboard.main()
+    while time.monotonic() < expires:
+        if ready(health):
+            try:
+                same_session = login_session() == session
+            except OSError:
+                return 0
+            if same_session and time.monotonic() < expires:
+                return uoink_dashboard.main()
+            break
+        time.sleep(0.25)
+    return 0
 
 
 def open_app(root: Path) -> int:
@@ -339,6 +391,12 @@ class Supervisor:
                 old = read_json(self.root / STATE_FILE)
             except ValueError:
                 old = {}
+            if sys.platform == "win32" and self.session.startswith("windows:"):
+                # 3.18.0 saved only the authentication LUID. It still identifies
+                # this logon for Quit and crash history. Opens require the full tag.
+                previous_tag = "windows:" + self.session.rsplit(":", 1)[-1]
+                if old.get("session") == previous_tag:
+                    old["session"] = self.session
             fresh = not self.startup or old.get("session") != self.session
             # Setup stops the helper only to replace its files. That stop is not
             # a user's Quit, so it never holds back a later login start.
@@ -385,6 +443,7 @@ class Supervisor:
             shown = first and "--show-dashboard" in self.first_args
             first = False
             self.save(status="starting", last_start_at=stamp(), ready_at=None,
+                      supervisor_run_id=run_id, helper_pid=None,
                       reason="Waiting for helper readiness.", action="")
             env = dict(os.environ, UOINK_SUPERVISOR_RUN_ID=run_id, PYTHONUNBUFFERED="1")
             child = None
@@ -503,9 +562,10 @@ def main(argv=None) -> int:
     on_ready = None
     if sys.platform == "darwin" and args.show_dashboard and not args.resident:
         return open_app(root)
+    if sys.platform == "win32" and args.show_dashboard and not args.resident:
+        return open_windows_app(root, args.quiet)
     if sys.platform in ("darwin", "win32"):
-        # The resident supervisor answers opens queued while its helper was
-        # still starting (Darwin since 3.11.2, Windows since 3.18.0). A quiet
+        # Answer queued Darwin opens and same-session Windows recovery opens. A quiet
         # (silent upgrade) start never answers an open made before it began:
         # that one was meant for a supervisor that has since exited.
         shown_at = [opened_at if args.quiet else 0.0]
@@ -515,7 +575,7 @@ def main(argv=None) -> int:
             # launch flag's window appeared are already answered by it.
             if shown:
                 shown_at[0] = time.monotonic()
-            requested = take_dashboard_request(root)
+            requested = take_dashboard_request(root, session=session if sys.platform == "win32" else None)
             if requested is not None and requested > shown_at[0]:
                 threading.Thread(target=show_running_dashboard, args=(root,), daemon=True).start()
     try:
@@ -543,15 +603,7 @@ def main(argv=None) -> int:
         if args.show_dashboard and not supervisor.owned:
             # Another supervisor won admission; it consumes the request.
             request_dashboard_later(root, args.opened_at)
-    elif sys.platform == "win32":
-        if args.show_dashboard and not supervisor.owned:
-            # A Start menu or desktop click while a supervisor runs. Its helper
-            # opens it on the next ready tick (every poll, 0.5 s), or once it
-            # is ready after a start, sign-in, upgrade or crash restart. Only
-            # the resident can tell a live helper from a stale "running" and
-            # coalesce clicks with the window its own launch already opened.
-            request_dashboard_later(root, opened_at, session=session)
-    elif args.show_dashboard and status(root).get("status") == "running":
+    elif sys.platform != "win32" and args.show_dashboard and status(root).get("status") == "running":
         show_running_dashboard(root)
     return result
 

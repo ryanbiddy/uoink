@@ -37,6 +37,13 @@ def test_ci_uses_node24_action_runtimes():
     assert seen == set(NODE24_ACTION_MAJORS)
 
 
+def test_backend_static_compiles_connect_modules():
+    job = _yaml_block(WORKFLOW.read_text(encoding="utf-8").splitlines(), "  backend-static:")
+    files = next(line for line in job if line.strip().startswith("files=("))
+    assert {"uoink_cli.py", "uoink_connect.py", "agent_config_writer.py"} <= set(
+        files.strip().removeprefix("files=(").removesuffix(")").split())
+
+
 def test_feature_branches_run_once_via_pull_request():
     lines = WORKFLOW.read_text(encoding="utf-8").splitlines()
     on_block = _yaml_block(lines, "on:")

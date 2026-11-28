@@ -16,6 +16,7 @@ from unittest.mock import Mock
 
 import pytest
 import index
+from uoink_mcp_tools import TOOL_REGISTRY
 
 from test_unique_capture_folders import (
     ROOT, URL_A, URL_B, _load, _metadata, _snapshot, capture, _generic_handler,
@@ -223,7 +224,7 @@ def test_capture_entry_points_refresh_the_legacy_item(legacy, entry):
     handler_class = type("Handler", (), {
         name: scope[name] for name in ("_handle_extract", "_handle_extract_any", "_validate_url_interval")})
     backend = SimpleNamespace(**scope, Handler=handler_class)
-    tools_scope = {"Any": object, "Path": Path, "_b": lambda: backend}
+    tools_scope = {"Any": object, "Path": Path, "_b": lambda: backend, "TOOL_REGISTRY": TOOL_REGISTRY}
     _load(ROOT / "uoink_mcp_tools.py", {"uoink_video", "uoink_url", "_ok", "_err", "_limit_int"}, tools_scope)
     if entry == "extension":
         handler = handler_class()

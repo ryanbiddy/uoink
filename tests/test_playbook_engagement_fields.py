@@ -26,7 +26,7 @@ def no_network(monkeypatch):
 
 
 @pytest.fixture
-def capture_env(tmp_path, monkeypatch, no_network):
+def capture_env(tmp_path, monkeypatch, no_network, public_dns):
     import index
     import server
 
@@ -62,13 +62,15 @@ def _mock_ytdlp_and_ffmpeg(cmd, **kwargs):
         shot = Path(parts[-1].replace("%04d", "0001"))
         shot.parent.mkdir(parents=True, exist_ok=True)
         shot.write_bytes(b"fixture-jpeg")
+    elif "--skip-download" in parts:
+        template = parts[parts.index("-o") + 1]
+        Path(template.replace("%(ext)s", "en.srt")).write_text(
+            "1\n00:00:00,000 --> 00:00:02,000\nA fixture transcript.\n",
+            encoding="utf-8")
     elif "-o" in parts:
         folder = Path(parts[parts.index("-o") + 1]).parent
         folder.mkdir(parents=True, exist_ok=True)
         (folder / "video.mp4").write_bytes(b"fixture-media")
-        (folder / "video.en.srt").write_text(
-            "1\n00:00:00,000 --> 00:00:02,000\nA fixture transcript.\n",
-            encoding="utf-8")
     return subprocess.CompletedProcess(cmd, 0, b"", b"")
 
 
@@ -93,6 +95,7 @@ def test_ytdlp_engagement_reaches_sidecar_and_index(
         url, 30, folder, notify=False, source_type=source_type, generate_paste=False)
     assert result["ok"] is True
     sidecar = json.loads((folder / "fixture.json").read_text(encoding="utf-8"))
+    assert sidecar["transcript_source"] == "captions"
     row = idx.get_yoink(metadata["id"])
     assert row["platform"] == platform
     assert row["source_type"] == (source_type or "video")

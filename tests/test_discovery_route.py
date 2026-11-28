@@ -22,6 +22,7 @@ import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -60,11 +61,13 @@ def _seed(idx, root, video_id, title):
     }, content=f"{title} transcript body")
 
 
-def test_discovery_route():
+@patch.object(server, "_settings_path")
+@patch.object(server, "_get_index")
+def test_discovery_route(get_index, settings_path):
     tmp = tempfile.TemporaryDirectory()
     idx = index_mod.Index.open(Path(tmp.name) / "index.db")
-    server._get_index = lambda: idx  # type: ignore
-    server.SETTINGS_PATH = Path(tmp.name) / "settings.json"  # type: ignore
+    get_index.return_value = idx
+    settings_path.return_value = Path(tmp.name) / "settings.json"
     httpd = ThreadingHTTPServer(("127.0.0.1", PORT), server.Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     try:
@@ -128,6 +131,7 @@ def test_discovery_route():
         print("\nall green")
     finally:
         httpd.shutdown()
+        httpd.server_close()
         idx.close()
         tmp.cleanup()
 

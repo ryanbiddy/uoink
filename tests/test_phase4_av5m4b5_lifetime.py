@@ -25,6 +25,7 @@ def _competitor_mutex(dest, timeout=0.25):
     source = (
         "import json, os, sys\n"
         "import library_mirror as m\n"
+        "m._WRITER_ADMISSION_MUTEX = sys.argv[3]\n"
         "try:\n"
         " h, k = m._win_acquire_dest_mutex(sys.argv[1], float(sys.argv[2]))\n"
         "except m._LockTimeout:\n"
@@ -34,7 +35,7 @@ def _competitor_mutex(dest, timeout=0.25):
         " m._win_release_dest_mutex(h, k)\n"
     )
     child = subprocess.run(
-        [sys.executable, "-B", "-c", source, str(dest), str(timeout)],
+        [sys.executable, "-B", "-c", source, str(dest), str(timeout), mirror._WRITER_ADMISSION_MUTEX],
         capture_output=True, text=True, timeout=8,
     )
     assert child.returncode == 0, child.stderr

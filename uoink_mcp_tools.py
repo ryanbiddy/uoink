@@ -22,12 +22,17 @@ import base64
 import json
 import logging
 import math
+import os
 import re
 import threading
 import time
 from dataclasses import dataclass
+from datetime import datetime
+from time import monotonic
+from uoink_core.storage import checked_path, open_regular, read_checked_json
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import urlsplit
 from research import CANDIDATE_KEY_PATTERN, RUN_ID_PATTERN
 
 
@@ -97,11 +102,11 @@ def _limit_int(value: Any, *, default: int, low: int, high: int) -> int:
     return max(low, min(high, out))
 
 
-def _read_json(path: Path) -> dict[str, Any]:
+def _read_json(path: Path, *, root=None) -> dict[str, Any]:
     try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw = read_checked_json(root or _b().DESKTOP_ROOT, path)
         return raw if isinstance(raw, dict) else {}
-    except (OSError, json.JSONDecodeError):
+    except (OSError, ValueError, RecursionError):
         return {}
 
 
@@ -113,8 +118,8 @@ def _metadata_path(folder: Path) -> Path:
     return folder / "metadata.json"
 
 
-def _read_sidecar(folder: Path) -> dict[str, Any]:
-    return _read_json(_sidecar_path(folder))
+def _read_sidecar(folder: Path, *, root=None) -> dict[str, Any]:
+    return _read_json(_sidecar_path(folder), root=root)
 
 
 def _read_metadata(folder: Path) -> dict[str, Any]:
@@ -136,9 +141,16 @@ def _iter_yoink_folders():
             continue
         if folder == trash or trash in folder.parents:
             continue
+        try:
+            checked_path(root, folder)
+        except OSError:
+            continue
         corpus = b._resolve_corpus_path(folder)
         if corpus is not None:
-            yield folder, corpus
+            try:
+                yield folder, checked_path(root, corpus)
+            except OSError:
+                continue
 
 
 def _yoink_summary(folder: Path, corpus: Path) -> dict[str, Any]:
@@ -164,7 +176,45 @@ def _yoink_summary(folder: Path, corpus: Path) -> dict[str, Any]:
     }
 
 
-def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
+class _ScanCache:
+    """One short-lived snapshot per library, shared by concurrent requests."""
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.key = None
+        self.until = 0
+        self.value = None
+
+    def read(self, key, scan):
+        with self.lock:
+            if key != self.key or monotonic() >= self.until:
+                self.value = scan()
+                self.key = key
+                self.until = monotonic() + 3
+            return self.value
+
+
+_corpus_cache = _ScanCache()
+_unfinished_cache = _ScanCache()
+
+
+def _corpus_by_slug():
+    matches = {}
+    for folder, corpus in _iter_yoink_folders() or ():
+        try:
+            entry = (corpus.stat().st_mtime, folder, corpus)
+        except OSError:
+            continue
+        if folder.name not in matches or entry > matches[folder.name]:
+            matches[folder.name] = entry
+    return matches
+
+
+def _find_yoink(slug):
+    folder, corpus, _root = _locate_yoink(slug)
+    return folder, corpus
+
+
+def _locate_yoink(slug: str):
     """Resolve a yoink slug to (folder, corpus_path).
 
     Sprint 19.6 / Fix 5: the index is queried first (O(1) seek by slug),
@@ -174,7 +224,7 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     takes a slug benefits: get_uoink_corpus, get_citation_map,
     get_uoink_health, analyze_comments, classify_hook."""
     if not isinstance(slug, str) or not re.match(r"^[A-Za-z0-9_-]{1,160}$", slug):
-        return None, None
+        return None, None, None
     # Fast path: index lookup. get_by_slug filters deleted_at IS NULL so a
     # trashed yoink won't resolve here.
     try:
@@ -184,20 +234,90 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     if row:
         corpus_path = row.get("corpus_path") or ""
         if corpus_path:
-            corpus = Path(corpus_path)
+            try:
+                b = _b()
+                root = b._item_storage_root(row) if row.get("source_type") == "episode" else b.DESKTOP_ROOT
+                corpus = checked_path(root, Path(corpus_path))
+            except OSError:
+                return None, None, None
             if corpus.is_file():
-                return corpus.parent, corpus
+                return corpus.parent, corpus, root
         # Indexed row missing on disk (folder moved/deleted outside the
         # extension) -- fall through to the walk so we don't return a
         # broken pointer.
-    matches = []
-    for folder, corpus in _iter_yoink_folders() or []:
-        if folder.name == slug:
-            matches.append((corpus.stat().st_mtime, folder, corpus))
-    if not matches:
-        return None, None
-    matches.sort(key=lambda item: item[0], reverse=True)
-    return matches[0][1], matches[0][2]
+    b = _b()
+    matches = _corpus_cache.read((b, b.DESKTOP_ROOT), _corpus_by_slug)
+    entry = matches.get(slug)
+    if entry and entry[2].is_file():
+        return entry[1], entry[2], b.DESKTOP_ROOT
+    return None, None, None
+
+
+def _capture_time(item):
+    try:
+        return datetime.fromisoformat(item["saved_at"].replace("Z", "+00:00")).timestamp()
+    except (AttributeError, KeyError, ValueError, OSError, OverflowError):
+        return float("-inf")
+
+
+def _unfinished_snapshot():
+    import transcript_backfill
+    b = _b()
+    scan = getattr(b, "_transcript_backfill_half_captures", None)
+    if scan is None:
+        return None, {}, set(), True
+    state_path = Path(b.DATA_ROOT) / transcript_backfill.STATE_FILE
+
+    def read():
+        with b._get_index().read_snapshot() as db:
+            rows = db.execute("SELECT sidecar_path, corpus_path FROM yoinks "
+                              "WHERE deleted_at IS NULL")
+            indexed = {os.path.normcase(str(Path(p).parent)) for row in rows for p in row if p}
+        items = sorted(scan(indexed), key=_capture_time, reverse=True)
+        # Stdio runs in a separate process from the helper that handles Finish.
+        state = _read_json(state_path, root=b.DATA_ROOT) if items else {}
+        ready = not items or b._transcript_backfill_model_ready()[0]
+        return items, state.get("settled", {}), set(state.get("requested", [])), ready
+
+    try:
+        try:
+            revision = state_path.stat().st_mtime_ns
+        except FileNotFoundError:
+            revision = None
+        return _unfinished_cache.read((b, b.DESKTOP_ROOT, state_path, revision), read)
+    except Exception:
+        logging.getLogger("uoink.mcp").debug("unfinished capture scan failed", exc_info=True)
+        return None, {}, set(), True
+
+
+def _capture_record(item, settled, requested, model_ready):
+    key = item["key"]
+    local = item.get("media") == "on_disk"
+    if settled.get(key, {}).get("outcome") == "gone" or item.get("media") == "gone":
+        hint = "Finish is unavailable. The source is gone and there is no local copy."
+    elif key in requested:
+        hint = "Finish is already queued. Check progress in Settings, Library health."
+    elif not model_ready:
+        hint = "Download the transcription model in Settings to make Finish available."
+    elif local:
+        hint = "Press Finish in Settings, Library health. Uoink reuses the video on this computer."
+    else:
+        hint = "Press Finish in Settings, Library health. Uoink needs to download the video again."
+    return {"title": item.get("title"), "folder_name": item.get("folder_name"),
+            "url": item.get("url"), "started_at": item.get("saved_at"),
+            "video_on_this_computer": local, "hint": hint}
+
+
+def _not_found(slug: Any = None) -> dict[str, Any]:
+    out = _err("uoink not found")
+    if isinstance(slug, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,160}", slug):
+        items, settled, requested, ready = _unfinished_snapshot()
+        for item in items or ():
+            if item.get("folder_name") == slug:
+                record = _capture_record(item, settled, requested, ready)
+                out.update(capture_not_finished=record, hint=record["hint"])
+                break
+    return out
 
 
 def _saved_key() -> str | None:
@@ -260,8 +380,10 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
             if ownership.completed_while_waiting and ownership.reused:
                 result = dict(ownership.reused)
                 corpus_path = result.get("corpus_path")
-                result["yoink_md"] = (
-                    Path(corpus_path).read_text(encoding="utf-8") if corpus_path else "")
+                result["yoink_md"] = ""
+                if corpus_path:
+                    with open_regular(b._item_storage_root(result), corpus_path) as stream:
+                        result["yoink_md"] = stream.read()
             else:
                 metadata = b._fetch_metadata(url)
                 title = metadata.get("title") or "Untitled"
@@ -371,7 +493,19 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             "folder": str(Path(sidecar_path).parent) if sidecar_path else None,
             "yoinked_at": r.get("yoinked_at"),
         })
-    return _ok(yoinks=yoinks)
+    items, settled, requested, ready = _unfinished_snapshot()
+    if items is None:
+        return _ok(yoinks=yoinks)
+    if items:
+        sample = [_capture_record(item, settled, requested, ready) for item in items[:20]]
+        return _ok(yoinks=yoinks, unfinished_capture_count=len(items), unfinished_captures=sample,
+                   hint="See Settings, Library health for each capture's Finish options.")
+    return _ok(yoinks=yoinks, unfinished_capture_count=0)
+
+
+def _item_pins(idx, video_id):
+    read = getattr(idx, "get_pins", None)
+    return read(video_id) if read and video_id else []
 
 
 def _search_source_availability(idx, rows) -> dict:
@@ -419,6 +553,7 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
             "slug": r.get("slug"),
             "title": r.get("title"),
             "snippet": (r.get("_snippet") or "").strip(),
+            "pins": _item_pins(idx, r.get("video_id")),
             # FTS5 bm25 is lower-is-better; negate so a higher score means a
             # better match, matching the old term-count score's direction.
             "score": -score if isinstance(score, (int, float)) else 0.0,
@@ -430,15 +565,15 @@ def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
 
 def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
-    folder, corpus = _find_yoink(slug)
+    folder, corpus, root = _locate_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     try:
         from uoink_core.storage import read_export_markdown
-        md = read_export_markdown(corpus)
+        md = read_export_markdown(corpus, root=root)
     except OSError as e:
         return _err(f"corpus read failed: {e}")
-    sidecar = _read_sidecar(folder)
+    sidecar = _read_sidecar(folder, root=root)
     video_id = sidecar.get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         video_id = None
@@ -460,11 +595,22 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     # Sprint 15: include the citation map alongside the markdown. Optional
     # field -- markdown-only consumers are unaffected.
     citations: list[dict[str, Any]] = []
+    pins = []
     if video_id:
+        idx = None
         try:
-            citations = _b()._get_index().get_citations(video_id)
+            idx = _b()._get_index()
+            citations = idx.get_citations(video_id)
+            for cue in citations:
+                if cue.get("kind") == "transcript_chunk":
+                    for key in ("source_deep_link", "youtube_deep_link"):
+                        cue[key] = cited_url(cue.get(key), cue.get("timestamp_start"))
         except Exception:
             citations = []
+        try:
+            pins = _item_pins(idx, video_id)
+        except Exception:
+            pins = []
     extra: dict[str, Any] = {}
     # Context-layer item 3: for an image uoink, the corpus markdown carries the
     # caption + source, but the pixels live in the image file. Hand a vision-
@@ -486,6 +632,19 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
                 "width": sidecar.get("width"),
                 "height": sidecar.get("height"),
             }
+    held = sidecar.get("held_transcript_lines") or []
+    if held:
+        import transcript_review
+        extra["review_note"] = transcript_review.notice(held)
+        if args.get("include_held") is True:
+            lines = []
+            for h in held:
+                cue = transcript_review.held_cue(h.get("segment"))
+                if cue is not None:
+                    start, _, text = cue
+                    lines.append(f"- Line {h['line']} [{_transcript_clock(start)}] {text}")
+            if lines:
+                md += "\n\n## Held transcript lines\n\n" + "\n".join(lines)
     return _ok(
         corpus_md=md,
         folder=str(folder),
@@ -493,6 +652,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         video_url=video_url,
         source_url=source_url,
         citations=citations,
+        pins=pins,
         **extra,
     )
 
@@ -501,10 +661,10 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     """Return the transcript + screenshot citation map for a saved yoink,
     each entry carrying a source-aware timestamp link."""
     slug = args.get("slug")
-    folder, corpus = _find_yoink(slug)
+    folder, corpus, root = _locate_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
-    video_id = _read_sidecar(folder).get("video_id")
+        return _not_found(slug)
+    video_id = _read_sidecar(folder, root=root).get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         return _err("This saved item has no video_id, so it cannot be used here.")
     transcript: list[dict[str, Any]] = []
@@ -526,8 +686,7 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
                 "timestamp_end": r.get("timestamp_end"),
                 "text": r.get("text"),
                 "source_url": r.get("source_url"),
-                "deep_link": (r.get("source_deep_link")
-                              or r.get("youtube_deep_link")),
+                "deep_link": cited_url(r.get("source_deep_link") or r.get("youtube_deep_link"), r.get("timestamp_start")),
             })
     return _ok(
         video_id=video_id,
@@ -543,6 +702,7 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
 
 _SLUG_RE = re.compile(r"^[A-Za-z0-9_-]{1,160}$")
 from library_cards import build_card, read_corpus_head
+from moments import cited_url
 
 
 def _clean_text(value: Any) -> str | None:
@@ -585,7 +745,8 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
             "start": r.get("start"),
             "end": r.get("end"),
             "text": r.get("text"),
-            "deep_link": r.get("source_deep_link"),
+            "deep_link": cited_url(r.get("source_deep_link"), r.get("start")),
+            "pins": _item_pins(idx, r.get("video_id")),
             "timing": r.get("timing", "unknown"),
             **{key: r[key] for key in ("passage", "source_id", "passage_id", "span", "timestamp_seconds", "passage_verified", "citation_reason") if key in r},
             # bm25 is lower-is-better; negate so higher means better, the
@@ -626,16 +787,17 @@ def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
                           profile=profile, n_clips=n_clips, display_channel=display.get("channel"))
     except ValueError as exc:
         return _err(str(exc))
-    return _ok(**card)
+    pins = _item_pins(idx, row["video_id"])
+    return _ok(**card, **({"pins": pins} if pins else {}))
 
 
 def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     """Return the per-section extraction health score for a saved uoink."""
     slug = args.get("slug")
-    folder, corpus = _find_yoink(slug)
+    folder, corpus, root = _locate_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
-    sidecar = _read_sidecar(folder)
+        return _not_found(slug)
+    sidecar = _read_sidecar(folder, root=root)
     video_id = sidecar.get("video_id")
     health = None
     if isinstance(video_id, str) and video_id.strip():
@@ -830,7 +992,6 @@ def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     URL returns the same row. Default poll interval 60 min, range
     15-1440. Audio auto-ingest is a separate opt-in and defaults off."""
     server = _b()
-    import podcasts as _pod
     feed_url = args.get("feed_url")
     if not isinstance(feed_url, str) or not feed_url.strip():
         return _err("feed_url (string) is required")
@@ -839,10 +1000,7 @@ def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(auto_ingest, bool):
         return _err("auto_ingest must be a boolean when provided")
     try:
-        return _ok(feed=_pod.add_feed(server._get_index(),
-                                        feed_url.strip(),
-                                        poll_interval_min=int(interval),
-                                        auto_ingest=auto_ingest))
+        return server._follow_podcast_link(feed_url.strip(), poll_interval_min=interval, auto_ingest=auto_ingest)
     except ValueError as e:
         return _err(str(e))
     except Exception as e:
@@ -863,7 +1021,7 @@ def list_podcast_feeds(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.1 podcast: delete a feed + cascade its episodes."""
+    """Remove a show from the feed list, retaining linked subscription history."""
     server = _b()
     import podcasts as _pod
     try:
@@ -874,7 +1032,8 @@ def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
         removed = _pod.remove_feed(server._get_index(), feed_id)
     except Exception as e:
         return _err(f"remove_podcast_feed failed: {e}")
-    return _ok(removed=removed)
+    return _ok(removed=removed, message=("Removed from your podcast feeds." if removed
+                                         else "This feed is already gone."))
 
 
 def poll_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
@@ -971,11 +1130,12 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     diarize = bool(args.get("diarize")
                      if args.get("diarize") is not None
                      else settings.get("diarization_default"))
-    consent_given = bool(args.get("consent_given"))
     language = args.get("language")
     result, _status = server._queue_podcast_transcription(
         episode_id, model=model, language=language, diarize=diarize,
-        consent_given=consent_given)
+        consent_given=False, defer_worker=not server._TOKEN_OWNED)
+    if result.get("consent_required"):
+        return {**result, "error": result["error"] + " Start the download in the Uoink dashboard."}
     return result
 
 
@@ -1163,25 +1323,28 @@ def _byo_source_text(server, yoink_row) -> str:
     empty string is fine (the model still has the title/channel)."""
     if not yoink_row:
         return ""
-    from pathlib import Path as _Path
+    try:
+        root = server._item_storage_root(yoink_row)
+    except (OSError, ValueError):
+        return ""
     sidecar_path = yoink_row.get("sidecar_path") or ""
-    if sidecar_path and _Path(sidecar_path).exists():
+    if sidecar_path:
         try:
-            data = json.loads(_Path(sidecar_path).read_text(encoding="utf-8"))
+            data = read_checked_json(root, sidecar_path)
             segs = data.get("transcript") or []
             text = " ".join(
                 str(s.get("text") or "").strip()
                 for s in segs if isinstance(s, dict))
             if text.strip():
                 return text[:_BYO_SOURCE_CHAR_CAP]
-        except (OSError, json.JSONDecodeError, AttributeError):
+        except (OSError, ValueError, AttributeError):
             pass
     corpus_path = yoink_row.get("corpus_path") or ""
-    if corpus_path and _Path(corpus_path).exists():
+    if corpus_path:
         try:
-            return _Path(corpus_path).read_text(
-                encoding="utf-8")[:_BYO_SOURCE_CHAR_CAP]
-        except OSError:
+            with open_regular(root, corpus_path) as stream:
+                return stream.read(_BYO_SOURCE_CHAR_CAP)
+        except (OSError, ValueError):
             pass
     return ""
 
@@ -1639,25 +1802,23 @@ def add_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Writing Studio: add a Substack-style voice anchor (URL or
     raw text). Cap at 10 per Ryan's locked answer #4."""
     server = _b()
+    import page_extractor as pages
     import writing_studio as _ws  # noqa: WPS433
-    try:
-        url_fetcher = (server.Handler._writing_url_fetcher
-                        if False else None)  # MCP path doesn't have a Handler instance
-    except Exception:
-        url_fetcher = None
-    # The MCP call doesn't have a Handler instance, so we resolve the
-    # extractor directly. Falls back to None if Universal Site PR isn't
-    # in main yet (anchor still saves with raw_text=NULL for URLs).
-    url_fetcher = globals().get("_extract_page_to_prose_fn")
-    if url_fetcher is None:
-        url_fetcher = getattr(server, "_extract_page_to_prose", None)
+    idx = server._get_index()
+    source_type = (args.get("source_type") or "").strip()
+    if source_type == "url":
+        url = pages.normalize_page_url(args.get("source_value"))
+        if not url:
+            return _err("Enter a valid webpage URL for the style reference.")
+        if not pages.host_is_allowed(idx, url):
+            return pages.page_consent_required(urlsplit(url).hostname)
     try:
         row = _ws.add_style_anchor(
-            server._get_index(),
+            idx,
             name=args.get("name"),
-            source_type=(args.get("source_type") or "").strip(),
+            source_type=source_type,
             source_value=args.get("source_value"),
-            url_to_prose=url_fetcher)
+            url_to_prose=server._extract_page_to_prose)
     except ValueError as e:
         return _err(str(e))
     except Exception as e:
@@ -1712,7 +1873,8 @@ def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
 
     probe = RegistryCaptureHandler()
     try:
-        server.Handler._handle_extract_any(probe, dict(args))
+        fields = TOOL_REGISTRY["uoink_url"].input_schema["properties"]
+        server.Handler._handle_extract_any(probe, {k: args[k] for k in fields if k in args})
     except Exception as exc:
         return _err(f"uoink_url failed: {exc}")
     if isinstance(probe.payload, dict):
@@ -1864,12 +2026,15 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
 
     LOCKED LOCAL-FIRST: Crawl4AI runs on-device (lazy import); stdlib
     fallback when Crawl4AI isn't installed. Allowlist gate enforced --
-    add the host via add_allowed_site first if it's not seeded."""
+    the user approves additional sites in the dashboard."""
     server = _b()
     import page_extractor as _pe  # noqa: WPS433
     url = args.get("url")
     if not isinstance(url, str) or not url.strip():
         return _err("url (string) is required")
+    import hn_extractor
+    if hn_extractor.item_id(url):
+        return server._capture_hn_thread(args)[1]
     render_mode = (args.get("render_mode")
                     or _pe.RENDER_MODE_JS).strip().lower()
     include_screenshot = bool(args.get("include_screenshot", True))
@@ -2056,20 +2221,16 @@ def list_allowed_sites(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def add_allowed_site(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.2 Universal Site: add a hostname or wildcard pattern
-    ('*.docs.example.com'). Idempotent on UNIQUE url_pattern."""
-    server = _b()
+    """Only the dashboard may grant access to a site."""
     import page_extractor as _pe  # noqa: WPS433
     pattern = args.get("url_pattern") or args.get("pattern")
     if not isinstance(pattern, str) or not pattern.strip():
         return _err("url_pattern (string) is required")
     try:
-        return _ok(site=_pe.add_allowed(
-            server._get_index(), pattern.strip()))
+        pattern = _pe.normalize_site_pattern(pattern)
     except ValueError as e:
-        return _err(str(e))
-    except Exception as e:
-        return _err(f"add_allowed_site failed: {e}")
+        return {"ok": False, "code": "consent_required", "error": str(e)}
+    return _pe.page_consent_required(pattern)
 
 
 def remove_allowed_site(args: dict[str, Any]) -> dict[str, Any]:
@@ -2476,7 +2637,8 @@ def get_transcript_reliability(args: dict[str, Any]) -> dict[str, Any]:
     folder, _row = _b()._folder_for_video_id(video_id.strip())
     if not folder:
         return _err("uoink not found")
-    reliability = _read_sidecar(folder).get("reliability")
+    root = _b()._item_storage_root(_row) if _row and _row.get("source_type") == "episode" else _b().DESKTOP_ROOT
+    reliability = _read_sidecar(folder, root=root).get("reliability")
     if not isinstance(reliability, dict):
         reliability = {"status": "not_computed", "spans": [], "span_count": 0}
     return _ok(video_id=video_id.strip(), reliability=reliability)
@@ -2490,7 +2652,7 @@ def analyze_comments_tool(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     comments = _comments_for_folder(folder)
     if len(comments) < 5:
         return _err("This item has too few saved comments to analyze. Capture a page or video that has comments.")
@@ -2519,7 +2681,7 @@ def classify_hook(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("uoink not found")
+        return _not_found(slug)
     try:
         context = _hook_context_for_folder(folder)
         analysis = b.analyze_hook_type(context, api_key=key)
@@ -3957,15 +4119,15 @@ def _transcript_clock(seconds: float) -> str:
     return f"{hours}:{minutes:02d}:{secs:02d}" if hours else f"{minutes}:{secs:02d}"
 
 
-def _split_long_segments(segments: list) -> list:
+def _split_long_segments(segments: list, held_reasons: dict) -> list:
     """Split an over-long cue (an unpunctuated ASR run) so one page can hold it."""
     out = []
     size = GET_TRANSCRIPT_SEGMENT_MAX_CHARS
-    for start, end, text in segments:
-        if len(text) <= size:
-            out.append((start, end, text))
-            continue
-        out.extend((start, end, text[i:i + size]) for i in range(0, len(text), size))
+    for position, (start, end, text) in enumerate(segments, 1):
+        line, reason = held_reasons.get(position, (position, None))
+        # A long cue can span pages. Each part retains the original review decision.
+        out.extend((start, end, text[i:i + size], line, reason)
+                   for i in range(0, max(1, len(text)), size))
     return out
 
 
@@ -3975,11 +4137,13 @@ def _transcript_page(segments: list, cursor: int, include_timestamps: bool):
     used = 0
     index = cursor
     while index < len(segments):
-        start, end, text = segments[index]
+        _, _, text, _, reason = segments[index]
         cost = len(json.dumps(text)) * (2 if include_timestamps else 1) + (80 if include_timestamps else 2)
+        if reason:
+            cost += 96  # Held-line label, original number and optional structured fields.
         if page and used + cost > GET_TRANSCRIPT_PAGE_BUDGET:
             break
-        page.append((start, end, text))
+        page.append(segments[index])
         used += cost
         index += 1
     return page, (index if index < len(segments) else None)
@@ -3996,17 +4160,20 @@ def get_transcript(args: dict[str, Any]) -> dict[str, Any]:
         return _err("next_cursor must be a non-negative integer from an earlier get_transcript call")
     include_timestamps = args.get("include_timestamps") is True
     try:
-        record = b.get_transcript_cascade(args.get("url"), args.get("lang"))
+        record = b.get_transcript_cascade(args.get("url"), args.get("lang"),
+                                          **({"include_held": True} if args.get("include_held") is True else {}))
     except b.TranscriptUnavailable as e:
         return {"ok": False, "error": e.why[:1].upper() + e.why[1:], "reason": e.reason}
-    segments = _split_long_segments(list(record.get("segments") or []))
+    segments = _split_long_segments(record.get("segments") or [], record.get("held_reasons") or {})
     if cursor >= len(segments) and cursor:
         return _err("next_cursor is past the end of this transcript")
     page, next_cursor = _transcript_page(segments, cursor, include_timestamps)
-    if include_timestamps:
-        text = "\n".join(f"[{_transcript_clock(s)}] {t}" for s, _e, t in page)
-    else:
-        text = " ".join(t for _s, _e, t in page)
+    lines = []
+    for start, _, words, line, reason in page:
+        clock = f"[{_transcript_clock(start)}] " if include_timestamps else ""
+        held = f"[held line {line}] " if reason else ""
+        lines.append(clock + held + words)
+    text = ("\n" if include_timestamps else " ").join(lines)
     out = {
         "video_id": record["video_id"],
         "url": record["url"],
@@ -4024,11 +4191,14 @@ def get_transcript(args: dict[str, Any]) -> dict[str, Any]:
     if record["source"] == "library":
         out["transcribed_by"] = record.get("transcribed_by")
         out["slug"] = record.get("slug")
+    if record.get("held_count"):
+        out["held_count"] = record["held_count"]
     if record.get("whisper_model"):
         out["whisper_model"] = record["whisper_model"]
     if include_timestamps:
-        out["segments"] = [{"start": round(float(s), 3), "end": round(float(e), 3), "text": t}
-                           for s, e, t in page]
+        out["segments"] = [{"start": round(float(s), 3), "end": round(float(e), 3), "text": t,
+                            **({"held_line": line, "held_reason": reason} if reason else {})}
+                           for s, e, t, line, reason in page]
     return _ok(**out)
 
 
@@ -4113,14 +4283,14 @@ DESCRIPTIONS = {
     "get_uoink_health": "Read the stored per-section extraction health of a saved capture. Use to diagnose missing or failed capture sections; use get_transcript_reliability for questionable transcript spans. Reads the index snapshot, falling back to the sidecar, and returns an error when no health data exists. It does not retry extraction or recompute health.",
     "find_mentions": "Find recorded entity-name mentions across saved items, with stored spans, timing and source links. Use for people, products, tools or topics already indexed as entities; use search_clips for arbitrary transcript text or search_uoinks for whole-item search. Ranks by name match with newest first on ties. Results are limited and do not extract new entities.",
     "get_transcript_reliability": "Read stored transcript-reliability spans for a saved item. Use to inspect suspect wording before quoting; use get_uoink_health for extraction-section health or export_cited_range for stored cue text. Returns status not_computed with empty spans when no reliability snapshot exists. Computation requires the helper endpoint or the user's auto-check setting; this read never downloads a model.",
-    "add_podcast_feed": "Register a podcast RSS feed for ongoing metadata monitoring. Use for the podcast feed and episode workflow; use register_source for the general standing-source interface or list_podcast_feeds to find an existing feed. Returns the existing row for a duplicate URL. Audio auto-ingest is a separate explicit opt-in, off by default; standing capture still requires source consent through the dashboard.",
+    "add_podcast_feed": "Follow an RSS or Atom feed or an Apple Podcasts show for new episode metadata. Pasting an Apple episode link queues just that episode for local transcription and returns its episode_id and show_job_id. Following a show returns its feed and leaves automatic audio capture off until you grant consent in the dashboard. Use list_podcast_feeds to see followed shows.",
     "list_podcast_feeds": "List registered podcast feeds newest first, including their saved polling settings. Use to obtain a feed_id before polling or removal; use list_podcast_episodes to inspect episodes and list_sources for standing-source consent. Returns feeds and their count. This call reads saved registrations without fetching RSS.",
     "remove_podcast_feed": "Stop monitoring a registered podcast feed. Use after list_podcast_feeds identifies the feed; use set_source_consent to disable capture while retaining detection. A source-linked feed is archived and disabled; a legacy unlinked feed is deleted with its tracked episode rows. Returns whether a row was affected; already published corpora are not removed.",
     "poll_podcast_feed": "Refresh metadata for one registered podcast feed through the source-aware polling path. Use after add_podcast_feed when new episode observations are needed; use list_podcast_episodes to read cached episodes without a fetch. Managed sources honor detection due times and leases. Polling records observations; capture remains subject to separate source consent and scheduling. Returns the poll outcome or a feed error.",
     "list_podcast_episodes": "List tracked podcast episodes newest published first, optionally scoped to a feed or lifecycle state. Use to obtain episode IDs and check download or transcription state; use list_podcast_feeds for feed settings or poll_podcast_feed to refresh observations. Returns episodes and count from local storage without fetching audio.",
     "download_podcast_episode": "Download a tracked podcast episode's audio to its canonical local MP3. Use after list_podcast_episodes, before transcribe_podcast_episode; use episode_to_corpus only after a transcript exists. Requires yt-dlp and ffmpeg, and blocks until download finishes or fails. Reuses an existing nonempty canonical file and records its path on the episode.",
     "get_whisperx_status": "Inspect local WhisperX availability, the selected model and the diarization default. Use before transcribe_podcast_episode to identify missing runtime prerequisites; use get_job_status to monitor an already queued transcription. Returns availability and supported model settings without downloading a model or starting transcription.",
-    "transcribe_podcast_episode": "Queue local WhisperX transcription for a downloaded podcast episode. Use after download_podcast_episode and get_whisperx_status; monitor the returned job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio. First-time model downloads require user consent: only reissue with consent_given after the dashboard records the opt-in. Missing runtime returns an error.",
+    "transcribe_podcast_episode": "Queue local WhisperX transcription for a downloaded podcast episode. Check get_whisperx_status for installed models. If the chosen model needs a download, ask the user to start it in the dashboard. Monitor the job with get_job_status, then publish with episode_to_corpus. A single worker writes or replaces the JSON transcript beside the audio.",
     "episode_to_corpus": "Publish a completed podcast transcript as a searchable local corpus with source-aware citations. Use after transcribe_podcast_episode completes; use download_podcast_episode for audio acquisition. Writes deterministic Markdown and sidecar files, replaces the prior corpus/index snapshot and repairs partial previous attempts. Missing audio or transcript prerequisites return an error; success identifies the published item.",
     "get_library_activity": "Report saved-library capture activity, shelf churn and standing-source observations for a time interval. Use for counts and revision-bound drill-down; use get_library_brief_input for a daily writing packet or source_status for one source's observations. Start with a summary, then reuse its report_revision for detail pages. Returns deterministic metrics and evidence; stale detail revisions require a fresh summary.",
     "search_library": "Retrieve a bounded, clip-first selection of saved-library matches with revision-bound card and excerpt URIs. Use for citation-ready research; use search_uoinks for whole-item filters or search_clips for more transcript windows. Check passage_verified before quoting; citation_reason explains missing passages. Follow resource URIs with read_library_resource and next_step for more retrieval. Results are not exhaustive; search-mode metadata explains keyword fallback.",
@@ -4178,18 +4348,18 @@ DESCRIPTIONS = {
     "write_blog": "Prepare grounding for a blog article, or save a credited Markdown draft in the local Writing Studio. Use for long prose; use write_tweet for tweets and threads or generate_script for video scripts. Without body, returns grounding unless direct generation is requested with the saved Anthropic key. With body, saves the agent's draft and returns soft Voice DNA warnings. Keep the required Source credit. Direct generation sends context to Anthropic and retries fatal phrase violations once before refusing to save; nothing is published to a website.",
     "list_writing_pieces": "List saved tweet, thread and blog drafts newest first, optionally filtered by kind or source item. Use to find a piece ID for get_writing_piece; use list_scripts for video-script versions. Returns pieces and count. The list contains local drafts, not posts fetched from social or publishing accounts.",
     "get_writing_piece": "Read one saved Writing Studio tweet, thread or blog draft. Use after list_writing_pieces; use write_tweet or write_blog to save another draft, or get_script for video scripts. Supply id or its piece_id alias; id takes precedence. Returns the piece object or a not-found error.",
-    "add_style_anchor": "Save a named writing-style reference from pasted text or a URL. Use to guide later write_tweet/write_blog drafts; use list_style_anchors to select existing references. URL references fetch prose through the page extractor and can retain null raw_text if extraction fails. Returns the anchor; more than ten anchors is refused. Style references do not authorize copying source facts or suppressing creator credit.",
+    "add_style_anchor": "Save a named writing-style reference from pasted text or an allowed webpage. Use list_style_anchors to select references for write_tweet or write_blog. New sites need dashboard approval. If extraction fails for an allowed URL, the anchor can have null raw_text. The library holds up to ten active anchors. Style references guide voice. Keep source facts and creator credit separate.",
     "list_style_anchors": "List saved writing-style references with active flags and the configured ten-anchor cap. Use to select style_anchor_ids for write_tweet or write_blog; use add_style_anchor to save a reference or remove_style_anchor to delete one. Returns anchors and count without refetching URL contents.",
     "remove_style_anchor": "Delete a saved writing-style reference. Use after list_style_anchors identifies the reference; use add_style_anchor to save a replacement. Supply anchor_id or its id alias; anchor_id takes precedence. Returns the selected ID and whether it was removed. Previously saved writing pieces remain.",
-    "uoink_url": "Capture a supported video URL through platform routing, with metadata/transcript fallback for other yt-dlp sites. Use for non-YouTube videos or long-video modes; use uoink_video for a single standard YouTube capture, uoink_page for webpage prose, uoink_x for X text chains, or uoink_reddit_thread for discussion comments. Requires the local media runtime. Saves a local corpus; generic fallback has no screenshots, comment fetch or hook classification. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_url": "Capture a supported video or Hacker News item. Hacker News links save the discussion through Algolia's public API. A comment link highlights that reply. Video capture requires the local media runtime and supports non-YouTube videos and long-video modes. Use uoink_video for a standard YouTube capture, uoink_page for webpage prose, uoink_x for X post chains or uoink_reddit_thread for Reddit comments. Generic video fallback saves metadata and available transcript text. Recapturing a source can replace its saved corpus and metadata.",
     "uoink_note": "Save user-provided text as a local searchable note with title and attribution. Use for pasted ideas or prose without fetching a source; use uoink_page for a web article or uoink_image for pixels. Returns the saved item ID, slug and metadata. Empty or invalid notes are refused; title can be derived from the text.",
     "uoink_image": "Save supplied PNG, JPEG or WebP bytes as a local image corpus item with optional caption and attribution. Use for screenshots, diagrams or images; use uoink_note for text or uoink_page to fetch a webpage. Accepts strict base64 or a data URL and returns the saved item ID, slug and metadata. Invalid images are refused. No cloud OCR or vision service runs.",
     "uoink_x": "Capture an X post and its author's earlier chain as a local text corpus item. Use for post text; use uoink_url for an X video capture or uoink_page for general webpage prose. Requires x_text_capture_enabled and public source access. Returns the saved item ID, title, captured-tweet count and metadata; disabled capture or extraction failure returns an error. Recapturing a source can replace its saved corpus and metadata.",
-    "uoink_page": "Fetch an allowed webpage as Markdown and save it as a local corpus item. Use for articles and documentation; use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Add an unlisted host with add_allowed_site only with user authorization. Crawl4AI renders locally when available; static fallback has no screenshot. Returns extracted content and metadata; video_id is null if extraction succeeded but persistence failed. Recapturing a source can replace its saved corpus and metadata.",
+    "uoink_page": "Save an allowed webpage or a Hacker News discussion as local Markdown. A Hacker News item uses Algolia's public API and includes nested replies. A comment link highlights that reply in the saved story. For an unlisted host, ask the user to allow the site in the dashboard. Use uoink_url for videos, uoink_x for post chains or uoink_reddit_thread for comments. Crawl4AI renders locally when available. Static capture omits the screenshot. Returns extracted content and metadata. A null video_id means the save failed. Recapturing a source can replace its saved corpus and metadata.",
     "uoink_reddit_thread": "Capture a Reddit post and filtered comment tree as a local discussion corpus. Use when replies matter; use uoink_page for general webpage prose or uoink_url for video extraction. Fetches Reddit's public JSON without API credentials or the page allowlist, then saves nested replies with source_type reddit_thread. Returns captured content, comment counts and the saved item ID; fetch or save failures return an error. Recapturing a source can replace its saved corpus and metadata.",
-    "list_allowed_sites": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access; use add_allowed_site or remove_allowed_site to change the allowlist. Returns sites, count and default seeds. Seeds can be removed like other entries; this call does not test reachability or fetch pages.",
-    "add_allowed_site": "Add a hostname pattern to the webpage-capture allowlist. Use for a user-authorized uoink_page destination; use list_allowed_sites to inspect rules or remove_allowed_site to revoke one. Plain hosts include subdomains; wildcard patterns match their specified subdomains. Returns the saved rule and reuses an existing pattern unchanged. This grants future page access but does not capture a page.",
-    "remove_allowed_site": "Remove a hostname pattern from the webpage-capture allowlist. Use to revoke a rule found by list_allowed_sites; use add_allowed_site to restore it. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
+    "list_allowed_sites": "List saved webpage-capture hostname patterns and their active state. Use before uoink_page to check access. The user adds sites in the dashboard. Use remove_allowed_site to revoke a rule, including a default. Returns sites, count and default seeds.",
+    "add_allowed_site": "Return dashboard instructions for approving a site for webpage capture. An MCP request returns consent_required. Ask the user to add the hostname or wildcard under Settings > Capture > Sites Uoink works on, then retry the original capture. Both plain and wildcard rules include the named host and its subdomains.",
+    "remove_allowed_site": "Remove a hostname pattern from the webpage-capture allowlist. Use list_allowed_sites to find the rule. The user can restore it in the dashboard. Returns the normalized pattern and whether a rule was removed. Saved captures remain, and overlapping rules can still allow the same host.",
 }
 
 # Existing constraints, enums and defaults remain authoritative. These strings
@@ -4205,7 +4375,7 @@ PARAMETERS = {
     "feed_id": "Integer feed ID returned by add_podcast_feed or list_podcast_feeds.",
     "episode_id": "Integer episode ID from list_podcast_episodes, not the feed ID.",
     "playlist_id": "Integer monitor ID from add_monitored_playlist or list_monitored_playlists.",
-    "feed_url": "Public HTTP(S) RSS or Atom feed URL, not the podcast's homepage.",
+    "feed_url": "Public RSS or Atom feed URL, or an Apple Podcasts show or episode link.",
     "playlist_url": "YouTube playlist URL containing its list identifier.",
     "poll_interval_min": "Requested interval between metadata checks, in minutes; not a capture deadline.",
     "auto_ingest": "Explicit podcast audio-ingest preference; false unless the user opted in. Standing-source capture consent is separate.",
@@ -4274,7 +4444,7 @@ PARAMETERS = {
     "model": "Local WhisperX model size; omit to use the saved model setting.",
     "language": "Whisper language code, such as en; omit for automatic language detection.",
     "diarize": "Request speaker diarization; omit to use the saved default and its runtime prerequisites.",
-    "consent_given": "True only after the user opted in through the dashboard to the required first-time model download.",
+    "consent_given": "Retained for compatibility. The user starts a first-time model download in the dashboard.",
     "run_id": "Librarian run identifier from list_library_work; omission selects the service's default run where allowed.",
     "cursor": "Opaque cursor from the previous response; pass unchanged to continue the same listing.",
     "state": "Work-state filter; all includes every state rather than only ready assignments.",
@@ -4365,7 +4535,7 @@ OVERRIDES = {
     "uoink_playlist": {"url": "YouTube playlist URL with a list identifier; individual videos use uoink_video."},
     "uoink_url": {"url": "HTTP(S) video/source URL accepted by yt-dlp's supported extractors.", "interval": "Seconds between screenshots in the full media pipeline; ignored by metadata-only fallback."},
     "check_live_status": {"url": "Public HTTP(S) video URL whose metadata should be probed."},
-    "uoink_page": {"url": "HTTP(S) webpage URL whose hostname matches an active page allowlist rule."},
+    "uoink_page": {"url": "Hacker News item URL, or an HTTP(S) webpage URL whose hostname matches an active page allowlist rule."},
     "uoink_x": {"url": "Public x.com or twitter.com status URL for the terminal post in the desired author chain."},
     "uoink_reddit_thread": {"url": "reddit.com/r/<sub>/comments/... thread URL."},
     "import_list": {
@@ -4543,6 +4713,7 @@ OUTPUT_SCHEMAS = {
     }, optional=("stage_url", "truncated")),
     "get_uoink_corpus": _output({
         "corpus_md": _field("string", "Complete saved Markdown document."),
+        "pins": _field("array", "Pinned times, links and nearby transcript lines.", items={"type": "object"}),
         "folder": _field("string", "Absolute local folder holding the corpus."),
         "video_id": _field(["string", "null"], "Saved source-item identifier when available."),
         "video_url": _field(["string", "null"], "YouTube watch URL when the source is a YouTube item."),
@@ -4638,16 +4809,21 @@ for _name, _key, _meaning in (
     ("add_style_anchor", "anchor", "Saved style reference; URL extraction can leave raw_text null."),
     ("add_podcast_feed", "feed", "New or existing podcast feed registration."),
     ("add_monitored_playlist", "playlist", "New or existing playlist monitor registration."),
-    ("add_allowed_site", "site", "New or existing allowlist rule, unchanged on a duplicate."),
 ):
     OUTPUT_SCHEMAS[_name] = _output({_key: _field("object", _meaning)})
 
+OUTPUT_SCHEMAS["add_allowed_site"] = _output({
+    "code": _field("string", "consent_required when site approval must come from the dashboard."),
+})
+OUTPUT_SCHEMAS["add_allowed_site"]["properties"]["ok"]["const"] = False
+
 # Optional get_transcript fields: present only for some sources or options.
 OUTPUT_SCHEMAS["get_transcript"]["properties"].update({
+    "held_count": _field("integer", "Number of saved lines held back by default."),
     "transcribed_by": _field("string", "Library hits only: captions or whisper, how the saved copy was made."),
     "slug": _field("string", "Library hits only: the saved item's slug."),
     "whisper_model": _field("string", "Whisper results only: the local model used."),
-    "segments": _field("array", "With include_timestamps: this page's cues as start, end (seconds) and text.", items={"type": "object"}),
+    "segments": _field("array", "With include_timestamps: cues with start, end (seconds) and text. Included held cues also carry held_line and held_reason.", items={"type": "object"}),
 })
 
 for _name in ("remove_podcast_feed", "remove_monitored_playlist"):
@@ -4968,6 +5144,8 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         description=DESCRIPTIONS["get_uoink_corpus"],
         input_schema=_schema({
             "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
+            "include_held": {"type": "boolean", "default": False,
+                             "description": "Append held transcript lines in a separate review section."},
         }, ["slug"]),
         handler=get_uoink_corpus,
     ),
@@ -6172,10 +6350,10 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "add_allowed_site": ToolSpec(
         name="add_allowed_site",
-        title="Add allowed site",
+        title="Request site access",
         annotations={
-            "readOnlyHint": False, "destructiveHint": False,
-            "idempotentHint": True, "openWorldHint": True,
+            "readOnlyHint": True, "destructiveHint": False,
+            "idempotentHint": True, "openWorldHint": False,
         },
         description=(
             DESCRIPTIONS["add_allowed_site"]
@@ -6476,10 +6654,12 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                      "description": "Preferred language code such as en, de or pt-BR. Default: English when YouTube has it, else the spoken language. Falls back to the available language and says so in why."},
             "include_timestamps": {"type": "boolean", "default": False,
                                    "description": "When true, each line starts with [m:ss] and segments carries start/end seconds."},
+            "include_held": {"type": "boolean", "default": False,
+                             "description": "Show suspected Whisper lines and non-speech labels for review."},
             "next_cursor": {"type": "integer", "minimum": 0,
                             "description": "Segment index from the previous response's next_cursor, to read the next page of a long transcript."},
             "strip_ads": {"type": "boolean",
-                          "description": "Accepted for compatibility with other transcript servers and ignored: Uoink returns every word."},
+                          "description": "Accepted for compatibility with other transcript servers and ignored."},
         }, ["url"]),
         handler=get_transcript,
         rate_limiter=_RateLimiter(20),
@@ -6638,6 +6818,19 @@ def cap_tool_result(envelope: Any, cap: int) -> Any:
             return envelope
     except (TypeError, ValueError):
         return envelope
+    if "yoinks" in envelope and envelope.get("unfinished_captures"):
+        # Spend the remaining wire budget on the optional newest-first sample.
+        sample = []
+        recent = {**envelope, "unfinished_captures": sample}
+        size = _json_len(recent)
+        for item in envelope["unfinished_captures"]:
+            size += _json_len(item) - 2 + (2 if sample else 0)
+            if size > cap:
+                break
+            sample.append(item)
+        if _json_len(recent) <= cap:
+            return recent
+        envelope = recent
     budget = max(cap - _CAP_NOTE_RESERVE, cap // 2)
     dropped: set = set()
     trimmed = _drop_bulky(envelope, dropped)
@@ -6751,6 +6944,11 @@ def _scrub_error_text(value: Any) -> str:
 # planted in a saved page reads as quoted data. The JSON text contract stays:
 # this is one added key, first in the object.
 UNTRUSTED_CONTENT_TOOL_NAMES = frozenset({
+    "uoink_page",
+    "uoink_url",
+    "uoink_video",
+    "uoink_x",
+    "uoink_reddit_thread",
     "research_evidence",
     "research_publish",
     "research_start",
@@ -6772,8 +6970,8 @@ UNTRUSTED_CONTENT_NOTICE = (
 
 
 def _label_untrusted(name: str, result: Any) -> Any:
-    if (name in UNTRUSTED_CONTENT_TOOL_NAMES and isinstance(result, dict)
-            and result.get("ok") is True):
+    if isinstance(result, dict) and ((result.get("ok") is True and name in UNTRUSTED_CONTENT_TOOL_NAMES)
+                                     or "capture_not_finished" in result):
         return {"untrusted_content": UNTRUSTED_CONTENT_NOTICE,
                 **{k: v for k, v in result.items() if k != "untrusted_content"}}
     return result

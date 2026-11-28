@@ -4,7 +4,7 @@ Install [Uoink for Windows](https://github.com/ryanbiddy/uoink/releases/latest)
 first. In the installer, leave **Add the uoink command to PATH for AI agents**
 checked, then open a new terminal. The agent CLI ships with Uoink 3.10.0.
 With Node installed, `npx uoink` does the download, checksum and install for you,
-and once Uoink is installed `npx uoink connect claude-code` runs the CLI directly.
+and once Uoink is installed `npx uoink connect claude-code --write` runs the CLI directly.
 In PowerShell, check the install:
 
 ```powershell
@@ -33,11 +33,32 @@ guide includes Docker config and the limits of capture from cloud IPs.
 
 ## Client recipes and documentation checks
 
-`uoink connect <client>` prints a recipe with this installation's absolute paths.
-It does not read or edit client config files, launch clients, or contact the
-running helper. Location, documentation status, sources and check date go to
-stderr. Stdout contains the config, command or setup steps. Merge entries into
-an existing config without replacing unrelated settings or servers.
+Run `uoink connect claude-code --write` to add Uoink to Claude Code for your user account.
+Review the command and enter `y` to run it. If `claude` is missing from PATH,
+Uoink prints the command so you can run it after installing Claude Code.
+Restart Claude Code and ask “What's in my Uoink library?”
+
+For a client with a known JSON config file, such as Claude Desktop or Cursor,
+`--write` shows the path and the entry it will add or replace. Press Enter to
+cancel. On confirmation, Uoink backs up each existing file to a sibling `.bak`
+and saves the `uoink` entry alongside your other servers. If the JSON needs
+repair, the command stops before editing it. Use `--write --yes` in scripts.
+For VS Code and Roo, run the command in the project you want to configure.
+Cline writes to the default VS Code profile. For another editor or profile,
+open the config from Cline's MCP Servers menu and merge the printed recipe.
+
+On Windows, the CLI and dashboard check both `%APPDATA%\Claude` and
+`%LOCALAPPDATA%\Packages\Claude_<id>\LocalCache\Roaming\Claude` for
+`claude_desktop_config.json`. They update each existing copy. If neither
+file exists, they create it in the Store package's Claude folder when present,
+or in `%APPDATA%\Claude` otherwise.
+
+Omit `--write` to preview a recipe. Stdout holds just the config, command or
+setup steps. Paths, sources and setup hints go to stderr. Use the printed
+recipe for Codex TOML, YAML, files with comments, or clients configured through
+their own menus. For Codex, merge the printed tables into your existing
+configuration. In a script, a nonzero exit from `--write` means setup still
+needs your attention.
 
 ### Choosing a toolset
 
@@ -194,7 +215,8 @@ working.
 | `lang` | `lang` | Default: English when YouTube has it, otherwise the spoken language. A missing language falls back to what's available and `why` says so. |
 | `include_timestamps` | `include_timestamps` | `[m:ss] text` lines, plus a `segments` list with start and end seconds. |
 | `next_cursor` | `next_cursor` | Long transcripts come in pages of about 40,000 characters. Pass back the returned `next_cursor` until it is `null`. |
-| `strip_ads` | accepted, ignored | Uoink returns every word. |
+| `strip_ads` | accepted, ignored | For compatibility with clients that send this option. |
+| | `include_held` | By default Uoink omits sound labels and lines it suspects Whisper invented. Set this to `true` to read the held lines at their original positions. |
 
 Why it keeps working where they stop:
 
@@ -424,6 +446,11 @@ odr.exe mcp add "C:\path with spaces\uoink-bundle\manifest.json"
 odr.exe list
 ```
 
+To register the bundle through Uoink, run
+`uoink connect windows-odr --manifest "C:\path with spaces\uoink-bundle\manifest.json" --write`.
+Review the path and confirm. If `odr.exe` is missing from PATH, Uoink prints
+the command for later.
+
 Keep the bundle files beside that manifest. The source tree's `.mcpb/manifest.json`
 has bundle-relative paths and is not a standalone installed package. Registration
 and client acceptance are not yet tested. Uoink's installer does not run ODR.
@@ -547,8 +574,9 @@ Calls print one JSON envelope. Exit codes are 0 for `ok: true`, 1 for a tool
 refusal/failure, and 2 for CLI usage errors. Errors also go to stderr.
 `--text` gives a short human display. `tools` includes names and one-line
 descriptions; `--json` also includes the same client schemas as stdio.
-`connect` prints native config and `skill path` prints a path rather than an
-envelope. `call` can invoke any registry tool, including tools outside `core`.
+By default, `connect` prints the client's config or setup instructions. With
+`--write`, it reports the result of setup for supported clients. `skill path`
+prints a path. `call` can invoke any registry tool, including tools outside `core`.
 
 The CLI waits for capture workers started by its call, including playlist work,
 podcast transcription, and capture follow-up analysis. This keeps a one-shot

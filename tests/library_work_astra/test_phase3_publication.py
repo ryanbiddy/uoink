@@ -14,7 +14,7 @@ import pytest
 
 from test_phase3_support import (
     Crash, Publication, digest, item_rows, ledger, migration_dir, ok,
-    phase3_isolation, phase3_module, race, rig, rows,
+    phase3_isolation, phase3_module, podcast_rig, race, rig, rows, transcript_path_for_episode,
 )
 
 PROMPT_HASH = digest('Astra fixture assignment prompt; never executed.')
@@ -92,11 +92,12 @@ def test_s16_each_publication_prefix_waits_for_complete_evidence(rig, boundary):
     assert status['items'][0]['classification']['state'] == 'waiting_for_client'
 
 
-def test_s16_real_podcast_upsert_crash_does_not_enqueue(rig, monkeypatch):
+def test_s16_real_podcast_upsert_crash_does_not_enqueue(podcast_rig, monkeypatch):
     """Real publisher, transcript and files; stop before its citation/clip commit."""
     import podcasts
     from test_phase3_support import snapshot
 
+    rig = podcast_rig
     configure(rig)
     sid = ok(rig.svc.register_source(rig.context, dict(
         kind='podcast_rss', url='https://show.example/feed.xml')))['source']['source_id']
@@ -108,7 +109,7 @@ def test_s16_real_podcast_upsert_crash_does_not_enqueue(rig, monkeypatch):
     rig.svc.poll_source(sid)
     start = rig.start(sid)
     episode_id = item_rows(rig.idx, sid)[0]['legacy_episode_id']
-    transcript = rig.root / 'synthetic.transcript.json'
+    transcript = transcript_path_for_episode(rig, episode_id)
     transcript.write_text(json.dumps(dict(model='synthetic', language='en', segments=[dict(
         start=12.5, end=21.75, text='Durable publication fixture.')])), encoding='utf-8')
     with rig.idx.write_transaction() as conn:

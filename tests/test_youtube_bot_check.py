@@ -46,7 +46,7 @@ class Clock:
 
 
 @pytest.fixture(autouse=True)
-def clock(monkeypatch):
+def clock(monkeypatch, public_dns):
     fake = Clock()
     monkeypatch.setattr(server, "_youtube_bot_check_clock", fake)
     monkeypatch.setattr(server, "_youtube_bot_check_until", None)

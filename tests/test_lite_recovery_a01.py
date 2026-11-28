@@ -23,9 +23,11 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
+from tests.offline_dns import public_address
 
 
 def _assert(cond, msg):
@@ -46,11 +48,14 @@ def test_normalize_accepts_lite():
     print("ok  _normalize_long_video_mode accepts lite, rejects junk")
 
 
+@patch("socket.getaddrinfo", new=public_address)
 def test_lite_extraction_path(tmp: Path):
+    tmp = tmp / "capture"
+    tmp.mkdir()
     calls = []
     comments_started = {"n": 0}
     saved = {name: getattr(server, name) for name in (
-        "_run_subprocess", "_download_thumbnail", "_fetch_channel_context",
+        "DESKTOP_ROOT", "_run_subprocess", "_download_thumbnail", "_fetch_channel_context",
         "_should_start_hook_type", "_read_settings", "_incremental_index_update",
         "_index_yoink", "_start_entity_extraction_thread",
         "_start_comments_thread", "_generate_paste_corpus",
@@ -65,15 +70,17 @@ def test_lite_extraction_path(tmp: Path):
             Path(base).write_bytes(b"jpeg")
             Path(cmd[-1].replace("%04d", "0002")).write_bytes(b"jpeg")
         elif any(a == "--write-subs" or a == "--write-auto-subs" for a in cmd):
-            # Full single-file media command also writes subs in this pipeline.
-            (tmp / "video.mp4").write_bytes(b"media")
-            (tmp / "video.en.srt").write_text(
+            template = cmd[cmd.index("-o") + 1]
+            Path(template.replace("%(ext)s", "en.srt")).write_text(
                 "1\n00:00:00,000 --> 00:00:02,000\nhello world\n",
                 encoding="utf-8")
+        elif "-o" in cmd:
+            (tmp / "video.mp4").write_bytes(b"media")
         return subprocess.CompletedProcess(cmd, 0, b"", b"")
 
     phases = []
     try:
+        server.DESKTOP_ROOT = tmp.parent
         server._run_subprocess = fake_run
         server._download_thumbnail = lambda *_a, **_k: None
         server._fetch_channel_context = lambda *_a, **_k: {}
@@ -117,9 +124,10 @@ def test_lite_extraction_path(tmp: Path):
                    if c[:1] != ["ffmpeg"] and "-o" in c and "video.%(ext)s"
                    in " ".join(c)]
     _assert(media_calls, "lite downloads a single media file")
-    _assert(any("--write-subs" in c or "--write-auto-subs" in c
-                for c in media_calls),
-            "lite still requests the full subtitle track (transcript kept)")
+    subtitle_calls = [c for c in calls if "--write-subs" in c or "--write-auto-subs" in c]
+    _assert(len(subtitle_calls) == 1 and "--skip-download" in subtitle_calls[0]
+            and calls.index(media_calls[0]) < calls.index(subtitle_calls[0]),
+            "lite requests the full subtitle track separately after the media download")
 
     # Sparse screenshots: exactly one ffmpeg pass, at >= 5-min interval.
     ffmpeg_calls = [c for c in calls if c and c[0] == "ffmpeg"]
@@ -147,8 +155,8 @@ def test_lite_extraction_path(tmp: Path):
             f"comments marked skipped, not pending: {sidecar['comments_status']}")
     _assert(sidecar["hook_type_status"] == "skipped",
             f"hook typing marked skipped: {sidecar['hook_type_status']}")
-    _assert(sidecar["caption_count"] >= 1 if "caption_count" in sidecar
-            else True, "transcript preserved")
+    _assert([row["text"] for row in sidecar["transcript"]] == ["hello world"],
+            "transcript preserved")
     # Transcript file written from the kept captions.
     _assert((tmp / "transcript.txt").exists(),
             "lite still writes the transcript from kept captions")
@@ -159,12 +167,17 @@ def test_lite_extraction_path(tmp: Path):
 def test_old_lite_export_on_read(tmp_path, monkeypatch):
     import uoink_mcp_tools
     from unittest.mock import Mock
+    monkeypatch.setattr(server, "DESKTOP_ROOT", tmp_path)
     pending = "*Fetching comments... they'll appear here when ready.*"
     path = tmp_path / f"{tmp_path.name}.md"
     saved = f"Quoted text: {pending}\n{server.COMMENTS_START_MARK}\n{pending}\n{server.COMMENTS_END_MARK}"
     path.write_text(saved, encoding="utf-8")
     sidecar = tmp_path / f"{tmp_path.name}.json"
-    monkeypatch.setattr(uoink_mcp_tools, "_find_yoink", lambda slug: (tmp_path, path))
+    row = {"video_id": "fixture", "slug": "fixture", "corpus_path": str(path),
+           "sidecar_path": str(sidecar), "source_type": "video"}
+    idx = Mock()
+    idx.get_by_slug.return_value = idx.get_yoink.return_value = row
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
     monkeypatch.setattr(uoink_mcp_tools, "_backend", server)
     for mode, status, expected in [("lite", "skipped", 1), ("full", "pending", 2)]:
         sidecar.write_text(json.dumps({"long_video_mode": mode, "comments_status": status}), encoding="utf-8")

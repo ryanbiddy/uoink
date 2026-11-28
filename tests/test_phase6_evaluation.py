@@ -887,8 +887,8 @@ def test_gate_6_exp_timed_source_cues(sandbox):
                             verbatim_text=f.cues[3]["text"] + "\n" + f.cues[4]["text"],
                             text_basis="stored_cues", separator="\n",
                             source_deep_link=f.cues[3]["source_deep_link"],
-                            seek_link="https://systems.example.fm/ep42.mp3#t=60",
-                            player_seek_seconds=60, truncated=False)
+                            seek_link="https://systems.example.fm/ep42.mp3#t=58",
+                            player_seek_seconds=58, truncated=False)
     assert result["units"] == [dict(cue_seq=i, cue_hash=f.block["cues"][i]["cue_hash"],
                                     start=f.cues[i]["timestamp_start"], end=f.cues[i]["timestamp_end"],
                                     text=f.cues[i]["text"], speaker="SPEAKER_01",
@@ -1127,8 +1127,8 @@ def test_gate_6_seek_player_equality(sandbox):
     """P6-11: supported seek arithmetic against a recording player command."""
     conn = _db(sandbox)
     for kind, key, url, expected in (
-        ("youtube", "abcdefghijk", "https://www.youtube.com/watch?v=abcdefghijk&t=999s", 22),
-        ("media_fragment", "direct-media", "https://systems.example.fm/ep42.mp3#old", 22),
+        ("youtube", "abcdefghijk", "https://www.youtube.com/watch?v=abcdefghijk&t=999s", 20),
+        ("media_fragment", "direct-media", "https://systems.example.fm/ep42.mp3#old", 20),
         ("none", "episode-page", "https://systems.example.fm/episodes/42#t=99", None),
         ("none", "unknown-provider", "https://vimeo.com/123456#t=99s", None),
     ):
@@ -1154,10 +1154,10 @@ def test_gate_6_seek_player_equality(sandbox):
         parsed = urlsplit(citation["seek_link"])
         if kind == "youtube":
             query = parse_qs(parsed.query)
-            assert query["v"] == [key] and query["t"] == ["22s"]
+            assert query["v"] == [key] and query["t"] == ["20s"]
             parsed_seconds = int(query["t"][0][:-1])
         else:
-            assert parsed.fragment == "t=22"
+            assert parsed.fragment == "t=20"
             parsed_seconds = int(parsed.fragment.removeprefix("t="))
         commands = []
         player = SimpleNamespace(seekTo=lambda seconds: commands.append(("seek", seconds)),
@@ -1165,8 +1165,8 @@ def test_gate_6_seek_player_equality(sandbox):
         player.seekTo(citation["player_seek_seconds"])
         player.stopAt(citation["end"])
         assert commands == [("seek", parsed_seconds), ("end", 48.125)]
-        assert parsed_seconds == math.floor(citation["start"])
-        assert 0 <= citation["start"] - parsed_seconds < 1
+        assert parsed_seconds == max(0, math.floor(citation["start"]) - 2)
+        assert 2 <= citation["start"] - parsed_seconds < 3
     # A watch URL for a different video cannot acquire seek authority.
     wrong = _fixture(sandbox, 2, key="wrong-watch", playback=dict(
         source_url="https://youtube.com/watch?v=abcdefghijk",
@@ -1484,15 +1484,13 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
         assert len(queued) == count
     # Execute the real queue admission function with inert dependencies. Missing
     # download consent must return before any job, worker or model can start.
-    audio_placeholder = env.root / "never-decoded.mp3"
-    audio_placeholder.write_bytes(b"synthetic placeholder; not an audio fixture")
+    import podcasts
+    from tests.podcast_fixtures import _seed_downloaded_episodes
     admission_globals = {
         "source_subscriptions": SimpleNamespace(CaptureLock=SimpleNamespace(
             acquire=lambda root, key, timeout: nullcontext())),
         "_platform": _platform,
-        "Path": Path, "_get_index": lambda: None,
-        "podcasts": SimpleNamespace(get_episode=lambda idx, episode_id: {
-            "audio_local_path": str(audio_placeholder), "title": "Synthetic episode"}),
+        "Path": Path, "podcasts": podcasts,
         "whisper_runner": SimpleNamespace(is_whisperx_available=lambda: True,
                                            is_transcription_available=lambda: True,
                                            normalize_model=lambda value: value or "base",
@@ -1506,9 +1504,12 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     }
     _function("server.py", "_admit_podcast_transcription", admission_globals)
     admission = _function("server.py", "_queue_podcast_transcription", admission_globals)
-    for diarize in (False, True):
-        body, status = admission(42, diarize=diarize, consent_given=False)
-        assert status == 412 and body["consent_required"] is True
+    with index_mod.Index.open(env.root / "admission.db") as idx:
+        episode_id, = _seed_downloaded_episodes(idx, env.root, count=1)
+        admission_globals["_get_index"] = lambda: idx
+        for diarize in (False, True):
+            body, status = admission(episode_id, diarize=diarize, consent_given=False)
+            assert status == 412 and body["consent_required"] is True
     # Recorded completed output: its own report and run ID survive reuse even
     # if the saved preference is subsequently disabled. Nothing is executed.
     f = _fixture(env, 3)
@@ -1521,15 +1522,18 @@ def test_phase6_diarization_opt_in_default_off(sandbox):
     assert result["attribution"]["diarization_ran"] is True
     assert result["attribution"]["runs"] == f.block["runs"]
     assert _snapshot(conn, f) == before
-    import podcasts
-    transcript_path = env.root / "done.json"
+    feed = {"id": 1, "title": "Show", "feed_url": "https://show.test/rss"}
+    episode = {"id": 42, "feed_id": 1, "guid": "episode-42", "title": "Never decoded",
+               "podcast_title": feed["title"], "feed_url": feed["feed_url"]}
+    transcript_path = podcasts._episode_audio_path(env.root, feed, episode).with_suffix(".transcript.json")
     transcript = dict(model="base", diarization_ran=True, diarization_run_id=f.block["runs"][0]["run_id"],
                       media_depth=f.block, segments=[dict(start=0.0, end=25.0, text=f.cues[0]["text"], speaker="SPEAKER_00")])
     transcript_path.write_text(_json(transcript), encoding="utf-8")
     with env.patch.context() as patch:
-        patch.setattr(podcasts, "get_episode", lambda idx, episode_id: {
-            "transcript_status": "done", "transcript_local_path": str(transcript_path), "diarization_ran": False})
-        reused = podcasts.load_completed_episode_transcript(SimpleNamespace(), 42)
+        episode.update(transcript_status="done", transcript_local_path=str(transcript_path), diarization_ran=False)
+        patch.setattr(podcasts, "get_episode", lambda idx, episode_id: episode)
+        patch.setattr(podcasts, "get_episode_with_feed", lambda idx, episode_id: episode)
+        reused = podcasts.load_completed_episode_transcript(SimpleNamespace(_lock=threading.RLock()), 42, data_root=env.root)
         assert reused["transcript"]["diarization_run_id"] == transcript["diarization_run_id"]
         assert reused["transcript"]["media_depth"] == f.block
     failed = _fixture(env, key="failed-optional-stage", state="failed")
@@ -1582,19 +1586,34 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
         # yt-dlp runs as `yt-dlp` on Windows/Linux and as the bundle's
         # `python -m yt_dlp` on macOS; both are the same downloader here.
         is_ytdlp = command[0] == "yt-dlp" or list(command[1:3]) == ["-m", "yt_dlp"]
-        if is_ytdlp and "--get-title" in command:
-            return "Synthetic Video"
+        if is_ytdlp and "--dump-single-json" in command:
+            return json.dumps({"title": "Synthetic Video", "extractor_key": "Youtube",
+                               "duration": 20, "subtitles": {"en": [{"ext": "srt"}]}})
         if is_ytdlp:
             folder = output / "Synthetic_Video"
             folder.mkdir(parents=True, exist_ok=True)
-            (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
-            (folder / "video.en.srt").write_text("1\n00:00:00,000 --> 00:00:20,000\nA caption.\n", encoding="utf-8")
+            if "--skip-download" in command:
+                template = command[command.index("-o") + 1]
+                Path(template.replace("%(ext)s", "en.srt")).write_text(
+                    "1\n00:00:00,000 --> 00:00:20,000\nA caption.\n", encoding="utf-8")
+            else:
+                (folder / "video.mp4").write_bytes(b"synthetic placeholder; never decoded")
         return SimpleNamespace(returncode=0)
 
+    admitted_hosts = []
+
+    def resolve_host(host):
+        admitted_hosts.append(host)
+        return ["8.8.8.8"]
+
     with env.patch.context() as patch:
-        patch.setattr(yt_extract, "subprocess", SimpleNamespace(run=record_command, check_output=record_command))
+        patch.setattr(subscriptions, "_check_resolved_host", resolve_host)
+        patch.setattr(yt_extract.subprocess, "run", record_command)
+        patch.setattr(yt_extract.subprocess, "check_output", record_command)
         patch.setattr(yt_extract.sys, "argv", ["yt_extract.py", "https://www.youtube.com/watch?v=abcdefghijk", "--out", str(output), "--keep-video"])
         yt_extract.main()
+    assert admitted_hosts == ["www.youtube.com"] * 3
+
     def tool(cmd):
         if cmd[0] == "yt-dlp" or list(cmd[1:3]) == ["-m", "yt_dlp"]:
             return "yt-dlp"
@@ -1603,9 +1622,14 @@ def test_phase6_adapter_fetch_boundaries(sandbox):
     downloads = [cmd for cmd in commands if tool(cmd) == "yt-dlp" and "--write-subs" in cmd]
     assert len(downloads) == 1
     command = downloads[0]
-    assert command[command.index("--sub-lang") + 1] == "en,en-US,en-GB,en-orig"
-    assert not any(flag in command for flag in ("--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
-    assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg"]
+    assert command[command.index("--sub-lang") + 1] == "en"
+    assert "--skip-download" in command and "--write-auto-subs" not in command
+    assert not any(flag in cmd for cmd in commands for flag in (
+        "--all-subs", "--cookies", "--cookies-from-browser", "--username", "--password"))
+    assert [tool(cmd) for cmd in commands] == ["yt-dlp", "yt-dlp", "ffmpeg", "yt-dlp"]
+    assert [cmd[-2:] for cmd in commands if tool(cmd) == "yt-dlp"] == [
+        ["--", "https://www.youtube.com/watch?v=abcdefghijk"]] * 3
+    assert (output / "Synthetic_Video" / "transcript.txt").read_text(encoding="utf-8") == "A caption."
     # X's existing same-author bounded parent traversal is the only supplied
     # status transport. It gains neither watcher nor media acquisition.
     x_requests = []

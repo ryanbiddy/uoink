@@ -341,9 +341,11 @@ function toast(p) {
   return p.els.toast.textContent;
 }
 
+const PLAYLIST_URL = "https://www.youtube.com/playlist?list=PLfixture";
 function fillAddForm(p) {
-  p.els.standingAddUrl.value = SOURCE.canonical_url;
-  p.els.standingAddKind.value = "podcast_rss";
+  // Podcasts use the feed endpoint. Playlists exercise the registry transport.
+  p.els.standingAddUrl.value = PLAYLIST_URL;
+  p.els.standingAddKind.value = "youtube_playlist";
   p.els.standingAddDisplayName.value = "Fixture Feed";
 }
 
@@ -363,7 +365,7 @@ async function groupRefusal() {
     check(p.viaHttp().length === 0, "nothing is re-sent over /tools/", p.viaHttp().map((r) => r.path));
     check(toast(p) === "Could not register source: Source URL is not a supported feed", "the toast names the tool's reason", toast(p));
     check(!toast(p).includes("[object Object]"), "the toast never reads [object Object]", toast(p));
-    check(p.els.standingAddUrl.value === SOURCE.canonical_url, "the URL stays in the box after a refusal", p.els.standingAddUrl.value);
+    check(p.els.standingAddUrl.value === PLAYLIST_URL, "the URL stays in the box after a refusal", p.els.standingAddUrl.value);
     check(p.els.standingAddButton.disabled === false, "the Subscribe button is enabled again", p.els.standingAddButton.disabled);
   });
 
@@ -512,7 +514,7 @@ async function groupTransport() {
     check(p.sent("register_source").length === 2, "a register_source that got no response is retried", p.sent("register_source").map((r) => r.path));
     check(p.viaHttp().filter((r) => r.path === "/tools/register_source").length === 1, "the retry goes over /tools/ once", p.viaHttp().map((r) => r.path));
     check(p.ranTool("register_source").length === 1, "the register tool runs once", p.ranTool("register_source").length);
-    check(toast(p) === "Source subscribed. Capture is off by default; detection watches metadata.", "the retried subscription succeeds", toast(p));
+    check(toast(p) === "Subscribed. Uoink will check for new items. Automatic capture is off.", "the retried subscription succeeds", toast(p));
     check(p.els.standingAddUrl.value === "", "the add form clears after the retried success", p.els.standingAddUrl.value);
   });
 

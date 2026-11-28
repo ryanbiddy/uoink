@@ -212,13 +212,15 @@ def test_dashboard_reader_never_renders_page_html_or_script_links():
         "![only](https://tracker.example.net/p.gif)"]
     html = run_js("(() => %s.map((md) => readerMarkdownHtml(md)))()" % json.dumps(docs))
     allowed = {"div": {"class"}, "p": set(), "ul": set(), "li": set(), "h2": set(), "h3": set(), "h4": set(),
-               "strong": set(), "em": set(), "code": set(),
+               "strong": set(), "em": set(), "code": set(), "pre": set(),
                "a": {"href", "data-source-link", "target", "rel"}}
     for md, out in zip(docs, html):
         parser = _Tags()
         parser.feed(out)
         for tag, attrs in parser.tags:
             assert tag in allowed and set(attrs) <= allowed[tag], (md, out)
+            if tag == "pre":
+                assert "```" in md and "<pre><code>" in out and "</code></pre>" in out, (md, out)
         assert all(re.match(r"https?://", href) for href in parser.hrefs), (md, out)
         assert "<img" not in out, (md, out)  # no remote image is ever loaded from a saved page
 

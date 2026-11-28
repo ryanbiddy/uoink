@@ -688,14 +688,64 @@ def stage_saves_text(data_root: Path, text: str, source=None, filename=None) -> 
     return stage_saves(data_root, source, items, filename=filename)
 
 
+def _require_local_saves_path(path):
+    if str(path).replace("\\", "/").startswith("//"):
+        raise ImportListError("Choose a file on this computer.", "unsupported")
+    if os.name == "nt":
+        import ctypes
+        path = Path(path).absolute()
+        if ctypes.windll.kernel32.GetDriveTypeW(path.anchor) == 4 or ":" in str(path)[len(path.anchor):]:
+            raise ImportListError("Choose a file on this computer.", "unsupported")
+
+
+def _local_saves_parent(parent: Path) -> Path:
+    if os.name == "nt":
+        from uoink_core.storage import _redirected
+        # Asking Windows to resolve a junction first can already contact its
+        # target. Read each substitute name locally before following it.
+        remaining = list(reversed(parent.parts[1:]))
+        current = Path(parent.anchor)
+        links = 0
+        while remaining:
+            name = remaining.pop()
+            if name == "..":
+                current = current.parent
+                continue
+            current /= name
+            if _redirected(current.lstat()):
+                links += 1
+                if links > 40:
+                    raise OSError("Too many linked directories.")
+                target = str(current.readlink())
+                if re.match(r"^\\\\\?\\[a-z]:\\", target, re.I):
+                    target = target[4:]
+                linked = current.parent / target
+                _require_local_saves_path(linked)
+                remaining.extend(reversed(linked.parts[1:]))
+                current = Path(linked.anchor)
+        parent = current
+    parent = parent.resolve()
+    _require_local_saves_path(parent)
+    return parent
+
+
 def stage_saves_file(data_root: Path, path, source=None) -> dict:
-    path = Path(path)
+    from uoink_core.storage import open_regular
+    _require_local_saves_path(path)
+    path = Path(path).absolute()
     if path.suffix.lower() not in (".csv", ".txt"):
         raise ImportListError("Choose a .csv or .txt saves file.", "unsupported")
     try:
-        if path.stat().st_size > SAVES_FILE_MAX_BYTES:
-            raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
-        with path.open("rb") as stream:
+        parent = _local_saves_parent(path.parent)
+        actual = parent / path.name
+        with open_regular(parent, actual, binary=True) as stream:
+            profile = Path(data_root).resolve()
+            if actual.is_relative_to(profile) and any(
+                    part.lower().startswith(("token", "settings", "credential", ".env"))
+                    for part in actual.relative_to(profile).parts):
+                raise ImportListError("Choose a saves export outside Uoink's private files.", "unsupported")
+            if os.fstat(stream.fileno()).st_size > SAVES_FILE_MAX_BYTES:
+                raise ImportListError("Saves files must be 5 MB or smaller.", "too_large")
             raw = stream.read(SAVES_FILE_MAX_BYTES + 1)
     except OSError:
         raise ImportListError("That saves file wasn't found or couldn't be read.", "not_found")
@@ -938,6 +988,8 @@ def fetch_source(spec: dict, *, offset: int, limit: int,
                 "total": int(total) if isinstance(total, (int, float)) else None,
                 "credit": HACKERTUBE_CREDIT}
     if kind == SOURCE_HN:
+        from hn_extractor import wait_for_algolia
+        wait_for_algolia()
         title, items = parse_hn_thread(fetch_json(HN_ALGOLIA_ITEM.format(id=spec["id"])))
         return {"title": title, "items": _slice(items, offset, limit),
                 "total": len(items), "credit": None}

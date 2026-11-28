@@ -32,7 +32,10 @@ import pytest
 import _platform
 
 import index
+import podcasts as podcast_module
+import source_subscriptions
 import uoink_usage
+import yt_extract
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,14 +56,13 @@ def source_tree():
 
 
 @pytest.fixture
-def helper(source_tree, tmp_path, monkeypatch):
+def helper(source_tree, tmp_path, monkeypatch, public_dns):
     def forbidden(*args, **kwargs):
         raise AssertionError("Network access is forbidden")
 
     monkeypatch.setattr(socket.socket, "connect", forbidden)
     monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
     monkeypatch.setattr(socket, "create_connection", forbidden)
-    monkeypatch.setattr(socket, "getaddrinfo", forbidden)
     names = {
         "Handler", "ALLOWED_ORIGINS", "ALLOWED_HOST_NAMES", "PINNED_EXTENSION_ID",
         "MAX_BODY_BYTES", "EXPORTS_DIRNAME", "_allowed_extension_ids",
@@ -104,7 +106,8 @@ def helper(source_tree, tmp_path, monkeypatch):
     idx = Mock()
     idx.import_payload.return_value = {"style_anchors": {"imported": 1}}
     namespace = {
-        "uoink_usage": uoink_usage,
+        "uoink_usage": uoink_usage, "yt_extract": yt_extract,
+        "source_subscriptions": source_subscriptions,
         "_platform": _platform, "sys": sys,
         "__name__": "offline_import_errors", "Path": Path,
         "BaseHTTPRequestHandler": BaseHTTPRequestHandler,
@@ -387,7 +390,7 @@ def test_machine_details_are_sanitized_before_return_and_storage(helper, error):
     row = helper["_get_index"]().upsert_job.call_args.args[0]
     assert json.loads(row["metadata_json"])["error_detail"] == detail
     raw_logs = "\n".join(str(call) for call in helper["_error_detail_log"].mock_calls)
-    assert KEY in raw_logs and "synthetic-password" in raw_logs
+    assert KEY not in raw_logs and "synthetic-password" not in raw_logs
     assert KEY not in str(helper["log"].mock_calls)
 
 
@@ -593,7 +596,8 @@ def test_redaction_happens_before_truncation(helper):
     assert helper["_sanitize_error"](sanitized, max_len=6000) == sanitized
 
 
-def test_raw_detail_logger_writes_only_server_log(source_tree, tmp_path):
+def test_detail_logger_writes_redacted_text_only_to_server_log(source_tree, tmp_path):
+    import server
     # Exercise the real file-handler/logger wiring, never the server bootstrap.
     names = {"_server_log_handler", "_error_detail_log"}
     nodes = [n for n in source_tree.body if
@@ -618,8 +622,10 @@ def test_raw_detail_logger_writes_only_server_log(source_tree, tmp_path):
     exec(compile(ast.Module(body=nodes, type_ignores=[]), "logging-setup", "exec"),
          namespace)
     try:
+        namespace["_server_log_handler"].setFormatter(server._server_log_handler.formatter)
         namespace["_error_detail_log"].error("%s", PRIVATE)
-        assert PRIVATE in path.read_text(encoding="utf-8")
+        saved = path.read_text(encoding="utf-8")
+        assert "tool failed" in saved and KEY not in saved and "synthetic-password" not in saved
         assert stream.getvalue() == ""
         assert logger.propagate is False
     finally:
@@ -720,12 +726,16 @@ class _StopWorker(BaseException):
 
 
 @pytest.fixture
-def podcast_job(helper, tmp_path):
+def podcast_job(helper, tmp_path, recorded_episode):
     """Run the real podcast transcription worker for one in-memory job."""
+    from uoink_core.storage import checked_path, open_regular
+    idx, episode_id = recorded_episode
+    idx.upsert_job = Mock(wraps=idx.upsert_job)
+    audio = podcast_module.episode_media_path(idx, episode_id, tmp_path)
     job_id = "job_podcast"
     helper["_jobs"][job_id] = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
-        "episode_id": 7, "audio_path": str(tmp_path / "episode.mp3"),
+        "episode_id": episode_id, "audio_path": str(audio),
         "model": "base", "title": "Synthetic episode", "publish_to_corpus": True}
     jobs = iter([job_id])
 
@@ -740,14 +750,17 @@ def podcast_job(helper, tmp_path):
         set_current_thread_below_normal=lambda: True,
         normalize_model=lambda model: model or "base",
         transcribe_audio=Mock(return_value={"model": "base", "segments": []}),
-        write_transcript=Mock(return_value=tmp_path / "episode.transcript.json"),
+        write_transcript=Mock(return_value=audio.with_suffix(".transcript.json")),
         update_episode_transcript_state=Mock())
     podcasts = SimpleNamespace(
         EPISODE_STATUS_TRANSCRIBED="transcribed",
+        podcast_storage=podcast_module.podcast_storage,
+        episode_media_path=podcast_module.episode_media_path,
         load_completed_episode_transcript=Mock(return_value=None),
         set_episode_status=Mock(), episode_to_corpus=Mock(return_value={"video_id": "v"}))
     helper.update(
-        contextlib=contextlib, DATA_ROOT=tmp_path, whisper_runner=whisper, podcasts=podcasts,
+        contextlib=contextlib, DATA_ROOT=tmp_path, _get_index=lambda: idx, whisper_runner=whisper, podcasts=podcasts,
+        checked_path=checked_path, open_regular=open_regular,
         RETRANSCRIBE_KIND="retranscribe", asr_worker=__import__("asr_worker"),
         PlaylistJobCancelled=type("PlaylistJobCancelled", (Exception,), {}), _raise_if_cancelled=Mock(),
         _podcast_transcription_queue=SimpleNamespace(get=get, task_done=Mock()),
@@ -790,8 +803,8 @@ def test_podcast_transcription_failure_stores_and_prints_only_sanitized_text(
     # text go only to the file-only logger.
     helper["log"].exception.assert_not_called()
     assert_no_secrets(str(helper["log"].mock_calls))
-    helper["_error_detail_log"].exception.assert_called()
-    assert KEY in str(helper["_error_detail_log"].mock_calls)
+    helper["_error_detail_log"].error.assert_called()
+    assert KEY not in str(helper["_error_detail_log"].mock_calls)
 
 
 def test_deferred_podcast_publish_error_is_sanitized(helper, podcast_job):
@@ -805,7 +818,7 @@ def test_deferred_podcast_publish_error_is_sanitized(helper, podcast_job):
     assert_no_secrets(json.dumps(helper["_get_index"]().upsert_job.call_args.args[0]))
     helper["log"].exception.assert_not_called()
     assert_no_secrets(str(helper["log"].mock_calls))
-    helper["_error_detail_log"].exception.assert_called()
+    helper["_error_detail_log"].error.assert_called()
     helper["_settle_source_capture"].assert_called_once_with(
         "job_podcast", video_id=None, failure_code="publish_failed")
 
@@ -984,7 +997,7 @@ def test_command_credentials_are_removed_before_formatting(helper, monkeypatch,
     assert formatter.called, "Both subprocess errors must format a redacted argument list"
     for call in formatter.call_args_list:
         assert all(secret not in str(arg) for arg in call.args[0])
-    assert "SECRET" in str(helper["_error_detail_log"].mock_calls)
+    assert "SECRET" not in str(helper["_error_detail_log"].mock_calls)
 
 
 @pytest.mark.parametrize("path", [
@@ -1253,9 +1266,9 @@ def test_optional_video_worker_errors_keep_raw_details_off_console(
                    "fixtureSTDERR", "fixtureOS", "--video-password", "--token="):
         assert secret not in visible
     raw = raw_stream.getvalue()
-    assert str(error) in raw
-    if failure.startswith("exit"):
-        assert "fixtureSTDERR" in raw
+    assert raw.strip()
+    for secret in (str(output), "fixture SECRET", "fixtureTOKEN", "fixtureSTDERR", "fixtureOS"):
+        assert secret not in raw
 
 
 @pytest.mark.parametrize("path", ["docs/security.md", "CHANGELOG.md"])

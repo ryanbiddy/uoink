@@ -715,6 +715,24 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
                 if version == PUBLISHED_DAY_MIGRATION:
                     # Parsing every shape of date needs Python, not SQL.
                     _backfill_published_day(conn)
+                if version == 40:
+                    from source_subscriptions import parse_published_ms
+                    conn.create_function("uoink_podcast_date_ms", 1, parse_published_ms,
+                                         deterministic=True)
+                    conn.execute("UPDATE podcast_episodes SET published_at_ms="
+                                 "uoink_podcast_date_ms(published_at) WHERE published_at IS NOT NULL")
+                    # 0039 clears failed legacy timestamps. The subscription poller
+                    # stored its own attempts and successes only on the cursor.
+                    conn.execute("""
+                        UPDATE source_subscriptions SET follow_feed=1
+                        WHERE kind='podcast_rss' AND detection_enabled=1 AND archived=0 AND follow_feed=0
+                          AND EXISTS (
+                            SELECT 1 FROM podcast_feeds f WHERE f.id=legacy_feed_id AND f.enabled=1
+                            AND (f.error_count>0 OR EXISTS (
+                                SELECT 1 FROM source_detection_cursors c
+                                WHERE c.source_id=source_subscriptions.source_id
+                                  AND (c.last_poll_attempt_ms IS NOT NULL OR c.last_poll_success_ms IS NOT NULL))))
+                    """)
                 conn.execute(
                     "INSERT INTO schema_version (version, applied_at) "
                     "VALUES (?, ?)", (version, _now_iso()),
@@ -1112,7 +1130,7 @@ def normalize_entity_name(name: str) -> str:
 
 
 def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
-                      metadata_json: str | None = None, source_url=None) -> str | None:
+                      metadata_json: str | None = None, source_url=None, lead=2) -> str | None:
     """Return a source-aware timestamp link for an entity mention."""
     vid = (video_id or "").strip()
     if source_url is None and metadata_json:
@@ -1121,15 +1139,12 @@ def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
             source_url = metadata.get("url") if isinstance(metadata, dict) else None
         except (TypeError, json.JSONDecodeError):
             pass
-    try:
-        t = max(0, int(float(seconds)))
-    except (TypeError, ValueError):
-        t = 0
+    from moments import citation_link
     if platform and platform != "youtube":
         if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
-            return f"{source_url.split('#', 1)[0]}#t={t}"
+            return citation_link(source_url, seconds, lead=lead)
         return None
-    return f"https://youtube.com/watch?v={vid}&t={t}s"
+    return citation_link(f"https://youtube.com/watch?v={vid}", seconds, youtube=True, lead=lead)
 
 
 # --------------------------------------------------------------------------
@@ -1183,6 +1198,8 @@ class Index:
         conn = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True,
                                check_same_thread=False)
         try:
+            from source_subscriptions import parse_published_ms
+            conn.create_function("uoink_podcast_date_ms", 1, parse_published_ms, deterministic=True)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys=ON")
             conn.execute("SELECT name FROM sqlite_master LIMIT 1").fetchone()
@@ -1724,7 +1741,8 @@ class Index:
         the user's shelf back in them."""
         try:
             from shelf_router import sync_files
-            sync_files(record.get("sidecar_path"), record.get("corpus_path"), shelf, by_hand=True)
+            sync_files(record.get("sidecar_path"), record.get("corpus_path"), shelf,
+                       by_hand=True, root=getattr(self, "corpus_root", None))
         except Exception as e:  # pragma: no cover -- the index already holds the shelf
             import logging
             logging.getLogger("uoink.index").warning("kept shelf not written to files: %s", e)
@@ -2390,6 +2408,10 @@ class Index:
         from uoink_core.search_service import citation_fields
         return [citation_fields({**r, "_snippet": _plain_snippet(r["_snippet"]),
                                  "passage_verified": True, "timing": timing_kind(r)}) for r in rows]
+
+    def get_pins(self, video_id: str) -> list[dict]:
+        import moments
+        return moments.for_item(self, video_id)
 
     def get_clips(self, video_id: str) -> list[dict]:
         """Every clip for one item, in timeline order."""
@@ -3857,17 +3879,17 @@ class Index:
                 "next_step": "retry_publication"})
 
     def begin_media_publication(self, video_id: str, *, folder=None, capture_binding=None,
-                                input_files=None):
+                                input_files=None, root=None):
         """Mint the publication ticket (ownership fence) a caller must carry
         into ``publish_media_snapshot``. See library_media.begin_publication."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
-        with self._lock:
+        with self._lock, _media.publication_storage(root):
             return _media.begin_publication(
                 self._conn, video_id, folder=folder, capture_binding=capture_binding,
                 input_files=input_files)
 
     def publish_media_snapshot(self, video_id: str, *, cues: list[dict], media_block: dict,
-                               artifacts: dict, ticket=None) -> dict:
+                               artifacts: dict, ticket=None, dry_run=False) -> dict:
         """The complete publication operation: one coherent source/citation/
         media/clip snapshot committed under the index lock through
         ``library_media.publish_transcript`` (ownership fence, owned files,
@@ -3877,12 +3899,13 @@ class Index:
         an omitted ticket is refused rather than minted here. Classification
         of omitted versus superseded committed input is the publisher's."""
         import library_media as _media  # noqa: WPS433 -- keeps index importable alone
-        with self._lock:
+        with self._lock, _media.publication_storage(getattr(ticket, "root", None)):
             if self._conn.in_transaction:
                 raise _media.MediaError("library_unavailable", details={"reason": "transaction_active"})
             result = _media.publish_transcript(self._conn, video_id, cues=cues, media_block=media_block,
-                                               artifacts=artifacts, ticket=ticket)
-        self._invalidate_after_publication(video_id)
+                                               artifacts=artifacts, ticket=ticket, dry_run=dry_run)
+        if not dry_run:
+            self._invalidate_after_publication(video_id)
         return result
 
     def refresh_media_bindings(self, video_id: str, *, clock=time.monotonic, deadline=None) -> bool:
@@ -4411,10 +4434,11 @@ class Index:
                 if "passage" in d:
                     d["passage_verified"] = True
             d = citation_fields(d, copy_row=False)
-            # Keep the v1 annotation timestamp and link. Verified coordinates
-            # live only in the additive passage and timestamp_seconds fields.
+            # An annotation without a timed source line keeps its original playback position.
+            start = d.get("timestamp_seconds")
             d["deep_link"] = _entity_deep_link(
-                video_id, d["timestamp"], platform=d["platform"], metadata_json=metadata_json)
+                video_id, d["timestamp"] if start is None else start, platform=d["platform"],
+                metadata_json=metadata_json, lead=0 if start is None else 2)
             out.append(d)
         return out
 

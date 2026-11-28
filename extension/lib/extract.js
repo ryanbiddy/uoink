@@ -132,8 +132,7 @@
   }
 
   // Canonicalize to the standard watch URL the server knows how to handle.
-  // Strips tracking junk (si, pp, feature, ...); preserves t (timestamp) so
-  // future features can use it.
+  // Keep the selected timestamp for the local helper and drop tracking parameters.
   function normalizeYouTubeUrl(rawUrl) {
     const id = extractVideoId(rawUrl);
     if (!id) return null;
@@ -147,6 +146,31 @@
     let normalized = `https://www.youtube.com/watch?v=${id}`;
     if (t) normalized += `&t=${encodeURIComponent(t)}`;
     return normalized;
+  }
+
+  function momentUrl(url, currentTime) {
+    const normalized = normalizeYouTubeUrl(url);
+    if (!normalized || !Number.isFinite(currentTime) || currentTime <= 15) return normalized;
+    const target = new URL(normalized);
+    target.searchParams.set("t", Math.floor(currentTime) + "s");
+    return target.href;
+  }
+
+  async function tabMomentUrl(tabId, url) {
+    if (!Number.isInteger(tabId) || !extractVideoId(url)) return url;
+    try {
+      const result = await chrome.tabs.sendMessage(tabId, { type: "uoinkReadMoment", videoId: extractVideoId(url) });
+      if (result && result.videoId === extractVideoId(url)) return momentUrl(url, result.seconds);
+    } catch { /* Use the timestamp in the link when the tab has no content script. */ }
+    return url;
+  }
+
+  function pinnedMessage(data, message = "") {
+    const n = data && data.pinned_seconds;
+    if (!Number.isInteger(n) || n < 0) return message;
+    const prefix = message || "Saved.";
+    return prefix + (prefix.endsWith(".") ? " " : ". ") +
+      "Pinned " + Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
   }
 
   const TWITTER_HOSTS = new Set(["twitter.com", "www.twitter.com", "mobile.twitter.com", "x.com", "www.x.com"]);
@@ -382,7 +406,11 @@
         console.error("[Uoink] HTTP", res.status, "body:", text);
       }
       try {
-        return withHttpStatus(JSON.parse(text), res);
+        const data = withHttpStatus(JSON.parse(text), res);
+        if (data.reused && Number.isInteger(data.pinned_seconds) && data.video_slug) {
+          try { data.yoink_md = await getCorpusMarkdown(data.video_slug); } catch { /* Pin was saved. */ }
+        }
+        return data;
       } catch {
         console.error("[Uoink] JSON parse error, raw text:", text);
         return withHttpStatus({ ok: false, error: "Server returned a non-JSON response." }, res);
@@ -886,15 +914,6 @@
     return normalizeAnyUrl(url) || String(url || "");
   }
 
-  // Shared "uoinked!" notification builder. Called from both the in-page
-  // YouTube button success path (content.js) and the SW-driven queue path
-  // (background.js) so the first-uoink CTA fires no matter which path the
-  // user takes -- previously only the SW path set the flag, and a normal
-  // YouTube-button click never got the special copy.
-  //
-  // Returns the message string to pass to chrome.notifications.create (each
-  // caller fires it via its own context-appropriate path). Atomically marks
-  // has_completed_first_yoink on the first successful + copied uoink.
   // "After a save" setting (extension-local, chrome.storage.local).
   //   stay    -- save only; the notification offers Copy for Claude / ChatGPT
   //   claude  -- copy, then open claude.ai/new (the pre-3.17 behaviour)
@@ -1013,34 +1032,18 @@
     return data && data.ok && typeof data.corpus_md === "string" ? data.corpus_md : "";
   }
 
-  // mode (optional): the After a save value. "stay" says it was saved and how
-  // to use the library from an AI; any other value (or none) keeps the
-  // clipboard wording. The first-uoink flag is set once the user has been
-  // told, whether or not anything was copied.
-  async function buildUoinkedMessage(data, copied, mode) {
+  // The worker records the first save after Chrome creates the notice.
+  async function buildUoinkedMessage(data, copied, mode, firstTime) {
+    const first = firstTime ?? await isFirstSave();
+    return pinnedMessage(data, saveMessage(data, copied, mode, first));
+  }
+
+  function saveMessage(data, copied, mode, firstTime) {
     const FIRST_UOINK_MSG =
       "Copied to your clipboard. Paste it in Claude or ChatGPT to see what it can do.";
     const FIRST_SAVE_MSG =
       "Saved to your library. Once Uoink is connected, ask Claude or ChatGPT about it.";
-    const stay = mode === "stay";
-    let firstTime = false;
-    try {
-      const stored = await new Promise((r) => {
-        try {
-          chrome.storage.local.get({ has_completed_first_yoink: false }, (i) => r(i));
-        } catch { r({ has_completed_first_yoink: false }); }
-      });
-      firstTime = !stored.has_completed_first_yoink;
-      if (firstTime && (copied || stay)) {
-        await new Promise((r) => {
-          try {
-            chrome.storage.local.set({ has_completed_first_yoink: true }, () => r());
-          } catch { r(); }
-        });
-      }
-    } catch { /* fall through to topic-aware copy */ }
-
-    if (stay) {
+    if (mode === "stay") {
       if (firstTime) return FIRST_SAVE_MSG;
       const rawTopic = data && data.topic && data.topic !== "Uncategorized" ? String(data.topic).trim() : "";
       const topic = rawTopic.length > 40 ? `${rawTopic.slice(0, 39).trimEnd()}…` : rawTopic;
@@ -1151,6 +1154,18 @@
       if (parts.length) query = "?" + parts.join("&");
     }
     return _getJson("/memory/search" + query);
+  }
+
+  function normalizeHnUrl(rawUrl) {
+    try {
+      const url = new URL(rawUrl.includes("://") ? rawUrl : "https://" + rawUrl);
+      const ids = url.searchParams.getAll("id");
+      if (!/^https?:$/.test(url.protocol) || !/^(www\.)?news\.ycombinator\.com$/.test(url.host)
+          || url.username || url.password || !/^\/item\/?$/.test(url.pathname)
+          || ids.length !== 1 || !/^\d{1,20}$/.test(ids[0])) return null;
+      const id = ids[0].replace(/^0+/, "");
+      return id ? `https://news.ycombinator.com/item?id=${id}` : null;
+    } catch { return null; }
   }
 
   function normalizeRedditUrl(rawUrl) {
@@ -1276,6 +1291,9 @@
     reddit_thread: {
       label: "thread", endpoint: "/extract/reddit", action: "reddit", note: "",
     },
+    hn_thread: {
+      label: "thread", endpoint: "/extract/page", action: "page", note: "",
+    },
     podcast_feed: {
       label: "podcast", endpoint: "/podcasts/feeds", action: "podcast",
       note: "Adds the RSS feed and watches new episode metadata. Audio stays off by default.",
@@ -1324,6 +1342,8 @@
     if (tw) return _classifyResult("x_video", tw);
     const rd = normalizeRedditUrl(text);
     if (rd) return _classifyResult("reddit_thread", rd);
+    const hn = normalizeHnUrl(text);
+    if (hn) return _classifyResult("hn_thread", hn);
     if (looksLikeFeedUrl(text)) {
       return _classifyResult("podcast_feed", normalizeAnyUrl(text) || text);
     }
@@ -1471,10 +1491,14 @@
     REQUEST_TIMEOUT_MS,
     extractVideoId,
     normalizeYouTubeUrl,
+    momentUrl,
+    tabMomentUrl,
+    pinnedMessage,
     normalizeTwitterUrl,
     normalizeXArticleUrl,
     isXArticleUrl,
     normalizeRedditUrl,
+    normalizeHnUrl,
     normalizePlaylistUrl,
     normalizeTikTokUrl,
     normalizeInstagramUrl,

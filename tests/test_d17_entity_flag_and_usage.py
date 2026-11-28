@@ -159,14 +159,15 @@ def _fake_run_subprocess(cmd, **kwargs):
         shot = Path(out.replace("%04d", "0001"))
         shot.parent.mkdir(parents=True, exist_ok=True)
         shot.write_bytes(b"\xff\xd8\xff\xe0jpg")
+    elif out and "--skip-download" in parts:
+        Path(out.replace("%(ext)s", "en.srt")).write_text(
+            "1\n00:00:00,000 --> 00:00:02,000\nAda Lovelace wrote it\n\n"
+            "2\n00:00:02,000 --> 00:00:04,000\nabout ai agents\n",
+            encoding="utf-8")
     elif out:
         base_dir = Path(out).parent
         base_dir.mkdir(parents=True, exist_ok=True)
         (base_dir / "video.mp4").write_bytes(b"\x00\x00\x00\x18ftypmp4")
-        (base_dir / "video.en.srt").write_text(
-            "1\n00:00:00,000 --> 00:00:02,000\nAda Lovelace wrote it\n\n"
-            "2\n00:00:02,000 --> 00:00:04,000\nabout ai agents\n",
-            encoding="utf-8")
     return types.SimpleNamespace(returncode=0, stdout="", stderr=b"")
 
 
@@ -224,7 +225,7 @@ def _capture_with(monkeypatch, *, settings: dict) -> tuple[dict, list]:
         tmp.cleanup()
 
 
-def test_saved_key_with_all_flags_off_makes_zero_background_model_calls(monkeypatch):
+def test_saved_key_with_all_flags_off_makes_zero_background_model_calls(monkeypatch, public_dns):
     sidecar, model_calls = _capture_with(monkeypatch, settings={})
     assert model_calls == []
     assert sidecar["entity_extraction_status"] == "skipped"
@@ -232,7 +233,7 @@ def test_saved_key_with_all_flags_off_makes_zero_background_model_calls(monkeypa
     assert sidecar.get("comment_intelligence") is None
 
 
-def test_sidecar_entity_status_matches_gate_when_flag_on(monkeypatch):
+def test_sidecar_entity_status_matches_gate_when_flag_on(monkeypatch, public_dns):
     """Flag on + key: the sidecar says pending and the worker does run
     (its model call is the one the fake refuses, so it lands as failed --
     the point is that it *spawned* and that it went through the gate)."""

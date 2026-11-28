@@ -361,12 +361,12 @@ def test_g1_http_registry_handlers_and_coverage(
         ] == "yt-g1"
         assert youtube_probe.payload["result"]["results"][0][
             "deep_link"
-        ] == youtube_link
+        ] == "https://youtube.com/watch?v=yt-g1&t=10s"
 
         podcast = uoink_mcp_tools.call_tool(
             "search_clips", {"query": "harbor signal"}
         )
-        assert podcast["results"][0]["deep_link"] == podcast_link
+        assert podcast["results"][0]["deep_link"] == "https://show.example/episodes/g1#t=32"
 
         by_slug = uoink_mcp_tools.call_tool(
             "get_evidence_card", {"slug": "youtube-g1"}
@@ -374,9 +374,9 @@ def test_g1_http_registry_handlers_and_coverage(
         by_video_id = uoink_mcp_tools.call_tool(
             "get_evidence_card", {"video_id": "pod-g1"}
         )
-        assert by_slug["clips"][0]["deep_link"] == youtube_link
+        assert by_slug["clips"][0]["deep_link"] == "https://youtube.com/watch?v=yt-g1&t=10s"
         assert by_slug["video_id"] == "yt-g1"
-        assert by_video_id["clips"][0]["deep_link"] == podcast_link
+        assert by_video_id["clips"][0]["deep_link"] == "https://show.example/episodes/g1#t=32"
         assert by_video_id["slug"] == "podcast-g1"
 
         assert index.clip_coverage() == {

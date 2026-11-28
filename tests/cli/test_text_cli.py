@@ -212,6 +212,24 @@ def test_unknown_command_points_at_help(capsys):
     assert "Run 'uoink --help'" in capsys.readouterr().err
 
 
+@pytest.mark.parametrize("options,preview", [([], True), (["--dry-run"], True), (["--apply"], False)])
+@pytest.mark.parametrize("removed", [16, 0])
+def test_repair_captions_defaults_to_preview(monkeypatch, capsys, options, preview, removed):
+    def repair(vid, dry_run):
+        assert vid == "talk0000001" and dry_run is preview
+        return {"ok": True, "dry_run": dry_run, "removed_words": removed, "original_sidecar": "item/original.bak"}
+    monkeypatch.setattr(cli, "backend", lambda: SimpleNamespace(repair_rolling_captions=repair))
+    queued = []
+    monkeypatch.setattr(runtime, "helper_running", lambda server: True)
+    monkeypatch.setattr(cli, "_helper_post", lambda server, path, body, **kwargs:
+                        queued.append((path, body)) or {"ok": True})
+    assert cli.main(["repair-captions", "talk0000001", "--text", *options]) == 0
+    out = capsys.readouterr().out
+    assert out == (f"Found {removed} repeated caption words.\n" if preview else
+                   f"Removed {removed} repeated caption words.\nOriginal transcript saved in item/original.bak\n")
+    assert queued == ([] if preview else [("/search/refresh-item", {"video_id": "talk0000001"})])
+
+
 def test_get_text_prints_full_admitted_item(tmp_path, monkeypatch, capsys):
     import index
     from tests.phase4_fixtures import seed_shelf, seed_yoink_item
@@ -229,4 +247,36 @@ def test_get_text_prints_full_admitted_item(tmp_path, monkeypatch, capsys):
     output = capsys.readouterr().out
     assert all(x in output for x in ("Clouds", vid, "Sky club", "2026-11-01", "Shelf: Field notes", "Weather",
                                      "https://example.test/clouds", "2026-10-02", "Cloud notes", "last word"))
+    db.close()
+
+
+def test_get_text_names_publish_day_and_folder_and_keeps_timestamps(tmp_path, monkeypatch, capsys):
+    """3.18.1: --text get shows where the save lives and when it first aired."""
+    import index
+    from tests.phase4_fixtures import seed_yoink_item
+
+    vid = "talk0000002"
+    body = ("## Transcript\n\n[00:00] the opening line\n\n[01:05] the middle part\n\n"
+            "[1:02:03] the closing words\n")
+    db = index.Index.open(tmp_path / "index.db")
+    seed_yoink_item(db, tmp_path, video_id=vid, slug="rain-talk", title="Rain talk", corpus_text=body,
+                    channel="Sky club", url="https://example.test/rain", topic="Weather",
+                    yoinked_at="2026-11-03")
+    with db.write_transaction() as conn:
+        conn.execute("UPDATE yoinks SET published_day='2026-09-30' WHERE video_id=?", (vid,))
+    row = db.get_yoink(vid)
+    backend = SimpleNamespace(DATA_ROOT=tmp_path, _get_index=lambda: db)
+    monkeypatch.setattr(cli, "backend", lambda: backend)
+    monkeypatch.setattr(runtime.registry, "_backend", backend)
+    assert cli.main(["--text", "get", vid]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert "Source: Sky club" in lines and "Saved: 2026-11-03" in lines and "Shelf: Unshelved" in lines
+    assert "Published: 2026-09-30" in lines
+    assert "Folder: " + str(Path(row["corpus_path"]).parent) in lines
+    for stamp in ("[00:00] the opening line", "[01:05] the middle part", "[1:02:03] the closing words"):
+        assert stamp in lines
+    # JSON output is unchanged by the text view.
+    assert cli.main(["get", vid]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["item_id"] == vid and "Folder" not in json.dumps(payload)
     db.close()

@@ -1,5 +1,4 @@
 """Boundary and evidence-truth checks for the newly exposed saved details."""
-import builtins
 import json
 from pathlib import Path
 import subprocess
@@ -49,14 +48,17 @@ def test_read_bound_is_bytes_when_file_grows(item,monkeypatch):
     path,register,request=item
     big=json.dumps({'title':'\u20ac'*800000},ensure_ascii=False).encode('utf8')
     assert len(big)>server.MAX_SIDECAR_BYTES and len(big.decode('utf8'))<server.MAX_SIDECAR_BYTES
-    original=builtins.open;grown=False
-    def growing_open(file,mode='r',*args,**kwargs):
+    original = server.open_regular
+    grown = False
+
+    def growing_open(root, file, **kwargs):
         nonlocal grown
-        if Path(file)==path and mode in ('r','rb') and not grown:
-            grown=True
-            with original(path,'wb') as out:out.write(big)
-        return original(file,mode,*args,**kwargs)
-    monkeypatch.setattr(builtins,'open',growing_open)
+        if file == path:
+            path.write_bytes(big)
+            grown = True
+        return original(root, file, **kwargs)
+
+    monkeypatch.setattr(server, 'open_regular', growing_open)
     code,data=request()
     assert grown and code==400 and data['ok'] is False
 
@@ -129,3 +131,22 @@ def test_saved_time_aliases_are_preserved(item):
     details=data['details']
     for rows in (details['transcript'],details['segments'],details['diarization']['segments']):
         assert rows[0]['start_seconds']==34 and rows[0]['end_seconds']==46
+
+
+@pytest.mark.parametrize("empty_lists", [False, True], ids=["absent", "empty"])
+def test_diarization_only_reader_clock_links_from_the_stored_start(item, empty_lists):
+    path, _, request = item
+    saved = {"diarization": {"segments": [
+        {"start_seconds": 34.8, "end_seconds": 46, "speaker": "A", "content": "Watch the shuttle."},
+    ]}}
+    if empty_lists:
+        saved.update(transcript=[], segments=[])
+    path.write_text(json.dumps(saved), encoding="utf8")
+    status, data = request()
+    assert status == 200
+    details = data["details"]
+    html = node("process.stdout.write(JSON.stringify(ctx.readerTranscriptHtml({}, "
+                + json.dumps(details) + ")));")
+    assert 'href="https://youtube.com/watch?v=saved-media&amp;t=32s"' in html
+    assert '>0:34</a>' in html and 'Watch the shuttle.' in html
+    assert json.loads(path.read_text(encoding="utf8")) == saved

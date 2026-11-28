@@ -80,7 +80,8 @@ def fixture_server(directory):
 def allow_fixture_origin(guards, origin):
     """The only test seam: admit this exact loopback origin in this process."""
     originals = {name: getattr(guards, name) for name in (
-        "public_http_open", "resolve_public_http_url", "check_public_http_url")}
+        "public_http_open", "resolve_public_http_url", "check_public_http_url",
+        "_parse_http_url") if hasattr(guards, name)}
     authority = urllib.parse.urlsplit(origin).netloc
 
     def is_fixture(url):
@@ -117,9 +118,18 @@ def allow_fixture_origin(guards, origin):
             return url
         return originals["check_public_http_url"](url)
 
+    def parse_http_url(url):
+        # Following and polling a feed parse its URL first, and that refuses
+        # literal loopback hosts before any network check. Admit only the fixture.
+        if is_fixture(url):
+            return urllib.parse.urlparse(url)
+        return originals["_parse_http_url"](url)
+
     guards.public_http_open = public_http_open
     guards.resolve_public_http_url = resolve_public_http_url
     guards.check_public_http_url = check_public_http_url
+    if "_parse_http_url" in originals:
+        guards._parse_http_url = parse_http_url
     try:
         yield
     finally:
@@ -217,9 +227,9 @@ class Smoke:
                                "elapsed": round(time.monotonic() - started, 3)})
 
     def call(self, backend, name, arguments):
-        from uoink_agent_runtime import call_tool
+        from uoink_mcp_tools import call_tool
         self.last_call = {"tool": name, "arguments": arguments, "payload": None}
-        payload = call_tool(name, arguments, backend)
+        payload = call_tool(name, arguments)
         self.last_call["payload"] = payload
         assert isinstance(payload, dict) and payload.get("ok") is True, self.last_call
         return payload
@@ -273,6 +283,8 @@ class Smoke:
                 queued = self.call(server, "transcribe_podcast_episode", {
                     "episode_id": episode_id, "model": "base", "diarize": True, "consent_given": False})
                 job_id = queued["job_id"]
+                # This fixture runs the helper's worker in the test process.
+                server._pickup_waiting_podcast_jobs()
                 assert isinstance(job_id, str) and job_id, queued
             with self.step("get_job_status"):
                 deadline = time.monotonic() + 300
@@ -285,9 +297,8 @@ class Smoke:
                     assert time.monotonic() < deadline, {"error": "Transcription timed out", **status}
                     time.sleep(0.25)
                 # The terminal state is written just before the worker releases
-                # its capture lock. Drain as the CLI does before publishing.
-                from uoink_cli import finish_call_work
-                finish_call_work(server, "transcribe_podcast_episode", queued, set(threading.enumerate()))
+                # its capture lock. Wait here before publishing the result.
+                server._podcast_transcription_queue.join()
                 transcript_path = Path(job["result"]["transcript_path"])
                 assert transcript_path.is_relative_to(profile), job
                 self.transcript = json.loads(transcript_path.read_text(encoding="utf-8"))

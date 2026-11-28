@@ -26,6 +26,7 @@ import p4_inspect_evidence as inspect
 import p4_observe_actions as observe
 import p4_prepare_client as client_cfg
 import p4_prepare_fixture as prepare
+from tests.receipt_fixtures import prepare_receipt
 import p4_stdio_check as stdio_check
 
 
@@ -431,7 +432,7 @@ def test_prepare_fixture_seeds_synthetic_items_and_keeps_apply_false(tmp_path: P
         instrument_only=True,
         original_local=Path(os.environ.get("P4_ORIGINAL_LOCALAPPDATA") or os.environ["LOCALAPPDATA"]),
     )
-    receipt_out = prepare.prepare(binding)
+    receipt_out = prepare_receipt(binding)
     assert receipt_out["apply_enabled"] is False
     assert receipt_out["isolation"]["installed_credit"] is False
     assert receipt_out["package_manifest"]["invented_hash"] is False
@@ -486,7 +487,7 @@ def test_stdio_synthetic_inventory_packets_reconnect_and_bounds(tmp_path: Path):
         instrument_only=True,
         original_local=Path(os.environ.get("P4_ORIGINAL_LOCALAPPDATA") or os.environ["LOCALAPPDATA"]),
     )
-    prepare.prepare(binding)
+    prepare_receipt(binding)
     env = common.isolation_env(binding, extra={"route_label": "synthetic-instrument"})
     expected = json.loads((profile / "expected.json").read_text(encoding="utf-8"))
     result = stdio_check.run_synthetic(binding, profile, env, expected)

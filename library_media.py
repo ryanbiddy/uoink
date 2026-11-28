@@ -113,13 +113,16 @@ import sqlite3
 import tempfile
 import time
 import unicodedata
-from contextlib import suppress
+from contextlib import ExitStack, contextmanager, suppress
+from contextvars import ContextVar
+from uoink_core.storage import atomic_output, checked_path, open_regular, read_checked_bytes, unlink_regular
 from pathlib import Path
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlsplit
 
 import clips as _clips
 import library_cards as _cards
 import library_resources as _resources
+from moments import citation_link, cited_url
 
 CONTRACT_VERSION = "phase6-v1"
 SCHEMA_MIGRATION = "0030_media_depth"
@@ -143,7 +146,7 @@ PHASE6_TRANSCRIPT_KEYS = ("diarization_run", "diarization_run_id", "media_depth"
 # Keys this publisher replaces on the sidecar. Every other top-level member
 # belongs to another owner or to the carrier identity and is snapshotted on
 # the ticket so an intervening edit can be merged instead of clobbered.
-SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript"})
+SIDECAR_PUBLICATION_KEYS = frozenset({"media_depth", "transcript", "held_transcript_lines"})
 
 CHAPTER_STATES = ("present", "absent", "invalid", "unsupported")
 SPEAKER_STATES = ("present", "partial", "absent", "invalid", "unsupported")
@@ -828,20 +831,17 @@ def _escape_markdown(value, limit: int = MAX_TITLE_CODEPOINTS * 2) -> str:
     return "".join(out)
 
 
-def _seek_link(playback: dict | None, video_id: str, start) -> tuple[str | None, int | None]:
+def _seek_link(playback: dict | None, video_id: str, start, *, lead=2) -> tuple[str | None, int | None]:
     """Seek link and player command from validated playback metadata only."""
     if not playback or start is None or not _is_number(start):
         return None, None
-    seconds = math.floor(start)
+    seconds = max(0, math.floor(start) - lead)
     url = playback.get("seek_url")
     kind = playback.get("seek_kind")
     if kind == "youtube" and _resources.safe_url(url) == url and _youtube_video_id(url) == video_id:
-        parts = urlsplit(url)
-        query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if k not in ("v", "t")]
-        query = [("v", video_id)] + query + [("t", f"{seconds}s")]
-        return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), "")), seconds
+        return citation_link(url, start, youtube=True, lead=lead), seconds
     if kind == "media_fragment" and _resources.safe_url(url) == url:
-        return f"{url.split('#', 1)[0]}#t={seconds}", seconds
+        return citation_link(url, start, lead=lead), seconds
     return None, None
 
 
@@ -850,7 +850,7 @@ def _span_text(start, end, link: str | None) -> str:
     return f"[{span}]({link})" if link else span
 
 
-def render_markdown(item: dict, cues: list[dict], *, chapters, annotations) -> str:
+def render_markdown(item: dict, cues: list[dict], *, chapters, annotations, stored_links=False) -> str:
     """Render the Phase 6 media sections: a ``## Chapters`` list and a
     ``## Transcript`` with every raw cue exactly once. Labels, titles and
     provenance are escaped data outside the quoted text; no revision hash is
@@ -868,7 +868,7 @@ def render_markdown(item: dict, cues: list[dict], *, chapters, annotations) -> s
     lines: list[str] = ["## Chapters", ""]
     if chapters:
         for chapter in chapters:
-            link, _ = _seek_link(playback, video_id, chapter["start"])
+            link, _ = _seek_link(playback, video_id, chapter["start"], lead=0)
             lines.append(f"- {_span_text(chapter['start'], chapter['end'], link)}: "
                          f"{_escape_markdown(chapter['title'])}")
     else:
@@ -883,7 +883,10 @@ def render_markdown(item: dict, cues: list[dict], *, chapters, annotations) -> s
     run_by_id = {run["run_id"]: run for run in block["runs"]} if block else {}
     annotated = block["cues"] if block else None
     for index, cue in enumerate(cues):
-        link = _resources.safe_url(cue.get("source_deep_link"))
+        link = cue.get("source_deep_link")
+        if not stored_links:
+            link = cited_url(link, cue.get("timestamp_start"))
+        link = _resources.safe_url(link)
         heading = "### " + _span_text(cue.get("timestamp_start"), cue.get("timestamp_end"), link)
         annotation = annotated[index] if annotated is not None else None
         if annotation is not None and annotation["speaker"] is not None:
@@ -917,6 +920,19 @@ def _pairs_hook(pairs):
     return out
 
 
+def capture_markdown_3180(plan, transcript):
+    """3.18.0 printed the stored link verbatim and generated missing links at the cue start."""
+    cues = []
+    rows = (row for row in transcript if isinstance(row, dict))
+    for cue, row in zip(plan["cues"], rows, strict=True):
+        link = row.get("source_deep_link") if "source_deep_link" in row else cited_url(
+            cue.get("source_deep_link"), cue.get("timestamp_start"), lead=0)
+        cues.append(dict(cue, source_deep_link=link))
+    block = plan["block"]
+    return render_markdown({"video_id": block["video_id"]}, cues, chapters=block["chapters"],
+                           annotations=block, stored_links=True)
+
+
 def _parse_json_object(raw: bytes, what: str) -> dict:
     try:
         value = json.loads(raw.decode("utf-8"), object_pairs_hook=_pairs_hook)
@@ -933,8 +949,33 @@ def _json_object_column(raw, what: str) -> dict:
     return _parse_json_object(raw.encode("utf-8"), what)
 
 
+# Nested ledger, dependency and artifact reads share the root on the owner's ticket.
+_publication_root = ContextVar("media_publication_root", default=None)
+
+
+@contextmanager
+def publication_storage(root):
+    token = _publication_root.set(root)
+    try:
+        yield
+    finally:
+        _publication_root.reset(token)
+
+
+def _publication_path(path):
+    path = Path(path)
+    root = _publication_root.get()
+    if root is None:
+        return path.resolve()
+    checked = checked_path(root, path)
+    return Path(root).resolve() / checked.relative_to(Path(root).absolute())
+
+
 def _read_bytes(path: Path, *, required: bool) -> bytes | None:
     try:
+        root = _publication_root.get()
+        if root is not None:
+            return read_checked_bytes(root, path)
         return Path(path).read_bytes()
     except FileNotFoundError:
         if required:
@@ -1101,7 +1142,8 @@ def _read_artifact_bytes(path: Path, *, limit: int | None = None) -> bytes:
     admitted; a longer file is invalid, a missing one ``library_unavailable``."""
     limit = MAX_ARTIFACT_BYTES if limit is None else limit
     try:
-        with open(path, "rb") as handle:
+        root = _publication_root.get()
+        with (open_regular(root, path, binary=True) if root is not None else open(path, "rb")) as handle:
             data = handle.read(limit + 1)
     except FileNotFoundError:
         raise MediaError("library_unavailable", details={"reason": "artifact_missing"}) from None
@@ -1503,13 +1545,7 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
     if entries and not explicit and any(a or b for a, b in flags):
         raise _invalid("sidecar_link_fields_mixed")
 
-    def seconds(value):
-        try:
-            return max(0, int(float(value)))
-        except (TypeError, ValueError):
-            return 0
-
-    def rows(mode: str, coerce: bool) -> list[dict]:
+    def rows(mode: str, coerce: bool, lead=2) -> list[dict]:
         out = []
         for index, entry in enumerate(entries):
             start, end = entry.get("start"), entry.get("end")
@@ -1522,10 +1558,10 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
                 source_url, deep = url, url
             elif mode == "fragment":
                 source_url = url
-                deep = f"{url.split('#', 1)[0]}#t={seconds(start)}" if url else None
+                deep = citation_link(url, start, lead=lead) if url else None
             else:
                 source_url = url or f"https://youtube.com/watch?v={video_id}"
-                deep = f"https://youtube.com/watch?v={video_id}&t={seconds(start)}s"
+                deep = citation_link(f"https://youtube.com/watch?v={video_id}", start, youtube=True, lead=lead)
             youtube_link = entry.get("youtube_deep_link") if "youtube_deep_link" in entry else (deep or "")
             out.append({"kind": "transcript_chunk", "seq": index, "timestamp_start": start,
                         "timestamp_end": end, "text": entry.get("text"), "file_path": None,
@@ -1540,8 +1576,9 @@ def _cues_from_sidecar(sidecar: dict, block: dict | None, item: dict) -> list[di
     else:
         chosen = None
         for mode in modes:
-            for coerce in (False, True):
-                candidate = rows(mode, coerce)
+            # Pre-3.18.1 manifests bind the exact start-time URL in their hash.
+            for coerce, lead in ((False, 2), (True, 2), (False, 0), (True, 0)):
+                candidate = rows(mode, coerce, lead)
                 if cue_revision(video_id, [cue_core(c) for c in candidate]) == block["cue_revision"]:
                     chosen = candidate
                     break
@@ -1629,6 +1666,13 @@ def project_clips_for_video(conn: sqlite3.Connection, video_id: str) -> int:
 
 
 def _atomic_replace(path: Path, data: bytes) -> None:
+    root = _publication_root.get()
+    if root is not None:
+        with atomic_output(path, root=root) as target:
+            target.write(data)
+            target.flush()
+            os.fsync(target.fileno())
+        return
     path.parent.mkdir(parents=True, exist_ok=True)
     handle = tempfile.NamedTemporaryFile(mode="wb", dir=path.parent, prefix="." + path.name + ".",
                                          suffix=".tmp", delete=False)
@@ -1778,12 +1822,13 @@ class PublicationTicket:
     mint a replacement ticket or adopt a changed dependency."""
 
     __slots__ = ("video_id", "base_generation", "base_media_revision", "sidecar_dependencies",
-                 "capture_binding", "sidecar_path", "input_bindings")
+                 "capture_binding", "sidecar_path", "input_bindings", "root")
 
     def __init__(self, video_id: str, base_generation: int, base_media_revision: str | None,
                  sidecar_dependencies: dict | None = None, *, capture_binding=None,
                  sidecar_path=None, input_bindings=None):
         self.video_id = video_id
+        self.root = _publication_root.get()
         self.base_generation = base_generation
         self.base_media_revision = base_media_revision
         self.sidecar_dependencies = copy.deepcopy(sidecar_dependencies or {})
@@ -1935,6 +1980,7 @@ def _sidecar_entry_binding(entry: dict) -> tuple:
         entry.get("start"),
         entry.get("end"),
         entry.get("text"),
+        entry.get("review_restored") is True,
         "source_url" in entry,
         entry.get("source_url") if "source_url" in entry else None,
         "source_deep_link" in entry,
@@ -1979,6 +2025,7 @@ def capture_sidecar_inputs(sidecar: dict) -> tuple:
         sidecar.get("transcript_source"),
         entries,
         chapters,
+        _binding_json(sidecar.get("held_transcript_lines") or []),
     )
 
 
@@ -2027,7 +2074,7 @@ def _freeze_capture_state(sidecar_path):
     if sidecar_path is None:
         return None, None
     path = Path(sidecar_path)
-    bound = str(path.resolve())
+    bound = str(_publication_path(path))
     raw = _read_bytes(path, required=False)
     if raw is None:
         return None, bound
@@ -2048,14 +2095,15 @@ def _freeze_input_files(files) -> tuple:
         raise _request("input_files_type")
     frozen = []
     for raw_path, data in files.items():
-        if not isinstance(raw_path, (str, Path)) or not isinstance(data, (bytes, bytearray)):
+        if (not isinstance(raw_path, (str, Path))
+                or (data is not None and not isinstance(data, (bytes, bytearray)))):
             raise _request("input_file_bytes")
-        frozen.append((str(Path(raw_path).resolve()), bytes(data)))
+        frozen.append((str(_publication_path(raw_path)), bytes(data) if data is not None else None))
     return tuple(frozen)
 
 
 def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
-                                     disk_raw=_REREAD_SIDECAR) -> None:
+                                     disk_raw=_REREAD_SIDECAR, written=None) -> None:
     """Refuse changed, removed, or conflicting consumed inputs inside publication.
 
     Disk may still match the frozen mint binding (intentional replacement of
@@ -2063,8 +2111,8 @@ def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
     after that carrier was already replaced). ``published_binding`` is the
     pre-merge artifact binding; non-owned disk keys must not be adopted into
     it. Any other consumed-input state is a conflict: do not replace the
-    current sidecar or adopt the new dependency. Extra bound input files
-    must still be the exact bytes consumed at mint.
+    current sidecar or adopt the new dependency. Extra bound files must
+    still contain the consumed bytes, or the bytes we just published.
     """
     if disk_raw is _REREAD_SIDECAR:
         disk_raw, owned = _sidecar_from_disk(Path(sidecar_path))
@@ -2089,7 +2137,7 @@ def require_bound_publication_inputs(ticket, sidecar_path, published_binding,
         if Path(sidecar_path).resolve() != Path(ticket.sidecar_path).resolve():
             raise _stale("publication_input_changed")
     for path, expected in ticket.input_bindings:
-        require_unchanged_input_bytes(path, expected)
+        require_unchanged_input_bytes(path, (written or {}).get(Path(path), expected))
 
 
 def _plan_cue_binding(cue: dict) -> tuple:
@@ -2143,7 +2191,7 @@ def capture_plan_matches(plan: dict, owned_plan: dict) -> bool:
     return capture_plan_inputs(plan) == capture_plan_inputs(owned_plan)
 
 
-def require_unchanged_input_bytes(path, expected: bytes) -> None:
+def require_unchanged_input_bytes(path, expected: bytes | None) -> None:
     """Refuse when a mutable publication input file no longer matches the
     exact bytes consumed under the ownership fence."""
     raw = _read_bytes(Path(path), required=False)
@@ -2188,7 +2236,8 @@ def _owned_artifact_digest(path: Path) -> str | None:
     if path.suffix != ".json" or not _is_hash(digest):
         return None
     try:
-        with open(path, "rb") as handle:
+        root = _publication_root.get()
+        with (open_regular(root, path, binary=True) if root is not None else open(path, "rb")) as handle:
             data = handle.read(MAX_ARTIFACT_BYTES + 1)
     except OSError:
         return None
@@ -2229,7 +2278,7 @@ def prune_artifacts(conn, item: dict) -> dict:
     committed publication. Never called by a read; a failed unlink leaves
     ``cleanup_pending`` for the next settlement or explicit call."""
     folder = _item_folder(item)
-    inputs = folder / MEDIA_INPUTS_DIR
+    inputs = _publication_path(folder / MEDIA_INPUTS_DIR)
     if not inputs.is_dir():
         return {"pruned": 0, "retained": 0, "cleanup_pending": False}
     try:
@@ -2251,7 +2300,11 @@ def prune_artifacts(conn, item: dict) -> dict:
             kept += 1
             continue
         try:
-            path.unlink()
+            root = _publication_root.get()
+            if root is not None:
+                unlink_regular(root, path)
+            else:
+                path.unlink()
             pruned += 1
         except OSError:
             pending = True
@@ -2281,7 +2334,7 @@ def purge_artifacts(folder) -> int:
     return removed
 
 
-def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, ticket=None) -> dict:
+def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, ticket=None, dry_run=False) -> dict:
     """Publish one coherent snapshot: validated inputs, the ownership fence
     rechecked under ``BEGIN IMMEDIATE`` before any file is touched, the
     ledger claim written first, owned files replaced atomically with the
@@ -2303,18 +2356,27 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         _bind_cues(block, cues, stale_code="invalid_source_data")
         if not isinstance(artifacts, dict):
             raise _request("artifacts_type")
-        folder = _item_folder(item).resolve()
-        sidecar_path = Path(item["sidecar_path"]).resolve()
-        corpus_path = Path(item["corpus_path"]).resolve()
+        folder = _publication_path(_item_folder(item))
+        sidecar_path = _publication_path(item["sidecar_path"])
+        corpus_path = _publication_path(item["corpus_path"])
+        if sidecar_path.parent != folder:
+            raise _request("artifact_outside_item")
+        ledger_path = _publication_path(_ledger_path(folder))
         owned: dict[Path, bytes] = {}
         for raw_path, data in artifacts.items():
             if not isinstance(raw_path, (str, Path)) or not isinstance(data, (bytes, bytearray)):
                 raise _request("artifact_bytes")
-            path = Path(raw_path).resolve()
+            path = _publication_path(raw_path)
             if not path.is_relative_to(folder):
                 raise _request("artifact_outside_item")
-            if path == _ledger_path(folder).resolve():
+            if path == ledger_path:
                 raise _request("ledger_not_publishable")
+            if ticket is not None and ticket.root is not None:
+                try:
+                    with open_regular(ticket.root, path, binary=True):
+                        pass  # Refuse an unsafe existing destination before publishing the ledger.
+                except FileNotFoundError:
+                    pass
             owned[path] = bytes(data)
         sidecar_bytes = owned.get(sidecar_path)
         if sidecar_bytes is None:
@@ -2366,7 +2428,8 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         if disk_corpus is not None and disk_corpus != corpus_bytes:
             recorded = (current_block.get("provenance") or {}).get("corpus_revision") \
                 if current_block is not None and isinstance(current_block.get("provenance"), dict) else None
-            if recorded != _sha256(disk_corpus):
+            expected = dict(ticket.input_bindings).get(str(corpus_path)) if ticket else None
+            if recorded != _sha256(disk_corpus) and expected != disk_corpus:
                 raise _stale("corpus_edited")
         generation, current, ledger = _publication_state(conn, video_id, folder)
         history = list(ledger["history"]) if ledger is not None else []
@@ -2406,6 +2469,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         # files are rechecked here under the lock before any publication
         # write. A caller check before this operation is not this lock.
         require_bound_publication_inputs(ticket, sidecar_path, published_binding)
+        if dry_run:
+            conn.rollback()
+            return {"ok": True}
 
         # Files: the ledger claim first, then inputs, corpus, other owned
         # artifacts and the complete sidecar last.
@@ -2419,9 +2485,16 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         ordered = ([p for p in owned if p.parent.name == MEDIA_INPUTS_DIR]
                    + ([corpus_path] if corpus_path in owned else [])
                    + [p for p in owned if p.parent.name != MEDIA_INPUTS_DIR and p not in (corpus_path, sidecar_path)])
+        bound_files = {Path(p): data for p, data in ticket.input_bindings}
+        # An original promised at an absent backup path precedes every replacement.
+        ordered.sort(key=lambda p: 0 if p in bound_files and bound_files[p] is None else 1)
+        written = {}
         for path in ordered:
             data = owned[path]
             existing = _read_bytes(path, required=False)
+            if path in bound_files and existing != bound_files[path]:
+                raise _stale("publication_input_changed")
+            written[path] = data
             if existing == data:
                 continue
             _atomic_replace(path, data)
@@ -2434,7 +2507,7 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
         sidecar_data = owned[sidecar_path]
         existing_sidecar = _read_bytes(sidecar_path, required=False)
         require_bound_publication_inputs(
-            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar)
+            ticket, sidecar_path, published_binding, disk_raw=existing_sidecar, written=written)
         if existing_sidecar != sidecar_data:
             _atomic_replace(sidecar_path, sidecar_data)
 
@@ -2448,6 +2521,9 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
                 "INSERT INTO yoinks_fts(video_id, slug, channel, title, topic, hook_type, content) "
                 "SELECT video_id, slug, channel, title, topic, hook_type, ? FROM yoinks WHERE video_id=?",
                 (owned[corpus_path].decode("utf-8"), video_id))
+            if isinstance(sidecar.get("health"), dict):
+                conn.execute("UPDATE yoinks SET health_score_json=? WHERE video_id=?",
+                             (_json(sidecar["health"]), video_id))
             if sidecar.get("transcript_source"):
                 metadata = _metadata(item)
                 metadata["transcript_source"] = sidecar["transcript_source"]
@@ -2600,7 +2676,8 @@ def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], a
                      corpus_revision: str, playback: dict, transcript_kind: str = "captions",
                      transcript_provider: str = "youtube_captions", language: str | None = None,
                      chapter_rows: list[dict] | None = None, chapter_provider: str = "youtube_metadata",
-                     recorded_at: str | None = None, item: dict | None = None) -> tuple[dict, str]:
+                     recorded_at: str | None = None, item: dict | None = None,
+                     retain_empty_artifact: bool = False) -> tuple[dict, str]:
     """Build the sealed block for a capture whose caption cues and source
     chapter list are already held in one archived JSON artifact
     (``artifact_bytes``: the capture record whose ``chapters`` member is the
@@ -2646,7 +2723,7 @@ def capture_snapshot(*, video_id: str, source_revision: str, cues: list[dict], a
         "provenance": {
             "chapter_source": chapter_source,
             "transcript_source": {"kind": transcript_kind if cores else "none",
-                                  "artifact_sha256": digest if cores else None,
+                                  "artifact_sha256": digest if cores or retain_empty_artifact else None,
                                   "provider": transcript_provider if cores else None,
                                   "model": None, "language": language if cores else None},
             "active_diarization_run_id": None,
@@ -2833,7 +2910,7 @@ def _export_range(snap: _Snapshot, request: dict, check) -> dict:
     citation = {
         "evidence_kind": "transcript_range", "timing": "source_cues", "start": start, "end": end,
         "verbatim_text": verbatim, "text_basis": "stored_cues", "separator": "\n",
-        "source_deep_link": _resources.safe_url(first.get("source_deep_link")),
+        "source_deep_link": _resources.safe_url(cited_url(first.get("source_deep_link"), start)),
         "seek_link": seek_link, "player_seek_seconds": seek_seconds, "truncated": False,
     }
     return {"citation": citation, "units": units, "chapters": _chapter_objects(block, start, end),
@@ -2897,7 +2974,7 @@ def _export_excerpt(snap: _Snapshot, request: dict, check) -> dict:
     citation = {
         "evidence_kind": "timed_clip", "timing": "source_cues", "start": clip["start"], "end": clip["end"],
         "verbatim_text": text, "text_basis": "clip_projection", "separator": None,
-        "source_deep_link": link, "seek_link": seek_link, "player_seek_seconds": seek_seconds,
+        "source_deep_link": cited_url(link, clip["start"]), "seek_link": seek_link, "player_seek_seconds": seek_seconds,
         "truncated": False,
     }
     return {"citation": citation, "units": units,
@@ -2973,7 +3050,7 @@ class _ReadTransaction:
         return False
 
 
-def _export(conn, request: dict, *, clock, deadline: float) -> dict:
+def _export(conn, request: dict, *, clock, deadline: float, resolve_root=None) -> dict:
     def check():
         if float(clock()) > deadline:
             raise MediaError("deadline_exceeded", details={"deadline_s": _resources.LIMITS["service_deadline_s"]})
@@ -2981,7 +3058,16 @@ def _export(conn, request: dict, *, clock, deadline: float) -> dict:
     if conn is None:
         raise MediaError("library_unavailable", details={"reason": "no_storage"})
     check()
-    with _ReadTransaction(conn, clock, deadline) as tx:
+    def item_root():
+        item = _load_item(conn, request["video_id"])
+        try:
+            return resolve_root(item)
+        except OSError:
+            raise MediaError("library_unavailable", details={"reason": "item_storage"}) from None
+
+    with _ReadTransaction(conn, clock, deadline) as tx, ExitStack() as files:
+        if resolve_root is not None:
+            files.enter_context(publication_storage(item_root()))
         snap = _read_snapshot(conn, request["video_id"])
         check()
         block = snap.block
@@ -2993,6 +3079,8 @@ def _export(conn, request: dict, *, clock, deadline: float) -> dict:
         # The deferred snapshot that built the body cannot see a second WAL
         # connection's commit; refresh so the final recheck can refuse it.
         tx.refresh()
+        if resolve_root is not None and item_root() != _publication_root.get():
+            raise _stale("source_changed")
         _recheck_snapshot(conn, snap)
     item = snap.item
     result = {
@@ -3058,7 +3146,7 @@ class _BoundedIndexLock:
 def _admitted_export(request: dict, *, clock, bind) -> dict:
     """One admission on the shared Phase 4 process guard (no second pool):
     the deadline runs from the admission timestamp through storage binding
-    (``bind() -> (connection, lock | None)``), the bounded lock wait, the
+    (``bind() -> (connection, lock, item root resolver)``), the bounded lock wait, the
     coherent read and the wire checks. A stdio transport scope already
     holding this request's slot is nested: no second admission."""
     scope = _resources.current_transport_scope()
@@ -3068,9 +3156,9 @@ def _admitted_export(request: dict, *, clock, bind) -> dict:
                            message=scope.refusal.message)
         deadline = float(scope.deadline_at)
         try:
-            conn, index_lock = bind()
+            conn, index_lock, resolve_root = bind()
             with _BoundedIndexLock(index_lock, clock, deadline):
-                return _export(conn, request, clock=clock, deadline=deadline)
+                return _export(conn, request, clock=clock, deadline=deadline, resolve_root=resolve_root)
         except MediaError as exc:
             return exc.envelope()
         except _resources.ResourceError as exc:
@@ -3084,9 +3172,9 @@ def _admitted_export(request: dict, *, clock, bind) -> dict:
         return _refuse(exc.code, details=exc.details, message=exc.message)
     deadline = float(admitted) + float(_resources.LIMITS["service_deadline_s"])
     try:
-        conn, index_lock = bind()
+        conn, index_lock, resolve_root = bind()
         with _BoundedIndexLock(index_lock, clock, deadline):
-            return _export(conn, request, clock=clock, deadline=deadline)
+            return _export(conn, request, clock=clock, deadline=deadline, resolve_root=resolve_root)
     except MediaError as exc:
         return exc.envelope()
     except _resources.ResourceError as exc:
@@ -3105,7 +3193,7 @@ def export_cited_range(conn, args: dict, *, clock=None) -> dict:
         request = _validate_export_args(args)
     except MediaError as exc:
         return exc.envelope()
-    return _admitted_export(request, clock=clock or time.monotonic, bind=lambda: (conn, None))
+    return _admitted_export(request, clock=clock or time.monotonic, bind=lambda: (conn, None, None))
 
 
 def export_cited_range_tool(args, backend, *, clock=None) -> dict:
@@ -3133,7 +3221,8 @@ def export_cited_range_tool(args, backend, *, clock=None) -> dict:
         lock = getattr(index, "_lock", None)
         if lock is not None and not (callable(getattr(lock, "acquire", None)) and callable(getattr(lock, "release", None))):
             lock = None
-        return conn, lock
+        resolver = getattr(backend, "_item_storage_root", None)
+        return conn, lock, (lambda item: resolver(item, index)) if resolver is not None else None
 
     return _admitted_export(request, clock=clock or time.monotonic, bind=bind)
 

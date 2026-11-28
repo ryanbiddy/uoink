@@ -424,11 +424,7 @@ def _shape_segments(segments) -> list[dict]:
         entries = reliability._transcript_entries_from_segments([s])
         if not entries:
             continue
-        start, end, text = entries[0]
-        row = {"start": start, "end": end, "text": text}
-        words = getattr(entries[0], "words", None)
-        if words:
-            row["words"] = words
+        row = reliability.segment_dict(entries[0])
         spk = s.get("speaker")
         if spk:
             row["speaker"] = str(spk)
@@ -467,6 +463,7 @@ def _transcribe_audio_plain(audio_path: Path, *, data_root: Path, model_size: st
                             initial_prompt: str | None, cancel_event=None, checkpoint=None, progress=None) -> dict:
     """Transcript-only faster-whisper run on this cache/consent/bundle policy."""
     import _platform
+    import transcript_review
     import uoink_reliability
     _platform.require_media()
     model_path = _prepare_model_snapshot(
@@ -486,9 +483,8 @@ def _transcribe_audio_plain(audio_path: Path, *, data_root: Path, model_size: st
         "language": info.get("language") or language or "en",
         "diarization_ran": False,
         # Word timings ride along when the model gave them (3.18).
-        "segments": [{"start": entry[0], "end": entry[1], "text": entry[2],
-                      **({"words": entry.words} if getattr(entry, "words", None) else {})}
-                     for entry in entries],
+        **transcript_review.reviewed_fields([reliability.segment_dict(e) for e in entries],
+                                            whisper=True, field="segments"),
         "generated_at": _now_iso(),
         "engine": "faster-whisper",
     }
@@ -513,6 +509,7 @@ def transcribe_audio(audio_path: Path, *,
     execution call receives a local snapshot and local_files_only=True;
     this does not qualify the separate VAD loader or artifact integrity."""
     import _platform
+    import transcript_review
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")
@@ -594,9 +591,8 @@ def transcribe_audio(audio_path: Path, *,
             "model": model_size,
             "language": info.get("language") or language or "en",
             "diarization_ran": False,
-            "segments": [{"start": entry[0], "end": entry[1], "text": entry[2],
-                          **({"words": entry.words} if getattr(entry, "words", None) else {})}
-                         for entry in entries],
+            **transcript_review.reviewed_fields([reliability.segment_dict(e) for e in entries],
+                                                whisper=True, duration=duration_seconds, field="segments"),
             "generated_at": _now_iso(),
             "engine": "faster-whisper",
         }
@@ -739,7 +735,8 @@ def transcribe_audio(audio_path: Path, *,
         "language": detected_lang,
         **({"english_fallback": fallback} if fallback else {}),
         "diarization_ran": diarization_succeeded,
-        "segments": _shape_segments(segments),
+        **transcript_review.reviewed_fields(_shape_segments(segments), whisper=True,
+                                            duration=duration_seconds, field="segments"),
         "generated_at": _now_iso(),
     }
     if diarization_run is not None:
@@ -755,7 +752,7 @@ def transcript_output_path(audio_path: Path) -> Path:
     return audio_path.with_suffix(".transcript.json")
 
 
-def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
+def write_transcript(transcript: dict, *, audio_path: Path, root=None) -> Path:
     """Persist the transcript JSON. Phase 6 (phase6-v1): when the transcript
     carries a ``diarization_run`` record, the output artifact digest is
     computed over the transcript *without* its run/provenance members
@@ -768,9 +765,9 @@ def write_transcript(transcript: dict, *, audio_path: Path) -> Path:
         import library_media  # offline validator; no model, no helper import
         run["artifact_sha256"] = hashlib.sha256(
             library_media.transcript_artifact_bytes(transcript)).hexdigest()
-    out.write_text(
-        json.dumps(transcript, indent=2, ensure_ascii=False, allow_nan=False),
-        encoding="utf-8")
+    from uoink_core.storage import atomic_output
+    with atomic_output(out, root=root, encoding="utf-8") as target:
+        json.dump(transcript, target, indent=2, ensure_ascii=False, allow_nan=False)
     return out
 
 

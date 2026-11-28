@@ -1,4 +1,4 @@
-# Permission justifications for 3.18.0
+# Permission justifications for 3.18.1
 
 Paste each paragraph into the matching Privacy practices field. All eight
 API permissions remain because they have live callers. Three unused host

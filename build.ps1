@@ -360,6 +360,7 @@ foreach ($f in @(
     'source_availability.py',
     # 3.18 transcript backfill (Library health); server.py imports it lazily.
     'transcript_backfill.py',
+    'transcript_review.py',
     'library_analysis.py',
     'library_resources.py',
     'library_prompts.py',
@@ -370,8 +371,10 @@ foreach ($f in @(
     'library_mirror.py',
     'library_mirror_vault_io.py',
     'library_media.py',
+    'caption_repair.py',
     'library_faithfulness.py',
     'reddit_extractor.py',
+    'hn_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
     'x_fulltext.py',
@@ -380,6 +383,7 @@ foreach ($f in @(
     'list_imports.py',
     'show_capture.py',
     'timed_cues.py',
+    'moments.py',
     'shelf_router.py',
     'local_embed.py',
     'research.py',
@@ -712,6 +716,7 @@ Copy-Item (Join-Path $RepoRoot 'library_work.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_subscriptions.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_availability.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'transcript_backfill.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'transcript_review.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_analysis.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_resources.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_prompts.py') $StagingDir -Force
@@ -722,6 +727,7 @@ Copy-Item (Join-Path $RepoRoot 'library_remember.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_mirror_vault_io.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_media.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'caption_repair.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_faithfulness.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
@@ -731,6 +737,7 @@ Copy-Item (Join-Path $RepoRoot 'cli\uoink.cmd') (Join-Path $StagingDir 'cli\uoin
 Copy-Item (Join-Path $RepoRoot 'cli\uoink') (Join-Path $StagingDir 'cli\uoink') -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_cli.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_connect.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'agent_config_writer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_agent_runtime.py') $StagingDir -Force
 New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'scripts') | Out-Null
 Copy-Item (Join-Path $RepoRoot 'scripts\install-watchdog.ps1') (Join-Path $StagingDir 'scripts') -Force
@@ -761,6 +768,7 @@ Copy-Item (Join-Path $RepoRoot 'article_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_manifest.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'openapi_bridge.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'reddit_extractor.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'hn_extractor.py') $StagingDir -Force
 # U-15 X text/thread capture. server.py imports x_extractor at module top,
 # so it must ship or the helper crashes with ModuleNotFoundError before
 # binding the port (cf. reddit_extractor.py). Added v3.2.6.
@@ -778,6 +786,7 @@ Copy-Item (Join-Path $RepoRoot 'list_imports.py') $StagingDir -Force
 # Save a whole show and the timed cues read. server.py imports both.
 Copy-Item (Join-Path $RepoRoot 'show_capture.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'timed_cues.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'moments.py') $StagingDir -Force
 # Shelf routing and Tidy Uncategorized. server.py imports shelf_router lazily on every capture.
 Copy-Item (Join-Path $RepoRoot 'shelf_router.py') $StagingDir -Force
 # 3.18: small local text embeddings from the bundled static model (shelving).
@@ -891,7 +900,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py x_fulltext.py x_text_repair.py research.py research_verify.py page_dom_capture.py shelf_router.py local_embed.py uoink_browser.py asr_worker.py asr_models.py
+        server.py index.py moments.py clips.py provenance.py library_cards.py usage_meter.py migrate_install.py uoink_install_isolation.py uoink_usage.py uoink_store.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py article_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py hn_extractor.py x_extractor.py x_article_extractor.py list_imports.py show_capture.py timed_cues.py research_report.py notes.py images.py taste_scoring.py suggestions.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_agent_runtime.py uoink_cli.py uoink_connect.py agent_config_writer.py uoink_reliability.py yoink_mcp.py yt_extract.py caption_repair.py helper\_version.py x_fulltext.py x_text_repair.py research.py research_verify.py page_dom_capture.py shelf_router.py local_embed.py uoink_browser.py asr_worker.py asr_models.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

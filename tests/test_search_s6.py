@@ -150,7 +150,7 @@ def test_mention_stored_timestamp_and_link_are_legacy_fields(dense, verified):
         {"timestamp": 999.0, "context": "w50 w400 YouTube evidence" if verified else "An invented YouTube quote"}]}])
     row = dense.find_mentions("YouTube", 1)[0]
     assert row["timestamp"] == 999.0
-    assert row["deep_link"] == "https://youtube.com/watch?v=source0000&t=999s"
+    assert row["deep_link"] == f"https://youtube.com/watch?v=source0000&t={0 if verified else 999}s"
     assert row["passage_verified"] is verified
     if verified:
         assert row["timestamp_seconds"] == 0
