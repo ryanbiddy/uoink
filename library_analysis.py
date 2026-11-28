@@ -1141,12 +1141,29 @@ def get_library_activity(
             guard.release()
 
 
+def _capabilities_reserve() -> int:
+    """Room for the capabilities block the MCP, HTTP and CLI adapters append
+    after this budget is applied when library mirroring is unavailable (macOS).
+    Measured as the block's own wire cost so a report trimmed to the limit
+    still fits once it is added."""
+    try:
+        import _platform
+        import library_resources
+        if _platform.library_mirror_capability()["available"]:
+            return 0
+        block = {"capabilities": _platform.platform_capabilities()}
+        text = library_resources.render_tool_text(block)
+        return library_resources.wire_bytes({"content": [{"type": "text", "text": text}]})
+    except Exception:
+        return 2048
+
+
 def _calculate_transport_bytes(resp_dict: dict) -> int:
     try:
         import library_resources
         rendered = library_resources.render_tool_text(resp_dict)
         payload = {"content": [{"type": "text", "text": rendered}], "isError": False}
-        return library_resources.wire_bytes(payload) + 256
+        return library_resources.wire_bytes(payload) + 256 + _capabilities_reserve()
     except Exception:
         return len(json.dumps(resp_dict, ensure_ascii=False).encode("utf-8"))
 

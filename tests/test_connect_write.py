@@ -311,6 +311,12 @@ def test_odr_registers_only_an_unpacked_manifest(home, monkeypatch, capsys):
     odr.touch()
     odr.chmod(0o755)
     monkeypatch.setenv("PATH", str(bin_dir))
+    if os.name != "nt":
+        # Python 3.12+ which() applies its win32 PATHEXT rules from the patched
+        # sys.platform but splits PATHEXT on the real os.pathsep (":"), so a
+        # simulated .exe is never found on POSIX. Keep the real access check.
+        monkeypatch.setattr(recipes.shutil, "which",
+                            lambda cmd, *a, **k: cmd if os.access(cmd, os.X_OK) else None)
 
     def run(argv, *, shell, timeout):
         calls.append((argv, shell))

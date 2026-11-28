@@ -41,6 +41,15 @@ def _system_path(path: Path) -> Path:
     return path
 
 
+try:
+    import fcntl as _fcntl
+    # Present on macOS only. Checked once, by capability, so tests that set
+    # sys.platform to model another OS don't switch the real I/O path.
+    _F_GETPATH = getattr(_fcntl, "F_GETPATH", None)
+except ImportError:
+    _F_GETPATH = None
+
+
 class LibraryPathError(OSError):
     """A path does not satisfy the library's ownership or link policy."""
 
@@ -147,8 +156,17 @@ def pinned_parent(root, path, *, create=False):
     with _parent_directory(base, target, create=create) as fd:
         if fd is None:
             yield target.parent
+        elif _F_GETPATH is not None:
+            # macOS /dev/fd entries can't be traversed into, so name-based I/O
+            # through them fails. Ask the kernel where the held directory is
+            # now and only proceed when it is still the checked parent.
+            import fcntl
+            current = Path(os.fsdecode(fcntl.fcntl(fd, _F_GETPATH, bytes(1024)).split(b"\0", 1)[0]))
+            if current != target.parent or not os.path.samestat(current.lstat(), os.fstat(fd)):
+                raise LibraryPathError("The settings folder changed.")
+            yield current
         else:
-            # Both Linux and macOS expose held directory descriptors here.
+            # Linux exposes held directory descriptors as traversable paths here.
             directory = Path("/dev/fd") / str(fd)
             if not os.path.samestat(directory.stat(), os.fstat(fd)):
                 raise LibraryPathError("The settings folder changed.")
