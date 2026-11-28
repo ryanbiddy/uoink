@@ -143,7 +143,12 @@ class _ConfigFile:
             if exc.errno == errno.ELOOP:
                 raise ConfigError(_LINK_MESSAGE, 409) from exc
             raise
-        with os.fdopen(fd, "rb") as stream:
+        try:
+            stream = os.fdopen(fd, "rb")
+        except BaseException:
+            os.close(fd)
+            raise
+        with stream:
             mode = os.fstat(stream.fileno()).st_mode
             if not stat.S_ISREG(mode):
                 raise OSError("Choose a regular file.")
@@ -205,9 +210,12 @@ def _staged_file(path: _ConfigFile, cleanup: ExitStack) -> _ConfigFile:
 
 
 def _check_original(path: _ConfigFile, expected: bytes | Path | str | None, label: str) -> int | None:
-    current = path.link_target() if isinstance(expected, (Path, str)) else None
     mode = None
-    if current is None:
+    if isinstance(expected, (Path, str)):
+        # A saved .bak link that is gone or no longer a link has changed;
+        # never open whatever took its name.
+        current = path.link_target()
+    else:
         current, mode = path.read()
     if current != expected:
         raise ConfigError(f"The {label} settings changed. Review the new settings and try again.", 409)
@@ -222,8 +230,12 @@ def _stage_bytes(path: _ConfigFile, data: bytes, cleanup: ExitStack, *, mode: in
         staged = path.temporary()
         flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
         fd = os.open(staged.path.name, flags, 0o600, dir_fd=path.dir_fd)
-        cleanup.callback(_discard, staged)
-        stream = os.fdopen(fd, "wb")
+        try:
+            cleanup.callback(_discard, staged)
+            stream = os.fdopen(fd, "wb")
+        except BaseException:
+            os.close(fd)
+            raise
     with stream as f:
         f.write(data)
         f.flush()
