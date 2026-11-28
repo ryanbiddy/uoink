@@ -7,7 +7,7 @@ whisperx==3.8.6
 # WhisperX's alignment and speaker models use the same loaders as the installer.
 torchvision==0.23.0
 torchcodec==0.7.0
-transformers==4.57.6
+transformers==5.10.1
 pyannote-audio==4.0.7
 pyannote-core==6.0.1
 pyannote-database==6.1.1

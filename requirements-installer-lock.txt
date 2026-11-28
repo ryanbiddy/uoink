@@ -146,7 +146,7 @@ torchcodec==0.7.0
 torchmetrics==1.9.0
 torchvision==0.23.0
 tqdm==4.70.1
-transformers==4.57.6
+transformers==5.10.1
 truststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c
 typing-inspection==0.4.5
 typing_extensions==4.16.0
