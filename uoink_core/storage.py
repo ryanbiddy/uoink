@@ -162,7 +162,15 @@ def pinned_parent(root, path, *, create=False):
             # now and only proceed when it is still the checked parent.
             import fcntl
             current = Path(os.fsdecode(fcntl.fcntl(fd, _F_GETPATH, bytes(1024)).split(b"\0", 1)[0]))
-            if current != target.parent or not os.path.samestat(current.lstat(), os.fstat(fd)):
+            # Compare identities, not spellings: APFS is usually case-insensitive
+            # and /var, /tmp are aliases of /private/var, /private/tmp.
+            held = os.fstat(fd)
+            try:
+                same = (os.path.samestat(os.lstat(target.parent), held)
+                        and os.path.samestat(current.lstat(), held))
+            except OSError:
+                same = False
+            if not same:
                 raise LibraryPathError("The settings folder changed.")
             yield current
         else:

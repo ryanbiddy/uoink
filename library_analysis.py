@@ -1141,21 +1141,34 @@ def get_library_activity(
             guard.release()
 
 
+_CAPABILITIES_RESERVE: tuple[float, int] | None = None
+_CAPABILITIES_RESERVE_TTL = 300.0
+
+
 def _capabilities_reserve() -> int:
     """Room for the capabilities block the MCP, HTTP and CLI adapters append
     after this budget is applied when library mirroring is unavailable (macOS).
     Measured as the block's own wire cost so a report trimmed to the limit
-    still fits once it is added."""
+    still fits once it is added. Measured once per few minutes, not per
+    trimmed row, so the trimming loop never re-probes the platform."""
+    global _CAPABILITIES_RESERVE
+    cached = _CAPABILITIES_RESERVE
+    now = time.monotonic()
+    if cached is not None and now - cached[0] < _CAPABILITIES_RESERVE_TTL:
+        return cached[1]
     try:
         import _platform
         import library_resources
         if _platform.library_mirror_capability()["available"]:
-            return 0
-        block = {"capabilities": _platform.platform_capabilities()}
-        text = library_resources.render_tool_text(block)
-        return library_resources.wire_bytes({"content": [{"type": "text", "text": text}]})
+            reserve = 0
+        else:
+            block = {"capabilities": _platform.platform_capabilities()}
+            text = library_resources.render_tool_text(block)
+            reserve = library_resources.wire_bytes({"content": [{"type": "text", "text": text}]})
     except Exception:
-        return 2048
+        reserve = 2048
+    _CAPABILITIES_RESERVE = (now, reserve)
+    return reserve
 
 
 def _calculate_transport_bytes(resp_dict: dict) -> int:
