@@ -37,6 +37,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Podcast episodes open in the dashboard reader again. In 3.18.0, opening a saved episode showed no transcript because episodes live in Uoink's data folder, outside the library folder the reader allowed.
+- **Transcribe again** saves the new transcript. In 3.18.0 it finished transcribing, then reported "The new transcript could not be saved (revision_unavailable)" and kept the old one.
+- On a Mac, `uoink connect <client> --write` saves the client's settings. In 3.18.1 builds before this fix it always reported "Couldn't save the settings". On macOS and Linux every settings write, backup and rollback now goes through the folder Uoink checked, so a folder swapped mid-save can't redirect it.
+- On a Mac, the library activity report for an AI client no longer comes back "too large" for a normal library. The Mac capability note added after the size check now has room reserved.
+- A pinned moment's link opens at the pin, two seconds early, instead of at the start of the quoted lines up to 45 seconds before it. **Copy this moment** names the pin's time.
 - On Windows, reopening Uoink from the Start menu or tray brings the dashboard forward and restores it if minimized, instead of opening a second window. Item and tab links keep your unsaved Writing Studio draft. If the dashboard can't come forward, Uoink opens a new window. If the window can't start, the link opens in your browser.
 - Podcast episodes appear in release order, even when a show changes its date format. Episodes without a usable date appear last.
 - Uoink checks the first 50 entries in large podcast feeds. Older followed shows resume their scheduled checks, Sources and Settings show why a check failed, and removed shows disappear from your feed list. A repeat check restores episodes that an earlier check found but failed to save.

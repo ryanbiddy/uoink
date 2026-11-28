@@ -105,7 +105,7 @@ def pending_capture(idx, url):
 
 
 def for_item(idx, video_id):
-    """Overlapping cues within 45 seconds. Quoting begins at the first included line."""
+    """Overlapping cues within 45 seconds. Quoting begins at the first included line; the link opens at the pin."""
     with idx._lock:
         db = idx._conn
         try:
@@ -127,7 +127,10 @@ def for_item(idx, video_id):
                 "WHERE video_id=? AND kind='transcript_chunk' AND timestamp_start<=? "
                 "AND coalesce(timestamp_end,timestamp_start)>=? AND text<>'' ORDER BY timestamp_start,seq",
                 (video_id, second + 45, second - 45))]
+            # The link opens at the pinned moment (2 s early, like every cited
+            # line), not at the start of the quoted window, which can be up to
+            # 45 s before it (per Ryan, 2026-11-27).
             pin.update(lines=lines, transcript_ready=ready, deep_link=citation_link(
-                f"https://youtube.com/watch?v={video_id}", lines[0]["start"] if lines else second,
+                f"https://youtube.com/watch?v={video_id}", second,
                 youtube=True, lead=2 if lines else 0))
     return pins

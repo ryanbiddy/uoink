@@ -11,6 +11,7 @@ import sys
 import pytest
 
 import agent_config_writer as writer
+import fd_paths
 import server
 import uoink_cli as cli
 import uoink_connect as recipes
@@ -191,14 +192,14 @@ def test_restore_first_config_if_second_replace_fails(home, monkeypatch):
     for path in (roaming, package):
         path.parent.mkdir(parents=True)
         path.write_bytes(b'{"theme":"original"}')
-    replace = Path.replace
+    replace = os.replace
 
-    def locked(path, target):
-        if target.resolve() == package.resolve():
+    def locked(path, target, **kwargs):
+        if fd_paths.replace_target(target, kwargs).resolve() == package.resolve():
             raise PermissionError("client has this file open")
-        return replace(path, target)
+        return replace(path, target, **kwargs)
 
-    monkeypatch.setattr(Path, "replace", locked)
+    monkeypatch.setattr(os, "replace", locked)
     assert connect("claude-desktop", "--write", "--yes") == 1
     assert roaming.read_bytes() == package.read_bytes() == b'{"theme":"original"}'
     assert list(roaming.parent.iterdir()) == [roaming]
@@ -311,6 +312,11 @@ def test_odr_registers_only_an_unpacked_manifest(home, monkeypatch, capsys):
     odr.touch()
     odr.chmod(0o755)
     monkeypatch.setenv("PATH", str(bin_dir))
+    if os.name != "nt":
+        # Python 3.12+ which() applies win32 PATHEXT rules from the patched
+        # sys.platform but splits PATHEXT on the real os.pathsep (":"); a
+        # single extension needs no separator, so the real lookup still runs.
+        monkeypatch.setenv("PATHEXT", ".EXE")
 
     def run(argv, *, shell, timeout):
         calls.append((argv, shell))
@@ -582,7 +588,18 @@ def test_cleanup_of_read_only_staging_preserves_backup_error(home, monkeypatch):
         staged.chmod(0o400)
         raise original_error
 
-    monkeypatch.setattr(shutil, "copy2", failed_copy)
+    if os.name == "nt":
+        monkeypatch.setattr(shutil, "copy2", failed_copy)
+    else:
+        fchmod = os.fchmod
+
+        def fail_backup_mode(fd, mode):
+            if os.fstat(fd).st_size == len(b"{}"):
+                fchmod(fd, 0o400)
+                raise original_error
+            fchmod(fd, mode)
+
+        monkeypatch.setattr(os, "fchmod", fail_backup_mode)
     with pytest.raises(writer.ConfigError, match="back up") as error:
         writer.apply_edits([writer.plan_edit(cfg, "Client", "servers", {})], "Client")
     assert error.value.__cause__ is original_error
@@ -610,14 +627,14 @@ def test_existing_backup_link_never_modifies_its_target(home, monkeypatch):
         assert cfg.read_bytes() == b"{}" and edit.backup.read_bytes() == b""
     else:
         with monkeypatch.context() as patch:
-            replace = Path.replace
+            replace = os.replace
 
-            def locked(staged, dest):
-                if dest.resolve() == cfg.resolve():
+            def locked(staged, dest, **kwargs):
+                if fd_paths.replace_target(dest, kwargs).resolve() == cfg.resolve():
                     raise PermissionError("locked")
-                return replace(staged, dest)
+                return replace(staged, dest, **kwargs)
 
-            patch.setattr(Path, "replace", locked)
+            patch.setattr(os, "replace", locked)
             with pytest.raises(writer.ConfigError):
                 writer.apply_edits([edit], "Client")
         assert edit.backup.is_symlink() and edit.backup.readlink() == Path(outside.name)
@@ -652,17 +669,18 @@ def test_rollback_continues_after_one_restore_fails(home, monkeypatch):
         edit.backup.write_bytes(b"earlier backup")
         edits.append(edit)
     first, second, third = edits
-    replace = Path.replace
+    replace = os.replace
     original_error = PermissionError("locked during save")
 
-    def locked(staged, dest):
-        if dest.resolve() == third.path.resolve():
+    def locked(staged, dest, **kwargs):
+        target = fd_paths.replace_target(dest, kwargs)
+        if target.resolve() == third.path.resolve():
             raise original_error
-        if dest.resolve() == second.path.resolve() and dest.read_bytes() == second.replacement:
+        if target.resolve() == second.path.resolve() and target.read_bytes() == second.replacement:
             raise PermissionError("locked during restore")
-        return replace(staged, dest)
+        return replace(staged, dest, **kwargs)
 
-    monkeypatch.setattr(Path, "replace", locked)
+    monkeypatch.setattr(os, "replace", locked)
     with pytest.raises(writer.ConfigError) as error:
         writer.apply_edits(edits, "Client")
     assert first.path.read_bytes() == third.path.read_bytes() == b"{}"
@@ -684,8 +702,42 @@ def test_fsync_failure_stops_before_any_replace(home, monkeypatch):
             raise OSError("sync failed")
 
     monkeypatch.setattr(os, "fsync", fail_second_sync)
-    monkeypatch.setattr(Path, "replace", lambda *a: pytest.fail("replaced before both files synced"))
+    monkeypatch.setattr(os, "replace", lambda *a, **kw: pytest.fail("replaced before both files synced"))
     with pytest.raises(writer.ConfigError):
         writer.apply_edits([edit], "Client")
     assert sorted(synced) == sorted([len(edit.original), len(edit.replacement)])
     assert cfg.read_bytes() == b"{}" and list(home.iterdir()) == [cfg]
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX directory descriptors")
+def test_parent_swap_after_staging_keeps_writes_in_held_folder(home, monkeypatch):
+    cfg = home / "client" / "settings.json"
+    cfg.parent.mkdir()
+    cfg.write_bytes(b"{}")
+    cfg.chmod(0o640)
+    edit = writer.plan_edit(cfg, "Client", "servers", {})
+    previous_backup = b"previous backup"
+    edit.backup.write_bytes(previous_backup)
+    held = home / "held"
+    replace = os.replace
+
+    def move_parent_then_replace(staged, dest, **kwargs):
+        if not held.exists():
+            cfg.parent.rename(held)
+            cfg.parent.mkdir()
+            # Matching contents let an unintended name-based recheck pass.
+            cfg.write_bytes(edit.original)
+            edit.backup.write_bytes(previous_backup)
+        return replace(staged, dest, **kwargs)
+
+    monkeypatch.setattr(os, "replace", move_parent_then_replace)
+    writer.apply_edits([edit], "Client")
+
+    assert cfg.read_bytes() == edit.original
+    assert edit.backup.read_bytes() == previous_backup
+    assert {path.name for path in cfg.parent.iterdir()} == {cfg.name, edit.backup.name}
+    assert {path.name for path in held.iterdir()} == {cfg.name, edit.backup.name}
+    assert (held / cfg.name).read_bytes() == edit.replacement
+    assert (held / edit.backup.name).read_bytes() == edit.original
+    assert (held / cfg.name).stat().st_mode & 0o777 == 0o640
+    assert (held / edit.backup.name).stat().st_mode & 0o777 == 0o640

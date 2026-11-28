@@ -9925,8 +9925,8 @@
       try {
         if (copy) {
           const quote = pin.lines.map(line => line.text).join(" ");
-          const time = pin.lines.length ? pin.lines[0].start : pin.seconds;
-          const citation = `${readerClock(time)} · ${pin.deep_link}`;
+          // The link opens at the pin, so the citation names the pin's time.
+          const citation = `${readerClock(pin.seconds)} · ${pin.deep_link}`;
           await navigator.clipboard.writeText([`Pinned ${readerClock(pin.seconds)}`, quote, citation].filter(Boolean).join("\n"));
           showToast("Moment copied.");
         } else {
