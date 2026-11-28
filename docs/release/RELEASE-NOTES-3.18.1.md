@@ -59,7 +59,7 @@ Your library stays in place. Upgrading from 3.18.0 applies migrations 0040 and 0
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `Uoink-Setup-3.18.1.exe` | 577,842,445 B | `471cac170787dbe22f1eaa9ccf9a5d086be801f72b43eb74ccd95ff334cea822` |
-| `uoink-3.18.1.mcpb` | 124,958 B | `0e964c769d7d7b19dbdadd5b5cb5c797142827684b79b316b3668096e8801eec` |
+| `Uoink-Setup-3.18.1.exe` | 577,852,339 B | `731b9820c8e6730bdc9f1110210e262d1cc0b471daa641633c3fb30ae722cde2` |
+| `uoink-3.18.1.mcpb` | 124,958 B | `a5ec52ffcde62944911715067148f4b7088b80681cf955ab76e82613310ef8f1` |
 | `Uoink-3.18.1-macos-arm64.dmg` | TBD | TBD |
 | `uoink-3.18.1-macos.mcpb` | TBD | TBD |
