@@ -161,13 +161,23 @@ def test_connect_refuses_when_backup_fails(tmp: Path):
     cfg_path.write_text(original, encoding="utf-8")
     spec = _patch_spec(tmp)
     orig_spec = server._agent_client_spec
-    orig_copy = server.shutil.copy2
+    sync = os.fsync
+
+    def fail_backup(*args, **kwargs):
+        raise OSError(f"raw machinery at {tmp / 'private-path'}")
+
+    def fail_backup_sync(fd):
+        if os.fstat(fd).st_size == len(original.encode("utf-8")):
+            fail_backup()
+        sync(fd)
+
+    failure = (patch.object(server.shutil, "copy2", fail_backup) if os.name == "nt"
+               else patch.object(os, "fsync", fail_backup_sync))
     server._agent_client_spec = lambda n: spec if n == "claude-desktop" else None
-    server.shutil.copy2 = lambda *_a, **_k: (_ for _ in ()).throw(
-        OSError(f"raw machinery at {tmp / 'private-path'}"))
     try:
         try:
-            server._connect_ai_client("claude-desktop")
+            with failure:
+                server._connect_ai_client("claude-desktop")
         except ValueError as e:
             message = str(e)
             _assert(getattr(e, "http_status", None) == 500,
@@ -185,7 +195,6 @@ def test_connect_refuses_when_backup_fails(tmp: Path):
         raise AssertionError("backup failure should have raised")
     finally:
         server._agent_client_spec = orig_spec
-        server.shutil.copy2 = orig_copy
 
 
 def test_connect_unknown_client():

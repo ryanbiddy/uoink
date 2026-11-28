@@ -1,6 +1,7 @@
 """Filesystem helpers for checked library reads and atomic publication."""
 from __future__ import annotations
 
+from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 import json
@@ -39,15 +40,6 @@ def _system_path(path: Path) -> Path:
         if alias.is_symlink() and alias.readlink() in (Path("private") / alias.name, Path("/private") / alias.name):
             return Path("/private") / path.relative_to("/")
     return path
-
-
-try:
-    import fcntl as _fcntl
-    # Present on macOS only. Checked once, by capability, so tests that set
-    # sys.platform to model another OS don't switch the real I/O path.
-    _F_GETPATH = getattr(_fcntl, "F_GETPATH", None)
-except ImportError:
-    _F_GETPATH = None
 
 
 class LibraryPathError(OSError):
@@ -109,10 +101,10 @@ def checked_path(root: Path, path: Path) -> Path:
 
 
 @contextmanager
-def _parent_directory(root: Path, path: Path, *, create: bool = False):
+def _parent_directory(root: Path, path: Path, *, create: bool = False, check_leaf: bool = True):
     """Hold each directory against replacement, or use directory-relative I/O."""
     root = Path(root).absolute()
-    checked_path(root, path)
+    checked_path(root, path if check_leaf else path.parent)
     root, path = _system_path(root), _system_path(path)
     if create:
         root.mkdir(parents=True, exist_ok=True)
@@ -150,35 +142,26 @@ def ensure_parent(root, path):
 
 
 @contextmanager
-def pinned_parent(root, path, *, create=False):
-    """Keep a directory stable for a producer which needs to operate by name."""
+def pinned_parent(root, path, *, create=False) -> Iterator[tuple[Path, int | None]]:
+    """Yield the parent path and a POSIX fd, or hold a Windows rename-denying handle."""
     base, target = _rooted_path(root, path)
-    with _parent_directory(base, target, create=create) as fd:
-        if fd is None:
-            yield target.parent
-        elif _F_GETPATH is not None:
-            # macOS /dev/fd entries can't be traversed into, so name-based I/O
-            # through them fails. Ask the kernel where the held directory is
-            # now and only proceed when it is still the checked parent.
-            import fcntl
-            current = Path(os.fsdecode(fcntl.fcntl(fd, _F_GETPATH, bytes(1024)).split(b"\0", 1)[0]))
-            # Compare identities, not spellings: APFS is usually case-insensitive
-            # and /var, /tmp are aliases of /private/var, /private/tmp.
+    with _parent_directory(base, target, create=create, check_leaf=os.name == "nt") as fd:
+        if fd is not None:
             held = os.fstat(fd)
             try:
-                same = (os.path.samestat(os.lstat(target.parent), held)
-                        and os.path.samestat(current.lstat(), held))
-            except OSError:
-                same = False
-            if not same:
+                visible = target.parent.lstat()
+            except OSError as exc:
+                raise LibraryPathError("The settings folder changed.") from exc
+            if not os.path.samestat(visible, held):
                 raise LibraryPathError("The settings folder changed.")
-            yield current
-        else:
-            # Linux exposes held directory descriptors as traversable paths here.
-            directory = Path("/dev/fd") / str(fd)
-            if not os.path.samestat(directory.stat(), os.fstat(fd)):
-                raise LibraryPathError("The settings folder changed.")
-            yield directory
+            try:
+                entry = os.stat(target.name, dir_fd=fd, follow_symlinks=False)
+            except FileNotFoundError:
+                pass
+            else:
+                if _redirected(entry):
+                    raise LibraryPathError("The library path contains a link.")
+        yield target.parent, fd
 
 
 def _check_opened(root, path, fd):

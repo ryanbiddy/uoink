@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+import errno
 import json
 import os
 from pathlib import Path
@@ -10,7 +11,11 @@ import shutil
 import stat
 import sys
 import tempfile
+import uuid
 from uoink_core.storage import checked_path, pinned_parent, read_checked_bytes
+
+
+_LINK_MESSAGE = "The settings file is a symbolic link. Merge the printed recipe into its target."
 
 
 class ConfigError(ValueError):
@@ -86,7 +91,7 @@ def _settings_root(path):
 
 def _read(path: Path, *, root=None) -> bytes | None:
     if path.is_symlink():
-        raise ConfigError("The settings file is a symbolic link. Merge the printed recipe into its target.", 409)
+        raise ConfigError(_LINK_MESSAGE, 409)
     try:
         return read_checked_bytes(root, path) if root is not None else path.read_bytes()
     except FileNotFoundError:
@@ -123,76 +128,158 @@ def plan_edit(path: Path, label: str, section: str, entry: dict) -> ConfigEdit:
     return ConfigEdit(root, path, original, replacement, action)
 
 
-def _discard(staged: Path):
-    try:
-        staged.unlink(missing_ok=True)
-    except PermissionError:
+@dataclass(frozen=True)
+class _ConfigFile:
+    path: Path
+    dir_fd: int | None = field(compare=False)
+
+    def temporary(self) -> _ConfigFile:
+        return _ConfigFile(self.path.with_name(f"{self.path.name}.{uuid.uuid4().hex}"), self.dir_fd)
+
+    def read_posix(self) -> tuple[bytes, int]:
         try:
-            if not staged.is_symlink():
-                staged.chmod(0o600)
-                staged.unlink(missing_ok=True)
-        except OSError:
-            pass
+            fd = os.open(self.path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=self.dir_fd)
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:
+                raise ConfigError(_LINK_MESSAGE, 409) from exc
+            raise
+        with os.fdopen(fd, "rb") as stream:
+            mode = os.fstat(stream.fileno()).st_mode
+            if not stat.S_ISREG(mode):
+                raise OSError("Choose a regular file.")
+            return stream.read(), stat.S_IMODE(mode)
+
+    def read(self) -> tuple[bytes | None, int | None]:
+        if self.dir_fd is None:
+            return _read(self.path), None
+        try:
+            return self.read_posix()
+        except FileNotFoundError:
+            return None, None
+
+    def link_target(self) -> Path | str | None:
+        if self.dir_fd is None:
+            return self.path.readlink() if self.path.is_symlink() else None
+        try:
+            return os.readlink(self.path.name, dir_fd=self.dir_fd)
+        except OSError as exc:
+            if exc.errno not in (errno.ENOENT, errno.EINVAL):
+                raise
+            return None
+
+    def replace(self, destination: _ConfigFile) -> None:
+        if self.dir_fd is None:
+            self.path.replace(destination.path)
+        else:
+            os.replace(self.path.name, destination.path.name,
+                       src_dir_fd=self.dir_fd, dst_dir_fd=destination.dir_fd)
+
+    def unlink(self) -> None:
+        if self.dir_fd is None:
+            self.path.unlink()
+        else:
+            os.unlink(self.path.name, dir_fd=self.dir_fd)
+
+
+def _discard(staged: _ConfigFile):
+    try:
+        staged.unlink()
+    except PermissionError:
+        if staged.dir_fd is None:
+            try:
+                if not staged.path.is_symlink():
+                    staged.path.chmod(0o600)
+                    staged.path.unlink(missing_ok=True)
+            except OSError:
+                pass
     except OSError:
         pass
 
 
-def _staged_file(path: Path, cleanup: ExitStack) -> Path:
+def _staged_file(path: _ConfigFile, cleanup: ExitStack) -> _ConfigFile:
     # A unique sibling makes replace atomic without following an old .tmp or .bak link.
-    with tempfile.NamedTemporaryFile(dir=path.parent, prefix=path.name + ".", delete=False) as f:
-        staged = Path(f.name)
+    with tempfile.NamedTemporaryFile(dir=path.path.parent, prefix=path.path.name + ".", delete=False) as f:
+        staged = _ConfigFile(Path(f.name), None)
     cleanup.callback(_discard, staged)
     return staged
 
 
-def _check_original(path: Path, expected: bytes | Path | None, label: str):
-    current = path.readlink() if isinstance(expected, Path) and path.is_symlink() else _read(path)
+def _check_original(path: _ConfigFile, expected: bytes | Path | str | None, label: str) -> int | None:
+    current = path.link_target() if isinstance(expected, (Path, str)) else None
+    mode = None
+    if current is None:
+        current, mode = path.read()
     if current != expected:
         raise ConfigError(f"The {label} settings changed. Review the new settings and try again.", 409)
+    return mode
 
 
-def _stage_bytes(path: Path, data: bytes, cleanup: ExitStack) -> Path:
-    staged = _staged_file(path, cleanup)
-    with staged.open("wb") as f:
+def _stage_bytes(path: _ConfigFile, data: bytes, cleanup: ExitStack, *, mode: int | None = None) -> _ConfigFile:
+    if path.dir_fd is None:
+        staged = _staged_file(path, cleanup)
+        stream = staged.path.open("wb")
+    else:
+        staged = path.temporary()
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+        fd = os.open(staged.path.name, flags, 0o600, dir_fd=path.dir_fd)
+        cleanup.callback(_discard, staged)
+        stream = os.fdopen(fd, "wb")
+    with stream as f:
         f.write(data)
         f.flush()
+        if mode is not None:
+            os.fchmod(f.fileno(), mode)
         os.fsync(f.fileno())
     return staged
 
 
-def _stage_copy(path: Path, expected: bytes, cleanup: ExitStack, label: str) -> Path:
-    if not path.stat().st_mode & (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH):
+def _check_writable(mode: int, label: str) -> None:
+    if not mode & (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH):
         raise ConfigError(f"The {label} settings or backup file is read-only. Check its permissions.")
-    staged = _staged_file(path, cleanup)
-    # Hold a writable descriptor for fsync even if copy2 copies a read-only attribute.
-    with staged.open("r+b") as f:
-        shutil.copy2(path, staged)
-        os.fsync(f.fileno())
+
+
+def _stage_copy(path: _ConfigFile, expected: bytes, cleanup: ExitStack, label: str) -> _ConfigFile:
+    if path.dir_fd is None:
+        _check_writable(path.path.stat().st_mode, label)
+        staged = _staged_file(path, cleanup)
+        # Hold a writable descriptor for fsync even if copy2 copies a read-only attribute.
+        with staged.path.open("r+b") as f:
+            shutil.copy2(path.path, staged.path)
+            os.fsync(f.fileno())
+    else:
+        data, mode = path.read_posix()
+        _check_writable(mode, label)
+        staged = _stage_bytes(path, data, cleanup, mode=mode)
     _check_original(staged, expected, label)
     return staged
 
 
 @dataclass
 class _PendingWrite:
-    path: Path
-    before: bytes | Path | None
+    path: _ConfigFile
+    before: bytes | Path | str | None
     after: bytes
-    staged: Path
-    restore: Path | None
-    backup: Path | None = None
+    staged: _ConfigFile
+    restore: _ConfigFile | None
+    backup: _ConfigFile | None = None
 
 
-def _previous_backup(backup: Path, cleanup: ExitStack, label: str):
+def _previous_backup(backup: _ConfigFile, cleanup: ExitStack, label: str):
     # The previous writer could replace a .bak symlink. Save the link itself
     # for rollback without ever opening its target.
-    if backup.is_symlink():
-        target = backup.readlink()
-        attributes = getattr(backup.lstat(), "st_file_attributes", 0)
-        restore = _staged_file(backup, cleanup)
-        restore.unlink()
-        restore.symlink_to(target, target_is_directory=bool(attributes & stat.FILE_ATTRIBUTE_DIRECTORY))
+    target = backup.link_target()
+    if target is not None:
+        if backup.dir_fd is None:
+            attributes = getattr(backup.path.lstat(), "st_file_attributes", 0)
+            restore = _staged_file(backup, cleanup)
+            restore.unlink()
+            restore.path.symlink_to(target, target_is_directory=bool(attributes & stat.FILE_ATTRIBUTE_DIRECTORY))
+        else:
+            restore = backup.temporary()
+            os.symlink(target, restore.path.name, dir_fd=backup.dir_fd)
+            cleanup.callback(_discard, restore)
         return target, restore
-    before = _read(backup)
+    before, _ = backup.read()
     return before, None if before is None else _stage_copy(backup, before, cleanup, label)
 
 
@@ -204,24 +291,25 @@ def apply_edits(edits: list[ConfigEdit], label: str) -> None:
         applied = []
         try:
             for edit in edits:
-                directory = cleanup.enter_context(pinned_parent(edit.root, edit.path, create=True))
-                path = directory / edit.path.name
-                _check_original(path, edit.original, label)
-                new = _stage_bytes(path, edit.replacement, cleanup)
+                directory, dir_fd = cleanup.enter_context(pinned_parent(edit.root, edit.path, create=True))
+                path = _ConfigFile(directory / edit.path.name, dir_fd)
+                mode = _check_original(path, edit.original, label)
+                new = _stage_bytes(path, edit.replacement, cleanup, mode=mode)
                 restore = None
+                backup = None
                 if edit.original is not None:
-                    backup = directory / edit.backup.name
+                    backup = _ConfigFile(directory / edit.backup.name, dir_fd)
                     try:
                         original_copy = _stage_copy(path, edit.original, cleanup, label)
                         previous, previous_copy = _previous_backup(backup, cleanup, label)
                     except OSError as exc:
                         raise ConfigError(f"Couldn't back up the {label} settings.") from exc
                     backups.append(_PendingWrite(backup, previous, edit.original, original_copy, previous_copy))
-                    restore = _stage_bytes(path, edit.original, cleanup)
-                    shutil.copymode(path, restore)
-                    shutil.copymode(path, new)
-                configs.append(_PendingWrite(path, edit.original, edit.replacement, new, restore,
-                                             directory / edit.backup.name if edit.backup else None))
+                    restore = _stage_bytes(path, edit.original, cleanup, mode=mode)
+                    if dir_fd is None:
+                        shutil.copymode(path.path, restore.path)
+                        shutil.copymode(path.path, new.path)
+                configs.append(_PendingWrite(path, edit.original, edit.replacement, new, restore, backup))
 
             pending = backups + configs
             for item in pending:

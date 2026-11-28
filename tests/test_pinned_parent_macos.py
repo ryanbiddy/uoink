@@ -1,19 +1,26 @@
-"""pinned_parent on macOS: /dev/fd is not traversable there, so the held
-directory's real path is used after an identity check (F_GETPATH)."""
+"""Verify the held directory descriptor and entry identity check on macOS."""
 import os
+import sys
 
 import pytest
 
 from uoink_core import storage
 
-pytestmark = pytest.mark.skipif(storage._F_GETPATH is None, reason="macOS F_GETPATH only")
+pytestmark = pytest.mark.skipif(sys.platform != "darwin", reason="macOS only")
+
+
+def _write_config(dir_fd):
+    fd = os.open("mcp.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600, dir_fd=dir_fd)
+    with os.fdopen(fd, "wb") as stream:
+        stream.write(b"{}")
 
 
 def test_yields_a_writable_path_for_the_held_folder(tmp_path):
     target = tmp_path / "client" / "mcp.json"
-    with storage.pinned_parent(tmp_path, target, create=True) as directory:
-        (directory / "mcp.json").write_text("{}")
+    with storage.pinned_parent(tmp_path, target, create=True) as (directory, dir_fd):
+        _write_config(dir_fd)
         assert os.path.samestat(os.stat(directory), os.stat(target.parent))
+        assert os.path.samestat(os.fstat(dir_fd), os.stat(target.parent))
     assert target.read_text() == "{}"
 
 
@@ -42,6 +49,6 @@ def test_case_variant_spelling_is_the_same_folder(tmp_path):
     probe = tmp_path / "client"
     if not probe.exists():
         pytest.skip("case-sensitive volume")
-    with storage.pinned_parent(tmp_path, probe / "mcp.json") as directory:
-        (directory / "mcp.json").write_text("{}")
+    with storage.pinned_parent(tmp_path, probe / "mcp.json") as (_, dir_fd):
+        _write_config(dir_fd)
     assert (tmp_path / "Client" / "mcp.json").read_text() == "{}"
