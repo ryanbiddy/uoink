@@ -309,6 +309,14 @@ def _wrap_podcasts(mod):
                 body = response.read(4096)
         root = os.path.abspath(str(data_root))
         audio = os.path.join(root, "fixture.mp3")
+        try:
+            # Store it where a real download does: the episode's own folder
+            # under Podcasts, which transcription and publication check.
+            feed = mod.get_feed(idx, episode["feed_id"])
+            from pathlib import Path as _Path
+            audio = str(mod._episode_audio_path(_Path(root), feed, episode))
+        except Exception:
+            pass
         with open(audio, "wb") as handle:
             handle.write(body)
         if episode is not None:

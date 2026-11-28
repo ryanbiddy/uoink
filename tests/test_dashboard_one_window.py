@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import socket
 import sys
 import threading
@@ -648,6 +649,26 @@ def test_pipe_security_flags(monkeypatch):
         api.close(server)
 
 
+def _canonical_sid(text):
+    import ctypes
+    from ctypes import wintypes as wt
+    security = ctypes.WinDLL("advapi32", use_last_error=True)
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    security.ConvertStringSidToSidW.argtypes = [wt.LPCWSTR, ctypes.POINTER(ctypes.c_void_p)]
+    security.ConvertSidToStringSidW.argtypes = [ctypes.c_void_p, ctypes.POINTER(wt.LPWSTR)]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    sid, out = ctypes.c_void_p(), wt.LPWSTR()
+    assert security.ConvertStringSidToSidW(text, ctypes.byref(sid)), text
+    try:
+        assert security.ConvertSidToStringSidW(sid, ctypes.byref(out))
+        try:
+            return out.value
+        finally:
+            kernel.LocalFree(ctypes.cast(out, ctypes.c_void_p))
+    finally:
+        kernel.LocalFree(sid)
+
+
 @WIN_ONLY
 def test_kernel_pipe_descriptor_contains_only_the_current_user():
     import ctypes
@@ -668,7 +689,13 @@ def test_kernel_pipe_descriptor_contains_only_the_current_user():
         assert security.ConvertSecurityDescriptorToStringSecurityDescriptorW(
             descriptor, 1, 4, ctypes.byref(sddl), None)
         try:
-            assert ctypes.wstring_at(sddl.value) == f"D:P(A;;FA;;;{api.user_sid()})"
+            text = ctypes.wstring_at(sddl.value)
+            # One protected ACE granting full access to one trustee. SDDL prints
+            # well-known accounts as aliases (the built-in Administrator is "LA"),
+            # so compare the trustee as a SID, not as text.
+            match = re.fullmatch(r"D:P\(A;;FA;;;([^)]+)\)", text)
+            assert match, text
+            assert _canonical_sid(match[1]) == _canonical_sid(api.user_sid()), text
         finally:
             api._k.LocalFree(sddl)
     finally:
