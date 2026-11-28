@@ -579,23 +579,35 @@ def test_a_save_that_stays_busy_waits_longer_then_is_set_aside(tmp_path):
     """P1: busy is retried with growing waits, other saves go first, and it ends."""
     items = [{"key": "held", "duration": 900, "media": "on_disk"},
              {"key": "free", "duration": 60, "media": "on_disk"}]
-    calls, times = [], []
+    base = 0.01
+    calls, waits, last_read = [], [], [0.0]
+
+    def clock():
+        last_read[0] = tb._now()
+        return last_read[0]
+
+    class Deadlines(dict):
+        # The busy branch sets clock() + wait, so the wait is the deadline
+        # minus the clock's last reading: exact, whatever the machine's speed.
+        def __setitem__(self, key, value):
+            if key == "held":
+                waits.append(value - last_read[0])
+            super().__setitem__(key, value)
 
     def work(item, checkpoint, stop, network_ok):
         calls.append(item["key"])
-        times.append(time.monotonic())
+        if not isinstance(job._retry_at, Deadlines):
+            job._retry_at = Deadlines(job._retry_at)
         return {"outcome": "busy"} if item["key"] == "held" else {"outcome": "transcribed"}
-    job = _job(tmp_path, items, work, busy_retry=0.002)
+    job = _job(tmp_path, items, work, busy_retry=base, clock=clock)
     job.start()
     assert job.wait(10), "a save that is always busy must not keep the run going forever"
     assert calls[:2] == ["held", "free"], "the run moves on to the next save"
     assert calls.count("held") == tb.MAX_BUSY_TRIES
-    held = [t for k, t in zip(calls, times) if k == "held"]
-    gaps = [b - a for a, b in zip(held, held[1:])]
-    assert gaps[-1] > gaps[0], "each busy try waits longer"
+    expected = [min(base * 30, base * 2 ** n) for n in range(tb.MAX_BUSY_TRIES - 1)]
+    assert waits == pytest.approx(expected, abs=1e-6), "each busy try waits longer, up to its cap"
     assert job._state["results"]["held"]["outcome"] == "failed"
     assert job._state["results"]["free"]["outcome"] == "transcribed"
-
 
 def test_a_refusal_on_a_save_with_media_on_disk_waits_out_the_back_off(tmp_path):
     """P1: no 1 s retry loop against a site that just said slow down."""
