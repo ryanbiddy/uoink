@@ -82,7 +82,7 @@ def test_storage_survives_reopen_refresh_and_late_transcript(library):
         pin, = reopened.get_pins(VID)
         assert pin["seconds"] == 100 and pin["pinned_at"] and pin["note"] is None
         assert [line["start"] for line in pin["lines"]] == [50.5, 110]
-        assert pin["deep_link"].endswith("&t=48s")
+        assert pin["deep_link"].endswith("&t=98s")  # the pin itself, 2 s early
         moments.add(reopened, VID, 100)
     assert library.get_pins(VID) == [pin]
     for n in range(20):
