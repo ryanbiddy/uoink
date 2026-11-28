@@ -2,7 +2,7 @@
 
 ## What's new
 
-Save a YouTube video partway through and Uoink now pins the moment you were watching. Open the item later to copy that quote with a link that lands two seconds before the line, so you hear it in context. Each save keeps up to 20 pins, and Claude can read them too.
+Save a YouTube video partway through and Uoink now pins the moment you were watching. Open the item later to copy that quote with a link that lands two seconds before that moment, so you hear it in context. Each save keeps up to 20 pins, and Claude can read them too.
 
 - **Save Hacker News discussions.** Paste or Uoink a thread to keep its nested replies, each with its own link. Saving a comment link puts that reply first. **Save linked story** captures the article or video the thread is about.
 - **Cleaner transcripts.** Whisper sometimes invents a "Thanks for watching!" over silence. Uoink now holds those lines back from search, citations and exports, and **Show them** puts them in view. `uoink tidy-transcripts` checks older saves. YouTube auto-captions read as sentences instead of repeating rolling lines, and `uoink repair-captions` fixes older saves while keeping the original.
@@ -10,6 +10,7 @@ Save a YouTube video partway through and Uoink now pins the moment you were watc
 - **Connect your agent in one step.** `uoink connect claude-code --write` adds Uoink through the Claude CLI. For Claude Desktop, Cursor, Cline and others, `--write` previews the change and backs up your settings first. Desktop setup also finds the Microsoft Store install on Windows.
 - **One dashboard window on Windows.** Opening Uoink from the Start menu or tray brings the dashboard you already have forward instead of starting a second one.
 - **Pick up unfinished captures.** Your agent can list interrupted captures and tell you whether Finish can reuse the video on disk.
+- **Fixes from 3.18.0.** Podcast episodes open in the reader again, **Transcribe again** saves its transcript, and on a Mac `uoink connect --write` saves your client's settings.
 - **Security.** A full review fixed issues around linked library folders, media links and thumbnails, startup diagnostics, phone pairing, private session names and approval for new capture sites. Dependencies were updated, including HTTPX2, Pydantic and python-multipart.
 
 The MCP server still exposes 99 tools by default, 36 with `UOINK_MCP_TOOLSET=core`, 9 with `search` and 7 with `research`.
